@@ -107,8 +107,8 @@ glyph-block Letter-Shared-Metrics : begin
 	define [BowlXDepth top bottom left right sw] : begin
 		local trShrink : Math.pow (((right - left) / (top - bottom))) 0.5
 		return : Math.max
-			sw * 1.25 * HVContrast
-			trShrink * [Math.min ((top - bottom) * 0.45) ((right - left + sw * HVContrast) * 0.875)]
+			HSwToV : 1.25 * sw
+			trShrink * [Math.min ((top - bottom) * 0.45) ((right - left + [HSwToV sw]) * 0.875)]
 
 glyph-block Letter-Shared-Shapes : begin
 	glyph-block-import CommonShapes
@@ -121,8 +121,8 @@ glyph-block Letter-Shared-Shapes : begin
 		local hookTurn  : Math.max [AdviceStroke 16] (hookDepth - [AdviceStroke 16])
 		local overshoot : O * 1
 		return : dispiro
-			flat (x - HVContrast * sw) high [widths.lhs.heading sw Downward]
-			curl (x - HVContrast * sw) (low + overshoot + sw + hookTurn) [heading Downward]
+			flat (x - [HSwToV sw]) high [widths.lhs.heading sw Downward]
+			curl (x - [HSwToV sw]) (low + overshoot + sw + hookTurn) [heading Downward]
 			arcvh
 			flat (x + hookTurn)  (low + overshoot) [heading Rightward]
 			curl (x + hookDepth + sw * TanSlope) (low + overshoot)
@@ -133,8 +133,8 @@ glyph-block Letter-Shared-Shapes : begin
 		local hookTurn  : Math.max [AdviceStroke 16] (hookDepth - [AdviceStroke 16])
 		local overshoot : O * 1
 		return : dispiro
-			flat (x - HVContrast * sw) low [widths.rhs.heading sw Upward]
-			curl (x - HVContrast * sw) (high - overshoot - sw - hookTurn) [heading Upward]
+			flat (x - [HSwToV sw]) low [widths.rhs.heading sw Upward]
+			curl (x - [HSwToV sw]) (high - overshoot - sw - hookTurn) [heading Upward]
 			arcvh
 			flat (x + hookTurn)  (high - overshoot) [heading Rightward]
 			curl (x + hookDepth + sw * TanSlope) (high - overshoot)
@@ -201,12 +201,12 @@ glyph-block Letter-Shared-Shapes : begin
 	glyph-block-export nShoulderKnots
 	define [nShoulderKnots] : with-params [left right [fine ShoulderFine] [top XH] [bottom 0] [ada SmallArchDepthA] [adb SmallArchDepthB] [stroke Stroke] [fMask false] [leftY0 nothing]] : begin
 		local skew : shoulderMidSkew fine stroke
-		local middle : [mix (left - stroke * HVContrast) right 0.5] + (skew - CorrectionOMidX) * stroke
+		local middle : [mix (left - [HSwToV stroke]) right 0.5] + (skew - CorrectionOMidX) * stroke
 		return : list
-			flat (left - fine * HVContrast) [fallback leftY0 (top - ada - 2)] [widths.rhs fine]
-			curl (left - fine * HVContrast) (top - ada)
+			flat (left - [HSwToV fine]) [fallback leftY0 (top - ada - 2)] [widths.rhs fine]
+			curl (left - [HSwToV fine]) (top - ada)
 			arcvh
-			ShoulderMidKnotRhs [mix (left - stroke * HVContrast) right 0.5] (top - O) fine stroke (+1) (-1)
+			ShoulderMidKnotRhs [mix (left - [HSwToV stroke]) right 0.5] (top - O) fine stroke (+1) (-1)
 			archv
 			flat right (top - adb) [widths.rhs stroke]
 			[if fMask corner curl] right bottom [widths.rhs.heading stroke Downward]
@@ -599,7 +599,7 @@ glyph-block Letter-Shared-Shapes : begin
 		define fine : mocFine / [mix 1 HVContrast 0.375]
 		define swMid : mix sw fine 0.7
 
-		define dxTurn : 0.5 * sw * HVContrast + rIn * df.div
+		define dxTurn : [HSwToV : 0.5 * sw] + rIn * df.div
 		define dxTurnObl : if (sign > 0) (-0.75 * TanSlope * rIn) (0.75 * TanSlope * rIn)
 		define dyTurn : 0.5 * mocSwMid
 		define dxTailStart : dxTurn + sinAngle * (rIn + 0.5 * mocFine * [mix 1 HVContrast sinAngle])
@@ -646,7 +646,7 @@ glyph-block Letter-Shared-Shapes : begin
 			DiagonalTailF (-1) df cx cy rInY DiagTailDefaultAngle depth sw
 
 	define [JutIn left right jut swRef hSplit] : begin
-		local ink : HVContrast * swRef
+		local ink : HSwToV swRef
 		local gap : (right - left - hSplit * ink) / (hSplit - 1)
 		Math.min jut (0.5 * ink + [Math.max (Stroke * TanSlope) (0.375 * gap)])
 
@@ -662,12 +662,12 @@ glyph-block Letter-Shared-Shapes : begin
 			set this.hSplit          hSplit
 			set this.fForceSymmetric fForceSymmetric
 
-			local ink : HVContrast * swRef
+			local ink : HSwToV swRef
 			local gap : (right - left - hSplit * ink) / (hSplit - 1)
 
 
 			local jutFS   MidJutSide
-			local jut     : mix (0.5 * HVContrast * swRef) Jut [Math.min 1 : div * 2.25 / hSplit]
+			local jut     : mix ([HSwToV : 0.5 * swRef]) Jut [Math.min 1 : div * 2.25 / hSplit]
 			local sideJut : jut - 0.5 * ink
 
 			local jutIn     : if fForceSymmetric jut : JutIn left right jut swRef hSplit
@@ -716,7 +716,7 @@ glyph-block Letter-Shared-Shapes : begin
 				full : tagged 'serifMT' : HSerif.mtAsymmetric [mix lBarCenter rBarCenter 0.5] top jutIn jutIn swSerif
 
 		public [slice l r] : begin
-			local ink : this.swRef * HVContrast
+			local ink : HSwToV this.swRef
 			local gap : (this.right - this.left - this.hSplit * ink) / (this.hSplit - 1)
 			local l1 : this.left + (ink + gap) * l
 			local r1 : this.left + (ink + gap) * r + ink
@@ -748,8 +748,8 @@ glyph-block Letter-Shared-Shapes : begin
 	define [WithSerifOverflowMask fEnable top bottom left right s] : begin
 		if [not fEnable] : return s
 
-		local leftCenter : left + HalfStroke * HVContrast
-		local rightCenter : right - HalfStroke * HVContrast
+		local leftCenter : left + [HSwToV HalfStroke]
+		local rightCenter : right - [HSwToV HalfStroke]
 		local adj : TanSlope * Stroke * DesignParameters.serifShiftX
 		return : intersection s : union
 			Rect top [mix top bottom 0.5] (leftCenter - Jut) (rightCenter + Jut - adj)
@@ -789,8 +789,8 @@ glyph-block Letter-Shared-Shapes : begin
 				Math.max (y - yDepth - hd.y + 0.25 * sw) (y + 0.01)
 
 			local x3 : if (xDepth > 0)
-				Math.min (x + xDepth - 0.01) (x + hd.x - 0.25 * sw * HVContrast)
-				Math.max (x + xDepth + 0.01) (x - hd.x + 0.25 * sw * HVContrast)
+				Math.min (x + xDepth - 0.01) (x + hd.x - [HSwToV : 0.25 * sw])
+				Math.max (x + xDepth + 0.01) (x - hd.x + [HSwToV : 0.25 * sw])
 
 			dispiro [widths.center sw]
 				flat x (y + yExtension) [heading : if (yDepth > 0) Downward Upward]
@@ -801,7 +801,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 		export : define [l] : with-params [x y xDepth yDepth [sw Stroke] [yExtension 0]]
 			m
-				x -- x + 0.5 * sw * HVContrast
+				x -- x + [HSwToV : 0.5 * sw]
 				y -- y
 				xDepth -- xDepth
 				yDepth -- yDepth
@@ -810,7 +810,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 		export : define [r] : with-params [x y xDepth yDepth [sw Stroke] [yExtension 0]]
 			m
-				x -- x - 0.5 * sw * HVContrast
+				x -- x - [HSwToV : 0.5 * sw]
 				y -- y
 				xDepth -- xDepth
 				yDepth -- yDepth
@@ -820,8 +820,8 @@ glyph-block Letter-Shared-Shapes : begin
 	do "Descender shapes"
 		define [xLinkStroke xLink x yAttach sw]
 			if (xLink == nothing) [no-shape] : HBar.b
-				Math.min xLink (x - 0.5 * HVContrast * sw)
-				Math.max xLink (x + 0.5 * HVContrast * sw)
+				Math.min xLink (x - [HSwToV : 0.5 * sw])
+				Math.max xLink (x + [HSwToV : 0.5 * sw])
 				begin yAttach
 
 		define [Descenders Impl] : namespace
@@ -833,30 +833,30 @@ glyph-block Letter-Shared-Shapes : begin
 				return : Impl x y xLink yAttach yOverflow sw maskOut
 			export : define [l] : with-params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : begin
 				local sw : Sw refSw
-				return : Impl (x + 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw maskOut
+				return : Impl (x + [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw maskOut
 			export : define [r] : with-params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : begin
 				local sw : Sw refSw
-				return : Impl (x - 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw maskOut
+				return : Impl (x - [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw maskOut
 
 			export : define [lExt] : with-params [x y xLink [yAttach y] [yOverflow 0] [sw Stroke] [maskOut null]] : begin
-				return : Impl (x + 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw maskOut
+				return : Impl (x + [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw maskOut
 			export : define [mExt] : with-params [x y xLink [yAttach y] [yOverflow 0] [sw Stroke] [maskOut null]] : begin
 				return : Impl x y xLink yAttach yOverflow sw maskOut
 			export : define [rExt] : with-params [x y xLink [yAttach y] [yOverflow 0] [sw Stroke] [maskOut null]] : begin
-				return : Impl (x - 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw maskOut
+				return : Impl (x - [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw maskOut
 
 			export : define [lSideJut] : with-params [x y [yOverflow 0] [refSw Stroke] [jut Jut] [sideJut nothing]] : begin
-				local sj : fallback sideJut (jut - 0.5 * HVContrast * refSw)
+				local sj : fallback sideJut (jut - [HSwToV : 0.5 * refSw])
 				local sw : Sw refSw
-				local xLink : x + 0.5 * HVContrast * refSw - TanSlope * sw
-				local xPos : x + 0.5 * HVContrast * sw - sj + sw * TanSlope * (DesignParameters.serifShiftX - 1)
+				local xLink : x + [HSwToV : 0.5 * refSw] - TanSlope * sw
+				local xPos : x + [HSwToV : 0.5 * sw] - sj + sw * TanSlope * (DesignParameters.serifShiftX - 1)
 				return : Impl xPos y xLink y yOverflow sw
 
 			export : define [rSideJut] : with-params [x y [yOverflow 0] [refSw Stroke] [jut Jut] [sideJut nothing]] : begin
-				local sj : fallback sideJut (jut - 0.5 * HVContrast * refSw)
+				local sj : fallback sideJut (jut - [HSwToV : 0.5 * refSw])
 				local sw : Sw refSw
-				local xLink : x - 0.5 * HVContrast * refSw
-				local xPos : x - 0.5 * HVContrast * sw + sj + sw * TanSlope * (DesignParameters.serifShiftX + 1)
+				local xLink : x - [HSwToV : 0.5 * refSw]
+				local xPos : x - [HSwToV : 0.5 * sw] + sj + sw * TanSlope * (DesignParameters.serifShiftX + 1)
 				return : Impl xPos y xLink y yOverflow sw
 
 		# Descender of cyrillics
@@ -927,7 +927,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 			# "Standard" version for El, Pe, En with MidHook
 			export : define [m df top] : begin
-				local xm : df.middle + 0.5 * df.mvs * HVContrast
+				local xm : df.middle + [HSwToV : 0.5 * df.mvs]
 				general
 					left   -- xm
 					right  -- df.rightSB
@@ -935,7 +935,7 @@ glyph-block Letter-Shared-Shapes : begin
 					ada    -- ArchDepthA
 					adb    -- ArchDepthB
 					sw     -- df.mvs
-					xDepth -- (-[Math.max (df.mvs * HVContrast) : Math.min HookX (0.5 * (df.rightSB - df.leftSB - 2 * df.mvs * HVContrast))])
+					xDepth -- (-[Math.max ([HSwToV df.mvs]) : Math.min HookX (0.5 * (df.rightSB - df.leftSB - [HSwToV : 2 * df.mvs]))])
 
 		# Hook for Eng shape
 		glyph-block-export EngHook
@@ -961,14 +961,14 @@ glyph-block Letter-Shared-Shapes : begin
 					VerticalHook.l x yHookStart TailX (-TailY) (sw -- sw)
 
 			export : define [rBarOuter] : with-params [x yBot yTop [sw Stroke]] : begin
-				return : lBarOuter (x - HVContrast * sw) yBot yTop (sw -- sw)
+				return : lBarOuter (x - [HSwToV sw]) yBot yTop (sw -- sw)
 			export : define [rBarInner] : with-params [x yBot yTop [sw Stroke]] : begin
-				return : lBarInner (x - HVContrast * sw) yBot yTop (sw -- sw)
+				return : lBarInner (x - [HSwToV sw]) yBot yTop (sw -- sw)
 
 			export : define [mBarOuter] : with-params [x yBot yTop [sw Stroke]] : begin
-				return : lBarOuter (x - 0.5 * HVContrast * sw) yBot yTop (sw -- sw)
+				return : lBarOuter (x - [HSwToV : 0.5 * sw]) yBot yTop (sw -- sw)
 			export : define [mBarInner] : with-params [x yBot yTop [sw Stroke]] : begin
-				return : lBarInner (x - 0.5 * HVContrast * sw) yBot yTop (sw -- sw)
+				return : lBarInner (x - [HSwToV : 0.5 * sw]) yBot yTop (sw -- sw)
 
 			export : define [arcStart] : with-params [cx cy hookY [refSw Stroke]] : begin
 				local sw : ArcStartSerifWidth refSw
@@ -1012,8 +1012,8 @@ glyph-block Letter-Shared-Shapes : begin
 		glyph-block-export LetterBarOverlay
 		define [LetterBarOverlay] : with-params [x y space refSw pXInSw sw] : begin
 			local {xLeftSpace xRightSpace} space
-			local xLeftEdge  : x - pXInSw * refSw * HVContrast
-			local xRightEdge : x + (1 - pXInSw) * refSw * HVContrast
+			local xLeftEdge  : x - pXInSw * [HSwToV refSw]
+			local xRightEdge : x + (1 - pXInSw) * [HSwToV refSw]
 			local p : (xLeftEdge - xLeftSpace) / ((xRightSpace - xRightEdge) + (xLeftEdge - xLeftSpace))
 			local xC : mix xLeftEdge xRightEdge [mix 0.5 (1 - p) 0.5]
 			local jut : 0.75 * LongJut
