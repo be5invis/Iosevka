@@ -56,6 +56,12 @@ glyph-block Letter-Latin-Upper-A : begin
 			intersection [HBar.t 0 df.width yBar] [AMaskShape df fStraightBar top sw]
 		include : ASerifs df top sw slabKind
 
+	glyph-block-export LambdaShape
+	define [LambdaShape] : with-params [df fBarStraight top sw slabKind] : glyph-proc
+		include : VShape df fBarStraight top sw
+		include : FlipAround df.middle (top / 2)
+		include : ASerifs df top sw slabKind
+
 	foreach { suffix { fStraightBar slabKind } } [Object.entries AConfig] : do
 		define [AShapeImpl mak top fGrek fOverlays] : glyph-proc
 			local df : DivFrame 1
@@ -83,6 +89,24 @@ glyph-block Letter-Latin-Upper-A : begin
 
 		create-glyph "currency/australSign.\(suffix)" : AShapeImpl "capital" CAP false true
 
+		create-glyph "grek/Lambda.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : LambdaShape
+				df           -- [DivFrame 1]
+				fBarStraight -- fStraightBar
+				top          -- CAP
+				sw           -- Stroke
+				slabKind     -- slabKind
+
+		create-glyph "grek/smcpLambda.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : LambdaShape
+				df           -- [DivFrame 1]
+				fBarStraight -- fStraightBar
+				top          -- XH
+				sw           -- Stroke
+				slabKind     -- slabKind
+
 	select-variant 'A' 'A'
 	link-reduced-variant 'A/sansSerif' 'A' MathSansSerif
 	select-variant 'smcpA' 0x1D00 (follow -- 'A')
@@ -92,26 +116,9 @@ glyph-block Letter-Latin-Upper-A : begin
 	alias 'cyrl/A' 0x410 'A'
 	turned 'turnA' 0x2C6F 'A' Middle (CAP / 2)
 
-	# Lambda
-	glyph-block-export LambdaShape
-	define [LambdaShape] : with-params [df fBarStraight top sw [slab SLAB]] : glyph-proc
-		include : VShape df fBarStraight top sw
-		include : FlipAround df.middle (top / 2)
-		local sf : SerifFrame.fromDf df top 0
-		include : NeedSlab slab : composite-proc sf.lb.full sf.rb.full
-
-	create-glyph 'grek/Lambda.straight' : composite-proc [MarkSet.capital]
-		LambdaShape [DivFrame 1] true  CAP Stroke
-	create-glyph 'grek/Lambda.curly' : composite-proc [MarkSet.capital]
-		LambdaShape [DivFrame 1] false CAP Stroke
-	create-glyph 'grek/smcpLambda.straight' : composite-proc [MarkSet.e]
-		LambdaShape [DivFrame 1] true  XH  Stroke
-	create-glyph 'grek/smcpLambda.curly' : composite-proc [MarkSet.e]
-		LambdaShape [DivFrame 1] false XH  Stroke
-
 	select-variant 'grek/Lambda' 0x39B
+	link-reduced-variant 'grek/Lambda/sansSerif' 'grek/Lambda' MathSansSerif
 	select-variant 'grek/smcpLambda' 0x1D27 (follow -- 'grek/Lambda')
-	alias 'latinLambda' 0x245 'grek/Lambda'
 
 	# Delta
 	glyph-block-export DeltaShape
@@ -126,20 +133,58 @@ glyph-block Letter-Latin-Upper-A : begin
 			HBar.b 0 df.width 0 sw
 			AMaskShape df fBarStraight top sw
 
-	create-glyph 'grek/Delta.straight' : composite-proc [MarkSet.capital]
-		DeltaShape
-			df -- [DivFrame 1]
-			fBarStraight -- true
-			top -- CAP
-			sw -- Stroke
-	create-glyph 'grek/Delta.curly' : composite-proc [MarkSet.capital]
-		DeltaShape
-			df -- [DivFrame 1]
-			fBarStraight -- false
-			top -- CAP
-			sw -- Stroke
+	define DeltaConfig : object
+		straight true
+		curly    false
+
+	foreach { suffix fBarStraight } [pairs-of DeltaConfig] : do
+		create-glyph "grek/Delta.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : DeltaShape
+				df -- [DivFrame 1]
+				fBarStraight -- fBarStraight
+				top -- CAP
+				sw -- Stroke
+
+		create-glyph "increment.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : DeltaShape
+				df -- [DivFrame 1]
+				fBarStraight -- fBarStraight
+				top -- CAP
+				sw -- OperatorStroke
+
+		create-glyph "increment.aplForm.\(suffix)" : glyph-proc
+			include : MarkSet.oper
+			define shapeHeight : OperTop - OperBot
+			include : DeltaShape
+				df -- [DivFrame 1]
+				fBarStraight -- fBarStraight
+				top -- shapeHeight
+				sw -- OperatorStroke
+			include : ApparentTranslate 0 (SymbolMid - shapeHeight / 2)
+
+		create-glyph "increment.aplThin.\(suffix)" : glyph-proc
+			include : MarkSet.oper
+			define shapeHeight : OperTop - OperBot
+			include : DeltaShape
+				df -- [DivFrame 1]
+				fBarStraight -- fBarStraight
+				top -- shapeHeight
+				sw -- [AdviceStroke 3.75]
+			include : ApparentTranslate 0 (SymbolMid - shapeHeight / 2)
+
+	define [CodeNonApl u] : if (para.variantSelector.__enableAplForm === 'enable') null u
+	define [CodeApl    u] : if (para.variantSelector.__enableAplForm === 'enable') u null
 
 	select-variant 'grek/Delta' 0x394
+	select-variant 'increment'      [CodeNonApl 0x2206] (follow -- 'grek/Delta')
+	select-variant 'increment.aplForm' [CodeApl 0x2206] (follow -- 'grek/Delta')
+	select-variant 'increment.aplThin'                  (follow -- 'grek/Delta')
+
+	turned 'nabla'      [CodeNonApl 0x2207] 'increment'         Middle (CAP / 2)
+	turned 'nabla.aplForm' [CodeApl 0x2207] 'increment.aplForm' Middle SymbolMid
+	turned 'nabla.aplThin' null             'increment.aplThin' Middle SymbolMid
 
 	derive-glyphs 'cyrl/De.BGR' null 'grek/Delta' : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS

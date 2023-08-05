@@ -7,12 +7,20 @@ assignees: ''
 
 ---
 
-- The requested character is...
+- The requested characters are ...
   - [ ] Latin
   - [ ] Cyrillic
   - [ ] Greek
   - [ ] Punctuation
+  - [ ] Diacritic / Mark
   - [ ] Symbol
+- The requested characters are used in ...
+  - [ ] The alphabet / character set of a natural language.
+  - [ ] The alphabet / character set of a constructed language.
+  - [ ] The alphabet / character set of a transliteration or notation system.
+  - [ ] Mathematical or other professional use in documents.
+  - [ ] The symbol set of a programming language.
+  - [ ] The symbol set of a command-line program.
 - [ ] Some other monospace/programming fonts supported this character. Provide images below.
 
 ------
