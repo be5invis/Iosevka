@@ -8,14 +8,28 @@ glyph-module
 glyph-block Letter-Latin-Lower-Eszet : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : FlatHookDepth PalatalHook CyrDescender
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth PalatalHook CyrDescender SerifFrame
 	glyph-block-import Letter-Latin-S : AdviceSArchDepth
 
 	define NO-TAIL    0
 	define DESCENDING 1
 	define TAILED     2
 
-	define [Traditional fFlathook slab tail] : glyph-proc
+	define SERIF-NONE 0
+	define SERIF-BOT  1
+	define SERIF-MID  2
+	define SERIF-DUAL 3
+
+	define [EszetSerifs df fTraditional slab] : begin
+		local sf : SerifFrame.fromDf [DivFrame 1] XH 0
+		local lb : if fTraditional sf.lb.full sf.lb.outer
+		return : match slab
+			[Just SERIF-BOT]  : composite-proc lb
+			[Just SERIF-MID]  : composite-proc    sf.lt.outer
+			[Just SERIF-DUAL] : composite-proc lb sf.lt.outer
+			__ : no-shape
+
+	define [Traditional fFlathook] : function [slab tail] : glyph-proc
 		include : MarkSet.bp
 		local l : SB * 1
 		local xHook : [mix SB RightSB 0.75] + HalfStroke * HVContrast
@@ -50,7 +64,7 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 			corner tl (tm - Stroke) [heading Upward]
 			corner (RightSB - HalfStroke * 1.2 - OX) t [heading Upward]
 
-		if slab : include : HSerif.lb SB 0 SideJut
+		include : EszetSerifs [DivFrame 1] true slab
 		include : match tail
 			[Just DESCENDING] : VBar.l l Descender 0
 			[Just TAILED] : PalatalHook.lExt l 0
@@ -84,7 +98,7 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 			flat xMiddleBot 0 [heading Leftward]
 			curl xFinal 0 [heading Leftward]
 
-		if slab : include : HSerif.lb SB 0 SideJut
+		include : EszetSerifs [DivFrame 1] false slab
 		include : match tail
 			[Just DESCENDING] : VBar.l SB Descender 0
 			[Just TAILED] : PalatalHook.lExt SB 0
@@ -127,25 +141,30 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 			flat ([Math.max (sEndX + 0.1 + TanSlope * swInner) : Math.min (RightSB - innerSmoothB) [mix sEndX RightSB 0.375]] + CorrectionOMidX * swInner / 2 + TanSlope * swInner ) 0
 			curl sEndX 0 [heading Leftward]
 
-		if slab : include : HSerif.lb SB 0 SideJut
+		include : EszetSerifs [DivFrame 1] false slab
 		include : match tail
 			[Just DESCENDING] : VBar.l SB Descender 0 swOuter
 			[Just TAILED] : PalatalHook.lExt SB 0 (sw -- swOuter)
-			__ : glyph-proc
+			__ : no-shape
 
+	define EszetConfig : SuffixCfg.weave
+		object # body
+			traditional           : Traditional false
+			traditionalFlatHook   : Traditional true
+			sulzbacher              Sulzbacher
+			longSSLig               LongSSLig
+		object # terminal
+			''                      NO-TAIL
+			'descending'            DESCENDING
+			'tailed'                TAILED
+		object # serifs
+			serifless               0
+			bottomSerifed           1
+			middleSerifed           2
+			dualSerifed             3
 
-	create-glyph 'eszet.traditional'                   : Traditional  false SLAB  NO-TAIL
-	create-glyph 'eszet.traditionalDescending'         : Traditional  false false DESCENDING
-	create-glyph 'eszet.traditionalTailed'             : Traditional  false false TAILED
-	create-glyph 'eszet.traditionalFlatHook'           : Traditional  true  SLAB  NO-TAIL
-	create-glyph 'eszet.traditionalFlatHookDescending' : Traditional  true  false DESCENDING
-	create-glyph 'eszet.traditionalFlatHookTailed'     : Traditional  true  false TAILED
-	create-glyph 'eszet.sulzbacher'                    : Sulzbacher         SLAB  NO-TAIL
-	create-glyph 'eszet.sulzbacherDescending'          : Sulzbacher         false DESCENDING
-	create-glyph 'eszet.sulzbacherTailed'              : Sulzbacher         false TAILED
-	create-glyph 'eszet.longSSLig'                     : LongSSLig          SLAB  NO-TAIL
-	create-glyph 'eszet.longSSLigDescending'           : LongSSLig          false DESCENDING
-	create-glyph 'eszet.longSSLigTailed'               : LongSSLig          false TAILED
+	foreach { suffix { Base tail serif } } [pairs-of EszetConfig] : do
+		create-glyph "eszet.\(suffix)" : Base serif tail
 
 	select-variant 'eszet' 0xDF
 

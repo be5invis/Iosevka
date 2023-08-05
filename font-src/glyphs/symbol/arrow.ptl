@@ -146,7 +146,17 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			corner o (-size)
 			corner o (+width / 2)
 
-	define [TriangleArrowHead x1 y1 x2 y2 width length] : begin
+	define [ArrowHeadMaskGap x1 y1 x2 y2 width length gap] : begin
+		return : new-glyph : PointingTo x1 y1 x2 y2 : lambda [mag] : spiro-outline
+			corner length (width - o)
+			corner o 0
+			corner length (-width + o)
+			corner (length - gap) (-width + o)
+			corner (o - gap) 0
+			corner (length - gap) (width - o)
+
+	define [TriangleArrowHead x1 y1 x2 y2 width _length] : begin
+		local length : fallback _length width
 		return : new-glyph : PointingTo x1 y1 x2 y2 : lambda [mag] : spiro-outline
 			corner o 0
 			corner length (width - o)
@@ -156,6 +166,10 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		include : ArrowHead x1 y1 x2 y2 size
 		include : ArrowBar x1 y1 x2 y2 halfArrowSw
 
+	define [TrigArrowShape x1 y1 x2 y2 size] : glyph-proc
+		include : TriangleArrowHead x1 y1 x2 y2 (0.75 * size)
+		include : ArrowBar x1 y1 x2 y2 halfArrowSw
+
 	define [SsArrowShape x1 y1 x2 y2 size] : glyph-proc
 		include : SsArrowHead x1 y1 x2 y2 size
 		include : ArrowBar x1 y1 x2 y2 halfArrowSw
@@ -163,6 +177,11 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 	define [DashArrowShape x1 y1 x2 y2 size] : glyph-proc
 		local gap : AdviceStroke 6
 		include : ArrowHead x1 y1 x2 y2 size
+		include : DashArrowBar x1 y1 x2 y2 halfArrowSw gap [Math.max (Width / 5) (gap * 3)]
+
+	define [TrigDashArrowShape x1 y1 x2 y2 size] : glyph-proc
+		local gap : AdviceStroke 6
+		include : TriangleArrowHead x1 y1 x2 y2 (0.75 * size)
 		include : DashArrowBar x1 y1 x2 y2 halfArrowSw gap [Math.max (Width / 5) (gap * 3)]
 
 	define [HookArrowShape mul] : lambda [x1 y1 x2 y2 size] : glyph-proc
@@ -382,6 +401,15 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow ArrowShape [MangleName 'arrowDownRight']  [MangleUnicode 0x2198] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
 		MkArrow ArrowShape [MangleName 'arrowDownLeft']   [MangleUnicode 0x2199] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
 
+		MkArrow TrigArrowShape [MangleName 'trigArrowLeft']       [MangleUnicode 0x2B60] arrowRSB SymbolMid arrowSB SymbolMid
+		MkArrow TrigArrowShape [MangleName 'trigArrowUp']         [MangleUnicode 0x2B61] arrowMidX arrowBot arrowMidX arrowTop
+		MkArrow TrigArrowShape [MangleName 'trigArrowRight']      [MangleUnicode 0x2B62] arrowSB SymbolMid arrowRSB SymbolMid
+		MkArrow TrigArrowShape [MangleName 'trigArrowDown']       [MangleUnicode 0x2B63] arrowMidX arrowTop arrowMidX arrowBot
+		MkArrow TrigArrowShape [MangleName 'trigArrowUpLeft']     [MangleUnicode 0x2B66] arrowDiagRSB arrowDiagBot arrowDiagSB arrowDiagTop
+		MkArrow TrigArrowShape [MangleName 'trigArrowUpRight']    [MangleUnicode 0x2B67] arrowDiagSB arrowDiagBot arrowDiagRSB arrowDiagTop
+		MkArrow TrigArrowShape [MangleName 'trigArrowDownRight']  [MangleUnicode 0x2B68] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
+		MkArrow TrigArrowShape [MangleName 'trigArrowDownLeft']   [MangleUnicode 0x2B69] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
+
 		MkArrow ArrowShape [MangleName 'arrowRightCompact']  null arrowSB SymbolMid arrowRSB SymbolMid nothing bendArrowHeadSize
 		MkArrow ArrowShape [MangleName 'arrowLeftCompact']   null arrowRSB SymbolMid arrowSB SymbolMid nothing bendArrowHeadSize
 
@@ -398,6 +426,11 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow DashArrowShape [MangleName 'dashArrowRight'] [MangleUnicode 0x21E2] arrowSB SymbolMid arrowRSB SymbolMid
 		MkArrow DashArrowShape [MangleName 'dashArrowDown']  [MangleUnicode 0x21E3] arrowMidX arrowTop arrowMidX arrowBot
 
+		MkArrow TrigDashArrowShape [MangleName 'trigDashArrowLeft']  [MangleUnicode 0x2B6A] arrowRSB SymbolMid arrowSB SymbolMid
+		MkArrow TrigDashArrowShape [MangleName 'trigDashArrowUp']    [MangleUnicode 0x2B6B] arrowMidX arrowBot arrowMidX arrowTop
+		MkArrow TrigDashArrowShape [MangleName 'trigDashArrowRight'] [MangleUnicode 0x2B6C] arrowSB SymbolMid arrowRSB SymbolMid
+		MkArrow TrigDashArrowShape [MangleName 'trigDashArrowDown']  [MangleUnicode 0x2B6D] arrowMidX arrowTop arrowMidX arrowBot
+
 	do "Hook Straight Arrow"
 		MkArrow [HookArrowShape 1]    [MangleName 'hookArrowLeft']      [MangleUnicode 0x21A9] arrowRSB SymbolMid arrowSB SymbolMid
 		MkArrow [HookArrowShape (-1)] [MangleName 'hookArrowRight']     [MangleUnicode 0x21AA] arrowSB SymbolMid arrowRSB SymbolMid
@@ -411,64 +444,100 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow [LoopArrowShape (-1)] [MangleName 'loopArrowRight']     [MangleUnicode 0x21AC] arrowSB SymbolMid arrowRSB SymbolMid
 
 	do "Half Circle Arrow"
-		local arcSW : Math.min arrowSw [AdviceStroke 4 MosaicWidthScalar]
+		local arcSW : Math.min arrowSw [AdviceStroke 5 MosaicWidthScalar]
 		local headSize : mix arcSW arrowHeadSize 0.5
-		local hsx0 : HVContrast * arcSW / 2
-		local hsx : hsx0 + headSize / 2
-		local hsx2 : hsx0 + (MosaicWidthScalar / 4) * headSize
-		local hsy : arcSW / 2 + headSize / 2
+		local headLength : (headSize + fine) * [Math.sqrt 0.5]
+		local l : arrowSB  + 0.5 * headSize
+		local r : arrowRSB - 0.5 * headSize
+		local t : arrowTop - 0.5 * headSize
+		local b : arrowBot + 0.5 * headSize
+		local ada : ArchDepthAOf (SmallArchDepth * (r - l) / (RightSB - SB)) (r - l)
+		local adb : ArchDepthBOf (SmallArchDepth * (r - l) / (RightSB - SB)) (r - l)
+		local gapWidth : Math.max ((t - b) * 0.05) (fine * [Math.sqrt 0.5])
 
-		define [MkHalfCircleArrow id unicode size sw z3 tween32 z2 tween21 z1 z1t]
-			create-glyph [MangleName id] [MangleUnicode unicode] : glyph-proc
-				set-width MosaicWidth
-				include : ArrowHead z1.x z1.y z1t.x z1t.y size
-				include : difference
-					dispiro [widths.center sw] z3 tween32 z2 tween21 z1 z1t
-					ArrowHeadMaskOut z1.x z1.y z1t.x z1t.y size
+		define [HalfCircleArrow headFunc fCcw fGapped] : glyph-proc
+			local arrowX : if fCcw (l + 0.5 * HVContrast * arcSW) (r - 0.5 * HVContrast * arcSW)
+			local arrowY SymbolMid
+			local arrowYS : arrowY + 0.5 * headLength
+			local arrowYE : arrowY - 0.5 * headLength
+			set-width MosaicWidth
+			include : union
+				difference
+					OShape.NoOvershoot t b l r arcSW ada adb
+					if fGapped
+						ArrowHeadMaskGap arrowX arrowYS arrowX arrowYE headSize headSize gapWidth
+						MaskBelow arrowY
+				difference
+					dispiro
+						widths.center arcSW
+						flat arrowX arrowY
+						curl arrowX arrowYE [heading Downward]
+					ArrowHeadMaskOut arrowX arrowYS arrowX arrowYE headSize
+			include : headFunc arrowX arrowYS arrowX arrowYE headSize
 
-		define [MkOpenCircleArrow id unicode size sw z4 tween43 z3 tween32 z2 tween21 z1 z1t]
-			create-glyph [MangleName id] [MangleUnicode unicode] : glyph-proc
-				set-width MosaicWidth
-				include : ArrowHead z1.x z1.y z1t.x z1t.y size
-				include : difference
-					dispiro [widths.center sw] z4 tween43 z3 tween32 z2 tween21 z1 z1t
-					ArrowHeadMaskOut z1.x z1.y z1t.x z1t.y size
+		define [ShareAlikeArrow] : glyph-proc
+			local arrowX : l + 0.5 * HVContrast * Stroke
+			local headLength : headSize * [Math.sqrt 0.5]
+			local gapSize : Math.max (2 * headLength) (CAP - 0 - ada - adb)
+			local gapTop : CAP / 2 + 0.5 * gapSize
+			local gapBot : CAP / 2 - 0.5 * gapSize
+			set-width MosaicWidth
+			include : union
+				difference
+					OShape.NoOvershoot CAP 0 l r Stroke ada adb
+					spiro-outline
+						corner arrowSB   gapTop
+						corner arrowMidX gapTop
+						corner arrowMidX gapBot
+						corner arrowSB   gapBot
+			include : TriangleArrowHead arrowX gapTop arrowX (gapTop - headLength) headSize
 
-		MkHalfCircleArrow 'ccwHalfCircleArrowTop' 0x21B6 headSize arcSW
-			g4 (arrowRSB - hsx) SymbolMid [heading Upward]
-			arcvh
-			g4 arrowMidX (arrowTop - hsy) [heading Leftward]
-			archv
-			flat (arrowSB + hsx) SymbolMid
-			curl (arrowSB + hsx) (SymbolMid - headSize) [heading Downward]
+		define [OpenCircleArrow headFunc fCcw fClosed] : glyph-proc
+			local arrowX : arrowMidX - CorrectionOMidX * arcSW
+			local arrowXS : arrowX + [if fCcw 0.5 (-0.5)] * headLength
+			local arrowXE : arrowX + [if fCcw (-0.5) 0.5] * headLength
+			local arrowY : t - (0.5 * arcSW)
 
-		MkHalfCircleArrow 'cwHalfCircleArrowTop'  0x21B7 headSize arcSW
-			g4 (arrowSB + hsx) SymbolMid [heading Upward]
-			arcvh
-			g4 arrowMidX (arrowTop - hsy) [heading Rightward]
-			archv
-			flat (arrowRSB - hsx) SymbolMid
-			curl (arrowRSB - hsx) (SymbolMid - headSize) [heading Downward]
+			local circle : OShape.NoOvershoot t b l r arcSW ada adb
+			set-width MosaicWidth
+			if fClosed
+				include circle
+				include : union
+					difference
+						OShape.NoOvershoot t b l r arcSW ada adb
+						intersection [MaskAbove SymbolMid] [[if fCcw MaskLeft MaskRight] arrowX]
+					difference
+						dispiro
+							widths.center arcSW
+							flat arrowX arrowY
+							curl arrowXE arrowY [heading [if fCcw Leftward Rightward]]
+						ArrowHeadMaskOut arrowXS arrowY arrowXE arrowY headSize
+			include : headFunc arrowXS arrowY arrowXE arrowY headSize
 
-		MkOpenCircleArrow 'ccwOpenCircleArrow' 0x21BA headSize arcSW
-			g4 (arrowSB + hsx2) SymbolMid [heading Downward]
-			arcvh
-			g4 arrowMidX (arrowBot + hsy) [heading Rightward]
-			archv
-			g4 (arrowRSB - hsx2) SymbolMid [heading Upward]
-			arcvh
-			flat arrowMidX (arrowTop - hsy)
-			curl (arrowMidX - headSize) (arrowTop - hsy) [heading Leftward]
+		create-glyph [MangleName 'ccwHalfCircleArrow'] [MangleUnicode 0x21B6] : glyph-proc
+			include : HalfCircleArrow ArrowHead true  false
+		create-glyph [MangleName 'cwHalfCircleArrow'] [MangleUnicode 0x21B7] : glyph-proc
+			include : HalfCircleArrow ArrowHead false false
+		create-glyph [MangleName 'ccwOpenCircleArrow'] [MangleUnicode 0x21BA] : glyph-proc
+			include : OpenCircleArrow ArrowHead true  false
+		create-glyph [MangleName 'cwOpenCircleArrow'] [MangleUnicode 0x21BB] : glyph-proc
+			include : OpenCircleArrow ArrowHead false false
+		create-glyph [MangleName 'ccwGappedCircleArrow'] [MangleUnicode 0x27F2] : glyph-proc
+			include : HalfCircleArrow ArrowHead true  true
+		create-glyph [MangleName 'cwGappedCircleArrow'] [MangleUnicode 0x27F3] : glyph-proc
+			include : HalfCircleArrow ArrowHead false true
+		create-glyph [MangleName 'ccwClosedCircleArrow'] [MangleUnicode 0x2940] : glyph-proc
+			include : OpenCircleArrow ArrowHead true  true
+		create-glyph [MangleName 'cwClosedCircleArrow'] [MangleUnicode 0x2941] : glyph-proc
+			include : OpenCircleArrow ArrowHead false true
+		create-glyph [MangleName 'ccwOpenCircleArrowTriangle'] [MangleUnicode 0x2B6E] : glyph-proc
+			include : OpenCircleArrow TriangleArrowHead true  false
+		create-glyph [MangleName 'cwOpenCircleArrowTriangle'] [MangleUnicode 0x2B6F] : glyph-proc
+			include : OpenCircleArrow TriangleArrowHead false false
 
-		MkOpenCircleArrow 'cwOpenCircleArrow'  0x21BB headSize arcSW
-			g4 (arrowRSB - hsx2) SymbolMid [heading Downward]
-			arcvh
-			g4 arrowMidX (arrowBot + hsy) [heading Leftward]
-			archv
-			g4 (arrowSB + hsx2) SymbolMid [heading Upward]
-			arcvh
-			flat arrowMidX (arrowTop - hsy)
-			curl (arrowMidX + headSize) (arrowTop - hsy) [heading Rightward]
+		if (MosaicWidthScalar == 1) : do
+			create-glyph 'ccCcwArrow' : glyph-proc
+				include : ShareAlikeArrow
 
 	do "Bend and Angle arrows"
 		define bendL : mix arrowMidX arrowSB [Math.max (bendArrowHeadSize / (arrowMidX - arrowSB)) : Math.pow 0.6 (2 /  MosaicWidthScalar)]
@@ -726,6 +795,24 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			refer-glyph : MangleName 'arrowDownSK'
 			HBar.m (arrowMidX - arrowHeadSize) (arrowMidX + arrowHeadSize) arrowTop fine
 
+		MkArrow TrigArrowShape [MangleName 'trigArrowLeftK']    null arrowRSB SymbolMid (arrowSB + fine) SymbolMid
+		MkArrow TrigArrowShape [MangleName 'trigArrowRightK']   null arrowSB SymbolMid (arrowRSB - fine) SymbolMid
+		MkArrow TrigArrowShape [MangleName 'trigArrowUpK']      null arrowMidX arrowBot arrowMidX (arrowTop - fine)
+		MkArrow TrigArrowShape [MangleName 'trigArrowDownK']    null arrowMidX arrowTop arrowMidX (arrowBot + fine)
+
+		create-glyph [MangleName 'trigArrowBarLeft'] [MangleUnicode 0x2B70] : composite-proc
+			refer-glyph : MangleName 'trigArrowLeftK'
+			VBar.m arrowSB (SymbolMid - arrowHeadSize) (SymbolMid + arrowHeadSize) fine
+		create-glyph [MangleName 'trigArrowBarRight'] [MangleUnicode 0x2B71] : composite-proc
+			refer-glyph : MangleName 'trigArrowRightK'
+			VBar.m arrowRSB (SymbolMid - arrowHeadSize) (SymbolMid + arrowHeadSize) fine
+		create-glyph [MangleName 'trigArrowBarUp'] [MangleUnicode 0x2B72] : composite-proc
+			refer-glyph : MangleName 'trigArrowUpK'
+			HBar.m (arrowMidX - arrowHeadSize) (arrowMidX + arrowHeadSize) arrowTop fine
+		create-glyph [MangleName 'trigArrowBarDown'] [MangleUnicode 0x2B73] : composite-proc
+			refer-glyph : MangleName 'trigArrowDownK'
+			HBar.m (arrowMidX - arrowHeadSize) (arrowMidX + arrowHeadSize) arrowBot fine
+
 		if (MosaicWidthScalar > 1 && !para.forceMonospace) : do
 			define l : mix 0 arrowSB kLongArrowSB
 			define r : mix MosaicWidth arrowRSB kLongArrowSB
@@ -768,6 +855,9 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		DoubleArrow ArrowShape [MangleName 'arrowUpDown.bottomSpaceLeft'] nothing arrowMidX arrowTop arrowMidX (arrowBot + arrowSw * 1.5)
 		DoubleArrow ArrowShape [MangleName 'arrowUpLeftAndDownRight'] [MangleUnicode 0x2921] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
 		DoubleArrow ArrowShape [MangleName 'arrowUpRightAndDownLeft'] [MangleUnicode 0x2922] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
+
+		DoubleArrow TrigArrowShape [MangleName 'trigArrowLeftRight'] [MangleUnicode 0x2B64] arrowSB SymbolMid arrowRSB SymbolMid
+		DoubleArrow TrigArrowShape [MangleName 'trigArrowUpDown'] [MangleUnicode 0x2B65] arrowMidX arrowTop arrowMidX arrowBot
 
 		create-glyph [MangleName 'arrowUpDownBar'] [MangleUnicode 0x21A8] : composite-proc
 			refer-glyph : MangleName 'arrowUpDown.bottomSpaceLeft'
@@ -849,6 +939,19 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			refer-glyph : MangleName 'arrowUp'
 			refer-glyph 'arrDblHStrokeOver'
 
+		create-glyph [MangleName 'uni2B7A'] [MangleUnicode 0x2B7A] : composite-proc
+			refer-glyph : MangleName 'trigArrowLeft'
+			refer-glyph 'arrDblVStrokeOver'
+		create-glyph [MangleName 'uni2B7B'] [MangleUnicode 0x2B7B] : composite-proc
+			refer-glyph : MangleName 'trigArrowUp'
+			refer-glyph 'arrDblHStrokeOver'
+		create-glyph [MangleName 'uni2B7C'] [MangleUnicode 0x2B7C] : composite-proc
+			refer-glyph : MangleName 'trigArrowRight'
+			refer-glyph 'arrDblVStrokeOver'
+		create-glyph [MangleName 'uni2B7D'] [MangleUnicode 0x2B7D] : composite-proc
+			refer-glyph : MangleName 'trigArrowDown'
+			refer-glyph 'arrDblHStrokeOver'
+
 	do "Stacked Arrows"
 		local hcDist : Math.max (halfArrowSw * 5) (arrowWidth / 2)
 		VCombine [MangleName 'uni21C4'] [MangleUnicode 0x21C4] [MangleName 'arrowRight'] [MangleName 'arrowLeft'] (arrowHeadSize * 1.75)
@@ -862,6 +965,17 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		VCombine [MangleName 'uni21CB'] [MangleUnicode 0x21CB] [MangleName 'arrowLeftHR'] [MangleName 'arrowRightHR'] (arrowHeadSize)
 		VCombine [MangleName 'uni21CC'] [MangleUnicode 0x21CC] [MangleName 'arrowRightHL'] [MangleName 'arrowLeftHL'] (arrowHeadSize)
 		VCombine [MangleName 'uni21B9'] [MangleUnicode 0x21B9] [MangleName 'arrowBarLeft'] [MangleName 'arrowBarRight'] (arrowHeadSize * 1.75)
+
+		VCombine [MangleName 'uni2B80'] [MangleUnicode 0x2B80] [MangleName 'trigArrowLeft'] [MangleName 'trigArrowRight'] (arrowHeadSize * 1.75)
+		HCombine [MangleName 'uni2B81'] [MangleUnicode 0x2B81] [MangleName 'trigArrowUp'] [MangleName 'trigArrowDown'] hcDist
+		VCombine [MangleName 'uni2B82'] [MangleUnicode 0x2B82] [MangleName 'trigArrowRight'] [MangleName 'trigArrowLeft'] (arrowHeadSize * 1.75)
+		HCombine [MangleName 'uni2B83'] [MangleUnicode 0x2B83] [MangleName 'trigArrowDown'] [MangleName 'trigArrowUp'] hcDist
+		VCombine [MangleName 'uni2B84'] [MangleUnicode 0x2B84] [MangleName 'trigArrowLeft'] [MangleName 'trigArrowLeft'] (arrowHeadSize * 1.75)
+		HCombine [MangleName 'uni2B85'] [MangleUnicode 0x2B85] [MangleName 'trigArrowUp'] [MangleName 'trigArrowUp'] hcDist
+		VCombine [MangleName 'uni2B86'] [MangleUnicode 0x2B86] [MangleName 'trigArrowRight'] [MangleName 'trigArrowRight'] (arrowHeadSize * 1.75)
+		HCombine [MangleName 'uni2B87'] [MangleUnicode 0x2B87] [MangleName 'trigArrowDown'] [MangleName 'trigArrowDown'] hcDist
+		VCombine [MangleName 'uni2B7E'] [MangleUnicode 0x2B7E] [MangleName 'trigArrowBarLeft'] [MangleName 'trigArrowBarRight'] (arrowHeadSize * 1.75)
+		HCombine [MangleName 'uni2B7F'] [MangleUnicode 0x2B7F] [MangleName 'trigArrowBarDown'] [MangleName 'trigArrowBarUp'] hcDist
 
 		create-glyph [MangleName 'uni21F6'] [MangleUnicode 0x21F6] : glyph-proc
 			set-width MosaicWidth

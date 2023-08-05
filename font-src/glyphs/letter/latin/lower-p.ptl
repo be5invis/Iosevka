@@ -13,12 +13,10 @@ glyph-block Letter-Latin-Lower-P : begin
 	glyph-block-import Letter-Shared-Shapes : OBarLeft DToothlessRise DMBlend
 	glyph-block-import Letter-Shared-Shapes : TopHook PalatalHook SerifFrame
 
-	define [SmallPSerifLT] : return [SerifFrame.fromDf [DivFrame 1] XH Descender].lt.outer
-	define [SmallPSerifLB] : return [SerifFrame.fromDf [DivFrame 1] XH Descender].lb.fullSide
 
-	define [EaredBody] : glyph-proc
+	define [EaredBody top] : glyph-proc
 		include : tagged 'bowl' : OBarLeft.shape
-		include : tagged 'stemLeft' : VBar.l SB Descender XH
+		include : tagged 'stemLeft' : VBar.l SB Descender top
 
 	define [EarlessCornerBody] : glyph-proc
 		include : tagged 'bowl' : OBarLeft.toothlessTop (rise -- DToothlessRise) (mBlend -- DMBlend)
@@ -27,12 +25,12 @@ glyph-block Letter-Latin-Lower-P : begin
 	define [EarlessRoundedBody] : glyph-proc
 		include : tagged 'bowl' : OBarLeft.roundedTop (yTerminal -- Descender)
 
-	define [FullSerifs] : glyph-proc
-		include : SmallPSerifLT
-		include : SmallPSerifLB
+	define [SmallPSerifLT top] : return [SerifFrame.fromDf [DivFrame 1] top Descender].lt.outer
+	define [SmallPSerifLB top] : return [SerifFrame.fromDf [DivFrame 1] top Descender].lb.fullSide
 
-	define [MotionSerif] : SmallPSerifLT
-	define [BottomSerif] : SmallPSerifLB
+	define [FullSerifs top] : composite-proc [SmallPSerifLT top] [SmallPSerifLB top]
+	define [MotionSerif top] : SmallPSerifLT top
+	define [BottomSerif top] : SmallPSerifLB top
 
 	define PConfig : SuffixCfg.weave
 		object # body
@@ -49,8 +47,15 @@ glyph-block Letter-Latin-Lower-P : begin
 		local yOverlay : mix 0 (Descender + [if doBS Stroke 0]) 0.5
 		create-glyph "p.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			include : Body
-			include : Serifs
+			include : Body XH
+			include : Serifs XH
+			set-base-anchor 'overlayOnExtension' (SB + 0.5 * Stroke * HVContrast) yOverlay
+			set-base-anchor 'strike' Middle (XH / 2)
+
+		create-glyph "thorn.\(suffix)" : glyph-proc
+			include : MarkSet.bp
+			include : Body Ascender
+			include : Serifs Ascender
 			set-base-anchor 'overlayOnExtension' (SB + 0.5 * Stroke * HVContrast) yOverlay
 			set-base-anchor 'strike' Middle (XH / 2)
 
@@ -73,6 +78,9 @@ glyph-block Letter-Latin-Lower-P : begin
 	link-reduced-variant 'p/hookTopBase' 'p'
 	select-variant 'cyrl/er' 0x440 (shapeFrom -- 'p') (follow -- 'p')
 	select-variant "pPalatalHook" 0x1D88 (follow -- 'p')
+
+	select-variant 'thorn' 0xFE
+	alias 'grek/sho' 0x3F8 'thorn.earedSerifless'
 
 	CreateAccentedComposition 'pTildeOver' 0x1D71 'p' 'tildeOverOnExension'
 

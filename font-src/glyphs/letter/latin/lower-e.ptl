@@ -25,6 +25,22 @@ glyph-block Letter-Latin-Lower-E : begin
 	define SLAB-CLASSICAL  1
 	define SLAB-INWARD     2
 
+	define [SmallESerifedTerminalShape df top stroke tailSlab] : match tailSlab
+		[Just SLAB-CLASSICAL] : begin
+			SerifedArcEnd.LtrLhs df.rightSB df.middle 0 stroke [HookHeight top stroke]
+		[Just SLAB-INWARD] : list
+			arcvh
+			g4 (df.middle + CorrectionOMidX * stroke) O
+			g4 df.rightSB (DToothlessRise)
+		__ : list
+			hookend O (sw -- stroke)
+			g4 [xTerminalR df] [HookHeight top stroke]
+
+	define [SmallETerminalSerif df top stroke tailSlab] : match tailSlab
+		[Just SLAB-CLASSICAL] : ArcEndSerif.R df.rightSB 0 stroke [HookHeight top stroke]
+		[Just SLAB-INWARD] : ArcEndSerif.InwardR df.rightSB 0 stroke [HookHeight top stroke]
+		__ : no-shape
+
 	glyph-block-export SmallEShape
 	define [SmallEShape] : with-params [df top stroke barpos [bbd 0] tailSlab] : glyph-proc
 		local barbottom : top * [fallback barpos DesignParameters.eBarPos] - (stroke / 2)
@@ -39,21 +55,9 @@ glyph-block Letter-Latin-Lower-E : begin
 			archv
 			flat (df.leftSB + OX) (top - [df.archDepthA SmallArchDepth])
 			curl (df.leftSB + OX) (0 + [df.archDepthB SmallArchDepth])
-			match tailSlab
-				[Just SLAB-CLASSICAL] : begin
-					SerifedArcEnd.LtrLhs df.rightSB df.middle 0 stroke [HookHeight top stroke]
-				[Just SLAB-INWARD] : list
-					arcvh
-					g4 (df.middle + CorrectionOMidX * stroke) O
-					g4 df.rightSB (DToothlessRise)
-				__ : list
-					hookend O (sw -- stroke)
-					g4 [xTerminalR df] [HookHeight top stroke]
+			SmallESerifedTerminalShape df top stroke tailSlab
 
-		include : match tailSlab
-			[Just SLAB-CLASSICAL] : ArcEndSerif.R df.rightSB 0 stroke [HookHeight top stroke]
-			[Just SLAB-INWARD] : ArcEndSerif.InwardR df.rightSB 0 stroke [HookHeight top stroke]
-			__ : no-shape
+		include : SmallETerminalSerif df top stroke tailSlab
 
 		return path.rhsKnots.[path.rhsKnots.length - 1]
 
@@ -77,7 +81,7 @@ glyph-block Letter-Latin-Lower-E : begin
 			g4 (df.width - [xTerminalR df]) [HookHeight top stroke]
 
 	glyph-block-export SmallERoundedShape
-	define [SmallERoundedShape] : with-params [df top stroke barpos] : glyph-proc
+	define [SmallERoundedShape] : with-params [df top stroke barpos tailSlab] : glyph-proc
 		local barbottom : top * [fallback barpos : if para.isItalic 0.500 0.475] - (stroke / 2)
 
 		local pBarRight : 0.475 - TanSlope * 0.5
@@ -97,8 +101,9 @@ glyph-block Letter-Latin-Lower-E : begin
 			archv
 			flat (df.leftSB + OX) (top - [df.archDepthA SmallArchDepth])
 			curl (df.leftSB + OX) (0 + [df.archDepthB SmallArchDepth])
-			hookend O (sw -- stroke)
-			g4 [xTerminalR df] [HookHeight top stroke]
+			SmallESerifedTerminalShape df top stroke tailSlab
+
+		include : SmallETerminalSerif df top stroke tailSlab
 
 		return path.rhsKnots.[path.rhsKnots.length - 1]
 
@@ -214,17 +219,22 @@ glyph-block Letter-Latin-Lower-E : begin
 			include : MarkSet.capital
 			set-base-anchor 'cvDecompose' 0 0
 			DependentSelector.set currentGlyph suffix
+		create-glyph "schwa/selector.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			set-base-anchor 'cvDecompose' 0 0
+			DependentSelector.set currentGlyph suffix
 
 		foreach { suffixSerif { styTop styBot } } [Object.entries CConfig] : do
 			create-glyph "Schwa.\(suffix).\(suffixSerif)" : glyph-proc
 				set-mark-anchor 'cvDecompose' 0 0
 				include : Body [DivFrame 1] CAP [AdviceStroke2 2 3 CAP] (tailSlab -- styTop)
 				include : FlipAround Middle (CAP / 2)
+			create-glyph "schwa.\(suffix).\(suffixSerif)" : glyph-proc
+				set-mark-anchor 'cvDecompose' 0 0
+				include : Body [DivFrame 1] XH [AdviceStroke2 2 3 XH] (tailSlab -- styTop)
+				include : FlipAround Middle (XH / 2)
 		select-variant "Schwa.\(suffix)" (follow -- "CTopSerifOnly")
-
-		create-glyph "schwa.\(suffix)" : glyph-proc
-			include [refer-glyph "e.\(suffix)"] AS_BASE ALSO_METRICS
-			include : FlipAround Middle (XH / 2)
+		select-variant "schwa.\(suffix)" (follow -- "cTopSerifOnly")
 
 		create-glyph "eRev.\(suffix)" : glyph-proc
 			include : MarkSet.e
@@ -273,8 +283,11 @@ glyph-block Letter-Latin-Lower-E : begin
 		rounded      "Schwa.rounded"
 	alias 'cyrl/Schwa' 0x4D8 'Schwa'
 
-	select-variant 'schwa' 0x259
-	alias 'cyrl/schwa' 0x4D9 'turne'
+	select-variant "schwa/selector" (follow -- "schwa")
+	CreateDependentComposite 'schwa' 0x259 "schwa/selector" : object
+		flatCrossbar "schwa.flatCrossbar"
+		rounded      "schwa.rounded"
+	alias 'cyrl/schwa' 0x4D9 'schwa'
 
 	select-variant 'eRev' 0x258 (follow -- 'e')
 

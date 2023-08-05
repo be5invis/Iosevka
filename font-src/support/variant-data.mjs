@@ -29,8 +29,9 @@ export function apply(data, para, argv) {
 export function parse(data, argv) {
 	const primes = new Map();
 	const selectorTree = new SelectorTree();
+	const ta = new CvTagAllocator();
 	for (const k in data.prime) {
-		const p = new Prime(k, data.prime[k]);
+		const p = new Prime(k, data.prime[k], ta);
 		p.register(selectorTree);
 		primes.set(k, p);
 	}
@@ -67,8 +68,53 @@ class SelectorTree {
 	}
 }
 
+class CvTagAllocator {
+	constructor() {
+		this.cvCount = 1;
+		this.kindWiseCount = new Map();
+	}
+
+	createTag(kind) {
+		if (this.cvCount <= 99) {
+			return `cv${String(this.cvCount++).padStart(2, "0")}`;
+		} else {
+			let n = this.kindWiseCount.get(kind) || 0;
+			this.kindWiseCount.set(kind, ++n);
+			return `${this.mapKindToTag(kind)}${this.mapNumberToLetter(n - 1)}`;
+		}
+	}
+
+	mapKindToTag(kind) {
+		switch (kind) {
+			case "letter":
+				return "VA";
+			case "digit":
+				return "VN";
+			case "dot":
+				return "VD";
+			case "symbol":
+				return "VS";
+			case "ligature":
+				return "VL";
+		}
+	}
+
+	// map number from 0 1 2 3 ... to AA AB AC ...
+	// 0 => AA, 1 => AB, ... 25 => BA, 26 => BB, ...
+	// Result should be at least 2 characters
+	mapNumberToLetter(n) {
+		let ans = "";
+		do {
+			ans += String.fromCharCode((n % 26) + 0x41);
+			n = Math.floor(n / 26);
+		} while (n > 0);
+		while (ans.length < 2) ans = "A" + ans;
+		return ans;
+	}
+}
+
 class Prime {
-	constructor(key, cfg) {
+	constructor(key, cfg, ta) {
 		this.key = key;
 		this.sampler = cfg.sampler;
 		this.samplerExplain = cfg.samplerExplain;
@@ -78,7 +124,7 @@ class Prime {
 		this.descSampleText = this.ligatureSampler
 			? cfg.sampler.split(" ").filter(x => !!x.trim())
 			: [...(cfg.sampler || "")];
-		this.tag = cfg.tag;
+		if (cfg.tagKind) this.tag = ta.createTag(cfg.tagKind);
 		this.slopeDependent = !!cfg.slopeDependent;
 		this.hotChars = cfg.hotChars ? [...cfg.hotChars] : this.descSampleText;
 
@@ -92,7 +138,7 @@ class Prime {
 		if (!variantConfig) throw new Error(`Missing variants in ${key}`);
 		for (const varKey in variantConfig) {
 			const variant = variantConfig[varKey];
-			this.variants.set(varKey, new PrimeVariant(varKey, cfg.tag, variant));
+			this.variants.set(varKey, new PrimeVariant(varKey, this.tag, variant));
 		}
 	}
 	register(tree) {
