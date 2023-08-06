@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 26.0.2
+
+* Fix incorrect code assignment for `U+2B6E`, `U+2B6F`, `U+2B71`, `U+2B72` (#1895).
+* Fix CYRILLIC CAPITAL LETTER KOMI SJE (`U+050C`) to follow serifs of `C` instead of `c` (#1896).
+
+
 ### 26.0.1
 
 * Fix shape of `ij` in Aile under NWID.
