@@ -405,6 +405,11 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow ArrowShape [MangleName 'arrowDownRight']  [MangleUnicode 0x2198] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
 		MkArrow ArrowShape [MangleName 'arrowDownLeft']   [MangleUnicode 0x2199] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
 
+		MkArrow ThinArrowShape [MangleName 'thinArrowLeft']  null arrowRSB SymbolMid arrowSB SymbolMid
+		MkArrow ThinArrowShape [MangleName 'thinArrowUp']    null arrowMidX arrowBot arrowMidX arrowTop
+		MkArrow ThinArrowShape [MangleName 'thinArrowRight'] null arrowSB SymbolMid arrowRSB SymbolMid
+		MkArrow ThinArrowShape [MangleName 'thinArrowDown']  null arrowMidX arrowTop arrowMidX arrowBot
+
 		MkArrow TrigArrowShape [MangleName 'trigArrowLeft']       [MangleUnicode 0x2B60] arrowRSB SymbolMid arrowSB SymbolMid
 		MkArrow TrigArrowShape [MangleName 'trigArrowUp']         [MangleUnicode 0x2B61] arrowMidX arrowBot arrowMidX arrowTop
 		MkArrow TrigArrowShape [MangleName 'trigArrowRight']      [MangleUnicode 0x2B62] arrowSB SymbolMid arrowRSB SymbolMid
@@ -958,29 +963,30 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			refer-glyph 'arrDblHStrokeOver'
 
 	do "Arrow with ring"
-		create-glyph [MangleName 'uni21F4'] [MangleUnicode 0x21F4] : composite-proc
-			refer-glyph : MangleName 'arrowRight'
-			refer-glyph : MangleName 'arrRingOver'
-		create-glyph [MangleName 'uni2B30'] [MangleUnicode 0x2B30] : composite-proc
-			refer-glyph : MangleName 'arrowLeft'
-			refer-glyph : MangleName 'arrRingOver'
-		create-glyph [MangleName 'uni2948'] [MangleUnicode 0x2948] : composite-proc
+		define [RingOverlayShape base baseThin overlay overlayMask] : composite-proc
 			with-transform [Translate 0 0] : composite-proc
-				refer-glyph : MangleName 'arrowLeftRight'
+				refer-glyph : MangleName base
 				clear-geometry
-				refer-glyph : MangleName 'arrRingOverLR'
+				refer-glyph : MangleName overlay
 			difference
-				refer-glyph : MangleName 'arrowLeftRight'
+				refer-glyph : MangleName base
 				with-transform [Translate 0 0] : composite-proc
-					refer-glyph : MangleName 'arrowLeftRight'
+					refer-glyph : MangleName base
 					clear-geometry
-					refer-glyph : MangleName 'arrRingOverLRMask'
+					refer-glyph : MangleName overlayMask
 			intersection
-				refer-glyph : MangleName 'thinArrowLeftRight'
+				refer-glyph : MangleName baseThin
 				with-transform [Translate 0 0] : composite-proc
-					refer-glyph : MangleName 'arrowLeftRight'
+					refer-glyph : MangleName base
 					clear-geometry
-					refer-glyph : MangleName 'arrRingOverLRMask'
+					refer-glyph : MangleName overlayMask
+
+		create-glyph [MangleName 'uni21F4'] [MangleUnicode 0x21F4]
+			RingOverlayShape 'arrowRight' 'thinArrowRight' 'arrRingOverLR' 'arrRingOverLRMask'
+		create-glyph [MangleName 'uni2B30'] [MangleUnicode 0x2B30]
+			RingOverlayShape 'arrowLeft' 'thinArrowLeft' 'arrRingOverLR' 'arrRingOverLRMask'
+		create-glyph [MangleName 'uni2948'] [MangleUnicode 0x2948]
+			RingOverlayShape 'arrowLeftRight' 'thinArrowLeftRight' 'arrRingOverLR' 'arrRingOverLRMask'
 
 	do "Stacked Arrows"
 		local hcDist : Math.max (halfArrowSw * 5) (arrowWidth / 2)
