@@ -2,6 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose] from"../../../support/gr.mjs"
+import [maskBits] from"../../../support/util/mask-bit.mjs"
 
 glyph-module
 
@@ -10,24 +11,28 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth PalatalHook CyrDescender SerifFrame
 	glyph-block-import Letter-Latin-S : AdviceSArchDepth
+	glyph-block-import Letter-Latin-Lower-F : fbar
 
 	define NO-TAIL    0
 	define DESCENDING 1
 	define TAILED     2
 
-	define SERIF-NONE 0
-	define SERIF-BOT  1
-	define SERIF-MID  2
-	define SERIF-DUAL 3
+	define SERIF-NONE    0
+	define SERIF-BOT     1
+	define SERIF-MID     2
+	define SERIF-MID-XH  4
 
-	define [EszetSerifs df fTraditional slab] : begin
-		local sf : SerifFrame.fromDf [DivFrame 1] XH 0
+	define SERIF-DUAL    : SERIF-BOT + SERIF-MID
+	define SERIF-DUAL-XH : SERIF-BOT + SERIF-MID-XH
+
+	define [EszetSerifs df fTraditional slab] : glyph-proc
+		local sf : SerifFrame.fromDf [DivFrame 1] fbar 0
 		local lb : if fTraditional sf.lb.full sf.lb.outer
-		return : match slab
-			[Just SERIF-BOT]  : composite-proc lb
-			[Just SERIF-MID]  : composite-proc    sf.lt.outer
-			[Just SERIF-DUAL] : composite-proc lb sf.lt.outer
-			__ : no-shape
+		if [maskBits slab SERIF-BOT] : include lb
+		if [maskBits slab SERIF-MID] : include sf.lt.outer
+
+		local sfXH : SerifFrame.fromDf [DivFrame 1] XH 0
+		if [maskBits slab SERIF-MID-XH] : include sfXH.lt.outer
 
 	define [Traditional fFlathook] : function [slab tail] : glyph-proc
 		include : MarkSet.bp
@@ -158,10 +163,12 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 			'descending'            DESCENDING
 			'tailed'                TAILED
 		object # serifs
-			serifless               0
-			bottomSerifed           1
-			middleSerifed           2
-			dualSerifed             3
+			serifless               SERIF-NONE
+			bottomSerifed           SERIF-BOT
+			middleSerifed           SERIF-MID
+			dualSerifed             SERIF-DUAL
+			middleSerifedXH         SERIF-MID-XH
+			dualSerifedXH           SERIF-DUAL-XH
 
 	foreach { suffix { Base tail serif } } [pairs-of EszetConfig] : do
 		create-glyph "eszet.\(suffix)" : Base serif tail

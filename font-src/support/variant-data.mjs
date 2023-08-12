@@ -267,9 +267,17 @@ class VariantBuilder {
 
 		globalState.stages.get(this.entry).accept(globalState, localState);
 
+		globalState.sink.sort(
+			(a, b) =>
+				a.nonBreakingVariantAdditionPriority - b.nonBreakingVariantAdditionPriority ||
+				a.rank - b.rank
+		);
+
 		let ans = {};
+		let itemRank = 0;
 		for (const item of globalState.sink) {
 			let cfg = item.createPrimeVariant();
+			cfg.rank = ++itemRank;
 			if (!cfg.key) throw new Error("Invalid variant key");
 			if (ans[cfg.key]) throw new Error("Duplicate variant : " + cfg.key);
 			ans[cfg.key] = cfg;
@@ -309,6 +317,7 @@ class VbStageAlternative {
 		this.key = key;
 		this.rank = raw.rank;
 		this.groupRank = raw.groupRank;
+		this.nonBreakingVariantAdditionPriority = raw.nonBreakingVariantAdditionPriority || 0;
 		this.next = raw.next;
 		this.mode = raw.mode;
 		this.enableIf = raw.enableIf;
@@ -339,6 +348,13 @@ class VbStageAlternative {
 		// RankGroup
 		if (this.groupRank) ans.groupRank += this.evalValue(this.groupRank, localState);
 		else if (this.stage === globalState.entry) ans.groupRank += this.rank;
+
+		// nonBreakingVariantAdditionPriority
+		if (this.nonBreakingVariantAdditionPriority) {
+			const p = this.evalValue(this.nonBreakingVariantAdditionPriority, localState);
+			ans.nonBreakingVariantAdditionPriority += p;
+			ans.groupRank = p;
+		}
 
 		if (this.keyAffix) ans.addKeyAffix(this.mode, this.evalValue(this.keyAffix, localState));
 		if (this.descriptionJoiner && this.descriptionAffix) {
@@ -416,6 +432,7 @@ class VbLocalState {
 		this.stage = ".start";
 		this.rank = 0;
 		this.groupRank = 0;
+		this.nonBreakingVariantAdditionPriority = 0;
 		this.descriptionLeader = "";
 
 		this.assignments = new Map();
@@ -429,6 +446,7 @@ class VbLocalState {
 		ans.stage = this.stage;
 		ans.rank = this.rank;
 		ans.groupRank = this.groupRank;
+		ans.nonBreakingVariantAdditionPriority = this.nonBreakingVariantAdditionPriority;
 		ans.descriptionLeader = this.descriptionLeader;
 		ans.assignments = new Map(this.assignments);
 		ans.key = [...this.key];

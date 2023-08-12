@@ -166,6 +166,10 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		include : ArrowHead x1 y1 x2 y2 size
 		include : ArrowBar x1 y1 x2 y2 halfArrowSw
 
+	define [ThinArrowShape x1 y1 x2 y2 size] : glyph-proc
+		include : ArrowHead x1 y1 x2 y2 size
+		include : ArrowBar x1 y1 x2 y2 (0.5 * [mix fine terminal 0.5])
+
 	define [TrigArrowShape x1 y1 x2 y2 size] : glyph-proc
 		include : TriangleArrowHead x1 y1 x2 y2 (0.75 * size)
 		include : ArrowBar x1 y1 x2 y2 halfArrowSw
@@ -400,6 +404,11 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow ArrowShape [MangleName 'arrowUpRight']    [MangleUnicode 0x2197] arrowDiagSB arrowDiagBot arrowDiagRSB arrowDiagTop
 		MkArrow ArrowShape [MangleName 'arrowDownRight']  [MangleUnicode 0x2198] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
 		MkArrow ArrowShape [MangleName 'arrowDownLeft']   [MangleUnicode 0x2199] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
+
+		MkArrow ThinArrowShape [MangleName 'thinArrowLeft']  null arrowRSB SymbolMid arrowSB SymbolMid
+		MkArrow ThinArrowShape [MangleName 'thinArrowUp']    null arrowMidX arrowBot arrowMidX arrowTop
+		MkArrow ThinArrowShape [MangleName 'thinArrowRight'] null arrowSB SymbolMid arrowRSB SymbolMid
+		MkArrow ThinArrowShape [MangleName 'thinArrowDown']  null arrowMidX arrowTop arrowMidX arrowBot
 
 		MkArrow TrigArrowShape [MangleName 'trigArrowLeft']       [MangleUnicode 0x2B60] arrowRSB SymbolMid arrowSB SymbolMid
 		MkArrow TrigArrowShape [MangleName 'trigArrowUp']         [MangleUnicode 0x2B61] arrowMidX arrowBot arrowMidX arrowTop
@@ -851,6 +860,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 
 	do "Double-headed Arrows"
 		DoubleArrow ArrowShape [MangleName 'arrowLeftRight'] [MangleUnicode 0x2194] arrowSB SymbolMid arrowRSB SymbolMid
+		DoubleArrow ThinArrowShape [MangleName 'thinArrowLeftRight'] null arrowSB SymbolMid arrowRSB SymbolMid
 		DoubleArrow ArrowShape [MangleName 'arrowUpDown'] [MangleUnicode 0x2195] arrowMidX arrowTop arrowMidX arrowBot
 		DoubleArrow ArrowShape [MangleName 'arrowUpDown.bottomSpaceLeft'] nothing arrowMidX arrowTop arrowMidX (arrowBot + arrowSw * 1.5)
 		DoubleArrow ArrowShape [MangleName 'arrowUpLeftAndDownRight'] [MangleUnicode 0x2921] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
@@ -952,6 +962,32 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			refer-glyph : MangleName 'trigArrowDown'
 			refer-glyph 'arrDblHStrokeOver'
 
+	do "Arrow with ring"
+		define [RingOverlayShape base baseThin overlay overlayMask] : composite-proc
+			with-transform [Translate 0 0] : composite-proc
+				refer-glyph : MangleName base
+				clear-geometry
+				refer-glyph : MangleName overlay
+			difference
+				refer-glyph : MangleName base
+				with-transform [Translate 0 0] : composite-proc
+					refer-glyph : MangleName base
+					clear-geometry
+					refer-glyph : MangleName overlayMask
+			intersection
+				refer-glyph : MangleName baseThin
+				with-transform [Translate 0 0] : composite-proc
+					refer-glyph : MangleName base
+					clear-geometry
+					refer-glyph : MangleName overlayMask
+
+		create-glyph [MangleName 'uni21F4'] [MangleUnicode 0x21F4]
+			RingOverlayShape 'arrowRight' 'thinArrowRight' 'arrRingOverLR' 'arrRingOverLRMask'
+		create-glyph [MangleName 'uni2B30'] [MangleUnicode 0x2B30]
+			RingOverlayShape 'arrowLeft' 'thinArrowLeft' 'arrRingOverLR' 'arrRingOverLRMask'
+		create-glyph [MangleName 'uni2948'] [MangleUnicode 0x2948]
+			RingOverlayShape 'arrowLeftRight' 'thinArrowLeftRight' 'arrRingOverLR' 'arrRingOverLRMask'
+
 	do "Stacked Arrows"
 		local hcDist : Math.max (halfArrowSw * 5) (arrowWidth / 2)
 		VCombine [MangleName 'uni21C4'] [MangleUnicode 0x21C4] [MangleName 'arrowRight'] [MangleName 'arrowLeft'] (arrowHeadSize * 1.75)
@@ -980,15 +1016,15 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		create-glyph [MangleName 'uni21F6'] [MangleUnicode 0x21F6] : glyph-proc
 			set-width MosaicWidth
 			local distance : bendArrowHeadSize * 2 - arrowSw
-			include : WithTransform [ApparentTranslate 0 (+distance)] : refer-glyph : MangleName 'arrowRightCompact'
+			include : with-transform [ApparentTranslate 0 (+distance)] : refer-glyph : MangleName 'arrowRightCompact'
 			include : refer-glyph : MangleName 'arrowRightCompact'
-			include : WithTransform [ApparentTranslate 0 (-distance)] : refer-glyph : MangleName 'arrowRightCompact'
+			include : with-transform [ApparentTranslate 0 (-distance)] : refer-glyph : MangleName 'arrowRightCompact'
 		create-glyph [MangleName 'uni2B31'] [MangleUnicode 0x2B31] : glyph-proc
 			set-width MosaicWidth
 			local distance : bendArrowHeadSize * 2 - arrowSw
-			include : WithTransform [ApparentTranslate 0 (+distance)] : refer-glyph : MangleName 'arrowLeftCompact'
+			include : with-transform [ApparentTranslate 0 (+distance)] : refer-glyph : MangleName 'arrowLeftCompact'
 			include : refer-glyph : MangleName 'arrowLeftCompact'
-			include : WithTransform [ApparentTranslate 0 (-distance)] : refer-glyph : MangleName 'arrowLeftCompact'
+			include : with-transform [ApparentTranslate 0 (-distance)] : refer-glyph : MangleName 'arrowLeftCompact'
 
 	do "Zig zag"
 		create-glyph [MangleName 'zigZagArrow'] [MangleUnicode 0x21AF] : glyph-proc
@@ -1074,7 +1110,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			define x2 : arrowMidX - bodyWidth / 2
 
 			include : HBar.t x2 x1(SymbolMid + enclosedSize / 2) arrowSw
-			include : WithTransform [ApparentTranslate 0 ((bodyWidth - enclosedSize) / 2)]
+			include : with-transform [ApparentTranslate 0 ((bodyWidth - enclosedSize) / 2)]
 				ArrowShape x1 (SymbolMid - bodyWidth / 2) x2 (SymbolMid + bodyWidth / 2)
 
 		create-glyph [MangleName 'uni21F1'] [MangleUnicode 0x21F1] : glyph-proc
@@ -1085,7 +1121,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			define y1 : SymbolMid - bodyWidth / 2
 			define y2 : SymbolMid + bodyWidth / 2
 
-			include : WithTransform [ApparentTranslate ((enclosedSize - bodyWidth) / 2) ((bodyWidth - enclosedSize) / 2)]
+			include : with-transform [ApparentTranslate ((enclosedSize - bodyWidth) / 2) ((bodyWidth - enclosedSize) / 2)]
 				ArrowShape x1 y1 x2 y2
 			include : HBar.t  (arrowMidX - enclosedSize / 2) (arrowMidX + enclosedSize / 2) (SymbolMid + enclosedSize / 2) arrowSw
 			include : VBar.l (arrowMidX - enclosedSize / 2) (SymbolMid - enclosedSize / 2) (SymbolMid + enclosedSize / 2) arrowSw
