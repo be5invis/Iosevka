@@ -1714,18 +1714,18 @@
 <td colspan="6"> </td>
 </tr>
 <tr>
-<td rowspan="6"><code>cv52</code></td>
+<td rowspan="8"><code>cv52</code></td>
 <td><img src="../images/cv-eszet-traditional-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-eszet-traditional-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-traditional-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-eszet-traditional-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-traditional-dual-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-dual-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-traditional-descending-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-descending-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-traditional-descending-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-descending-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-traditional-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-traditional-tailed-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-tailed-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-traditional-flat-hook-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-flat-hook-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-eszet-traditional-flat-hook-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-flat-hook-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-traditional-flat-hook-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-flat-hook-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-eszet-traditional-flat-hook-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-flat-hook-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-traditional-flat-hook-dual-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-flat-hook-dual-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 </tr>
 <tr>
@@ -1748,8 +1748,8 @@
 <td><img src="../images/cv-eszet-traditional-flat-hook-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-flat-hook-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-traditional-flat-hook-tailed-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-flat-hook-tailed-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-sulzbacher-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-eszet-sulzbacher-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-sulzbacher-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-eszet-sulzbacher-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-sulzbacher-dual-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-dual-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-sulzbacher-descending-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-descending-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-sulzbacher-descending-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-descending-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -1772,14 +1772,17 @@
 </tr>
 <tr>
 <td><img src="../images/cv-eszet-longs-s-lig-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-eszet-longs-s-lig-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-longs-s-lig-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-eszet-longs-s-lig-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-longs-s-lig-dual-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-dual-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-longs-s-lig-descending-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-descending-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-longs-s-lig-descending-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-descending-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-longs-s-lig-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-eszet-longs-s-lig-tailed-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-tailed-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="4"> </td>
+<td><img src="../images/cv-eszet-sulzbacher-middle-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-middle-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-eszet-sulzbacher-descending-middle-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-descending-middle-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-eszet-sulzbacher-tailed-middle-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-tailed-middle-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-eszet-longs-s-lig-middle-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-middle-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td>
 </tr>
 <tr>
 <td>25</td>
@@ -1790,7 +1793,24 @@
 <td>30</td>
 <td>31</td>
 <td>32</td>
-<td colspan="4"> </td>
+<td>33</td>
+<td>34</td>
+<td>35</td>
+<td>36</td>
+</tr>
+<tr>
+<td><img src="../images/cv-eszet-longs-s-lig-descending-middle-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-descending-middle-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-eszet-longs-s-lig-tailed-middle-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-tailed-middle-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-eszet-sulzbacher-dual-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-dual-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-eszet-longs-s-lig-dual-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-dual-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>37</td>
+<td>38</td>
+<td>39</td>
+<td>40</td>
+<td colspan="8"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv53</code></td>
