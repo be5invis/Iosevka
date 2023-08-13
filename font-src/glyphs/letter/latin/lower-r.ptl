@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Lower-R : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend PalatalHook RetroflexHook
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
@@ -73,11 +74,15 @@ glyph-block Letter-Latin-Lower-R : begin
 			[Just rNarrow]        : xArchMiddle + 0.1
 			__                      rHookX
 		local [setMarks doTopSerif top bottom] : glyph-proc
-			set-base-anchor 'above' [mix [mix df.leftSB (xBar - [HSwToV Stroke]) : if doTopSerif 0.5 1] df.rightSB 0.5] top
-			set-base-anchor 'leaningBelow' (xBar - [HSwToV HalfStroke]) bottom
+			include : LeaningAnchor.Below.VBar.r xBar
+			include : LeaningAnchor.Above.Hook
+				mix df.leftSB (xBar - [HSwToV Stroke]) : if doTopSerif 0.5 1
+				begin df.rightSB
 			set-base-anchor 'overlay' (xBar - Stroke * 0.25) [mix bottom top 0.5]
 			set-base-anchor 'palatalHookAttach' xBar bottom
 			set-base-anchor 'palatalHookPos' (xBar + [PalatalHook.adviceGap Stroke]) bottom
+			currentGlyph.copyBaseAnchorIfAbsent 'leaningAbove' 'above'
+			currentGlyph.copyBaseAnchorIfAbsent 'leaningBelow' 'below'
 
 		return : object xBar rBottomSerif rTopSerif fine xArchMiddle skew rHookX rHookXN rHookY hookSuperness setMarks
 
@@ -185,7 +190,6 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : setMarks doTS XH 0
 
 			include : F df mode doTS doBS
-			currentGlyph.copyBaseAnchorIfAbsent 'leaningBelow' 'below'
 
 		create-glyph "rLongLeg.\(suffix)" : glyph-proc
 			set-width df.width
