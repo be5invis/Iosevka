@@ -1,4 +1,4 @@
-import { Joining, AnyCv, TieMark, Nwid, Wwid } from "../../support/gr.mjs";
+import { Joining, AnyCv, TieMark, Nwid, Wwid, VS01 } from "../../support/gr.mjs";
 
 const ApplePostNames = new Map([
 	/* spell-checker: disable */
@@ -286,14 +286,18 @@ export function bySpacing(gSrcBase, gOtBase, internalNameMap, conflictSet) {
 	return n;
 }
 
+const NamingGr = [TieMark, VS01];
+
 export function byGr(gSrcBase, gOtBase, internalNameMap, conflictSet) {
 	if (!gOtBase.name) return 0;
 	let n = 0;
 	for (const cv of AnyCv.query(gSrcBase)) {
 		n += nameByGr(cv, gSrcBase, gOtBase, internalNameMap, conflictSet);
 	}
-	if (TieMark.get(gSrcBase)) {
-		n += nameByGr(TieMark, gSrcBase, gOtBase, internalNameMap, conflictSet);
+	for (const gr of NamingGr) {
+		if (gr.get(gSrcBase)) {
+			n += nameByGr(gr, gSrcBase, gOtBase, internalNameMap, conflictSet);
+		}
 	}
 	return n;
 }

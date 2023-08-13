@@ -20,6 +20,9 @@ export const LowerYDotAtBelow = LinkedGlyphProp("LowerYDotAtBelow");
 export const DependentSelector = LinkedGlyphProp("DependentSelector");
 export const MathSansSerif = LinkedGlyphProp("MathSansSerif");
 export const VS01 = LinkedGlyphProp("VS01");
+export const TieMark = LinkedGlyphProp("TieMark");
+export const LeaningMark = LinkedGlyphProp("LeaningMark");
+export const LeaningMarkSpacer = LinkedGlyphProp("LeaningMarkSpacer");
 function LinkedGlyphProp(key) {
 	return {
 		get(glyph) {
@@ -30,6 +33,12 @@ function LinkedGlyphProp(key) {
 			if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
 			if (!glyph.related) glyph.related = {};
 			glyph.related[key] = toGid;
+		},
+		amendName(name) {
+			return `${key}{${name}}`;
+		},
+		amendOtName(name) {
+			return `${name}.${key}`;
 		}
 	};
 }
@@ -61,25 +70,6 @@ function DecompositionProp(key) {
 	};
 }
 
-export const TieMark = {
-	tag: "TMRK",
-	get(glyph) {
-		if (glyph && glyph.related) return glyph.related.TieMark;
-		else return null;
-	},
-	set(glyph, toGid) {
-		if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
-		if (!glyph.related) glyph.related = {};
-		glyph.related.TieMark = toGid;
-	},
-	amendName(name) {
-		return `TieMark{${name}}`;
-	},
-	amendOtName(name) {
-		return name + ".tieMark";
-	}
-};
-
 export const TieGlyph = {
 	get(glyph) {
 		if (glyph && glyph.related) return glyph.related.TieGlyph;
@@ -109,6 +99,7 @@ export const NeqLigationSlashDotted = BoolProp("NeqLigationSlashDotted");
 export const OgonekTrY = BoolProp("OgonekTrY");
 export const IsSuperscript = BoolProp("IsSuperscript");
 export const IsSubscript = BoolProp("IsSubscript");
+export const ScheduleLeaningMark = BoolProp("ScheduleLeaningMark");
 
 export const Joining = {
 	get(glyph) {
@@ -242,6 +233,7 @@ export function getGrTree(gid, grSetList, fnGidToGlyph) {
 	getGrTreeImpl(gid, grSetList, fnGidToGlyph, sink);
 	return sink;
 }
+
 function getGrTreeImpl(gid, grSetList, fnGidToGlyph, sink) {
 	if (!grSetList.length) return;
 	const g = fnGidToGlyph(gid);
@@ -463,5 +455,6 @@ export const SvInheritableRelations = [
 	DependentSelector,
 	Joining,
 	NeqLigationSlashDotted,
-	OgonekTrY
+	OgonekTrY,
+	ScheduleLeaningMark
 ];

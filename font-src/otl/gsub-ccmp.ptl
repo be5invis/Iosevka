@@ -1,7 +1,7 @@
 $$include '../meta/macros.ptl'
 
 import [AddCommonFeature AddFeature AddLookup AddFeatureLookup ChainRuleBuilder BeginLookupBlock EndLookupBlock UkMapToLookup UkMap2ToLookup] from"./table-util.mjs"
-import [AnyCv Dotless TieMark TieGlyph OgonekTrY IsSuperscript IsSubscript] from"../support/gr.mjs"
+import [Dotless TieMark TieGlyph OgonekTrY IsSuperscript IsSubscript LeaningMark LeaningMarkSpacer] from"../support/gr.mjs"
 import as UnicodeKnowledge from"../meta/unicode-knowledge.mjs"
 
 extern Set
@@ -40,24 +40,18 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 		define groupLF             {}
 		define dotlessFrom         {}
 		define dotlessTo           {}
-		define TieMarkFrom         {}
-		define TieMarkTo           {}
-		define TieGlyphs           {}
 
-		foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== "."): begin
-			if g.baseAnchors.lf             : groupLF.push gid
-			if g.baseAnchors.grekUpperTonos : groupGrekUpperTonos.push gid
+		foreach { gn g } [glyphStore.namedEntries] : if (gn.(0) !== "."): begin
+			if g.baseAnchors.lf             : groupLF.push gn
+			if g.baseAnchors.grekUpperTonos : groupGrekUpperTonos.push gn
 			if [Dotless.get g] : begin
-				dotlessFrom.push gid
+				dotlessFrom.push gn
 				dotlessTo.push   [Dotless.get g]
-			if [TieGlyph.get g] : TieGlyphs.push gid
-			if [TieMark.get g] : begin
-				TieMarkFrom.push gid
-				TieMarkTo.push   [TieMark.get g]
 
 		define [IotaLF]           : UkMapToLookup UnicodeKnowledge.iotaBelowToLfTf
 		define [GrekUpperTonosTf] : UkMapToLookup UnicodeKnowledge.upperGrekMarkToTonosTf
 
+		# Dotless transform
 		export-lookup : AddLookup sink : object
 			.type 'gsub_chaining'
 			.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'above']
@@ -65,7 +59,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				chain-rule (dotlessFrom ~> dotlessTo) (aboveMark ~> null)
 				chain-rule groupGrekUpperTonos [GrekUpperTonosTf]
 
-		# Iota transform (max 6 middle marks are supported)
+		# Iota transform
 		export-lookup : AddLookup sink : object
 			.type 'gsub_chaining'
 			.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'below']
@@ -84,7 +78,17 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				'brackAbove' { 'leftBrackAbove' 'rightBrackAbove' }
 				'parenBelow' { 'leftParenBelow' 'rightParenBelow' }
 
-		# Tie marks
+	Ccmp-Group "Tie Mark Transform" : begin
+		define TieMarkFrom         {}
+		define TieMarkTo           {}
+		define TieGlyphs           {}
+
+		foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== ".") : begin
+			if [TieGlyph.get g] : TieGlyphs.push gid
+			if [TieMark.get g] : begin
+				TieMarkFrom.push gid
+				TieMarkTo.push   [TieMark.get g]
+
 		define lookupTieMarkLigature : AddLookup sink : object
 			.type 'gsub_ligature'
 			.substitutions : {}.concat
@@ -99,13 +103,47 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				inputEnds 3
 				apply {{.at 1 .lookup lookupTieMarkLigature}}
 
+	Ccmp-Group "Leaning Mark Trasnform" : begin
+		define LeaningAnchorMap : list
+			list 'above' 'leaningAbove'
+			list 'below' 'leaningBelow'
+
+		foreach { mkCenter mkLeaning } [items-of LeaningAnchorMap] : begin
+			local basesToConsider {}
+			local markFrom        {}
+			local markTo          {}
+			local markSpacer      {}
+			local splitMapping    {}
+
+			foreach { gn g } [glyphStore.namedEntries] : if (gn.(0) !== ".") : begin
+				if (![markGlyphs.all.has gn] && g.baseAnchors.(mkLeaning)) : basesToConsider.push gn
+				if (g.markAnchors.(mkCenter) && [LeaningMark.get g] && [LeaningMarkSpacer.get g]) : begin
+					markFrom.push       gn
+					markTo.push         [LeaningMark.get g]
+					markSpacer.push     [LeaningMarkSpacer.get g]
+					splitMapping.push   { gn {[LeaningMarkSpacer.get g] [LeaningMark.get g]} }
+
+			define lookupTurnMarkIntoLeaningAndSpacer : AddLookup sink : object
+				.type 'gsub_multiple'
+				.substitutions : Object.fromEntries splitMapping
+
+			export-lookup : AddLookup sink : object
+				.type 'gsub_chaining'
+				.ignoreGlyphs [filterMarkByClassNegated markGlyphs mkCenter]
+				.rules : list
+					object
+						.match         { [basesToConsider.concat markSpacer] markFrom }
+						.inputBegins   1
+						.inputEnds     2
+						.apply         {{.at 1 .lookup lookupTurnMarkIntoLeaningAndSpacer}}
+
 	Ccmp-Group "Rhotic Hook Transform" : begin
 		define superscripts        {}
 		define subscripts          {}
 
-		foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== "."): begin
-			if [IsSuperscript.get g] : superscripts.push gid
-			if [IsSubscript.get g]   : subscripts.push gid
+		foreach { gn g } [glyphStore.namedEntries] : if (gn.(0) !== ".") : begin
+			if [IsSuperscript.get g] : superscripts.push gn
+			if [IsSubscript.get g]   : subscripts.push gn
 
 		export-lookup : AddLookup sink : object
 			.type 'gsub_chaining'

@@ -72,17 +72,17 @@ glyph-block Letter-Latin-Lower-R : begin
 			[Just rNarrowSerifed] : mix df.width rHookX df.div
 			[Just rNarrow]        : xArchMiddle + 0.1
 			__                      rHookX
-		local [setMarks doTopSerif] : glyph-proc
-			set-base-anchor 'above' [mix [mix df.leftSB (xBar - [HSwToV Stroke]) : if doTopSerif 0.5 1] df.rightSB 0.5] XH
-			set-base-anchor 'overlay' (xBar - Stroke * 0.25) (XH * 0.5)
-			set-base-anchor 'palatalHookAttach' xBar 0
-			set-base-anchor 'palatalHookPos' (xBar + [PalatalHook.adviceGap Stroke]) 0
+		local [setMarks doTopSerif top bottom] : glyph-proc
+			set-base-anchor 'above' [mix [mix df.leftSB (xBar - [HSwToV Stroke]) : if doTopSerif 0.5 1] df.rightSB 0.5] top
+			set-base-anchor 'leaningBelow' (xBar - [HSwToV HalfStroke]) bottom
+			set-base-anchor 'overlay' (xBar - Stroke * 0.25) [mix bottom top 0.5]
+			set-base-anchor 'palatalHookAttach' xBar bottom
+			set-base-anchor 'palatalHookPos' (xBar + [PalatalHook.adviceGap Stroke]) top
 
 		return : object xBar rBottomSerif rTopSerif fine xArchMiddle skew rHookX rHookXN rHookY hookSuperness setMarks
 
 	define [StandardShape df md doTopSerif doBottomSerif] : glyph-proc
-		define [object xBar rBottomSerif rTopSerif fine xArchMiddle skew rHookX rHookY hookSuperness setMarks] : RDim df md
-		include : setMarks doTopSerif
+		define [object xBar rBottomSerif rTopSerif fine xArchMiddle skew rHookX rHookY hookSuperness] : RDim df md
 		include : dispiro
 			widths.lhs
 			g4.up.start rHookX (XH - rHookY - Stroke * 0.5) [heading Upward]
@@ -97,8 +97,7 @@ glyph-block Letter-Latin-Lower-R : begin
 	define [CompactShape    df md ts bs] : CompactShapeImpl df md false ts bs
 	define [CornerHookShape df md ts bs] : CompactShapeImpl df md true  ts bs
 	define [CompactShapeImpl df md doHookSerif doTopSerif doBottomSerif] : glyph-proc
-		define [object xBar rBottomSerif rTopSerif fine xArchMiddle rHookXN setMarks] : RDim df md
-		include : setMarks doTopSerif
+		define [object xBar rBottomSerif rTopSerif fine xArchMiddle rHookXN] : RDim df md
 		define xCor : if doHookSerif 0 : CorrectionOMidS * [linreg 72 0.75 108 1 Stroke]
 
 		define arcTopShift : match md
@@ -126,8 +125,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		if doTopSerif : include : rTopSerif XH
 
 	define [EarlessCornerShape df md doTopSerif doBottomSerif] : glyph-proc
-		define [object xBar xArchMiddle rHookX rHookY hookSuperness rBottomSerif setMarks] : RDim df md
-		include : setMarks doTopSerif
+		define [object xBar xArchMiddle rHookX rHookY hookSuperness rBottomSerif] : RDim df md
 		include : dispiro
 			widths.lhs
 			g4.up.start rHookX (XH - rHookY - Stroke * 0.5) [heading Upward]
@@ -138,8 +136,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		if doBottomSerif : include : rBottomSerif 0
 
 	define [EarlessRoundedShape df md doTopSerif doBottomSerif] : glyph-proc
-		define [object xBar xArchMiddle rHookX rHookY hookSuperness rBottomSerif setMarks] : RDim df md
-		include : setMarks doTopSerif
+		define [object xBar xArchMiddle rHookX rHookY hookSuperness rBottomSerif] : RDim df md
 		local hx : Math.max rHookX (xBar + 1.25 * Stroke)
 		include : dispiro
 			widths.lhs
@@ -150,9 +147,8 @@ glyph-block Letter-Latin-Lower-R : begin
 		if doBottomSerif : include : rBottomSerif 0
 
 	define [FlapHooklessShape df md doTopSerif doBottomSerif] : glyph-proc
-		define [object xBar rBottomSerif xArchMiddle setMarks] : RDim df md
+		define [object xBar rBottomSerif xArchMiddle] : RDim df md
 		set-base-anchor 'overlay' (xBar - [HSwToV : 0.5 * Stroke]) (XH / 2)
-		include : setMarks doTopSerif
 		include : dispiro
 			widths.lhs
 			g4.left.start (xArchMiddle - CorrectionOMidS * [linreg 72 0.75 108 1 Stroke]) (XH - O)
@@ -184,12 +180,20 @@ glyph-block Letter-Latin-Lower-R : begin
 		create-glyph "r.\(suffix)" : glyph-proc
 			set-width df.width
 			include : df.markSet.e
+
+			define [object setMarks] : RDim df mode
+			include : setMarks doTS XH 0
+
 			include : F df mode doTS doBS
+			currentGlyph.copyBaseAnchorIfAbsent 'leaningBelow' 'below'
 
 		create-glyph "rLongLeg.\(suffix)" : glyph-proc
 			set-width df.width
 			include : df.markSet.p
-			define [object xBar rBottomSerif] : RDim df mode
+
+			define [object xBar rBottomSerif setMarks] : RDim df mode
+			include : setMarks doTS XH Descender
+
 			include : F df mode doTS 0
 			eject-contour 'serifLB'
 			include : VBar.r xBar Descender 0
@@ -230,11 +234,10 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : RetroflexHook.rExt xBar 0
 
 		create-glyph "rTurnRTail.\(suffix)" : glyph-proc
-			set-width df.width
-			include : df.markSet.e
-			include : F df mode 0 doBS
+			include [refer-glyph "r.\(suffix)"] AS_BASE ALSO_METRICS
 			eject-contour 'serifLT'
 			include : FlipAround df.middle (XH / 2)
+			include : df.markSet.e
 
 			define [object xBar] : RDim df mode
 			include : RetroflexHook.lExt (df.rightSB - xBar + df.leftSB) 0

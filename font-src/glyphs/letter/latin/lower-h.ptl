@@ -1,7 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
-import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
+import [ScheduleLeaningMark MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -57,6 +57,7 @@ glyph-block Letter-Latin-Lower-H : begin
 	foreach { suffix { fTailed {fHasTopSerif Serifs} } } [Object.entries HConfig] : do
 		create-glyph "h.\(suffix)" : glyph-proc
 			include : MarkSet.b
+			set-base-anchor 'leaningAbove' (SB + [HSwToV HalfStroke]) Ascender
 			include : VBar.l SB 0 Ascender
 			include : nShoulder
 				left -- (SB + [HSwToV Stroke])
@@ -64,10 +65,6 @@ glyph-block Letter-Latin-Lower-H : begin
 				bottom -- [if fTailed (XH - SmallArchDepthB + O) 0]
 			if fTailed : include : RightwardTailedBar RightSB 0 (XH - SmallArchDepthB)
 			include : Serifs fTailed false
-
-		create-glyph "h/circumflexBase.\(suffix)" : glyph-proc
-			include [refer-glyph "h.\(suffix)"] AS_BASE ALSO_METRICS
-			set-base-anchor 'above' (SB + [HSwToV HalfStroke]) Ascender
 
 		create-glyph "hBar.\(suffix)" : glyph-proc
 			include [refer-glyph "h.\(suffix)"] AS_BASE ALSO_METRICS
@@ -125,18 +122,8 @@ glyph-block Letter-Latin-Lower-H : begin
 
 	select-variant 'h' 'h'
 	select-variant 'h/tailless' (shapeFrom -- 'h')
-	select-variant 'h/circumflexBase' (follow -- 'h')
 	link-reduced-variant 'h/descBase' 'h'
 	link-reduced-variant 'h/sansSerif' 'h' MathSansSerif
-
-	derive-glyphs 'hCircumflex' 0x125 'h/circumflexBase' : lambda [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include [refer-glyph "circumflexAbove"]
-
-
-	derive-glyphs 'hCaron' 0x21F 'h/circumflexBase' : lambda [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include [refer-glyph "caronAbove"]
 
 	select-variant 'hBar' 0x127 (follow -- 'h')
 	turned 'turnh' 0x265 'h/tailless' Middle (XH / 2) [MarkSet.p]
@@ -159,6 +146,7 @@ glyph-block Letter-Latin-Lower-H : begin
 		local { base mark } srcs
 		include [refer-glyph base] AS_BASE ALSO_METRICS
 		include : with-transform [ApparentTranslate [HSwToV HalfStroke] (XH - Ascender)] [refer-glyph mark]
+		set-base-anchor 'leaningAbove' (Middle + [HSwToV HalfStroke]) Ascender
 
 	derive-glyphs 'hCedilla' 0x1E29 'h' : lambda [src gr] : glyph-proc
 		local shift : Width + SB - Middle + [HSwToV HalfStroke]
