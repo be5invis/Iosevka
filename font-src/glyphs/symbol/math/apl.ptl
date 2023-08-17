@@ -125,9 +125,14 @@ glyph-block Symbol-Math-APL : begin
 		include : intersection [refer-glyph 'apl/quadShadow'] shape
 		include : ScaleAround Middle SymbolMid aplBoxInnerScale
 
-	define [aplBoxedPhantom shape] : glyph-proc
-		include : intersection [refer-glyph 'apl/quadShadow'] shape
-		include : ScaleAround Middle SymbolMid aplBoxInnerScale
+
+	define [centerSmallPunctuations] : glyph-proc
+		include : ApparentTranslate (Width / 2 - currentGlyph.advanceWidth / 2) 0
+		set-width Width
+
+	define [aplBoxedInner gn] : new-glyph : glyph-proc
+		include [refer-glyph gn] AS_BASE ALSO_METRICS
+		include : centerSmallPunctuations
 
 	# Aliases
 	alias 'apl/iota'  0x2373 'grek/iota'
@@ -136,7 +141,7 @@ glyph-block Symbol-Math-APL : begin
 	alias 'apl/alpha' 0x237A 'grek/alpha'
 
 	# Boxed
-	define [DeriveBoxed src] : aplBoxed : refer-glyph src
+	define [DeriveBoxed src] : aplBoxed : aplBoxedInner src
 	derive-glyphs 'uni2338' 0x2338 'equal'                          DeriveBoxed
 	derive-glyphs 'uni233A' 0x233A 'whiteDiamondOperator'           DeriveBoxed
 	derive-glyphs 'uni233B' 0x233B 'mathSmallCircle'                DeriveBoxed
@@ -173,15 +178,14 @@ glyph-block Symbol-Math-APL : begin
 	create-glyph 0x2366 : composite-proc [refer-glyph 'cup'] [refer-glyph 'apl/bar']
 	create-glyph 0x236D : composite-proc [refer-glyph 'overlayTildeOperator'] [refer-glyph 'bar']
 
-	define CenterSmallPunctuations : ApparentTranslate (Middle - [DivFrame para.diversityF].middle) 0
-
-	derive-composites 'apl/barComma' 0x236A 'markDemoBaseSpace' 'comma' CenterSmallPunctuations 'minus'
+	derive-composites 'apl/barComma' 0x236A 'comma' [centerSmallPunctuations] 'minus'
 	derive-composites 'apl/zeroTilde' 0x236C 'zero.lnum/forceUnslashed' 'overlayTildeOperator'
 
 	# Dieresis & underscore
 	define [AplAccented u part1 part2 marks]
 		derive-multi-part-glyphs [NameUni u] u {part1 part2} : function [srcs gr] : composite-proc
 			refer-glyph srcs.0
+			centerSmallPunctuations
 			begin marks
 			refer-glyph srcs.1
 			clear-anchors
@@ -194,7 +198,7 @@ glyph-block Symbol-Math-APL : begin
 	AplAccented 0x2368 'asciiTilde.low'                    'dieresisAbove'  [MarkSet.plus]
 	AplAccented 0x2369 'greater.narrow'                    'dieresisAbove'  [MarkSet.plus]
 	AplAccented 0x234A 'bot'                               'underlineBelow' [MarkSet.tack]
-	AplAccented 0x2358 'asciiSingleQuote/body/straight/HW' 'underlineBelow' [MarkSet.plus]
+	AplAccented 0x2358 'asciiSingleQuote/body/straight'    'underlineBelow' [MarkSet.plus]
 	AplAccented 0x235A 'whiteDiamondOperator'              'underlineBelow' [MarkSet.plus]
 	AplAccented 0x235B 'mathSmallCircle'                   'underlineBelow' [MarkSet.plus]
 	AplAccented 0x235C 'whiteCircle.NWID'                  'underlineBelow' [MarkSet.plus]
@@ -212,9 +216,8 @@ glyph-block Symbol-Math-APL : begin
 	create-glyph 0x2346 : composite-proc : Overlay [refer-glyph 'arrowRight.NWID'] [refer-glyph 'apl/bar']
 	create-glyph 0x235F : composite-proc [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'opAsterisk.low']] [refer-glyph 'mathO']
 
-	derive-glyphs 'apl/barSemicolon' 0x236E 'semicolon' : function [src gr] : Overlay
-		with-transform CenterSmallPunctuations [refer-glyph src]
-		refer-glyph 'underscore.high'
+	derive-glyphs 'apl/barSemicolon' 0x236E 'semicolon'
+		function [src gr] : Overlay [aplBoxedInner src] [refer-glyph 'underscore.high']
 
 	# Complex Composition
 	create-glyph 0x2367 : composite-proc [refer-glyph 'apl/bar'] : union
