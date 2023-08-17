@@ -7,6 +7,7 @@ import * as Toml from "@iarna/toml";
 import { encode } from "@msgpack/msgpack";
 
 import { buildFont } from "./gen/build-font.mjs";
+import { buildCompatLigatures } from "./gen/hb-compat-ligature/index.mjs";
 import { createNamingDictFromArgv } from "./gen/meta/naming.mjs";
 import { saveTTF } from "./support/font-io/font-io.mjs";
 import { createGrDisplaySheet } from "./support/gr.mjs";
@@ -20,9 +21,15 @@ const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 export default main;
 async function main(argv) {
 	const paraT = await getParameters();
-	const { font, glyphStore, cacheUpdated } = await buildFont(argv, paraT(argv));
-	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
-	if (argv.o) await saveTTF(argv.o, font);
+	const para = paraT(argv);
+	const { font, glyphStore, cacheUpdated } = await buildFont(argv, para);
+	if (argv.oCharMap) {
+		await saveCharMap(argv, glyphStore);
+	}
+	if (argv.o) {
+		if (para.compatibilityLigatures) await buildCompatLigatures(para, font);
+		await saveTTF(argv.o, font);
+	}
 	return { cacheUpdated };
 }
 
@@ -52,7 +59,7 @@ async function getParameters() {
 		VariantData.apply(deepClone(rawVariantsData), para, argv);
 		applyLigationData(deepClone(rawLigationData), para, argv);
 		if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
-		if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
+		if (argv.compatibilityLigatures) para.compatibilityLigatures = argv.compatibilityLigatures;
 		if (argv.metricOverride) applyMetricOverride(para, argv.metricOverride, argv);
 		para.naming = {
 			miscNames: para.naming,
