@@ -98,18 +98,30 @@ glyph-block AutoBuild-Accents : begin
 		return { g }
 
 	define [markSubst uk] : begin
-		local fromGlyphs : new Set
 		local mapping : new Map
 		foreach { k v } [Object.entries uk] : begin
 			local gFrom : query-glyph k
 			local gTo : query-glyph v
-			if (gFrom && gTo) : begin
-				fromGlyphs.add gFrom
-				mapping.set gFrom gTo
+			mapping.set gFrom gTo
 
-		define [matcher g] : fromGlyphs.has g
+		define [matcher g] : mapping.has g
 		define [ignore g] : g && g.markAnchors && [Object.keys g.markAnchors].length && ![matcher g]
 		define [production g] : list ([mapping.get g] || g)
+
+		return : object matcher ignore production
+
+	define [markSplit uk] : begin
+		local mapping : new Map
+		foreach { k v } [Object.entries uk] : begin
+			local gFrom : query-glyph k
+			local gsTo : v.map query-glyph
+			mapping.set gFrom gsTo
+
+		define [matcher g] : mapping.has g
+		define [ignore g] : g && g.markAnchors && [Object.keys g.markAnchors].length && ![matcher g]
+		define [production g] : begin
+			console.log g [mapping.get g]
+			return : [mapping.get g] || { g }
 
 		return : object matcher ignore production
 
@@ -145,7 +157,7 @@ glyph-block AutoBuild-Accents : begin
 		return : object matchFirst matchSecond production
 
 	define iotaLF : markSubst UnicodeKnowledge.iotaBelowToLfTf
-	define ogonek : markSubst UnicodeKnowledge.ogonekBelowToTRTf
+	define ogonek : markSplit UnicodeKnowledge.ogonekBelowToTRTf
 	define upperTonos : markSubst UnicodeKnowledge.upperGrekMarkToTonosTf
 
 	define markComposition : markCombine UnicodeKnowledge.markCompositionTf

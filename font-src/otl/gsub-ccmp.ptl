@@ -278,7 +278,6 @@ export : define [buildCCMPPostCvSs sink ccmpFeature glyphStore markGlyphs] : beg
 	local rec : BeginLookupBlock sink
 
 	define ccmp : AddFeature sink 'ccmp'
-	define {chain-rule} : ChainRuleBuilder sink
 
 	define triggerGlyphs_Normal { }
 	define triggerGlyphs_Y      { }
@@ -287,15 +286,27 @@ export : define [buildCCMPPostCvSs sink ccmpFeature glyphStore markGlyphs] : beg
 			[OgonekTrY.get g] : triggerGlyphs_Y.push      gid
 			true              : triggerGlyphs_Normal.push gid
 
-	define [markTransform_Normal] : UkMapToLookup UnicodeKnowledge.ogonekBelowToTRTf
-	define [markTransform_Y]      : UkMapToLookup UnicodeKnowledge.ogonekBelowToTRTf_Y
+	define ogonekSpacerNormal : AddLookup sink : object
+		.type 'gsub_multiple'
+		.substitutions UnicodeKnowledge.ogonekBelowToTRTf
+	define ogonekSpacerY : AddLookup sink : object
+		.type 'gsub_single'
+		.substitutions UnicodeKnowledge.ogonekBelowToTRTf_Y
 
 	define lookupMarks1 : AddLookup sink : object
 		.type 'gsub_chaining'
 		.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'below']
 		.rules : list
-			chain-rule triggerGlyphs_Normal [markTransform_Normal]
-			chain-rule triggerGlyphs_Y      [markTransform_Y]
+			object
+				.match { triggerGlyphs_Y [Object.keys UnicodeKnowledge.ogonekBelowToTRTf_Y] }
+				.inputBegins   1
+				.inputEnds     2
+				.apply         {{.at 1 .lookup ogonekSpacerY}}
+			object
+				.match { triggerGlyphs_Normal [Object.keys UnicodeKnowledge.ogonekBelowToTRTf] }
+				.inputBegins   1
+				.inputEnds     2
+				.apply         {{.at 1 .lookup ogonekSpacerNormal}}
 
 	ccmpFeature.lookups.push lookupMarks1
 	EndLookupBlock rec sink
