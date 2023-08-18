@@ -57,9 +57,21 @@ glyph-block Letter-Greek-Pi : begin
 	derive-composites 'cyrl/PeDescender' 0x524 'cyrl/Pe' [CyrDescender.rSideJut RightSB 0]
 	derive-composites 'cyrl/peDescender.upright' null 'cyrl/pe.upright' [CyrDescender.rSideJut RightSB 0]
 
-	create-glyph 'grek/pi' 0x3C0 : glyph-proc
-		include : MarkSet.e
-		include : PiShape [DivFrame 1] XH 0 (doSerif -- false) (shrinkRate -- (1/6 - [HSwToV : 0.25 * Stroke] / (RightSB - SB))) (tailed -- true)
+	define SmallPiShrink : 1/6 - [HSwToV : 0.25 * Stroke] / (RightSB - SB)
+
+	define SmallPiConfig : object
+		smallCap { {0             SLAB  } false }
+		tailless { {SmallPiShrink false } false }
+		tailed   { {SmallPiShrink false } true  }
+
+	foreach { suffix { { shrink slab } tail } } [pairs-of SmallPiConfig] : do
+		create-glyph "grek/pi.\(suffix)" : glyph-proc
+			define df : DivFrame 1
+			set-width df.width
+			include : df.markSet.e
+			include : PiShape df XH 0 (shrinkRate -- shrink) (doSerif -- slab) (tailed -- tail)
+
+	select-variant 'grek/pi' 0x3C0
 
 	create-glyph 'mathbb/grek/pi' 0x213C : glyph-proc
 		include : MarkSet.e
