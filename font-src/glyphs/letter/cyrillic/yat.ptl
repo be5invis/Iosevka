@@ -7,6 +7,7 @@ glyph-module
 glyph-block Letter-Cyrillic-Yat : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
 	glyph-block-import Letter-Cyrillic-Yeri : CyrlYeriUprightShape CyrlYeriCursiveShape
@@ -16,8 +17,7 @@ glyph-block Letter-Cyrillic-Yat : begin
 		Just ([mix df.leftSB df.rightSB 0.35] - df.mvs / 2 * HVContrast)
 		Just  [mix df.leftSB df.rightSB 0.2]
 
-	define [YatShape df top pBar fLowerCase _sw _xCrossbarLeftOverride] : glyph-proc
-		local sw : fallback _sw df.mvs
+	define [YatShape] : with-params [df top [pBar 0.5] [fLowerCase false] [sw df.mvs] [xCrossbarLeftOverride nothing] [yCrossbarOverride nothing]] : glyph-proc
 		local xYeriLeft : xBarLeft df
 
 		include : CyrlYeriUprightShape top
@@ -29,9 +29,9 @@ glyph-block Letter-Cyrillic-Yat : begin
 		local cTop : if SLAB (top - Stroke / 2) top
 
 		local _xCrossbarLeft : mix 0 df.leftSB [if SLAB 0.25 0.375]
-		local xCrossbarLeft : fallback _xCrossbarLeftOverride _xCrossbarLeft
+		local xCrossbarLeft : fallback xCrossbarLeftOverride _xCrossbarLeft
 		local xCrossbarRight : mix _xCrossbarLeft (xYeriLeft + [HSwToV : 0.5 * sw]) 2
-		local yCrossbar : [mix (top * pBar + sw / 2) cTop [if SLAB 0.625 0.5]] + 0.25 * OverlayStroke
+		local yCrossbar : fallback yCrossbarOverride : [mix (top * pBar + sw / 2) cTop [if SLAB 0.625 0.5]] + 0.25 * OverlayStroke
 		include : HBar.t xCrossbarLeft xCrossbarRight yCrossbar OverlayStroke
 
 		if SLAB : begin
@@ -48,22 +48,40 @@ glyph-block Letter-Cyrillic-Yat : begin
 		local df : DivFrame [mix 1 para.diversityM 0.5]
 		set-width df.width
 		include : df.markSet.capital
-		include : YatShape df CAP 0.5 false
+		include : YatShape df CAP
+			pBar -- 0.5
 
 	create-glyph 'cyrl/yat.upright' : glyph-proc
 		local df : DivFrame [mix 1 para.diversityM 0.5]
 		set-width df.width
 		include : df.markSet.b
-		include : YatShape df Ascender 0.375 true
+		include : YatShape df Ascender
+			pBar -- 0.375
+			fLowerCase -- true
 
-	define [IotifiedYatShape df top pBar fLowerCase] : glyph-proc
+	# Italic form unknwon, so we just use the upright form
+	create-glyph 'cyrl/yatTall' 0x1C87 : glyph-proc
+		local df : DivFrame [mix 1 para.diversityM 0.5]
+		set-width df.width
+		include : df.markSet.b
+		include : ExtendAboveBaseAnchors (Ascender + 0.5 * AccentStackOffset)
+		include : YatShape df (Ascender + 0.5 * AccentStackOffset)
+			pBar -- 0.375
+			fLowerCase -- true
+			yCrossbarOverride -- Ascender
+
+	define [IotifiedYatShape] : with-params [df top [pBar 0.5] [fLowerCase false]] : glyph-proc
 		local gap : 0.25 * (df.width - 2 * df.leftSB - [if SLAB 2.5 4.5] * df.mvs)
 		define divSub : (df.width - gap - df.mvs) / Width
 		define dfSub : DivFrame divSub 2
 
 		local shift : Width * (df.div - divSub)
 		include : with-transform [ApparentTranslate shift 0]
-			YatShape dfSub top pBar fLowerCase df.mvs (df.leftSB - shift)
+			YatShape dfSub top
+				pBar -- pBar
+				fLowerCase -- fLowerCase
+				sw -- df.mvs
+				xCrossbarLeftOverride -- (df.leftSB - shift)
 		eject-contour 'serifDL'
 
 		if fLowerCase
@@ -74,13 +92,13 @@ glyph-block Letter-Cyrillic-Yat : begin
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.capital
-		include : IotifiedYatShape df CAP 0.5 false
+		include : IotifiedYatShape df CAP (pBar -- 0.5)
 
 	create-glyph 'cyrl/yatIotified' 0xA653 : glyph-proc
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.b
-		include : IotifiedYatShape df Ascender 0.375 true
+		include : IotifiedYatShape df Ascender (pBar -- 0.375) (fLowerCase -- true)
 
 	glyph-block-import Letter-Shared-Shapes : nShoulderKnots
 	create-glyph 'cyrl/yat.italic' : glyph-proc
