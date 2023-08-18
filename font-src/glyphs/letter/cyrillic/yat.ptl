@@ -17,10 +17,10 @@ glyph-block Letter-Cyrillic-Yat : begin
 		Just ([mix df.leftSB df.rightSB 0.35] - df.mvs / 2 * HVContrast)
 		Just  [mix df.leftSB df.rightSB 0.2]
 
-	define [YatShape] : with-params [df top [pBar 0.5] [fLowerCase false] [sw df.mvs] [xCrossbarLeftOverride nothing] [yCrossbarOverride nothing]] : glyph-proc
+	define [YatShape] : with-params [df top [pBar 0.5] [fLowerCase false] [sw df.mvs] [xCrossbarLeftOverride nothing] [yCrossbarOverride nothing] [YeriShape CyrlYeriUprightShape]] : glyph-proc
 		local xYeriLeft : xBarLeft df
 
-		include : CyrlYeriUprightShape top
+		include : YeriShape top
 			left -- xYeriLeft
 			right  -- df.rightSB - O * 2
 			pBar -- pBar
@@ -60,15 +60,20 @@ glyph-block Letter-Cyrillic-Yat : begin
 			fLowerCase -- true
 
 	# Italic form unknwon, so we just use the upright form
-	create-glyph 'cyrl/yatTall' 0x1C87 : glyph-proc
-		local df : DivFrame [mix 1 para.diversityM 0.5]
-		set-width df.width
-		include : df.markSet.b
-		include : ExtendAboveBaseAnchors (Ascender + 0.5 * AccentStackOffset)
-		include : YatShape df (Ascender + 0.5 * AccentStackOffset)
-			pBar -- 0.375
-			fLowerCase -- true
-			yCrossbarOverride -- Ascender
+	do
+		create-glyph 'cyrl/yatTall.upright' : make CyrlYeriUprightShape
+		create-glyph 'cyrl/yatTall.italic'  : make CyrlYeriCursiveShape
+	: where
+		[make Yeri] : glyph-proc
+			local df : DivFrame [mix 1 para.diversityM 0.5]
+			set-width df.width
+			include : df.markSet.b
+			include : ExtendAboveBaseAnchors (Ascender + 0.5 * AccentStackOffset)
+			include : YatShape df (Ascender + 0.5 * AccentStackOffset)
+				pBar -- 0.375
+				fLowerCase -- true
+				yCrossbarOverride -- Ascender
+				YeriShape -- Yeri
 
 	define [IotifiedYatShape] : with-params [df top [pBar 0.5] [fLowerCase false]] : glyph-proc
 		local gap : 0.25 * (df.width - 2 * df.leftSB - [if SLAB 2.5 4.5] * df.mvs)
