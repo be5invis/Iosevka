@@ -14,8 +14,14 @@ export class GlyphStore {
 	namedEntries() {
 		return this.nameForward.entries();
 	}
-	encodedEntries() {
-		return this.encodingForward.entries();
+	glyphNames() {
+		return this.nameForward.keys();
+	}
+	*encodedEntries() {
+		for (const [u, g] of this.encodingForward.entries()) {
+			const name = this.nameBackward.get(g);
+			if (name) yield [u, name, g];
+		}
 	}
 	*flattenCodes(g, flatteners) {
 		{

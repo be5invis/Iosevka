@@ -10,7 +10,7 @@ const languages = [
     { lang: 'Catalan', sample: '«Dóna amor que seràs feliç!». Això, iŀlús company geniüt, ja és un lluït rètol blavís d’onze kWh.' },
     { lang: 'Croatian', sample: 'Gojazni đačić s biciklom drži hmelj i finu vatu u džepu nošnje.' },
     { lang: 'Czech', sample: 'Nechť již hříšné saxofony ďáblů rozezvučí síň úděsnými tóny waltzu, tanga a quickstepu.' },
-    { lang: 'Dutch', sample: 'Pa’s wijze lynx bezag vroom het fikse aquaduct.' },
+    { lang: 'Dutch', sample: 'Pa’s wĳze lynx bezag vroom het fikse aquaduct.' },
     { lang: 'Esperanto', sample: 'Eble ĉiu kvazaŭ-deca fuŝĥoraĵo ĝojigos homtipon.' },
     { lang: 'Finnish', sample: 'Charles Darwin jammaili Åken hevixylofonilla Qatarin yöpub Zeligissä.' },
     { lang: 'French', sample: 'Voix ambiguë d’un cœur qui au zéphyr préfère les jattes de kiwi.' },
@@ -35,6 +35,7 @@ const languages = [
     { lang: 'Turkish', sample: 'Pijamalı hasta yağız şoföre çabucak güvendi.' },
     { lang: 'Ukrainian', sample: 'Чуєш їх, доцю, га? Кумедна ж ти, прощайся без ґольфів!' },
     { lang: 'Vietnamese', sample: 'Do bạch kim rất quý nên sẽ dùng để lắp vô xương.' },
+    { lang: 'Volapük', sample: 'Ꞝrꞛtom jofazaris hodagudik ꞟf binoy ve cꞛl ad xilapel.' },
     { lang: 'Welsh', sample: 'Parciais fy jac codi baw hud llawn dŵr ger tŷ Mabon.' }
 ];
 

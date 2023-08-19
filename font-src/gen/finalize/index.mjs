@@ -21,7 +21,7 @@ function assignSubRank(glyphStore) {
 // "Fixed" subfamilies are properly built.
 function validateMonospace(para, glyphStore) {
 	let awSet = new Set();
-	for (const [u, g] of glyphStore.encodedEntries()) {
+	for (const [u, n, g] of glyphStore.encodedEntries()) {
 		const aw = Math.round(g.advanceWidth || 0);
 		if (aw > 0) awSet.add(aw);
 	}

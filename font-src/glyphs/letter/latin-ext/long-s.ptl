@@ -9,6 +9,7 @@ glyph-module
 glyph-block Letter-Latin-Long-S : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth LetterBarOverlay
 	glyph-block-import Letter-Shared-Shapes : PalatalHook RetroflexHook VerticalHook
 	glyph-block-import Letter-Latin-Lower-F : StdSmallFBarLeftPos StdSmallFBarLeftPos0 fbar
@@ -78,12 +79,14 @@ glyph-block Letter-Latin-Long-S : begin
 				HSerif.mt xSerifPos XH serifLength
 
 	define [LongSBentHookBase y0 m fSlab] : glyph-proc
+		local xTerminal : RightSB + RBalance2 + [Math.max 0 (m - [StdSmallFBarLeftPos0])]
 		include : dispiro
 			widths.lhs
-			g4 (RightSB + RBalance2 + [Math.max 0 (m - [StdSmallFBarLeftPos0])]) (Ascender - Hook)
+			g4 xTerminal (Ascender - Hook)
 			hookstart (Ascender - O)
 			flat m (Ascender - ArchDepthA)
 			curl m 0 [heading Downward]
+		include : LeaningAnchor.Above.Hook m xTerminal
 		set-base-anchor "overlay" (m + [HSwToV : 0.65 * Stroke]) (Ascender * OverlayPos)
 		include : StandardSerifs m fSlab
 
@@ -108,6 +111,7 @@ glyph-block Letter-Latin-Long-S : begin
 			archv
 			flat m (Ascender - hd.y)
 			curl m yBot [heading Downward]
+		include : LeaningAnchor.Above.Hook m RightSB
 		set-base-anchor "overlay" (m + [HSwToV : 0.65 * Stroke]) (Ascender * OverlayPos)
 		include : StandardSerifs m fSlab
 
@@ -157,6 +161,7 @@ glyph-block Letter-Latin-Long-S : begin
 
 		create-glyph "longs.flatHookTailed\(suffix)" : glyph-proc
 			include : MarkSet.bp
+			currentGlyph.copyBaseAnchorIfAbsent 'leaningAbove' 'above'
 			include : LongSShape Ascender Descender (HookX + 0.25 * Stroke) Hook
 			include : StandardSerifs (Middle - [HSwToV HalfStroke]) serifStyle
 			create-forked-glyph "longsbar.flatHookTailed\(suffix)" : LongSSymmetricOverlayBar Middle
@@ -167,6 +172,7 @@ glyph-block Letter-Latin-Long-S : begin
 
 		create-glyph "longs.flatHookDiagonalTailed\(suffix)" : glyph-proc
 			include : MarkSet.bp
+			currentGlyph.copyBaseAnchorIfAbsent 'leaningAbove' 'above'
 			include : union
 				intersection [MaskAbove 0] [LongSShape Ascender Descender (HookX + 0.25 * Stroke) Hook]
 				SmallFDiagonalTail [DivFrame 1] (Middle - [HSwToV HalfStroke])

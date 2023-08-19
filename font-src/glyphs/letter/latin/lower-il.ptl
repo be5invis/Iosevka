@@ -196,8 +196,13 @@ glyph-block Letter-Latin-Lower-I : begin
 		#
 		'hookyPL'               { Body.PhoneticLeft  Serifs.Hooky         XMiddle.PhoneticLeft       1                 0      }
 		'seriflessPL'           { Body.PhoneticLeft  null                 XMiddle.PhoneticLeft       1                 0      }
+		# Special variants for Tau (which is built using dotlessi)
+		'tau/tailless'          { Body.Serifless     null                 XMiddle.Center             para.diversityF   0      }
+		'tau/tailed'            { Body.Tailed        null                 XMiddle.Tailed             1                 Stroke }
+		'tau/flatTailed'        { Body.FlatTailed    null                 XMiddle.FlatTailed         1                 Stroke }
+		'tau/diagonalTailed'    { Body.DiagTailed    null                 XMiddle.FlatTailed         1                 Stroke }
 
-	foreach { suffix { Body Serif xMiddleT div y0R} } [Object.entries SmallILConfig] : do
+	foreach { suffix { Body Serif xMiddleT div y0R } } [Object.entries SmallILConfig] : do
 		create-glyph "dotlessi.\(suffix)" : glyph-proc
 			local df : DivFrame div
 			set-width df.width
@@ -271,6 +276,14 @@ glyph-block Letter-Latin-Lower-I : begin
 			local df : DivFrame div
 			include : LetterBarOverlay.m.in [xMiddleT df] XH (Ascender - [if Serif Stroke 0])
 
+		create-glyph "grek/tau.\(suffix)" : glyph-proc
+			local df : DivFrame div
+			set-width df.width
+			include : df.markSet.e
+			local xMiddle : xMiddleT df
+			include : Body df XH xMiddle
+			include : HBar.t df.leftSB df.rightSB XH
+
 	do "i glyphs"
 		select-variant 'dotlessi' 0x131
 		link-reduced-variant 'dotlessi/sansSerif' 'dotlessi' MathSansSerif
@@ -330,6 +343,8 @@ glyph-block Letter-Latin-Lower-I : begin
 		derive-composites 'lBelt' 0x26C  'l/reduced/decompress' 'lBeltOverlay'
 		derive-composites 'lBeltRTail' 0xA78E 'lRTail/decompress' 'lBeltOverlay'
 
+		derive-composites 'lDot' 0x140 'lDotBase' 'LDotDot'
+
 		CreateCommaCaronComposition 'lcaron' 0x13E 'l'
 		derive-glyphs 'lSlash' 0x142 'l' : lambda [src gr] : glyph-proc
 			include [refer-glyph src] AS_BASE ALSO_METRICS
@@ -384,6 +399,9 @@ glyph-block Letter-Latin-Lower-I : begin
 				curl df.middle 0 [heading Downward]
 				arcvh
 				straight.right.end (df.middle + HookX) (-Hook)
+
+	do "Tau"
+		select-variant 'grek/tau' 0x3C4
 
 	do "Blackboard"
 		glyph-block-import Letter-Blackboard : BBS BBD BBBarCenter

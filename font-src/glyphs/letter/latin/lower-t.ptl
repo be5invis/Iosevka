@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateCommaCaronComposition
 	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth ConnectedCedilla SerifedArcEnd
 	glyph-block-import Letter-Shared-Shapes : DiagonalTailR DiagonalTailStdDepth DToothlessRise
@@ -67,12 +68,13 @@ glyph-block Letter-Latin-Lower-T : begin
 
 			local g : include : HookShapeT dispiro df sym 0 top bot Stroke
 			local gEnd g.knots.(g.knots.length - 1)
-			set-base-anchor 'bottomRight' gEnd.x gEnd.y
 
 			local xLeft : BarLeftPos df sym
-			set-base-anchor 'above' (xLeft + [HSwToV HalfStroke]) top
+
+			include : LeaningAnchor.Above.VBar.l xLeft
+			include : LeaningAnchor.Below.Hook xLeft gEnd.x
 			set-base-anchor 'hooktopAttach' (xLeft + [HSwToV HalfStroke]) top
-			set-base-anchor 'below' [mix xLeft gEnd.x : StrokeWidthBlend 0.375 0.5] bot
+			set-base-anchor 'bottomRight' gEnd.x gEnd.y
 			set-base-anchor 'overlay' (g.knots.0.x + [HSwToV : 0.625 * Stroke]) (XH * 0.58)
 
 		export : define [Retroflex df sym top bot] : Flat.Retroflex df sym top bot
@@ -89,22 +91,23 @@ glyph-block Letter-Latin-Lower-T : begin
 
 		export : define BarLeftPos BentHook.BarLeftPos
 
-		export : define [Body df sym top] : glyph-proc
+		export : define [Body df sym top bot] : glyph-proc
 			include : BentHook.CrossBar df sym
 
 			local g : include : HookShape df sym top 0 Stroke
 
 			local gEnd g.rhsKnots.(g.rhsKnots.length - 1)
 
-			set-base-anchor 'bottomRight' gEnd.x gEnd.y
-			set-base-anchor 'above' ([BarLeftPos df sym] + [HSwToV HalfStroke]) top
+			include : LeaningAnchor.Above.VBar.l [BarLeftPos df sym]
+			include : LeaningAnchor.Below.VBar.l [BarLeftPos df sym] (2 * Stroke)
 			set-base-anchor 'hooktopAttach' ([BarLeftPos df sym] + [HSwToV HalfStroke]) top
+			set-base-anchor 'bottomRight' gEnd.x gEnd.y
 			set-base-anchor 'overlay' (g.knots.0.x + [HSwToV : 0.125 * Stroke]) (XH * 0.58)
 
 		export : define [Retroflex df sym top bot] : Flat.Retroflex df sym top bot
 
 	define Flat : namespace
-		define [xCrossBarPos df sym] : match sym
+		export : define [xCrossBarPos df sym] : match sym
 			([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {[BarLeftPos df sym] [mix df.width df.rightSB [mix 1 df.div 2]]}
 			__ {[mix 0 df.leftSB  [mix 1 df.div 2]] [mix df.width df.rightSB [mix 1 df.div 2]]}
 
@@ -147,13 +150,29 @@ glyph-block Letter-Latin-Lower-T : begin
 					flat xBarLeft [if (shape === RETROFLEX) (bot + Hook + HalfStroke) hd.y]
 					curl xBarLeft top [heading Upward]
 
-			set-base-anchor 'above' (xBarLeft + [HSwToV HalfStroke]) top
+			include : LeaningAnchor.Above.VBar.l xBarLeft
+			include : LeaningAnchor.Below.Hook xBarLeft xCrossRight
 			set-base-anchor 'hooktopAttach' (xBarLeft + [HSwToV HalfStroke]) top
 			set-base-anchor 'topRight' xCrossRight  Ascender
 			set-base-anchor 'overlay' (xBarLeft + [HSwToV : 0.625 * Stroke]) (XH * 0.58)
-			set-base-anchor 'below' ([HSwToV HalfStroke] + [Math.min (xBarLeft + (1 / 3) * hd.x) (xCrossRight - 1)]) bot
 			set-base-anchor 'bottomRight' xTailEnd bot
 			set-base-anchor 'lTailHookAttach' xTailEnd (bot + Stroke)
+
+	define UprightTailed : namespace
+		export : define BarLeftPos Flat.BarLeftPos
+		export : define [Body df sym top bot] : glyph-proc
+			local {xCrossLeft xCrossRight} : Flat.xCrossBarPos df sym
+			local xBarLeft : BarLeftPos df sym
+
+			include : union
+				HCrossBar.top xCrossLeft xCrossRight yCrossBar
+				dispiro
+					widths.rhs
+					flat xCrossRight bot
+					curl xCrossRight top [heading Upward]
+					flat xBarLeft top
+					curl xBarLeft bot [heading Downward]
+
 
 	define Hookless : namespace
 		export : define [BarLeftPos df sym] : match sym
@@ -170,17 +189,22 @@ glyph-block Letter-Latin-Lower-T : begin
 			local xEnd : xLeft + [HSwToV : 1.75 * Stroke]
 			include : VBar.l xLeft 0 top
 			include : HCrossBar.top xcl xcr yCrossBar
+
+			include : LeaningAnchor.Above.VBar.l xLeft
+			include : LeaningAnchor.Below.VBar.l xLeft
 			set-base-anchor 'overlay' (xLeft + [HSwToV HalfStroke]) (XH * 0.58)
 			set-base-anchor 'hooktopAttach' (xLeft + [HSwToV HalfStroke]) top
+			set-base-anchor 'bottomRight' xEnd (bot + Stroke)
 			set-base-anchor 'lTailHookAttach' xEnd (bot + Stroke)
 
 		export : define [Retroflex df sym top bot] : Flat.CrossRTBody df sym top bot
 
 		export : define [PLBody df sym top bot] : glyph-proc
+			local xLeft : BarLeftPos df sym
 			include : Body df sym top bot
-			include : HBar.b df.middle RightSB 0
+			include : HBar.b xLeft RightSB 0
 
-	define SmallTConfig :SuffixCfg.weave
+	define SmallTConfig : SuffixCfg.weave
 		object # body
 			bentHook                       { [DivFrame  1] BentHook           }
 			diagonalTailed                 {  dfNarrowT    DiagTail           }
@@ -190,7 +214,7 @@ glyph-block Letter-Latin-Lower-T : begin
 			""                             SYM-BALANCED
 			"asymmetric"                   SYM-LEFT
 		object # height
-			""							   Ascender
+			""                             Ascender
 			shortNeck                      yShortNeck1
 			shortNeck2                     yShortNeck2
 
@@ -199,6 +223,8 @@ glyph-block Letter-Latin-Lower-T : begin
 			set-width df.width
 			include : df.markSet.b
 			include : Style.Body df sym top 0
+			currentGlyph.copyBaseAnchorIfAbsent 'leaningAbove' 'above'
+			currentGlyph.copyBaseAnchorIfAbsent 'leaningBelow' 'below'
 
 		create-glyph "t/phoneticLeft2.\(suffix)" : glyph-proc
 			set-width df.width
@@ -291,7 +317,7 @@ glyph-block Letter-Latin-Lower-T : begin
 
 	select-variant "tHookTopRTail" 0x1DF09
 
-	# U+01BE is catually "t" and "s" combined together
+	# U+01BE is actually "t" and "s" combined together
 	define SLAB-NONE        0
 	define SLAB-CLASSICAL   1
 	define SLAB-INWARD      2
