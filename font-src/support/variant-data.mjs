@@ -116,15 +116,21 @@ class CvTagAllocator {
 class Prime {
 	constructor(key, cfg, ta) {
 		this.key = key;
+		if (cfg.nonBreakingTagForNewVariantSelector) {
+			this.tag = cfg.nonBreakingTagForNewVariantSelector;
+		} else if (cfg.tagKind) {
+			this.tag = ta.createTag(cfg.tagKind);
+		}
 		this.sampler = cfg.sampler;
 		this.samplerExplain = cfg.samplerExplain;
+
 		this.isSpecial = cfg.isSpecial || false;
 		this.description = cfg.description || null;
 		this.ligatureSampler = / /.test(cfg.sampler || "");
 		this.descSampleText = this.ligatureSampler
 			? cfg.sampler.split(" ").filter(x => !!x.trim())
 			: [...(cfg.sampler || "")];
-		if (cfg.tagKind) this.tag = ta.createTag(cfg.tagKind);
+
 		this.slopeDependent = !!cfg.slopeDependent;
 		this.hotChars = cfg.hotChars ? [...cfg.hotChars] : this.descSampleText;
 
