@@ -158,6 +158,7 @@ function linkSpacingDerivableBuildPlans(bps) {
 	for (const pfxTo in bps) {
 		const planTo = bps[pfxTo];
 		const planToVal = rectifyPlanForSpacingDerivation(planTo);
+		if (blockSpacingDerivation(planTo)) continue;
 		if (!isLinkDeriveToSpacing(planTo.spacing)) continue;
 		for (const pfxFrom in bps) {
 			const planFrom = bps[pfxFrom];
@@ -169,6 +170,9 @@ function linkSpacingDerivableBuildPlans(bps) {
 	}
 }
 
+function blockSpacingDerivation(bp) {
+	return !!bp["compatibility-ligatures"];
+}
 function isLinkDeriveToSpacing(spacing) {
 	return spacing === "term" || spacing === "fontconfig-mono" || spacing === "fixed";
 }

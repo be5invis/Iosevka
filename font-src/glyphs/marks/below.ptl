@@ -3,7 +3,7 @@ $$include '../../meta/macros.ptl'
 import [Arcs Quadify ShapeConv] from "typo-geom"
 import [mix linreg clamp fallback] from"../../support/utils.mjs"
 import [DesignParameters] from"../../meta/aesthetics.mjs"
-import [TieMark TieGlyph] from"../../support/gr.mjs"
+import [ScheduleLeaningMark] from"../../support/gr.mjs"
 import [Box] from"../../support/geometry/box.mjs"
 
 glyph-module
@@ -22,14 +22,15 @@ glyph-block Mark-Below : begin
 	define belowMarkStack (0 - AccentStackOffset)
 
 	define StdAnchors : namespace
-		export : define [impl padding k] : glyph-proc
+		export : define [impl padding k fLeaning] : glyph-proc
 			set-mark-anchor 'below' markMiddle (0 + padding * AccentHeight) markMiddle (belowMarkStack - padding * AccentHeight)
 			set-base-anchor 'belowBraceL' (markMiddle - k * markExtend) belowMarkMid
 			set-base-anchor 'belowBraceR' (markMiddle + k * markExtend) belowMarkMid
+			if fLeaning : ScheduleLeaningMark.set currentGlyph
 
-		export : define [narrow]       : impl 0 0
-		export : define [mediumNarrow] : impl 0 0.25
-		export : define [medium]       : impl 0 0.5
+		export : define [narrow]       : impl 0 0    true
+		export : define [mediumNarrow] : impl 0 0.25 true
+		export : define [medium]       : impl 0 0.5  true
 		export : define [mediumWide]   : impl 0 0.75
 		export : define [wide]         : impl 0 1
 
@@ -56,7 +57,7 @@ glyph-block Mark-Below : begin
 	create-glyph 'cedillaExtShapeBelow' : glyph-proc
 		set-width 0
 		include : StdAnchors.medium
-		include : CedillaShape (2 * Stroke)
+		include : CedillaShape (4 * Stroke)
 
 	create-glyph 'cedillaExtShapeBelowOArc' : glyph-proc
 		set-width 0
@@ -174,6 +175,7 @@ glyph-block Mark-Below : begin
 				mirrorAnchor aboveGlyph currentGlyph 'above' 'below'
 				mirrorAnchor aboveGlyph currentGlyph 'aboveBraceL' 'belowBraceR'
 				mirrorAnchor aboveGlyph currentGlyph 'aboveBraceR' 'belowBraceL'
+			if [ScheduleLeaningMark.get aboveGlyph] : ScheduleLeaningMark.set currentGlyph
 
 	TurnAboveMarkToBelow 'graveBelow'              0x316  'graveAbove'
 	TurnAboveMarkToBelow 'acuteBelow'              0x317  'acuteAbove'

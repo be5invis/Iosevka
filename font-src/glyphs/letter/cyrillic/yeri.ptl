@@ -133,7 +133,7 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			flat ([mix left right 0.5] - CorrectionOMidX * stroke) bowl
 			curl (right - Stroke * 0.2) bowl [heading Rightward]
 
-	define [CyrBackYerShape] : with-params [Yeri top left right [stroke Stroke] [jut Jut]] : glyph-proc
+	define [CyrBackYerShape] : with-params [Yeri top left right [stroke Stroke] [jut Jut] [pBar DefaultBarPos]] : glyph-proc
 		local xLeftBarLeftEdge : Math.max (right - (RightSB - SB)) : if SLAB
 			[mix left right 0.35] - [HSwToV : 0.50 * stroke]
 			[mix left right 0.20] - [HSwToV : 0.25 * stroke]
@@ -145,6 +145,7 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			right  -- right
 			stroke -- stroke
 			jut    -- jut
+			pBar   -- pBar
 
 		if SLAB : begin
 			include : VSerif.dl xTopBarLeftEnd top VJut
@@ -198,15 +199,12 @@ glyph-block Letter-Cyrillic-Yeri : begin
 				else : HSerif.mb (df.rightSB - sw / 2 * HVContrast) 0 jut sw
 
 	define [ZhuangToneSixShape Yeri top] : glyph-proc
-		include : Yeri top
+		local xLeft : [mix SB RightSB 0.20] - [HSwToV : 0.125 * Stroke]
+		include : Yeri top (left -- xLeft) (right -- RightSB)
 		eject-contour 'serifYeriLT'
-		local s : Math.max Stroke (XH * 0.1)
-		include : spiro-outline
-			corner  SB top
-			corner (SB - O) top
-			corner (SB - O) (top - s * 2)
-			corner  SB (top - s * 2)
-			corner (SB - s) (top - s)
+		include : dispiro
+			corner xLeft top [widths.lhs : AdviceStroke 5.5]
+			corner (0.25 * xLeft) (top - xLeft)
 
 	define YerConfig : object
 		corner        { CyrlYeriUprightShape false }
@@ -256,6 +254,11 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			set-width df.width
 			include : df.markSet.e
 			include : CyrBackYerShape Yeri XH (left -- df.leftSB) (right -- df.rightSB)
+		create-glyph "cyrl/yerTall.\(suffix)" : glyph-proc
+			local df : DivFrame [mix 1 para.diversityM 0.5]
+			set-width df.width
+			include : df.markSet.b
+			include : CyrBackYerShape Yeri Ascender (left -- df.leftSB) (right -- df.rightSB) (pBar -- DefaultBarPos * XH / Ascender)
 		create-glyph "cyrl/YerNeutral.\(suffix)" : glyph-proc
 			local df : DivFrame [mix 1 para.diversityM 0.5]
 			set-width df.width
@@ -298,6 +301,8 @@ glyph-block Letter-Cyrillic-Yeri : begin
 	select-variant 'cyrl/Yer'  0x42A
 	select-variant 'cyrl/yer'  0x44A
 	select-variant 'cyrl/yer.BGR' (shapeFrom -- 'cyrl/yer')
+	select-variant 'cyrl/yerTall' 0x1C86 (follow -- 'cyrl/yer')
+
 	select-variant 'cyrl/Yery' 0x42B
 	select-variant 'cyrl/yery' 0x44B
 	select-variant 'cyrl/Yeri' 0x42C

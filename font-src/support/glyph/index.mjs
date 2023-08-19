@@ -23,6 +23,10 @@ export class Glyph {
 		this.ctxTag = null;
 	}
 
+	toString() {
+		return `<Glyph ${this._m_identifier}>`;
+	}
+
 	get identifier() {
 		return this._m_identifier;
 	}
@@ -180,6 +184,11 @@ export class Glyph {
 			if (isNaN(mbx - 0) || isNaN(mby - 0))
 				throw new Error(`NaN found in anchor coord for ${id}`);
 			this.baseAnchors[id] = new Anchor(mbx, mby).transform(this.gizmo);
+		}
+	}
+	copyBaseAnchorIfAbsent(to, from) {
+		if (this.baseAnchors[from] && !this.baseAnchors[to]) {
+			this.baseAnchors[to] = new Anchor(this.baseAnchors[from].x, this.baseAnchors[from].y);
 		}
 	}
 	clearAnchors() {
