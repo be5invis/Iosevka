@@ -120,49 +120,72 @@ export function SetupBuilders(bindings) {
 	}
 
 	function widths(l, r) {
+		if (!isFinite(l)) throw new TypeError("NaN detected for left width");
+		if (!isFinite(r)) throw new TypeError("NaN detected for right width");
 		return function () {
-			if (!isFinite(l)) throw new TypeError("NaN detected for left width");
-			if (!isFinite(r)) throw new TypeError("NaN detected for right width");
-
 			if (this.setWidth) this.setWidth(l, r);
 		};
 	}
 	widths.lhs = function (w) {
-		return widths(fallback(w, Stroke), 0);
+		w = fallback(w, Stroke);
+		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
+		return widths(w, 0);
 	};
 	widths.rhs = function (w) {
-		return widths(0, fallback(w, Stroke));
+		w = fallback(w, Stroke);
+		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
+		return widths(0, w);
 	};
 	widths.center = function (w) {
-		return widths(fallback(w, Stroke) / 2, fallback(w, Stroke) / 2);
+		w = fallback(w, Stroke);
+		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
+		return widths(w / 2, w / 2);
 	};
 
 	function heading(d) {
+		if (!isFinite(d.x) || !isFinite(d.y))
+			throw new TypeError("NaN detected for heading directions");
 		return function () {
 			if (this.headsTo) this.headsTo(d);
 		};
 	}
 	widths.heading = function (l, r, d) {
+		if (!isFinite(l)) throw new TypeError("NaN detected for left width");
+		if (!isFinite(r)) throw new TypeError("NaN detected for left width");
+		if (!isFinite(d.x) || !isFinite(d.y))
+			throw new TypeError("NaN detected for heading directions");
 		return function () {
 			if (this.setWidth) this.setWidth(l, r);
 			if (this.headsTo) this.headsTo(d);
 		};
 	};
 	widths.lhs.heading = function (w, d) {
+		w = fallback(w, Stroke);
+		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
+		if (!isFinite(d.x) || !isFinite(d.y))
+			throw new TypeError("NaN detected for heading directions");
 		return function () {
-			if (this.setWidth) this.setWidth(fallback(w, Stroke), 0);
+			if (this.setWidth) this.setWidth(w, 0);
 			if (this.headsTo) this.headsTo(d);
 		};
 	};
 	widths.rhs.heading = function (w, d) {
+		w = fallback(w, Stroke);
+		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
+		if (!isFinite(d.x) || !isFinite(d.y))
+			throw new TypeError("NaN detected for heading directions");
 		return function () {
-			if (this.setWidth) this.setWidth(0, fallback(w, Stroke));
+			if (this.setWidth) this.setWidth(0, w);
 			if (this.headsTo) this.headsTo(d);
 		};
 	};
 	widths.center.heading = function (w, d) {
+		w = fallback(w, Stroke);
+		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
+		if (!isFinite(d.x) || !isFinite(d.y))
+			throw new TypeError("NaN detected for heading directions");
 		return function () {
-			if (this.setWidth) this.setWidth(fallback(w, Stroke) / 2, fallback(w, Stroke) / 2);
+			if (this.setWidth) this.setWidth(w / 2, w / 2);
 			if (this.headsTo) this.headsTo(d);
 		};
 	};
