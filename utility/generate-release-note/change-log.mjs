@@ -9,7 +9,6 @@ import { Output } from "./shared/index.mjs";
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
-const ModifiedSinceVersion = "2.x";
 async function GenerateChangeList(argv, out) {
 	const changeFiles = await fs.promises.readdir(ChangeFileDir);
 	const fragments = new Map();
@@ -21,7 +20,7 @@ async function GenerateChangeList(argv, out) {
 		fragments.set(fileParts.name, await fs.promises.readFile(filePath, "utf8"));
 	}
 	const sortedFragments = Array.from(fragments).sort((a, b) => semver.compare(b[0], a[0]));
-	out.log(`## Modifications since version ${ModifiedSinceVersion}`);
+	out.log(`## Modifications since last major version`);
 	for (const [version, notes] of sortedFragments) {
 		out.log(`\n### ${version}\n`);
 		out.log(notes.trimEnd() + "\n");

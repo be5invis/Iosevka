@@ -1,4 +1,11 @@
-## Modifications since version 2.x
+## Modifications since last major version
+
+### 26.2.1
+
+* Fix leaning marks of LATIN SMALL LETTER T WITH CEDILLA (`U+0163`) (#1914).
+* Fix the dimensions of wide geometric shapes in quasi-proportional (#1941).
+* Fix `cv76`'s application on CYRILLIC SMALL LETTER CHE WITH VERTICAL STROKE (`U+04B9`) (#1942).
+
 
 ### 26.2.0
 
