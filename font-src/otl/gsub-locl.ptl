@@ -68,32 +68,33 @@ export : define [buildLOCL sink para glyphStore] : begin
 	define [sx s] : lambda [t] : t.map : lambda [x] "\(x)/\(s)"
 
 	do "Decompose Vietnamese glyphs"
-		local initials : new Set
-		local medials : new Set
-		local finals : new Set
 
 		local decompositionSubstitutions {.}
 		loclVIT.lookups.push : AddLookup sink
 			.type 'gsub_multiple'
 			.substitutions decompositionSubstitutions
-		local vnDualAboveMarkCodePoints 'ẦẤẨỀẾỂỒỐỔầấẩềếểồốổ'
-		foreach ch vnDualAboveMarkCodePoints : begin
+
+		local viCircumflex 'ẦẤẨỀẾỂỒỐỔầấẩềếểồốổ'
+		local viBreve      'ẮẰẲằắẳ'
+		local viShiftableMarks { 'acuteAbove' 'graveAbove' 'hookAbove' }
+
+		foreach ch (viCircumflex + viBreve) : begin
 			local u : ch.codePointAt 0
 			local gn : glyphStore.queryNameByUnicode u
 			local g : glyphStore.queryByNameEnsured gn
 			local decomp : CvDecompose.get g
 			set decompositionSubstitutions.(gn) decomp
 
-			initials.add decomp.0
-			medials.add  decomp.1
-			finals.add   decomp.2
-
 		loclVIT.lookups.push : AddLookup sink
 			.type 'gsub_chaining'
 			.rules : list
 				chain-rule
-					[Array.from initials ] ~> nothing
-					[Array.from medials  ] ~> nothing
-					[Array.from finals   ] ~> [sx 'viSecondary']
+					{'A' 'a' 'E' 'e' 'O' 'o'} ~> nothing
+					{'circumflexAbove'}       ~> nothing
+					viShiftableMarks          ~> [sx 'viSide']
+				chain-rule
+					{'A' 'a'}                 ~> nothing
+					{'breveAbove'}            ~> nothing
+					viShiftableMarks          ~> [sx 'viCenter']
 
 	EndLookupBlock.Front rec sink

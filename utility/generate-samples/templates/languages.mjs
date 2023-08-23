@@ -34,7 +34,7 @@ const languages = [
     { lang: 'Spanish', sample: 'Benjamín pidió una bebida de kiwi y fresa; Noé, sin vergüenza, la más exquisita champaña del menú.' },
     { lang: 'Turkish', sample: 'Pijamalı hasta yağız şoföre çabucak güvendi.' },
     { lang: 'Ukrainian', sample: 'Чуєш їх, доцю, га? Кумедна ж ти, прощайся без ґольфів!' },
-    { lang: 'Vietnamese', sample: 'Do bạch kim rất quý nên sẽ dùng để lắp vô xương.' },
+    { lang: 'Vietnamese', sample: 'Do bạch kim rất quý nên sẽ dùng để lắp vô xương.', localeId :'vi' },
     { lang: 'Volapük', sample: 'Ꞝrꞛtom jofazaris hodagudik ꞟf binoy ve cꞛl ad xilapel.' },
     { lang: 'Welsh', sample: 'Parciais fy jac codi baw hud llawn dŵr ger tŷ Mabon.' }
 ];
