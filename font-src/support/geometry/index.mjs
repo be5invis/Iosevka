@@ -319,6 +319,38 @@ export class TransformedGeometry extends GeometryBase {
 	}
 }
 
+export class RadicalGeometry extends GeometryBase {
+	constructor(g) {
+		super();
+		this.m_geom = g;
+	}
+	asContours() {
+		return this.m_geom.asContours();
+	}
+	asReferences() {
+		return null;
+	}
+	filterTag(fn) {
+		const e = this.m_geom.filterTag(fn);
+		if (!e) return null;
+		return new RadicalGeometry(e);
+	}
+	isEmpty() {
+		return this.m_geom.isEmpty();
+	}
+	measureComplexity() {
+		return this.m_geom.measureComplexity();
+	}
+	unlinkReferences() {
+		return this.m_geom.unlinkReferences();
+	}
+	toShapeStringOrNull() {
+		const sTarget = this.m_geom.toShapeStringOrNull();
+		if (!sTarget) return null;
+		return Format.struct("RadicalGeometry", sTarget);
+	}
+}
+
 export class CombineGeometry extends GeometryBase {
 	constructor(parts) {
 		super();
