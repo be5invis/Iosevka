@@ -83,7 +83,7 @@ export class GlyphStore {
 	queryByUnicode(u) {
 		return this.encodingForward.get(u);
 	}
-	queryNameOfUnicode(u) {
+	queryNameByUnicode(u) {
 		const g = this.queryByUnicode(u);
 		if (!g) return undefined;
 		return this.queryNameOf(g);

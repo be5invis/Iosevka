@@ -47,8 +47,7 @@ function ConvertGsubGposImpl(handlers, T, table, glyphs) {
 			}
 		}
 		for (const l in table.lookups) {
-			if (!table.lookups[l]) throw new Error(`Cannot find lookup '${l}'`);
-			ls.declare(l, table.lookups[l]);
+			if (!ls.query(l)) throw new Error("Unreachable: lookupOrder must contain everything");
 		}
 		for (const l in table.lookups) ls.fill(l, table.lookups[l]);
 	}

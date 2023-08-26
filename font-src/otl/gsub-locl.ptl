@@ -1,11 +1,19 @@
-import [CopyLanguage AddFeature AddLookup BeginLookupBlock EndLookupBlock] from"./table-util.mjs"
+$$include '../meta/macros.ptl'
+
+import [CopyLanguage AddFeature AddLookup BeginLookupBlock EndLookupBlock ChainRuleBuilder] from"./table-util.mjs"
+import [CvDecompose] from"../support/gr.mjs"
+
+extern Set
 
 export : define [buildLOCL sink para glyphStore] : begin
 	local rec : BeginLookupBlock sink
 
+	define { chain-rule } : ChainRuleBuilder sink
+
 	define cyrlSRB  : CopyLanguage sink 'cyrl_SRB ' 'cyrl_DFLT'
 	define cyrlMKD  : CopyLanguage sink 'cyrl_MKD ' 'cyrl_DFLT'
 	define cyrlBGR  : CopyLanguage sink 'cyrl_BGR ' 'cyrl_DFLT'
+	define latnVIT  : CopyLanguage sink 'latn_VIT ' 'latn_DFLT'
 
 	# SRB
 	define loclSRB : AddFeature sink 'locl'
@@ -52,5 +60,41 @@ export : define [buildLOCL sink para glyphStore] : begin
 			'cyrl/tse'     : glyphStore.ensureExists 'cyrl/tse.BGR'
 			'cyrl/yer'     : glyphStore.ensureExists 'cyrl/yer.BGR'
 			'cyrl/yeri'    : glyphStore.ensureExists 'cyrl/yeri.BGR'
+
+	# VIT
+	define loclVIT : AddFeature sink 'locl'
+	latnVIT.features.unshift loclVIT.name
+
+	define [sx s] : lambda [t] : t.map : lambda [x] "\(x)/\(s)"
+
+	do "Decompose Vietnamese glyphs"
+
+		local decompositionSubstitutions {.}
+		loclVIT.lookups.push : AddLookup sink
+			.type 'gsub_multiple'
+			.substitutions decompositionSubstitutions
+
+		local viCircumflex 'ẦẤẨỀẾỂỒỐỔầấẩềếểồốổ'
+		local viBreve      'ẮẰẲằắẳ'
+		local viShiftableMarks { 'acuteAbove' 'graveAbove' 'hookAbove' }
+
+		foreach ch (viCircumflex + viBreve) : begin
+			local u : ch.codePointAt 0
+			local gn : glyphStore.queryNameByUnicode u
+			local g : glyphStore.queryByNameEnsured gn
+			local decomp : CvDecompose.get g
+			set decompositionSubstitutions.(gn) decomp
+
+		loclVIT.lookups.push : AddLookup sink
+			.type 'gsub_chaining'
+			.rules : list
+				chain-rule
+					{'A' 'a' 'E' 'e' 'O' 'o'} ~> nothing
+					{'circumflexAbove'}       ~> nothing
+					viShiftableMarks          ~> [sx 'viSide']
+				chain-rule
+					{'A' 'a'}                 ~> nothing
+					{'breveAbove'}            ~> nothing
+					viShiftableMarks          ~> [sx 'viCenter']
 
 	EndLookupBlock.Front rec sink

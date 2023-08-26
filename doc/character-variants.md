@@ -2853,6 +2853,17 @@
 <td colspan="6"> </td>
 </tr>
 <tr>
+<td rowspan="2"><code>VXAC</code></td>
+<td colspan="2"><img src="../images/cv-guillemet-straight.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-guillemet-straight.dark.svg#gh-dark-mode-only" width=64/></td>
+<td colspan="2"><img src="../images/cv-guillemet-curly.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-guillemet-curly.dark.svg#gh-dark-mode-only" width=64/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td colspan="2">1</td>
+<td colspan="2">2</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
 <td rowspan="2"><code>cv99</code></td>
 <td><img src="../images/cv-number-sign-upright.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-upright.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-number-sign-slanted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-slanted.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -3076,17 +3087,6 @@
 <tr>
 <td>13</td>
 <td colspan="11"> </td>
-</tr>
-<tr>
-<td rowspan="2"><code>VXAC</code></td>
-<td colspan="2"><img src="../images/cv-guillemet-straight.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-guillemet-straight.dark.svg#gh-dark-mode-only" width=64/></td>
-<td colspan="2"><img src="../images/cv-guillemet-curly.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-guillemet-curly.dark.svg#gh-dark-mode-only" width=64/></td>
-<td colspan="8"> </td>
-</tr>
-<tr>
-<td colspan="2">1</td>
-<td colspan="2">2</td>
-<td colspan="8"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>VLAA</code></td>
