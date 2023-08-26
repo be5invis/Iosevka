@@ -35,7 +35,7 @@ function validateMonospace(para, glyphStore) {
 export function finalizeFont(cache, para, glyphStore, excludedCodePoints, restFont) {
 	assignGrAndCodeRank(glyphStore, Nwid, Wwid);
 	assignSubRank(glyphStore);
-	glyphStore = gcFont(glyphStore, excludedCodePoints, restFont, {});
+	glyphStore = gcFont(glyphStore, excludedCodePoints, restFont);
 	glyphStore = finalizeGlyphs(cache, para, glyphStore);
 	validateMonospace(para, glyphStore);
 	return glyphStore;
