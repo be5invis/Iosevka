@@ -3,7 +3,7 @@ import { Ot } from "ot-builder";
 import { Point } from "../../support/geometry/point.mjs";
 import * as Gr from "../../support/gr.mjs";
 
-import { byCode, bySpacing, byGr, byBuildOrder } from "./glyph-name.mjs";
+import { byBuildOrder, byCode, byGr, bySpacing } from "./glyph-name.mjs";
 
 function byRank([gna, a], [gnb, b]) {
 	return (
@@ -28,9 +28,11 @@ class MappedGlyphStore {
 		this.m_primaryUnicodeMapping.set(u, source);
 	}
 	queryBySourceGlyph(source) {
+		if (!source) return undefined;
 		return this.m_mapping.get(source);
 	}
 	queryByName(name) {
+		if (!name) return undefined;
 		return this.m_nameMapping.get(name);
 	}
 	decideOrder() {

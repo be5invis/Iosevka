@@ -379,22 +379,25 @@ const DistUnhintedTTF = file.make(
 
 		const charMapDir = `${BUILD}/ttf/${gr}`;
 		const charMapPath = `${charMapDir}/${fn}.charmap.mpz`;
-		const noGcTtfPath = `${charMapDir}/${fn}.no-gc.ttf`;
+		const ttfaControlsPath = `${charMapDir}/${fn}.ttfa.txt`;
 
 		if (fi.spacingDerive) {
 			// The font is a spacing variant, and is derivable form an existing
 			// normally-spaced variant.
+
+			const noGcTtfPath = `${charMapDir}/${fn}.no-gc.unhinted.ttf`;
+
 			const spD = fi.spacingDerive;
 			const [deriveFrom] = await target.need(
 				DistUnhintedTTF(spD.prefix, spD.fileName),
 				de(charMapDir)
 			);
 
-			echo.action(echo.hl.command(`Create TTF`), out.full);
+			echo.action(echo.hl.command(`Hint TTF`), out.full);
 			await silently.node(`font-src/derive-spacing.mjs`, {
 				i: deriveFrom.full,
-				oNoGc: noGcTtfPath,
 				o: out.full,
+				oNoGc: noGcTtfPath,
 				...fi
 			});
 		} else {
@@ -415,6 +418,7 @@ const DistUnhintedTTF = file.make(
 			const { cacheUpdated } = await silently.node("font-src/index.mjs", {
 				o: out.full,
 				oCharMap: charMapPath,
+				oTtfaControls: ttfaControlsPath,
 				cacheFreshAgeKey: ageKey,
 				iCache: cachePath,
 				oCache: cacheDiffPath,
@@ -437,10 +441,63 @@ const DistUnhintedTTF = file.make(
 	}
 );
 
-const BuildNoGcTtfImpl = file.make(
-	(gr, f) => `${BUILD}/ttf/${gr}/${f}.no-gc.ttf`,
+const BuildCM = file.make(
+	(gr, f) => `${BUILD}/ttf/${gr}/${f}.charmap.mpz`,
 	async (target, output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
+	}
+);
+
+const BuildTtfaControls = file.make(
+	(gr, f) => `${BUILD}/ttf/${gr}/${f}.ttfa.txt`,
+	async (target, output, gr, f) => {
+		await target.need(DistUnhintedTTF(gr, f));
+	}
+);
+
+const DistHintedTTF = file.make(
+	(gr, fn) => `${DIST}/${gr}/ttf/${fn}.ttf`,
+	async (target, out, gr, fn) => {
+		const [fi, hint] = await target.need(
+			FontInfoOf(fn),
+			CheckTtfAutoHintExists,
+			de`${out.dir}`
+		);
+		if (fi.spacingDerive) {
+			// The font is a spacing variant, and is derivable form an existing
+			// normally-spaced variant.
+
+			const spD = fi.spacingDerive;
+			const charMapDir = `${BUILD}/ttf/${gr}`;
+			const noGcTtfPath = `${charMapDir}/${fn}.no-gc.hinted.ttf`;
+
+			const [deriveFrom] = await target.need(
+				DistHintedTTF(spD.prefix, spD.fileName),
+				de(charMapDir)
+			);
+
+			echo.action(echo.hl.command(`Create TTF`), out.full);
+			await silently.node(`font-src/derive-spacing.mjs`, {
+				i: deriveFrom.full,
+				oNoGc: noGcTtfPath,
+				o: out.full,
+				...fi
+			});
+		} else {
+			const [from, ttfaControls] = await target.need(
+				DistUnhintedTTF(gr, fn),
+				BuildTtfaControls(gr, fn)
+			);
+			echo.action(echo.hl.command(`Hint TTF`), out.full, echo.hl.operator("<-"), from.full);
+			await silently.run(hint, fi.hintParams, "-m", ttfaControls.full, from.full, out.full);
+		}
+	}
+);
+
+const BuildNoGcTtfImpl = file.make(
+	(gr, f) => `${BUILD}/ttf/${gr}/${f}.no-gc.hinted.ttf`,
+	async (target, output, gr, f) => {
+		await target.need(DistHintedTTF(gr, f));
 	}
 );
 
@@ -452,26 +509,9 @@ const BuildNoGcTtf = task.make(
 			const [noGc] = await target.need(BuildNoGcTtfImpl(gr, fn));
 			return noGc;
 		} else {
-			const [distUnhinted] = await target.need(DistUnhintedTTF(gr, fn));
+			const [distUnhinted] = await target.need(DistHintedTTF(gr, fn));
 			return distUnhinted;
 		}
-	}
-);
-
-const BuildCM = file.make(
-	(gr, f) => `${BUILD}/ttf/${gr}/${f}.charmap.mpz`,
-	async (target, output, gr, f) => {
-		await target.need(DistUnhintedTTF(gr, f));
-	}
-);
-
-const DistHintedTTF = file.make(
-	(gr, fn) => `${DIST}/${gr}/ttf/${fn}.ttf`,
-	async (target, out, gr, fn) => {
-		const [fi, hint] = await target.need(FontInfoOf(fn), CheckTtfAutoHintExists);
-		const [from] = await target.need(DistUnhintedTTF(gr, fn), de`${out.dir}`);
-		echo.action(echo.hl.command(`Hint TTF`), out.full, echo.hl.operator("<-"), from.full);
-		await silently.run(hint, fi.hintParams, from.full, out.full);
 	}
 );
 
@@ -712,12 +752,9 @@ async function buildCompositeTtc(out, inputs) {
 async function buildGlyphSharingTtc(target, parts, out) {
 	await target.need(de`${out.dir}`);
 	const [ttfInputs] = await target.need(parts.map(part => BuildNoGcTtf(part.dir, part.file)));
-	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
 	const ttfInputPaths = ttfInputs.map(p => p.full);
 	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), ttfInputPaths);
-	await silently.run(TTCIZE, "-u", ["-o", tmpTtc], ttfInputPaths);
-	await silently.run("ttfautohint", tmpTtc, out.full);
-	await rm(tmpTtc);
+	await silently.run(TTCIZE, "-u", ["-o", out.full], ttfInputPaths);
 }
 
 ///////////////////////////////////////////////////////////

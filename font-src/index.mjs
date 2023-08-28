@@ -22,9 +22,12 @@ export default main;
 async function main(argv) {
 	const paraT = await getParameters();
 	const para = paraT(argv);
-	const { font, glyphStore, cacheUpdated } = await buildFont(argv, para);
+	const { font, glyphStore, cacheUpdated, ttfaControls } = await buildFont(argv, para);
 	if (argv.oCharMap) {
 		await saveCharMap(argv, glyphStore);
+	}
+	if (argv.oTtfaControls) {
+		await fs.promises.writeFile(argv.oTtfaControls, ttfaControls.join("\n") + "\n");
 	}
 	if (argv.o) {
 		if (para.compatibilityLigatures) await buildCompatLigatures(para, font);

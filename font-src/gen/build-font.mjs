@@ -7,6 +7,7 @@ import { finalizeFont } from "./finalize/index.mjs";
 import { CreateEmptyFont } from "./meta/empty-font.mjs";
 import { assignFontNames } from "./meta/naming.mjs";
 import { convertOtd } from "./otd-conv/index.mjs";
+import { generateTtfaControls } from "./ttfa-controls/index.mjs";
 
 export async function buildFont(argv, para) {
 	const baseFont = CreateEmptyFont(argv);
@@ -30,6 +31,7 @@ export async function buildFont(argv, para) {
 	if (cache.isUpdated()) {
 		await Caching.save(argv.oCache, argv.menu.version, cache, true);
 	}
-	const font = convertOtd(baseFont, otl, finalGs);
-	return { font, glyphStore: finalGs, cacheUpdated: cache.isUpdated() };
+	const font = await convertOtd(baseFont, otl, finalGs);
+	const ttfaControls = await generateTtfaControls(finalGs, font.glyphs);
+	return { font, glyphStore: finalGs, cacheUpdated: cache.isUpdated(), ttfaControls };
 }
