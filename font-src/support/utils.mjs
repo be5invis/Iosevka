@@ -114,5 +114,27 @@ export const ArrayUtil = {
 	},
 	insertSliceAt(a, i, b) {
 		a.splice(i, 0, ...b);
+	},
+	// Convert character array to array of ranges. Input may be unsorted.
+	// The output ranges has both ends inclusive.
+	toRanges(chars) {
+		chars.sort((a, b) => a - b);
+
+		const ranges = [];
+		let range = null;
+
+		for (const ch of chars) {
+			if (!range) {
+				range = [ch, ch];
+				ranges.push(range);
+			} else if (ch === range[1] + 1) {
+				range[1] = ch;
+			} else {
+				range = [ch, ch];
+				ranges.push(range);
+			}
+		}
+
+		return ranges;
 	}
 };
