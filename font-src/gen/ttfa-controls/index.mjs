@@ -53,6 +53,8 @@ function generateTTFAAlignments(sink, alignment, gsOrig, gsTtf) {
 		nonDefaultGlyphIndices.push(gOrd.reverse(gd));
 	}
 
+	if (!nonDefaultGlyphIndices.length) return;
+
 	const glyphIndicesRangesStr = ArrayUtil.toRanges(nonDefaultGlyphIndices)
 		.map(([lo, hi]) => (lo === hi ? `${lo}` : `${lo}-${hi}`))
 		.join(", ");
