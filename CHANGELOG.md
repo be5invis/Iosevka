@@ -1,5 +1,10 @@
 ## Modifications since last major version
 
+### 26.3.1
+
+* Fix TTFA control generator to fix broken superscript letters (#1976).
+
+
 ### 26.3.0
 
 * Add earless variants for `m` and `n` with motion serifs at bottom-right (#1974).
