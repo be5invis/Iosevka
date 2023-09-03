@@ -132,6 +132,17 @@ export const Joining = {
 	}
 };
 
+export const HintClass = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.hintClass;
+		else return null;
+	},
+	set(glyph, script, style) {
+		if (!glyph.related) glyph.related = {};
+		glyph.related.hintClass = [script, style];
+	}
+};
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 const CvTagCache = new Map();
