@@ -2,62 +2,95 @@ import ttfaRanges from "../../generated/ttfa-ranges.mjs";
 import * as Gr from "../../support/gr.mjs";
 import { ArrayUtil } from "../../support/utils.mjs";
 
-export async function generateTtfaControls(gsOrig, gs) {
+export async function generateTtfaControls(gsOrig, gsTtf) {
 	let ttfaControls = [`# Machine generated. Do not modify.`];
 
-	for (const alignment of ttfaRanges) {
-		generateTTFAAlignments(ttfaControls, alignment, gsOrig, gs);
+	let alignments = [];
+	for (const cfg of ttfaRanges) {
+		const alignment = new Alignment(cfg.scriptTag, cfg.featureTag, cfg.ranges);
+		alignment.collectDefault(gsOrig, gsTtf);
+		alignments.push(alignment);
+	}
+
+	for (const go of gsOrig.glyphs()) {
+		const hc = Gr.HintClass.get(go);
+		if (!hc) continue;
+		const gd = gsTtf.queryBySourceGlyph(go);
+		if (!gd) continue;
+		const [s, f] = hc;
+		for (const alignment of alignments) {
+			if (s === alignment.scriptTag && f === alignment.featureTag)
+				alignment.allGlyphs.set(go, gd);
+		}
+	}
+
+	for (const alignment of alignments) {
+		alignment.extend(gsOrig, gsTtf);
+		alignment.write(ttfaControls, gsTtf);
 	}
 
 	return ttfaControls;
 }
 
-function generateTTFAAlignments(sink, alignment, gsOrig, gsTtf) {
-	let allGlyphs = new Map();
-	let defaultGlyphs = new Map();
-	for (const [lo, hi] of alignment.ranges) {
-		for (let lch = lo; lch <= hi; lch++) {
-			const go = gsOrig.queryByUnicode(lch);
-			if (!go) continue;
-			const gd = gsTtf.queryBySourceGlyph(go);
-			if (!gd) continue;
-			allGlyphs.set(go, gd);
-			defaultGlyphs.set(go, gd);
-		}
+class Alignment {
+	constructor(scriptTag, featureTag, ranges) {
+		this.scriptTag = scriptTag;
+		this.featureTag = featureTag;
+		this.ranges = ranges;
+
+		this.defaultGlyphs = new Map();
+		this.allGlyphs = new Map();
 	}
 
-	for (;;) {
-		let sizeBefore = allGlyphs.size;
-
-		for (const [go, gd] of allGlyphs) {
-			const cvs = Gr.AnyCv.query(go);
-			for (const gr of cvs) {
-				const gnLinked = gr.get(go);
-				if (!gnLinked) continue;
-				const goLinked = gsOrig.queryByName(gnLinked);
-				if (!goLinked) continue;
-				const gdLinked = gsTtf.queryBySourceGlyph(goLinked);
-				if (!gdLinked) continue;
-				allGlyphs.set(goLinked, gdLinked);
+	collectDefault(gsOrig, gsTtf) {
+		for (const [lo, hi] of this.ranges) {
+			for (let lch = lo; lch <= hi; lch++) {
+				const go = gsOrig.queryByUnicode(lch);
+				if (!go) continue;
+				const gd = gsTtf.queryBySourceGlyph(go);
+				if (!gd) continue;
+				this.allGlyphs.set(go, gd);
+				this.defaultGlyphs.set(go, gd);
 			}
 		}
-
-		let sizeAfter = allGlyphs.size;
-		if (sizeAfter <= sizeBefore) break;
 	}
 
-	const gOrd = gsTtf.decideOrder();
-	let nonDefaultGlyphIndices = [];
-	for (const [go, gd] of allGlyphs) {
-		if (defaultGlyphs.has(go)) continue;
-		nonDefaultGlyphIndices.push(gOrd.reverse(gd));
+	extend(gsOrig, gsTtf) {
+		for (;;) {
+			let sizeBefore = this.allGlyphs.size;
+
+			for (const [go, gd] of this.allGlyphs) {
+				const cvs = Gr.AnyCv.query(go);
+				for (const gr of cvs) {
+					const gnLinked = gr.get(go);
+					if (!gnLinked) continue;
+					const goLinked = gsOrig.queryByName(gnLinked);
+					if (!goLinked) continue;
+					const gdLinked = gsTtf.queryBySourceGlyph(goLinked);
+					if (!gdLinked) continue;
+					this.allGlyphs.set(goLinked, gdLinked);
+				}
+			}
+
+			let sizeAfter = this.allGlyphs.size;
+			if (sizeAfter <= sizeBefore) break;
+		}
 	}
 
-	if (!nonDefaultGlyphIndices.length) return;
+	write(sink, gsTtf) {
+		const gOrd = gsTtf.decideOrder();
+		let nonDefaultGlyphIndices = [];
+		for (const [go, gd] of this.allGlyphs) {
+			if (this.defaultGlyphs.has(go)) continue;
+			nonDefaultGlyphIndices.push(gOrd.reverse(gd));
+		}
 
-	const glyphIndicesRangesStr = ArrayUtil.toRanges(nonDefaultGlyphIndices)
-		.map(([lo, hi]) => (lo === hi ? `${lo}` : `${lo}-${hi}`))
-		.join(", ");
+		if (!nonDefaultGlyphIndices.length) return;
 
-	sink.push(`${alignment.scriptTag} ${alignment.featureTag} @ ${glyphIndicesRangesStr}`);
+		const glyphIndicesRangesStr = ArrayUtil.toRanges(nonDefaultGlyphIndices)
+			.map(([lo, hi]) => (lo === hi ? `${lo}` : `${lo}-${hi}`))
+			.join(", ");
+
+		sink.push(`${this.scriptTag} ${this.featureTag} @ ${glyphIndicesRangesStr}`);
+	}
 }
