@@ -1,5 +1,11 @@
 ## Modifications since last major version
 
+### 26.3.2
+
+* Remove duplicate serifed variant for LATIN SMALL LETTER N WITH LEFT HOOK (`U+0272`).
+* Add special k-dot shape (#1978).
+
+
 ### 26.3.1
 
 * Fix TTFA control generator to fix broken superscript letters (#1976).
