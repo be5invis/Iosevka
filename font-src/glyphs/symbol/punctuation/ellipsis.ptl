@@ -9,19 +9,17 @@ glyph-block Symbol-Punctuation-Ellipsis : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define [EllipsisDotRadius darkness space] : begin
-		return : 0.5 * [AdviceStroke darkness (space / Width)] * PeriodSize / Stroke
+	define [EllipsisDotRadius nDots space] : begin
+		return : 0.5 * [AdviceStroke (nDots + 1.5) (space / Width)] * PeriodSize / Stroke
 
-	define [VThreeDotsShape DrawAt kDotRadius overshoot l r p bottom top] : glyph-proc
-		local radius : [EllipsisDotRadius 5 (top - bottom)] * kDotRadius
+	define [VThreeDotsShape DrawAt radius overshoot l r p bottom top] : glyph-proc
 		local xMid : mix l r 0.5
 		local yMid : mix bottom top 0.5
 		include : DrawAt [mix xMid l p] (bottom + radius) (radius - overshoot)
 		include : DrawAt xMid           yMid              (radius - overshoot)
 		include : DrawAt [mix xMid r p] (top - radius)    (radius - overshoot)
 
-	define [VFourDotShape DrawAt kDotRadius overshoot xMid bottom top] : glyph-proc
-		local radius : [EllipsisDotRadius (20 / 3) (top - bottom)] * kDotRadius
+	define [VFourDotShape DrawAt radius overshoot xMid bottom top] : glyph-proc
 		local [yp p] : mix (bottom + radius) (top - radius) p
 		include : DrawAt xMid [yp 0]       (radius - overshoot)
 		include : DrawAt xMid [yp (1 / 3)] (radius - overshoot)
@@ -33,13 +31,13 @@ glyph-block Symbol-Punctuation-Ellipsis : begin
 			create-glyph "\[MangleName 'onedotLeader'].\(suffix)" : glyph-proc
 				local width : MosaicWidth * [mix para.diversityF para.diversityII (MosaicWidthScalar - 1)]
 				set-width width
-				local radius : [EllipsisDotRadius 3.5 MosaicWidth] * kDotRadius
+				local radius : [EllipsisDotRadius 2 MosaicWidth] * kDotRadius
 				include : DrawAt (width / 2) radius (radius - overshoot)
 
 			create-glyph "\[MangleName 'twodotsLEader'].\(suffix)" : glyph-proc
 				local width : MosaicWidth * [mix 1 para.diversityF (MosaicWidthScalar - 1)]
 				set-width width
-				local radius : [EllipsisDotRadius 3.5 MosaicWidth] * kDotRadius
+				local radius : [EllipsisDotRadius 2 MosaicWidth] * kDotRadius
 				local left : mix 0 width (1 / 4)
 				local right : mix 0 width (3 / 4)
 				include : DrawAt left radius (radius - overshoot)
@@ -47,13 +45,10 @@ glyph-block Symbol-Punctuation-Ellipsis : begin
 
 			create-glyph "\[MangleName 'ellipsis'].\(suffix)" : glyph-proc
 				set-width MosaicWidth
-				local radius : [EllipsisDotRadius 5 MosaicWidth] * kDotRadius
+				local radius : [EllipsisDotRadius 3 MosaicWidth] * kDotRadius
 				local left : mix 0 MosaicWidth (1 / 6)
 				local right : mix 0 MosaicWidth (5 / 6)
-				include : DrawAt left radius (radius - overshoot)
-				include : DrawAt (MosaicWidth / 2) radius (radius - overshoot)
-				include : DrawAt right radius (radius - overshoot)
-
+				include : VThreeDotsShape DrawAt radius overshoot left right (+1) 0 (2 * radius)
 				create-forked-glyph "\[MangleName 'mathCDots'].\(suffix)"
 					ApparentTranslate 0 (SymbolMid - radius)
 
@@ -61,12 +56,15 @@ glyph-block Symbol-Punctuation-Ellipsis : begin
 				set-width MosaicWidth
 				local left : mix 0 MosaicWidth (1 / 6)
 				local right : mix 0 MosaicWidth (5 / 6)
+				local top : SymbolMid + [Math.max (right - [mix left right 0.5]) ([mix PlusTop OperTop 0.5] - SymbolMid)]
+				local bot : SymbolMid - [Math.max ([mix left right 0.5] - left) (SymbolMid - [mix PlusBot OperBot 0.5])]
+				local radius : [EllipsisDotRadius 3 : Math.min MosaicWidth (top - bot)] * kDotRadius
 				create-forked-glyph "\[MangleName 'mathCVDots'].\(suffix)" : begin
-					VThreeDotsShape DrawAt kDotRadius overshoot left right 0 OperBot OperTop
+					VThreeDotsShape DrawAt radius overshoot left right 0 (bot - radius) (top + radius)
 				create-forked-glyph "\[MangleName 'mathCD1Dots'].\(suffix)" : begin
-					VThreeDotsShape DrawAt kDotRadius overshoot left right (-1) OperBot OperTop
+					VThreeDotsShape DrawAt radius overshoot left right (-1) (bot - radius) (top + radius)
 				create-forked-glyph "\[MangleName 'mathCD2Dots'].\(suffix)" : begin
-					VThreeDotsShape DrawAt kDotRadius overshoot left right (+1) OperBot OperTop
+					VThreeDotsShape DrawAt radius overshoot left right (+1) (bot - radius) (top + radius)
 
 		select-variant [MangleName 'onedotLeader'] [MangleUnicode 0x2024] (follow -- 'punctuationDot')
 		select-variant [MangleName 'twodotsLEader'] [MangleUnicode 0x2025] (follow -- 'punctuationDot')
@@ -78,25 +76,23 @@ glyph-block Symbol-Punctuation-Ellipsis : begin
 
 
 	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
-		create-glyph "triColon.\(suffix)" : glyph-proc
-			local df : DivFrame para.diversityF
-			set-width df.width
-			include : VThreeDotsShape DrawAt kDotRadius overshoot 0 df.width 0 0 XH
+		define radius : kDotRadius * [EllipsisDotRadius 3 XH]
 
-		create-glyph "quadColon.\(suffix)" : glyph-proc
-			local df : DivFrame para.diversityF
-			set-width df.width
-			include : VFourDotShape DrawAt kDotRadius overshoot df.middle (-XH / 6) (XH * 7 / 6)
+		create-glyph "triColon.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityF
+			include : VThreeDotsShape DrawAt radius overshoot 0 df.width 0 0 XH
 
 		create-glyph "mathTriColon.\(suffix)" : glyph-proc
-			local df : DivFrame para.diversityF
-			set-width df.width
-			include : VThreeDotsShape DrawAt kDotRadius overshoot 0 df.width 0 (SymbolMid - XH / 2) (SymbolMid + XH / 2)
+			local df : include : DivFrame para.diversityF
+			include : VThreeDotsShape DrawAt radius overshoot 0 df.width 0 (SymbolMid - XH / 2) (SymbolMid + XH / 2)
+
+		create-glyph "quadColon.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityF
+			include : VFourDotShape DrawAt radius overshoot df.middle (-XH / 6) (XH * 7 / 6)
 
 		create-glyph "mathQuadColon.\(suffix)" : glyph-proc
-			local df : DivFrame para.diversityF
-			set-width df.width
-			include : VFourDotShape DrawAt kDotRadius overshoot df.middle (SymbolMid - XH * 2 / 3) (SymbolMid + XH * 2 / 3)
+			local df : include : DivFrame para.diversityF
+			include : VFourDotShape DrawAt radius overshoot df.middle (SymbolMid - XH * 2 / 3) (SymbolMid + XH * 2 / 3)
 
 	select-variant "triColon"  0x205D (follow -- 'punctuationDot')
 	select-variant "quadColon" 0x205E (follow -- 'punctuationDot')
