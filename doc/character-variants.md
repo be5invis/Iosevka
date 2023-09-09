@@ -1856,10 +1856,15 @@
 <td rowspan="2"><code>cv55</code></td>
 <td><img src="../images/cv-lower-alpha-crossing.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-crossing.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-alpha-barred.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-lower-alpha-tailed-barred.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-tailed-barred.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-alpha-barred-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-alpha-barred-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-alpha-barred-earless-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-earless-corner.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-lower-alpha-tailed-barred-earless-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-tailed-barred-earless-corner.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="7"> </td>
+<td><img src="../images/cv-lower-alpha-barred-earless-corner-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-earless-corner-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-alpha-barred-earless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-earless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-alpha-barred-earless-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-earless-rounded.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-alpha-barred-earless-rounded-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-earless-rounded-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-alpha-barred-earless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-earless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="2"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -1867,7 +1872,12 @@
 <td>3</td>
 <td>4</td>
 <td>5</td>
-<td colspan="7"> </td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td colspan="2"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv56</code></td>
