@@ -47,6 +47,7 @@ export const Nwid = OtlTaggedProp("Nwid", "NWID", "Wide cell");
 export const Wwid = OtlTaggedProp("Wwid", "WWID", "Narrow cell");
 export const Lnum = OtlTaggedProp("Lnum", "lnum", "Lining number");
 export const Onum = OtlTaggedProp("Onum", "onum", "Old-style number");
+export const Zero = OtlTaggedProp("Zero", "zero", "Slashed zero");
 export const AplForm = OtlTaggedProp("AplForm", "APLF", "APL form");
 export const NumeratorForm = OtlTaggedProp("Numerator", "numr");
 export const DenominatorForm = OtlTaggedProp("Denominator", "dnom");
