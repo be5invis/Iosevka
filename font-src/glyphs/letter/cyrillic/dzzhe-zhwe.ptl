@@ -84,9 +84,9 @@ glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
 
 	do "zhe subglyphs"
 		glyph-block-import Letter-Cyrillic-Zhe : Zhe
-		define [CyrRightZheShape legShape fSlab df top barLeft] : glyph-proc
+		define [CyrRightZheShape legShape fSlab fMidSlab df top barLeft] : glyph-proc
 			local [object subDf shift sw] : SubDfDim 1 3 df OX
-			include : with-transform [ApparentTranslate shift 0] : Zhe.HalfShape legShape fSlab subDf 0 top top
+			include : with-transform [ApparentTranslate shift 0] : Zhe.HalfShape legShape fSlab fMidSlab subDf 0 top top
 			include : HBar.m barLeft (shift + subDf.middle) (0.5 * top) sw
 
 		define [DzzheLeft df] : begin
@@ -94,51 +94,52 @@ glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
 			local swInner : sw * [AdviceStroke 2.75] / Stroke
 			return : [mix subDf.leftSB subDf.rightSB : StrokeWidthBlend 0.95 0.96] - [HSwToV : 0.5 * swInner]
 
-		define [ZhweZheShape legShape fSlab df top hook] : glyph-proc
+		define [ZhweZheShape legShape fSlab fMidSlab df top hook] : glyph-proc
 			local [object subDf sw] : SubDfDim 0 2 df OX
 			local ze : CyrZe 0 0 top 0 subDf.leftSB subDf.rightSB 0.65 hook (0.5 * sw)
-			include : difference [CyrRightZheShape legShape fSlab df top subDf.middle] [ze.ShapeMask]
+			include : difference [CyrRightZheShape legShape fSlab fMidSlab df top subDf.middle] [ze.ShapeMask]
 
 		glyph-block-import Letter-Cyrillic-De : CyrDeItalicShapeT
-		define [DzzheZheItalicShape legShape fSlab df] : glyph-proc
+		define [DzzheZheItalicShape legShape fSlab fMidSlab df top] : glyph-proc
 			local [object subDf sw] : SubDfDim 0 2 df OX
 			include : difference
-				CyrRightZheShape legShape fSlab df XH subDf.middle
+				CyrRightZheShape legShape fSlab fMidSlab df top subDf.middle
 				CyrDeItalicShapeT spiro-outline subDf sw
 
 		define ZheConfig : object
-			straight            { Zhe.StraightLegs   SLAB }
-			curly               { Zhe.CurlyLegs      SLAB }
-			symmetricTouching   { Zhe.TouchingLegs   SLAB }
-			symmetricConnected  { Zhe.ConnectingLegs SLAB }
+			straight            { Zhe.StraightLegs   SLAB  SLAB }
+			curly               { Zhe.CurlyLegs      SLAB  SLAB }
+			symmetricTouching   { Zhe.TouchingLegs   SLAB  SLAB }
+			symmetricConnected  { Zhe.ConnectingLegs SLAB  SLAB }
+			cursive             { Zhe.CursiveLegs    false SLAB }
 
-		foreach { suffix { legShape fSlab } } [Object.entries ZheConfig] : do
+		foreach { suffix { legShape fSlab fMidSlab } } [Object.entries ZheConfig] : do
 			create-glyph "cyrl/Dzzhe/right.\(suffix)" : glyph-proc
 				define df : include : DivFrame para.diversityM 3.5
 				include : df.markSet.capital
-				include : CyrRightZheShape legShape fSlab df CAP : DzzheLeft df
+				include : CyrRightZheShape legShape fSlab fMidSlab df CAP : DzzheLeft df
 
 			create-glyph "cyrl/dzzhe.upright/right.\(suffix)" : glyph-proc
 				define df : include : DivFrame para.diversityM 3.5
 				include : df.markSet.e
-				include : CyrRightZheShape legShape fSlab df XH : DzzheLeft df
+				include : CyrRightZheShape legShape fSlab fMidSlab df XH : DzzheLeft df
 
 			create-glyph "cyrl/dzzhe.italic/right.\(suffix)" : glyph-proc
 				define df : include : DivFrame para.diversityM 3.5
 				include : df.markSet.e
-				include : DzzheZheItalicShape legShape fSlab df
+				include : DzzheZheItalicShape legShape fSlab fMidSlab df XH
 
 			create-glyph "cyrl/Zhwe/right.\(suffix)" : glyph-proc
 				define df : include : DivFrame para.diversityM 3.5
 				include : df.markSet.capital
 				set-base-anchor 'cvDecompose' 0 0
-				include : ZhweZheShape legShape fSlab df CAP Hook
+				include : ZhweZheShape legShape fSlab fMidSlab df CAP Hook
 
 			create-glyph "cyrl/zhwe/right.\(suffix)" : glyph-proc
 				define df : include : DivFrame para.diversityM 3.5
 				include : df.markSet.e
 				set-base-anchor 'cvDecompose' 0 0
-				include : ZhweZheShape legShape fSlab df XH SHook
+				include : ZhweZheShape legShape fSlab fMidSlab df XH SHook
 
 	select-variant "cyrl/Dzzhe/right" (follow -- "cyrl/Zhe")
 	select-variant "cyrl/dzzhe.upright/right" (follow -- "cyrl/zhe")
