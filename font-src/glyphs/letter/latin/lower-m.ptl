@@ -59,58 +59,72 @@ glyph-block Letter-Latin-Lower-M : begin
 			corner left [Math.min (top - sm - 0.1) bottom]
 			close
 
-	define [SmallMTopLeftSerif df top lbot] : begin
+
+	define [SmallMTopLeftSerif df top lbot fFull] : begin
 		local sf : SerifFrame.fromDf df top 0
 		return sf.lt.outer
 
-	define [SmallMBottomLeftSerif df top lbot] : begin
+	define [SmallMBottomLeftSerif df top lbot fFull] : begin
 		local sf : SerifFrame.fromDf df top lbot
-		return : if sf.enoughSpaceForFullSerifs sf.lb.full sf.lb.outer
+		return : if fFull sf.lb.full sf.lb.outer
 
-	define [SmallMBottomMiddleSerif df top mbot] : begin
+	define [SmallMBottomMiddleSerif df top mbot fFull mid] : begin
 		local sf : SerifFrame.fromDf df top mbot
-		return : if sf.enoughSpaceForFullSerifs sf.mb.full [no-shape]
+		return : if fFull [sf.mb.fullAt mid] [no-shape]
 
-	define [SmallMBottomRightSerif df top rbot] : begin
+	define [SmallMBottomRightSerif df top rbot fFull] : begin
 		local sf : SerifFrame.fromDf df top rbot
-		return : if sf.enoughSpaceForFullSerifs sf.rb.full sf.rb.outer
+		return : if fFull sf.rb.full sf.rb.outer
 
-	define [SmallMBottomMotionRightSerif df top rbot] : begin
+	define [SmallMBottomMotionRightSerif df top rbot fFull] : begin
 		local sf : SerifFrame.fromDf df top rbot
 		return sf.rb.outer
 
-	define [FullSerifs df top lbot mbot rbot tailed earless] : glyph-proc
-		if [not earless] : include : SmallMTopLeftSerif df top lbot
-		include : SmallMBottomLeftSerif df top lbot
-		include : SmallMBottomMiddleSerif df top mbot
-		if [not tailed] : include : SmallMBottomRightSerif df top rbot
 
-	define [AutoSerifs df top lbot mbot rbot tailed earless] : begin
-		if SLAB [FullSerifs df top lbot mbot rbot tailed earless] [no-shape]
+	define [MEnoughSpaceForFullSerifs df mid] : begin
+		local ink : HSwToV df.mvs
+		local gap : [Math.min (mid - df.leftSB) (df.rightSB - mid)] - 1.5 * ink
+		return : 0.5 * ink + 0.375 * gap > para.refJut
 
-	define [LtSerifs df top lbot mbot rbot tailed earless] : glyph-proc
-		include : SmallMTopLeftSerif df top lbot
+	define [FullSerifs df top lbot mbot rbot tailed earless _mid] : glyph-proc
+		local mid : fallback _mid df.middle
+		local fFull : MEnoughSpaceForFullSerifs df mid
+		if [not earless] : include : SmallMTopLeftSerif df top lbot fFull
+		include : SmallMBottomLeftSerif df top lbot fFull
+		include : SmallMBottomMiddleSerif df top mbot fFull mid
+		if [not tailed] : include : SmallMBottomRightSerif df top rbot fFull
 
-	define [LtRbSerifs df top lbot mbot rbot tailed earless] : glyph-proc
-		include : SmallMTopLeftSerif df top lbot
-		include : SmallMBottomMotionRightSerif df top rbot
+	define [AutoSerifs df top lbot mbot rbot tailed earless _mid] : begin
+		if SLAB [FullSerifs df top lbot mbot rbot tailed earless _mid] [no-shape]
 
-	define [RbSerifs df top lbot mbot rbot tailed earless] : glyph-proc
-		include : SmallMBottomMotionRightSerif df top rbot
+	define [LtSerifs df top lbot mbot rbot tailed earless _mid] : glyph-proc
+		local fFull : MEnoughSpaceForFullSerifs df : fallback _mid df.middle
+		include : SmallMTopLeftSerif df top lbot fFull
+
+	define [LtRbSerifs df top lbot mbot rbot tailed earless _mid] : glyph-proc
+		local fFull : MEnoughSpaceForFullSerifs df : fallback _mid df.middle
+		include : SmallMTopLeftSerif df top lbot fFull
+		include : SmallMBottomMotionRightSerif df top rbot fFull
+
+	define [RbSerifs df top lbot mbot rbot tailed earless _mid] : glyph-proc
+		local fFull : MEnoughSpaceForFullSerifs df : fallback _mid df.middle
+		include : SmallMBottomMotionRightSerif df top rbot fFull
+
 
 	define [dfM] : DivFrame para.diversityM 3
-	define [SmallMArches top lbot mbot rbot df] : glyph-proc
+	define [SmallMArches df top lbot mbot rbot _mid] : glyph-proc
+		local mid : fallback _mid df.middle
 		include : SmallMShoulderSpiro
 			df        -- df
 			left      -- (df.leftSB + [HSwToV df.mvs])
-			right     -- (df.middle + df.mvs / 2 * HVContrast)
+			right     -- (mid + [HSwToV : 0.5 * df.mvs])
 			top       -- top
 			bottom    -- mbot
 			width     -- df.mvs
 			fine      -- (df.mvs * ShoulderFine / Stroke)
 		include : SmallMShoulderSpiro
 			df        -- df
-			left      -- (df.middle + [HSwToV : 0.5 * df.mvs])
+			left      -- (mid + [HSwToV : 0.5 * df.mvs])
 			right     -- df.rightSB
 			top       -- top
 			bottom    -- rbot
@@ -121,29 +135,31 @@ glyph-block Letter-Latin-Lower-M : begin
 	define [SmallMShortLegHeight top df] : (top - df.mvs) * 0.45
 	define [SmallMSmoothHeight top df] : top - [SmallMSmooth df] - TanSlope * Stroke
 
-	define [EarlessCornerDoubleArchSmallMShape top lbot mbot rbot df] : glyph-proc
+	define [EarlessCornerDoubleArchSmallMShape df top lbot mbot rbot _mid] : glyph-proc
+		local mid : fallback _mid df.middle
 		include : dispiro
 			widths.rhs df.mvs
 			g4 df.leftSB (top - DToothlessRise)
-			g4.right.mid [mix df.leftSB (df.middle + df.mvs / 2 * HVContrast) 0.5] (top - O) [heading Rightward]
-			g4 (df.middle + df.mvs / 2 * HVContrast) (top - DToothlessRise)
+			g4.right.mid [mix df.leftSB (mid + [HSwToV : 0.5 * df.mvs]) 0.5] (top - O) [heading Rightward]
+			g4 (mid + [HSwToV : 0.5 * df.mvs]) (top - DToothlessRise)
 		include : dispiro
 			widths.rhs df.mvs
-			g4 (df.middle - df.mvs / 2 * HVContrast) (top - DToothlessRise)
-			g4.right.mid [mix df.rightSB (df.middle - df.mvs / 2 * HVContrast) 0.5] (top - O) [heading Rightward]
+			g4 (mid - [HSwToV : 0.5 * df.mvs]) (top - DToothlessRise)
+			g4.right.mid [mix df.rightSB (mid - [HSwToV : 0.5 * df.mvs]) 0.5] (top - O) [heading Rightward]
 			archv
 			flat df.rightSB (top - [SmallMSmooth df]) [heading Downward]
 			curl df.rightSB rbot [heading Downward]
 
 		include : tagged 'barL' : VBar.l df.leftSB lbot (top - DToothlessRise) df.mvs
-		include : tagged 'barM' : VBar.m df.middle mbot (top - DToothlessRise) df.mvs
+		include : tagged 'barM' : VBar.m mid mbot (top - DToothlessRise) df.mvs
 
-	define [EarlessRoundedDoubleArchSmallMShape top lbot mbot rbot df] : glyph-proc
+	define [EarlessRoundedDoubleArchSmallMShape df top lbot mbot rbot _mid] : glyph-proc
+		local mid : fallback _mid df.middle
 		include : union
 			RevSmallMShoulderSpiro
 				df        -- df
 				left      -- df.leftSB
-				right     -- (df.middle - df.mvs / 2 * HVContrast)
+				right     -- (mid - [HSwToV : 0.5 * df.mvs])
 				top       -- top
 				bottom    -- lbot
 				coBottom  -- mbot
@@ -151,7 +167,7 @@ glyph-block Letter-Latin-Lower-M : begin
 				fine      -- (df.mvs * CThin)
 			SmallMShoulderSpiro
 				df        -- df
-				left      -- (df.middle + [HSwToV : 0.5 * df.mvs])
+				left      -- (mid + [HSwToV : 0.5 * df.mvs])
 				right     -- df.rightSB
 				top       -- top
 				bottom    -- rbot
@@ -159,13 +175,14 @@ glyph-block Letter-Latin-Lower-M : begin
 				width     -- df.mvs
 				fine      -- (df.mvs * CThin)
 
-	define [EarlessSingleArchSmallMShape top lbot mbot rbot df] : glyph-proc
+	define [EarlessSingleArchSmallMShape df top lbot mbot rbot _mid] : glyph-proc
+		local mid : fallback _mid df.middle
 		include : tagged 'barL' : VBar.l df.leftSB lbot (top - DToothlessRise) df.mvs
-		include : tagged 'barM' : VBar.m df.middle mbot top df.mvs
+		include : tagged 'barM' : VBar.m mid mbot top df.mvs
 		include : dispiro
 			widths.rhs df.mvs
 			g4 df.leftSB (top - DToothlessRise)
-			g4 (df.middle - CorrectionOMidS) (top - O)
+			g4 (mid - CorrectionOMidS) (top - O)
 			archv
 			flat df.rightSB [Math.max (top - [SmallMSmooth df]) (rbot + 0.1)]
 			curl df.rightSB rbot [heading Downward]
@@ -191,7 +208,7 @@ glyph-block Letter-Latin-Lower-M : begin
 
 	foreach { suffix { {Body earless} {shortLeg} {tailed} {Serifs} } } [pairs-of SmallMConfig] : do
 		define [mShapeBody df height] : glyph-proc
-			include : Body height 0 [if shortLeg [SmallMShortLegHeight height df] 0] [if tailed ([SmallMSmoothHeight height df] + O) 0] df
+			include : Body df height 0 [if shortLeg [SmallMShortLegHeight height df] 0] [if tailed ([SmallMSmoothHeight height df] + O) 0]
 			if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight height df] (sw -- df.mvs)
 			include : Serifs df height 0 [if shortLeg [SmallMShortLegHeight height df] 0] 0 tailed earless
 
@@ -223,30 +240,26 @@ glyph-block Letter-Latin-Lower-M : begin
 			local df : include : DivFrame para.diversityM 4
 			include : df.markSet.e
 
-			local fine : AdviceStroke 5.5 df.div
+			local fine : AdviceStroke 4.5 df.div
 			local rinner : XH * 0.15 - fine * 0.75
+			local gap : (df.rightSB - df.leftSB - 3 * [HSwToV df.mvs] - [HSwToV fine]) / 3
 			local m1 : df.rightSB - [HSwToV df.mvs]
-			local m2 : [mix (df.middle + [HSwToV : 0.5 * df.mvs]) m1 0.35] - [HSwToV : 0.5 * fine]
+			local m2 : df.leftSB + 2 * ([HSwToV df.mvs] + gap)
 			local x2 : df.rightSB + SideJut
 			local y2 : rinner * 2 + fine - O
-			include : Body XH 0 [if shortLeg [SmallMShortLegHeight XH df] 0] (y2 + O) df
+			include : Body df XH 0 [if shortLeg [SmallMShortLegHeight XH df] 0] (y2 + O)
 			include : dispiro
 				straight.down.start df.rightSB (y2 + O) [widths.rhs.heading df.mvs Downward]
-				CurlyTail fine rinner m1 0 m2 x2 y2 (adj -- 0)
+				CurlyTail fine rinner m1 0 m2 x2 y2 (adj -- 0.2)
 
 			include : Serifs df XH 0 [if shortLeg [SmallMShortLegHeight XH df] 0] 0 true earless
-			if (SLAB && [not shortLeg] && Serifs === FullSerifs) : begin
-				local sf : SerifFrame.fromDf df XH 0
-				if (sf.enoughSpaceForFullSerifs && m2 - (df.middle + sf.jutIn) < 0.01 * Width) : begin
-					eject-contour 'serifMB'
-					include sf.mb.left
 
 		if (Body === SmallMArches && shortLeg == 0 && tailed == 0) : begin
 			create-glyph "cyrl/tjeKomi.italic.\(suffix)" : glyph-proc
 				local df : include : DivFrame para.diversityM 4
 				include : df.markSet.e
 				local subDf : df.slice 4 3 0
-				include : Body XH 0 0 (XH / 2) subDf
+				include : Body subDf XH 0 0 (XH / 2)
 				include : UpwardHookShape
 					left -- subDf.rightSB - [HSwToV subDf.mvs]
 					right -- df.rightSB
@@ -297,7 +310,7 @@ glyph-block Letter-Latin-Lower-M : begin
 
 	foreach { suffix { {Body toothless tailed} {Serifs} } } [pairs-of TurnMConfig] : do
 		define [turnMShapeBody df top] : glyph-proc
-			include : Body top 0 0 0 df
+			include : Body df top 0 0 0
 			include : Serifs df top 0 0 0 0 toothless
 			include : FlipAround df.middle (top / 2)
 			if tailed : begin

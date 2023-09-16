@@ -120,16 +120,16 @@ glyph-block Letter-Latin-Upper-R : begin
 	define [RBarPos charTop slab] : begin PShape.BarPos
 	define [RLegTop charTop sw bp] : (sw / 2) + [PBarPosY charTop sw bp]
 
-	define [RShape] : with-params [legShape top bp [mul 1] [slab null] [open false]] : glyph-proc
+	define [RShape] : with-params [legShape top bp [mul 1] [slab null] [legSlab false] [open false]] : glyph-proc
 		local right : RightSB - O - [if slab (Jut / 8) 0]
 		include : difference
 			PShape top (mul -- mul) (overshoot -- O) (slab -- slab) (bp -- bp)
 			if open [PShape.OpenGap (mul -- mul) (bp -- bp) (top -- top) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
 		include : difference
-			RLegShapes.(legShape) [RLegTop top Stroke bp] 0 Middle right top (slab === PShape.SlabSymmetric) Stroke 0
+			RLegShapes.(legShape) [RLegTop top Stroke bp] 0 Middle right top legSlab Stroke 0
 			if open [PShape.OpenGap (mul -- mul) (bp -- bp) (top -- top) (bot -- 0) ] [glyph-proc]
 
-	define [RRotundaShape] : with-params [legShape top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook] [pBar 1] [slab null]] : glyph-proc
+	define [RRotundaShape] : with-params [legShape top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook] [pBar 1] [slab null] [legSlab false]] : glyph-proc
 		local bp : pBar * [RBarPos top false]
 		local legTop : RLegTop top Stroke bp
 		local right (RightSB - O - [if slab (Jut / 8) 0])
@@ -137,16 +137,16 @@ glyph-block Letter-Latin-Upper-R : begin
 		local endX1 : endX - [if legShape (HalfStroke * [HSwToV cor]) HalfStroke] + [if legShape [RSlabExtraShift SLAB Stroke] 0]
 		include : PRotundaShape top (mul -- mul) (bp -- bp) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
 		include : difference
-			RLegShapes.(legShape) legTop 0 endX right top (slab === PShape.SlabSymmetric) Stroke 0
+			RLegShapes.(legShape) legTop 0 endX right top legSlab Stroke 0
 			MaskLeft endX1
 
-	define [RevRShape] : with-params [legShape top bp [slab null] [mul 1] [tailedShape false] [open false]] : glyph-proc
+	define [RevRShape] : with-params [legShape top bp [slab null] [legSlab false] [mul 1] [tailedShape false] [open false]] : glyph-proc
 		local left : SB + O + [if slab (Jut / 8) 0]
 		include : difference
 			RevPShape top (mul -- mul) (overshoot -- O) (slab -- slab) (bp -- bp)
 			if open [RevPShape.OpenGap (mul -- mul) (bp -- bp) (top -- top) (bot -- [if fSlabBot Stroke 0]) ] [glyph-proc]
 		include : difference
-			RevRLegShapes.(legShape) [RLegTop top Stroke bp] 0 left Middle top (!(!slab)) Stroke 0
+			RevRLegShapes.(legShape) [RLegTop top Stroke bp] 0 left Middle top legSlab Stroke 0
 			if open [RevPShape.OpenGap (mul -- mul) (bp -- bp) (top -- top) (bot -- 0) ] [glyph-proc]
 		if tailedShape : begin
 			eject-contour 'strokeR'
@@ -168,12 +168,14 @@ glyph-block Letter-Latin-Upper-R : begin
 			""                       false
 			tailed                   true
 		object # serifs
-			serifless                { null                           null                                                                }
-			motionSerifed            { PShape.SlabMotion              RevPShape.SlabMotion                                                }
-			serifed                  { PShape.SlabSymmetric           RevPShape.SlabSymmetric                                             }
-			smallCyrl                { PShape.SlabMotion              [if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] }
+			serifless                    { null                           null                                                                false }
+			topLeftSerifed               { PShape.SlabMotion              RevPShape.SlabMotion                                                false }
+			bottomRightSerifed           { null                           null                                                                true  }
+			topLeftAndBottomRightSerifed { PShape.SlabMotion              RevPShape.SlabMotion                                                true  }
+			serifed                      { PShape.SlabSymmetric           RevPShape.SlabSymmetric                                             true  }
+			smallCyrl                    { PShape.SlabMotion              [if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] true  }
 
-	foreach { suffix { legShape fOpen fTailed {slabs revSlabs} } } [Object.entries RConfig] : begin
+	foreach { suffix { legShape fOpen fTailed {slabs revSlabs doLegSlab} } } [Object.entries RConfig] : begin
 		local fMotion : slabs === PShape.SlabMotion
 		local fSlabBot : slabs && slabs !== PShape.SlabMotion
 		local bpCap : RBarPos CAP fSlabBot
@@ -182,7 +184,7 @@ glyph-block Letter-Latin-Upper-R : begin
 		create-glyph "R.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : StrikeAnchor
-			include : RShape legShape CAP (slab -- slabs) (bp -- bpCap) (open -- fOpen)
+			include : RShape legShape CAP (slab -- slabs) (legSlab -- doLegSlab) (bp -- bpCap) (open -- fOpen)
 
 		if (!fOpen) : create-glyph "RBar.\(suffix)" : glyph-proc
 			include [refer-glyph "R.\(suffix)"] AS_BASE ALSO_METRICS
@@ -191,25 +193,25 @@ glyph-block Letter-Latin-Upper-R : begin
 		create-glyph "smcpR.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : StrikeAnchor
-			include : RShape legShape XH (slab -- slabs) (bp -- bpXH) (open -- fOpen)
+			include : RShape legShape XH (slab -- slabs) (legSlab -- doLegSlab) (bp -- bpXH) (open -- fOpen)
 
-		if (!fMotion && !fOpen) : create-glyph "RRotunda.\(suffix)" : glyph-proc
+		if (!slabs && !fOpen) : create-glyph "RRotunda.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : RRotundaShape legShape CAP (hook -- Hook) (pBar -- 0.9) (slab -- slabs)
+			include : RRotundaShape legShape CAP (hook -- Hook) (pBar -- 0.9) (slab -- null) (legSlab -- doLegSlab)
 
-		if (!fMotion && !fOpen) : create-glyph "rRotunda.\(suffix)" : glyph-proc
+		if (!slabs && !fOpen) : create-glyph "rRotunda.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : RRotundaShape legShape XH (hook -- AHook) (pBar -- 0.9) (slab -- slabs)
+			include : RRotundaShape legShape XH (hook -- AHook) (pBar -- 0.9) (slab -- null) (legSlab -- doLegSlab)
 
 		create-glyph "cyrl/Ya.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : StrikeAnchor
-			include : RevRShape legShape CAP (slab -- revSlabs) (bp -- bpCap) (open -- fOpen)
+			include : RevRShape legShape CAP (slab -- revSlabs) (legSlab -- doLegSlab) (bp -- bpCap) (open -- fOpen)
 
 		create-glyph "cyrl/ya.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : StrikeAnchor
-			include : RevRShape legShape XH (slab -- revSlabs) (bp -- bpXH) (tailedShape -- fTailed) (open -- fOpen)
+			include : RevRShape legShape XH (slab -- revSlabs) (legSlab -- doLegSlab) (bp -- bpXH) (tailedShape -- fTailed) (open -- fOpen)
 
 		create-glyph "Yr.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
@@ -223,17 +225,17 @@ glyph-block Letter-Latin-Upper-R : begin
 				PShape top (mul -- 1) (bp -- bp) (slab -- slabs)
 				if fOpen [PShape.OpenGap (mul -- 1) (bp -- bp) (top -- top) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
 			include : difference
-				RLegShapes.(legShape) legTop Descender Middle right (top - Descender) (slabs === PShape.SlabSymmetric) Stroke 0
+				RLegShapes.(legShape) legTop Descender Middle right (top - Descender) doLegSlab Stroke 0
 				if fOpen [PShape.OpenGap (mul -- 1) (bp -- bp) (top -- top) (bot -- 0)] [glyph-proc]
 
-		create-glyph "currency/indianRupeeSign.\(suffix)" : glyph-proc
+		if (!slabs && !fOpen) : create-glyph "currency/indianRupeeSign.\(suffix)" : glyph-proc
 			define bp : RBarPos CAP 0
 			include : intersection
 				Rect CAP 0 SB Width
 				with-transform [Translate (-Width / 8) 0]
 					PShape CAP (bp -- bp) (withBar -- false)
 			local right : RightSB - O - [if legShape 0 (Width / 16)]
-			include : RLegShapes.(legShape) [RLegTop CAP Stroke bp] 0 (Width * 0.375) right CAP (slabs === PShape.SlabSymmetric) Stroke 0
+			include : RLegShapes.(legShape) [RLegTop CAP Stroke bp] 0 (Width * 0.375) right CAP doLegSlab Stroke 0
 
 			define sw : AdviceStroke2 2 4 CAP
 			include : HBar.t SB RightSB CAP sw

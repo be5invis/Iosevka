@@ -140,27 +140,52 @@ glyph-block Letter-Cyrillic-Zhe : begin
 
 			return : union fullShape : HBar.m [if fHalf df.middle midX] (df.width - midX) midY fine
 
-		export : define [Shape Legs fSlab df bot top midTop] : glyph-proc
-			include : CenterBar fSlab df bot midTop
+		export : define [CursiveLegs fSlab fHalf df bot top] : begin
+			define fine : ZheSw df
+			define fine2 : AdviceStroke 4.2 df.div
+			define midX : mix df.leftSB (df.middle - [HSwToV : 0.5 * fine]) 0.4
+			define midY : mix bot top 0.5
+			define overshoot : Overshoot fSlab df
+
+			local rightShape : dispiro
+					g4.left.start (df.rightSB - overshoot) (top - fine) [widths.rhs.heading fine Leftward]
+					archv
+					g4.down.mid (df.width - midX + OX) midY [widths.rhs.heading fine2 Downward]
+					arcvh
+					g4.right.end (df.rightSB - overshoot) (bot + fine) [widths.rhs.heading fine Rightward]
+
+			local fullShape : if fHalf rightShape : union rightShape
+				dispiro
+					g4.right.start (df.leftSB + overshoot) (top - fine) [widths.lhs.heading fine Rightward]
+					archv
+					g4.down.mid (midX - OX) midY [widths.lhs.heading fine2 Downward]
+					arcvh
+					g4.left.end (df.leftSB + overshoot) (bot + fine) [widths.lhs.heading fine Leftward]
+
+			return : union fullShape : HBar.m [if fHalf df.middle (midX + 0.5 * fine)] (df.width - (midX + 0.5 * fine)) midY fine
+
+		export : define [Shape Legs fSlab fMidSlab df bot top midTop] : glyph-proc
+			include : CenterBar fMidSlab    df bot midTop
 			include : Legs      fSlab false df bot top
 			include : LegSerifs fSlab false df bot top
 
-		export : define [HalfShape Legs fSlab df bot top] : glyph-proc
-			include : CenterBar fSlab df bot top
+		export : define [HalfShape Legs fSlab fMidSlab df bot top midTop] : glyph-proc
+			include : CenterBar fMidSlab   df bot midTop
 			include : Legs      fSlab true df bot top
 			include : LegSerifs fSlab true df bot top
 
 	define ZheConfig : object
-		straight            { Zhe.StraightLegs   SLAB }
-		curly               { Zhe.CurlyLegs      SLAB }
-		symmetricTouching   { Zhe.TouchingLegs   SLAB }
-		symmetricConnected  { Zhe.ConnectingLegs SLAB }
+		straight            { Zhe.StraightLegs   SLAB  SLAB }
+		curly               { Zhe.CurlyLegs      SLAB  SLAB }
+		symmetricTouching   { Zhe.TouchingLegs   SLAB  SLAB }
+		symmetricConnected  { Zhe.ConnectingLegs SLAB  SLAB }
+		cursive             { Zhe.CursiveLegs    false SLAB }
 
-	foreach { suffix { legShape fSlab } } [Object.entries ZheConfig] : do
+	foreach { suffix { legShape fSlab fMidSlab } } [Object.entries ZheConfig] : do
 		create-glyph "cyrl/Zhe.\(suffix)" : glyph-proc
 			define df : include : DivFrame para.diversityM 3
 			include : df.markSet.capital
-			include : Zhe.Shape legShape fSlab df 0 CAP CAP
+			include : Zhe.Shape legShape fSlab fMidSlab df 0 CAP CAP
 
 		create-glyph "cyrl/ZheDescender.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
@@ -170,7 +195,7 @@ glyph-block Letter-Cyrillic-Zhe : begin
 		create-glyph "cyrl/zhe.\(suffix)" : glyph-proc
 			define df : include : DivFrame para.diversityM 3
 			include : df.markSet.e
-			include : Zhe.Shape legShape fSlab df 0 XH XH
+			include : Zhe.Shape legShape fSlab fMidSlab df 0 XH XH
 
 		create-glyph "cyrl/zheDescender.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
@@ -180,7 +205,7 @@ glyph-block Letter-Cyrillic-Zhe : begin
 		create-glyph "cyrl/zhe.BGR.\(suffix)" : glyph-proc
 			define df : include : DivFrame para.diversityM 3
 			include : df.markSet.b
-			include : Zhe.Shape legShape fSlab df 0 XH Ascender
+			include : Zhe.Shape legShape fSlab fMidSlab df 0 XH Ascender
 
 	select-variant 'cyrl/Zhe'          0x416
 	select-variant 'cyrl/ZheDescender' 0x496 (follow -- 'cyrl/Zhe')
