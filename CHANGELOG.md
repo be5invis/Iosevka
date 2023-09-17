@@ -1,5 +1,12 @@
 ## Modifications since last major version
 
+### 27.0.1
+
+* Add Characters
+  - VERY MUCH LESS-THAN (`U+22D8`) (#1990).
+  - VERY MUCH GREATER-THAN (`U+22D9`) (#1990).
+
+
 ### 27.0.0
 
 * \[**Breaking**\] Variants for `π`, `τ` and `«` are inserted into the main tag sequence. As a consequence, variant features after them have the tags changed.
