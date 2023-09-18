@@ -30,6 +30,14 @@ glyph-block Letter-Latin-Lower-H : begin
 	define [SmallHTopLeftSerifs tailed hookTop] : glyph-proc
 		if [not hookTop] : include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
 
+	define [SmallTurnHSerifs tailed hookTop] : glyph-proc : begin
+		include : SmallTurnHLeftSerifs tailed hookTop
+		if [not tailed] : include : tagged 'serifRB' : HSerif.rb RightSB 0 SideJut
+
+	define [SmallTurnHLeftSerifs tailed hookTop] : glyph-proc : begin
+		if [not hookTop] : include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
+		include : tagged 'serifLB' : HSerif.rb (SB + [HSwToV HalfStroke]) 0 Jut
+
 	define [HBar.mOverlay fHasTopSerif] : glyph-proc
 		local barSpaceTop : Ascender - [if fHasTopSerif Stroke 0]
 		local s : Math.min OverlayStroke (0.625 * (barSpaceTop - XH))
@@ -97,6 +105,58 @@ glyph-block Letter-Latin-Lower-H : begin
 			include [refer-glyph "heng.\(suffix)"] AS_BASE ALSO_METRICS
 			include : HBar.mOverlay fHasTopSerif
 
+	select-variant 'h' 'h'
+	link-reduced-variant 'h/descBase' 'h'
+	link-reduced-variant 'h/sansSerif' 'h' MathSansSerif
+
+	select-variant 'hBar' 0x127 (follow -- 'h')
+
+	select-variant 'hHookTop' 0x266
+	select-variant 'hengHookTop' 0x267
+	select-variant 'heng' 0xA727
+	select-variant 'cyrl/dje' 0x452 (follow -- 'heng') (shapeFrom -- 'hengBar')
+
+	select-variant 'cyrl/shha' 0x4BB (shapeFrom -- 'h')
+
+	derive-composites 'hPalatalHook' 0xA795 'h/descBase' [PalatalHook.rSideJut RightSB 0]
+	derive-composites 'hDescender' 0x2C68 'h/descBase' [CyrDescender.rSideJut RightSB 0]
+	alias 'cyrl/shhaDescender' 0x527 'hDescender'
+
+	derive-multi-part-glyphs 'hDot' 0x1E23 { 'h' 'dotAbove' } : lambda [srcs gr] : glyph-proc
+		local { base mark } srcs
+		include : refer-glyph mark
+		include : Translate (Width + [HSwToV HalfStroke]) 0
+		include [refer-glyph base] AS_BASE ALSO_METRICS
+		include : LeaningAnchor.Above.VBar.l Middle
+
+	derive-glyphs 'hCedilla' 0x1E29 'h' : lambda [src gr] : glyph-proc
+		local shift : Width + SB - Middle + [HSwToV HalfStroke]
+		include [refer-glyph 'cedillaBelow']
+		include : ApparentTranslate shift 0
+		include [refer-glyph src]
+		include : MarkSet.bp
+		set-base-anchor 'belowBraceL' ((-Middle) + shift - 0.5 * markExtend) belowMarkMid
+		set-base-anchor 'belowBraceR' ((-Middle) + shift + 0.5 * markExtend) belowMarkMid
+
+	alias 'cyrl/tshe' 0x45B 'hBar'
+
+	define TurnHConfig : object
+		serifless          { no-shape            }
+		serifed            { SmallTurnHSerifs    }
+		motionSerifed      { SmallHMotionSerifs  }
+		bottomRightSerifed { SmallHTopLeftSerifs }
+
+	foreach { suffix { Serifs } } [Object.entries TurnHConfig] : do
+		create-glyph "turnh.\(suffix)" : glyph-proc
+			include : nShoulder
+				left -- (SB + [HSwToV Stroke])
+				right -- RightSB
+				bottom -- 0
+			include : VBar.l SB 0 Ascender
+			include : Serifs false false
+			include : FlipAround Middle (XH / 2)
+			include : MarkSet.p
+
 		create-glyph "hookturnh.\(suffix)" : glyph-proc
 			include : nShoulder
 				left -- (SB + [HSwToV Stroke])
@@ -120,46 +180,9 @@ glyph-block Letter-Latin-Lower-H : begin
 			include : RetroflexHook.rExt RightSB (Descender + TailY + HalfStroke) (yAttach -- 0)
 			include : MarkSet.p
 
-
-	select-variant 'h' 'h'
-	select-variant 'h/tailless' (shapeFrom -- 'h')
-	link-reduced-variant 'h/descBase' 'h'
-	link-reduced-variant 'h/sansSerif' 'h' MathSansSerif
-
-	select-variant 'hBar' 0x127 (follow -- 'h')
-	turned 'turnh' 0x265 'h/tailless' Middle (XH / 2) [MarkSet.p]
-
-	select-variant 'hHookTop' 0x266
-	select-variant 'hengHookTop' 0x267
-	select-variant 'heng' 0xA727
-	select-variant 'cyrl/dje' 0x452 (follow -- 'heng') (shapeFrom -- 'hengBar')
-
-	select-variant 'cyrl/shha' 0x4BB (shapeFrom -- 'h')
-
-	derive-composites 'hPalatalHook' 0xA795 'h/descBase' [PalatalHook.rSideJut RightSB 0]
-	derive-composites 'hDescender' 0x2C68 'h/descBase' [CyrDescender.rSideJut RightSB 0]
-	alias 'cyrl/shhaDescender' 0x527 'hDescender'
-
-	select-variant 'hookturnh' 0x2AE (follow -- 'heng')
-	select-variant 'hookturnhrtail' 0x2AF (follow -- 'hengHookTop')
-
-	derive-multi-part-glyphs 'hDot' 0x1E23 { 'h' 'dotAbove' } : lambda [srcs gr] : glyph-proc
-		local { base mark } srcs
-		include : refer-glyph mark
-		include : Translate (Width + [HSwToV HalfStroke]) 0
-		include [refer-glyph base] AS_BASE ALSO_METRICS
-		include : LeaningAnchor.Above.VBar.l Middle
-
-	derive-glyphs 'hCedilla' 0x1E29 'h' : lambda [src gr] : glyph-proc
-		local shift : Width + SB - Middle + [HSwToV HalfStroke]
-		include [refer-glyph 'cedillaBelow']
-		include : ApparentTranslate shift 0
-		include [refer-glyph src]
-		include : MarkSet.bp
-		set-base-anchor 'belowBraceL' ((-Middle) + shift - 0.5 * markExtend) belowMarkMid
-		set-base-anchor 'belowBraceR' ((-Middle) + shift + 0.5 * markExtend) belowMarkMid
-
-	alias 'cyrl/tshe' 0x45B 'hBar'
+	select-variant 'turnh' 0x265
+	select-variant 'hookturnh' 0x2AE
+	select-variant 'hookturnhrtail' 0x2AF
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/h' 0x1D559 : glyph-proc
