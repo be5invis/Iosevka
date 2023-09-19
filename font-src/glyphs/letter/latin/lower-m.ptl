@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Lower-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar DToothlessRise DMBlend
 	glyph-block-import Letter-Shared-Shapes : nShoulder nShoulderMask
 	glyph-block-import Letter-Shared-Shapes : CyrDescender PalatalHook CurlyTail UpwardHookShape
@@ -305,13 +306,13 @@ glyph-block Letter-Latin-Lower-M : begin
 			"toothlessCorner"    { EarlessCornerDoubleArchSmallMShape  1 0 }
 			"toothlessRounded"   { EarlessRoundedDoubleArchSmallMShape 1 0 }
 		object
-			"serifless"          { no-shape   }
-			"serifed"            { FullTurnMSerifs }
-			"topLeftSerifed"     { RbSerifs   } # The name-shapipng mapping is swapped by design
-			"bottomRightSerifed" { LtSerifs   } # The name-shapipng mapping is swapped by design
-			"motionSerifed"      { LtRbSerifs }
+			"serifless"          { no-shape        0 }
+			"serifed"            { FullTurnMSerifs 1 }
+			"topLeftSerifed"     { RbSerifs        0 } # The name-shaping mapping is swapped by design
+			"bottomRightSerifed" { LtSerifs        1 } # The name-shaping mapping is swapped by design
+			"motionSerifed"      { LtRbSerifs      1 }
 
-	foreach { suffix { {Body toothless tailed} {Serifs} } } [pairs-of TurnMConfig] : do
+	foreach { suffix { {Body toothless tailed} {Serifs doBottomSerif} } } [pairs-of TurnMConfig] : do
 		define [turnMShapeBody df top] : glyph-proc
 			include : Body df top 0 0 0
 			include : Serifs df top 0 0 0 0 toothless
@@ -338,10 +339,10 @@ glyph-block Letter-Latin-Lower-M : begin
 				include : turnMShapeBody df XH
 				eject-contour 'serifLT'
 				include : VBar.r df.rightSB Descender XH df.mvs
-
-				if (Serifs !== no-shape) : begin
+				if doBottomSerif : begin
 					local sf : SerifFrame.fromDf df XH Descender
-					include sf.rb.outer
+					include sf.rb.fullSide
+				include : LeaningAnchor.Below.VBar.r df.rightSB
 
 		create-glyph "turnmSideways.\(suffix)" : glyph-proc
 			local realHeight : XH * para.diversityM
