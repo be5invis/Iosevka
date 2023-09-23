@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Lower-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar DToothlessRise DMBlend
 	glyph-block-import Letter-Shared-Shapes : nShoulder nShoulderMask
 	glyph-block-import Letter-Shared-Shapes : CyrDescender PalatalHook CurlyTail UpwardHookShape
@@ -68,9 +69,17 @@ glyph-block Letter-Latin-Lower-M : begin
 		local sf : SerifFrame.fromDf df top lbot
 		return : if fFull sf.lb.full sf.lb.outer
 
+	define [SmallMBottomMotionLeftSerif df top lbot fFull] : begin
+		local sf : SerifFrame.fromDf df top lbot
+		return : if fFull sf.lb.inner sf.lb.outer
+
 	define [SmallMBottomMiddleSerif df top mbot fFull mid] : begin
 		local sf : SerifFrame.fromDf df top mbot
 		return : if fFull [sf.mb.fullAt mid] [no-shape]
+
+	define [SmallMBottomMotionMiddleSerif df top mbot fFull mid] : begin
+		local sf : SerifFrame.fromDf df top mbot
+		return : if fFull [sf.mb.rightAt mid] [no-shape]
 
 	define [SmallMBottomRightSerif df top rbot fFull] : begin
 		local sf : SerifFrame.fromDf df top rbot
@@ -93,6 +102,14 @@ glyph-block Letter-Latin-Lower-M : begin
 		include : SmallMBottomLeftSerif df top lbot fFull
 		include : SmallMBottomMiddleSerif df top mbot fFull mid
 		if [not tailed] : include : SmallMBottomRightSerif df top rbot fFull
+
+	define [FullTurnMSerifs df top lbot mbot rbot tailed earless _mid] : glyph-proc
+		local mid : fallback _mid df.middle
+		local fFull : MEnoughSpaceForFullSerifs df mid
+		if [not earless] : include : SmallMTopLeftSerif df top lbot fFull
+		include : SmallMBottomMotionLeftSerif df top lbot fFull
+		include : SmallMBottomMotionMiddleSerif df top mbot fFull mid
+		if [not tailed] : include : SmallMBottomMotionRightSerif df top rbot fFull
 
 	define [AutoSerifs df top lbot mbot rbot tailed earless _mid] : begin
 		if SLAB [FullSerifs df top lbot mbot rbot tailed earless _mid] [no-shape]
@@ -224,18 +241,6 @@ glyph-block Letter-Latin-Lower-M : begin
 			eject-contour 'serifRB'
 			include : PalatalHook.rExt df.rightSB 0 (sw -- df.mvs)
 
-		create-glyph "turnmLeg.\(suffix)" : glyph-proc
-			local df : include : dfM
-			include : df.markSet.p
-			include [refer-glyph "m.\(suffix)"]
-			eject-contour 'serifLT'
-			include : FlipAround df.middle (XH / 2)
-			include : VBar.r df.rightSB Descender XH df.mvs
-
-			if (Serifs !== no-shape) : begin
-				local sf : SerifFrame.fromDf df XH Descender
-				include sf.rb.outer
-
 		create-glyph "mCrossedTail.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 4
 			include : df.markSet.e
@@ -292,7 +297,6 @@ glyph-block Letter-Latin-Lower-M : begin
 			refSw -- df.mvs
 
 	select-variant 'meng' 0x271
-	select-variant 'turnmLeg' 0x270
 	select-variant 'mCrossedTail' 0xAB3A (follow -- 'meng')
 
 	define TurnMConfig : SuffixCfg.weave
@@ -302,13 +306,13 @@ glyph-block Letter-Latin-Lower-M : begin
 			"toothlessCorner"    { EarlessCornerDoubleArchSmallMShape  1 0 }
 			"toothlessRounded"   { EarlessRoundedDoubleArchSmallMShape 1 0 }
 		object
-			"serifless"          { no-shape   }
-			"serifed"            { FullSerifs }
-			"topLeftSerifed"     { RbSerifs   } # The name-shapipng mapping is swapped by design
-			"bottomRightSerifed" { LtSerifs   } # The name-shapipng mapping is swapped by design
-			"motionSerifed"      { LtRbSerifs }
+			"serifless"          { no-shape        0 }
+			"serifed"            { FullTurnMSerifs 1 }
+			"topLeftSerifed"     { RbSerifs        0 } # The name-shaping mapping is swapped by design
+			"bottomRightSerifed" { LtSerifs        1 } # The name-shaping mapping is swapped by design
+			"motionSerifed"      { LtRbSerifs      1 }
 
-	foreach { suffix { {Body toothless tailed} {Serifs} } } [pairs-of TurnMConfig] : do
+	foreach { suffix { {Body toothless tailed} {Serifs doBottomSerif} } } [pairs-of TurnMConfig] : do
 		define [turnMShapeBody df top] : glyph-proc
 			include : Body df top 0 0 0
 			include : Serifs df top 0 0 0 0 toothless
@@ -327,6 +331,18 @@ glyph-block Letter-Latin-Lower-M : begin
 			local df : include : DivFrame para.diversityM 3
 			include : df.markSet.capital
 			include : turnMShapeBody df CAP
+
+		if (!toothless && !tailed) : begin
+			create-glyph "turnmLeg.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.diversityM 3
+				include : df.markSet.p
+				include : turnMShapeBody df XH
+				eject-contour 'serifLT'
+				include : VBar.r df.rightSB Descender XH df.mvs
+				if doBottomSerif : begin
+					local sf : SerifFrame.fromDf df XH Descender
+					include sf.rb.fullSide
+				include : LeaningAnchor.Below.VBar.r df.rightSB
 
 		create-glyph "turnmSideways.\(suffix)" : glyph-proc
 			local realHeight : XH * para.diversityM
@@ -347,6 +363,7 @@ glyph-block Letter-Latin-Lower-M : begin
 
 	select-variant 'turnm' 0x26F
 	select-variant 'capitalTurnm' 0x19C (follow -- 'turnm')
+	select-variant 'turnmLeg' 0x270
 	select-variant 'turnmSideways' 0x1D1F (follow -- 'turnm')
 
 	select-variant 'cyrl/sha.italic' (shapeFrom -- 'turnm')

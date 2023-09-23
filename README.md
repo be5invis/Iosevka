@@ -26,6 +26,10 @@
 ### Manual Installation
 
 1. Download your font package from [releases](https://github.com/be5invis/Iosevka/releases).
+  * For Linux users you could use the following command to download all the packages in the latest release:
+    ```bash
+    curl -s 'https://api.github.com/repos/be5invis/Iosevka/releases/latest' | jq -r ".assets[] | .browser_download_url" | grep ttf-iosevka | xargs -n 1 curl -L -O --fail --silent --show-error
+    ```
 2. Quit all your editors / programs.
 3. Unarchive the font package and you will see the font files.
 4. Take actions depending on your OS:

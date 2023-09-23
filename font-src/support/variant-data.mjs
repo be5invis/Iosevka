@@ -359,7 +359,6 @@ class VbStageAlternative {
 		if (this.nonBreakingVariantAdditionPriority) {
 			const p = this.evalValue(this.nonBreakingVariantAdditionPriority, localState);
 			ans.nonBreakingVariantAdditionPriority += p;
-			ans.groupRank = p;
 		}
 
 		if (this.keyAffix) ans.addKeyAffix(this.mode, this.evalValue(this.keyAffix, localState));
