@@ -2384,14 +2384,22 @@
 <td><img src="../images/cv-cyrl-ef-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-cursive.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-ef-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-ef-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="8"> </td>
+<td><img src="../images/cv-cyrl-ef-split-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-ef-split-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-cursive.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-ef-split-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-ef-split-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="4"> </td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
 <td>3</td>
 <td>4</td>
-<td colspan="8"> </td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td colspan="4"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv78</code></td>

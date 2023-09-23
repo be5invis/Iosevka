@@ -1,5 +1,18 @@
 ## Modifications since last major version
 
+### 27.0.2
+
+* Add Characters
+  - LATIN LETTER SMALL CAPITAL R WITH RIGHT LEG (`U+AB46`).
+* Add variants for Cyrillic lower Ef (`ф`) with a split bowl (#1992).
+* Add Bulgarian local variants for Cyrillic Ef (`Ф`,`ф`).
+* Fix serifs in `U+01A6`.
+* Improve serifs of Turn M (`U+019C`, `U+026F`) under quasi-proportional.
+* Make Turn h (`U+0265`) and Turn M with Long Leg (`U+0270`) follow serif variants of `u`.
+* Optimize geometry for `U+A65A` and `U+A65B` under extended width.
+* Fix assignment of `8` for `ss14` (#1999).
+
+
 ### 27.0.1
 
 * Add Characters
