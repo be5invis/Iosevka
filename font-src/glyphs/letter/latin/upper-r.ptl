@@ -120,13 +120,13 @@ glyph-block Letter-Latin-Upper-R : begin
 	define [RBarPos charTop slab] : begin PShape.BarPos
 	define [RLegTop charTop sw bp] : (sw / 2) + [PBarPosY charTop sw bp]
 
-	define [RShape] : with-params [legShape top bp [mul 1] [slab null] [legSlab false] [open false]] : glyph-proc
+	define [RShape] : with-params [legShape top bp [mul 1] [slab null] [legSlab false] [open false] [legBottom 0]] : glyph-proc
 		local right : RightSB - O - [if slab (Jut / 8) 0]
 		include : difference
 			PShape top (mul -- mul) (overshoot -- O) (slab -- slab) (bp -- bp)
 			if open [PShape.OpenGap (mul -- mul) (bp -- bp) (top -- top) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
 		include : difference
-			RLegShapes.(legShape) [RLegTop top Stroke bp] 0 Middle right top legSlab Stroke 0
+			RLegShapes.(legShape) [RLegTop top Stroke bp] legBottom Middle right top legSlab Stroke 0
 			if open [PShape.OpenGap (mul -- mul) (bp -- bp) (top -- top) (bot -- 0) ] [glyph-proc]
 
 	define [RRotundaShape] : with-params [legShape top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook] [pBar 1] [slab null] [legSlab false]] : glyph-proc
@@ -221,12 +221,16 @@ glyph-block Letter-Latin-Upper-R : begin
 			local right (RightSB - O - [if SLAB (Jut / 8) 0])
 
 			include : VBar.l SB (top - 1) CAP
-			include : difference
-				PShape top (mul -- 1) (bp -- bp) (slab -- slabs)
-				if fOpen [PShape.OpenGap (mul -- 1) (bp -- bp) (top -- top) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
-			include : difference
-				RLegShapes.(legShape) legTop Descender Middle right (top - Descender) doLegSlab Stroke 0
-				if fOpen [PShape.OpenGap (mul -- 1) (bp -- bp) (top -- top) (bot -- 0)] [glyph-proc]
+			include : RShape legShape top (legSlab -- doLegSlab) (bp -- bp) (open -- fOpen) (legBottom -- Descender)
+			include : match slabs
+				[Just PShape.SlabSymmetric] : PShape.SlabFullSymmetric CAP Stroke 1
+				[Just PShape.SlabMotion]    : PShape.SlabMotion        CAP Stroke 1
+				__                          : glyph-proc
+
+		create-glyph "smcpRLongRightLeg.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : StrikeAnchor
+			include : RShape legShape XH (slab -- slabs) (legSlab -- doLegSlab) (bp -- bpXH) (open -- fOpen) (legBottom -- Descender)
 
 		if (!slabs && !fOpen) : create-glyph "currency/indianRupeeSign.\(suffix)" : glyph-proc
 			define bp : RBarPos CAP 0
@@ -258,6 +262,7 @@ glyph-block Letter-Latin-Upper-R : begin
 	turned 'invSmcpR' 0x281 'revSmcpR' Middle (XH / 2)
 
 	select-variant 'Yr' 0x1A6 (follow -- 'R')
+	select-variant 'smcpRLongRightLeg' 0xAB46 (follow -- 'R')
 
 	select-variant 'currency/indianRupeeSign' 0x20B9 (follow -- 'RRotunda')
 
