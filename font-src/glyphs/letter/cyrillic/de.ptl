@@ -10,32 +10,42 @@ glyph-block Letter-Cyrillic-De : begin
 	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 	glyph-block-import Letter-Greek-Lower-Epsilon : CyrZe EpsilonConfig
 
+	glyph-block-export BottomExtension
 	local BottomExtension : 0.25 * Stroke - LongJut
+
+	glyph-block-export CyrDeBottom
+	define [CyrDeBottom left right _sw _desc] : glyph-proc
+		local descenderOverflow : if SLAB SideJut ((right - left) * 0.075)
+		local xTopLeft : mix left right : StrokeWidthBlend 0.15 0.1
+		local xTopRight : mix left right : StrokeWidthBlend 0.95 0.96
+		local swOuter : fallback _sw Stroke
+		local desc : fallback _desc BottomExtension
+
+		include : HBar.b xTopLeft xTopRight 0 swOuter
+		include : tagged 'footL' : union
+			HBar.b (left - descenderOverflow) xTopLeft 0 swOuter
+			VBar.l (left - descenderOverflow) desc 0.1 swOuter
+		include : tagged 'footR' : union
+			HBar.b xTopRight (right + descenderOverflow) 0 swOuter
+			VBar.r (right + descenderOverflow) desc 0.1 swOuter
 
 	glyph-block-export CyrDeShape CyrDeItalicShapeT
 	define [CyrDeShape top left right _sw _desc] : glyph-proc
 		local descenderOverflow : if SLAB SideJut ((right - left) * 0.075)
-		local xCutLeft left
-		local xCutRight right
-		local xTopLeft : mix xCutLeft xCutRight : StrokeWidthBlend 0.15 0.1
-		local xTopRight : mix xCutLeft xCutRight : StrokeWidthBlend 0.95 0.96
+		local xTopLeft : mix left right : StrokeWidthBlend 0.15 0.1
+		local xTopRight : mix left right : StrokeWidthBlend 0.95 0.96
 		local swOuter : fallback _sw Stroke
 		local swInner : swOuter * [AdviceStroke 2.75] / Stroke
 		local desc : fallback _desc BottomExtension
 
-		include : HBar.b xTopLeft xTopRight 0 swOuter
+		include : CyrDeBottom left right _sw _desc
+
 		include : VBar.r xTopRight 0 top swInner
 		include : dispiro
 			widths.lhs swInner
 			flat xTopLeft top
 			curl xTopLeft [mix 0 top 0.625]
-			g4   xCutLeft  swOuter
-		include : tagged 'footL' : union
-			HBar.b (xCutLeft - descenderOverflow) xTopLeft 0 swOuter
-			VBar.l (xCutLeft  - descenderOverflow) desc 0.1 swOuter
-		include : tagged 'footR' : union
-			HBar.b xTopRight (xCutRight + descenderOverflow) 0 swOuter
-			VBar.r (xCutRight + descenderOverflow) desc 0.1 swOuter
+			g4   left  swOuter
 
 		include : if SLAB
 			then : dispiro
