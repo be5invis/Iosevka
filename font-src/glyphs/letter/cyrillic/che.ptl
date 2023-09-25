@@ -7,59 +7,64 @@ glyph-module
 glyph-block Letter-Cyrillic-Che : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Adjustment : LeaningAnchor ExtendBelowBaseAnchors
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar DToothlessRise
 	glyph-block-import Letter-Shared-Shapes : CyrDescender BottomExtension
-	glyph-block-import Letter-Cyrillic-De : CyrDeBottom
 
-	define BODY-STRAIGHT 0
-	define BODY-TAILED   1
+	glyph-block-export BODY
+	define BODY : object
+		STRAIGHT 0
+		TAILED   1
 
-	define SLAB-NONE        0
-	define SLAB-ALL         1
-	define SLAB-LOWER       2
-	define SLAB-TOP    3
-	define SLAB-TAILED-I    4
-	define SLAB-ALL-BGR     5
-	define SLAB-TAILED-BGR  6
+	glyph-block-export SERIFS
+	define SERIFS : object
+		NONE        0
+		ALL         1
+		LOWER       2
+		TOP         3
+		TAILED-I    4
+		ALL-BGR     5
+		TAILED-BGR  6
 
-	define [CyrCheShape top pyBar bodyType slabType] : glyph-proc
+	glyph-block-export CyrCheShape
+	define [CyrCheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs]] : glyph-proc
 		local bar : top * [fallback pyBar 0.5]
 		include : match bodyType
-			[Just BODY-TAILED] : RightwardTailedBar RightSB 0 top
-			__                 : VBar.r RightSB 0 top
+			[Just BODY.TAILED] : RightwardTailedBar df.rightSB 0 top (sw -- sw)
+			__                 : VBar.r df.rightSB 0 top sw
 		include : dispiro
-			widths.lhs
-			flat SB top [heading Downward]
-			curl SB (bar + ArchDepthB - HalfStroke)
-			g4 (Middle + CorrectionOMidS) (bar - HalfStroke)
-			g4 (RightSB - 1 / 16) (bar - HalfStroke + DToothlessRise) [heading Rightward]
+			widths.lhs sw
+			flat df.leftSB top [heading Downward]
+			curl df.leftSB (bar + ArchDepthB - HalfStroke)
+			g4 (df.middle + CorrectionOMidS) (bar - HalfStroke)
+			g4 (df.rightSB - 1 / 16) (bar - HalfStroke + DToothlessRise) [heading Rightward]
 
-		local sf : SerifFrame.fromDf [DivFrame 1] top 0
+		local sf : SerifFrame.fromDf df top 0
 		include : tagged 'serifLT' : match slabType
-			[Just SLAB-ALL]        sf.lt.full
-			[Just SLAB-TOP]        sf.lt.full
-			[Just SLAB-ALL-BGR]    sf.lt.outer
-			[Just SLAB-TAILED-BGR] sf.lt.outer
-			[Just SLAB-LOWER]      sf.lt.outer
-			[Just SLAB-TAILED-I]   sf.lt.outer
+			[Just SERIFS.ALL]        sf.lt.full
+			[Just SERIFS.TOP]        sf.lt.full
+			[Just SERIFS.ALL-BGR]    sf.lt.outer
+			[Just SERIFS.TAILED-BGR] sf.lt.outer
+			[Just SERIFS.LOWER]      sf.lt.outer
+			[Just SERIFS.TAILED-I]   sf.lt.outer
 			__                   : glyph-proc
 		include : tagged 'SerifRT' : match slabType
-			[Just SLAB-ALL]        sf.rt.full
-			[Just SLAB-TOP]        sf.rt.full
-			[Just SLAB-ALL-BGR]    sf.rt.inner
-			[Just SLAB-TAILED-BGR] sf.rt.inner
+			[Just SERIFS.ALL]        sf.rt.full
+			[Just SERIFS.TOP]        sf.rt.full
+			[Just SERIFS.ALL-BGR]    sf.rt.inner
+			[Just SERIFS.TAILED-BGR] sf.rt.inner
 			__                   : glyph-proc
 		include : tagged 'SerifRB' : match slabType
-			[Just SLAB-ALL]        sf.rb.fullSide
-			[Just SLAB-ALL-BGR]    sf.rb.fullSide
-			[Just SLAB-LOWER]      sf.rb.outer
+			[Just SERIFS.ALL]        sf.rb.fullSide
+			[Just SERIFS.ALL-BGR]    sf.rb.fullSide
+			[Just SERIFS.LOWER]      sf.rb.outer
 			__                   : glyph-proc
 
 	create-glyph 'cyrl/Che' 0x427 : glyph-proc
 		include : MarkSet.capital
 		include : LeaningAnchor.Below.VBar.r RightSB
-		include : CyrCheShape CAP [if SLAB 0.45 0.35] BODY-STRAIGHT : if SLAB SLAB-ALL SLAB-NONE
+		include : CyrCheShape [DivFrame 1] CAP [if SLAB 0.45 0.35] BODY.STRAIGHT
+			if SLAB SERIFS.ALL SERIFS.NONE
 
 	create-glyph 0x4B6 : composite-proc
 		refer-glyph 'cyrl/Che'
@@ -68,29 +73,23 @@ glyph-block Letter-Cyrillic-Che : begin
 		refer-glyph 'cyrl/Che'
 		CyrDescender.lSideJut (RightSB - [HSwToV Stroke]) 0 (jut -- MidJutSide)
 
-	create-glyph 'cyrl/che.standard' : glyph-proc
-		include : MarkSet.e
-		include : LeaningAnchor.Below.VBar.r RightSB
-		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-STRAIGHT
-			if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL] SLAB-NONE
+	glyph-block-export ItalicConfig
+	define ItalicConfig : object
+		standard { BODY.STRAIGHT SERIFS.ALL SERIFS.ALL-BGR    SERIFS.LOWER    }
+		tailed   { BODY.TAILED   SERIFS.TOP SERIFS.TAILED-BGR SERIFS.TAILED-I }
 
-	create-glyph 'cyrl/che.tailed' : glyph-proc
-		include : MarkSet.e
-		include : LeaningAnchor.Below.VBar.r RightSB
-		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-TAILED
-			if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TOP] SLAB-NONE
+	foreach { suffix { body slabUpright slabUprightBGR slabItalic } } [pairs-of ItalicConfig] : do
+		create-glyph "cyrl/che.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : LeaningAnchor.Below.VBar.r RightSB
+			include : CyrCheShape [DivFrame 1] XH [if SLAB 0.45 0.4] body
+				if SLAB [if para.isItalic slabItalic slabUpright] SERIFS.NONE
 
-	create-glyph 'cyrl/che.BGR.standard' : glyph-proc
-		include : MarkSet.e
-		include : LeaningAnchor.Below.VBar.r RightSB
-		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-STRAIGHT
-			if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL-BGR] SLAB-NONE
-
-	create-glyph 'cyrl/che.BGR.tailed' : glyph-proc
-		include : MarkSet.e
-		include : LeaningAnchor.Below.VBar.r RightSB
-		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-TAILED
-			if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TAILED-BGR] SLAB-NONE
+		create-glyph "cyrl/che.BGR.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : LeaningAnchor.Below.VBar.r RightSB
+			include : CyrCheShape [DivFrame 1] XH [if SLAB 0.45 0.4] body
+				if SLAB [if para.isItalic slabItalic slabUprightBGR] SERIFS.NONE
 
 	select-variant 'cyrl/che' 0x447
 	select-variant 'cyrl/che.BGR' (follow -- 'cyrl/che')
@@ -112,25 +111,3 @@ glyph-block Letter-Cyrillic-Che : begin
 
 	derive-composites 'cyrl/CheVBar' 0x4B8 'cyrl/Che' [ChrVBar CAP]
 	derive-composites 'cyrl/cheVBar' 0x4B9 'cyrl/che' [ChrVBar XH]
-
-	create-glyph 'cyrl/Dche' 0x52C : glyph-proc
-		include : MarkSet.capital
-		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrCheShape CAP [if SLAB 0.5 0.4] BODY-STRAIGHT : if SLAB SLAB-TOP SLAB-NONE
-		include : CyrDeBottom SB RightSB
-
-		local fine : AdviceStroke 3.5
-		include : dispiro
-			flat SB Stroke [widths.rhs fine]
-			curl (RightSB - [HSwToV Stroke]) (CAP - [if SLAB Stroke 0])
-
-	create-glyph 'cyrl/dche' 0x52D : glyph-proc
-		include : MarkSet.capital
-		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrCheShape XH [if SLAB 0.5 0.4] BODY-STRAIGHT : if SLAB SLAB-TOP SLAB-NONE
-		include : CyrDeBottom SB RightSB
-
-		local fine : AdviceStroke 3.5
-		include : dispiro
-			flat SB Stroke [widths.rhs fine]
-			curl (RightSB - [HSwToV Stroke]) (XH - [if SLAB Stroke 0])
