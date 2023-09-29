@@ -23,7 +23,7 @@ const languages = [
     { lang: 'Kurdish', sample: 'Cem vî Feqoyê pîs zêdetir ji çar gulên xweşik hebûn.' },
     { lang: 'Latvian', sample: 'Muļķa hipiji mēģina brīvi nogaršot celofāna žņaudzējčūsku.' },
     { lang: 'Lithuanian', sample: 'Įlinkdama fechtuotojo špaga sublykčiojusi pragręžė apvalų arbūzą.' },
-    { lang: 'Macedonian', sample: 'Ѕидарски пејзаж: шугав билмез со чудење џвака ќофте и кељ на туѓ цех.' },
+    { lang: 'Macedonian', sample: 'Ѕидарски пејзаж: шугав билмез со чудење џвака ќофте и кељ на туѓ цех.', localeId :'mk' },
     { lang: 'Maltese', sample: 'Kien liebes gozz ħwejjeġ u ċraret vera qodma u m’għażluhx fil-pront.' },
     { lang: 'Norwegian', sample: 'Jeg begynte å fortære en sandwich mens jeg kjørte taxi på vei til quiz' },
     { lang: 'Polish', sample: 'Pchnąć w tę łódź jeża lub ośm skrzyń fig.' },
