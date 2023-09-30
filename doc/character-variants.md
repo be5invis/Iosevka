@@ -2332,6 +2332,27 @@
 <td colspan="5"> </td>
 </tr>
 <tr>
+<td rowspan="2"><code>VXAA</code></td>
+<td><img src="../images/cv-cyrl-er-eared-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-eared-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-er-eared-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-eared-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-er-eared-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-eared-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-er-earless-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-earless-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-er-earless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-earless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-er-earless-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-earless-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-er-earless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-earless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td colspan="5"> </td>
+</tr>
+<tr>
 <td rowspan="4"><code>cv76</code></td>
 <td><img src="../images/cv-cyrl-capital-u-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-u-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-capital-u-straight-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-u-straight-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -2367,6 +2388,53 @@
 <td><img src="../images/cv-cyrl-capital-u-cursive-flat-hook-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-u-cursive-flat-hook-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-capital-u-cursive-flat-hook-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-u-cursive-flat-hook-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-capital-u-cursive-flat-hook-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-u-cursive-flat-hook-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td>17</td>
+<td>18</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="4"><code>VXAB</code></td>
+<td><img src="../images/cv-cyrl-u-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-straight-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-straight-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-straight-turn-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-straight-turn-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-straight-turn-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-straight-turn-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-straight-turn-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-straight-turn-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-curly-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-curly-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-curly-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-curly-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-curly-turn-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-curly-turn-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-curly-turn-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-curly-turn-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-curly-turn-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-curly-turn-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="../images/cv-cyrl-u-cursive-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-cursive-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-cursive-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-cursive-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-cursive-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-cursive-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-cursive-flat-hook-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-cursive-flat-hook-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-cursive-flat-hook-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-cursive-flat-hook-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-u-cursive-flat-hook-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-cursive-flat-hook-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td colspan="6"> </td>
 </tr>
 <tr>
@@ -2775,14 +2843,18 @@
 </tr>
 <tr>
 <td rowspan="2"><code>cv88</code></td>
-<td><img src="../images/cv-five-vertical-upper-left-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-vertical-upper-left-bar.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-five-oblique-upper-left-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-upper-left-bar.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="10"> </td>
+<td><img src="../images/cv-five-upright-arched.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-arched.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-five-oblique-arched.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-arched.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-five-upright-flat.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-flat.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-five-oblique-flat.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-flat.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="8"> </td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
-<td colspan="10"> </td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv89</code></td>

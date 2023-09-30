@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../support/utils.mjs"
+import [mix linreg clamp fallback SuffixCfg] from"../../support/utils.mjs"
 import [AnyCv getGrMesh] from"../../support/gr.mjs"
 
 glyph-module
@@ -10,33 +10,44 @@ glyph-block Digits-Five : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
 
-	define [FiveShape] : with-params [top bp [sw Stroke] [bbd 0] [obl 0] [zt 0]] : glyph-proc
-		local t1 : top * bp * 0.8
-		local t2 : top * bp
-		local ycurly : YSmoothMidR t2 0 ArchDepthA ArchDepthB
-		local xleft : [mix SB RightSB 0.025] + zt
+	define [FiveFlatStroke xLeft archTop pShapeHeight sw] : dispiro
+		widths.rhs sw
+		flat (xLeft + [HSwToV sw]) archTop
+		curl [Math.max (xLeft + 0.01) (Middle - CorrectionOMidX * sw)] archTop
+		archv
+		g4 (RightSB - OX) [YSmoothMidR archTop 0 ArchDepthA ArchDepthB]
+		hookend O
+		g4 SB (Hook * pShapeHeight)
+
+	define [FiveArcStroke xLeft archTop pShapeHeight sw] : dispiro
+		widths.rhs sw
+		g4 xLeft (archTop - AHook * pShapeHeight)
+		hookstart (archTop - O)
+		g4 (RightSB - OX) [YSmoothMidR archTop 0 ArchDepthA ArchDepthB]
+		hookend O
+		g4 SB (Hook * pShapeHeight)
+
+	define [FiveArcStrokeMask xLeft archTop pShapeHeight sw] : spiro-outline
+		g4 (xLeft + 1) (archTop - AHook * pShapeHeight)
+		hookstart (archTop - O - 1)
+		g4 (RightSB - OX - 1) [YSmoothMidR archTop 0 ArchDepthA ArchDepthB]
+		hookend (O + 1)
+		g4 (SB + 1) (Hook * pShapeHeight)
+
+	define [FiveShape] : with-params [
+			top bp pBarPosSwAdj [sw Stroke] [bbd 0] [obl 0] [zt 0]
+			[bottomShape FiveArcStroke]
+		] : glyph-proc
+		local t1 : (top * bp + sw * pBarPosSwAdj) * 0.8
+		local t2 : (top * bp + sw * pBarPosSwAdj) * 1.0
+		local xLeft : [mix SB RightSB 0.025] + zt
 		local xright : [mix RightSB SB 0.05] - (OX - O)
-
-		local FiveStroke : dispiro
-			widths.rhs sw
-			g4 xleft (t2 - AHook * top / CAP)
-			hookstart (t2 - O)
-			g4 (RightSB - OX) ycurly
-			hookend O
-			g4 SB (Hook * top / CAP)
-
-		local FiveStrokeMask : spiro-outline
-			g4 (xleft + 1) (t2 - AHook * top / CAP)
-			hookstart (t2 - O - 1)
-			g4 (RightSB - OX - 1) ycurly
-			hookend (O + 1)
-			g4 (SB + 1) (Hook * top / CAP)
 
 		local kGap : 0.144 - 0.1 * sw / t2
 
 		include : difference
 			glyph-proc
-				local fiveStroke : include FiveStroke
+				local fiveStroke : include : bottomShape xLeft t2 (top / CAP) sw
 				local firstKnot fiveStroke.rhsKnots.0
 
 				local oblCor : Math.hypot 1 obl
@@ -51,47 +62,46 @@ glyph-block Digits-Five : begin
 						flat xVBar firstKnot.y [widths.rhs.heading (oblCor * sw) Upward]
 						flat (xVBar + xVBarOffset) top [heading Upward]
 
-				if bbd : begin
-					include : intersection FiveStrokeMask [VBar.r (RightSB - OX - bbd) 0 CAP sw]
-					include : difference
-						VBar.r (firstKnot.x + bbd) 0 CAP sw
-						begin FiveStrokeMask
-						Rect (t2 / 2) 0 0 Width
+				if bbd : let [mask : FiveArcStrokeMask xLeft t2 (top / CAP) sw] : begin
+					include : intersection mask [VBar.r (RightSB - OX - bbd) 0 CAP sw]
+					include : difference [VBar.r (firstKnot.x + bbd) 0 CAP sw] mask [Rect (t2 / 2) 0 0 Width]
 
 			Rect (t2 / 2 + t2 * kGap) (t2 / 2 - t2 * kGap) 0 Middle
 
-		if (!bbd && SLAB) : include : VSerif.dr xright top VJut
+		if (!bbd && SLAB) : include : VSerif.dr xright top [Math.min VJut ((top - t2) * 0.8)]
 
-	create-glyph 'five.lnum.verticalUpperLeftBar' : glyph-proc
-		include : MarkSet.capital
-		include : FiveShape CAP DesignParameters.fiveBarPos
+	define FiveConfig : SuffixCfg.weave
+		object # upper-left-bar
+			"upright" 0
+			"oblique" (1 / 12)
+		object # middle
+			"arched"  { FiveArcStroke  DesignParameters.fiveBarPos           0     }
+			"flat"    { FiveFlatStroke (7 / 8 * DesignParameters.fiveBarPos) (1/3) }
 
-	create-glyph 'five.onum.verticalUpperLeftBar' : glyph-proc
-		include : OnumMarks.p
-		include : FiveShape CAP DesignParameters.fiveBarPos
-		include : ShiftDown
+	foreach { suffix { obl { bottomShape pBarPos pBarPosSwAdj } } } [pairs-of FiveConfig] : do
+		create-glyph "five.lnum.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (obl -- obl)
 
-	create-glyph 'five.lnum.obliqueUpperLeftBar' : glyph-proc
-		include : MarkSet.capital
-		include : FiveShape CAP DesignParameters.fiveBarPos (obl -- (1 / 12))
+		create-glyph "five.onum.\(suffix)" : glyph-proc
+			include : OnumMarks.p
+			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (obl -- obl)
+			include : ShiftDown
 
-	create-glyph 'five.onum.obliqueUpperLeftBar' : glyph-proc
-		include : OnumMarks.p
-		include : FiveShape CAP DesignParameters.fiveBarPos (obl -- (1 / 12))
-		include : ShiftDown
+		create-glyph "zhuangToneFive.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (zt -- ((RightSB - SB) * 0.05))
+
+		create-glyph "zhuangtonefive.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : FiveShape XH pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (zt -- ((RightSB - SB) * 0.05))
 
 	select-variant 'five.lnum' [CodeLnum '5'] (follow -- 'five')
 	select-variant 'five.onum' [CodeOnum '5'] (follow -- 'five')
-
-	create-glyph 'zhuangToneFive' 0x1BC : glyph-proc
-		include : MarkSet.capital
-		include : FiveShape CAP DesignParameters.fiveBarPos (zt -- ((RightSB - SB) * 0.05))
-
-	create-glyph 'zhuangtonefive' 0x1BD : glyph-proc
-		include : MarkSet.e
-		include : FiveShape XH DesignParameters.fiveBarPos (zt -- ((RightSB - SB) * 0.05))
+	select-variant 'zhuangToneFive' 0x1BC
+	select-variant 'zhuangtonefive' 0x1BD (follow -- 'zhuangToneFive')
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/five' 0x1D7DD : glyph-proc
 		include : MarkSet.capital
-		include : FiveShape CAP DesignParameters.fiveBarPos (sw -- BBS) (bbd -- BBD)
+		include : FiveShape CAP DesignParameters.fiveBarPos 0 (sw -- BBS) (bbd -- BBD)
