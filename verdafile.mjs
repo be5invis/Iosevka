@@ -33,6 +33,7 @@ const ARCHIVE_DIR = "release-archives";
 const PATEL_C = ["node", "node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
 const SEVEN_ZIP = process.env.SEVEN_ZIP_PATH || "7z";
+const TTFAUTOHINT = process.env.TTFAUTOHINT_PATH || "ttfautohint";
 
 const defaultWebFontFormats = ["ttf", "woff2"];
 const webfontFormatsFast = ["ttf"];
@@ -63,7 +64,7 @@ const Version = computed(`env::version`, async target => {
 
 const CheckTtfAutoHintExists = oracle(`oracle:check-ttfautohint-exists`, async target => {
 	try {
-		return await which("ttfautohint");
+		return await which(TTFAUTOHINT);
 	} catch (e) {
 		fail("External dependency <ttfautohint>, needed for building hinted font, does not exist.");
 	}

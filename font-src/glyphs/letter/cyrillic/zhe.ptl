@@ -55,19 +55,21 @@ glyph-block Letter-Cyrillic-Zhe : begin
 				corner (df.width - attach1X) (attach1Y + 0.1)
 				corner (df.rightSB - overshoot - 0.1)    top
 
-			local rightShape : union
+			local rightHalf : union
 				intersection [MaskRight df.middle]
 					ExtLineRhs 4 fine (df.rightSB - overshoot) top (df.width - attach1X) attach1Y
 				intersection [MaskRight df.middle] : difference
 					ExtLineLhs 4 fine (df.rightSB - overshoot) bot (df.width - attach1X) attach2Y
 					mask
 
-			local fullShape : if fHalf rightShape : union rightShape
+			local leftHalf : union
 				intersection [MaskLeft df.middle]
 					ExtLineLhs 4 fine (df.leftSB  + overshoot) top attach1X attach1Y
 				intersection [MaskLeft df.middle] : difference
 					ExtLineRhs 4 fine (df.leftSB  + overshoot) bot attach1X attach2Y
 					mask
+
+			local fullShape : if fHalf rightHalf : union rightHalf leftHalf
 
 			return : intersection [MaskBelow top] [MaskAbove bot] fullShape
 
@@ -83,7 +85,7 @@ glyph-block Letter-Cyrillic-Zhe : begin
 			define [upperCurvature] : bezControls  0 0.3 0.5 0.75 8
 			define [lowerCurvature] : quadControls 0 0.3          8
 
-			local rightShape : union
+			local rightHalf : union
 				dispiro
 					g4.down.start (df.rightSB - overshoot) top [widths.rhs.heading fine Downward]
 					upperCurvature
@@ -99,7 +101,7 @@ glyph-block Letter-Cyrillic-Zhe : begin
 						corner (df.width - attach1X) (attach1Y + 0.1)
 						corner df.middle top
 
-			local fullShape : if fHalf rightShape : union rightShape
+			local leftHalf : union
 				dispiro
 					g4.down.start (df.leftSB  + overshoot) top [widths.lhs.heading fine Downward]
 					upperCurvature
@@ -115,6 +117,8 @@ glyph-block Letter-Cyrillic-Zhe : begin
 						corner attach1X (attach1Y + 0.1)
 						corner df.middle top
 
+			local fullShape : if fHalf rightHalf : union rightHalf leftHalf
+
 			return : intersection [MaskBelow top] [MaskAbove bot] fullShape
 
 		export : define [TouchingLegs   fSlab fHalf df bot top] : ConnectedLegsImpl 1.00 fSlab fHalf df bot top
@@ -126,17 +130,19 @@ glyph-block Letter-Cyrillic-Zhe : begin
 			define midY : mix bot top 0.5
 			define overshoot : Overshoot fSlab df
 
-			local rightShape : union
+			local rightHalf : union
 				intersection [MaskBelow midY] [MaskAbove bot]
 					ExtLineLhs 4 fine (df.rightSB - overshoot) bot (df.width - midX) midY
 				intersection [MaskBelow top] [MaskAbove midY]
 					ExtLineRhs 4 fine (df.rightSB - overshoot) top (df.width - midX) midY
 
-			local fullShape : if fHalf rightShape : union rightShape
+			local leftHalf : union
 				intersection [MaskBelow midY] [MaskAbove bot]
 					ExtLineRhs 4 fine (df.leftSB + overshoot) bot midX midY
 				intersection [MaskBelow top] [MaskAbove midY]
 					ExtLineLhs 4 fine (df.leftSB + overshoot) top midX midY
+
+			local fullShape : if fHalf rightHalf : union rightHalf leftHalf
 
 			return : union fullShape : HBar.m [if fHalf df.middle midX] (df.width - midX) midY fine
 
@@ -147,20 +153,16 @@ glyph-block Letter-Cyrillic-Zhe : begin
 			define midY : mix bot top 0.5
 			define overshoot : Overshoot fSlab df
 
-			local rightShape : dispiro
-					g4.left.start (df.rightSB - overshoot) (top - fine) [widths.rhs.heading fine Leftward]
-					archv
-					g4.down.mid (df.width - midX + OX) midY [widths.rhs.heading fine2 Downward]
-					arcvh
-					g4.right.end (df.rightSB - overshoot) (bot + fine) [widths.rhs.heading fine Rightward]
+			local rightHalf : dispiro
+				straight.left.start (df.rightSB - overshoot) (top - fine) [widths.rhs.heading fine Leftward]
+				archv
+				g4.down.mid (df.width - midX + OX) midY [widths.rhs.heading fine2 Downward]
+				arcvh
+				straight.right.end (df.rightSB - overshoot) (bot + fine) [widths.rhs.heading fine Rightward]
 
-			local fullShape : if fHalf rightShape : union rightShape
-				dispiro
-					g4.right.start (df.leftSB + overshoot) (top - fine) [widths.lhs.heading fine Rightward]
-					archv
-					g4.down.mid (midX - OX) midY [widths.lhs.heading fine2 Downward]
-					arcvh
-					g4.left.end (df.leftSB + overshoot) (bot + fine) [widths.lhs.heading fine Leftward]
+			local leftHalf : with-transform [FlipAround df.middle (0.5 * top)] rightHalf
+
+			local fullShape : if fHalf rightHalf : union rightHalf leftHalf
 
 			return : union fullShape : HBar.m [if fHalf df.middle (midX + 0.5 * fine)] (df.width - (midX + 0.5 * fine)) midY fine
 
