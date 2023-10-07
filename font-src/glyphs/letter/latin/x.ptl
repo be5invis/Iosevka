@@ -49,6 +49,42 @@ glyph-block Letter-Latin-X : begin
 		include : HalfXStrand stb slab _leftx lefty middlex middley turn pStraight tension
 		include : HalfXStrand stb slab _rightx righty middlex middley turn pStraight tension
 
+	glyph-block-export XCursiveHalfShape
+	define [XCursiveHalfShape] : with-params [top bottom left right [swEnd : AdviceStroke 2.75] [swMid : AdviceStroke 3] [kThin 0.55] [setMark false]] : glyph-proc
+		local ada : ArchDepthAOf (ArchDepth * 0.8) (Width / 2)
+		local adb : ArchDepthBOf (ArchDepth * 0.8) (Width / 2)
+
+		define xCenterRight : left + [HSwToV swMid] / 2
+		define xCenterLeft  : left - [HSwToV swMid] / 2
+		define xTurn : mix (right - [HSwToV swEnd]) xCenterRight 0.5
+		define hook1Depth : Hook + Stroke * 0.125
+		define hook1StraightDepth : Math.min
+			hook1Depth - swEnd * 1.125
+			Math.max 1 : hook1Depth / 5 - swEnd / 4
+
+		define fineMid : swMid * kThin
+		define rIn : Math.max (0.4 * (right - left) - [HSwToV : 0.7 * Stroke]) [AdviceStroke 16]
+		define flatHookDepth : 1.4 * (right - left) - swEnd - 1.5 * rIn
+
+		define upperHalf : include : dispiro
+			flat (xCenterRight - [HSwToV fineMid]) ([mix bottom top 0.5] + O) [widths.rhs.heading fineMid Upward]
+			curl (xCenterRight - [HSwToV fineMid]) (top - ada)
+			arcvh
+			ShoulderMidKnotRhs xTurn (top - O) fineMid swEnd (+1) (-1)
+			archv
+			flat (right - OX) (top - hook1Depth + hook1StraightDepth) [heading Downward]
+			curl (right - OX) (top - hook1Depth) [heading Downward]
+
+		define lowerHalf : include : dispiro
+			flat (xCenterRight - [HSwToV : 0.5 * fineMid]) ([mix bottom top 0.5] - O) [widths.center fineMid]
+			curl (xCenterRight - [HSwToV : 0.5 * fineMid]) (bottom + [Math.min adb (swMid + rIn)])
+			arcvh 16
+			DiagonalTailF 1 [DivFrame 1] (xCenterRight - [HSwToV : 0.5 * Stroke] + TanSlope * rIn) bottom rIn 50 flatHookDepth Stroke
+
+		if setMark : begin
+			define lowerHalfLastKnot lowerHalf.rhsKnots.(lowerHalf.rhsKnots.length - 1)
+			set-base-anchor 'cyrlDescenderAttach' lowerHalfLastKnot.x lowerHalfLastKnot.y
+
 	define Shape : namespace
 		define [XBase fStraight fSlab top bottom turn tension] : composite-proc
 			XStrand fStraight fSlab SB bottom RightSB top turn 0.4 tension
@@ -59,56 +95,10 @@ glyph-block Letter-Latin-X : begin
 		export : define [CurlyBase    fSlab top bottom turn tension]
 			XBase false fSlab top bottom turn tension
 
-		define [XCursiveHalfShape top bottom] : glyph-proc
-			local ada : ArchDepthAOf (ArchDepth * 0.8) (Width / 2)
-			local adb : ArchDepthBOf (ArchDepth * 0.8) (Width / 2)
-
-			define kThin 0.550
-			define swEnd : AdviceStroke 2.75
-			define swMid : AdviceStroke 3
-			define xCenterRight : Middle + [HSwToV swMid] / 2
-			define xCenterLeft  : Middle - [HSwToV swMid] / 2
-			define xTurn : mix (RightSB - [HSwToV swEnd]) xCenterRight 0.5
-			define hook1Depth : Hook + Stroke * 0.125
-			define hook1StraightDepth : Math.min
-				hook1Depth - swEnd * 1.125
-				Math.max 1 : hook1Depth / 5 - swEnd / 4
-
-			define fineMid : swMid * kThin
-			define rIn : Math.max (0.2 * (RightSB - SB) - [HSwToV : 0.7 * Stroke]) [AdviceStroke 16]
-			define flatHookDepth : 0.7 * (RightSB - SB) - swEnd - 1.5 * rIn
-
-			define upperHalf : include : dispiro
-				flat (xCenterRight - [HSwToV fineMid]) ([mix bottom top 0.5] + O) [widths.rhs.heading fineMid Upward]
-				curl (xCenterRight - [HSwToV fineMid]) (top - ada)
-				arcvh
-				ShoulderMidKnotRhs xTurn (top - O) fineMid swEnd (+1) (-1)
-				archv
-				flat (RightSB - OX) (top - hook1Depth + hook1StraightDepth) [heading Downward]
-				curl (RightSB - OX) (top - hook1Depth) [heading Downward]
-
-			# define upperHalf : include : dispiro
-			# 	curl (RightSB - OX) (top - hook1Depth) [widths.lhs.heading swEnd Upward]
-			# 	flat (RightSB - OX) (top - hook1Depth + hook1StraightDepth) [heading Upward]
-			# 	arcvh 16
-			# 	ShoulderMidKnotLhsRev (xTurn) (top - O) fineMid swEnd (-1) (-1)
-			# 	archv 16
-			# 	flat (xCenterRight - [HSwToV fineMid]) (top - ada) [widths.lhs fineMid]
-			# 	curl (xCenterRight - [HSwToV fineMid]) ([mix bottom top 0.5] + O)
-
-			define lowerHalf : include : dispiro
-				flat (xCenterRight - [HSwToV : 0.5 * fineMid]) ([mix bottom top 0.5] - O) [widths.center fineMid]
-				curl (xCenterRight - [HSwToV : 0.5 * fineMid]) (bottom + [Math.min adb (swMid + rIn)])
-				arcvh 16
-				DiagonalTailF 1 [DivFrame 1] (xCenterRight - [HSwToV : 0.5 * Stroke] + TanSlope * rIn) bottom rIn 50 flatHookDepth Stroke
-
-			define lowerHalfLastKnot lowerHalf.rhsKnots.(lowerHalf.rhsKnots.length - 1)
-			set-base-anchor 'cyrlDescenderAttach' lowerHalfLastKnot.x lowerHalfLastKnot.y
-
 		export : define [CursiveBase fSerifs top bottom turn tension] : glyph-proc
-			include : XCursiveHalfShape top bottom
+			include : XCursiveHalfShape top bottom Middle RightSB
 			include : FlipAround Middle [mix bottom top 0.5]
-			include : XCursiveHalfShape top bottom
+			include : XCursiveHalfShape top bottom Middle RightSB (setMark -- true)
 
 		# Serifs
 		export : define [FullSerifs top bot] : let [sf : SerifFrame.fromDf [DivFrame 1] top bot]
