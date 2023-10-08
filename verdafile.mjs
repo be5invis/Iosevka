@@ -856,6 +856,9 @@ const PagesDataExport = task(`pages:data-export`, async t => {
 		BuildCM("iosevka", "iosevka-italic"),
 		BuildCM("iosevka", "iosevka-oblique")
 	);
+	await node(`utility/export-tokenized-sample-code.mjs`, {
+		output: Path.resolve(pagesDir, "shared/tokenized-sample-code/alphabet.txt.json")
+	});
 	await node(`utility/export-data/index.mjs`, {
 		charMapPath: cm.full,
 		charMapItalicPath: cmi.full,
