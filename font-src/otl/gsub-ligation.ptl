@@ -1,6 +1,5 @@
 $$include '../meta/macros.ptl'
 
-import [AddCommonFeature AddFeature ChainRuleBuilder BeginLookupBlock EndLookupBlock] from"./table-util.mjs"
 extern Map
 extern Set
 
@@ -12,62 +11,52 @@ define look-around null
 define advance : lambda [t] null
 define ident : lambda [t] : t.map : lambda [x] x
 
-export : define [buildLigations sink para plm] : begin
+export : define [buildLigations gsub para plm] : begin
 	# Initialize features
 	define features : new Map
 	foreach [ { featureTag } : pairs-of plm] : begin
-		local feature : AddCommonFeature sink : AddFeature sink featureTag
+		local feature : gsub.addCommonFeature : gsub.createFeature featureTag
 		features.set featureTag feature
 
-	buildLigationsImpl sink para [DoLigGroupT sink plm features]
+	buildLigationsImpl gsub para [DoLigGroupT gsub plm features]
 
-define [DoLigGroupT sink plm features] : function [F] : begin
+define [DoLigGroupT gsub plm features] : function [F] : begin
 	define deDupeGroups : new Map
 
 	# Groupwise deduplicate of the lookups we just added
+	# Push the lookups if they are indeed new
 	define [deDupe lookupsToPush] : begin
-		local h ''
-		foreach obj [lookupsToPush.values] : begin
-			set h : h + [JSON.stringify obj] + '\n'
-
+		local h : JSON.stringify lookupsToPush
 		local g : deDupeGroups.get h
 		if g : return { false g }
 
-		deDupeGroups.set h lookupsToPush
-		return { true lookupsToPush }
+		# We now actually push the lookups
+
+		local results {}
+		local rec : gsub.beginBlock
+
+		local lastLookupInGroup null
+		foreach raw [items-of lookupsToPush] : begin
+			local lookup : gsub.createLookup raw
+			if lastLookupInGroup : gsub.setDependency lastLookupInGroup lookup
+			set lastLookupInGroup lookup
+			results.push lookup
+
+		gsub.endBlock rec
+
+		deDupeGroups.set h results
+		return { true results }
 
 	# Execute body function F, collect lookups and add them into the GSUB
 	foreach [ { featureTag groups } : pairs-of plm] : begin
 		define feature : features.get featureTag
-		define { fUnique lookupsToPush } : deDupe
-			DoFeatureLigGroup sink feature groups F
+		define { fUnique lookups } : deDupe : DoFeatureLigGroup gsub feature groups F
+		foreach lookup [items-of lookups] : feature.addLookup lookup
 
-		# Set feature lookups
-		foreach ln [lookupsToPush.keys] : feature.lookups.push ln
-
-		if fUnique : begin
-			define rec : BeginLookupBlock sink
-
-			# Add lookups into the sink
-			foreach { ln obj } lookupsToPush : begin
-				if sink.lookups.(ln) : throw : new Error "Lookup name conflict \(ln)"
-				set sink.lookups.(ln) obj
-
-			# Set in-group priority
-			local lastLookupInGroup null
-			foreach ln [lookupsToPush.keys] : begin
-				if lastLookupInGroup : sink.lookupDep.push { lastLookupInGroup ln }
-				set lastLookupInGroup ln
-
-			EndLookupBlock rec sink
-
-define [DoFeatureLigGroup sink feature groups F] : begin
+define [DoFeatureLigGroup gsub feature groups F] : begin
 	define [hasLG ln] : [groups.indexOf ln] >= 0
 	define lookupNamePrefix : 'lig_' + feature.tag + '_'
-	define lookupsToPush : new Map
-
-	define [AddLookup obj] : begin
-		lookupsToPush.set (lookupNamePrefix + (feature.lookups.length + lookupsToPush.size)) obj
+	define lookupsToPush {}
 
 	define [filterNulls _rules] : begin
 		if [not _rules] : return _rules
@@ -77,13 +66,13 @@ define [DoFeatureLigGroup sink feature groups F] : begin
 
 	define [CreateLigationLookup _rules] : begin
 		define rules : filterNulls _rules
-		if (rules && rules.length) : AddLookup
+		if (rules && rules.length) : lookupsToPush.push
 			.type 'gsub_chaining'
 			.rules rules
 
 	define [CreateReverseLigationLookup _rules] : begin
 		define rules : filterNulls _rules
-		if (rules && rules.length) : AddLookup
+		if (rules && rules.length) : lookupsToPush.push
 			.type 'gsub_reverse'
 			.rules rules
 
@@ -99,8 +88,8 @@ define-macro LigGroup : syntax-rules
 ###################################################################################################
 ###################################################################################################
 
-define [buildLigationsImpl sink para $LigGroup$] : begin
-	define { chain-rule reverse-rule } : ChainRuleBuilder sink
+define [buildLigationsImpl gsub para $LigGroup$] : begin
+	define { chain-rule reverse-rule } : gsub.ChainRuleBuilder
 
 	define less {'less'}
 	define lessAndEquiv {'less' 'less.lig.shift0' 'less.lig.shift0.anti'}
