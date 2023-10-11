@@ -81,10 +81,13 @@ glyph-block Letter-Latin-Lower-Y : begin
 			set-base-anchor 'trailing' anchorX 0
 			OgonekTrY.set currentGlyph
 
+		define [px1HooktopAdj hooktop] : begin
+			return : px1 - [if hooktop ([StrokeWidthBlend (0.5 * TailX) (0.375 * TailX)] / (RightSB - SB)) 0]
+
 		define [yBaseKnots top bottom shrink hooktop] : begin
 			define {ds ds2} : CalcDS top bottom
 
-			define coJoinX : mix yrstrokel yrstroker px1
+			define coJoinX : mix yrstrokel yrstroker [px1HooktopAdj hooktop]
 			define coJoinY : mix (bottom + ds2) (top - ds) py1
 			define joinX : mix yrstrokel yrstroker (1 - px2)
 			define joinY : mix (bottom + ds2) (top - ds) (1 - py2)
@@ -92,7 +95,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 
 			return : list
-				if (straightBar && (! hooktop))
+				if (straightBar && !hooktop)
 					then : list
 					else : list [flat coJoinX coJoinY]
 
@@ -141,7 +144,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 		define [yJoinProportion hooktop x] : linreg
 			1 - px2
 			1 - py2
-			if (straightBar && !hooktop) 1 px1
+			if (straightBar && !hooktop) 1 [px1HooktopAdj hooktop]
 			if (straightBar && !hooktop) 1 py1
 			(x - yrstrokel) / (yrstroker - yrstrokel)
 
@@ -207,18 +210,20 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 			include : yOgonekAttach top bottom yshrink true
 
+			local startX : [mix yrstrokel yrstroker px1] - HalfStroke + [StrokeWidthBlend 0.5 0.75] * TailX
+			local startY : top - Stroke - O
+
+			local [rightStroke shrink] : dispiro
+				straight.left.start startX startY [widths.rhs]
+				alsoThruThem {{[StrokeWidthBlend 0.58 0.65] 0.2} {[StrokeWidthBlend 0.78 0.85] 0.5}} important
+				yBaseKnots top bottom shrink true
+
 			include : intersection
+				rightStroke 1
 				SmallYStrokeSplitMask top bottom true 1
-				dispiro
-					widths.rhs
-					straight.left.start ([mix yrstrokel yrstroker px1] - HalfStroke + TailX) (XH - Stroke - O)
-					yBaseKnots top bottom 1 true
 
 			include : difference
-				dispiro
-					widths.rhs
-					straight.left.start ([mix yrstrokel yrstroker px1] - HalfStroke + TailX) (XH - Stroke - O)
-					yBaseKnots top bottom yshrink true
+				rightStroke yshrink
 				SmallYStrokeSplitMask top bottom true 1 1
 
 			include : difference
@@ -236,6 +241,14 @@ glyph-block Letter-Latin-Lower-Y : begin
 		export : define [SmallLambdaShape top bottom] : union : glyph-proc
 			set currentGlyph.gizmo : Italify (-para.slopeAngle)
 			include : SmallYShape top bottom
+			set currentGlyph.gizmo : Italify (+para.slopeAngle)
+			include : Translate 0 (-[mix bottom top 0.5])
+			include : Scale 1 (-1)
+			include : Translate 0 (+[mix bottom top 0.5])
+
+		export : define [SmallLambdaShapeFromHookTop top bottom] : union : glyph-proc
+			set currentGlyph.gizmo : Italify (-para.slopeAngle)
+			include : SmallYHookTopShape top bottom
 			set currentGlyph.gizmo : Italify (+para.slopeAngle)
 			include : Translate 0 (-[mix bottom top 0.5])
 			include : Scale 1 (-1)
@@ -266,11 +279,21 @@ glyph-block Letter-Latin-Lower-Y : begin
 			include : MarkSet.b
 			include : Shapes.SmallLambdaShape Ascender 0
 
+		create-glyph "grek/lambdaFHT.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : Shapes.SmallLambdaShapeFromHookTop Ascender 0
+
 		create-glyph "lambdaSlash.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : union
 				FlatSlashShape [mix SB RightSB 0.45] [mix 0 CAP 0.8] (OverlayStroke / 2)
 				Shapes.SmallLambdaShape Ascender 0
+
+		create-glyph "lambdaSlashFHT.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : union
+				FlatSlashShape [mix SB RightSB 0.45] [mix 0 CAP 0.8] (OverlayStroke / 2)
+				Shapes.SmallLambdaShapeFromHookTop Ascender 0
 
 		create-glyph "yHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.p
@@ -282,6 +305,11 @@ glyph-block Letter-Latin-Lower-Y : begin
 			include : MarkSet.capital
 			set-base-anchor 'strike' Middle (XH / 2 - Descender)
 			include : Shapes.SmallYShape CAP 0
+
+	alias 'grek/lambda.tailedTurnSerifless' null 'grek/lambdaFHT.straightTurnSerifless'
+	alias 'lambdaSlash.tailedTurnSerifless' null 'lambdaSlashFHT.straightTurnSerifless'
+	alias 'grek/lambda.curlyTailedTurnSerifless' null 'grek/lambdaFHT.curlyTurnSerifless'
+	alias 'lambdaSlash.curlyTailedTurnSerifless' null 'lambdaSlashFHT.curlyTurnSerifless'
 
 	define Cursive : namespace
 		export : define [Arc top bottom] : new-glyph : glyph-proc
@@ -349,7 +377,6 @@ glyph-block Letter-Latin-Lower-Y : begin
 			include : Cursive.Arc CAP (CAP - XH)
 			include : hookShape CAP 0
 			include : Cursive.Serifs CAP slabKind
-
 
 	select-variant 'y' 'y'
 	select-variant 'y/nonCursive' (shapeFrom -- 'y')
