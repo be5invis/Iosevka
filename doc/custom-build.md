@@ -1,16 +1,23 @@
 # Building Iosevka from Source
-### Cloning
-Note that this repo has a 30+ GB commit history. If you only want the current files and future changes, you can avoid downloading so much by cloning the repo with a [`--depth`](https://git-scm.com/docs/git-clone#Documentation/git-clone.txt---depthltdepthgt) limit. Example:
-```
-git clone --depth 1 https://github.com/be5invis/Iosevka.git 
-```
+
+### Getting the files
+
+To make the font, first you need to have the files that contain the repository’s source code. Here are two ways:
+
+ * Download [the archive of Iosevka’s source code](https://github.com/be5invis/Iosevka/archive/refs/heads/main.zip), then extract its contents into somewhere on your computer.
+ * [Cloning](https://git-scm.com/docs/git-clone) this repository using [Git](https://git-scm.com/): 
+    ```
+    git clone --depth 1 https://github.com/be5invis/Iosevka.git 
+    ```
 
 ### Building
+
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 14.0.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present, and accessible from `PATH`.
-2. Run `npm install`. This command will install **all** the NPM dependencies, and will also validate whether external dependencies are present.
-3. `npm run build -- contents::iosevka`.
+1. Install [`nodejs`](http://nodejs.org) (≥ 18.0.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/). Make sure that they are accessible from [`PATH` environment variable](https://en.wikipedia.org/wiki/PATH_(variable)).
+2. Open a CLI shell in a terminal, [`cd`](https://en.wikipedia.org/wiki/Cd_(command)) into the directory containing Iosevka source code.
+3. Run `npm install`. This command will install **all** the NPM dependencies.
+4. Run `npm run build -- contents::iosevka`. This command will build your fonts.
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
 
@@ -38,7 +45,7 @@ You can provide `private-build.plans.toml` for a customized build and/or specify
 
 To create a custom build, you need:
 
-1. Create `private-build-plans.toml` file if absent.
+1. Create `private-build-plans.toml` file if absent, place alongside the `build-plans.toml` in the repository.
 
 2. Add a build plan into `private-build-plans.toml`. The configurable properties are described in the following sections.
    
