@@ -1,12 +1,12 @@
 $$include '../meta/macros.ptl'
 
-import [AddCommonFeature AddFeature AddLookup ChainRuleBuilder QueryRelatedGlyphs BeginLookupBlock EndLookupBlock] from"./table-util.mjs"
+import [QueryRelatedGlyphs] from"./table-util.mjs"
 
-export : define [buildGsubThousands sink para] : begin
-	local rec : BeginLookupBlock sink
+export : define [buildGsubThousands gsub para] : begin
+	local rec : gsub.beginBlock
 
-	define Thousand : AddFeature sink 'THND'
-	define {chain-rule reverse-rule} : ChainRuleBuilder sink
+	define Thousand : gsub.addCommonFeature : gsub.createFeature 'THND'
+	define {chain-rule reverse-rule} : gsub.ChainRuleBuilder
 	define numberGlyphIDs {
 		'zero.lnum' 'one.lnum' 'two.lnum' 'three.lnum' 'four.lnum'
 		'five.lnum' 'six.lnum' 'seven.lnum' 'eight.lnum' 'nine.lnum'
@@ -14,7 +14,7 @@ export : define [buildGsubThousands sink para] : begin
 
 	define [nd s] : numberGlyphIDs.map : lambda [x] "\(x).nd\(s)"
 
-	define lookupThousand1 : AddLookup sink : object
+	define a : Thousand.addLookup : gsub.createLookup : object
 		.type 'gsub_chaining'
 		.rules : list
 			chain-rule ({'period'} ~> null) (numberGlyphIDs ~> [nd 2]) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null)
@@ -25,13 +25,13 @@ export : define [buildGsubThousands sink para] : begin
 			chain-rule ([nd 4] ~> null) (numberGlyphIDs ~> [nd 3])
 			chain-rule ([nd 3] ~> null) (numberGlyphIDs ~> [nd 2])
 
-	define lookupThousand2 : AddLookup sink : object
+	define b : Thousand.addLookup : gsub.createLookup : object
 		.type 'gsub_chaining'
 		.rules : list
 			chain-rule (numberGlyphIDs ~> [nd 0]) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null)
 			chain-rule ([nd 0] ~> null) (numberGlyphIDs ~> [nd 0])
 
-	define lookupThousand3 : AddLookup sink : object
+	define c : Thousand.addLookup : gsub.createLookup : object
 		.type 'gsub_reverse'
 		.rules : list
 			reverse-rule ([nd 0] ~> [nd 1]) ([nd 0] ~>  null)
@@ -42,7 +42,7 @@ export : define [buildGsubThousands sink para] : begin
 			reverse-rule ([nd 0] ~> [nd 6]) ([nd 5] ~>  null)
 			reverse-rule ([nd 0] ~> [nd 1]) ([nd 6] ~>  null)
 
+	gsub.setDependency a b
+	gsub.setDependency b c
 
-	Thousand.lookups.push lookupThousand1 lookupThousand2 lookupThousand3
-	AddCommonFeature sink Thousand
-	EndLookupBlock rec sink
+	gsub.endBlock rec

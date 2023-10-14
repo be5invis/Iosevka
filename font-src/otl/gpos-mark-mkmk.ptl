@@ -1,5 +1,3 @@
-import [AddCommonFeature AddFeature AddLookup] from"./table-util.mjs"
-
 extern Map
 extern Set
 
@@ -21,27 +19,22 @@ define MarkInteractions : new Map : list
 
 define MkmkStackingLimit : new Set { 'above' 'below' }
 
-export : define [buildMarkMkmk sink glyphStore markGlyphs] : begin
+export : define [buildMarkMkmk gpos glyphStore markGlyphs] : begin
 	define validMarkClasses : new Set MarkClasses
 
 	define mark : object
-		feature      : AddFeature sink 'mark'
+		feature      : gpos.addCommonFeature : gpos.createFeature 'mark'
 		lookupMap    : new Map
-		lookupNames  : new Set
 		createLookup : function [] {.type 'gpos_mark_to_base' .marks {.} .bases {.}}
 	define mkmk : object
-		feature      : AddFeature sink 'mkmk'
+		feature      : gpos.addCommonFeature : gpos.createFeature 'mkmk'
 		lookupMap    : new Map
-		lookupNames  : new Set
 		createLookup : function [] {.type 'gpos_mark_to_mark' .marks {.} .bases {.}}
-
-	AddCommonFeature sink mark.feature
-	AddCommonFeature sink mkmk.feature
 
 	# Populate the marks
 	foreach cls [items-of MarkClasses] : begin
-		local markLookup : ensureLookup sink mark cls
-		local mkmkLookup : ensureLookup sink mkmk cls
+		local markLookup : ensureLookup gpos mark cls
+		local mkmkLookup : ensureLookup gpos mkmk cls
 
 		foreach { gn glyph } [glyphStore.namedEntries] : begin
 			if glyph.markAnchors.(cls) : begin
@@ -52,8 +45,8 @@ export : define [buildMarkMkmk sink glyphStore markGlyphs] : begin
 
 	# Populate the bases
 	foreach cls [items-of MarkClasses] : begin
-		local markLookup : ensureLookup sink mark cls
-		local mkmkLookup : ensureLookup sink mkmk cls
+		local markLookup : ensureLookup gpos mark cls
+		local mkmkLookup : ensureLookup gpos mkmk cls
 
 		foreach { gn glyph } [glyphStore.namedEntries] : begin
 			if glyph.baseAnchors.(cls) : begin
@@ -61,8 +54,8 @@ export : define [buildMarkMkmk sink glyphStore markGlyphs] : begin
 				: then : addBaseAnchor mkmkLookup gn cls glyph.baseAnchors.(cls)
 				: else : addBaseAnchor markLookup gn cls glyph.baseAnchors.(cls)
 
-	foreach lidMark mark.lookupNames : foreach lidMkmk mkmk.lookupNames
-		sink.lookupDep.push { lidMark lidMkmk }
+	foreach markLookup [mark.lookupMap.values] : foreach mkmkLookup [mkmk.lookupMap.values]
+		gpos.setDependency markLookup mkmkLookup
 
 	foreach { cls lookup } mkmk.lookupMap : begin
 		local interactionMarkSet : new Set ([MarkInteractions.get cls] || { cls })
@@ -77,17 +70,14 @@ export : define [buildMarkMkmk sink glyphStore markGlyphs] : begin
 		if (interactionMarkSet.size > 1) : begin
 			markGlyphs.markGlyphSets.push : Array.from includeSet
 
-define [ensureLookup sink feat cls] : begin
+define [ensureLookup gpos feat cls] : begin
 	local existing : feat.lookupMap.get cls
 	if existing : return existing
 
-	local novel : feat.createLookup
-	local lid : AddLookup sink novel
-	feat.feature.lookups.push lid
-	feat.lookupNames.add lid
-	feat.lookupMap.set cls novel
-
-	return novel
+	local lookup : gpos.createLookup : feat.createLookup
+	feat.feature.addLookup lookup
+	feat.lookupMap.set cls lookup
+	return lookup
 
 define [addMarkAnchor lookup gn cls anchor] : begin
 	local a : object
