@@ -244,6 +244,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		name: fileName,
 		variants: bp.variants || null,
 		derivingVariants: bp.derivingVariants,
+		buildCharMap: bp.buildCharMap,
 		featureControl: {
 			noCvSs: bp["no-cv-ss"] || false,
 			noLigation: bp["no-ligation"] || false,
@@ -418,7 +419,7 @@ const DistUnhintedTTF = file.make(
 			echo.action(echo.hl.command(`Create TTF`), out.full);
 			const { cacheUpdated } = await silently.node("font-src/index.mjs", {
 				o: out.full,
-				oCharMap: charMapPath,
+				...(fi.buildCharMap ? { oCharMap: charMapPath } : {}),
 				oTtfaControls: ttfaControlsPath,
 				cacheFreshAgeKey: ageKey,
 				iCache: cachePath,
