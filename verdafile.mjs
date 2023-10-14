@@ -187,6 +187,7 @@ function rectifyPlanForSpacingDerivation(p) {
 		family: "#Validation",
 		desc: "#Validation",
 		spacing: "#Validation",
+		buildCharMap: false,
 		snapshotFamily: null,
 		snapshotFeature: null,
 		targets: null
