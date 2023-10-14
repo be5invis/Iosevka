@@ -1554,7 +1554,10 @@
 <td><img src="../images/cv-x-curly-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-curly-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-x-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-x-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-cursive.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="5"> </td>
+<td><img src="../images/cv-x-semi-chancery-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-semi-chancery-straight.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-x-semi-chancery-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-semi-chancery-curly.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-x-chancery.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-chancery.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="2"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -1564,7 +1567,10 @@
 <td>5</td>
 <td>6</td>
 <td>7</td>
-<td colspan="5"> </td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td colspan="2"> </td>
 </tr>
 <tr>
 <td rowspan="4"><code>cv49</code></td>
@@ -1996,14 +2002,18 @@
 <td><img src="../images/cv-lower-lambda-straight-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-straight-turn.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-lambda-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-curly.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-lambda-curly-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-curly-turn.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="8"> </td>
+<td><img src="../images/cv-lower-lambda-tailed-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-tailed-turn.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-lambda-curly-tailed-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-curly-tailed-turn.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="6"> </td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
 <td>3</td>
 <td>4</td>
-<td colspan="8"> </td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
 </tr>
 <tr>
 <td rowspan="4"><code>cv62</code></td>
@@ -2089,7 +2099,10 @@
 <td><img src="../images/cv-lower-chi-curly-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-curly-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-chi-curly-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-curly-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-chi-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="6"> </td>
+<td><img src="../images/cv-lower-chi-semi-chancery-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-semi-chancery-straight.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-chi-semi-chancery-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-semi-chancery-curly.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-chi-chancery.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-chancery.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="3"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -2098,7 +2111,10 @@
 <td>4</td>
 <td>5</td>
 <td>6</td>
-<td colspan="6"> </td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td colspan="3"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv67</code></td>
@@ -3216,13 +3232,19 @@
 <td><img src="../images/cv-cent-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-open.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cent-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-through.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cent-bar-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-bar-interrupted.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="9"> </td>
+<td><img src="../images/cv-cent-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-open-cap.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cent-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-through-cap.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cent-bar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-bar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="6"> </td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
 <td>3</td>
-<td colspan="9"> </td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>VSAN</code></td>
