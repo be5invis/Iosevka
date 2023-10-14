@@ -436,6 +436,8 @@ function queryCvFeatureTagsOf(sink, gid, glyph, tagSet) {
 	for (const g of existingFeatures.values()) sink.push(g);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 export function linkSuffixGr(gs, suffix, gr) {
 	const reSuffix = new RegExp("\\." + suffix + "$");
 	for (const [gnSuffixed, gSuffixed] of gs.namedEntries()) {
