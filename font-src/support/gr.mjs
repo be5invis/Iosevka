@@ -189,6 +189,14 @@ export function Cv(tag, rank, groupRank, description) {
 	return rel;
 }
 
+Cv.compare = function (a, b) {
+	if (a.tag < b.tag) return -1;
+	if (a.tag > b.tag) return 1;
+	if (a.rank < b.rank) return -1;
+	if (a.rank > b.rank) return 1;
+	return 0;
+};
+
 export const DotlessOrNot = {
 	query(glyph) {
 		if (Dotless.get(glyph)) return [Dotless];
@@ -265,11 +273,13 @@ function getGrTreeImpl(gid, grSetList, fnGidToGlyph, sink) {
 export function getGrMesh(gidList, grq, fnGidToGlyph) {
 	if (typeof gidList === "string" || !Array.isArray(gidList))
 		throw new TypeError(`glyphs must be a glyph array!`);
+
 	const allGrSet = new Set();
 	for (const g of gidList) {
 		for (const gr of grq.query(fnGidToGlyph(g))) allGrSet.add(gr);
 	}
-	const allGrList = Array.from(allGrSet);
+	const allGrList = Array.from(allGrSet).sort(Cv.compare).reverse();
+
 	let ret = [];
 	for (const gr of allGrList) {
 		const col = [];
@@ -425,6 +435,8 @@ function queryCvFeatureTagsOf(sink, gid, glyph, tagSet) {
 	}
 	for (const g of existingFeatures.values()) sink.push(g);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 export function linkSuffixGr(gs, suffix, gr) {
 	const reSuffix = new RegExp("\\." + suffix + "$");

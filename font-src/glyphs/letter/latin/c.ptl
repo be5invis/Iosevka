@@ -1,7 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from"../../../support/utils.mjs"
-import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
+import [DependentSelector CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -10,6 +10,7 @@ glyph-block Letter-Latin-C : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors ExtendBelowBaseAnchors
 	glyph-block-import Mark-Shared-Metrics : markStroke
+	glyph-block-import Letter-Shared : CreateDependentComposite
 	glyph-block-import Letter-Shared-Shapes : SerifFrame CurlyTail DToothlessRise
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart SerifedArcEnd InwardSlabArcStart
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerif ArcEndSerif
@@ -180,8 +181,23 @@ glyph-block Letter-Latin-C : begin
 
 		create-glyph "c.\(suffix)" : glyph-proc
 			include : MarkSet.e
+			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
+				ada -- SmallArchDepthA
+				adb -- SmallArchDepthB
+			include : lf.full
+
+		create-glyph "c/centKernelStd.\(suffix)" : glyph-proc
 			set-base-anchor 'cvDecompose' 0 0
 			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
+				ada -- SmallArchDepthA
+				adb -- SmallArchDepthB
+			include : lf.full
+
+		create-glyph "c/centKernelCap.\(suffix)" : glyph-proc
+			set-base-anchor 'cvDecompose' 0 0
+			local t : CAP / 2 + XH / 2
+			local b : CAP / 2 - XH / 2
+			local lf : CLetterForm [DivFrame 1] sty styBot t b
 				ada -- SmallArchDepthA
 				adb -- SmallArchDepthB
 			include : lf.full
@@ -294,6 +310,8 @@ glyph-block Letter-Latin-C : begin
 	link-reduced-variant 'c/sansSerif' 'c' MathSansSerif
 	link-reduced-variant 'c/turnDescBase' 'c'
 	select-variant 'revSmallC' 0x2184 (follow -- 'c')
+	select-variant 'c/centKernelStd' (follow -- 'c')
+	select-variant 'c/centKernelCap' (follow -- 'c')
 	alias 'cyrl/es' 0x441 'c'
 	alias 'grek/lunateSmallSigma' 0x3F2 'c.serifless'
 	select-variant 'turncSideways' 0x1D12 (follow -- 'c')
@@ -333,43 +351,54 @@ glyph-block Letter-Latin-C : begin
 		LetterBarOverlay.l SB (CAP * 0.6)
 	derive-composites 'currency/euroSign' 0x20AC 'C' 'currency/euroSign/overlay'
 
-	create-glyph 'currency/centSignBar.open' : glyph-proc
-		set-width 0
-		set-mark-anchor 'cvDecompose' 0 0
-		include : dispiro
-			widths.center [AdviceStroke 3]
-			flat Middle (XH - HalfStroke)
-			curl Middle (XH - Descender / 2) [heading Upward]
-		include : dispiro
-			widths.center [AdviceStroke 3]
-			flat Middle (Descender / 2) [heading Upward]
-			curl Middle HalfStroke
+	define CentBarConfig : object
+		open           { (Descender / 2) (XH - Descender / 2) 0 "std" }
+		through        { (Descender / 2) (XH - Descender / 2) 1 "std" }
+		interrupted    { (Descender / 2) (XH - Descender / 2) 2 "std" }
+		openCap        { 0               CAP                  0 "cap" }
+		throughCap     { 0               CAP                  1 "cap" }
+		interruptedCap { 0               CAP                  2 "cap" }
 
-	create-glyph 'currency/centSignBar.through' : glyph-proc
-		include [refer-glyph 'currency/centSignBar.open'] AS_BASE ALSO_METRICS
+	foreach { suffix { bot top fillType selector } } [Object.entries CentBarConfig] : do
+		create-glyph "cent/bar.\(suffix)" : glyph-proc
+			define w : AdviceStroke 3
+			define fine : AdviceStroke [StrokeWidthBlend 3 5.5]
 
-		define fine : AdviceStroke [StrokeWidthBlend 3 5]
-		include : VBar.m Middle (XH - HalfStroke) (0 + HalfStroke) fine
+			local yMid : mix bot top 0.5
+			local fillBottom : yMid - XH / 2
+			local fillTop : yMid + XH / 2
 
-	create-glyph 'currency/centSignBar.barInterrupted' : glyph-proc
-		include [refer-glyph 'currency/centSignBar.open'] AS_BASE ALSO_METRICS
+			# Draw the outside subbars
+			include : dispiro
+				flat Middle fillTop [widths.center w]
+				curl Middle top     [heading Upward]
+			include : dispiro
+				flat Middle fillBottom [widths.center w]
+				curl Middle bot        [heading Downward]
 
-		define cofine : AdviceStroke 4
-		define fine : AdviceStroke [StrokeWidthBlend 3 5]
-		define gap : Math.max (XH / 8) [AdviceStroke2 6 6 XH]
-		include : dispiro
-			flat Middle (XH - HalfStroke)  [widths.center.heading cofine Downward]
-			curl Middle (XH / 2 + gap / 2) [widths.center.heading fine Downward]
-		include : dispiro
-			flat Middle (HalfStroke)       [widths.center.heading cofine Upward]
-			curl Middle (XH / 2 - gap / 2) [widths.center.heading fine Upward]
+			include : match fillType
+				[Just 1] : VBar.m Middle fillBottom fillTop fine
+				[Just 2] : begin
+					define cofine : AdviceStroke 4
+					define gap : Math.max (XH / 8) [AdviceStroke2 6 6 XH]
 
-	select-variant 'currency/centSignBar' (follow -- 'cent')
+					union
+						dispiro
+							flat Middle fillTop [widths.center.heading cofine Downward]
+							curl Middle (yMid + gap / 2) [widths.center.heading fine Downward]
+						dispiro
+							flat Middle fillBottom [widths.center.heading cofine Upward]
+							curl Middle (yMid - gap / 2) [widths.center.heading fine Upward]
 
-	create-glyph 'currency/centSign' 0xA2 : glyph-proc
-		include [refer-glyph 'c'] AS_BASE ALSO_METRICS
-		include [refer-glyph 'currency/centSignBar']
-		CvDecompose.set currentGlyph { 'c' 'currency/centSignBar' }
+				__ : no-shape
+
+			DependentSelector.set currentGlyph selector
+
+	select-variant 'cent/bar' (follow -- 'cent')
+
+	CreateDependentComposite 'cent/centSign' 0xA2 "cent/bar" : object
+		'std' 'c/centKernelStd'
+		'cap' 'c/centKernelCap'
 
 	turned 'turnC' 0x186 'C' Middle (CAP / 2)
 	turned 'turnc' 0x254 'c' Middle (XH / 2)

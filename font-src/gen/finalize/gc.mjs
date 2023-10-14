@@ -34,7 +34,11 @@ function markLookups(table, sink, sinkDirect) {
 			if (lookup.type === "gsub_chaining" || lookup.type === "gpos_chaining") {
 				for (let st of lookup.rules) {
 					if (!st || !st.apply) continue;
-					for (const app of st.apply) sink.add(app.lookup);
+					for (const app of st.apply) {
+						if (!app.lookup.name)
+							throw new Error("Unreachable: lookup name should be present");
+						sink.add(app.lookup.name);
+					}
 				}
 			}
 		}
@@ -46,7 +50,7 @@ function markLookupsStart(table, sink, sinkDirect) {
 	for (let f in table.features) {
 		const feature = table.features[f];
 		if (!feature) continue;
-		for (const l of feature) {
+		for (const l of feature.lookups) {
 			sink.add(l);
 			sinkDirect.add(l);
 		}
@@ -65,9 +69,15 @@ function sweepFeatures(table, accessibleLookupsIds) {
 	for (let f in table.features) {
 		const feature = table.features[f];
 		if (!feature) continue;
-		const featureFiltered = [];
-		for (const l of feature) if (accessibleLookupsIds.has(l)) featureFiltered.push(l);
-		if (!featureFiltered.length) continue;
+		const featureFiltered = {
+			name: feature.name,
+			tag: feature.tag,
+			lookups: []
+		};
+		for (const l of feature.lookups) {
+			if (accessibleLookupsIds.has(l)) featureFiltered.lookups.push(l);
+		}
+		if (!featureFiltered.lookups.length) continue;
 		features1[f] = featureFiltered;
 	}
 	table.features = features1;
@@ -151,7 +161,11 @@ function markGlyphsByLookup(gsub, lid, markedGlyphs) {
 					if (!atLeastOneMatch) continue rules;
 				}
 				// If so traverse through the lookup applications
-				for (const app of rule.apply) markGlyphsByLookup(gsub, app.lookup, markedGlyphs);
+				for (const app of rule.apply) {
+					if (!app.lookup.name)
+						throw new Error("Unreachable: lookup name should be present");
+					markGlyphsByLookup(gsub, app.lookup.name, markedGlyphs);
+				}
 			}
 			break;
 		}

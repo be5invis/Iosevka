@@ -1,6 +1,6 @@
 $$include '../meta/macros.ptl'
 
-import [AddCommonFeature AddFeature AddLookup AddFeatureLookup ChainRuleBuilder BeginLookupBlock EndLookupBlock UkMapToLookup UkMap2ToLookup] from"./table-util.mjs"
+import [UkMapToLookup UkMap2ToLookup] from"./table-util.mjs"
 import [Dotless TieMark TieGlyph OgonekTrY IsSuperscript IsSubscript LeaningMark LeaningMarkSpacer] from"../support/gr.mjs"
 import as UnicodeKnowledge from"../meta/unicode-knowledge.mjs"
 
@@ -10,29 +10,28 @@ define-macro Ccmp-Group : syntax-rules
 	`[Ccmp-Group @description @body]
 		dirty `[$ExecCcmpGroup$ [function [export-lookup chain-rule] @[formOf body]]]
 
-export : define [buildCCMP sink glyphStore markGlyphs] : begin
+export : define [buildCCMP gsub glyphStore markGlyphs] : begin
 	local anyMark : Array.from markGlyphs.all
 	local aboveMark : filterMarkByClass markGlyphs 'above'
 
-	define ccmp : AddFeature sink 'ccmp'
-	AddCommonFeature sink ccmp
+	define ccmp : gsub.addCommonFeature : gsub.createFeature 'ccmp'
 
 	define [$ExecCcmpGroup$ fn] : begin
 		local addedLookups {}
-		define [export-lookup lookupName] : begin
-			ccmp.lookups.push lookupName
-			addedLookups.push lookupName
+		define [export-lookup lookup] : begin
+			ccmp.addLookup lookup
+			addedLookups.push lookup
 
 
-		local rec : BeginLookupBlock sink
-		define {chain-rule} : ChainRuleBuilder sink
+		local rec : gsub.beginBlock
+		define {chain-rule} : gsub.ChainRuleBuilder
 
 		fn export-lookup chain-rule
 
 		for [local j 1] (j < addedLookups.length) [inc j] : begin
-			sink.lookupDep.push {addedLookups.(j - 1) addedLookups.(j)}
+			gsub.setDependency addedLookups.(j - 1) addedLookups.(j)
 
-		EndLookupBlock rec sink
+		gsub.endBlock rec
 
 	Ccmp-Group "Mark transforms" : begin
 
@@ -52,7 +51,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 		define [GrekUpperTonosTf] : UkMapToLookup UnicodeKnowledge.upperGrekMarkToTonosTf
 
 		# Dotless transform
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_chaining'
 			.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'above']
 			.rules : list
@@ -60,17 +59,17 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				chain-rule groupGrekUpperTonos [GrekUpperTonosTf]
 
 		# Iota transform
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_chaining'
 			.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'below']
 			.rules : list
 				chain-rule groupLF [IotaLF]
 
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_ligature'
 			.substitutions : UkMap2ToLookup UnicodeKnowledge.markCompositionTf
 
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_multiple'
 			.substitutions : object
 				'parenAbove' { 'leftParenAbove' 'rightParenAbove' }
@@ -89,13 +88,13 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				TieMarkFrom.push gid
 				TieMarkTo.push   [TieMark.get g]
 
-		define lookupTieMarkLigature : AddLookup sink : object
+		define lookupTieMarkLigature : gsub.createLookup : object
 			.type 'gsub_ligature'
 			.substitutions : {}.concat
 				TieMarkFrom.map : lambda [gnFrom idx]
 					object [from {'cgj' gnFrom}] [to TieMarkTo.(idx)]
 
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_chaining'
 			.rules : list : object
 				match {[TieGlyphs.concat TieMarkTo] {'cgj'} TieMarkFrom}
@@ -105,7 +104,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 
 	Ccmp-Group "Special dot-above transformation" : begin
 		# b-dot, d-dot, h-dot, k-dot
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_ligature'
 			.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'above']
 			.substitutions : list
@@ -134,11 +133,11 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 					markSpacer.push     [LeaningMarkSpacer.get g]
 					splitMapping.push   { gn {[LeaningMarkSpacer.get g] [LeaningMark.get g]} }
 
-			define lookupTurnMarkIntoLeaningAndSpacer : AddLookup sink : object
+			define lookupTurnMarkIntoLeaningAndSpacer : gsub.createLookup : object
 				.type 'gsub_multiple'
 				.substitutions : Object.fromEntries splitMapping
 
-			export-lookup : AddLookup sink : object
+			export-lookup : gsub.createLookup : object
 				.type 'gsub_chaining'
 				.ignoreGlyphs [filterMarkByClassNegated markGlyphs mkCenter]
 				.rules : list
@@ -158,7 +157,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 			if [IsSuperscript.get g] : superscripts.push gn
 			if [IsSubscript.get g]   : subscripts.push gn
 
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_chaining'
 			.ignoreGlyphs anyMark
 			.rules : list
@@ -230,7 +229,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				e.push ('toneSandhiMid' + toneStart + toneMid + toneEnd)
 			return (f ~> e)
 
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_chaining'
 			.rules : list
 				chain-rule [ToneToToneStart 0] {'tone0'}
@@ -239,7 +238,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				chain-rule [ToneToToneStart 3] {'tone3'}
 				chain-rule [ToneToToneStart 4] {'tone4'}
 
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_chaining'
 			.rules : list
 				chain-rule [ToneStartOrMidAt 0] [ToneStartToToneMid 0]
@@ -248,7 +247,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				chain-rule [ToneStartOrMidAt 3] [ToneStartToToneMid 3]
 				chain-rule [ToneStartOrMidAt 4] [ToneStartToToneMid 4]
 
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_chaining'
 			.rules : list
 				chain-rule [ToneStartOrMidAt 0] [ToneToToneEnd 0]
@@ -257,7 +256,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				chain-rule [ToneStartOrMidAt 3] [ToneToToneEnd 3]
 				chain-rule [ToneStartOrMidAt 4] [ToneToToneEnd 4]
 
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_chaining'
 			.rules : list
 				chain-rule [ToneSandhiToToneStart 0] {'toneSandhi0'}
@@ -266,7 +265,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				chain-rule [ToneSandhiToToneStart 3] {'toneSandhi3'}
 				chain-rule [ToneSandhiToToneStart 4] {'toneSandhi4'}
 
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_chaining'
 			.rules : list
 				chain-rule [ToneSandhiStartOrMidAt 0] [ToneSandhiStartToToneMid 0]
@@ -275,7 +274,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 				chain-rule [ToneSandhiStartOrMidAt 3] [ToneSandhiStartToToneMid 3]
 				chain-rule [ToneSandhiStartOrMidAt 4] [ToneSandhiStartToToneMid 4]
 
-		export-lookup : AddLookup sink : object
+		export-lookup : gsub.createLookup : object
 			.type 'gsub_chaining'
 			.rules : list
 				chain-rule [ToneSandhiStartOrMidAt 0] [ToneSandhiToToneEnd 0]
@@ -286,11 +285,9 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 
 	return ccmp
 
-export : define [buildCCMPPostCvSs sink ccmpFeature glyphStore markGlyphs] : begin
+export : define [buildCCMPPostCvSs gsub ccmp glyphStore markGlyphs] : begin
 	local anyMark : Array.from markGlyphs.all
-	local rec : BeginLookupBlock sink
-
-	define ccmp : AddFeature sink 'ccmp'
+	local rec : gsub.beginBlock
 
 	define triggerGlyphs_Normal { }
 	define triggerGlyphs_Y      { }
@@ -299,14 +296,14 @@ export : define [buildCCMPPostCvSs sink ccmpFeature glyphStore markGlyphs] : beg
 			[OgonekTrY.get g] : triggerGlyphs_Y.push      gid
 			true              : triggerGlyphs_Normal.push gid
 
-	define ogonekSpacerNormal : AddLookup sink : object
+	define ogonekSpacerNormal : gsub.createLookup : object
 		.type 'gsub_multiple'
 		.substitutions UnicodeKnowledge.ogonekBelowToTRTf
-	define ogonekSpacerY : AddLookup sink : object
+	define ogonekSpacerY : gsub.createLookup : object
 		.type 'gsub_single'
 		.substitutions UnicodeKnowledge.ogonekBelowToTRTf_Y
 
-	define lookupMarks1 : AddLookup sink : object
+	ccmp.addLookup : gsub.createLookup : object
 		.type 'gsub_chaining'
 		.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'below']
 		.rules : list
@@ -321,8 +318,7 @@ export : define [buildCCMPPostCvSs sink ccmpFeature glyphStore markGlyphs] : beg
 				.inputEnds     2
 				.apply         {{.at 1 .lookup ogonekSpacerNormal}}
 
-	ccmpFeature.lookups.push lookupMarks1
-	EndLookupBlock rec sink
+	gsub.endBlock rec
 
 define [objectIsNotEmpty obj] : obj && [Object.keys obj].length
 

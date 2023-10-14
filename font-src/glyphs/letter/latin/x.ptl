@@ -85,6 +85,26 @@ glyph-block Letter-Latin-X : begin
 			define lowerHalfLastKnot lowerHalf.rhsKnots.(lowerHalf.rhsKnots.length - 1)
 			set-base-anchor 'cyrlDescenderAttach' lowerHalfLastKnot.x lowerHalfLastKnot.y
 
+	define [XChanceryStrand sign leftX leftY rightX rightY sw] : begin
+		local blendK1X : StrokeWidthBlend 0.58 0.65
+		local blendK1Y   0.2
+		local blendK2X   0.78
+		local blendK2Y : StrokeWidthBlend 0.5 0.4
+
+		local pStraightX : StrokeWidthBlend 0.3 0.35
+		local pStraightY : StrokeWidthBlend 0.2 0.25
+
+		local fine : [AdviceStroke 3] / Stroke * sw
+
+		return : dispiro
+			straight.right.start leftX  (leftY - sign * sw / 2) [widths.center sw]
+			alsoThruThem {{blendK1X blendK1Y} {blendK2X blendK2Y}}
+			flat [mix leftX rightX pStraightX] [mix leftY rightY pStraightY] [widths.center : mix sw fine 0.5]
+			corner [mix leftX rightX 0.5] [mix leftY rightY 0.5] [widths.center fine]
+			curl [mix leftX rightX (1 - pStraightX)] [mix leftY rightY (1 - pStraightY)] [widths.center : mix sw fine 0.5]
+			alsoThruThem {{(1 - blendK2X) (1 - blendK2Y)} {(1 - blendK1X) (1 - blendK1Y)}}
+			straight.right.end   rightX (rightY + sign * sw / 2) [widths.center sw]
+
 	define Shape : namespace
 		define [XBase fStraight fSlab top bottom turn tension] : composite-proc
 			XStrand fStraight fSlab SB bottom RightSB top turn 0.4 tension
@@ -100,6 +120,16 @@ glyph-block Letter-Latin-X : begin
 			include : FlipAround Middle [mix bottom top 0.5]
 			include : XCursiveHalfShape top bottom Middle RightSB (setMark -- true)
 
+		export : define [SemiChanceryStr fSlab top bottom turn tension] : union
+			XChanceryStrand (+1) SB top RightSB bottom Stroke
+			XStrand true fSlab SB bottom RightSB top turn 0.4 tension
+		export : define [SemiChanceryCur fSlab top bottom turn tension] : union
+			XChanceryStrand (+1) SB top RightSB bottom Stroke
+			XStrand false fSlab SB bottom RightSB top turn 0.4 tension
+		export : define [ChanceryBase fSlab top bottom turn tension] : union
+			XChanceryStrand (+1) SB top RightSB bottom Stroke
+			XChanceryStrand (-1) SB bottom RightSB top Stroke
+
 		# Serifs
 		export : define [FullSerifs top bot] : let [sf : SerifFrame.fromDf [DivFrame 1] top bot]
 			composite-proc sf.lt.full sf.rt.full sf.lb.full sf.rb.full
@@ -110,15 +140,18 @@ glyph-block Letter-Latin-X : begin
 			include : tagged 'serifRB' : HSerif.rb RightSB bot SideJut
 
 	define Config : object
-		straightSerifless              { Shape.StraightBase null                        false }
-		curlySerifless                 { Shape.CurlyBase    null                        false }
-		cursive                        { Shape.CursiveBase  null                        false }
-		straightSerifed                { Shape.StraightBase Shape.FullSerifs            true  }
-		curlySerifed                   { Shape.CurlyBase    Shape.FullSerifs            true  }
-		straightMotionSerifed          { Shape.StraightBase Shape.MotionSerifs          false }
-		curlyMotionSerifed             { Shape.CurlyBase    Shape.MotionSerifs          false }
-		straightBilateralMotionSerifed { Shape.StraightBase Shape.MotionSerifsBilateral false }
-		curlyBilateralMotionSerifed    { Shape.CurlyBase    Shape.MotionSerifsBilateral false }
+		straightSerifless              { Shape.StraightBase       null                        false }
+		curlySerifless                 { Shape.CurlyBase          null                        false }
+		cursive                        { Shape.CursiveBase        null                        false }
+		semiChanceryStraight           { Shape.SemiChanceryStr    null                        false }
+		semiChanceryCurly              { Shape.SemiChanceryCur    null                        false }
+		chancery                       { Shape.ChanceryBase       null                        false }
+		straightSerifed                { Shape.StraightBase       Shape.FullSerifs            true  }
+		curlySerifed                   { Shape.CurlyBase          Shape.FullSerifs            true  }
+		straightMotionSerifed          { Shape.StraightBase       Shape.MotionSerifs          false }
+		curlyMotionSerifed             { Shape.CurlyBase          Shape.MotionSerifs          false }
+		straightBilateralMotionSerifed { Shape.StraightBase       Shape.MotionSerifsBilateral false }
+		curlyBilateralMotionSerifed    { Shape.CurlyBase          Shape.MotionSerifsBilateral false }
 
 	foreach { suffix { baseShape serifShape fMaskBase} } [Object.entries Config] : do
 		define [letterShape top bottom turn tension] : glyph-proc
@@ -132,15 +165,15 @@ glyph-block Letter-Latin-X : begin
 
 		create-glyph "x.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : letterShape XH 0 0.1 0.24
+			include : letterShape XH 0 0.1 0.20
 
 		create-glyph "latn/chi.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			include : letterShape XH Descender 0.05 0.11
+			include : letterShape XH Descender 0.1 0.20
 
 		create-glyph "latn/Chi.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
-			include : letterShape CAP Descender 0.05 0.11
+			include : letterShape CAP Descender 0.1 0.20
 
 	select-variant 'X' 'X'
 	link-reduced-variant 'X/sansSerif' 'X' MathSansSerif
