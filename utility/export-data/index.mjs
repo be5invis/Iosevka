@@ -33,11 +33,9 @@ async function main(argv) {
 					nonMergeSets: ligationData.nonMergeSets
 				}
 			},
-			{ spaces: 2 }
+			null,
+			2
 		)
 	);
-	await fs.promises.writeFile(
-		argv.exportPathCov,
-		JSON.stringify({ version, ...cl }, { spaces: 2 })
-	);
+	await fs.promises.writeFile(argv.exportPathCov, JSON.stringify({ version, ...cl }, null, 2));
 }

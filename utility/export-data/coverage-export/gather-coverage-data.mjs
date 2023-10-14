@@ -69,7 +69,10 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 	}
 
 	let featureSeries = [];
-	for (const [id, x] of featureSeriesStore.values()) featureSeries[id] = x;
+	for (const [id, x] of featureSeriesStore.values()) {
+		for (let gr of x.groups) gr.sort((a, b) => a.css.localeCompare(b.css));
+		featureSeries[id] = x;
+	}
 
 	return { unicodeCoverage, featureSeries };
 }
