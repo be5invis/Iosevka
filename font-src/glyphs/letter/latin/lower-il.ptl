@@ -29,10 +29,10 @@ glyph-block Letter-Latin-Lower-I : begin
 		set-base-anchor 'topRight' (xMiddle + df.rightSB - df.middle) yTop
 
 	# Support shapes
-	define [TailedDotlessXMiddle df addTopSerif] : df.middle - [if addTopSerif 0 : IBalance2 df]
-	define [ItalicDotlessIShift df] : (1 - df.div) * 0.2
-	define [ItalicDotlessIXMiddle df] : begin
-		return : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [ItalicDotlessIShift df])
+	define [FlatTailedDotlessIXMiddle df addTopSerif] : df.middle - [if addTopSerif 0 : IBalance2 df]
+	define [TailedDotlessIShift df] : (1 - df.div) * 0.2
+	define [TailedDotlessIXMiddle df addTopSerif] : begin
+		return : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [TailedDotlessIShift df])
 
 	###########################################################################################
 	# Implementations
@@ -42,14 +42,10 @@ glyph-block Letter-Latin-Lower-I : begin
 		export : define [Hooky df] : df.middle + [IBalance2 df]
 		export : define [HookyBottom df] : df.middle - [IBalance2 df]
 		export : define [Serifed df] : df.middle + [IBalance df]
-		export : define [Tailed df] : if para.isItalic
-			ItalicDotlessIXMiddle df
-			TailedDotlessXMiddle df false
-		export : define [TailedSerifed df] : if para.isItalic
-			ItalicDotlessIXMiddle df
-			TailedDotlessXMiddle df true
-		export : define [FlatTailed df] : TailedDotlessXMiddle df false
-		export : define [SerifedFlatTailed df] : TailedDotlessXMiddle df true
+		export : define [Tailed df] : TailedDotlessIXMiddle df false
+		export : define [TailedSerifed df] : TailedDotlessIXMiddle df true
+		export : define [FlatTailed df] : FlatTailedDotlessIXMiddle df false
+		export : define [SerifedFlatTailed df] : FlatTailedDotlessIXMiddle df true
 		export : define [PhoneticLeft df] : df.leftSB + [HSwToV Stroke]
 
 	define Body : namespace
@@ -70,9 +66,9 @@ glyph-block Letter-Latin-Lower-I : begin
 				HSerif.mb df.middle 0 (LongJut * df.div)
 			set-base-anchor 'trailing' (df.middle + LongJut * df.div) 0
 
-		define [IalicTailed df top xMiddle] : glyph-proc
+		export : define [Tailed df top xMiddle] : glyph-proc
 			local fine : AdviceStroke 3
-			local shift : ItalicDotlessIShift df
+			local shift : TailedDotlessIShift df
 			local left : xMiddle - [HSwToV : 0.5 * df.mvs]
 			local right : mix df.leftSB df.rightSB (1.1 - shift)
 			local rightTerm : Math.max right (left + HookX + df.mvs)
@@ -89,28 +85,6 @@ glyph-block Letter-Latin-Lower-I : begin
 			include : OverrideILMarks df xDot top
 			set-base-anchor 'trailing' [mix left rightTerm 0.5] 0
 			set-base-anchor 'palatalHookMask' [mix left rightTerm 0.5] (HalfStroke + O)
-
-		define [UprightTailed df top xMiddle] : glyph-proc
-			local tailLength : LongJut * 1.05 * [mix 1 df.div 0.75]
-			local hookScaleX  : mix 1 df.div 0.5
-			local hookScaleY  : mix 1 df.div 1.25
-			local x0 : mix (0.5 * df.mvs) (0.5 * df.mvs + (Hook - df.mvs + 1) * 0.85 * df.div + [IBalance2 df]) hookScaleX
-			local x1 : mix (0.5 * df.mvs) ([Math.max (Hook - 0.5 * df.mvs + 1) tailLength] + [IBalance2 df]) hookScaleX
-			include : dispiro
-				widths.center df.mvs
-				flat xMiddle top [heading Downward]
-				curl xMiddle [Math.max (df.mvs * 1.1) : mix df.mvs Hook hookScaleY]
-				arcvh 16
-				g2.right.mid (xMiddle + x0) (0.5 * df.mvs + O) [heading Rightward]
-				g4 (xMiddle + x1) (0.5 * df.mvs + (1 - 2 * hookScaleY) * O) [heading Rightward]
-
-			include : OverrideILMarks df xMiddle top
-			set-base-anchor 'trailing' (xMiddle + x0) 0
-			set-base-anchor 'palatalHookMask' (xMiddle + x0) (HalfStroke + O)
-
-		export : define [Tailed df top xMiddle] : if para.isItalic
-			IalicTailed df top xMiddle
-			UprightTailed df top xMiddle
 
 		export : define [FlatTailed df top xMiddle] : glyph-proc
 			local tailLength : LongJut * 1.05 * [mix 1 df.div 0.75]
