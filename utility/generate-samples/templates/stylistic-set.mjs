@@ -3,7 +3,7 @@ import * as themes from "../themes/index.mjs";
 // prettier-ignore
 const ssStrings = [
 	["ABC.DEF.GHI.JKL.MNO.PQRS.TUV.WXYZ", "abc.def.ghi.jkl.mno.pqrs.tuv.wxyz"],
-	["!iIlL17|¦ ¢coO08BbDQ $5SZ2sz 96µm", "float il1[]={1-2/3.4,5+6=7/8%90};"],
+	["!iIlL17|¦ ¢coO08BbDQ $5SZ2zs 96µm", "float il1[]={1-2/3.4,5+6=7/8%90};"],
 	["1234567890 ,._-+= >« ¯-¬_ »~–÷+×<", "{*}[]()<>`+-=$/#_%^@\\&|~?'\" !,.;:"],
 	["E3CGQ g9q¶ uvw ſßðþ ΓΔΛαδιλμξπτχ∂", [..."ЖЗКУЯжзклмнруфчьыя ", "<=", " ", "!="," ","==", " ", "=>", " ", "->"]]
 ];
