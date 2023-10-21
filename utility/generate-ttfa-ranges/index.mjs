@@ -1,6 +1,10 @@
 import fs from "fs";
+import path from "path";
+import url from "url";
 
-import { ArrayUtil } from "../font-src/support/utils.mjs";
+import { ArrayUtil } from "../../font-src/support/utils.mjs";
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 setImmediate(() => {
 	main().catch(e => {
@@ -45,7 +49,7 @@ async function main() {
 	}
 
 	await fs.promises.writeFile(
-		"font-src/generated/ttfa-ranges.mjs",
+		path.resolve(__dirname, "../../font-src/generated/ttfa-ranges.mjs"),
 		`/* eslint-disable */\n` +
 			`// Machine generated. Do not modify。\n` +
 			`export default ` +

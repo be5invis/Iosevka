@@ -429,7 +429,10 @@ function queryCvFeatureTagsOf(sink, gid, glyph, tagSet) {
 			existingFeatures.set(gr.tag, series);
 		}
 
-		const featureApp = { css: `'${gr.tag}' ${gr.rank}`, description: gr.description };
+		const featureApp = {
+			css: `'${gr.tag}' ${String(gr.rank).padStart(2)}`,
+			description: gr.description
+		};
 		if (!series.groups[gr.groupRank]) series.groups[gr.groupRank] = [];
 		series.groups[gr.groupRank].push(featureApp);
 	}

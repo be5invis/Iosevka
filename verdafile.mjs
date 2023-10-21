@@ -35,7 +35,7 @@ const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
 const SEVEN_ZIP = process.env.SEVEN_ZIP_PATH || "7z";
 const TTFAUTOHINT = process.env.TTFAUTOHINT_PATH || "ttfautohint";
 
-const defaultWebFontFormats = ["ttf", "woff2"];
+const defaultWebFontFormats = ["woff2", "ttf"];
 const webfontFormatsFast = ["ttf"];
 const webfontFormatsPages = ["woff2"];
 
@@ -187,6 +187,7 @@ function rectifyPlanForSpacingDerivation(p) {
 		family: "#Validation",
 		desc: "#Validation",
 		spacing: "#Validation",
+		buildCharMap: false,
 		snapshotFamily: null,
 		snapshotFeature: null,
 		targets: null
