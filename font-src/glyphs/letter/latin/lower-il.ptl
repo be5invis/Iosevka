@@ -9,10 +9,11 @@ glyph-block Letter-Latin-Lower-I : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
-	glyph-block-import Letter-Shared : CreateCommaCaronComposition
-	glyph-block-import Letter-Shared : CreateAccentedComposition CreateMultiAccentedComposition CreateOgonekComposition
+	glyph-block-import Letter-Shared : CreateAccentedComposition CreateMultiAccentedComposition
+	glyph-block-import Letter-Shared : CreateCommaCaronComposition CreateOgonekComposition
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth DiagonalTailR DiagonalTailStdDepth
-	glyph-block-import Letter-Shared-Shapes : CurlyTail BeltOverlay PalatalHook RetroflexHook LetterBarOverlay
+	glyph-block-import Letter-Shared-Shapes : CurlyTail BeltOverlay PalatalHook
+	glyph-block-import Letter-Shared-Shapes : RetroflexHook LetterBarOverlay RightwardTailedBar
 
 	glyph-block-export OverrideILMarks
 	define [OverrideILMarks df xMiddle yTop] : glyph-proc
@@ -29,10 +30,10 @@ glyph-block Letter-Latin-Lower-I : begin
 		set-base-anchor 'topRight' (xMiddle + df.rightSB - df.middle) yTop
 
 	# Support shapes
-	define [TailedDotlessXMiddle df addTopSerif] : df.middle - [if addTopSerif 0 : IBalance2 df]
-	define [ItalicDotlessIShift df] : (1 - df.div) * 0.2
-	define [ItalicDotlessIXMiddle df] : begin
-		return : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [ItalicDotlessIShift df])
+	define [FlatTailedDotlessIXMiddle df addTopSerif] : df.middle - [if addTopSerif 0 : IBalance2 df]
+	define [TailedDotlessIShift df] : (1 - df.div) * 0.2
+	define [TailedDotlessIXMiddle df addTopSerif] : begin
+		return : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [TailedDotlessIShift df])
 
 	###########################################################################################
 	# Implementations
@@ -42,14 +43,10 @@ glyph-block Letter-Latin-Lower-I : begin
 		export : define [Hooky df] : df.middle + [IBalance2 df]
 		export : define [HookyBottom df] : df.middle - [IBalance2 df]
 		export : define [Serifed df] : df.middle + [IBalance df]
-		export : define [Tailed df] : if para.isItalic
-			ItalicDotlessIXMiddle df
-			TailedDotlessXMiddle df false
-		export : define [TailedSerifed df] : if para.isItalic
-			ItalicDotlessIXMiddle df
-			TailedDotlessXMiddle df true
-		export : define [FlatTailed df] : TailedDotlessXMiddle df false
-		export : define [SerifedFlatTailed df] : TailedDotlessXMiddle df true
+		export : define [Tailed df] : TailedDotlessIXMiddle df false
+		export : define [TailedSerifed df] : TailedDotlessIXMiddle df true
+		export : define [FlatTailed df] : FlatTailedDotlessIXMiddle df false
+		export : define [SerifedFlatTailed df] : FlatTailedDotlessIXMiddle df true
 		export : define [PhoneticLeft df] : df.leftSB + [HSwToV Stroke]
 
 	define Body : namespace
@@ -70,9 +67,9 @@ glyph-block Letter-Latin-Lower-I : begin
 				HSerif.mb df.middle 0 (LongJut * df.div)
 			set-base-anchor 'trailing' (df.middle + LongJut * df.div) 0
 
-		define [IalicTailed df top xMiddle] : glyph-proc
+		export : define [Tailed df top xMiddle] : glyph-proc
 			local fine : AdviceStroke 3
-			local shift : ItalicDotlessIShift df
+			local shift : TailedDotlessIShift df
 			local left : xMiddle - [HSwToV : 0.5 * df.mvs]
 			local right : mix df.leftSB df.rightSB (1.1 - shift)
 			local rightTerm : Math.max right (left + HookX + df.mvs)
@@ -90,7 +87,23 @@ glyph-block Letter-Latin-Lower-I : begin
 			set-base-anchor 'trailing' [mix left rightTerm 0.5] 0
 			set-base-anchor 'palatalHookMask' [mix left rightTerm 0.5] (HalfStroke + O)
 
-		define [UprightTailed df top xMiddle] : glyph-proc
+		export : define [FlatTailed df top xMiddle] : glyph-proc
+			local tailLength : LongJut * 1.05 * [mix 1 df.div 0.75]
+			local hd : FlatHookDepth df
+
+			define xFinal : xMiddle + [Math.max (hd.x - [HSwToV : 0.5 * df.mvs] + 1) tailLength] + 0.5 * df.mvs * TanSlope
+			include : dispiro
+				widths.center df.mvs
+				flat xMiddle top [heading Downward]
+				curl xMiddle hd.y
+				arcvh.superness DesignParameters.tightHookSuperness
+				flat (xMiddle + hd.x - [HSwToV : 0.5 * df.mvs]) (0.5 * df.mvs)
+				curl xFinal (0.5 * df.mvs)
+
+			include : OverrideILMarks df xMiddle top
+			set-base-anchor 'trailing' xFinal 0
+
+		export : define [SemiTailed df top xMiddle] : glyph-proc
 			local tailLength : LongJut * 1.05 * [mix 1 df.div 0.75]
 			local hookScaleX  : mix 1 df.div 0.5
 			local hookScaleY  : mix 1 df.div 1.25
@@ -108,25 +121,8 @@ glyph-block Letter-Latin-Lower-I : begin
 			set-base-anchor 'trailing' (xMiddle + x0) 0
 			set-base-anchor 'palatalHookMask' (xMiddle + x0) (HalfStroke + O)
 
-		export : define [Tailed df top xMiddle] : if para.isItalic
-			IalicTailed df top xMiddle
-			UprightTailed df top xMiddle
-
-		export : define [FlatTailed df top xMiddle] : glyph-proc
-			local tailLength : LongJut * 1.05 * [mix 1 df.div 0.75]
-			local hd : FlatHookDepth df
-
-			define xFinal : xMiddle + [Math.max (hd.x - [HSwToV : 0.5 * df.mvs] + 1) tailLength] + 0.5 * df.mvs * TanSlope
-			include : dispiro
-				widths.center df.mvs
-				flat xMiddle top [heading Downward]
-				curl xMiddle hd.y
-				arcvh.superness DesignParameters.tightHookSuperness
-				flat (xMiddle + hd.x - [HSwToV : 0.5 * df.mvs]) (0.5 * df.mvs)
-				curl xFinal (0.5 * df.mvs)
-
-			include : OverrideILMarks df xMiddle top
-			set-base-anchor 'trailing' xFinal 0
+		export : define [ShortTailed df top xMiddle] : glyph-proc
+			include : RightwardTailedBar (xMiddle + [HSwToV : 0.5 * Stroke]) 0 top
 
 		export : define [DiagTailed df top xMiddle] : glyph-proc
 			include : OverrideILMarks df xMiddle top
@@ -179,6 +175,8 @@ glyph-block Letter-Latin-Lower-I : begin
 		'serifedFlatTailed'     { Body.FlatTailed    Serifs.Hooky         XMiddle.SerifedFlatTailed  para.diversityI   Stroke }
 		'diagonalTailed'        { Body.DiagTailed    null                 XMiddle.FlatTailed         para.diversityII  Stroke }
 		'serifedDiagonalTailed' { Body.DiagTailed    Serifs.Hooky         XMiddle.SerifedFlatTailed  para.diversityI   Stroke }
+		'semiTailed'            { Body.SemiTailed    null                 XMiddle.FlatTailed         para.diversityII  Stroke }
+		'serifedSemiTailed'     { Body.SemiTailed    Serifs.Hooky         XMiddle.SerifedFlatTailed  para.diversityI   Stroke }
 		'hookyBottom'           { Body.HookyBottom   null                 XMiddle.HookyBottom        para.diversityII  Stroke }
 		# Decompressed
 		'hookyDec'              { Body.Serifless     Serifs.Hooky         XMiddle.Hooky              para.diversityI   0      }
@@ -186,6 +184,7 @@ glyph-block Letter-Latin-Lower-I : begin
 		'tailedDec'             { Body.Tailed        null                 XMiddle.Tailed             para.diversityI   Stroke }
 		'flatTailedDec'         { Body.FlatTailed    null                 XMiddle.FlatTailed         para.diversityI   Stroke }
 		'diagonalTailedDec'     { Body.DiagTailed    null                 XMiddle.FlatTailed         para.diversityI   Stroke }
+		'semiTailedDec'         { Body.SemiTailed    null                 XMiddle.FlatTailed         para.diversityI   Stroke }
 		'hookyBottomDec'        { Body.HookyBottom   null                 XMiddle.HookyBottom        para.diversityI   Stroke }
 		# R Tail
 		'hookyRTail'            { Body.Serifless     Serifs.Hooky         XMiddle.Center             para.diversityII  0      }
@@ -197,10 +196,12 @@ glyph-block Letter-Latin-Lower-I : begin
 		'hookyPL'               { Body.PhoneticLeft  Serifs.Hooky         XMiddle.PhoneticLeft       1                 0      }
 		'seriflessPL'           { Body.PhoneticLeft  null                 XMiddle.PhoneticLeft       1                 0      }
 		# Special variants for Tau (which is built using dotlessi)
-		'tau/tailless'          { Body.Serifless     null                 XMiddle.Center             para.diversityF   0      }
+		'tau/tailless'          { Body.Serifless     null                 XMiddle.Center             1                 0      }
 		'tau/tailed'            { Body.Tailed        null                 XMiddle.Tailed             1                 Stroke }
 		'tau/flatTailed'        { Body.FlatTailed    null                 XMiddle.FlatTailed         1                 Stroke }
 		'tau/diagonalTailed'    { Body.DiagTailed    null                 XMiddle.FlatTailed         1                 Stroke }
+		'tau/semiTailed'        { Body.SemiTailed    null                 XMiddle.FlatTailed         1                 Stroke }
+		'tau/shortTailed'       { Body.ShortTailed   null                 XMiddle.Center             1                 Stroke }
 
 	foreach { suffix { Body Serif xMiddleT div y0R } } [Object.entries SmallILConfig] : do
 		create-glyph "dotlessi.\(suffix)" : glyph-proc
@@ -278,6 +279,8 @@ glyph-block Letter-Latin-Lower-I : begin
 			local xMiddle : xMiddleT df
 			include : Body df XH xMiddle
 			include : HBar.t df.leftSB df.rightSB XH
+
+			currentGlyph.deleteBaseAnchor 'trailing'
 
 	do "i glyphs"
 		select-variant 'dotlessi' 0x131
