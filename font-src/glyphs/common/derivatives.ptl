@@ -8,17 +8,16 @@ extern Map
 glyph-module
 
 glyph-block Common-Derivatives : begin
-	glyph-block-export ApplyCv
 	define [ApplyCv g shapeFrom follow para] : begin
-		foreach { kPrime prime } para.variants.primes : foreach h [prime.variants.values] : begin
-			local suffix : h.resolveFor para follow
-			if suffix : begin
+		foreach { kPrime prime } para.variants.primes : foreach pv [prime.variants.values] : begin
+			local suffix : pv.resolveFor para follow
+			if (para.enableCvSs && pv.tag && pv.rank && suffix) : begin
 				local dstName : shapeFrom + '.' + suffix
 				local dst : glyphStore.queryByName dstName
 				if dst : g.dependsOn dst
-				if (para.enableCvSs && h.tag && h.rank) : begin
-					[Cv h.tag h.rank h.groupRank h.description].set g dstName
-					if h.nonDeriving : [Cv h.tag h.rank].setPreventDeriving g
+
+				pv.set g dstName
+				if pv.nonDeriving : pv.setPreventDeriving g
 
 	glyph-block-export select-variant
 	define [select-variant] : with-params [name unicode [shapeFrom name] [follow name] [reduction null]] : begin
