@@ -404,7 +404,7 @@ function byTagPreference(a, b) {
 		ub = b.tag.toUpperCase();
 	if (ua < ub) return -1;
 	if (ua > ub) return 1;
-	return 0;
+	return a.rank - b.rank;
 }
 function queryCvFeatureTagsOf(sink, gid, glyph, tagSet) {
 	const cvs = AnyCv.query(glyph).sort(byTagPreference);
