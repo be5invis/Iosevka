@@ -1,5 +1,12 @@
 ## Modifications since last major version
 
+### 27.3.1
+
+* Fix application of `cv39` on italic Cyrillic Yat.
+* Fix mark placement for `U+024F`.
+* Fix overlay placement of Tugrik Sign (U+20AE) under Etoile (#2060).
+
+
 ### 27.3.0
 
 * Make the tailed variants of `i` and `l` use the fully-tailed shape even when upright, as is consistent with `t = bent-hook` (#1692).

@@ -8,17 +8,17 @@ extern Map
 glyph-module
 
 glyph-block Common-Derivatives : begin
-	glyph-block-export ApplyCv
 	define [ApplyCv g shapeFrom follow para] : begin
-		foreach { kPrime prime } para.variants.primes : foreach h [prime.variants.values] : begin
-			local suffix : h.resolveFor para follow
+		foreach { kPrime prime } para.variants.primes : foreach pv [prime.variants.values] : begin
+			local suffix : pv.resolveFor para follow
 			if suffix : begin
 				local dstName : shapeFrom + '.' + suffix
-				local dst : glyphStore.queryByName dstName
-				if dst : g.dependsOn dst
-				if (para.enableCvSs && h.tag && h.rank) : begin
-					[Cv h.tag h.rank h.groupRank h.description].set g dstName
-					if h.nonDeriving : [Cv h.tag h.rank].setPreventDeriving g
+				local dstGlyph : query-glyph dstName
+				if dstGlyph : g.dependsOn dstGlyph
+
+				if (para.enableCvSs && pv.tag && pv.rank) : begin
+					pv.set g dstName
+					if pv.nonDeriving : pv.setPreventDeriving g
 
 	glyph-block-export select-variant
 	define [select-variant] : with-params [name unicode [shapeFrom name] [follow name] [reduction null]] : begin
@@ -30,11 +30,18 @@ glyph-block Common-Derivatives : begin
 			throw : new Error "Variant for \(name) (selector: \(shapeFrom)) is not assigned."
 
 		create-glyph name unicode : glyph-proc
-			include [refer-glyph (shapeFrom + '.' + variant)] AS_BASE ALSO_METRICS
+			local fromGlyphName : shapeFrom + '.' + variant
+			local fromGlyph : query-glyph fromGlyphName
+			if [not fromGlyph] : throw : new Error "Cannot find glyph '\(fromGlyphName)'"
+
+			include fromGlyph AS_BASE ALSO_METRICS
+			currentGlyph.dependsOn fromGlyph
+			currentGlyph.cloneRankFromGlyph fromGlyph
+
 			ApplyCv currentGlyph shapeFrom follow para
-			currentGlyph.cloneRankFromGlyph [query-glyph (shapeFrom + '.' + variant)]
+
 			foreach gr [items-of SvInheritableRelations] : begin
-				local v : gr.get [query-glyph (shapeFrom + '.' + variant)]
+				local v : gr.get fromGlyph
 				if v : gr.set this v
 
 	glyph-block-export orthographic-italic
