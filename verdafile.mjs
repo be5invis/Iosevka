@@ -908,6 +908,7 @@ const AmendReadme = task("amend-readme", async target => {
 		AmendReadmeFor("doc/character-variants.md"),
 		AmendReadmeFor("doc/custom-build.md"),
 		AmendReadmeFor("doc/language-specific-ligation-sets.md"),
+		AmendReadmeFor("doc/cv-influences.md"),
 		AmendLicenseYear
 	);
 });

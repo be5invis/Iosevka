@@ -181,7 +181,7 @@ class Prime {
 	}
 }
 
-class PrimeVariant {
+export class PrimeVariant {
 	constructor(key, tag, cfg) {
 		this.key = key;
 		this.tag = tag;
@@ -199,6 +199,36 @@ class PrimeVariant {
 	}
 	resolve(para, vs) {
 		Object.assign(vs, this.selector);
+	}
+
+	// Gr methods
+	get(glyph) {
+		if (glyph && glyph.related && glyph.related.cv) return glyph.related.cv.get(this);
+		else return null;
+	}
+	set(glyph, toGid) {
+		if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
+		if (!glyph.related) glyph.related = {};
+		if (!glyph.related.cv) glyph.related.cv = new Map();
+		glyph.related.cv.set(this, toGid);
+	}
+	getPreventDeriving(glyph) {
+		return (
+			glyph.related &&
+			glyph.related.preventCvDeriving &&
+			!!glyph.related.preventCvDeriving.has(this)
+		);
+	}
+	setPreventDeriving(glyph) {
+		if (!glyph.related) glyph.related = {};
+		if (!glyph.related.preventCvDeriving) glyph.related.preventCvDeriving = new Set();
+		glyph.related.preventCvDeriving.add(this);
+	}
+	amendName(name) {
+		return name + "." + this.tag + "-" + this.rank;
+	}
+	amendOtName(name) {
+		return this.amendName(name);
 	}
 }
 
