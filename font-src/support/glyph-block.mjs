@@ -1,3 +1,22 @@
+export class GlyphBuildExecutor {
+	constructor() {
+		this.currentBlockName = null;
+		this.dependencyManager = new DependencyManager();
+		this.pendingGlyphBlocks = [];
+		this.glyphBlockStore = {};
+	}
+	setGlyphToBlockDependency(glyph) {
+		if (this.currentBlockName) {
+			this.dependencyManager.glyphToBlock.set(glyph, this.currentBlockName);
+		}
+	}
+	defineGlyphBlock(capture, blockName, body) {
+		const block = new GlyphBlock(capture, this, blockName, body);
+		this.glyphBlockStore[blockName] = block;
+		this.pendingGlyphBlocks.push(block);
+	}
+}
+
 export class RecursiveBuildFilter {
 	constructor(glyphIdFilter) {
 		this.glyphIdFilter = glyphIdFilter;
@@ -48,34 +67,23 @@ export class DependencyManager {
 	}
 }
 
-export class GlyphBlockExecState {
-	constructor() {
-		this.currentBlockName = null;
-		this.dependencyManager = new DependencyManager();
-	}
-	setGlyphToBlockDependency(glyph) {
-		if (this.currentBlockName) {
-			this.dependencyManager.glyphToBlock.set(glyph, this.currentBlockName);
-		}
-	}
-}
-
 export class GlyphBlock {
 	constructor(capture, execState, blockName, body) {
 		this.capture = capture;
 		this.execState = execState;
 		this.blockName = blockName;
 		this.body = body;
-		this.resolved = false;
+		this.resolved = 0;
 		this.exports = {};
 	}
 	resolve() {
-		if (this.resolved) return this.exports;
+		if (this.resolved == 2) return this.exports;
+		if (this.resolved == 1) throw new Error(`Circular dependency detected: ${this.blockName}`);
+		this.resolved = 1;
 
 		const prevBlockName = this.execState.currentBlockName;
 		this.execState.currentBlockName = this.blockName;
 
-		this.resolved = true;
 		const pendingApplications = [];
 		const ExportCapture = fnObj => {
 			pendingApplications.push(() => {
@@ -88,6 +96,7 @@ export class GlyphBlock {
 		for (const f of pendingApplications) f();
 
 		this.execState.currentBlockName = prevBlockName;
+		this.resolved = 2;
 		return this.exports;
 	}
 }

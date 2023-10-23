@@ -1,6 +1,6 @@
 import [Glyph] from"../support/glyph/index.mjs"
 import [GlyphStore] from"../support/glyph-store.mjs"
-import [GlyphBlock GlyphBlockExecState] from"../support/glyph-block.mjs"
+import [GlyphBlock GlyphBuildExecutor] from"../support/glyph-block.mjs"
 import as Gr from"../support/gr.mjs"
 import as SpiroKit from"../kits/spiro-kit.mjs"
 import as BooleKit from"../kits/boole-kit.mjs"
@@ -8,27 +8,32 @@ import [DesignParameters] from"../meta/aesthetics.mjs"
 
 extern isFinite
 
-import [mix linreg clamp fallback $NamedParameterPair$] from"../support/utils.mjs"
+import [$NamedParameterPair$] from"../support/utils.mjs"
 import [calculateMetrics setFontMetrics GenDivFrame] from"../meta/aesthetics.mjs"
 
 $$include '../meta/macros.ptl'
 
 export : define [buildGlyphs para recursive] : begin
+	# Execution and dependency management
+	local $Exec$ : new GlyphBuildExecutor
+	define [glyph-is-needed name] : [not recursive] || [recursive.glyphIsNeeded name]
+
+	# Initialize glyph store
 	local glyphStore : new GlyphStore
 
+	# Font metrics
 	define Metrics : calculateMetrics para
-
 	define fontMetrics { .head {.} .hhea {.} .os2 {.} .post {.} }
 	setFontMetrics para Metrics fontMetrics
+
+	# Glyph metrics and parameters
+	define DivFrame : GenDivFrame Metrics
+	define MarkSet    [DivFrame 1 2].markSet
 
 	# Anchor parameters
 	define {AS_BASE ALSO_METRICS} {'AS-BASE' 'ALSO-METRICS'}
 
-	define DivFrame : GenDivFrame Metrics
-	define MarkSet    [DivFrame 1 2].markSet
-
-	define [glyph-is-needed name] : [not recursive] || [recursive.glyphIsNeeded name]
-
+	# The callback used to create and save glyphs
 	define [$createAndSaveGlyphImpl$ _1 _2 actions] : begin
 		local saveGlyphName    null
 		local unicode          null
@@ -50,35 +55,25 @@ export : define [buildGlyphs para recursive] : begin
 		local glyphObject [new Glyph saveGlyphName]
 		glyphObject.setWidth Metrics.Width
 		glyphObject.gizmo = Metrics.GlobalTransform
-		glyphObject._m_dependencyManager = $execState$.dependencyManager
+		glyphObject._m_dependencyManager = $Exec$.dependencyManager
 
 		glyphObject.include actions true true
 
-		$execState$.setGlyphToBlockDependency glyphObject
+		$Exec$.setGlyphToBlockDependency glyphObject
 
 		if saveGlyphName : begin
 			if (saveGlyphName.0 != '.' && [glyphStore.queryByName saveGlyphName])
 				throw : new Error "Glyph \(saveGlyphName) already exists"
 			glyphStore.addGlyph saveGlyphName glyphObject
-			if unicode : $assignUnicodeImpl$ glyphObject unicode
+			if unicode : begin
+				local u unicode
+				if ([typeof unicode] === "string") : begin
+					set u [unicode.codePointAt 0]
+				glyphStore.encodeGlyph u glyphObject
 
 		return glyphObject
 
-	define [$assignUnicodeImpl$ g unicode] : begin
-		local u unicode
-		if ([typeof unicode] === "string") : begin
-			set u [unicode.codePointAt 0]
-		glyphStore.encodeGlyph u g
-
-	local $pendingGlyphBlocks$ {}
-	local $execState$ : new GlyphBlockExecState
-	define [$defineGlyphBlockImpl$ $Capture$ blockName body] : begin
-		local glyphBlock : new GlyphBlock $Capture$ $execState$ blockName body
-		if [not $Capture$.(blockName)] : set $Capture$.(blockName) glyphBlock
-		$pendingGlyphBlocks$.push glyphBlock
-
-	### Spiro constructions
-	# Basic knots
+	# Spiro kit and boole kit
 	define SpiroFns : SpiroKit.SetupBuilders : object
 		globalTransform Metrics.GlobalTransform
 		Contrast        Metrics.Contrast
@@ -87,22 +82,12 @@ export : define [buildGlyphs para recursive] : begin
 		Superness       DesignParameters.superness
 	define BooleFns : BooleKit.SetupBuilders : object
 		globalTransform Metrics.GlobalTransform
-		Glyph           Glyph
 
-	# Meta
-	define [tagged tag component] : function [ca cw] : begin
-		define t this.ctxTag
-		set this.ctxTag tag
-		define ret : this.include component ca cw
-		set this.ctxTag t
-		return ret
-
+	# Setup the capture
 	define $$Capture$$ : object
 		$createAndSaveGlyphImpl$
 		$NamedParameterPair$
-		$assignUnicodeImpl$
-		$defineGlyphBlockImpl$
-		$execState$
+		$Exec$
 		Metrics : Object.assign {.} Metrics
 		para
 		recursive
@@ -115,12 +100,11 @@ export : define [buildGlyphs para recursive] : begin
 		ALSO_METRICS
 		glyph-is-needed
 		buildGlyphs
-		tagged
 		fontMetrics
 
 	### HERE WE GO
-	run-glyph-module "./common/shapes.mjs"
 	run-glyph-module "./common/derivatives.mjs"
+	run-glyph-module "./common/shapes.mjs"
 	run-glyph-module "./space/index.mjs"
 	run-glyph-module "./marks/index.mjs"
 
@@ -148,12 +132,13 @@ export : define [buildGlyphs para recursive] : begin
 
 	# Auto-builds
 	if [not recursive] : begin
+		run-glyph-module "./auto-build/recursive-build.mjs"
 		run-glyph-module "./auto-build/mark-doppelganger.mjs"
 		run-glyph-module "./auto-build/accents.mjs"
 		run-glyph-module "./auto-build/transformed.mjs"
 		run-glyph-module "./auto-build/composite.mjs"
 
-	foreach [gb : items-of $pendingGlyphBlocks$] : gb.resolve
+	foreach [gb : items-of $Exec$.pendingGlyphBlocks] : gb.resolve
 
 	Gr.linkSuffixPairGr glyphStore 'NWID' 'WWID' Gr.Nwid Gr.Wwid
 	Gr.linkSuffixPairGr glyphStore 'lnum' 'onum' Gr.Lnum Gr.Onum
