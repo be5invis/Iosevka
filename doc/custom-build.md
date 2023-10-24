@@ -619,3 +619,12 @@ It is possible to create a customized TTC build by using the following method:
  2. Run build with the following command:
   - `npm run build -- ttc::iosevka-custom`: Create TTCs from collection `iosevka-custom`; The file will be saved into `dist/.ttc`.
   - `npm run build -- super-ttc::iosevka-custom`: Create a single-file TTC from collection `iosevka-custom`; The file will be saved into `dist/.super-ttc`.
+
+### Baking other OpenType features
+
+There are tools tha could be used to bake other OpenType that are not configurable with TOML files (like baking localized forms). The tools include:
+
+ * https://mutsuntsai.github.io/fontfreeze/
+ * https://github.com/twardoch/fonttools-opentype-feature-freezer
+
+These tools could be used in post-processing fonts. Please refer their documents for instructions.
