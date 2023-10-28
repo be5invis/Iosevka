@@ -13,9 +13,11 @@ export async function buildFont(argv, para) {
 	const baseFont = CreateEmptyFont(argv);
 	assignFontNames(baseFont, para.naming, para.isQuasiProportional);
 
+	// Build glyphs
 	const gs = buildGlyphs(para);
 	copyFontMetrics(gs.fontMetrics, baseFont);
 
+	// Build OTL
 	const otl = buildOtl(para, gs.glyphStore);
 
 	// Regulate
@@ -25,12 +27,13 @@ export async function buildFont(argv, para) {
 			for (let p = start; p <= end; p++) excludeChars.add(p);
 		}
 	}
+
 	// Finalize (like geometry conversion)
 	const cache = await Caching.load(argv.iCache, argv.menu.version, argv.cacheFreshAgeKey);
 	const finalGs = finalizeFont(cache, para, gs.glyphStore, excludeChars, otl);
-	if (cache.isUpdated()) {
-		await Caching.save(argv.oCache, argv.menu.version, cache, true);
-	}
+	if (cache.isUpdated()) await Caching.save(argv.oCache, argv.menu.version, cache, true);
+
+	// Convert to TTF
 	const font = await convertOtd(baseFont, otl, finalGs);
 	const ttfaControls = await generateTtfaControls(finalGs, font.glyphs);
 	return { font, glyphStore: finalGs, cacheUpdated: cache.isUpdated(), ttfaControls };

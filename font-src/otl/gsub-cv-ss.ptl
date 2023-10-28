@@ -92,11 +92,11 @@ export : define [buildCVSS gsub para glyphStore] : begin
 			if (variant.tag && variant.rank) : cvGrs.push variant
 		cvGrs.sort AnyCv.compare
 
-		foreach gr [items-of cvGrs] : begin
-			local cvAlt : [cvs.get gr.tag].createAlternateSubst
-			foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
+		foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
+			foreach gr [items-of cvGrs] : begin
 				local subst : gr.get glyph
 				if (subst && subst != gn) : begin
+					local cvAlt : [cvs.get gr.tag].createAlternateSubst
 					if [not cvAlt.substitutions.(gn)] : set cvAlt.substitutions.(gn) { }
 					set cvAlt.substitutions.(gn).(gr.rank - 1) : glyphStore.ensureExists subst
 
@@ -114,9 +114,12 @@ export : define [buildCVSS gsub para glyphStore] : begin
 		foreach gr [items-of ssGrs] : begin
 			local cvSingle : [cvs.get gr.tag].createSingleSubstFor gr.rank
 			feature.addLookup cvSingle
-			foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
+
+		foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
+			foreach gr [items-of ssGrs] : begin
 				local subst : gr.get glyph
 				if (subst && subst != gn) : begin
+					local cvSingle : [cvs.get gr.tag].createSingleSubstFor gr.rank
 					set cvSingle.substitutions.(gn) : glyphStore.ensureExists subst
 
 	do "Cleanup and link dependency"

@@ -31,7 +31,7 @@ const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
 
 const PATEL_C = ["node", "node_modules/patel/bin/patel-c"];
-const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
+const MAKE_TTC = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
 const SEVEN_ZIP = process.env.SEVEN_ZIP_PATH || "7z";
 const TTFAUTOHINT = process.env.TTFAUTOHINT_PATH || "ttfautohint";
 
@@ -130,13 +130,25 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	const rawBuildPlans = rp.buildPlans;
 
+	// Initialize build plans
 	const returnBuildPlans = {};
-	const fileNameToBpMap = {};
 	for (const prefix in rawBuildPlans) {
 		const bp = { ...rawBuildPlans[prefix] };
-		validateAndShimBuildPlans(prefix, bp, rp.weights, rp.slopes, rp.widths);
+		if (!bp.family) fail(`Build plan for ${prefix} does not have a family name. Exit.`);
 		bp.webfontFormats = bp["webfont-formats"] || defaultWebFontFormats;
 		bp.targets = [];
+		returnBuildPlans[prefix] = bp;
+	}
+
+	// Resolve WWS, including inheritance and default config
+	for (const prefix in rawBuildPlans) {
+		resolveWws(prefix, returnBuildPlans, rp);
+	}
+
+	// Create file name to BP mapping
+	const fileNameToBpMap = {};
+	for (const prefix in rawBuildPlans) {
+		const bp = returnBuildPlans[prefix];
 		const weights = bp.weights,
 			slopes = bp.slopes,
 			widths = bp.widths;
@@ -157,31 +169,31 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 
 function linkSpacingDerivableBuildPlans(bps) {
 	for (const pfxTo in bps) {
-		const planTo = bps[pfxTo];
-		const planToVal = rectifyPlanForSpacingDerivation(planTo);
-		if (blockSpacingDerivation(planTo)) continue;
-		if (!isLinkDeriveToSpacing(planTo.spacing)) continue;
+		const bpTo = bps[pfxTo];
+		if (blockSpacingDerivation(bpTo)) continue;
+		if (!isDeriveToSpacing(bpTo.spacing)) continue;
 		for (const pfxFrom in bps) {
-			const planFrom = bps[pfxFrom];
-			if (!isLinkDeriveFromSpacing(planFrom.spacing)) continue;
-			const planFromVal = rectifyPlanForSpacingDerivation(planFrom);
-			if (!deepEqual(planToVal, planFromVal)) continue;
-			planTo.spacingDeriveFrom = pfxFrom;
+			const bpFrom = bps[pfxFrom];
+			if (!isDeriveFromSpacing(bpFrom.spacing)) continue;
+			if (!spacingDeriveCompatible(pfxTo, bpTo, pfxFrom, bpFrom)) continue;
+			bpTo.spacingDeriveFrom = pfxFrom;
 		}
 	}
 }
-
 function blockSpacingDerivation(bp) {
 	return !!bp["compatibility-ligatures"];
 }
-function isLinkDeriveToSpacing(spacing) {
+function isDeriveToSpacing(spacing) {
 	return spacing === "term" || spacing === "fontconfig-mono" || spacing === "fixed";
 }
-function isLinkDeriveFromSpacing(spacing) {
+function isDeriveFromSpacing(spacing) {
 	return !spacing || spacing === "normal";
 }
-
-function rectifyPlanForSpacingDerivation(p) {
+function spacingDeriveCompatible(pfxTo, bpTo, pfxFrom, bpFrom) {
+	// If the two build plans are the same, then they are compatible.
+	return deepEqual(rectifyPlanForSpacingDerive(bpTo), rectifyPlanForSpacingDerive(bpFrom));
+}
+function rectifyPlanForSpacingDerive(p) {
 	return {
 		...p,
 		family: "#Validation",
@@ -749,7 +761,7 @@ const GlyfTtc = file.make(
 async function buildCompositeTtc(out, inputs) {
 	const inputPaths = inputs.map(f => f.full);
 	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), inputPaths);
-	await absolutelySilently.run(TTCIZE, ["-o", out.full], inputPaths);
+	await absolutelySilently.run(MAKE_TTC, ["-o", out.full], inputPaths);
 }
 
 async function buildGlyphSharingTtc(target, parts, out) {
@@ -757,7 +769,7 @@ async function buildGlyphSharingTtc(target, parts, out) {
 	const [ttfInputs] = await target.need(parts.map(part => BuildNoGcTtf(part.dir, part.file)));
 	const ttfInputPaths = ttfInputs.map(p => p.full);
 	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), ttfInputPaths);
-	await silently.run(TTCIZE, "-u", ["-o", out.full], ttfInputPaths);
+	await silently.run(MAKE_TTC, "-u", ["-o", out.full], ttfInputPaths);
 }
 
 ///////////////////////////////////////////////////////////
@@ -1179,21 +1191,48 @@ const Parameters = task(`meta:parameters`, async target => {
 ///////////////////////////////////////////////////////////
 
 // Build plan validation
-function validateAndShimBuildPlans(prefix, bp, dWeights, dSlopes, dWidths) {
-	if (!bp.family) {
-		fail(`Build plan for ${prefix} does not have a family name. Exit.`);
-	}
+
+function resolveWws(bpName, buildPlans, defaultConfig) {
+	const bp = buildPlans[bpName];
+	if (!bp) fail(`Build plan ${bpName} not found.`);
+
 	if (!bp.slopes && bp.slants) {
-		echo.warn(
-			`Build plan for ${prefix} uses legacy "slants" to define slopes. ` +
+		fail(
+			`Build plan for ${bpName} uses legacy "slants" to define slopes. ` +
 				`Use "slopes" instead.`
 		);
 	}
 
-	bp.weights = shimBpAspect("weights", bp.weights, dWeights);
-	bp.slopes = shimBpAspect("slopes", bp.slopes || bp.slants, dSlopes);
-	bp.widths = shimBpAspect("widths", bp.widths, dWidths);
+	bp.weights = resolveWwsAspect("weights", bpName, buildPlans, defaultConfig, []);
+	bp.widths = resolveWwsAspect("widths", bpName, buildPlans, defaultConfig, []);
+	bp.slopes = resolveWwsAspect("slopes", bpName, buildPlans, defaultConfig, []);
 }
+
+function resolveWwsAspect(aspectName, bpName, buildPlans, defaultConfig, deps) {
+	const bp = buildPlans[bpName];
+	if (!bp) fail(`Build plan ${bpName} not found.`);
+
+	if (bp[aspectName]) {
+		return shimBpAspect(aspectName, bp[aspectName], defaultConfig[aspectName]);
+	} else if (bp[`${aspectName}-inherits`]) {
+		const inheritedPlanName = bp[`${aspectName}-inherits`];
+		const inheritedPlan = buildPlans[inheritedPlanName];
+		if (deps.includes(inheritedPlan))
+			fail(`Circular dependency detected when resolving ${aspectName} of ${bp.family}.`);
+
+		const updatedDes = [...deps, bpName];
+		return resolveWwsAspect(
+			aspectName,
+			inheritedPlanName,
+			buildPlans,
+			defaultConfig,
+			updatedDes
+		);
+	} else {
+		return defaultConfig[aspectName];
+	}
+}
+
 function shimBpAspect(aspectName, aspect, defaultAspect) {
 	if (!aspect) return defaultAspect;
 	const result = {};
