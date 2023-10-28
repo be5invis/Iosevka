@@ -19,9 +19,18 @@ glyph-block Letter-Latin-Lower-N : begin
 		if trAnchor : set-base-anchor 'trailing' (trAnchor.x + SideJut) trAnchor.y
 
 	define [NHTB df top] : VBar.l df.leftSB 0 top
-	define [NTopLeftSerif df top] : begin [local sf : SerifFrame.fromDf df top 0] sf.lt.outer
-	define [NBottomLeftSerif df y] : begin [local sf : SerifFrame.fromDf df Ascender y] sf.lb.full
-	define [NBottomLeftOuterSerif df y] : begin [local sf : SerifFrame.fromDf df Ascender y] sf.lb.outer
+	define [NTopLeftSerif df top] : begin
+		local sf : SerifFrame.fromDf df top 0
+		return sf.lt.outer
+	define [NBottomLeftSerif df y] : begin
+		local sf : SerifFrame.fromDf df Ascender y
+		return sf.lb.full
+	define [NBottomLeftOuterSerif df y] : begin
+		local sf : SerifFrame.fromDf df Ascender y
+		return sf.lb.outer
+	define [NBottomLeftYatSerif df y] : begin
+		local sf : SerifFrame.fromDf df Ascender y
+		return : if sf.enoughSpaceForFullSerifs sf.lb.full sf.lb.outer
 
 	define [NBottomRightSerifUpright df y] : glyph-proc
 		local sf : SerifFrame.fromDf df Ascender y
@@ -31,6 +40,9 @@ glyph-block Letter-Latin-Lower-N : begin
 		local sf : SerifFrame.fromDf df Ascender y
 		include sf.rb.outer
 		include : AdjustTrailingAnchor
+	define [NBottomRightYatSerif df y] : begin
+		local sf : SerifFrame.fromDf df Ascender y
+		return : if sf.enoughSpaceForFullSerifs sf.rb.full [no-shape]
 
 	define [EaredBody top left right yBR sw] : glyph-proc
 		include : VBar.l left 0 top sw
@@ -94,6 +106,13 @@ glyph-block Letter-Latin-Lower-N : begin
 					__                                                        NTopLeftSerif
 				begin NBottomLeftSerif
 				if (tail != 'tailed') NBottomRightSerifUpright
+			serifedItalicYat : list
+				match body
+					([Just "earlessCorner"] || [Just "earlessRounded"])       nothing
+					([Just "earlessCornerHTB"] || [Just "earlessRoundedHTB"]) NHTB
+					__                                                        NTopLeftSerif
+				begin NBottomLeftYatSerif
+				begin NBottomRightYatSerif
 
 	foreach { suffix { Body tailed {sLT sLB sRB} } } [Object.entries NConfig] : do
 		create-glyph "n.\(suffix)" : glyph-proc
@@ -219,11 +238,12 @@ glyph-block Letter-Latin-Lower-N : begin
 			local df : include : DivFrame para.diversityM 3
 			include : df.markSet.e
 
-			local xMidBarRight   : df.middle + [HSwToV : 0.5 * df.mvs]
-			include : Body XH df.leftSB xMidBarRight (XH - SmallArchDepthB - 0.1) df.mvs
+			local dfSub : df.slice 3 2
+			include : Body XH dfSub.leftSB dfSub.rightSB (XH - SmallArchDepthB - 0.1) dfSub.mvs
 
-			if sLT : include : sLT df XH
-			if sLB : include : sLB df 0
+			if sLT : include : sLT dfSub XH
+			if sLB : include : sLB dfSub 0
+			if sRB : include : sRB dfSub 0
 
 	select-variant 'n' 'n'
 	link-reduced-variant 'n/sansSerif' 'n' MathSansSerif

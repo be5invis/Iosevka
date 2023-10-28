@@ -117,16 +117,18 @@ glyph-block Letter-Latin-Upper-B : begin
 
 	define BConfig : SuffixCfg.weave
 		object # body
-			standard                  { StdShape                   StdMask        BBarPos           }
-			moreAsymmetric            { AsymmetricShape            AsymmetricMask AsymmetricBBarPos }
-			standardInterrupted       { StdShapeInterrupted        StdMask        BBarPos           }
-			moreAsymmetricInterrupted { AsymmetricShapeInterrupted AsymmetricMask AsymmetricBBarPos }
+			standard                  { StdShape                   StdMask        BBarPos           false }
+			moreAsymmetric            { AsymmetricShape            AsymmetricMask AsymmetricBBarPos false }
+			standardInterrupted       { StdShapeInterrupted        StdMask        BBarPos           true  }
+			moreAsymmetricInterrupted { AsymmetricShapeInterrupted AsymmetricMask AsymmetricBBarPos true  }
 		object # serifs
 			serifless         { false false }
 			unilateralSerifed { true  false }
 			bilateralSerifed  { true  true  }
 
-	foreach { suffix { {body mask bp} {ts bs} } } [Object.entries BConfig] : do
+	foreach { suffix { {body mask bp fGap} {ts bs} } } [Object.entries BConfig] : do
+		local fMotion : ts && !bs
+		local fAsymmetric : mask === AsymmetricMask
 		local currencySw : AdviceStroke2 3.5 3 CAP
 
 		create-glyph "B.\(suffix)" : glyph-proc
@@ -137,9 +139,22 @@ glyph-block Letter-Latin-Upper-B : begin
 			include [refer-glyph "B.\(suffix)"] AS_BASE ALSO_METRICS
 			include : BOverlayStroke CAP bp
 
-		create-glyph "BBar.\(suffix)" : glyph-proc
+		if (!fMotion) : create-glyph "Bhookleft.\(suffix)" : glyph-proc
+			include [refer-glyph "B.\(suffix)"] AS_BASE ALSO_METRICS
+			eject-contour "serifLT"
+			include : LeftHook SB CAP
+
+		if (!fGap) : create-glyph "BBar.\(suffix)" : glyph-proc
 			include [refer-glyph "B.\(suffix)"] AS_BASE ALSO_METRICS
 			include : BOverlayBar CAP bp
+
+		if (!fAsymmetric) : create-glyph "smcpB.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : body XH [AdviceStroke2 2 3 XH] ts bs
+
+		if (!fGap && !fAsymmetric) : create-glyph "smcpBBar.\(suffix)" : glyph-proc
+			include [refer-glyph "smcpB.\(suffix)"] AS_BASE ALSO_METRICS
+			include : BOverlayBar XH bp
 
 		create-glyph "currency/baht.\(suffix)" : union
 			body CAP currencySw ts bs
@@ -149,14 +164,6 @@ glyph-block Letter-Latin-Upper-B : begin
 		create-glyph "currency/bitcoin.\(suffix)" : union
 			body CAP currencySw ts bs
 			difference [BitcoinBar : AdviceStroke 5] [mask CAP : AdviceStroke2 2 3 CAP]
-
-		create-glyph "smcpB.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : body XH [AdviceStroke2 2 3 XH] ts bs
-
-		create-glyph "smcpBBar.\(suffix)" : glyph-proc
-			include [refer-glyph "smcpB.\(suffix)"] AS_BASE ALSO_METRICS
-			include : BOverlayBar XH bp
 
 		create-glyph "latn/Beta.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
@@ -180,7 +187,9 @@ glyph-block Letter-Latin-Upper-B : begin
 	alias 'cyrl/ve.upright' null 'smcpB'
 
 	select-variant 'BBar'
-	select-variant 'smcpBBar' 0x1D03 (follow -- 'BBar')
+	select-variant 'smcpBBar' 0x1D03
+
+	select-variant 'Bhookleft' 0x181
 
 	create-glyph 'mathbb/B' 0x1D539 : glyph-proc
 		include : MarkSet.capital
@@ -192,11 +201,6 @@ glyph-block Letter-Latin-Upper-B : begin
 					VBar.r (RightSB - BBD - OX * 2) 0 (CAP * BBarPos) BBS
 					VBar.r ([mix SB RightSB BArcMix] - BBD - OX * 2) (CAP * BBarPos) CAP BBS
 					VBar.l (SB + BBD) 0 CAP BBS
-
-	derive-glyphs 'Bhookleft' 0x181 'B' : lambda [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		eject-contour "serifLT"
-		include : LeftHook SB CAP
 
 	define [ItalicCyrveShape top] : glyph-proc
 		local stroke : AdviceStroke2 2 3 top

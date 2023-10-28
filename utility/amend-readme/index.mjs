@@ -112,6 +112,7 @@ async function processSsStyles() {
 		if (!gr.rank) continue;
 		md.log(`  - \`${gr.tag}\`: Set character variant to “${gr.description}”.`);
 	}
+	md.log(`  - Other build plans’ configuration, using \`inherits = "buildPlans.<Plan name>"\`.`);
 	return md;
 }
 
