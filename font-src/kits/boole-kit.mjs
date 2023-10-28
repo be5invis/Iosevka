@@ -1,6 +1,7 @@
 import * as TypoGeom from "typo-geom";
 
 import { BooleanGeometry, TransformedGeometry } from "../support/geometry/index.mjs";
+import { Glyph } from "../support/glyph/index.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 class BooleImpl {
@@ -14,7 +15,7 @@ class BooleImpl {
 		const forwardGizmo = glyph.gizmo || this.bindings.GlobalTransform;
 		const backwardGizmo = forwardGizmo.inverse();
 		for (const operand of this.operands) {
-			const g1 = new this.bindings.Glyph();
+			const g1 = new Glyph();
 			g1.gizmo = forwardGizmo;
 			g1.include(operand);
 			operandGeometries.push(new TransformedGeometry(g1.geometry, backwardGizmo));

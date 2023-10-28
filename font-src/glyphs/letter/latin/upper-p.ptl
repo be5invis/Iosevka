@@ -141,6 +141,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		openSerifed           { true   PShape.SlabAsymmetric           RevPShape.SlabAsymmetric           }
 
 	foreach { suffix { fGap slabs revSlabs } } [Object.entries PConfig] : do
+		local fMotion : slabs === PShape.SlabMotion
 		local fSlabBot : slabs && slabs !== PShape.SlabMotion
 
 		create-glyph "P.\(suffix)" : glyph-proc
@@ -154,6 +155,11 @@ glyph-block Letter-Latin-Upper-P : begin
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
 			include : SetGrekUpperTonos [if slabs (-SideJut) 0]
 
+		if (!fMotion) : create-glyph "PHookLeft.\(suffix)" : glyph-proc
+			include [refer-glyph "P.\(suffix)"] AS_BASE
+			eject-contour "serifLT"
+			include : LeftHook (SB * 1.25) CAP
+
 		create-glyph "smcpP.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : LeaningAnchor.Below.VBar.l (SB * PShape.defaultMul)
@@ -161,7 +167,7 @@ glyph-block Letter-Latin-Upper-P : begin
 				PShape XH (slab -- slabs)
 				if fGap [PShape.OpenGap (top -- XH) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
 
-		create-glyph "currency/rubleSign.\(suffix)" : glyph-proc
+		if (!fGap) : create-glyph "currency/rubleSign.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
 			define bar1pos : [PBarPosY CAP Stroke PShape.BarPos] + HalfStroke
 
@@ -175,11 +181,6 @@ glyph-block Letter-Latin-Upper-P : begin
 			include : HOverlayBar xCrossBarLeft xPLeft bar1pos Stroke
 			include : HOverlayBar xCrossBarLeft xCrossBarRight yCrossbar
 
-		create-glyph "PHookLeft.\(suffix)" : glyph-proc
-			include [refer-glyph "P.\(suffix)"] AS_BASE
-			eject-contour "serifLT"
-			include : LeftHook (SB * 1.25) CAP
-
 		create-glyph "currency/pesoSign.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
 			define bar1pos : PBarPosY CAP Stroke PShape.BarPos
@@ -190,16 +191,19 @@ glyph-block Letter-Latin-Upper-P : begin
 
 	select-variant 'P' 'P'
 	link-reduced-variant 'P/sansSerif' 'P' MathSansSerif
-	select-variant 'smcpP' 0x1D18 (follow -- 'P')
-	alias 'grek/smcpRho' 0x1D29 'smcpP'
 
 	select-variant 'grek/Rho' 0x3A1 (follow -- 'P')
 	link-reduced-variant 'grek/Rho/sansSerif' 'grek/Rho' MathSansSerif (follow -- 'P/sansSerif')
+
+	select-variant 'smcpP' 0x1D18 (follow -- 'P')
+	alias 'grek/smcpRho' 0x1D29 'smcpP'
+
 	alias 'cyrl/Er' 0x420 'P'
+
+	select-variant 'PHookLeft' 0x1A4
 
 	select-variant 'currency/rubleSign' 0x20BD
 	select-variant 'currency/pesoSign' 0x20B1 (follow -- 'P')
-	select-variant 'PHookLeft' 0x1A4
 
 	derive-glyphs 'cyrl/ErTick' 0x48E 'cyrl/Er' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS

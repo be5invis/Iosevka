@@ -70,16 +70,16 @@ async function getParameters() {
 		};
 		return para;
 	}
-	function reinit(argv) {
+	function paraT(argv) {
 		const para = createParaImpl(argv);
-		para.reinit = function (tf) {
+		para.createFork = function (tf) {
 			const argv1 = deepClone(argv);
 			tf(argv1, argv);
-			return reinit(argv1);
+			return paraT(argv1);
 		};
 		return para;
 	}
-	return reinit;
+	return paraT;
 }
 async function tryParseToml(str) {
 	try {
