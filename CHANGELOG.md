@@ -1,5 +1,13 @@
 ## Modifications since last major version
 
+### 27.3.2
+
+* Fix overlapping serifs of italic Yat (#2061).
+* Fix width of VERY MUCH GREATER-THAN (`U+22D9`).
+* Remove duplicate variants for `U+0181`, `U+018A`, `U+01A4`, and `U+2C64`.
+* Remove asymmetric variants for small capital `B` (`U+0299`, `U+1D03`) and Cyrillic Lower Ve (`U+0432`).
+
+
 ### 27.3.1
 
 * Fix application of `cv39` on italic Cyrillic Yat.
