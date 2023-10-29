@@ -1,6 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [DependentSelector] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -8,11 +9,11 @@ glyph-block Letter-Cyrillic-Yat : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors
+	glyph-block-import Letter-Shared : CreateDependentComposite
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
 	glyph-block-import Letter-Cyrillic-Yeri : YeriConfig
 	glyph-block-import Letter-Cyrillic-Iotified-A : Iotified
-	glyph-block-import Letter-Shared-Shapes : nShoulderKnots
 
 	define [xBarLeft df] : Math.max (df.rightSB - (RightSB - SB)) : if SLAB
 		Just ([mix df.leftSB df.rightSB 0.35] - [HSwToV : 0.5 * df.mvs])
@@ -109,6 +110,8 @@ glyph-block Letter-Cyrillic-Yat : begin
 			eject-contour 'serifYeriLT'
 			eject-contour 'serifYeriLB'
 
+			DependentSelector.set currentGlyph : if (suffix === "corner") 'full' 'reduced'
+
 	select-variant 'cyrl/Yat' 0x462 (follow -- 'cyrl/YeriBar')
 	select-variant 'cyrl/yat.upright' (follow -- 'cyrl/yeriBar')
 	select-variant 'cyrl/yatTall' 0x1C87 (follow -- 'cyrl/yeriBar')
@@ -117,5 +120,8 @@ glyph-block Letter-Cyrillic-Yat : begin
 	select-variant 'cyrl/yatIotified' 0xA653 (follow -- 'cyrl/yeriBar')
 
 	select-variant 'cyrl/yat.italic/yeri' (follow -- 'cyrl/yeriBar')
-	derive-composites 'cyrl/yat.italic' null 'cyrl/yat.italic/base' 'cyrl/yat.italic/yeri'
+	CreateDependentComposite 'cyrl/yat.italic' null 'cyrl/yat.italic/yeri' : object
+		full    'cyrl/yat.italic/base/corner'
+		reduced 'cyrl/yat.italic/base/cursive'
+
 	alias 'latn/yatSakha.italic' null 'cyrl/yat.italic'
