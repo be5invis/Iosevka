@@ -20,15 +20,13 @@ export async function buildFont(argv, para) {
 	// Build OTL
 	const otl = buildOtl(para, gs.glyphStore);
 
-	// Regulate
+	// Regulate (like geometry conversion)
 	const excludeChars = new Set();
 	if (para.excludedCharRanges) {
 		for (const [start, end] of para.excludedCharRanges) {
 			for (let p = start; p <= end; p++) excludeChars.add(p);
 		}
 	}
-
-	// Finalize (like geometry conversion)
 	const cache = await Caching.load(argv.iCache, argv.menu.version, argv.cacheFreshAgeKey);
 	const finalGs = finalizeFont(cache, para, gs.glyphStore, excludeChars, otl);
 	if (cache.isUpdated()) await Caching.save(argv.oCache, argv.menu.version, cache, true);
