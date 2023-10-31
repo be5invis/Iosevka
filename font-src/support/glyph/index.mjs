@@ -6,8 +6,8 @@ import { Point, Vec2 } from "../geometry/point.mjs";
 import { Transform } from "../geometry/transform.mjs";
 
 export class Glyph {
-	constructor(_identifier) {
-		this._m_identifier = _identifier;
+	constructor(identifier) {
+		this._m_identifier = identifier;
 		// Ranks
 		this.glyphRank = 0;
 		this.grRank = 0;
@@ -65,6 +65,21 @@ export class Glyph {
 		if (!this._m_dependencyManager) return;
 		this._m_dependencyManager.addDependency(this, glyph);
 	}
+
+	// Copying
+	cloneFromGlyph(g) {
+		this.includeGlyph(g, true, true);
+		this.cloneRelationFromGlyph(g);
+		this.cloneRankFromGlyph(g);
+	}
+	cloneRelationFromGlyph(g) {
+		this.related = g.related;
+	}
+	cloneRankFromGlyph(g) {
+		this.glyphRank = g.glyphRank;
+		this.avoidBeingComposite = g.avoidBeingComposite;
+	}
+
 	// Inclusion
 	include(component, copyAnchors, copyWidth) {
 		if (!component) {
@@ -92,23 +107,6 @@ export class Glyph {
 		if (g.isMarkSet) throw new Error("Invalid component to be introduced.");
 		if (copyAnchors) this.copyAnchors(g);
 		if (copyWidth && g.advanceWidth >= 0) this.advanceWidth = g.advanceWidth;
-		this.dependsOn(g);
-	}
-	cloneFromGlyph(g) {
-		this.includeGlyph(g, true, true);
-		this.cloneRelationFromGlyph(g);
-		this.cloneRankFromGlyph(g);
-	}
-	cloneRelationFromGlyph(g) {
-		this.related = g.related;
-	}
-	cloneRankFromGlyph(g) {
-		this.glyphRank = g.glyphRank;
-		this.avoidBeingComposite = g.avoidBeingComposite;
-	}
-	includeGeometry(g) {
-		if (this.ctxTag) g = new Geom.TaggedGeometry(g, this.ctxTag);
-		this.geometry = Geom.combineWith(this.geometry, g);
 	}
 	includeGlyphImpl(g, shiftX, shiftY) {
 		if (g._m_identifier) {
@@ -118,6 +116,12 @@ export class Glyph {
 				new Geom.TransformedGeometry(g.geometry, Transform.Translate(shiftX, shiftY))
 			);
 		}
+	}
+	includeGeometry(g) {
+		let deps = g.getDependencies();
+		if (deps && deps.length) for (const dep of deps) this.dependsOn(dep);
+		if (this.ctxTag) g = new Geom.TaggedGeometry(g, this.ctxTag);
+		this.geometry = Geom.combineWith(this.geometry, g);
 	}
 	includeContours(cs, shiftX, shiftY) {
 		let parts = [];
