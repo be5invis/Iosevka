@@ -113,25 +113,20 @@ glyph-block Letter-Latin-Upper-Y : begin
 			include : YSlabs slabType CAP 0
 			eject-contour 'serifRT'
 
-		create-glyph "cyrl/ue.\(suffix)" : glyph-proc
-			include : MarkSet.p
-			include : YShape bodyType slabType XH Descender
-			include : YSlabs slabType XH Descender
+		if (slabType !== SLAB-BASE) : begin
+			create-glyph "cyrl/ue.\(suffix)" : glyph-proc
+				include : MarkSet.p
+				include : YShape bodyType slabType XH Descender
+				include : YSlabs slabType XH Descender
 
-		create-glyph "grek/upsilonHookedSymbolShape.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : UpsilonHookedSymbolShape CAP 0
-			include : YSlabs slabType CAP 0
-			eject-contour 'serifLT'
-			eject-contour 'serifRT'
-			include : SetGrekUpperTonos (OX - TailX / 3)
-
-		create-glyph "YStroke.\(suffix)" : glyph-proc
-			include [refer-glyph "Y.\(suffix)"] AS_BASE ALSO_METRICS
-			local b : YCrossPos CAP 0
-			local t : CAP - [if (slabType === SLAB-ALL || slabType === SLAB-MOTION) Stroke 0]
-			include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix b t 0.5]
-				Math.min OverlayStroke ((t - b) * 0.625)
+		if ((slabType === SLAB-NONE || slabType === SLAB-BASE) && bodyType === BODY-STRAIGHT) : begin
+			create-glyph "grek/UpsilonHookTop.\(suffix)" : glyph-proc
+				include : MarkSet.capital
+				include : UpsilonHookedSymbolShape CAP 0
+				include : YSlabs slabType CAP 0
+				eject-contour 'serifLT'
+				eject-contour 'serifRT'
+				include : SetGrekUpperTonos (OX - TailX / 3)
 
 		create-glyph "currency/yenSign.\(suffix)" : glyph-proc
 			include [refer-glyph "Y.\(suffix)"] AS_BASE ALSO_METRICS
@@ -139,21 +134,22 @@ glyph-block Letter-Latin-Upper-Y : begin
 
 	select-variant 'Y' 'Y'
 	link-reduced-variant 'Y/sansSerif' 'Y' MathSansSerif
-	select-variant 'YHookTop' 0x1B3 (follow -- 'Y')
 	select-variant 'smcpY' 0x28F (follow -- 'Y')
-	select-variant 'cyrl/ue' 0x4AF (follow -- 'Y')
-	select-variant 'grek/upsilonHookedSymbolShape' 0x3D2
+	select-variant 'YHookTop' 0x1B3 (follow -- 'Y')
 
 	select-variant 'grek/Upsilon' 0x3A5 (follow -- 'Y')
 	link-reduced-variant 'grek/Upsilon/sansSerif' 'grek/Upsilon' MathSansSerif (follow -- 'Y/sansSerif')
+	select-variant 'grek/UpsilonHookTop' 0x3D2
+
 	alias 'cyrl/Ue' 0x4AE 'Y'
-	select-variant 'currency/yenSign' 0xA5 (follow -- 'Y')
+	select-variant 'cyrl/ue' 0x4AF
+	CreateAccentedComposition 'cyrl/KazakhShortU' 0x4B0 'cyrl/Ue' 'barOver'
+	CreateAccentedComposition 'cyrl/KazakhShortu' 0x4B1 'cyrl/ue' 'barOver'
 
 	create-glyph 'YStrokeOverlay' : HOverlayBar ([mix 0 SB 0.5]) ([mix Width RightSB 0.5]) [mix 0 CAP 0.75]
 	derive-composites 'YStroke' 0x24E 'Y' 'YStrokeOverlay'
 
-	CreateAccentedComposition 'cyrl/KazakhShortU' 0x4B0 'cyrl/Ue' 'barOver'
-	CreateAccentedComposition 'cyrl/KazakhShortu' 0x4B1 'cyrl/ue' 'barOver'
+	select-variant 'currency/yenSign' 0xA5 (follow -- 'Y')
 
 	# Blackboard
 	glyph-block-import Letter-Blackboard : BBS BBD
