@@ -19,12 +19,12 @@ export class GlyphBuildExecutor {
 		}
 	}
 	executePendingBlocks() {
-		// if (!this.recursiveBuildFilter) {
-		for (const block of this.pendingGlyphBlocks) block.resolve();
-		// } else {
-		// for (const block of this.pendingGlyphBlocks)
-		// if (this.recursiveBuildFilter.blockIsNeeded(block.id)) block.resolve();
-		// }
+		if (!this.recursiveBuildFilter) {
+			for (const block of this.pendingGlyphBlocks) block.resolve();
+		} else {
+			for (const block of this.pendingGlyphBlocks)
+				if (this.recursiveBuildFilter.blockIsNeeded(block.id)) block.resolve();
+		}
 	}
 	defineGlyphBlock(capture, id, body) {
 		const block = new GlyphBlock(capture, this, id, body);
