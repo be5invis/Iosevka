@@ -1,5 +1,13 @@
 ## Modifications since last major version
 
+### 27.3.4
+
+* Disunify anonymous untagged variant selectors for Cyrillic Capital Yeri/Yery for consistency in style-driven configurations.
+* Make LATIN CAPITAL LETTER Y WITH LOOP (`U+1EFE`) follow variants of capital `Y` (`cv24`) for a more balanced slab-italic form like that of Cyrillic Capital U.
+* Remove `base-serifed`-only variants for CYRILLIC SMALL LETTER STRAIGHT U (`U+04AF`, `U+04B1`).
+* Make Etoile use `flat-bottom-serifed` for `M` and Cyrillic Lower Em (`cv13`, `cv74`).
+
+
 ### 27.3.3
 
 * Make `cv96` take effect on math asterisk operators (#2066).
