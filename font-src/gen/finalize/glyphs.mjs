@@ -107,6 +107,9 @@ class SimplifyGeometry extends Geom.GeometryBase {
 	asReferences() {
 		return null;
 	}
+	getDependencies() {
+		return this.m_geom.getDependencies();
+	}
 	filterTag(fn) {
 		return this.m_geom.filterTag(fn);
 	}

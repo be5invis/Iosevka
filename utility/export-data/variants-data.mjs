@@ -140,10 +140,10 @@ function uniqueHotChars(cfgDefault, cfgSS) {
 	}
 	return Array.from(s);
 }
-export async function parseVariantsData() {
+export async function parseVariantsData(fileName) {
 	const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 	const variantsToml = await fs.promises.readFile(
-		path.join(__dirname, "../../params/variants.toml"),
+		path.join(__dirname, "../../params/", fileName || "variants.toml"),
 		"utf8"
 	);
 	const varDatRaw = toml.parse(variantsToml);
