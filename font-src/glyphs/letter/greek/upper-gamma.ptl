@@ -43,11 +43,11 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	define GammaConfig : object
 		serifless       { SLAB-NONE   false }
 		topLeftSerifed  { SLAB-LT     false }
-		topRightSerifed { SLAB-TR     false }
-		bottomSerifed   { SLAB-BOTTOM false }
+		topRightSerifed { SLAB-TR     true  }
+		bottomSerifed   { SLAB-BOTTOM SLAB  }
 		serifed         { SLAB-ALL    true  }
 
-	foreach { suffix { slabType doSB } } [Object.entries GammaConfig] : do
+	foreach { suffix { slabType doSM } } [Object.entries GammaConfig] : do
 		create-glyph "grek/Gamma.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : GammaShape CAP slabType
@@ -57,9 +57,9 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 			include : GammaShape CAP slabType
 
 			local yBar : CAP * DesignParameters.upperEBarPos
-			include : HBar.m GammaBarLeft (RightSB - [xMidBarShrink slabType]) yBar
-			if slabType : include : tagged 'serifRM'
-				VSerif.dr (RightSB - [xMidBarShrink slabType]) (yBar + HalfStroke) [mix Stroke VJut 0.5]
+			include : HBar.m GammaBarLeft (RightSB - [xMidBarShrink doSM]) yBar
+			if doSM : include : tagged 'serifRM'
+				VSerif.dr (RightSB - [xMidBarShrink doSM]) (yBar + HalfStroke) [mix Stroke VJut 0.5]
 
 		create-glyph "cyrl/GheDescender.\(suffix)" : glyph-proc
 			include [refer-glyph "grek/Gamma.\(suffix)"] AS_BASE ALSO_METRICS
@@ -163,9 +163,11 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		include : BBBarLeft GammaBarLeft 0 CAP
 		include : HBar.t GammaBarLeft RightSB CAP BBS
 
-	create-glyph 'digamma' 0x3DD : glyph-proc
+	create-glyph 'grek/digamma' 0x3DD : glyph-proc
 		include : MarkSet.p
-		include : GammaShape (XH - Descender) SLAB-NONE
-		include : ApparentTranslate 0 Descender
-		local yBar : mix Descender XH DesignParameters.upperEBarPos
+		include : GammaShape XH SLAB-NONE
+		include : PalatalHook.lExt GammaBarLeft 0
+		local yBar : mix 0 XH DesignParameters.upperEBarPos
 		include : HBar.m GammaBarLeft (RightSB - [xMidBarShrink SLAB]) yBar
+		if SLAB : include : tagged 'serifRM'
+			VSerif.dr (RightSB - [xMidBarShrink SLAB]) (yBar + HalfStroke) [mix Stroke VJut 0.5]
