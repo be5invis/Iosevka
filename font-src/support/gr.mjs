@@ -23,8 +23,19 @@ export const VS01 = LinkedGlyphProp("VS01");
 export const TieMark = LinkedGlyphProp("TieMark");
 export const LeaningMark = LinkedGlyphProp("LeaningMark");
 export const LeaningMarkSpacer = LinkedGlyphProp("LeaningMarkSpacer");
+
+export const Texture = {
+	ExtL: LinkedGlyphProp("TextureExtL"),
+	ExtR: LinkedGlyphProp("TextureExtR"),
+	ExtLR: LinkedGlyphProp("TextureExtLR"),
+	ShrL: LinkedGlyphProp("TextureShrL"),
+	ShrR: LinkedGlyphProp("TextureShrR"),
+	ShrLR: LinkedGlyphProp("TextureShrLR")
+};
+
 function LinkedGlyphProp(key) {
 	return {
+		key,
 		get(glyph) {
 			if (glyph && glyph.related) return glyph.related[key];
 			else return null;

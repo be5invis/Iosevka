@@ -1,0 +1,88 @@
+$$include '../meta/macros.ptl'
+
+extern Set
+
+import [Texture CvDecompose] from"../support/gr.mjs"
+
+# Name-driven feature pairs
+export : define [buildGsubTexture gsub glyphStore markGlyphs cvs] : begin
+	local anyMark : Array.from markGlyphs.all
+	local rec : gsub.beginBlock
+
+	define txtr : gsub.addCommonFeature : gsub.createFeature 'TXTR'
+	define { chain-rule reverse-rule } : gsub.ChainRuleBuilder
+
+	local extRFrom { }
+	local extRTo   { }
+	local extLFrom { }
+	local extLTo   { }
+	local shrLFrom { }
+	local shrLTo   { }
+	local shrRFrom { }
+	local shrRTo   { }
+
+	local anyInfluence : new Set
+
+	foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== ".") : begin
+		local extL : Texture.ExtL.get g
+		local extR : Texture.ExtR.get g
+		local extLR : Texture.ExtLR.get g
+		local shrL : Texture.ShrL.get g
+		local shrR : Texture.ShrR.get g
+		local shrLR : Texture.ShrLR.get g
+
+		if extR : begin [extRFrom.push gid] [extRTo.push extR]
+		if extL : begin [extLFrom.push gid] [extLTo.push extL]
+		if (extR && extLR) : begin [extLFrom.push extR] [extLTo.push extLR]
+
+		if shrL : begin [shrLFrom.push gid] [shrLTo.push shrL]
+		if shrR : begin [shrRFrom.push gid] [shrRTo.push shrR]
+		if (shrL && shrLR) : begin [shrRFrom.push shrL] [shrRTo.push shrLR]
+
+		if (extL || extR || shrL || shrR) : anyInfluence.add gid
+
+	define subExtR : gsub.createLookup
+		.type 'gsub_chaining'
+		.ignoreGlyphs anyMark
+		.rules : list
+			chain-rule
+				extRFrom ~> extRTo
+				shrLFrom ~> shrLTo
+
+	define subExtL : gsub.createLookup
+		.type 'gsub_chaining'
+		.ignoreGlyphs anyMark
+		.rules : list
+			chain-rule
+				shrRFrom ~> shrRTo
+				extLFrom ~> extLTo
+
+	txtr.addLookup subExtR
+	txtr.addLookup subExtL
+	gsub.setDependency subExtR subExtL
+
+	# Decompose everything if we enable TXTR
+	if cvs
+	: then : begin
+		# Reuse existing Cvdecompose data
+		foreach cv [cvs.values] : begin
+			if cv.decompositionLookup : begin
+				txtr.addLookup cv.decompositionLookup
+				gsub.setDependency cv.decompositionLookup subExtR
+	: else : begin
+		# Built it from scratch
+		local decompose : gsub.createLookup
+			.type 'gsub_multiple'
+			.substitutions {.}
+
+		foreach { gn glyph } [glyphStore.namedEntries] : begin
+			local parts : CvDecompose.get glyph
+			if parts : begin
+				local influenced : anyInfluence.has gn
+				foreach part [items-of parts] : if [anyInfluence.has part] : set influenced true
+				if influenced : set decompose.substitutions.(gn) parts
+
+		txtr.addLookup decompose
+		gsub.setDependency decompose subExtR
+
+	gsub.endBlock rec

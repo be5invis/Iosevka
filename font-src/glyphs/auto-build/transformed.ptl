@@ -3,7 +3,7 @@ $$include '../../meta/macros.ptl'
 
 import [linreg clamp mix fallback] from"../../support/utils.mjs"
 import [getGrTree IsSuperscript IsSubscript] from"../../support/gr.mjs"
-import [AnyCv DotlessOrNot CvDecompose MathSansSerif] from"../../support/gr.mjs"
+import [AnyCv DotlessOrNot CvDecompose MathSansSerif Texture] from"../../support/gr.mjs"
 import [NumeratorForm DenominatorForm] from"../../support/gr.mjs"
 import [Transform] from"../../support/geometry/transform.mjs"
 extern Map
@@ -692,6 +692,68 @@ glyph-block Autobuild-Transformed : begin
 				include GlobalTransform
 
 		link-relations relSets
+
+glyph-block Autobuild-Transformed-Texture : begin
+	if (!(para.buildTexture && !para.isQuasiProportional)) : return nothing
+
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Recursive-Build : Fork
+	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations wrapName
+
+	define [createTextureDerivatives gr extL extR _records] : begin
+		local { records relSets targetNameMap } : extendRelatedGlyphs gr.key _records
+		local pendingGlyphs : records.map : [record] => record.1
+
+		local forkedPara : Object.assign {.} para
+		if (extL + extR > 0)
+		: then : forkedPara.diversityM = 1 + extL + extR
+		: else : begin
+			forkedPara.diversityF  = 1 + extL + extR
+			forkedPara.diversityI  = 1 + extL + extR
+			forkedPara.diversityII = 1 + extL + extR
+
+		local forked : Fork pendingGlyphs forkedPara
+		foreach {unicode glyphid} [items-of records] : begin
+			if [not : query-glyph targetNameMap.(glyphid)] : begin
+				define glyphT : forked.queryByName glyphid
+				define glyphO : glyphStore.queryByName glyphid
+				if (glyphT && glyphO) : begin
+					if (glyphT.advanceWidth != glyphO.advanceWidth) : begin
+						gr.set glyphO targetNameMap.(glyphid)
+					create-glyph targetNameMap.(glyphid) unicode : glyph-proc
+						include glyphT AS_BASE ALSO_METRICS
+						set-width Width
+						if extL : currentGlyph.applyTransform [Translate (-extL * Width) 0] true
+
+		link-relations relSets
+
+	define ranges : list
+		list 0x41 0x5A
+		list 0x61 0x7A
+		list 0xC0 0xFF
+		list 0x100 0x2AF
+		list 0x370 0x3FF
+		list 0x400 0x4FF
+		list 0x500 0x52F
+
+	define [jobs base] : list
+		local results {}
+		foreach {low high} [items-of ranges] : begin
+			foreach lch [range low till high] : begin
+				local source : glyphStore.queryNameByUnicode lch
+				if source : results.push { null source }
+		return results
+
+	define EXTENSION :  1 / 12
+	define SHRINK    : -1 / 12
+	createTextureDerivatives Texture.ExtL  EXTENSION 0         [jobs 0xF000]
+	createTextureDerivatives Texture.ExtR  0         EXTENSION [jobs 0xF100]
+	createTextureDerivatives Texture.ExtLR EXTENSION EXTENSION [jobs 0xF200]
+	createTextureDerivatives Texture.ShrL  SHRINK    0         [jobs 0xF300]
+	createTextureDerivatives Texture.ShrR  0         SHRINK    [jobs 0xF400]
+	createTextureDerivatives Texture.ShrLR SHRINK    SHRINK    [jobs 0xF500]
+
 
 glyph-block Autobuild-Transformed-Mathematical : begin
 	glyph-block-import CommonShapes
