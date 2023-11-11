@@ -22,44 +22,44 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	define SLAB-ALL    4
 
 	define GammaBarLeft (SB * 1.5)
-	define [GammaShape top slabType] : glyph-proc
+	define [GammaShape top bot slabType] : glyph-proc
 		include : LeaningAnchor.Below.VBar.l GammaBarLeft
-		include : VBar.l GammaBarLeft 0 top
+		include : VBar.l GammaBarLeft bot top
 		include : HBar.t (GammaBarLeft - O) (RightSB - OX) top
 		match slabType
 			[Just SLAB-ALL] : begin
 				include : HSerif.lt GammaBarLeft top SideJut
-				include : HSerif.lb (GammaBarLeft + [HSwToV HalfStroke]) 0 Jut
-				include : HSerif.rb (GammaBarLeft + [HSwToV HalfStroke]) 0 MidJutSide
+				include : HSerif.lb (GammaBarLeft + [HSwToV HalfStroke]) bot Jut
+				include : HSerif.rb (GammaBarLeft + [HSwToV HalfStroke]) bot MidJutSide
 				include : tagged 'serifRT' : VSerif.dr (RightSB - OX) top VJut
 			[Just SLAB-BOTTOM] : begin
-				include : HSerif.lb (GammaBarLeft + [HSwToV HalfStroke]) 0 Jut
-				include : HSerif.rb (GammaBarLeft + [HSwToV HalfStroke]) 0 MidJutSide
+				include : HSerif.lb (GammaBarLeft + [HSwToV HalfStroke]) bot Jut
+				include : HSerif.rb (GammaBarLeft + [HSwToV HalfStroke]) bot MidJutSide
 			[Just SLAB-LT] : begin
 				include : HSerif.lt GammaBarLeft top SideJut
 			[Just SLAB-TR] : begin
 				include : tagged 'serifRT' : VSerif.dr (RightSB - OX) top VJut
 
 	define GammaConfig : object
-		serifless       { SLAB-NONE   false }
-		topLeftSerifed  { SLAB-LT     false }
-		topRightSerifed { SLAB-TR     false }
-		bottomSerifed   { SLAB-BOTTOM false }
-		serifed         { SLAB-ALL    true  }
+		serifless       { SLAB-NONE   SLAB }
+		topLeftSerifed  { SLAB-LT     SLAB }
+		topRightSerifed { SLAB-TR     true }
+		bottomSerifed   { SLAB-BOTTOM SLAB }
+		serifed         { SLAB-ALL    true }
 
-	foreach { suffix { slabType doSB } } [Object.entries GammaConfig] : do
+	foreach { suffix { slabType doSM } } [Object.entries GammaConfig] : do
 		create-glyph "grek/Gamma.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : GammaShape CAP slabType
+			include : GammaShape CAP 0 slabType
 
 		create-glyph "grek/Digamma.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : GammaShape CAP slabType
+			include : GammaShape CAP 0 slabType
 
 			local yBar : CAP * DesignParameters.upperEBarPos
-			include : HBar.m GammaBarLeft (RightSB - [xMidBarShrink slabType]) yBar
-			if slabType : include : tagged 'serifRM'
-				VSerif.dr (RightSB - [xMidBarShrink slabType]) (yBar + HalfStroke) [mix Stroke VJut 0.5]
+			include : HBar.m GammaBarLeft (RightSB - [xMidBarShrink doSM]) yBar
+			if doSM : include : tagged 'serifRM'
+				VSerif.dr (RightSB - [xMidBarShrink doSM]) (yBar + HalfStroke) [mix Stroke VJut 0.5]
 
 		create-glyph "cyrl/GheDescender.\(suffix)" : glyph-proc
 			include [refer-glyph "grek/Gamma.\(suffix)"] AS_BASE ALSO_METRICS
@@ -77,7 +77,7 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 
 		create-glyph "cyrl/ghe.upright.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : GammaShape XH slabType
+			include : GammaShape XH 0 slabType
 
 		create-glyph "cyrl/gheDescender.upright.\(suffix)" : glyph-proc
 			include [refer-glyph "cyrl/ghe.upright.\(suffix)"] AS_BASE ALSO_METRICS
@@ -96,21 +96,21 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		create-glyph "cyrl/Ge.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : ExtendAboveBaseAnchors (CAP + LongJut - 0.5 * Stroke)
-			include : GammaShape CAP slabType
+			include : GammaShape CAP 0 slabType
 			eject-contour 'serifRT'
 			include : VBar.r (RightSB - OX) CAP (CAP + LongJut - 0.5 * Stroke)
 
 		create-glyph "cyrl/ge.upright.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : ExtendAboveBaseAnchors (XH + LongJut - 0.5 * Stroke)
-			include : GammaShape XH slabType
+			include : GammaShape XH 0 slabType
 			eject-contour 'serifRT'
 			include : VBar.r (RightSB - OX) XH (XH + LongJut - 0.5 * Stroke)
 
 		create-glyph "cyrl/ge.italic.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : ExtendAboveBaseAnchors (XH + LongJut - 0.5 * Stroke)
-			include : GammaShape XH slabType
+			include : GammaShape XH 0 slabType
 			eject-contour 'serifRT'
 			include : VBar.r (RightSB - OX) XH (XH + LongJut - 0.5 * Stroke)
 
@@ -163,9 +163,10 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		include : BBBarLeft GammaBarLeft 0 CAP
 		include : HBar.t GammaBarLeft RightSB CAP BBS
 
-	create-glyph 'digamma' 0x3DD : glyph-proc
+	create-glyph 'grek/digamma' 0x3DD : glyph-proc
 		include : MarkSet.p
-		include : GammaShape (XH - Descender) SLAB-NONE
-		include : ApparentTranslate 0 Descender
-		local yBar : mix Descender XH DesignParameters.upperEBarPos
+		include : GammaShape XH Descender SLAB-NONE
+		local yBar : mix 0 XH DesignParameters.upperEBarPos
 		include : HBar.m GammaBarLeft (RightSB - [xMidBarShrink SLAB]) yBar
+		if SLAB : include : tagged 'serifRM'
+			VSerif.dr (RightSB - [xMidBarShrink SLAB]) (yBar + HalfStroke) [mix Stroke VJut 0.5]

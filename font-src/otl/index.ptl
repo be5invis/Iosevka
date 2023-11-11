@@ -10,6 +10,7 @@ import [buildFrac] from"./gsub-frac.mjs"
 import [buildCVSS] from"./gsub-cv-ss.mjs"
 import [buildLOCL] from"./gsub-locl.mjs"
 import [buildGsubThousands] from"./gsub-thousands.mjs"
+import [buildGsubTexture] from"./gsub-texture.mjs"
 import [buildMarkMkmk] from"./gpos-mark-mkmk.mjs"
 
 define GDEF_SIMPLE 1
@@ -60,8 +61,9 @@ define [buildGSUB para glyphStore markGlyphs] : begin
 	buildGsubThousands gsub para glyphStore
 
 	# cv##, ss##
+	local cvs nothing
 	if para.enableCvSs : begin
-		buildCVSS gsub para glyphStore
+		set cvs : buildCVSS gsub para glyphStore
 
 	# ccmp post cv/ss (for Ogonek shape transform)
 	buildCCMPPostCvSs gsub ccmp glyphStore markGlyphs
@@ -69,6 +71,10 @@ define [buildGSUB para glyphStore markGlyphs] : begin
 	# locl
 	# Builds last, but the lookups are added into the beginning of the lookup list
 	buildLOCL gsub para glyphStore
+
+	# TXTR, "texture" feature
+	if (para.buildTexture && !para.isQuasiProportional) : begin
+		 buildGsubTexture gsub glyphStore markGlyphs cvs
 
 	gsub.finalize
 	return gsub
