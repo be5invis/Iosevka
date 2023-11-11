@@ -4,7 +4,6 @@ export async function collectBlockData() {
 	const BlockData = [
 		[[0xe0a0, 0xe0df], "Private Use Area — Powerline"],
 		[[0xee00, 0xee3f], "Private Use Area — Progress Bar"],
-		[[0xf000, 0xf8ff], "Private Use Area — Texture"]
 	];
 
 	for (const id of UnicodeDataIndex.Block) {
