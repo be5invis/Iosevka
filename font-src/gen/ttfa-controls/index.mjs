@@ -60,7 +60,15 @@ class Alignment {
 			let sizeBefore = this.allGlyphs.size;
 
 			for (const [go, gd] of this.allGlyphs) {
-				const cvs = Gr.AnyCv.query(go);
+				const cvs = [
+					...Gr.AnyCv.query(go),
+					Gr.Texture.ExtL,
+					Gr.Texture.ExtR,
+					Gr.Texture.ExtLR,
+					Gr.Texture.ShrL,
+					Gr.Texture.ShrR,
+					Gr.Texture.ShrLR
+				];
 				for (const gr of cvs) {
 					const gnLinked = gr.get(go);
 					if (!gnLinked) continue;

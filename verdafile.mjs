@@ -230,6 +230,7 @@ const CompositesFromBuildPlan = computed(`metadata:composites-from-build-plan`, 
 	return data;
 });
 
+// eslint-disable-next-line complexity
 const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileName) => {
 	const [{ fileNameToBpMap, buildPlans }] = await target.need(BuildPlans);
 	const [version] = await target.need(Version);
@@ -261,7 +262,8 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		featureControl: {
 			noCvSs: bp["no-cv-ss"] || false,
 			noLigation: bp["no-ligation"] || false,
-			exportGlyphNames: bp["export-glyph-names"] || false
+			exportGlyphNames: bp["export-glyph-names"] || false,
+			buildTexture: bp["build-texture-feature"] || false
 		},
 		// Ligations
 		ligations: bp.ligations || null,

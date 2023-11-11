@@ -1,7 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from"../../../support/utils.mjs"
-import [Dotless CvDecompose] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -14,8 +13,8 @@ glyph-block Letter-Latin-Thorn : begin
 
 	define xThornLeftStroke : SB * 1.25
 	define yThornBowlBot : CAP * 0.25 + [if SLAB (Stroke * 0.125) 0]
-	define [ThornShape yBowlBot] : glyph-proc
-		local yBowlTop : CAP - 0.7 * yBowlBot + [if SLAB (-0.125) 0.25] * Stroke
+	define yThornBowlTop : CAP - 0.7 * yThornBowlBot + [if SLAB (-0.125) 0.25] * Stroke
+	define [ThornShape yBowlBot yBowlTop] : glyph-proc
 
 		local turn : mix yBowlTop yBowlBot (ArchDepthB / (ArchDepthA + ArchDepthB))
 		local turnRadius : (yBowlTop - yBowlBot) / 2
@@ -37,14 +36,21 @@ glyph-block Letter-Latin-Thorn : begin
 
 	create-glyph 'Thorn' 0xDE : glyph-proc
 		include : MarkSet.capital
-		include : ThornShape yThornBowlBot
+		include : ThornShape yThornBowlBot yThornBowlTop
+		include : LeaningAnchor.Above.VBar.l xThornLeftStroke
+		include : LeaningAnchor.Below.VBar.l xThornLeftStroke
+
+	create-glyph 'grek/Sho' 0x3F7 : glyph-proc
+		include : MarkSet.capital
+		local d : mix yThornBowlBot (CAP - yThornBowlTop) 0.5
+		include : ThornShape d (CAP - d)
 		include : LeaningAnchor.Above.VBar.l xThornLeftStroke
 		include : LeaningAnchor.Below.VBar.l xThornLeftStroke
 
 	create-glyph 'ThornBarTop/Overlay' : LetterBarOverlay.l.in
 		x   -- xThornLeftStroke
 		top -- (CAP - [if SLAB Stroke 0])
-		bot -- (CAP - yThornBowlBot)
+		bot -- (CAP - [mix yThornBowlBot (CAP - yThornBowlTop) 0.5])
 	create-glyph 'thornBarTop/Overlay' : LetterBarOverlay.l.in
 		x   -- SB
 		top -- (Ascender - [if SLAB Stroke 0])
@@ -52,15 +58,13 @@ glyph-block Letter-Latin-Thorn : begin
 	create-glyph 'ThornBarBot/Overlay' : LetterBarOverlay.l.in
 		x   -- xThornLeftStroke
 		bot -- (0 + [if SLAB Stroke 0])
-		top -- yThornBowlBot
+		top -- [mix yThornBowlBot (CAP - yThornBowlTop) 0.5]
 	create-glyph 'thornBarBot/Overlay' : LetterBarOverlay.l.in
 		x   -- SB
 		bot -- (Descender + [if SLAB Stroke 0])
 		top -- 0
 
-	derive-composites 'ThornBarTop' 0xA764 'Thorn' 'ThornBarTop/Overlay'
+	derive-composites 'ThornBarTop' 0xA764 'grek/Sho' 'ThornBarTop/Overlay'
 	derive-composites 'thornBarTop' 0xA765 'thorn' 'thornBarTop/Overlay'
-	derive-composites 'ThornBarBot' 0xA766 'Thorn' 'ThornBarBot/Overlay'
+	derive-composites 'ThornBarBot' 0xA766 'grek/Sho' 'ThornBarBot/Overlay'
 	derive-composites 'thornBarBot' 0xA767 'thorn' 'thornBarBot/Overlay'
-
-	alias 'grek/Sho' 0x3F7 'Thorn'

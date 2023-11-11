@@ -1,5 +1,18 @@
 ## Modifications since last major version
 
+### 27.3.5
+
+* Add italic form of CYRILLIC SMALL LETTER THREE-LEGGED TE (`U+1C85`).
+* Add top-right serif to fully serifed form for CYRILLIC SMALL LETTER TALL TE (`U+1C84`).
+* Fix serifs of GREEK LETTER DIGAMMA (`U+03DC`) under `ss12`.
+* Improve crossbar position of GREEK SMALL LETTER DIGAMMA (`U+03DD`) and add a middle serif under slab.
+* Refine Greek Capital Sho (U+03F7) glyph (#2079).
+* \[Experimental\] Add a font feature for texture control (#2081).
+  - Currently only available through custom builds with `build-texture-feature = true`.
+* Make SYMBOL FOR DELETE FORM TWO (`U+2425`) narrow by default, align with other Control Pictures characters (#2084).
+* Make APL FUNCTIONAL SYMBOL CIRCLE STAR (`U+235F`) always be five-pointed and upright, to align its pentagram history (#2083).
+
+
 ### 27.3.4
 
 * Disunify anonymous untagged variant selectors for Cyrillic Capital Yeri/Yery for consistency in style-driven configurations.

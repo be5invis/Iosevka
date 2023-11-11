@@ -3,7 +3,7 @@ import UnicodeDataIndex from "@unicode/unicode-15.0.0";
 export async function collectBlockData() {
 	const BlockData = [
 		[[0xe0a0, 0xe0df], "Private Use Area — Powerline"],
-		[[0xee00, 0xee3f], "Private Use Area — Progress Bar"]
+		[[0xee00, 0xee3f], "Private Use Area — Progress Bar"],
 	];
 
 	for (const id of UnicodeDataIndex.Block) {
