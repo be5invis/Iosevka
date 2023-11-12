@@ -63,7 +63,7 @@ To create a custom build, you need:
 
 ### Configuring Custom Build
 
-Configuration of build plans are organized under `[buildPlans.<plan name>]` sections in the `private-build-plans.toml`. You can use [the Customizer](https://be5invis.github.io/Iosevka/customizer) to create the build plan, and/or manually edit them, following the instructions below.
+Configuration of build plans are organized under `[buildPlans.<plan name>]` sections in the `private-build-plans.toml`. You can use [the Customizer](https://be5invis.github.io/Iosevka/customizer) to create the build plan, and/or manually edit them, following the instructions below. It is recommended to use PascalCase in the plan names.
 
 Inside the plan, top-level properties include:
 
@@ -89,6 +89,7 @@ Inside the plan, top-level properties include:
 * `no-ligation`: Optional, Boolean, disables ligations.
 * `export-glyph-names`: Optional, Boolean, whether to export glyph names into the fonts. Setting this to `true` will increase file footprint, however this is necessary for ligature support in [Kitty](https://sw.kovidgoyal.net/kitty/).
 * `webfont-formats`: Optional, Array of String. Controls the formats needed to be exported into the webfont CSS. Valid options are `'ttf'` and `'woff2'`, or including both.
+* `build-texture-feature`: Optional, Boolean, whether to build the `TXTR` feature for cross-letter texture adjustments. Defaults to false.
 
 Build plan could have 5 optional subsections: `ligations`, `variants`, `weights`, `widths` and `slopes`.
 
@@ -493,24 +494,30 @@ Subsection `variants` is used to configure character variants in the font. Prope
 
 #### Configuring Weights, Widths and Slopes
 
-Subsection `weights` is used to change the weight grades that the custom family needs. It is a dictionary of either strings formatted in `default.<weight>` format, meaning reusing a default weight grade, or sub-objects with properties:
+Subsection `weights` is used to change the weight grades that the custom family needs. It is a dictionary from the filename suffix (in PascalCase) to either...
 
-* `shape`: Number, configures the weight grade of the glyphs' shapes.
-* `menu`: Integer, configures the weight grade used when naming fonts.
-* `css`: Integer, configures the weight grade used in web font CSS.
+ * A string formatted in `default.<weight>` format, meaning reusing a default weight grade;
+ * Or, a sub-object with properties:
+   * `shape`: Number, configures the weight grade of the glyphs' shapes.
+   * `menu`: Integer, configures the weight grade used when naming fonts.
+   * `css`: Integer, configures the weight grade used in web font CSS.
 
-Subsection `widths` is used to change the width grades that the custom family needs. It is a dictionary of either strings formatted in `default.<width>` format, meaning reusing a default width grade, or sub-objects with properties:
+Subsection `widths` is used to change the width grades that the custom family needs. It is a dictionary from the filename suffix (in PascalCase) to either...
 
-* `shape`: Number, configures the width of the glyphs' shapes, measured in 1/1000 em.
-* `menu`: Integer, configures the width grade used when naming fonts. The valid values are `1` to `9`, inclusive.
-* `css`: String, configures the [font-stretch](https://developer.mozilla.org/en-US/docs/Web/CSS/font-stretch) value used in web font CSS.
+ * A string formatted in `default.<width>` format, meaning reusing a default width grade;
+ * Or, a sub-object with properties:
+   * `shape`: Number, configures the width of the glyphs' shapes, measured in 1/1000 em.
+   * `menu`: Integer, configures the width grade used when naming fonts. The valid values are from `1` to `9`, inclusive.
+   * `css`: String, configures the [font-stretch](https://developer.mozilla.org/en-US/docs/Web/CSS/font-stretch) value used in web font CSS.
 
-Subsection `slopes` is used to change the slope angles and grades that the custom family needs. It is a dictionary of either strings formatted in `default.<slope>` format, meaning reusing a default slope grade, or sub-objects with properties:
+Subsection `slopes` is used to change the slope angles and grades that the custom family needs. It is a dictionary from the filename suffix (in PascalCase) to either...
 
-* `angle`: Number, configures the slope angle in degrees. The valid vales are `0` to `15`, inclusive.
-* `shape`: String from `upright`, `italic` or `oblique`. Configures the slope used for variant selection. 
-* `menu`: String from `upright`, `italic` or `oblique`. Configures the slope grade used when naming fonts.
-* `css`: String from `normal`, `italic` or `oblique`. Configures the [CSS font-style](https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-style) value.
+ * A string formatted in `default.<slope>` format, meaning reusing a default slope grade;
+ * Or, a sub-object with properties:
+   * `angle`: Number, configures the slope angle in degrees. The valid vales are from `0` to `15`, inclusive.
+   * `shape`: String from `upright`, `italic` or `oblique`. Configures the slope used for variant selection. 
+   * `menu`: String from `upright`, `italic` or `oblique`. Configures the slope grade used when naming fonts.
+   * `css`: String from `normal`, `italic` or `oblique`. Configures the [CSS font-style](https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-style) value.
 
 #### Compatibility Ligatures
 
