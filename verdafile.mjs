@@ -134,8 +134,8 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	const returnBuildPlans = {};
 	for (const prefix in rawBuildPlans) {
 		const bp = { ...rawBuildPlans[prefix] };
-		if (!bp.family) fail(`Build plan for ${prefix} does not have a family name. Exit.`);
-		bp.webfontFormats = bp["webfont-formats"] || defaultWebFontFormats;
+		validateBuildPlan(prefix, bp);
+		bp.webfontFormats = bp.webfontFormats || defaultWebFontFormats;
 		bp.targets = [];
 		returnBuildPlans[prefix] = bp;
 	}
@@ -170,7 +170,7 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 function linkSpacingDerivableBuildPlans(bps) {
 	for (const pfxTo in bps) {
 		const bpTo = bps[pfxTo];
-		if (blockSpacingDerivation(bpTo)) continue;
+		if (blockSpacingDerivationTo(bpTo)) continue;
 		if (!isDeriveToSpacing(bpTo.spacing)) continue;
 		for (const pfxFrom in bps) {
 			const bpFrom = bps[pfxFrom];
@@ -180,8 +180,8 @@ function linkSpacingDerivableBuildPlans(bps) {
 		}
 	}
 }
-function blockSpacingDerivation(bp) {
-	return !!bp["compatibility-ligatures"];
+function blockSpacingDerivationTo(bp) {
+	return !!bp.compatibilityLigatures;
 }
 function isDeriveToSpacing(spacing) {
 	return spacing === "term" || spacing === "fontconfig-mono" || spacing === "fixed";
@@ -260,10 +260,10 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		derivingVariants: bp.derivingVariants,
 		buildCharMap: bp.buildCharMap,
 		featureControl: {
-			noCvSs: bp["no-cv-ss"] || false,
-			noLigation: bp["no-ligation"] || false,
-			exportGlyphNames: bp["export-glyph-names"] || false,
-			buildTexture: bp["build-texture-feature"] || false
+			noCvSs: bp.noCvSs || false,
+			noLigation: bp.noLigation || false,
+			exportGlyphNames: bp.exportGlyphNames || false,
+			buildTextureFeature: bp.buildTextureFeature || false
 		},
 		// Ligations
 		ligations: bp.ligations || null,
@@ -290,14 +290,17 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			stretch: sfi.cssStretch,
 			style: sfi.cssStyle
 		},
+		// Hinting
 		hintParams: bp.hintParams || [],
 		hintReference:
-			!bp["metric-override"] && hintReferenceSuffix !== fi0.suffix
+			!bp.metricOverride && hintReferenceSuffix !== fi0.suffix
 				? makeFileName(fi0.prefix, hintReferenceSuffix)
 				: null,
-		compatibilityLigatures: bp["compatibility-ligatures"] || null,
-		metricOverride: bp["metric-override"] || null,
-		excludedCharRanges: bp["exclude-chars"]?.ranges,
+
+		// Other parameters
+		compatibilityLigatures: bp.compatibilityLigatures || null,
+		metricOverride: bp.metricOverride || null,
+		excludedCharRanges: bp.excludeChars?.ranges,
 
 		// Spacing derivation -- creating faster build for spacing variants
 		spacingDerive
@@ -1197,6 +1200,26 @@ const Parameters = task(`meta:parameters`, async target => {
 ///////////////////////////////////////////////////////////
 
 // Build plan validation
+
+function validateBuildPlan(prefix, bp) {
+	if (!bp.family) fail(`Build plan for ${prefix} does not have a family name. Exit.`);
+	failWithLegacyParamName(prefix, bp, `no-cv-ss`, `noCvSs`);
+	failWithLegacyParamName(prefix, bp, `no-ligation`, `noLigation`);
+	failWithLegacyParamName(prefix, bp, `export-glyph-names`, `exportGlyphNames`);
+	failWithLegacyParamName(prefix, bp, `build-texture-feature`, `buildTextureFeature`);
+	failWithLegacyParamName(prefix, bp, `metric-override`, `metricOverride`);
+	failWithLegacyParamName(prefix, bp, `compatibility-ligatures`, `compatibilityLigatures`);
+	failWithLegacyParamName(prefix, bp, `exclude-chars`, `excludeChars`);
+}
+
+function failWithLegacyParamName(prefix, bp, legacy, expected) {
+	if (bp[legacy]) {
+		fail(
+			`Build plan for '${prefix}' contains legacy build parameter '${legacy}'. ` +
+				`Please use '${expected}' instead.`
+		);
+	}
+}
 
 function resolveWws(bpName, buildPlans, defaultConfig) {
 	const bp = buildPlans[bpName];

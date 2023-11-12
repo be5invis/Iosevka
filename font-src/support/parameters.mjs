@@ -11,7 +11,7 @@ export function init(data, argv) {
 	applyAlternatesParam(argv, para, data, "slope", "slope");
 	if (argv.featureControl.noCvSs) para.enableCvSs = false;
 	if (argv.featureControl.noLigation) para.enableLigation = false;
-	if (argv.featureControl.buildTexture) para.buildTexture = true;
+	if (argv.featureControl.buildTextureFeature) para.buildTextureFeature = true;
 	return para;
 }
 function applyBlendingParam(argv, para, data, key, keyArgv) {

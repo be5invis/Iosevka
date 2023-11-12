@@ -85,13 +85,21 @@ Inside the plan, top-level properties include:
 * `serifs`: Optional, String, configures style of serifs.
   - When set to `slab`, the font will be converted into slab-serif.
   - Otherwise the font will be sans-serif.
-* `no-cv-ss`: Optional, Boolean, disables `cv##` and `ss##` OpenType features.
-* `no-ligation`: Optional, Boolean, disables ligations.
-* `export-glyph-names`: Optional, Boolean, whether to export glyph names into the fonts. Setting this to `true` will increase file footprint, however this is necessary for ligature support in [Kitty](https://sw.kovidgoyal.net/kitty/).
-* `webfont-formats`: Optional, Array of String. Controls the formats needed to be exported into the webfont CSS. Valid options are `'ttf'` and `'woff2'`, or including both.
-* `build-texture-feature`: Optional, Boolean, whether to build the `TXTR` feature for cross-letter texture adjustments. Defaults to false.
+* `noCvSs`: Optional, Boolean, disables `cv##` and `ss##` OpenType features.
+* `noLigation`: Optional, Boolean, disables ligations.
+* `exportGlyphNames`: Optional, Boolean, whether to export glyph names into the fonts. Setting this to `true` will increase file footprint, however this is necessary for ligature support in [Kitty](https://sw.kovidgoyal.net/kitty/).
+* `webfontFormats`: Optional, Array of String. Controls the formats needed to be exported into the webfont CSS. Valid options are `'ttf'` and `'woff2'`, or including both.
+* `buildTextureFeature`: Optional, Boolean, whether to build the `TXTR` feature for cross-letter texture adjustments. Defaults to false.
 
-Build plan could have 5 optional subsections: `ligations`, `variants`, `weights`, `widths` and `slopes`.
+Build plan could have 8 optional subsections:
+* `ligations`
+* `variants`
+* `weights`
+* `widths`
+* `slopes`
+* `compatibilityLigatures`
+* `excludeChars`
+* `metricOverride`
 
 #### Configuring Ligations
 
@@ -521,7 +529,7 @@ Subsection `slopes` is used to change the slope angles and grades that the custo
 
 #### Compatibility Ligatures
 
-Certain software, notably Emacs, relies on pre-encoded ligatures instead of OpenType to provide ligations. Iosevka could be configured with additional subsection `compatibility-ligatures`, being an array of records with following fields:
+Certain software, notably Emacs, relies on pre-encoded ligatures instead of OpenType to provide ligations. Iosevka could be configured with additional subsection `compatibilityLigatures`, being an array of records with following fields:
 
 * `unicode`: The PUA code point being assigned to.
 * `featureTag`: The feature tag to compute ligations.
@@ -530,15 +538,24 @@ Certain software, notably Emacs, relies on pre-encoded ligatures instead of Open
 A sample of compatibility ligature config is:
 
 ```toml
-[[buildPlans.IosevkaCustom.compatibility-ligatures]]
+[[buildPlans.IosevkaCustom.compatibilityLigatures]]
 unicode = 57600 # 0xE100
 featureTag = 'calt'
 sequence = '<*>'
 ```
 
+#### Excluding Characters
+
+Use the `excludeChars` configuration to exclude character ranges from the font.
+
+```toml
+[buildPlans.iosevkaCustom.excludeChars]
+ranges = [[10003, 10008]]
+```
+
 #### Metric Override
 
-Subsection `metric-override` provides ability to override certain metric values, if you *reallly* want to. Adding this section is **strongly discouraged** as it may introduce broken geometry or broken shapes.
+Subsection `metricOverride` provides ability to override certain metric values, if you *reallly* want to. Adding this section is **strongly discouraged** as it may introduce broken geometry or broken shapes.
 
 | Property | Unit | Default Value | Meaning |
 |----------|------|---------|----------|
@@ -597,7 +614,7 @@ Valid functions include:
 For example, the following configuration:
 
 ```toml
-[buildPlans.IosevkaCustom.metric-override]
+[buildPlans.IosevkaCustom.metricOverride]
 leading = 1500
 sb = 'default_sb * 1.0625 + 15'
 dotSize = 'blend(weight, [100, 50], [400, 125], [900, 180])'
