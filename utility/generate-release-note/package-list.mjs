@@ -34,8 +34,8 @@ async function GeneratePackageList(argv, out) {
 	for (let [groupID, gr] of Object.entries(pkgShapesData)) {
 		const prime = gr.subGroups[groupID];
 		const familyName = buildName("\u00a0", ...prime.family.split(" "));
-		const sTtcName = buildName("-", "super-ttc", groupID, argv.version);
-		const ttcName = buildName("-", "ttc", groupID, argv.version);
+		const sTtcName = buildName("-", "SuperTTC", groupID, argv.version);
+		const ttcName = buildName("-", "PkgTTC", groupID, argv.version);
 		const sTtcLink = `${DownloadLinkPrefix}/${sTtcName}.zip`;
 		const ttcLink = `${DownloadLinkPrefix}/${ttcName}.zip`;
 		const proportionPrefix = gr.quasiProportional ? "Quasi-proportional" : "Monospace";
@@ -74,12 +74,12 @@ async function GeneratePackageList(argv, out) {
 				`<td>${leader}&nbsp;<b>${noBreak(subGr.family)}</b></td>`,
 				`<td>${spacingDesc}</td>`,
 				`<td>${flag(ligation)}</td>`,
-				`<td>${createLink("Super\u00A0TTC", "super-ttc-sgr")}</td>`,
-				`<td>${createLink("TTC", "ttc-sgr")}</td>`,
-				`<td>${createLink("TTF", "ttf")}&nbsp;` +
-					`(${createLink("Unhinted", "ttf-unhinted")})</td>`,
-				`<td>${createLink("WebFont", "webfont")}&nbsp;` +
-					`(${createLink("Unhinted", "webfont-unhinted")})</td>`,
+				`<td>${createLink("Super\u00A0TTC", "SuperTTC-SGr")}</td>`,
+				`<td>${createLink("TTC", "PkgTTC-SGr")}</td>`,
+				`<td>${createLink("TTF", "PkgTTF")}&nbsp;` +
+					`(${createLink("Unhinted", "PkgTTF-Unhinted")})</td>`,
+				`<td>${createLink("WebFont", "PkgWebFont")}&nbsp;` +
+					`(${createLink("Unhinted", "PkgWebFont-Unhinted")})</td>`,
 				`</tr>`
 			);
 		}

@@ -1,8 +1,8 @@
 import fs from "fs";
 
 const WebfontFormatMap = new Map([
-	["woff2", "woff2"],
-	["ttf", "truetype"]
+	["WOFF2", "woff2"],
+	["TTF", "truetype"]
 ]);
 export default (function (output, family, hs, formats, unhinted) {
 	if (!formats) {
