@@ -530,7 +530,7 @@ Certain software, notably Emacs, relies on pre-encoded ligatures instead of Open
 A sample of compatibility ligature config is:
 
 ```toml
-[[buildPlans.iosevka-custom.compatibility-ligatures]]
+[[buildPlans.IosevkaCustom.compatibility-ligatures]]
 unicode = 57600 # 0xE100
 featureTag = 'calt'
 sequence = '<*>'
@@ -597,7 +597,7 @@ Valid functions include:
 For example, the following configuration:
 
 ```toml
-[buildPlans.iosevka-custom.metric-override]
+[buildPlans.IosevkaCustom.metric-override]
 leading = 1500
 sb = 'default_sb * 1.0625 + 15'
 dotSize = 'blend(weight, [100, 50], [400, 125], [900, 180])'
@@ -619,12 +619,12 @@ It is possible to create a customized TTC build by using the following method:
 
  1. Add a collect plan into `private-build-plans.toml`, with a `from` field containing all the TTF groups it needs:
    ```toml
-   [collectPlans.iosevka-custom]
-   from = ["iosevka-custom1", "iosevka-custom-2"]
+   [collectPlans.IosevkaCustom]
+   from = ["IosevkaCustom1", "IosevkaCustom2"]
    ```
  2. Run build with the following command:
-  - `npm run build -- ttc::iosevka-custom`: Create TTCs from collection `iosevka-custom`; The file will be saved into `dist/.ttc`.
-  - `npm run build -- super-ttc::iosevka-custom`: Create a single-file TTC from collection `iosevka-custom`; The file will be saved into `dist/.super-ttc`.
+  - `npm run build -- ttc::IosevkaCustom`: Create TTCs from collection `IosevkaCustom`; The file will be saved into `dist/.ttc`.
+  - `npm run build -- super-ttc::IosevkaCustom`: Create a single-file TTC from collection `IosevkaCustom`; The file will be saved into `dist/.super-ttc`.
 
 ### Baking other OpenType features
 
