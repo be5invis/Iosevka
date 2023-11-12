@@ -643,6 +643,7 @@ const CollectPlans = computed(`metadata:collect-plans`, async target => {
 	return await getCollectPlans(target, rawPlans.collectPlans);
 });
 
+// eslint-disable-next-line complexity
 async function getCollectPlans(target, rawCollectPlans) {
 	const plans = {};
 
@@ -654,7 +655,10 @@ async function getCollectPlans(target, rawCollectPlans) {
 	}
 
 	const amendedRawCollectPlans = { ...rawCollectPlans };
-	for (const gr of allCollectableGroups) {
+	out: for (const gr of allCollectableGroups) {
+		for (const [k, cp] of Object.entries(rawCollectPlans)) {
+			if (cp.from.length === 1 && cp.from[0] === gr) continue out;
+		}
 		amendedRawCollectPlans[`SGr-` + gr] = { release: true, isAmended: true, from: [gr] };
 	}
 
