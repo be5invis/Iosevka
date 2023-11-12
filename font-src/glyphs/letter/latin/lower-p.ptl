@@ -14,24 +14,41 @@ glyph-block Letter-Latin-Lower-P : begin
 	glyph-block-import Letter-Shared-Shapes : TopHook PalatalHook SerifFrame
 
 
-	define [EaredBody top] : glyph-proc
+	define [SmallThornEaredBody] : glyph-proc
 		include : tagged 'bowl' : OBarLeft.shape
-		include : tagged 'stemLeft' : VBar.l SB Descender top
+		include : tagged 'stemLeft' : VBar.l SB Descender Ascender
 
-	define [EarlessCornerBody] : glyph-proc
+	define [EaredBody] : with-params [[left SB] [right RightSB] [sw Stroke]] : glyph-proc
+		include : tagged 'bowl' : OBarLeft.shape
+			left  -- left
+			right -- right
+			sw    -- sw
+			fine  -- (ShoulderFine * sw / Stroke)
+		include : tagged 'stemLeft' : VBar.l left Descender XH sw
+
+	define [EarlessCornerBody] : with-params [[left SB] [right RightSB] [sw Stroke]] : glyph-proc
 		include : tagged 'bowl' : OBarLeft.toothlessTop (rise -- DToothlessRise) (mBlend -- DMBlend)
-		include : tagged 'stemLeft' : VBar.l SB Descender (XH - DToothlessRise)
+			left  -- left
+			right -- right
+			sw    -- sw
+			fine  -- (ShoulderFine * sw / Stroke)
+		include : tagged 'stemLeft' : VBar.l left Descender (XH - DToothlessRise) sw
 
-	define [EarlessRoundedBody] : glyph-proc
+	define [EarlessRoundedBody] : with-params [[left SB] [right RightSB] [sw Stroke]] : glyph-proc
 		include : tagged 'bowl' : OBarLeft.roundedTop (yTerminal -- Descender)
+			left  -- left
+			right -- right
+			sw    -- sw
+			fine  -- (ShoulderFine * sw / Stroke)
 
-	define [SmallPSerifLT top] : return [SerifFrame.fromDf [DivFrame 1] top Descender].lt.outer
-	define [SmallPSerifLB top] : return [SerifFrame.fromDf [DivFrame 1] top Descender].lb.fullSide
+	define [SmallPSerifLT df top _sw] : return [SerifFrame.fromDf df top Descender (swRef -- _sw)].lt.outer
+	define [SmallPSerifLB df top _sw] : return [SerifFrame.fromDf df top Descender (swRef -- _sw)].lb.fullSide
 
-	define [FullSerifs top] : composite-proc [SmallPSerifLT top] [SmallPSerifLB top]
-	define [MotionSerif top] : SmallPSerifLT top
-	define [BottomSerif top] : SmallPSerifLB top
+	define [FullSerifs  df top _sw] : composite-proc [SmallPSerifLT df top _sw] [SmallPSerifLB df top _sw]
+	define [MotionSerif df top _sw] : SmallPSerifLT df top _sw
+	define [BottomSerif df top _sw] : SmallPSerifLB df top _sw
 
+	glyph-block-export : PConfig
 	define PConfig : SuffixCfg.weave
 		object # body
 			eared                EaredBody
@@ -45,18 +62,20 @@ glyph-block Letter-Latin-Lower-P : begin
 
 	foreach { suffix { Body {Serifs doBS} }} [Object.entries PConfig] : do
 		local yOverlay : mix 0 (Descender + [if doBS Stroke 0]) 0.5
+		local df : DivFrame 1
+
 		create-glyph "p.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			include : Body XH
-			include : Serifs XH
+			include : Body
+			include : Serifs df XH
 			include : LeaningAnchor.Below.VBar.l SB
 			set-base-anchor 'overlayOnExtension' (SB + [HSwToV : 0.5 * Stroke]) yOverlay
 			set-base-anchor 'strike' Middle (XH / 2)
 
 		create-glyph "thorn.\(suffix)" : glyph-proc
 			include : MarkSet.bp
-			include : Body Ascender
-			include : Serifs Ascender
+			include : SmallThornEaredBody
+			include : Serifs df Ascender
 			include : LeaningAnchor.Above.VBar.l SB
 			include : LeaningAnchor.Below.VBar.l SB
 			set-base-anchor 'overlayOnExtension' (SB + [HSwToV : 0.5 * Stroke]) yOverlay
