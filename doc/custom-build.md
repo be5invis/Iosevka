@@ -512,8 +512,6 @@ Subsection `slopes` is used to change the slope angles and grades that the custo
 * `menu`: String from `upright`, `italic` or `oblique`. Configures the slope grade used when naming fonts.
 * `css`: String from `normal`, `italic` or `oblique`. Configures the [CSS font-style](https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-style) value.
 
-Subsection `slopes` is a simple string-to-string dictionary maps slopes (`upright`, `italic` or `oblique`) to [CSS font-style](https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-style) values, represented in string.
-
 #### Compatibility Ligatures
 
 Certain software, notably Emacs, relies on pre-encoded ligatures instead of OpenType to provide ligations. Iosevka could be configured with additional subsection `compatibility-ligatures`, being an array of records with following fields:
