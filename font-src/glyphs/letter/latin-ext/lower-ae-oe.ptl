@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Lower-AE-OE : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Shapes : nShoulder OBarLeft
 
 	glyph-block-export SubDfAndShift
@@ -191,7 +192,96 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				set-base-anchor 'cvDecompose' 0 0
 				include : EsTeLeftShape df styBot
 
+	do "P/R subglyphs"
+		glyph-block-import Letter-Latin-Upper-P : PShape PBarPosY
+		glyph-block-import Letter-Latin-Upper-R : RevRShape RConfig RBarPos
+
+		# Ya
+		foreach { suffix { legShape fOpen fTailed {slabs revSlabs doLegSlab} } } [Object.entries RConfig] : begin
+			local fSlabBot : slabs && slabs !== PShape.SlabMotion
+
+			if [not fTailed] : begin
+				create-glyph "cyrl/yae/left.\(suffix)" : glyph-proc
+					local df : include : DivFrame para.diversityM 3
+					include : df.markSet.e
+					set-base-anchor 'cvDecompose' 0 0
+
+					local { subDf } : SubDfAndShift 0 df
+					local bp : RBarPos XH fSlabBot
+
+					include : RevRShape legShape XH (df -- subDf) (slab -- revSlabs) (legSlab -- doLegSlab) (bp -- bp) (open -- fOpen) (sw -- df.mvs)
+
+					eject-contour 'strokeR'
+					eject-contour 'serifRB'
+					eject-contour 'serifRT'
+					include : VBar.r subDf.rightSB [PBarPosY XH df.mvs bp] XH df.mvs
+
+		# P
+		glyph-block-import Letter-Latin-Lower-P : PConfig
+		foreach { suffix { Body {Serifs doBS} }} [Object.entries PConfig] : do
+			create-glyph "cyrl/rha/left.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.diversityM 3
+				include : df.markSet.p
+				local { subDf } : SubDfAndShift 0 df
+				set-base-anchor 'cvDecompose' 0 0
+
+				include : Body
+					left  -- subDf.leftSB
+					right -- subDf.rightSB
+					sw    -- df.mvs
+				include : Serifs subDf XH df.mvs
+				include : LeaningAnchor.Below.VBar.l SB
+
+	do "X subglyphs"
+		glyph-block-import Letter-Shared-Shapes : SerifFrame WithSerifOverflowMask
+		glyph-block-import Letter-Latin-X : XConfig XLetterForm XSerifs
+
+		foreach { suffix {stroke1 stroke2 serifShape fMaskBase} } [Object.entries XConfig] : do
+			define [halfLetterShape df top bot turn tension] : glyph-proc
+				local lf : XLetterForm df top bot stroke1 stroke2 turn tension
+				include : WithSerifOverflowMask fMaskBase top bot df.leftSB df.rightSB : lf.rightHalf fMaskBase
+				if serifShape : begin
+					local sf : SerifFrame.fromDf df top bot
+					include : match serifShape
+						[Just XSerifs.Full] : composite-proc sf.rt.full sf.rb.full
+						[Just XSerifs.BilateralMotion] : composite-proc sf.rb.outer
+						__ : glyph-proc
+
+			define [letterShape df top bot turn tension] : glyph-proc
+				local stroke1f : if (stroke1 == 3) 4 stroke1
+				local lf : XLetterForm df top bot stroke1f stroke2 turn tension
+				include : WithSerifOverflowMask fMaskBase top bot df.leftSB df.rightSB : lf.base fMaskBase
+				if serifShape : begin
+					local sf : SerifFrame.fromDf df top bot
+					include : match serifShape
+						[Just XSerifs.Full] : composite-proc sf.rt.full sf.lb.full sf.rb.full
+						[Just XSerifs.BilateralMotion] : composite-proc sf.rb.outer
+						__ : glyph-proc
+
+			create-glyph "cyrl/rha/right.\(suffix)" : glyph-proc
+				local df : DivFrame para.diversityM 3
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : halfLetterShape df XH 0 0.1 0.20
+
+			create-glyph "cyrl/lha/right.\(suffix)" : glyph-proc
+				local df : DivFrame para.diversityM 3
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+
+				local { subDf shift } : SubDfAndShift 1 df
+				include : with-transform [ApparentTranslate shift 0] : letterShape subDf XH 0 0.1 0.20
+
+			create-glyph "cyrl/Lha/right.\(suffix)" : glyph-proc
+				local df : DivFrame para.diversityM 3
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+
+				local { subDf shift } : SubDfAndShift 1 df
+				include : with-transform [ApparentTranslate shift 0] : letterShape subDf CAP 0 0.1 0.28
+
 	do "other subglyphs"
+		# Te
 		define [EsTeRightShape df doTopSerifs doBottomSerifs] : new-glyph : glyph-proc
 			local subDf : df.sliceFine 3 2 (1/3)
 			# local shift : df.rightSB - subDf.rightSB
@@ -220,6 +310,22 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
 				include : EsTeRightShape df doST doSB
+
+		# El
+		glyph-block-import Letter-Cyrillic-El : CyrElShape
+		create-glyph 'cyrl/Lha/left' : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			local { subDf } : SubDfAndShift 0 df
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrElShape subDf.leftSB (subDf.rightSB - [HSwToV : 0.5 * df.mvs]) CAP 0 [if SLAB 4 0] df.mvs
+
+		create-glyph 'cyrl/lha/left' : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+			local { subDf } : SubDfAndShift 0 df
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrElShape subDf.leftSB (subDf.rightSB - [HSwToV : 0.5 * df.mvs]) XH 0 [if SLAB 4 0] df.mvs
 
 	do "subglyph diacritics"
 		glyph-block-import Mark-Overlay : InnerDot
@@ -262,6 +368,11 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	select-variant "aeInvE/right" (follow -- 'e')
 	select-variant "ue/u"
 	select-variant "oeOpenO/left" (follow -- 'c')
+	select-variant "cyrl/yae/left"
+	select-variant "cyrl/rha/left" (follow -- 'cyrl/er')
+	select-variant "cyrl/rha/right"
+	select-variant "cyrl/Lha/right" (follow -- 'cyrl/Rha/right')
+	select-variant "cyrl/lha/right" (follow -- 'cyrl/rha/right')
 
 	derive-composites 'ae' 0xE6   'ae/a' 'ae/e'
 	derive-composites 'oe' 0x153  'oe/o' 'ae/e'
@@ -272,6 +383,10 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	derive-composites 'oeOpenO' 0xAB62 'oeOpenO/left' 'ae/e'
 	derive-composites 'aeInvE' 0xAB31 'ae/a' 'aeInvE/right'
 	derive-composites 'oeInv' 0xAB40 'oe/o' 'aeInvE/right'
+	derive-composites 'cyrl/lha' 0x515 'cyrl/lha/left' 'cyrl/lha/right'
+	derive-composites 'cyrl/Lha' 0x514 'cyrl/Lha/left' 'cyrl/Lha/right'
+	derive-composites 'cyrl/rha' 0x517 'cyrl/rha/left' 'cyrl/rha/right'
+	derive-composites 'cyrl/yae' 0x519 'cyrl/yae/left' 'ae/e'
 
 	alias 'cyrl/ae' 0x4D5  'ae'
 	alias 'cyrl/oo' 0xA699 'oo'

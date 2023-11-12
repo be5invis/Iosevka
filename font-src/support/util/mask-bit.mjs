@@ -4,6 +4,9 @@ export function maskBit(x, y) {
 export function maskBits(x, y) {
 	return x & y;
 }
+export function maskOffBits(x, y) {
+	return x & ~y;
+}
 export function bitOr(...xs) {
 	let x = 0;
 	for (const a of xs) x |= a;
