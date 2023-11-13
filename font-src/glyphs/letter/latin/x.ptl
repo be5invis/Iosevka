@@ -34,7 +34,7 @@ glyph-block Letter-Latin-X : begin
 			local straightxleft : mix leftx rightx pStraight
 			local straightyleft : mix cyleft righty pStraight
 			include : dispiro
-				widths.center
+				widths.center sw
 				flat leftx lefty [heading [if (lefty < righty) Upward Downward]]
 				curl leftx turnyleft [heading [if (lefty < righty) Upward Downward]]
 				quadControls 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
@@ -75,8 +75,8 @@ glyph-block Letter-Latin-X : begin
 
 	glyph-block-export XCursiveHalfShape
 	define [XCursiveHalfShape] : with-params [
-			top bottom left right 
-			[sw Stroke] [swEnd : AdviceStroke 2.75] [swMid : AdviceStroke 3] 
+			top bottom left right
+			[sw Stroke] [swEnd : AdviceStroke 2.75] [swMid : AdviceStroke 3]
 			[kThin 0.55] [setMark false] [flatTail false]
 		] : glyph-proc
 		local ada : ArchDepthAOf (ArchDepth * 0.8) (Width / 2)
@@ -85,7 +85,7 @@ glyph-block Letter-Latin-X : begin
 
 		define xCenterRight : left + [HSwToV swMid] / 2
 		define xTurn : mix (right - [HSwToV swEnd]) xCenterRight 0.5
-		define hook1Depth : Hook + sw * 0.125
+		define hook1Depth : Math.max (sw * 2) (div * (Hook + sw * 0.125))
 		define hook1StraightDepth : Math.min
 			hook1Depth - swEnd * 1.125
 			Math.max 1 : hook1Depth / 5 - swEnd / 4
@@ -108,7 +108,7 @@ glyph-block Letter-Latin-X : begin
 				flat (xCenterRight - [HSwToV fineMid]) ([mix bottom top 0.5] - O) [widths.lhs fineMid]
 				curl (xCenterRight - [HSwToV fineMid]) (bottom + [Math.min adb (swMid + rIn)])
 				arcvh
-				flat (xCenterRight + div * rIn + 0.25 * TanSlope * rIn) bottom [widths.lhs.heading sw Rightward]
+				flat (xCenterRight + div * (0.5 * swMid + rIn) + 0.25 * TanSlope * (0.5 * swMid + rIn)) bottom [widths.lhs.heading sw Rightward]
 				curl right bottom
 			dispiro
 				flat (xCenterRight - [HSwToV : 0.5 * fineMid]) ([mix bottom top 0.5] - O) [widths.center fineMid]
@@ -132,7 +132,10 @@ glyph-block Letter-Latin-X : begin
 			stroke1 stroke2
 			turn tension
 			[sw df.mvs]
+			[swCursiveEnd : (sw / Stroke) * [AdviceStroke 2.75]]
+			[swCursiveMid : (sw / Stroke) * [AdviceStroke 3]]
 		] : namespace
+		local sw df.mvs
 		export : define [base fSlab] : union
 			match stroke1
 				[Just STROKE-STRAIGHT] : XStrand true  fSlab df.leftSB bot df.rightSB top turn 0.4 tension sw
@@ -141,8 +144,8 @@ glyph-block Letter-Latin-X : begin
 				([Just STROKE-CURSIVE] || [Just STROKE-CURSIVE-FLAT]) : composite-proc
 					XCursiveHalfShape top bot df.middle df.rightSB
 						sw -- sw
-						swEnd -- (sw / Stroke) * [AdviceStroke 2.75]
-						swMid -- (sw / Stroke) * [AdviceStroke 3]
+						swEnd -- swCursiveEnd
+						swMid -- swCursiveMid
 						flatTail -- (stroke1 === STROKE-CURSIVE-FLAT)
 					FlipAround df.middle [mix bot top 0.5]
 				__ : glyph-proc
@@ -152,8 +155,8 @@ glyph-block Letter-Latin-X : begin
 				[Just STROKE-CHANCERY] : XChanceryStrand (+1) df.leftSB top df.rightSB bot false sw
 				[Just STROKE-CURSIVE]  : XCursiveHalfShape top bot df.middle df.rightSB
 					sw -- sw
-					swEnd -- (sw / Stroke) * [AdviceStroke 2.75]
-					swMid -- (sw / Stroke) * [AdviceStroke 3]
+					swEnd -- swCursiveEnd
+					swMid -- swCursiveMid
 					setMark -- true
 				__ : glyph-proc
 
@@ -172,8 +175,8 @@ glyph-block Letter-Latin-X : begin
 					[Just STROKE-CHANCERY] : XChanceryStrand (+1) df.leftSB top df.rightSB bot true sw
 					[Just STROKE-CURSIVE]  : XCursiveHalfShape top bot df.middle df.rightSB
 						sw -- sw
-						swEnd -- (sw / Stroke) * [AdviceStroke 2.75]
-						swMid -- (sw / Stroke) * [AdviceStroke 3]
+						swEnd -- swCursiveEnd
+						swMid -- swCursiveMid
 						setMark -- true
 					__ : glyph-proc
 
@@ -200,7 +203,7 @@ glyph-block Letter-Latin-X : begin
 
 	foreach { suffix {stroke1 stroke2 serifShape fMaskBase} } [Object.entries XConfig] : do
 		define [letterShape top bot turn tension] : glyph-proc
-			local df : DivFrame 1
+			local df : DivFrame 1 2
 			local lf : XLetterForm df top bot stroke1 stroke2 turn tension
 			include : WithSerifOverflowMask fMaskBase top bot df.leftSB df.rightSB : lf.base fMaskBase
 			if serifShape : begin

@@ -18,6 +18,13 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		local shift : pShift * subDfFullShift
 		return { subDf shift }
 
+	glyph-block-export SubDfAndShiftEx
+	define [SubDfAndShiftEx p q pShift df _o] : begin
+		local subDf : df.slice p q _o
+		local subDfFullShift : df.rightSB - subDf.rightSB
+		local shift : pShift * subDfFullShift
+		return { subDf shift }
+
 	do "a subglyphs"
 		define [AAShape body hookStyle pShift df o] : begin
 			local { subDf shift } : SubDfAndShift pShift df o
@@ -247,9 +254,12 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 						[Just XSerifs.BilateralMotion] : composite-proc sf.rb.outer
 						__ : glyph-proc
 
-			define [letterShape df top bot turn tension] : glyph-proc
+			define [LhaRightLetterShape df top bot turn tension] : glyph-proc
 				local stroke1f : if (stroke1 == 3) 4 stroke1
 				local lf : XLetterForm df top bot stroke1f stroke2 turn tension
+					sw -- df.mvs
+					swCursiveEnd -- [AdviceStroke 3 df.div]
+					swCursiveMid -- df.mvs
 				include : WithSerifOverflowMask fMaskBase top bot df.leftSB df.rightSB : lf.base fMaskBase
 				if serifShape : begin
 					local sf : SerifFrame.fromDf df top bot
@@ -265,20 +275,20 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				include : halfLetterShape df XH 0 0.1 0.20
 
 			create-glyph "cyrl/lha/right.\(suffix)" : glyph-proc
-				local df : DivFrame para.diversityM 3
+				local df : DivFrame para.diversityM 3.5
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
 
-				local { subDf shift } : SubDfAndShift 1 df
-				include : with-transform [ApparentTranslate shift 0] : letterShape subDf XH 0 0.1 0.20
+				local { subDf shift } : SubDfAndShiftEx 6 4 1 df
+				include : with-transform [ApparentTranslate shift 0] : LhaRightLetterShape subDf XH 0 0.1 0.20
 
 			create-glyph "cyrl/Lha/right.\(suffix)" : glyph-proc
-				local df : DivFrame para.diversityM 3
+				local df : DivFrame para.diversityM 3.5
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
 
-				local { subDf shift } : SubDfAndShift 1 df
-				include : with-transform [ApparentTranslate shift 0] : letterShape subDf CAP 0 0.1 0.28
+				local { subDf shift } : SubDfAndShiftEx 6 4 1 df
+				include : with-transform [ApparentTranslate shift 0] : LhaRightLetterShape subDf CAP 0 0.1 0.28
 
 	do "other subglyphs"
 		# Te
@@ -314,16 +324,16 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		# El
 		glyph-block-import Letter-Cyrillic-El : CyrElShape
 		create-glyph 'cyrl/Lha/left' : glyph-proc
-			local df : include : DivFrame para.diversityM 3
+			local df : include : DivFrame para.diversityM 3.5
 			include : df.markSet.capital
-			local { subDf } : SubDfAndShift 0 df
+			local { subDf } : SubDfAndShiftEx 6 3 0 df
 			set-base-anchor 'cvDecompose' 0 0
 			include : CyrElShape subDf.leftSB (subDf.rightSB - [HSwToV : 0.5 * df.mvs]) CAP 0 [if SLAB 4 0] df.mvs
 
 		create-glyph 'cyrl/lha/left' : glyph-proc
-			local df : include : DivFrame para.diversityM 3
+			local df : include : DivFrame para.diversityM 3.5
 			include : df.markSet.e
-			local { subDf } : SubDfAndShift 0 df
+			local { subDf } : SubDfAndShiftEx 6 3 0 df
 			set-base-anchor 'cvDecompose' 0 0
 			include : CyrElShape subDf.leftSB (subDf.rightSB - [HSwToV : 0.5 * df.mvs]) XH 0 [if SLAB 4 0] df.mvs
 
