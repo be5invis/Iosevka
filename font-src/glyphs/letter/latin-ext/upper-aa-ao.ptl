@@ -85,10 +85,20 @@ glyph-block Letter-Latin-Upper-AA-AO : begin
 								with-transform [ApparentTranslate topSerifGap 0] [refer-glyph leftMask]
 							with-transform [ApparentTranslate (OX - 0.1) 0] [refer-glyph rightMask]
 
+	do "AO"
+		derive-multi-part-glyphs 'AO' 0xA734 {"AA/Left" "AA/LeftMask" "OO/right"}
+			function [srcs gr] : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				define topSerifGap : Math.max (0.1 * (df.rightSB - df.leftSB)) [AdviceStroke 6]
+				define { left leftMask right } srcs
+				include [refer-glyph left] AS_BASE ALSO_METRICS
+				include : difference [refer-glyph right] [refer-glyph leftMask]
+
 	do "RHA"
 		glyph-block-import Letter-Shared-Shapes : SerifFrame WithSerifOverflowMask
 		glyph-block-import Letter-Latin-Upper-P : PShape PConfig
 		glyph-block-import Letter-Latin-X : XConfig XLetterForm XSerifs
+		glyph-block-import Letter-Latin-Lower-AE-OE : BuildRha
 
 		foreach { suffix { fGap slabs revSlabs } } [Object.entries PConfig] : do
 			local fMotion : slabs === PShape.SlabMotion
@@ -124,11 +134,4 @@ glyph-block Letter-Latin-Upper-AA-AO : begin
 		select-variant "cyrl/Rha/left" (follow -- 'P')
 		select-variant "cyrl/Rha/right"
 
-		derive-composites "cyrl/Rha" 0x516 'cyrl/Rha/left' 'cyrl/Rha/right'
-
-	derive-multi-part-glyphs 'AO' 0xA734 {"AA/Left" "AA/LeftMask" "OO/right"} : function [srcs gr] : glyph-proc
-		define df : DivFrame para.diversityM 3.5
-		define topSerifGap : Math.max (0.1 * (df.rightSB - df.leftSB)) [AdviceStroke 6]
-		define { left leftMask right } srcs
-		include [refer-glyph left] AS_BASE ALSO_METRICS
-		include : difference [refer-glyph right] [refer-glyph leftMask]
+		derive-multi-part-glyphs "cyrl/Rha" 0x516 {'cyrl/Rha/left' 'cyrl/Rha/right'} BuildRha
