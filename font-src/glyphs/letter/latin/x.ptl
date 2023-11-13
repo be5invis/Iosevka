@@ -76,45 +76,46 @@ glyph-block Letter-Latin-X : begin
 	glyph-block-export XCursiveHalfShape
 	define [XCursiveHalfShape] : with-params [
 			top bottom left right
-			[sw Stroke] [swEnd : AdviceStroke 2.75] [swMid : AdviceStroke 3]
-			[kThin 0.55] [setMark false] [flatTail false]
+			[swMid   : AdviceStroke 2.75]
+			[swEnd   : AdviceStroke 3]
+			[swCoEnd : AdviceStroke 2]
+			[setMark false] [flatTail false]
 		] : glyph-proc
 		local ada : ArchDepthAOf (ArchDepth * 0.8) (Width / 2)
 		local adb : ArchDepthBOf (ArchDepth * 0.8) (Width / 2)
 		local div : (right - left) / (RightSB - Middle)
+		local divHook : Math.min div 1
 
-		define xCenterRight : left + [HSwToV swMid] / 2
-		define xTurn : mix (right - [HSwToV swEnd]) xCenterRight 0.5
-		define hook1Depth : Math.max (sw * 2) (div * (Hook + sw * 0.125))
-		define hook1StraightDepth : Math.min
-			hook1Depth - swEnd * 1.125
-			Math.max 1 : hook1Depth / 5 - swEnd / 4
-
-		define fineMid : swMid * kThin
-		define rIn : Math.max (0.4 * (right - left) - [HSwToV : 0.7 * sw]) [AdviceStroke 16]
-		define flatHookDepth : 1.4 * (right - left) - swEnd - 1.5 * rIn
-
-		define upperHalf : include : dispiro
-			flat (xCenterRight - [HSwToV fineMid]) ([mix bottom top 0.5] + O) [widths.rhs.heading fineMid Upward]
-			curl (xCenterRight - [HSwToV fineMid]) (top - ada)
+		local fineMid : 0.55 * swMid
+		local xMidBarRightEdge : left + [HSwToV swMid] / 2
+		local xUpperTurn : mix (right - [HSwToV swEnd]) xMidBarRightEdge 0.5
+		local upperHookDepth : Math.max (swEnd * 2) ([Math.sqrt divHook] * (Hook + swEnd * 0.125))
+		local upperHookStraightDepth : Math.min
+			upperHookDepth - swEnd * 1.125
+			Math.max 1 : upperHookDepth / 5 - swEnd / 4
+		local upperHalf : include : dispiro
+			flat (xMidBarRightEdge - [HSwToV fineMid]) ([mix bottom top 0.5] + O) [widths.rhs.heading fineMid Upward]
+			curl (xMidBarRightEdge - [HSwToV fineMid]) (top - ada)
 			arcvh
-			ShoulderMidKnotRhs xTurn (top - O) fineMid swEnd (+1) (-1)
+			ShoulderMidKnotRhs xUpperTurn (top - O) fineMid swEnd (+1) (-1)
 			archv
-			flat (right - OX) (top - hook1Depth + hook1StraightDepth) [heading Downward]
-			curl (right - OX) (top - hook1Depth) [heading Downward]
+			flat (right - OX) (top - upperHookDepth + upperHookStraightDepth) [heading Downward]
+			curl (right - OX) (top - upperHookDepth) [heading Downward]
 
-		define lowerHalf : include : if flatTail
+		local rIn : Math.max [AdviceStroke 16] (0.4 * (right - left) - [HSwToV : 0.5 * swMid])
+		local flatHookDepth : 1.3 * (right - left) - (0.5 - TanSlope) * swEnd - 1.5 * (rIn + 0.5 * swMid)
+		local lowerHalf : include : if flatTail
 			dispiro
-				flat (xCenterRight - [HSwToV fineMid]) ([mix bottom top 0.5] - O) [widths.lhs fineMid]
-				curl (xCenterRight - [HSwToV fineMid]) (bottom + [Math.min adb (swMid + rIn)])
+				flat (xMidBarRightEdge - [HSwToV fineMid]) ([mix bottom top 0.5] - O) [widths.lhs fineMid]
+				curl (xMidBarRightEdge - [HSwToV fineMid]) (bottom + [Math.min adb (swMid + rIn)])
 				arcvh
-				flat (xCenterRight + div * (0.5 * swMid + rIn) + 0.25 * TanSlope * (0.5 * swMid + rIn)) bottom [widths.lhs.heading sw Rightward]
+				flat (xMidBarRightEdge + div * (0.5 * swMid + rIn) + 0.25 * TanSlope * (0.5 * swMid + rIn)) bottom [widths.lhs.heading swCoEnd Rightward]
 				curl right bottom
 			dispiro
-				flat (xCenterRight - [HSwToV : 0.5 * fineMid]) ([mix bottom top 0.5] - O) [widths.center fineMid]
-				curl (xCenterRight - [HSwToV : 0.5 * fineMid]) (bottom + [Math.min adb (swMid + rIn)])
+				flat (xMidBarRightEdge - [HSwToV : 0.5 * fineMid]) ([mix bottom top 0.5] - O) [widths.center fineMid]
+				curl (xMidBarRightEdge - [HSwToV : 0.5 * fineMid]) (bottom + [Math.min adb (swMid + rIn)])
 				arcvh 16
-				DiagonalTailF 1 [DivFrame div] (xCenterRight - [HSwToV : 0.5 * sw] + TanSlope * rIn) bottom rIn 50 flatHookDepth sw
+				DiagonalTailF 1 (xMidBarRightEdge - [HSwToV : 0.5 * swCoEnd] + TanSlope * rIn) bottom rIn 50 flatHookDepth swCoEnd
 
 		if setMark : begin
 			define lowerHalfLastKnot lowerHalf.rhsKnots.(lowerHalf.rhsKnots.length - 1)
@@ -132,8 +133,9 @@ glyph-block Letter-Latin-X : begin
 			stroke1 stroke2
 			turn tension
 			[sw df.mvs]
-			[swCursiveEnd : (sw / Stroke) * [AdviceStroke 2.75]]
-			[swCursiveMid : (sw / Stroke) * [AdviceStroke 3]]
+			[swCursiveMid   : (sw / Stroke) * [AdviceStroke 2.75]]
+			[swCursiveEnd   : (sw / Stroke) * [AdviceStroke 3]]
+			[swCursiveCoEnd : (sw / Stroke) * [AdviceStroke 2]]
 		] : namespace
 		local sw df.mvs
 		export : define [base fSlab] : union
@@ -143,7 +145,7 @@ glyph-block Letter-Latin-X : begin
 				[Just STROKE-CHANCERY] : XChanceryStrand (-1) df.leftSB bot df.rightSB top false sw
 				([Just STROKE-CURSIVE] || [Just STROKE-CURSIVE-FLAT]) : composite-proc
 					XCursiveHalfShape top bot df.middle df.rightSB
-						sw -- sw
+						swCoEnd -- swCursiveCoEnd
 						swEnd -- swCursiveEnd
 						swMid -- swCursiveMid
 						flatTail -- (stroke1 === STROKE-CURSIVE-FLAT)
@@ -154,7 +156,7 @@ glyph-block Letter-Latin-X : begin
 				[Just STROKE-CURLY]    : XStrand false fSlab df.leftSB top df.rightSB bot turn 0.4 tension sw
 				[Just STROKE-CHANCERY] : XChanceryStrand (+1) df.leftSB top df.rightSB bot false sw
 				[Just STROKE-CURSIVE]  : XCursiveHalfShape top bot df.middle df.rightSB
-					sw -- sw
+					swCoEnd -- swCursiveCoEnd
 					swEnd -- swCursiveEnd
 					swMid -- swCursiveMid
 					setMark -- true
@@ -174,7 +176,7 @@ glyph-block Letter-Latin-X : begin
 					[Just STROKE-CURLY]    : HalfXStrand false fSlab df.rightSB bot df.middle midy turn 0.4 tension sw
 					[Just STROKE-CHANCERY] : XChanceryStrand (+1) df.leftSB top df.rightSB bot true sw
 					[Just STROKE-CURSIVE]  : XCursiveHalfShape top bot df.middle df.rightSB
-						sw -- sw
+						swCoEnd -- swCursiveCoEnd
 						swEnd -- swCursiveEnd
 						swMid -- swCursiveMid
 						setMark -- true
