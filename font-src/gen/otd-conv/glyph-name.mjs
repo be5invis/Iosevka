@@ -1,4 +1,4 @@
-import { Joining, AnyCv, TieMark, Nwid, Wwid, VS01 } from "../../support/gr.mjs";
+import { Joining, AnyCv, TieMark, Nwid, Wwid, VS01, CvDecompose } from "../../support/gr.mjs";
 
 const ApplePostNames = new Map([
 	/* spell-checker: disable */
@@ -267,7 +267,7 @@ export function byCode(gSrc, primaryUnicode, conflictSet) {
 	let preferredName = null;
 	if (primaryUnicode) {
 		preferredName =
-			ApplePostNames.get(primaryUnicode) || `u${formatCodePointHex(primaryUnicode)}`;
+			ApplePostNames.get(primaryUnicode) || `uni${formatCodePointHex(primaryUnicode)}`;
 	}
 	if (preferredName && !conflictSet.has(preferredName)) {
 		conflictSet.add(preferredName);
@@ -278,30 +278,16 @@ function formatCodePointHex(u) {
 	return u.toString(16).padStart(4, "0").toUpperCase();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 export function bySpacing(gSrcBase, gOtBase, internalNameMap, conflictSet) {
 	if (!gOtBase.name) return 0;
 	let n = 0;
-	n += nameByPairGr(Nwid, Wwid, "NWID", "WWID", gSrcBase, gOtBase, internalNameMap, conflictSet);
-	n += nameByPairGr(Wwid, Nwid, "WWID", "NWID", gSrcBase, gOtBase, internalNameMap, conflictSet);
+	n += byPairGrImpl(Nwid, "NWID", "WWID", gSrcBase, gOtBase, internalNameMap, conflictSet);
+	n += byPairGrImpl(Wwid, "WWID", "NWID", gSrcBase, gOtBase, internalNameMap, conflictSet);
 	return n;
 }
-
-const NamingGr = [TieMark, VS01];
-
-export function byGr(gSrcBase, gOtBase, internalNameMap, conflictSet) {
-	if (!gOtBase.name) return 0;
-	let n = 0;
-	for (const cv of AnyCv.query(gSrcBase)) {
-		n += nameByGr(cv, gSrcBase, gOtBase, internalNameMap, conflictSet);
-	}
-	for (const gr of NamingGr) {
-		if (gr.get(gSrcBase)) {
-			n += nameByGr(gr, gSrcBase, gOtBase, internalNameMap, conflictSet);
-		}
-	}
-	return n;
-}
-function nameByPairGr(grCis, grTrans, tagCis, tagTrans, gSrcBase, gOtBase, nm, conflictSet) {
+function byPairGrImpl(grCis, tagCis, tagTrans, gSrcBase, gOtBase, nm, conflictSet) {
 	const gnDst = grCis.get(gSrcBase);
 	if (!gnDst) return 0;
 	const gOtDst = nm.get(gnDst);
@@ -317,7 +303,48 @@ function nameByPairGr(grCis, grTrans, tagCis, tagTrans, gSrcBase, gOtBase, nm, c
 	}
 	return 0;
 }
-function nameByGr(gr, gSrcBase, gOtBase, internalNameMap, conflictSet) {
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function byDecompose(gSrcBase, gOtBase, internalNameMap, conflictSet) {
+	const parts = CvDecompose.get(gSrcBase);
+
+	if (!parts || !parts.length) return 0;
+
+	let newNamesCount = 0;
+	for (const [index, gnPart] of parts.entries()) {
+		const gComponent = internalNameMap.get(gnPart);
+
+		if (!gComponent || gComponent.name) continue;
+
+		const nameT = CvDecompose.amendOtName(gOtBase.name, index);
+		if (!conflictSet.has(nameT)) {
+			conflictSet.add(nameT);
+			gComponent.name = nameT;
+			newNamesCount++;
+		}
+	}
+
+	return newNamesCount;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+const NamingGr = [TieMark, VS01];
+export function byGr(gSrcBase, gOtBase, internalNameMap, conflictSet) {
+	if (!gOtBase.name) return 0;
+	let n = 0;
+	for (const cv of AnyCv.query(gSrcBase)) {
+		n += nameByGrImpl(cv, gSrcBase, gOtBase, internalNameMap, conflictSet);
+	}
+	for (const gr of NamingGr) {
+		if (gr.get(gSrcBase)) {
+			n += nameByGrImpl(gr, gSrcBase, gOtBase, internalNameMap, conflictSet);
+		}
+	}
+	return n;
+}
+function nameByGrImpl(gr, gSrcBase, gOtBase, internalNameMap, conflictSet) {
 	const gnDst = gr.get(gSrcBase);
 	if (!gnDst) return 0;
 	const gOtDst = internalNameMap.get(gnDst);
@@ -330,6 +357,8 @@ function nameByGr(gr, gSrcBase, gOtBase, internalNameMap, conflictSet) {
 	}
 	return 0;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 export function byBuildOrder(rank, gSrc, gnOrig) {
 	if (!gnOrig) gnOrig = `.g${rank}`;
