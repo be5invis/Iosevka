@@ -603,72 +603,75 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [InwardR cx cy stroke hook] : begin
 			return : tagged 'arcEndSerifR' : VBar.r cx (cy + hook + DToothlessRise / 2) (cy + DToothlessRise) [ArcStartSerifWidth stroke]
 
-	define DiagTailDefaultAngle 40
+	glyph-block-export DiagTail
+	define DiagTail : namespace
 
-	glyph-block-export DiagonalTailStdDepth
-	define [DiagonalTailStdDepth df sw] : Math.max (0.5 * sw)
-		df.div * para.unitWidthScalar * [Math.hypot HookX Hook] - 0.25 * sw
+		export : define DefaultAngle 40
 
-	glyph-block-export DiagonalTailInnerRadius
-	define [DiagonalTailInnerRadius] : Math.max (XH / 32) (0.5 * [AdviceStroke2 24 32 XH])
+		export : define [StdDepth df sw] : Math.max (0.5 * sw)
+			df.div * para.unitWidthScalar * [Math.hypot HookX Hook] - 0.25 * sw
 
-	glyph-block-export DiagonalTailF
-	define [DiagonalTailF sign cx cy rIn angle depth sw] : begin
-		define tailAngle : angle / 180 * Math.PI
-		define sinAngle : Math.sin tailAngle
-		define cosAngle : Math.cos tailAngle
+		export : define [DefaultInnerRadius] : Math.max (XH / 32) (0.5 * [AdviceStroke2 24 32 XH])
 
-		define mocFine : [AdviceStroke 3] / Stroke * sw
-		define mocSwMid : mix sw mocFine (2 / 3)
-		define fine : mocFine / [mix 1 HVContrast 0.375]
-		define swMid : mix sw fine 0.7
+		define [FineSw sw] : begin
+			define mocFine : [AdviceStroke 3] / Stroke * sw
+			return : mocFine / [mix 1 HVContrast 0.375]
 
-		define dxTurn : [HSwToV : 0.5 * sw] + rIn
-		define dxTurnObl : 0.75 * TanSlope * rIn
-		define dyTurn : 0.5 * mocSwMid
-		define dxTailStart : dxTurn + sinAngle * (rIn + 0.5 * mocFine * [mix 1 HVContrast sinAngle])
-		define dyTailStart : dyTurn + (1 - cosAngle + [if (sign > 0) 0 (TanSlope)]) * (rIn + 0.5 * mocFine)
-		define dxDepth : (depth - 0.5 * sw) * cosAngle
-		define dyDepth : (depth - 0.5 * sw) * sinAngle
-		return : list
-			g4.[if (sign > 0) "right" "left"].mid
-				cx + sign * (dxTurn - dxTurnObl)
-				cy + O + dyTurn
-				if (sign > 0)
-					widths.center.heading swMid Rightward
-					widths.center.heading swMid Leftward
-			if (sign <= 0) {} : alsoThruThem
-				list
-					DiagonalTailFArc2K tailAngle (1 / 4)
-					DiagonalTailFArc2K tailAngle (2 / 4)
-					DiagonalTailFArc2K tailAngle (3 / 4)
-			# if (sign <= 0) {} : alsoThru.g2
-			# 	[Math.sin (tailAngle / 2)] / [Math.sin tailAngle]
-			# 	(1 - [Math.cos (tailAngle / 2)]) / (1 - [Math.cos tailAngle])
-			# 	widths.center : mix swMid fine (1 / 2)
-			flat (cx + sign * dxTailStart) (cy + O + dyTailStart) [widths.center fine]
-			curl (cx + sign * dxTailStart + sign * dxDepth) (cy + O + dyTailStart + dyDepth)
+		define DiagTailSuperness DesignParameters.superness
 
-	define [DiagonalTailFArc2K tailAngle t] : list
-		[Math.sin (t * tailAngle)] / [Math.sin tailAngle]
-		(1 - [Math.cos (t * tailAngle)]) / (1 - [Math.cos tailAngle])
-		begin t
+		export : define [F sign cx cy rIn angle depth sw] : begin
+			define tailAngle : angle / 180 * Math.PI
+			define {cosAngle sinAngle} : superEllipse tailAngle
+			define {dCosAngle dSinAngle} : superEllipseDerivative tailAngle
 
-	glyph-block-export DiagonalTailR
-	define [DiagonalTailR cx cy depth sw] : begin
-		define rInY : DiagonalTailInnerRadius
-		return : list
-			curl cx (cy + sw + rInY)
-			arcvh 8
-			DiagonalTailF (+1) cx cy rInY DiagTailDefaultAngle depth sw
+			define fine : FineSw sw
+			define r : rIn + 0.5 * fine
+			define dxTurn : [HSwToV : 0.5 * sw] + rIn + 0.5 * sign * TanSlope * fine
+			define dxTailStart : dxTurn + sinAngle * (r * [mix 1 HVContrast sinAngle])
+			define dyTailStart : (rIn + fine) - cosAngle * r
+			define dxDepth : (depth - 0.25 * sw) * +dSinAngle
+			define dyDepth : (depth - 0.25 * sw) * -dCosAngle
+			return : list
+				g4.[if (sign > 0) "right" "left"].mid
+					cx + sign * dxTurn
+					cy + O + 0.5 * fine
+					widths.center fine
+				alsoThruThem : FArc tailAngle 4
+				flat (cx + sign * dxTailStart)             (cy + O + dyTailStart) [widths.center fine]
+				curl (cx + sign * (dxTailStart + dxDepth)) (cy + O + dyTailStart + dyDepth)
 
-	glyph-block-export DiagonalTailL
-	define [DiagonalTailL cx cy depth sw] : begin
-		define rInY : DiagonalTailInnerRadius
-		return : list
-			curl cx (cy + sw + rInY)
-			arcvh 8
-			DiagonalTailF (-1) cx cy rInY DiagTailDefaultAngle depth sw
+		define [superEllipse theta] : list
+			Math.pow [Math.cos theta] (2 / DiagTailSuperness)
+			Math.pow [Math.sin theta] (2 / DiagTailSuperness)
+
+		define [superEllipseDerivative theta] : begin
+			local dc : (-2 / DiagTailSuperness) * [Math.sin theta] * [Math.pow [Math.cos theta] (2 / DiagTailSuperness - 1)]
+			local ds : (+2 / DiagTailSuperness) * [Math.cos theta] * [Math.pow [Math.sin theta] (2 / DiagTailSuperness - 1)]
+			local h : Math.hypot dc ds
+			return : list (dc / h) (ds / h)
+
+		define [FArc tailAngle n] : begin
+			local results {}
+			foreach i [range 1 n] : begin
+				local t : i / n
+				local {tc ts} : superEllipse (t * tailAngle)
+				local {ec es} : superEllipse tailAngle
+				results.push : list (ts / es) ((1 - tc) / (1 - ec))
+			return results
+
+		export : define [R cx cy depth sw] : begin
+			define rInY : DefaultInnerRadius
+			return : list
+				curl cx (cy + [FineSw sw] + rInY)
+				arcvh 8 DiagTailSuperness
+				F (+1) cx cy rInY DefaultAngle depth sw
+
+		export : define [L cx cy depth sw] : begin
+			define rInY : DefaultInnerRadius
+			return : list
+				curl cx (cy + [FineSw sw] + rInY)
+				arcvh 8 DiagTailSuperness
+				F (-1) cx cy rInY DefaultAngle depth sw
 
 	define [JutIn left right jut swRef hSplit] : begin
 		local ink : HSwToV swRef
