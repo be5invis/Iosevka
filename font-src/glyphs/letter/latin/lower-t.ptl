@@ -11,7 +11,7 @@ glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared : CreateCommaCaronComposition
 	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth ConnectedCedilla SerifedArcEnd
-	glyph-block-import Letter-Shared-Shapes : DiagonalTailR DiagonalTailStdDepth DToothlessRise
+	glyph-block-import Letter-Shared-Shapes : DiagTail DToothlessRise
 	glyph-block-import Letter-Shared-Shapes : TopHook PalatalHook
 	glyph-block-import Letter-Latin-S : SAutoSlabEnd AdviceSArchDepth
 	glyph-block-import Letter-Blackboard : BBS BBD
@@ -36,8 +36,8 @@ glyph-block Letter-Latin-Lower-T : begin
 			([Just SYM-PR-LEFT] || [Just SYM-PR-BALANCED]) : df.middle - [HSwToV HalfStroke]
 
 		define [xCrossBarPos df sym] : match sym
-			([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {[BarLeftPos df sym] ([xSmallTCrossRefT df] + LongJut * [Math.sqrt df.div])}
-			__              {([xSmallTCrossRefT df] - LongJut * [Math.sqrt df.div]) ([xSmallTCrossRefT df] + LongJut * [Math.sqrt df.div])}
+			([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {([BarLeftPos df sym] + TanSlope * Stroke) ([xSmallTCrossRefT df] + LongJut * [Math.sqrt df.div])}
+			__                         {([xSmallTCrossRefT df] - LongJut * [Math.sqrt df.div]) ([xSmallTCrossRefT df] + LongJut * [Math.sqrt df.div])}
 
 		define [XHookTerminal df sym] : match sym
 			[Just SYM-LEFT]        df.rightSB
@@ -79,13 +79,13 @@ glyph-block Letter-Latin-Lower-T : begin
 
 		export : define [Retroflex df sym top bot] : Flat.Retroflex df sym top bot
 
-	define DiagTail : namespace
+	define DiagonalTailed : namespace
 		define [HookShape df sym top bot sw] : begin
 			local xMid : [BarLeftPos df sym] + [HSwToV HalfStroke]
-			local hookDepth : [if (sym === SYM-LEFT) 1.375 1] * [DiagonalTailStdDepth [DivFrame : Math.sqrt df.div] sw] - [HSwToV HalfStroke]
+			local hookDepth : [if (sym === SYM-LEFT) 1.375 1] * [DiagTail.StdDepth [DivFrame : Math.sqrt df.div] sw] - [HSwToV HalfStroke]
 			return : dispiro
 				flat xMid top [widths.center.heading sw Downward]
-				DiagonalTailR df xMid bot hookDepth sw
+				DiagTail.R xMid bot hookDepth sw
 
 		###########################################################################################
 
@@ -108,7 +108,7 @@ glyph-block Letter-Latin-Lower-T : begin
 
 	define Flat : namespace
 		export : define [xCrossBarPos df sym] : match sym
-			([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {[BarLeftPos df sym] [mix df.width df.rightSB [mix 1 df.div 2]]}
+			([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {([BarLeftPos df sym] + TanSlope * Stroke) [mix df.width df.rightSB [mix 1 df.div 2]]}
 			__ {[mix 0 df.leftSB  [mix 1 df.div 2]] [mix df.width df.rightSB [mix 1 df.div 2]]}
 
 
@@ -180,7 +180,7 @@ glyph-block Letter-Latin-Lower-T : begin
 			__              : df.middle - [HSwToV HalfStroke]
 
 		define [xCrossBarPos df sym] : match sym
-			([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {[BarLeftPos df sym] (df.middle + LongJut * [Math.sqrt df.div])}
+			([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {([BarLeftPos df sym] + TanSlope * Stroke) (df.middle + LongJut * [Math.sqrt df.div])}
 			__              {(df.middle - LongJut * [Math.sqrt df.div]) (df.middle + LongJut * [Math.sqrt df.div])}
 
 		export : define [Body df sym top bot] : glyph-proc
@@ -207,7 +207,7 @@ glyph-block Letter-Latin-Lower-T : begin
 	define SmallTConfig : SuffixCfg.weave
 		object # body
 			bentHook                       { [DivFrame  1] BentHook           }
-			diagonalTailed                 {  dfNarrowT    DiagTail           }
+			diagonalTailed                 {  dfNarrowT    DiagonalTailed     }
 			flatHook                       {  dfNarrowT    Flat               }
 			hookless                       {  dfNarrowT    Hookless           }
 		object # symmetry

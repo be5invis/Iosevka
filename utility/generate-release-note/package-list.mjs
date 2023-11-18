@@ -34,19 +34,28 @@ async function GeneratePackageList(argv, out) {
 	for (let [groupID, gr] of Object.entries(pkgShapesData)) {
 		const prime = gr.subGroups[groupID];
 		const familyName = buildName("\u00a0", ...prime.family.split(" "));
-		const sTtcName = buildName("-", "super-ttc", groupID, argv.version);
-		const ttcName = buildName("-", "ttc", groupID, argv.version);
-		const sTtcLink = `${DownloadLinkPrefix}/${sTtcName}.zip`;
-		const ttcLink = `${DownloadLinkPrefix}/${ttcName}.zip`;
+		const sTtcName = buildName("-", "SuperTTC", groupID, argv.version);
+		const ttcName = buildName("-", "PkgTTC", groupID, argv.version);
 		const proportionPrefix = gr.quasiProportional ? "Quasi-proportional" : "Monospace";
 		const desc = `<i>${proportionPrefix}, ${prime.desc}</i>`;
 		const img = ImgX(`${imagePrefix}/${groupID}`);
+
+		let ttcCells = [`<td colspan="4">&nbsp;</td>`];
+		const hasSpacings = Object.entries(gr.subGroups).length > 1;
+		if (hasSpacings) {
+			const sTtcLink = `${DownloadLinkPrefix}/${sTtcName}.zip`;
+			const ttcLink = `${DownloadLinkPrefix}/${ttcName}.zip`;
+			ttcCells = [
+				`<td><b><a href="${sTtcLink}">Super\u00A0TTC</b></td>`,
+				`<td><b><a href="${ttcLink}">TTC</b></td>`,
+				`<td colspan="2">&nbsp;</td>`
+			];
+		}
+
 		out.log(
 			`<tr>`,
 			`<td colspan="3"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
-			`<td><b><a href="${sTtcLink}">Super\u00A0TTC</b></td>`,
-			`<td><b><a href="${ttcLink}">TTC</b></td>`,
-			`<td colspan="2">&nbsp;</td>`,
+			...ttcCells,
 			`</tr>`
 		);
 		out.log(
@@ -69,17 +78,19 @@ async function GeneratePackageList(argv, out) {
 				return `<b><a href="${downloadLink}">${label}</a></b>`;
 			};
 			const leader = "&nbsp;&nbsp;&nbsp;&nbsp;" + (subGroupID === lastSubGroupID ? "└" : "├");
+			const superTtcPrefix = hasSpacings ? "SuperTTC-SGr" : "SuperTTC";
+			const ttcPrefix = hasSpacings ? "PkgTTC-SGr" : "PkgTTC";
 			out.log(
 				`<tr>`,
 				`<td>${leader}&nbsp;<b>${noBreak(subGr.family)}</b></td>`,
 				`<td>${spacingDesc}</td>`,
 				`<td>${flag(ligation)}</td>`,
-				`<td>${createLink("Super\u00A0TTC", "super-ttc-sgr")}</td>`,
-				`<td>${createLink("TTC", "ttc-sgr")}</td>`,
-				`<td>${createLink("TTF", "ttf")}&nbsp;` +
-					`(${createLink("Unhinted", "ttf-unhinted")})</td>`,
-				`<td>${createLink("WebFont", "webfont")}&nbsp;` +
-					`(${createLink("Unhinted", "webfont-unhinted")})</td>`,
+				`<td>${createLink("Super\u00A0TTC", superTtcPrefix)}</td>`,
+				`<td>${createLink("TTC", ttcPrefix)}</td>`,
+				`<td>${createLink("TTF", "PkgTTF")}&nbsp;` +
+					`(${createLink("Unhinted", "PkgTTF-Unhinted")})</td>`,
+				`<td>${createLink("WebFont", "PkgWebFont")}&nbsp;` +
+					`(${createLink("Unhinted", "PkgWebFont-Unhinted")})</td>`,
 				`</tr>`
 			);
 		}

@@ -9,6 +9,7 @@ glyph-module
 glyph-block Symbol-Punctuation-Small : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Punctuation-Ellipsis EllipsisDotRadius
 
 	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
 		create-glyph "period.\(suffix)" : glyph-proc
@@ -206,6 +207,27 @@ glyph-block Symbol-Punctuation-Small : begin
 			include : with-transform [ApparentTranslate (-multiDotShift) 0] : composite-proc
 				refer-glyph "halfXhSmallPeriod.\(suffix)"
 
+		create-glyph "geor/paragraphSeparator.\(suffix)" : glyph-proc
+			include : with-transform [ApparentTranslate (+multiDotShift) 0] : composite-proc
+				refer-glyph "halfXhSmallPeriod.\(suffix)"
+			include : with-transform [ApparentTranslate (-multiDotShift) 0] : composite-proc
+				refer-glyph "smallPeriod.\(suffix)"
+				refer-glyph "xhSmallPeriod.\(suffix)"
+
+		create-glyph "twoDotOverOneDotPunct.\(suffix)" : glyph-proc
+			include [refer-glyph "smallPeriod.\(suffix)"]
+			include : with-transform [ApparentTranslate (+multiDotShiftDense) 0] : composite-proc
+				refer-glyph "xhSmallPeriod.\(suffix)"
+			include : with-transform [ApparentTranslate (-multiDotShiftDense) 0] : composite-proc
+				refer-glyph "xhSmallPeriod.\(suffix)"
+
+		create-glyph "oneDotOverTwoDotPunct.\(suffix)" : glyph-proc
+			include [refer-glyph "xhSmallPeriod.\(suffix)"]
+			include : with-transform [ApparentTranslate (+multiDotShiftDense) 0] : composite-proc
+				refer-glyph "smallPeriod.\(suffix)"
+			include : with-transform [ApparentTranslate (-multiDotShiftDense) 0] : composite-proc
+				refer-glyph "smallPeriod.\(suffix)"
+
 		create-glyph "fourDotPunct.\(suffix)" : glyph-proc
 			include [refer-glyph "smallPeriod.\(suffix)"]
 			include [refer-glyph "xhSmallPeriod.\(suffix)"]
@@ -222,14 +244,28 @@ glyph-block Symbol-Punctuation-Small : begin
 			include : with-transform [ApparentTranslate (-multiDotShiftDense) 0] : composite-proc
 				refer-glyph "halfCapSmallPeriod.\(suffix)"
 
-		create-glyph "fiveDotPunct.\(suffix)" : glyph-proc
+		create-glyph "squareFourDotPunct.\(suffix)" : glyph-proc
 			include : with-transform [ApparentTranslate (-multiDotShiftDense) 0] : composite-proc
 				refer-glyph "smallPeriod.\(suffix)"
 				refer-glyph "xhSmallPeriod.\(suffix)"
 			include : with-transform [ApparentTranslate (+multiDotShiftDense) 0] : composite-proc
 				refer-glyph "smallPeriod.\(suffix)"
 				refer-glyph "xhSmallPeriod.\(suffix)"
+
+		create-glyph "fiveDotPunct.\(suffix)" : glyph-proc
+			include : refer-glyph "squareFourDotPunct.\(suffix)"
 			include : refer-glyph "halfXhSmallPeriod.\(suffix)"
+
+		create-glyph "fiveDotMark.\(suffix)" : glyph-proc
+			local l : mix SB 0 0.5
+			local r : mix RightSB Width 0.5
+			local radius : EllipsisDotRadius 3 [Math.min XH (r - l)]
+			include : DrawAt  Middle  radius       (kDotRadius * radius - overshoot)
+			include : DrawAt  Middle (XH / 2)      (kDotRadius * radius - overshoot)
+			include : DrawAt  Middle (XH - radius) (kDotRadius * radius - overshoot)
+
+			include : DrawAt (l + radius) (XH / 2) (kDotRadius * radius - overshoot)
+			include : DrawAt (r - radius) (XH / 2) (kDotRadius * radius - overshoot)
 
 		create-glyph "dottedCross.\(suffix)" : glyph-proc
 			include : HBar.m [mix 0 SB 0.5] [mix Width RightSB 0.5] (XH / 2) OperatorStroke
@@ -246,13 +282,23 @@ glyph-block Symbol-Punctuation-Small : begin
 	select-variant 'modifierLetterRaisedColon' 0x2F8 (follow -- 'punctuationDot')
 	select-variant 'semicolon' ';' (follow -- 'punctuationDot')
 	select-variant 'invertSemicolon' 0x204F (follow -- 'punctuationDot')
+
 	select-variant 'threeDotPunct' 0x2056 (follow -- 'punctuationDot')
+	select-variant 'geor/paragraphSeparator' 0x10FB (follow -- 'punctuationDot')
+	select-variant 'twoDotOverOneDotPunct' 0x2E2A (follow -- 'punctuationDot')
+	select-variant 'oneDotOverTwoDotPunct' 0x2E2B (follow -- 'punctuationDot')
+
 	select-variant 'fourDotPunct' 0x2058 (follow -- 'punctuationDot')
+	select-variant 'squareFourDotPunct' 0x2E2C (follow -- 'punctuationDot')
 	select-variant 'fiveDotPunct' 0x2059 (follow -- 'punctuationDot')
+	select-variant 'fiveDotMark' 0x2E2D (follow -- 'punctuationDot')
+
 	select-variant 'capColon' 0x205A (follow -- 'punctuationDot')
 	select-variant 'capFourDotPunct' 0x205B (follow -- 'punctuationDot')
+
 	select-variant 'dottedCross' 0x205C (follow -- 'punctuationDot')
-	alias 'greekquestion' 0x37E 'semicolon'
+
+	alias 'grek/question' 0x37E 'semicolon'
 
 	turned 'turnSemiColon' 0x2E35 'semicolon' [DivFrame para.diversityF].middle (XH / 2)
 

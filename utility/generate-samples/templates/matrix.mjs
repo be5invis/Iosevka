@@ -7,6 +7,7 @@ export default (function (args) {
 	const elementHeight = 1.5 * EM;
 	const canvasWidth = 30 * EM;
 	const canvasHeight = 12 * EM;
+	const sigilHeight = 2 * EM;
 	const lineConfig = [
 		[-(1 / 4), "Iosevka", "normal"],
 		[+(1 / 4), "Iosevka Slab", "normal"],
@@ -41,5 +42,26 @@ export default (function (args) {
 			});
 		}
 	}
-	return { width: canvasWidth, height: canvasHeight, frames };
+
+	// Add the sigil
+	frames.push({
+		left: 0,
+		top: canvasHeight,
+		right: canvasWidth,
+		bottom: canvasHeight + sigilHeight,
+		"horizontal-align": "center",
+		"vertical-align": "center",
+		contents: [
+			{
+				"font-family": "Iosevka",
+				"font-weight": 100,
+				"font-style": "normal",
+				"font-size": 3 * EM,
+				color: theme.sigil
+			},
+			"\uEF10"
+		]
+	});
+
+	return { width: canvasWidth, height: canvasHeight + sigilHeight, frames };
 });

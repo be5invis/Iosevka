@@ -78,6 +78,9 @@ function DecompositionProp(key) {
 			if (!Array.isArray(composition)) throw new Error("Must supply a GID array");
 			if (!glyph.related) glyph.related = {};
 			glyph.related[key] = composition;
+		},
+		amendOtName(baseName, index) {
+			return `${baseName}.d${index}`;
 		}
 	};
 }

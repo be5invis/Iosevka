@@ -32,7 +32,7 @@ export class BiKnotCollector {
 			this.controls.push(c);
 			this.needsUnwrap = true;
 		} else {
-			throw new Error("Invalid spiro control type");
+			throw new Error("Invalid spiro control type " + String(c));
 		}
 	}
 	unwrap() {

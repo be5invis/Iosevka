@@ -35,14 +35,14 @@ const MAKE_TTC = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
 const SEVEN_ZIP = process.env.SEVEN_ZIP_PATH || "7z";
 const TTFAUTOHINT = process.env.TTFAUTOHINT_PATH || "ttfautohint";
 
-const defaultWebFontFormats = ["woff2", "ttf"];
-const webfontFormatsFast = ["ttf"];
-const webfontFormatsPages = ["woff2"];
+const defaultWebFontFormats = ["WOFF2", "TTF"];
+const webfontFormatsFast = ["TTF"];
+const webfontFormatsPages = ["WOFF2"];
 
-const WIDTH_NORMAL = "normal";
-const WEIGHT_NORMAL = "regular";
-const SLOPE_NORMAL = "upright";
-const DEFAULT_SUBFAMILY = "regular";
+const WIDTH_NORMAL = "Normal";
+const WEIGHT_NORMAL = "Regular";
+const SLOPE_NORMAL = "Upright";
+const DEFAULT_SUBFAMILY = "Regular";
 
 const BUILD_PLANS = "build-plans.toml";
 const PRIVATE_BUILD_PLANS = "private-build-plans.toml";
@@ -134,8 +134,8 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	const returnBuildPlans = {};
 	for (const prefix in rawBuildPlans) {
 		const bp = { ...rawBuildPlans[prefix] };
-		if (!bp.family) fail(`Build plan for ${prefix} does not have a family name. Exit.`);
-		bp.webfontFormats = bp["webfont-formats"] || defaultWebFontFormats;
+		validateBuildPlan(prefix, bp);
+		bp.webfontFormats = bp.webfontFormats || defaultWebFontFormats;
 		bp.targets = [];
 		returnBuildPlans[prefix] = bp;
 	}
@@ -170,7 +170,7 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 function linkSpacingDerivableBuildPlans(bps) {
 	for (const pfxTo in bps) {
 		const bpTo = bps[pfxTo];
-		if (blockSpacingDerivation(bpTo)) continue;
+		if (blockSpacingDerivationTo(bpTo)) continue;
 		if (!isDeriveToSpacing(bpTo.spacing)) continue;
 		for (const pfxFrom in bps) {
 			const bpFrom = bps[pfxFrom];
@@ -180,8 +180,8 @@ function linkSpacingDerivableBuildPlans(bps) {
 		}
 	}
 }
-function blockSpacingDerivation(bp) {
-	return !!bp["compatibility-ligatures"];
+function blockSpacingDerivationTo(bp) {
+	return !!bp.compatibilityLigatures;
 }
 function isDeriveToSpacing(spacing) {
 	return spacing === "term" || spacing === "fontconfig-mono" || spacing === "fixed";
@@ -260,10 +260,10 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		derivingVariants: bp.derivingVariants,
 		buildCharMap: bp.buildCharMap,
 		featureControl: {
-			noCvSs: bp["no-cv-ss"] || false,
-			noLigation: bp["no-ligation"] || false,
-			exportGlyphNames: bp["export-glyph-names"] || false,
-			buildTexture: bp["build-texture-feature"] || false
+			noCvSs: bp.noCvSs || false,
+			noLigation: bp.noLigation || false,
+			exportGlyphNames: bp.exportGlyphNames || false,
+			buildTextureFeature: bp.buildTextureFeature || false
 		},
 		// Ligations
 		ligations: bp.ligations || null,
@@ -290,14 +290,17 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			stretch: sfi.cssStretch,
 			style: sfi.cssStyle
 		},
+		// Hinting
 		hintParams: bp.hintParams || [],
 		hintReference:
-			!bp["metric-override"] && hintReferenceSuffix !== fi0.suffix
+			!bp.metricOverride && hintReferenceSuffix !== fi0.suffix
 				? makeFileName(fi0.prefix, hintReferenceSuffix)
 				: null,
-		compatibilityLigatures: bp["compatibility-ligatures"] || null,
-		metricOverride: bp["metric-override"] || null,
-		excludedCharRanges: bp["exclude-chars"]?.ranges,
+
+		// Other parameters
+		compatibilityLigatures: bp.compatibilityLigatures || null,
+		metricOverride: bp.metricOverride || null,
+		excludedCharRanges: bp.excludeChars?.ranges,
 
 		// Spacing derivation -- creating faster build for spacing variants
 		spacingDerive
@@ -389,12 +392,12 @@ function whyBuildPlanIsnNotThere(gid) {
 
 const ageKey = uuid.v4();
 const DistUnhintedTTF = file.make(
-	(gr, fn) => `${DIST}/${gr}/ttf-unhinted/${fn}.ttf`,
+	(gr, fn) => `${DIST}/${gr}/TTF-Unhinted/${fn}.ttf`,
 	async (target, out, gr, fn) => {
 		await target.need(Scripts, Parameters, Dependencies, de(out.dir));
 		const [fi] = await target.need(FontInfoOf(fn));
 
-		const charMapDir = `${BUILD}/ttf/${gr}`;
+		const charMapDir = `${BUILD}/TTF/${gr}`;
 		const charMapPath = `${charMapDir}/${fn}.charmap.mpz`;
 		const ttfaControlsPath = `${charMapDir}/${fn}.ttfa.txt`;
 
@@ -459,21 +462,21 @@ const DistUnhintedTTF = file.make(
 );
 
 const BuildCM = file.make(
-	(gr, f) => `${BUILD}/ttf/${gr}/${f}.charmap.mpz`,
+	(gr, f) => `${BUILD}/TTF/${gr}/${f}.charmap.mpz`,
 	async (target, output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
 	}
 );
 
 const BuildTtfaControls = file.make(
-	(gr, f) => `${BUILD}/ttf/${gr}/${f}.ttfa.txt`,
+	(gr, f) => `${BUILD}/TTF/${gr}/${f}.ttfa.txt`,
 	async (target, output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
 	}
 );
 
 const DistHintedTTF = file.make(
-	(gr, fn) => `${DIST}/${gr}/ttf/${fn}.ttf`,
+	(gr, fn) => `${DIST}/${gr}/TTF/${fn}.ttf`,
 	async (target, out, gr, fn) => {
 		const [fi, hint] = await target.need(
 			FontInfoOf(fn),
@@ -485,7 +488,7 @@ const DistHintedTTF = file.make(
 			// normally-spaced variant.
 
 			const spD = fi.spacingDerive;
-			const charMapDir = `${BUILD}/ttf/${gr}`;
+			const charMapDir = `${BUILD}/TTF/${gr}`;
 			const noGcTtfPath = `${charMapDir}/${fn}.no-gc.hinted.ttf`;
 
 			const [deriveFrom] = await target.need(
@@ -512,7 +515,7 @@ const DistHintedTTF = file.make(
 );
 
 const BuildNoGcTtfImpl = file.make(
-	(gr, f) => `${BUILD}/ttf/${gr}/${f}.no-gc.hinted.ttf`,
+	(gr, f) => `${BUILD}/TTF/${gr}/${f}.no-gc.hinted.ttf`,
 	async (target, output, gr, f) => {
 		await target.need(DistHintedTTF(gr, f));
 	}
@@ -533,10 +536,10 @@ const BuildNoGcTtf = task.make(
 );
 
 function formatSuffix(fmt, unhinted) {
-	return fmt + (unhinted ? "-unhinted" : "");
+	return fmt + (unhinted ? "-Unhinted" : "");
 }
 const DistWoff2 = file.make(
-	(gr, fn, unhinted) => `${DIST}/${gr}/${formatSuffix("woff2", unhinted)}/${fn}.woff2`,
+	(gr, fn, unhinted) => `${DIST}/${gr}/${formatSuffix("WOFF2", unhinted)}/${fn}.woff2`,
 	async (target, out, group, f, unhinted) => {
 		const Ctor = unhinted ? DistUnhintedTTF : DistHintedTTF;
 
@@ -598,7 +601,7 @@ async function createWebFontCssImpl(target, output, gr, formats, unhinted) {
 
 // Content files
 const GroupTtfsImpl = task.make(
-	(gr, unhinted) => `group-${formatSuffix("ttf-impl", unhinted)}::${gr}`,
+	(gr, unhinted) => `group-${formatSuffix("TTFImpl", unhinted)}::${gr}`,
 	async (target, gr, unhinted) => {
 		const Ctor = unhinted ? DistUnhintedTTF : DistHintedTTF;
 		const [ts] = await target.need(GroupFontsOf(gr));
@@ -607,7 +610,7 @@ const GroupTtfsImpl = task.make(
 	}
 );
 const GroupWoff2Impl = task.make(
-	(gr, unhinted) => `group-${formatSuffix("woff2-impl", unhinted)}::${gr}`,
+	(gr, unhinted) => `group-${formatSuffix("WOFF2Impl", unhinted)}::${gr}`,
 	async (target, gr, unhinted) => {
 		const [ts] = await target.need(GroupFontsOf(gr));
 		await target.need(ts.map(tn => DistWoff2(gr, tn, unhinted)));
@@ -615,16 +618,16 @@ const GroupWoff2Impl = task.make(
 	}
 );
 const GroupWebFontsImpl = task.make(
-	(gr, unhinted) => `group-${formatSuffix("webfont-impl", unhinted)}::${gr}`,
+	(gr, unhinted) => `group-${formatSuffix("WebFontImpl", unhinted)}::${gr}`,
 	async (target, gr, unhinted) => {
 		const [bp] = await target.need(BuildPlanOf(gr));
 		const groupsNeeded = [];
 		for (const ext of bp.webfontFormats) {
 			switch (ext) {
-				case "ttf":
+				case "TTF":
 					groupsNeeded.push(GroupTtfsImpl(gr, unhinted));
 					break;
-				case "woff2":
+				case "WOFF2":
 					groupsNeeded.push(GroupWoff2Impl(gr, unhinted));
 					break;
 			}
@@ -643,6 +646,7 @@ const CollectPlans = computed(`metadata:collect-plans`, async target => {
 	return await getCollectPlans(target, rawPlans.collectPlans);
 });
 
+// eslint-disable-next-line complexity
 async function getCollectPlans(target, rawCollectPlans) {
 	const plans = {};
 
@@ -654,8 +658,11 @@ async function getCollectPlans(target, rawCollectPlans) {
 	}
 
 	const amendedRawCollectPlans = { ...rawCollectPlans };
-	for (const gr of allCollectableGroups) {
-		amendedRawCollectPlans[`sgr-` + gr] = { release: true, isAmended: true, from: [gr] };
+	out: for (const gr of allCollectableGroups) {
+		for (const [k, cp] of Object.entries(rawCollectPlans)) {
+			if (cp.from.length === 1 && cp.from[0] === gr) continue out;
+		}
+		amendedRawCollectPlans[`SGr-` + gr] = { release: true, isAmended: true, from: [gr] };
 	}
 
 	for (const collectPrefix in amendedRawCollectPlans) {
@@ -780,7 +787,7 @@ async function buildGlyphSharingTtc(target, parts, out) {
 
 // Collection Archives
 const TtcZip = file.make(
-	(cgr, version) => `${ARCHIVE_DIR}/ttc-${cgr}-${version}.zip`,
+	(cgr, version) => `${ARCHIVE_DIR}/PkgTTC-${cgr}-${version}.zip`,
 	async (target, out, cgr) => {
 		const [cPlan] = await target.need(CollectPlans, de`${out.dir}`);
 		const ttcFiles = Array.from(Object.keys(cPlan[cgr].ttcComposition));
@@ -789,7 +796,7 @@ const TtcZip = file.make(
 	}
 );
 const SuperTtcZip = file.make(
-	(cgr, version) => `${ARCHIVE_DIR}/super-ttc-${cgr}-${version}.zip`,
+	(cgr, version) => `${ARCHIVE_DIR}/SuperTTC-${cgr}-${version}.zip`,
 	async (target, out, cgr) => {
 		await target.need(de`${out.dir}`, CollectedSuperTtcFile(cgr));
 		await CreateGroupArchiveFile(DIST_SUPER_TTC, out, `${cgr}.ttc`);
@@ -799,12 +806,12 @@ const SuperTtcZip = file.make(
 // Single-group Archives
 const GroupTtfZip = file.make(
 	(gr, version, unhinted) =>
-		`${ARCHIVE_DIR}/${formatSuffix("ttf", unhinted)}-${gr}-${version}.zip`,
+		`${ARCHIVE_DIR}/${formatSuffix("PkgTTF", unhinted)}-${gr}-${version}.zip`,
 	async (target, out, gr, _version_, unhinted) => {
 		await target.need(de`${out.dir}`);
 		await target.need(GroupTtfsImpl(gr, unhinted));
 		await CreateGroupArchiveFile(
-			`${DIST}/${gr}/${formatSuffix("ttf", unhinted)}`,
+			`${DIST}/${gr}/${formatSuffix("TTF", unhinted)}`,
 			out,
 			"*.ttf"
 		);
@@ -812,7 +819,7 @@ const GroupTtfZip = file.make(
 );
 const GroupWebZip = file.make(
 	(gr, version, unhinted) =>
-		`${ARCHIVE_DIR}/${formatSuffix("webfont", unhinted)}-${gr}-${version}.zip`,
+		`${ARCHIVE_DIR}/${formatSuffix("PkgWebFont", unhinted)}-${gr}-${version}.zip`,
 	async (target, out, gr, _version_, unhinted) => {
 		const [plan] = await target.need(BuildPlanOf(gr));
 		await target.need(de`${out.dir}`);
@@ -848,14 +855,14 @@ async function CreateGroupArchiveFile(dir, out, ...files) {
 const Pages = task(`pages`, async t => {
 	await t.need(
 		PagesDataExport,
-		PagesFontExport`iosevka`,
-		PagesFontExport`iosevka-slab`,
-		PagesFontExport`iosevka-aile`,
-		PagesFontExport`iosevka-etoile`,
-		PagesFontExport`iosevka-QP`,
-		PagesFontExport`iosevka-QP-slab`,
-		PagesFontExport`iosevka-QPE`,
-		PagesFontExport`iosevka-QPE-slab`
+		PagesFontExport`Iosevka`,
+		PagesFontExport`IosevkaSlab`,
+		PagesFontExport`IosevkaAile`,
+		PagesFontExport`IosevkaEtoile`,
+		PagesFontExport`IosevkaQp`,
+		PagesFontExport`IosevkaQpSlab`,
+		PagesFontExport`IosevkaQpe`,
+		PagesFontExport`IosevkaQpeSlab`
 	);
 });
 
@@ -868,9 +875,9 @@ const PagesDir = oracle(`pages-dir-path`, async t => {
 const PagesDataExport = task(`pages:data-export`, async t => {
 	const [pagesDir] = await t.need(PagesDir, Version, Parameters, UtilScripts);
 	const [cm, cmi, cmo] = await t.need(
-		BuildCM("iosevka", "iosevka-regular"),
-		BuildCM("iosevka", "iosevka-italic"),
-		BuildCM("iosevka", "iosevka-oblique")
+		BuildCM("Iosevka", "Iosevka-Regular"),
+		BuildCM("Iosevka", "Iosevka-Italic"),
+		BuildCM("Iosevka", "Iosevka-Oblique")
 	);
 	await node(`utility/export-tokenized-sample-code.mjs`, {
 		output: Path.resolve(pagesDir, "shared/tokenized-sample-code/alphabet.txt.json")
@@ -888,18 +895,18 @@ const PagesFontExport = task.group(`pages:font-export`, async (target, gr) => {
 	target.is.volatile();
 	const [pagesDir] = await target.need(PagesDir);
 	if (!pagesDir) return;
-	const outDir = Path.resolve(pagesDir, "shared/fonts", gr);
+	const outDir = Path.resolve(pagesDir, "shared/fonts/imports", gr);
 	await target.need(GroupWebFontsImpl(gr, false), de(outDir));
-	await cp(`${DIST}/${gr}/woff2`, Path.resolve(outDir, "woff2"));
+	await cp(`${DIST}/${gr}/WOFF2`, Path.resolve(outDir, "WOFF2"));
 	await createWebFontCssImpl(target, Path.resolve(outDir, `${gr}.css`), gr, webfontFormatsPages);
-	await rm(Path.resolve(outDir, "ttf"));
+	await rm(Path.resolve(outDir, "TTF"));
 });
 
 const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, gr) => {
 	target.is.volatile();
 	const [pagesDir] = await target.need(PagesDir);
 	if (!pagesDir) return;
-	const outDir = Path.resolve(pagesDir, "shared/fonts", gr);
+	const outDir = Path.resolve(pagesDir, "shared/fonts/imports", gr);
 	await target.need(GroupTtfsImpl(gr, true), de(outDir));
 
 	// Next.js 12 has some problem about refreshing fonts, so write an empty CSS first
@@ -907,9 +914,9 @@ const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, 
 	await Delay(2000);
 
 	// Then do the copy
-	await cp(`${DIST}/${gr}/ttf-unhinted`, Path.resolve(outDir, "ttf"));
+	await cp(`${DIST}/${gr}/TTF-Unhinted`, Path.resolve(outDir, "TTF"));
 	await createWebFontCssImpl(target, Path.resolve(outDir, `${gr}.css`), gr, webfontFormatsFast);
-	await rm(Path.resolve(outDir, "woff2"));
+	await rm(Path.resolve(outDir, "WOFF2"));
 });
 
 ///////////////////////////////////////////////////////////
@@ -931,9 +938,9 @@ const AmendReadmeFor = task.make(
 	async (target, f) => {
 		await target.need(Parameters, UtilScripts);
 		const [cm, cmi, cmo] = await target.need(
-			BuildCM("iosevka", "iosevka-regular"),
-			BuildCM("iosevka", "iosevka-italic"),
-			BuildCM("iosevka", "iosevka-oblique")
+			BuildCM("Iosevka", "Iosevka-Regular"),
+			BuildCM("Iosevka", "Iosevka-Italic"),
+			BuildCM("Iosevka", "Iosevka-Oblique")
 		);
 		return node(`utility/amend-readme/index.mjs`, {
 			mdFilePath: f,
@@ -962,15 +969,15 @@ const SampleImages = task(`sample-images`, async target => {
 const SampleImagesPre = task(`sample-images:pre`, async target => {
 	const [version] = await target.need(Version, de(IMAGE_TASKS), UtilScripts);
 	const fontGroups = await target.need(
-		GroupTtfsImpl(`iosevka`, false),
-		GroupTtfsImpl(`iosevka-slab`, false),
-		GroupTtfsImpl(`iosevka-aile`, false),
-		GroupTtfsImpl(`iosevka-etoile`, false)
+		GroupTtfsImpl(`Iosevka`, false),
+		GroupTtfsImpl(`IosevkaSlab`, false),
+		GroupTtfsImpl(`IosevkaAile`, false),
+		GroupTtfsImpl(`IosevkaEtoile`, false)
 	);
 	const [cm, cmi, cmo] = await target.need(
-		BuildCM("iosevka", "iosevka-regular"),
-		BuildCM("iosevka", "iosevka-italic"),
-		BuildCM("iosevka", "iosevka-oblique")
+		BuildCM("Iosevka", "Iosevka-Regular"),
+		BuildCM("Iosevka", "Iosevka-Italic"),
+		BuildCM("Iosevka", "Iosevka-Oblique")
 	);
 	return await node("utility/generate-samples/index.mjs", {
 		version,
@@ -989,7 +996,7 @@ const PackageSnapshotConfig = async target => {
 		const p = plan.buildPlans[key];
 		if (!p || !p.snapshotFamily) continue;
 		cfg.push({
-			name: key,
+			name: "package-sample-" + key,
 			fontFamily: p.snapshotFamily,
 			fontFeatures: p.snapshotFeature
 		});
@@ -1193,6 +1200,26 @@ const Parameters = task(`meta:parameters`, async target => {
 ///////////////////////////////////////////////////////////
 
 // Build plan validation
+
+function validateBuildPlan(prefix, bp) {
+	if (!bp.family) fail(`Build plan for ${prefix} does not have a family name. Exit.`);
+	failWithLegacyParamName(prefix, bp, `no-cv-ss`, `noCvSs`);
+	failWithLegacyParamName(prefix, bp, `no-ligation`, `noLigation`);
+	failWithLegacyParamName(prefix, bp, `export-glyph-names`, `exportGlyphNames`);
+	failWithLegacyParamName(prefix, bp, `build-texture-feature`, `buildTextureFeature`);
+	failWithLegacyParamName(prefix, bp, `metric-override`, `metricOverride`);
+	failWithLegacyParamName(prefix, bp, `compatibility-ligatures`, `compatibilityLigatures`);
+	failWithLegacyParamName(prefix, bp, `exclude-chars`, `excludeChars`);
+}
+
+function failWithLegacyParamName(prefix, bp, legacy, expected) {
+	if (bp[legacy]) {
+		fail(
+			`Build plan for '${prefix}' contains legacy build parameter '${legacy}'. ` +
+				`Please use '${expected}' instead.`
+		);
+	}
+}
 
 function resolveWws(bpName, buildPlans, defaultConfig) {
 	const bp = buildPlans[bpName];

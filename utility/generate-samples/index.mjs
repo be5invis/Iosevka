@@ -42,7 +42,7 @@ async function main(argv) {
 	const ligationData = await parseLigationData();
 	const tasks = new Generator(
 		argv.outputDir,
-		argv.fontGroups.map(fg => path.resolve(process.cwd(), "dist", fg, "ttf", "*.ttf"))
+		argv.fontGroups.map(fg => path.resolve(process.cwd(), "dist", fg, "TTF", "*.ttf"))
 	);
 
 	// Common

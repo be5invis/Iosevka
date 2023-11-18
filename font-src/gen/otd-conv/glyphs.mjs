@@ -3,7 +3,7 @@ import { Ot } from "ot-builder";
 import { Point } from "../../support/geometry/point.mjs";
 import * as Gr from "../../support/gr.mjs";
 
-import { byBuildOrder, byCode, byGr, bySpacing } from "./glyph-name.mjs";
+import * as GlyphName from "./glyph-name.mjs";
 
 function byRank([gna, a], [gnb, b]) {
 	return (
@@ -54,7 +54,6 @@ class MappedGlyphStore {
 		}
 	}
 	fillOtGlyphNames() {
-		let gid = 0;
 		let conflictSet = new Set();
 		let rev = new Map();
 		for (const [u, g] of this.m_primaryUnicodeMapping) rev.set(g, u);
@@ -62,29 +61,52 @@ class MappedGlyphStore {
 			([a], [b]) => a.subRank - b.subRank
 		);
 		for (const [gSrc, gOt] of glyphsInBuildOrder) gOt.name = undefined;
+
 		// Name by Unicode
 		for (const [gSrc, gOt] of glyphsInBuildOrder) {
-			gOt.name = byCode(gSrc, rev.get(gSrc), conflictSet);
+			gOt.name = GlyphName.byCode(gSrc, rev.get(gSrc), conflictSet);
 		}
+
 		// Name by NWID/WWID
 		let nNewNames = 0;
 		do {
 			nNewNames = 0;
 			for (const [gSrcBase, gOtBase] of glyphsInBuildOrder) {
-				nNewNames += bySpacing(gSrcBase, gOtBase, this.m_nameMapping, conflictSet);
+				nNewNames += GlyphName.bySpacing(
+					gSrcBase,
+					gOtBase,
+					this.m_nameMapping,
+					conflictSet
+				);
 			}
 		} while (nNewNames > 0);
+
+		// Name by decompose
+		do {
+			nNewNames = 0;
+			for (const [gSrcBase, gOtBase] of glyphsInBuildOrder) {
+				nNewNames += GlyphName.byDecompose(
+					gSrcBase,
+					gOtBase,
+					this.m_nameMapping,
+					conflictSet
+				);
+			}
+		} while (nNewNames > 0);
+
 		// Name by Gr
 		do {
 			nNewNames = 0;
 			for (const [gSrcBase, gOtBase] of glyphsInBuildOrder) {
-				nNewNames += byGr(gSrcBase, gOtBase, this.m_nameMapping, conflictSet);
+				nNewNames += GlyphName.byGr(gSrcBase, gOtBase, this.m_nameMapping, conflictSet);
 			}
 		} while (nNewNames > 0);
+
 		// Name rest
 		for (const [gSrc, gOt] of glyphsInBuildOrder) {
-			gOt.name = byBuildOrder(gSrc.subRank, gSrc, gOt.name);
+			gOt.name = GlyphName.byBuildOrder(gSrc.subRank, gSrc, gOt.name);
 		}
+
 		// validate
 		{
 			let gnSet = new Set();

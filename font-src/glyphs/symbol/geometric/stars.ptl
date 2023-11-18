@@ -100,3 +100,75 @@ glyph-block Symbol-Geometric-Stars : for-width-kinds WideWidth1
 						Geom.MidX + Geom.Size * mag * [Math.sin (-angle)]
 						Geom.MidY + Geom.Size * mag * [Math.cos (-angle)]
 						widths.center sw
+
+	# Dingbat
+	create-glyph [MangleName "crystalFlower"] [MangleUnicode 0xEF10] : glyph-proc
+		set-width Geom.Width
+
+		define [createPetals] : with-params [fnSelect fill kSw rotate expansion sw size] : glyph-proc
+			local sizeIn  : size * 0.45
+			local sizeExt : size * 1.0 - O
+			foreach [j : range 0 6] : if [fnSelect j] : begin
+				local anglePre  : 2 * Math.PI * ((j - expansion + rotate) / 6)
+				local angle     : 2 * Math.PI * ((j             + rotate) / 6)
+				local anglePost : 2 * Math.PI * ((j + expansion + rotate) / 6)
+
+				local z1x : sizeIn  * [Math.cos anglePre]
+				local z1y : sizeIn  * [Math.sin anglePre]
+				local z2x : sizeExt * [Math.cos angle]
+				local z2y : sizeExt * [Math.sin angle]
+				local z3x : sizeIn  * [Math.cos anglePost]
+				local z3y : sizeIn  * [Math.sin anglePost]
+
+				local outline : spiro-outline
+					corner 0 0
+					corner z3x z3y
+					corner z2x z2y
+					corner z1x z1y
+
+				if fill
+				: then : include outline
+				: else : include : intersection outline : union
+					ExtLineLhs 1 (kSw * sw) 0   0   z1x z1y
+					ExtLineLhs 1 sw         z1x z1y z2x z2y
+					ExtLineLhs 1 sw         z2x z2y z3x z3y
+					ExtLineLhs 1 (kSw * sw) z3x z3y 0   0
+
+		define [makeOverlay gap shape] : glyph-proc
+			foreach [j : range 0 6] : begin
+				local angle : 2 * Math.PI * (j / 6)
+				local tx : gap * [Math.cos angle]
+				local ty : gap * [Math.sin angle]
+				include : with-transform [ApparentTranslate tx ty] shape
+
+		local swOuter : AdviceStroke 10 [Math.sqrt Geom.Scalar]
+		local swInner : AdviceStroke 16 [Math.sqrt Geom.Scalar]
+		local gap : Math.min [AdviceStroke 12] (Geom.Size / 12)
+		include : union
+			createPetals
+				fnSelect  -- [function x : x % 2 == 0]
+				rotate    -- (-0.5)
+				expansion -- 0.6
+				fill      -- false
+				kSw       -- 1
+				sw        -- swInner
+				size      -- (0.625 * Geom.Size + swInner)
+			difference
+				createPetals
+					fnSelect  -- [function x true]
+					rotate    -- 0
+					expansion -- 0.5
+					fill      -- false
+					kSw       -- 0.5
+					sw        -- swOuter
+					size      -- Geom.Size
+				makeOverlay gap : createPetals
+					fnSelect  -- [function x : x % 2 == 0]
+					rotate    -- (-0.5)
+					expansion -- 0.6
+					fill      -- true
+					kSw       -- 1
+					sw        -- (swInner + gap)
+					size      -- (0.625 * Geom.Size + swInner)
+
+		include : ApparentTranslate Geom.MidX Geom.MidY

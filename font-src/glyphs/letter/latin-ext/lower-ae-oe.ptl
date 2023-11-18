@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Lower-AE-OE : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Shapes : nShoulder OBarLeft
 
 	glyph-block-export SubDfAndShift
@@ -17,33 +18,45 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		local shift : pShift * subDfFullShift
 		return { subDf shift }
 
+	glyph-block-export SubDfAndShiftEx
+	define [SubDfAndShiftEx p q pShift df _o] : begin
+		local subDf : df.slice p q _o
+		local subDfFullShift : df.rightSB - subDf.rightSB
+		local shift : pShift * subDfFullShift
+		return { subDf shift }
+
 	do "a subglyphs"
-		define [AAShape pShift df body o] : begin
+		define [AAShape body hookStyle pShift df o] : begin
 			local { subDf shift } : SubDfAndShift pShift df o
-			return : with-transform [ApparentTranslate shift 0] [body subDf df.mvs]
+			return : with-transform [ApparentTranslate shift 0] [body subDf hookStyle df.mvs]
 
 		glyph-block-import Letter-Latin-Lower-A : DoubleStorey
 		define DoubleStoreyConfig : object
-			doubleStoreySerifless        { DoubleStorey.Serifless         }
-			doubleStoreySerifed          { DoubleStorey.Serifed           }
-			doubleStoreyTailed           { DoubleStorey.Tailed            }
-			doubleStoreyToothlessCorner  { DoubleStorey.ToothlessCorner   }
-			doubleStoreyToothlessRounded { DoubleStorey.ToothlessRounded  }
+			doubleStoreySerifless                         { DoubleStorey.Serifless         1 }
+			doubleStoreySerifed                           { DoubleStorey.Serifed           1 }
+			doubleStoreyTailed                            { DoubleStorey.Tailed            1 }
+			doubleStoreyToothlessCorner                   { DoubleStorey.ToothlessCorner   1 }
+			doubleStoreyToothlessRounded                  { DoubleStorey.ToothlessRounded  1 }
+			doubleStoreyHookInwardSerifedSerifless        { DoubleStorey.Serifless         2 }
+			doubleStoreyHookInwardSerifedSerifed          { DoubleStorey.Serifed           2 }
+			doubleStoreyHookInwardSerifedTailed           { DoubleStorey.Tailed            2 }
+			doubleStoreyHookInwardSerifedToothlessCorner  { DoubleStorey.ToothlessCorner   2 }
+			doubleStoreyHookInwardSerifedToothlessRounded { DoubleStorey.ToothlessRounded  2 }
 
-		create-glyph "ae/a" : glyph-proc
-			local df : include : DivFrame para.diversityM 3
-			include : df.markSet.e
-			set-base-anchor 'cvDecompose' 0 0
-			include : AAShape 0 df DoubleStorey.ToothlessRounded 0
+		foreach { suffix { bodyR hookStyle } } [Object.entries DoubleStoreyConfig] : do
 
-		foreach { suffix { bodyR } } [Object.entries DoubleStoreyConfig] : do
+			create-glyph "ae/a.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.diversityM 3
+				include : df.markSet.e
+				set-base-anchor 'cvDecompose' 0 0
+				include : AAShape DoubleStorey.ToothlessRounded hookStyle 0 df 0
 
 			create-glyph "aa.\(suffix)" : glyph-proc
 				local df : include : DivFrame para.diversityM 3
 				include : df.markSet.e
 
-				local [left] : AAShape 0 df DoubleStorey.ToothlessRounded
-				local [right] : AAShape 1 df bodyR
+				local [left]  : AAShape DoubleStorey.ToothlessRounded hookStyle 0 df
+				local [right] : AAShape bodyR                         hookStyle 1 df
 				include : difference [right] : intersection
 					MaskAbove (XH * OverlayPos * 1.02)
 					union
@@ -51,6 +64,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 						with-transform [ApparentTranslate (-0.50 * df.mvs) 0] [left]
 						with-transform [ApparentTranslate (-0.75 * df.mvs) 0] [left]
 						with-transform [ApparentTranslate (-1.00 * df.mvs) 0] [left]
+
 				include : difference [left] : intersection
 					MaskBelow (XH * OverlayPos * 1.02)
 					union
@@ -185,7 +199,100 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				set-base-anchor 'cvDecompose' 0 0
 				include : EsTeLeftShape df styBot
 
+	do "P/R subglyphs"
+		glyph-block-import Letter-Latin-Upper-P : PShape PBarPosY
+		glyph-block-import Letter-Latin-Upper-R : RevRShape RConfig RBarPos
+
+		# ya
+		foreach { suffix { legShape fOpen fTailed {slabs revSlabs doLegSlab} } } [Object.entries RConfig] : begin
+			local fSlabBot : slabs && slabs !== PShape.SlabMotion
+
+			if [not fTailed] : begin
+				create-glyph "cyrl/yae/left.\(suffix)" : glyph-proc
+					local df : include : DivFrame para.diversityM 3
+					include : df.markSet.e
+					set-base-anchor 'cvDecompose' 0 0
+
+					local { subDf } : SubDfAndShift 0 df
+					local bp : RBarPos XH fSlabBot
+
+					include : RevRShape legShape XH (df -- subDf) (slab -- revSlabs) (legSlab -- doLegSlab) (bp -- bp) (open -- fOpen) (sw -- df.mvs)
+
+					eject-contour 'strokeR'
+					eject-contour 'serifRB'
+					eject-contour 'serifRT'
+					include : VBar.r subDf.rightSB [PBarPosY XH df.mvs bp] XH df.mvs
+
+		# p
+		glyph-block-import Letter-Latin-Lower-P : PConfig
+		foreach { suffix { Body {Serifs doBS} }} [Object.entries PConfig] : do
+			create-glyph "cyrl/rha/left.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.diversityM 3
+				include : df.markSet.p
+				local { subDf } : SubDfAndShift 0 df
+				set-base-anchor 'cvDecompose' 0 0
+
+				include : Body
+					left  -- subDf.leftSB
+					right -- subDf.rightSB + OX
+					sw    -- df.mvs
+				include : Serifs subDf XH df.mvs
+				include : LeaningAnchor.Below.VBar.l SB
+
+	do "X subglyphs"
+		glyph-block-import Letter-Shared-Shapes : SerifFrame WithSerifOverflowMask
+		glyph-block-import Letter-Latin-X : XConfig XLetterForm XSerifs
+
+		foreach { suffix {stroke1 stroke2 serifShape fMaskBase} } [Object.entries XConfig] : do
+			define [halfLetterShape df top bot turn tension] : glyph-proc
+				local lf : XLetterForm df top bot stroke1 stroke2 turn tension
+				include : WithSerifOverflowMask fMaskBase top bot df.leftSB df.rightSB : lf.rightHalf fMaskBase
+				if serifShape : begin
+					local sf : SerifFrame.fromDf df top bot
+					include : match serifShape
+						[Just XSerifs.Full] : composite-proc sf.rt.full sf.rb.full
+						[Just XSerifs.BilateralMotion] : composite-proc sf.rb.outer
+						__ : glyph-proc
+
+			define [LhaRightLetterShape df top bot turn tension] : glyph-proc
+				local stroke1f : if (stroke1 == 3) 4 stroke1
+				local lf : XLetterForm df top bot stroke1f stroke2 turn tension
+					sw -- df.mvs
+					swCursiveEnd   -- [AdviceStroke 3 df.div]
+					swCursiveCoEnd -- df.mvs
+					swCursiveMid   -- df.mvs
+				include : WithSerifOverflowMask fMaskBase top bot df.leftSB df.rightSB : lf.base fMaskBase
+				if serifShape : begin
+					local sf : SerifFrame.fromDf df top bot
+					include : match serifShape
+						[Just XSerifs.Full] : composite-proc sf.rt.full sf.lb.full sf.rb.full
+						[Just XSerifs.BilateralMotion] : composite-proc sf.rb.outer
+						__ : glyph-proc
+
+			create-glyph "cyrl/rha/right.\(suffix)" : glyph-proc
+				local df : DivFrame para.diversityM 3
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : halfLetterShape df XH 0 0.1 0.20
+
+			create-glyph "cyrl/lha/right.\(suffix)" : glyph-proc
+				local df : DivFrame para.diversityM 3.2
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+
+				local { subDf shift } : SubDfAndShiftEx 6 4 1 df
+				include : with-transform [ApparentTranslate shift 0] : LhaRightLetterShape subDf XH 0 0.1 0.20
+
+			create-glyph "cyrl/Lha/right.\(suffix)" : glyph-proc
+				local df : DivFrame para.diversityM 3.2
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+
+				local { subDf shift } : SubDfAndShiftEx 6 4 1 df
+				include : with-transform [ApparentTranslate shift 0] : LhaRightLetterShape subDf CAP 0 0.1 0.28
+
 	do "other subglyphs"
+		# Te
 		define [EsTeRightShape df doTopSerifs doBottomSerifs] : new-glyph : glyph-proc
 			local subDf : df.sliceFine 3 2 (1/3)
 			# local shift : df.rightSB - subDf.rightSB
@@ -214,6 +321,22 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
 				include : EsTeRightShape df doST doSB
+
+		# El
+		glyph-block-import Letter-Cyrillic-El : CyrElShape
+		create-glyph 'cyrl/Lha/left' : glyph-proc
+			local df : include : DivFrame para.diversityM 3.2
+			include : df.markSet.capital
+			local { subDf } : SubDfAndShiftEx 6 3 0 df
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrElShape subDf.leftSB (subDf.rightSB - [HSwToV : 0.5 * df.mvs]) CAP 0 [if SLAB 4 0] df.mvs
+
+		create-glyph 'cyrl/lha/left' : glyph-proc
+			local df : include : DivFrame para.diversityM 3.2
+			include : df.markSet.e
+			local { subDf } : SubDfAndShiftEx 6 3 0 df
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrElShape subDf.leftSB (subDf.rightSB - [HSwToV : 0.5 * df.mvs]) XH 0 [if SLAB 4 0] df.mvs
 
 	do "subglyph diacritics"
 		glyph-block-import Mark-Overlay : InnerDot
@@ -251,10 +374,16 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 	select-variant "aa" 0xA733 (follow -- 'a/turnABase')
 
+	select-variant "ae/a"
 	select-variant "ae/e" (follow -- 'e')
 	select-variant "aeInvE/right" (follow -- 'e')
 	select-variant "ue/u"
 	select-variant "oeOpenO/left" (follow -- 'c')
+	select-variant "cyrl/yae/left"
+	select-variant "cyrl/rha/left" (follow -- 'cyrl/er')
+	select-variant "cyrl/rha/right"
+	select-variant "cyrl/Lha/right" (follow -- 'cyrl/Rha/right')
+	select-variant "cyrl/lha/right" (follow -- 'cyrl/rha/right')
 
 	derive-composites 'ae' 0xE6   'ae/a' 'ae/e'
 	derive-composites 'oe' 0x153  'oe/o' 'ae/e'
@@ -265,6 +394,9 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	derive-composites 'oeOpenO' 0xAB62 'oeOpenO/left' 'ae/e'
 	derive-composites 'aeInvE' 0xAB31 'ae/a' 'aeInvE/right'
 	derive-composites 'oeInv' 0xAB40 'oe/o' 'aeInvE/right'
+	derive-composites 'cyrl/lha' 0x515 'cyrl/lha/left' 'cyrl/lha/right'
+	derive-composites 'cyrl/Lha' 0x514 'cyrl/Lha/left' 'cyrl/Lha/right'
+	derive-composites 'cyrl/yae' 0x519 'cyrl/yae/left' 'ae/e'
 
 	alias 'cyrl/ae' 0x4D5  'ae'
 	alias 'cyrl/oo' 0xA699 'oo'
@@ -287,3 +419,20 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	select-variant 'cyrl/este/left' (follow -- 'cBottomSerifOnly')
 	select-variant 'cyrl/este/right' (follow -- 'T')
 	derive-composites 'cyrl/este' null 'cyrl/este/left' 'cyrl/este/right'
+
+	glyph-block-export BuildRha
+	define [BuildRha srcs] : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.p
+
+		local {ra ha} srcs
+		include : union
+			refer-glyph ra
+			difference
+				refer-glyph ha
+				with-transform [ApparentTranslate (-0.25 * df.mvs) 0] [refer-glyph ra]
+				with-transform [ApparentTranslate (-0.50 * df.mvs) 0] [refer-glyph ra]
+				with-transform [ApparentTranslate (-0.75 * df.mvs) 0] [refer-glyph ra]
+				with-transform [ApparentTranslate (-1.00 * df.mvs) 0] [refer-glyph ra]
+
+	derive-multi-part-glyphs 'cyrl/rha' 0x517 { 'cyrl/rha/left' 'cyrl/rha/right' } BuildRha
