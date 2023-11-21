@@ -397,27 +397,26 @@ const DistUnhintedTTF = file.make(
 		await target.need(Scripts, Parameters, Dependencies, de(out.dir));
 		const [fi] = await target.need(FontInfoOf(fn));
 
-		const charMapDir = `${BUILD}/TTF/${gr}`;
-		const charMapPath = `${charMapDir}/${fn}.charmap.mpz`;
-		const ttfaControlsPath = `${charMapDir}/${fn}.ttfa.txt`;
+		const charMapPath = file.getPathOf(BuildCM(gr, fn));
+		const ttfaControlsPath = file.getPathOf(BuildTtfaControls(gr, fn));
 
 		if (fi.spacingDerive) {
 			// The font is a spacing variant, and is derivable form an existing
 			// normally-spaced variant.
 
-			const noGcTtfPath = `${charMapDir}/${fn}.no-gc.unhinted.ttf`;
+			const noGcTtfPath = file.getPathOf(BuildNoGcTtfImpl(gr, fn));
 
 			const spD = fi.spacingDerive;
 			const [deriveFrom] = await target.need(
 				DistUnhintedTTF(spD.prefix, spD.fileName),
-				de(charMapDir)
+				de(charMapPath.dir)
 			);
 
 			echo.action(echo.hl.command(`Hint TTF`), out.full);
 			await silently.node(`font-src/derive-spacing.mjs`, {
 				i: deriveFrom.full,
 				o: out.full,
-				oNoGc: noGcTtfPath,
+				oNoGc: noGcTtfPath.full,
 				...fi
 			});
 		} else {
@@ -426,19 +425,20 @@ const DistUnhintedTTF = file.make(
 				`${Math.round(1000 * fi.shape.weight)}-${Math.round(1000 * fi.shape.width)}-` +
 				`${Math.round(3600 * fi.shape.slopeAngle)}-${fi.shape.slope}`;
 			const cachePath = `${SHARED_CACHE}/${cacheFileName}.mpz`;
-			const cacheDiffPath = `${charMapDir}/${fn}.cache.mpz`;
+			const cacheDiffPath = `${charMapPath.dir}/${fn}.cache.mpz`;
 
 			const [comps] = await target.need(
 				CompositesFromBuildPlan,
-				de(charMapDir),
+				de(charMapPath.dir),
+				de(ttfaControlsPath.dir),
 				de(SHARED_CACHE)
 			);
 
 			echo.action(echo.hl.command(`Create TTF`), out.full);
 			const { cacheUpdated } = await silently.node("font-src/index.mjs", {
 				o: out.full,
-				...(fi.buildCharMap ? { oCharMap: charMapPath } : {}),
-				oTtfaControls: ttfaControlsPath,
+				...(fi.buildCharMap ? { oCharMap: charMapPath.full } : {}),
+				oTtfaControls: ttfaControlsPath.full,
 				cacheFreshAgeKey: ageKey,
 				iCache: cachePath,
 				oCache: cacheDiffPath,
@@ -467,11 +467,16 @@ const BuildCM = file.make(
 		await target.need(DistUnhintedTTF(gr, f));
 	}
 );
-
 const BuildTtfaControls = file.make(
 	(gr, f) => `${BUILD}/TTF/${gr}/${f}.ttfa.txt`,
 	async (target, output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
+	}
+);
+const BuildNoGcTtfImpl = file.make(
+	(gr, f) => `${BUILD}/TTF/${gr}/${f}.no-gc.hinted.ttf`,
+	async (target, output, gr, f) => {
+		await target.need(DistHintedTTF(gr, f));
 	}
 );
 
@@ -488,18 +493,17 @@ const DistHintedTTF = file.make(
 			// normally-spaced variant.
 
 			const spD = fi.spacingDerive;
-			const charMapDir = `${BUILD}/TTF/${gr}`;
-			const noGcTtfPath = `${charMapDir}/${fn}.no-gc.hinted.ttf`;
+			const noGcTtfPath = file.getPathOf(BuildNoGcTtfImpl(gr, fn));
 
 			const [deriveFrom] = await target.need(
 				DistHintedTTF(spD.prefix, spD.fileName),
-				de(charMapDir)
+				de(noGcTtfPath.dir)
 			);
 
 			echo.action(echo.hl.command(`Create TTF`), out.full);
 			await silently.node(`font-src/derive-spacing.mjs`, {
 				i: deriveFrom.full,
-				oNoGc: noGcTtfPath,
+				oNoGc: noGcTtfPath.full,
 				o: out.full,
 				...fi
 			});
@@ -511,13 +515,6 @@ const DistHintedTTF = file.make(
 			echo.action(echo.hl.command(`Hint TTF`), out.full, echo.hl.operator("<-"), from.full);
 			await silently.run(hint, fi.hintParams, "-m", ttfaControls.full, from.full, out.full);
 		}
-	}
-);
-
-const BuildNoGcTtfImpl = file.make(
-	(gr, f) => `${BUILD}/TTF/${gr}/${f}.no-gc.hinted.ttf`,
-	async (target, output, gr, f) => {
-		await target.need(DistHintedTTF(gr, f));
 	}
 );
 
