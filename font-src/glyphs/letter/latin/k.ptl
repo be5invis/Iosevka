@@ -325,8 +325,8 @@ glyph-block Letter-Latin-K : begin
 					DiagTail.F 1 xDTEnd 0 dtInnerRadius tailAngle (Hook + swDiagTail / 4) swDiagTail
 				CursiveLoopT spiro-outline (-O) left right stroke top slabLT slabLegs
 
-	define [KHookTopBar slabLegs straightBar] : TopHook.lBarInner
-		x -- SB + [KBalance slabLegs straightBar]
+	define [KHookTopBar xBarLeft] : TopHook.lBarInner
+		x -- xBarLeft
 		yBot -- 0
 		yTop -- Ascender
 
@@ -352,19 +352,21 @@ glyph-block Letter-Latin-K : begin
 			serifed                       { 1 1 3 0 }
 			serifedKH                     { 1 1 2 0 }
 			serifed2                      { 1 1 2 1 }
+			serifedKra                    { 2 1 3 0 }
+			serifedKappa                  { 2 0 3 0 }
 
-	define [UpperKLTSerif top sw slabLT straightBar] : match slabLT
-		2 : HSerif.lt (SB + [KBalance slabLT straightBar]) top SideJut
-		1 : HSerif.mt (SB + [KBalance slabLT straightBar] + [HSwToV : 0.5 * sw]) top Jut
+	define [UpperKLTSerif top sw xBarLeft slabType] : match slabType
+		2 : HSerif.lt xBarLeft top SideJut
+		1 : HSerif.mt (xBarLeft + [HSwToV : 0.5 * sw]) top Jut
 		_ : glyph-proc
 
-	define [UpperKLBSerif top sw slabLT straightBar] : match slabLT
-		2 : HSerif.lb (SB + [KBalance slabLT straightBar]) 0 SideJut
-		1 : HSerif.mb (SB + [KBalance slabLT straightBar] + [HSwToV : 0.5 * sw]) 0 Jut
+	define [UpperKLBSerif top sw xBarLeft slabType] : match slabType
+		2 : HSerif.lb xBarLeft 0 SideJut
+		1 : HSerif.mb (xBarLeft + [HSwToV : 0.5 * sw]) 0 Jut
 		_ : glyph-proc
 
-	define [CyrlKaVBar top slabLT straightBar] : VBar.m
-		SB + [KBalance slabLT straightBar] + [HSwToV : 0.5 * CyrlVbSw] + 0.7 * CyrlVbGap
+	define [CyrlKaVBar top xBarLeft] : VBar.m
+		xBarLeft + [HSwToV : 0.5 * CyrlVbSw] + 0.7 * CyrlVbGap
 		top / 2 - [CyrlVbLength top] / 2
 		top / 2 + [CyrlVbLength top] / 2
 		Math.min [AdviceStroke 5] (CyrlVbGap * 0.5)
@@ -395,12 +397,13 @@ glyph-block Letter-Latin-K : begin
 	# Main building
 	foreach { suffix { LegsImpl {slabLT slabLB slabLegs slabKS} } } [pairs-of UpperKConfig] : do
 		local straightBar : LegsImpl !== KLegs.Curly
+		local xBarLeft : SB + [KBalance slabLT straightBar]
 
 		define [KBaseShape sw top attachment] : glyph-proc
-			include : VBar.l (SB + [KBalance slabLT straightBar]) 0 top sw
+			include : VBar.l xBarLeft 0 top sw
 			include : LegsImpl false SB RightSB sw top slabLT slabLegs attachment
-			if slabLT : include : UpperKLTSerif top sw slabLT straightBar
-			if slabLB : include : UpperKLBSerif top sw slabLT straightBar
+			if slabLT : include : UpperKLTSerif top sw xBarLeft slabLT
+			if slabLB : include : UpperKLBSerif top sw xBarLeft slabLB
 
 		create-glyph "K.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -411,10 +414,10 @@ glyph-block Letter-Latin-K : begin
 			include : KBaseShape Stroke CAP CyrDescender
 			include : ExtendBelowBaseAnchors (-LongJut + 0.5 * Stroke)
 
-		create-glyph "KBar.\(suffix)" : glyph-proc
+		create-glyph "KStroke.\(suffix)" : glyph-proc
 			include [refer-glyph "K.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.l.in
-				x     -- (SB + [KBalance slabLT straightBar])
+				x     -- xBarLeft
 				bot   -- XH
 				top   -- (CAP - [if slabLT Stroke 0])
 				space -- { 0 [mix SB RightSB 0.75] }
@@ -422,7 +425,7 @@ glyph-block Letter-Latin-K : begin
 		create-glyph "KVBar.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : KBaseShape CyrlVbSw CAP
-			include : CyrlKaVBar CAP slabLT straightBar
+			include : CyrlKaVBar CAP xBarLeft
 
 		create-glyph "grek/KaiSymbol.\(suffix)" : glyph-proc
 			include [refer-glyph "K.\(suffix)"] AS_BASE ALSO_METRICS
@@ -443,15 +446,19 @@ glyph-block Letter-Latin-K : begin
 		create-glyph "smcpKVBar.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : KBaseShape CyrlVbSw XH
-			include : CyrlKaVBar XH slabLT straightBar
+			include : CyrlKaVBar XH xBarLeft
 
 		create-glyph "KHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : VBar.l (SB + [KBalance slabLT straightBar]) 0 CAP Stroke
+			include : VBar.l xBarLeft 0 CAP Stroke
 			include : LegsImpl true SB RightSB Stroke CAP slabLT slabLegs
 			eject-contour 'serifRT'
-			if slabLT : include : UpperKLTSerif CAP Stroke slabLT straightBar
-			if slabLB : include : UpperKLBSerif CAP Stroke slabLT straightBar
+			if slabLT : include : UpperKLTSerif CAP Stroke xBarLeft slabLT
+			if slabLB : include : UpperKLBSerif CAP Stroke xBarLeft slabLB
+
+		turned "turnK.\(suffix)" nothing "K.\(suffix)" Middle (CAP / 2)
+
+		turned "smcpTurnK.\(suffix)" nothing "smcpK.\(suffix)" Middle (XH / 2)
 
 		define [BashkirKaShape df top] : glyph-proc
 			local left : if slabLT ([mix SB RightSB 0.35] - [HSwToV : 0.5 * df.mvs]) [mix SB RightSB 0.2]
@@ -479,11 +486,11 @@ glyph-block Letter-Latin-K : begin
 
 	define LowerKConfig : SuffixCfg.weave
 		object # body
-			straight 			 KLegs.Straight
-			curly 				 KLegs.Curly
-			cursive 			 KLegs.Cursive
-			cursiveTailed 		 KLegs.CursiveTailed
-			symmetricTouching 	[KLegs.Symmetric 0]
+			straight             KLegs.Straight
+			curly                KLegs.Curly
+			cursive              KLegs.Cursive
+			cursiveTailed        KLegs.CursiveTailed
+			symmetricTouching   [KLegs.Symmetric 0]
 			symmetricConnected  [KLegs.Symmetric : AdviceStroke 6]
 		object # serifs
 			serifless                    { 0 0 0 }
@@ -494,14 +501,15 @@ glyph-block Letter-Latin-K : begin
 
 	foreach { suffix { LegsImpl {slabLT slabLB slabLegs} } } [pairs-of LowerKConfig] : do
 		local straightBar : LegsImpl !== KLegs.Curly
+		local xBarLeft : SB + [KBalance slabLT straightBar]
 
 		define [kBaseShape attachment] : glyph-proc
-			include : LeaningAnchor.Above.VBar.l (SB + [KBalance slabLT straightBar])
-			include : VBar.l (SB + [KBalance slabLT straightBar]) 0 Ascender
+			include : LeaningAnchor.Above.VBar.l xBarLeft
+			include : VBar.l xBarLeft 0 Ascender
 			include : LegsImpl false SB RightSB Stroke XH slabLT slabLegs attachment
-			if slabLT : include : HSerif.lt (SB + [KBalance slabLT straightBar]) Ascender SideJut
+			if slabLT : include : HSerif.lt xBarLeft Ascender SideJut
 			if slabLB : include : tagged 'serifLB'
-				HSerif.mb (SB + [KBalance slabLT straightBar] + [HSwToV HalfStroke]) 0 Jut
+				HSerif.mb (xBarLeft + [HSwToV HalfStroke]) 0 Jut
 
 		create-glyph "k.\(suffix)" : glyph-proc
 			include : MarkSet.b
@@ -517,45 +525,56 @@ glyph-block Letter-Latin-K : begin
 			include : kBaseShape PalatalHook
 			include : ExtendBelowBaseAnchors Descender
 
-		create-glyph "kBar.\(suffix)" : glyph-proc
+		create-glyph "kStroke.\(suffix)" : glyph-proc
 			include [refer-glyph "k.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.l.in
-				x     -- (SB + [KBalance slabLT straightBar])
+				x     -- xBarLeft
 				bot   -- XH
 				top   -- (Ascender - [if slabLT Stroke 0])
 
 		create-glyph "kHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : LegsImpl false SB RightSB Stroke XH slabLT slabLegs
-			include : KHookTopBar slabLT straightBar
+			include : KHookTopBar xBarLeft
 			if slabLB : include : tagged 'serifLB'
-				HSerif.mb (SB + [KBalance slabLT straightBar] + [HSwToV HalfStroke]) 0 Jut
+				HSerif.mb (xBarLeft + [HSwToV HalfStroke]) 0 Jut
+
+		create-glyph "turnk.\(suffix)" : glyph-proc
+			include : VBar.l xBarLeft 0 Ascender
+			include : LegsImpl false SB RightSB Stroke XH slabLT slabLegs
+			if slabLT : include : tagged 'serifLT' : union
+				HSerif.lt (xBarLeft + [HSwToV HalfStroke]) Ascender Jut
+				HSerif.rt (xBarLeft + [HSwToV HalfStroke]) Ascender MidJutSide
+			if slabLB : include : tagged 'serifLB'
+				HSerif.lb xBarLeft 0 SideJut
+			include : FlipAround Middle (XH / 2)
+			include : MarkSet.p
+			include : LeaningAnchor.Below.VBar.r (RightSB - [KBalance slabLT straightBar])
 
 	select-variant 'K' 'K'
 	link-reduced-variant 'K/sansSerif' 'K' MathSansSerif
 	alias 'grek/Kappa' 0x39A 'K'
 	alias-reduced-variant 'grek/Kappa/sansSerif' 'grek/Kappa' 'K/sansSerif' MathSansSerif
-	select-variant 'KBar' 0xA740 (follow -- 'K')
-	select-variant 'cyrl/KaStroke' 0x49E (shapeFrom -- 'KBar') (follow -- 'cyrl/Ka')
+	select-variant 'KStroke' 0xA740 (follow -- 'K')
+	select-variant 'cyrl/KaStroke' 0x49E (shapeFrom -- 'KStroke') (follow -- 'cyrl/Ka')
 	select-variant 'KDescender' 0x2C69
-	select-variant 'cyrl/Ka' 0x41A 'K' (shapeFrom -- 'K') (follow -- 'cyrl/Ka')
+	select-variant 'cyrl/Ka' 0x41A (shapeFrom -- 'K')
 	select-variant 'cyrl/KaDescender' 0x49A (shapeFrom -- 'KDescender')
 	select-variant 'cyrl/KaVBar' 0x49C (shapeFrom -- 'KVBar') (follow -- 'cyrl/KaVBar')
 	select-variant 'cyrl/KaHook' 0x4C3 (shapeFrom -- 'K') (follow -- 'cyrl/KaHook')
 
 	select-variant 'k' 'k'
-	select-variant 'k/nonCursive' (shapeFrom -- 'k')
 	link-reduced-variant 'k/sansSerif' 'k' MathSansSerif
 	select-variant 'kDescender' 0x2C6A
 	select-variant 'kPalatalHook' 0x1D84 (follow -- 'kDescender')
-	select-variant 'kBar' 0xA741 (follow -- 'k')
-	select-variant 'cyrl/kaStroke' 0x49F (shapeFrom -- 'kBar') (follow -- 'cyrl/ka')
+	select-variant 'kStroke' 0xA741 (follow -- 'k')
+	select-variant 'cyrl/kaStroke' 0x49F (shapeFrom -- 'kStroke') (follow -- 'cyrl/ka')
 
 	select-variant 'grek/kappa' 0x3BA (shapeFrom -- 'smcpK')
 	link-reduced-variant 'grek/kappa/sansSerif' 'grek/kappa' MathSansSerif (shapeFrom -- 'smcpK')
 
 	select-variant 'smcpK' 0x1D0B (follow -- 'K')
-	select-variant 'latn/kappa' 0x138 (shapeFrom -- 'smcpK') (follow -- 'k/nonCursive')
+	select-variant 'latn/kappa' 0x138 (shapeFrom -- 'smcpK')
 	select-variant 'cyrl/ka' 0x43A (shapeFrom -- 'smcpK')
 	select-variant 'cyrl/kaDescender' 0x49B (shapeFrom -- 'smcpKDescender')
 	select-variant 'cyrl/ka.BGR' (shapeFrom -- 'k') (follow -- 'cyrl/ka')
@@ -569,12 +588,12 @@ glyph-block Letter-Latin-K : begin
 	derive-composites 'cyrl/kaAleut' 0x51F 'cyrl/ka' 'aleutSlashOver'
 	derive-composites 'KLegStroke' 0xA742 'K' 'legSlashOver'
 	derive-composites 'kLegStroke' 0xA743 'k' 'legSlashOver'
-	derive-composites 'KBarLegStroke' 0xA744 'KBar' 'legSlashOver'
-	derive-composites 'kBarLegStroke' 0xA745 'kBar' 'legSlashOver'
+	derive-composites 'KStrokeLegStroke' 0xA744 'KStroke' 'legSlashOver'
+	derive-composites 'kStrokeLegStroke' 0xA745 'kStroke' 'legSlashOver'
 
-	turned 'turnK' 0xA7B0 'K' Middle (CAP / 2)
-	turned 'turnk' 0x29E  'k' Middle (XH / 2) [MarkSet.p]
-	turned 'turnSmcpK' 0x1DF10 'smcpK' Middle (XH / 2)
+	select-variant 'turnK' 0xA7B0 (follow -- 'K')
+	select-variant 'turnk' 0x29E (follow -- 'k')
+	select-variant 'smcpTurnK' 0x1DF10 (follow -- 'K')
 
 	select-variant 'cyrl/BashkirUpperKa' 0x4A0 (follow -- 'cyrl/Ka')
 	select-variant 'cyrl/BashkirKa'      0x4A1 (follow -- 'cyrl/ka')

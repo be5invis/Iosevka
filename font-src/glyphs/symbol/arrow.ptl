@@ -447,6 +447,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow ThinArrowShape [MangleName 'thinArrowRight'] null arrowSB SymbolMid arrowRSB SymbolMid
 		MkArrow ThinArrowShape [MangleName 'thinArrowDown']  null arrowMidX arrowTop arrowMidX arrowBot
 
+		MkArrow TrigArrowShape [MangleName 'uni279D']             [MangleUnicode 0x279D] arrowSB SymbolMid arrowRSB SymbolMid
 		MkArrow TrigArrowShape [MangleName 'trigArrowLeft']       [MangleUnicode 0x2B60] arrowRSB SymbolMid arrowSB SymbolMid
 		MkArrow TrigArrowShape [MangleName 'trigArrowUp']         [MangleUnicode 0x2B61] arrowMidX arrowBot arrowMidX arrowTop
 		MkArrow TrigArrowShape [MangleName 'trigArrowRight']      [MangleUnicode 0x2B62] arrowSB SymbolMid arrowRSB SymbolMid
@@ -688,8 +689,8 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		glyph-block-import Shared-Symbol-Shapes : CreateWaveShape
 		define WaveSw : AdviceStroke (5.5 - MosaicWidthScalar)
 
-		define [SquiggleArrowBarSide kMag1 kMag2 kL kR y0] : begin
-			local mag : arrowRSB - arrowSB
+		define [SquiggleArrowBarSide kMag1 kMag2 l r kL kR y0] : begin
+			local mag : r - l
 			local p : (mag - o - halfArrowSw * 1.1) / mag
 			local p2   0.75
 			local p2L : mix 1 p2 [mix 1 kL (1 / 2)]
@@ -698,21 +699,21 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			local innerStops : 3 * MosaicWidthScalar
 			local knots {}
 
-			knots.push : corner [mix arrowSB arrowRSB : mix 0 (1 - p) kL]  y0
-			knots.push : corner [mix arrowSB arrowRSB (1 - p2L)]      y0
+			knots.push : corner [mix l r : mix 0 (1 - p) kL]  y0
+			knots.push : corner [mix l r (1 - p2L)]      y0
 			foreach j [range 0 innerStops] : begin
 				knots.push : corner
-					mix arrowSB arrowRSB : mix (1 - p2L) p2R ((j + 1 / 2) / innerStops)
+					mix l r : mix (1 - p2L) p2R ((j + 1 / 2) / innerStops)
 					y0 + waveArrowAmplitude * [if (j % 2) kMag1 kMag2]
-			knots.push : corner [mix arrowSB arrowRSB p2R]      y0
-			knots.push : corner [mix arrowSB arrowRSB : mix 1 p kR]  y0
+			knots.push : corner [mix l r p2R]      y0
+			knots.push : corner [mix l r : mix 1 p kR]  y0
 
 			return knots
 
 		define [SquiggleArrowBar kL kR] : begin
 			return : spiro-outline
-				SquiggleArrowBarSide   0.3 (-0.25) kL kR (SymbolMid + arrowSw / 2)
-				[SquiggleArrowBarSide  0.25 (-0.3) kL kR (SymbolMid - arrowSw / 2)].reverse
+				SquiggleArrowBarSide   0.3 (-0.25) arrowSB arrowRSB kL kR (SymbolMid + arrowSw / 2)
+				[SquiggleArrowBarSide  0.25 (-0.3) arrowSB arrowRSB kL kR (SymbolMid - arrowSw / 2)].reverse
 
 		create-glyph [MangleName 'squiggleArrowLeft'] [MangleUnicode 0x21DC] : glyph-proc
 			set-width MosaicWidth
@@ -723,6 +724,25 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			set-width MosaicWidth
 			include : SquiggleArrowBar 0 1
 			include : ArrowHead arrowSB SymbolMid arrowRSB SymbolMid
+
+		if (MosaicWidthScalar > 1 && !para.forceMonospace) : do
+			define l : mix 0 arrowSB kLongArrowSB
+			define r : mix MosaicWidth arrowRSB kLongArrowSB
+
+			define [LongSquiggleArrowBar kL kR] : begin
+				return : spiro-outline
+					SquiggleArrowBarSide   0.3 (-0.25) l r kL kR (SymbolMid + arrowSw / 2)
+					[SquiggleArrowBarSide  0.25 (-0.3) l r kL kR (SymbolMid - arrowSw / 2)].reverse
+
+			create-glyph 'longSquiggleArrowLeft' 0x2B33 : glyph-proc
+				set-width MosaicWidth
+				include : LongSquiggleArrowBar 1 0
+				include : ArrowHead r SymbolMid l SymbolMid
+
+			create-glyph 'longSquiggleArrowRight' 0x27FF : glyph-proc
+				set-width MosaicWidth
+				include : LongSquiggleArrowBar 0 1
+				include : ArrowHead l SymbolMid r SymbolMid
 
 	do "Thick Arrows"
 		MkArrow [ThickArrowShape 'white'] [MangleName 'uni21E6'] [MangleUnicode 0x21E6] arrowRSB SymbolMid arrowSB SymbolMid
@@ -1068,6 +1088,16 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			refer-glyph : MangleName 'arrowUp'
 			refer-glyph 'arrDblHStrokeOver'
 
+		create-glyph [MangleName 'uni2902'] [MangleUnicode 0x2902] : composite-proc
+			refer-glyph : MangleName 'dblArrowLeft'
+			refer-glyph 'dblArrVStrokeOver'
+		create-glyph [MangleName 'uni2903'] [MangleUnicode 0x2903] : composite-proc
+			refer-glyph : MangleName 'dblArrowRight'
+			refer-glyph 'dblArrVStrokeOver'
+		create-glyph [MangleName 'uni2904'] [MangleUnicode 0x2904] : composite-proc
+			refer-glyph : MangleName 'dblArrowLeftRight'
+			refer-glyph 'dblArrVStrokeOver'
+
 		create-glyph [MangleName 'uni2B7A'] [MangleUnicode 0x2B7A] : composite-proc
 			refer-glyph : MangleName 'trigArrowLeft'
 			refer-glyph 'arrDblVStrokeOver'
@@ -1146,37 +1176,50 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			include : with-transform [ApparentTranslate 0 (-distance)] : refer-glyph : MangleName 'arrowLeftCompact'
 
 	do "Zig zag"
+		define x2 : mix arrowMidX arrowSB  (0.875 / [Math.sqrt MosaicWidthScalar])
+		define x3 : mix arrowMidX arrowRSB (0.875 / [Math.sqrt MosaicWidthScalar])
+		define x1 : mix x2 x3 (1 / 3)
+		define x4 : mix x2 x3 (2 / 3)
+
+		define y1   arrowTop
+		define y4   arrowBot
+		define y2 : mix y1 y4 0.625
+		define y3 : mix y1 y4 0.375
+
+		define magLastSeg : Math.hypot (x3 - x4) (y3 - y4)
+		define pLastSeg : (magLastSeg - o - 0.55 * arrowSw) / magLastSeg
+
+		define [ZigZagArrowBar] : union
+			difference
+				dispiro
+					flat [mix x3 x4 pLastSeg] [mix y3 y4 pLastSeg] [widths.center arrowSw]
+					curl x3 y3 [widths.lhs arrowSw]
+				MaskAboveLine x2 y2 x3 y3
+			difference
+				dispiro
+					flat x3 y3 [widths.lhs arrowSw]
+					curl x2 y2 [widths.rhs arrowSw]
+				MaskRightLine x3 y3 x4 y4
+				MaskLeftLine  x2 y2 x1 y1
+			difference
+				dispiro
+					flat x2 y2 [widths.rhs arrowSw]
+					curl x1 y1 [widths.center arrowSw]
+				MaskBelowLine x2 y2 x3 y3
+
+		define x3ArrowHeadMock : x3 - (x3 - x4) / magLastSeg * [HSwToV arrowSw]
+
 		create-glyph [MangleName 'zigZagArrow'] [MangleUnicode 0x21AF] : glyph-proc
 			set-width MosaicWidth
-			local x2 : mix arrowMidX arrowSB  (0.875 / [Math.sqrt MosaicWidthScalar])
-			local x3 : mix arrowMidX arrowRSB (0.875 / [Math.sqrt MosaicWidthScalar])
-			local x1 : mix x2 x3 (1 / 3)
-			local x4 : mix x2 x3 (2 / 3)
-			local y2 : mix arrowBot arrowTop 0.375
-			local y3 : mix arrowBot arrowTop 0.625
-
-			local magLastSeg : Math.hypot (x3 - x4) (y3 - arrowBot)
-			local x3ArrowHeadMock : x3 - (x3 - x4) / magLastSeg * [HSwToV arrowSw]
-			local pLastSeg : (magLastSeg - o - 0.55 * arrowSw) / magLastSeg
-
 			include : union
-				ArrowHead x3ArrowHeadMock y3 x4 arrowBot arrowHeadSize
-				difference
-					dispiro
-						flat [mix x3 x4 pLastSeg] [mix y3 arrowBot pLastSeg] [widths.center arrowSw]
-						curl x3 y3 [widths.lhs arrowSw]
-					MaskAboveLine x2 y2 x3 y3
-				difference
-					dispiro
-						flat x3 y3 [widths.lhs arrowSw]
-						curl x2 y2 [widths.rhs arrowSw]
-					MaskRightLine x3 y3 x4 arrowBot
-					MaskLeftLine  x2 y2 x1 arrowTop
-				difference
-					dispiro
-						flat x2 y2       [widths.rhs arrowSw]
-						curl x1 arrowTop [widths.center arrowSw]
-					MaskBelowLine x2 y2 x3 y3
+				ArrowHead x3ArrowHeadMock y3 x4 y4 arrowHeadSize
+				ZigZagArrowBar
+
+		create-glyph [MangleName 'zigZagTrigArrow'] [MangleUnicode 0x2B4D] : glyph-proc
+			set-width MosaicWidth
+			include : union
+				TriangleArrowHead x3ArrowHeadMock y3 x4 y4 arrowHeadSize
+				ZigZagArrowBar
 
 	do "Legacy computing arrows"
 		define bodyWidth : Math.min arrowWidth (arrowHeight * 0.6)
