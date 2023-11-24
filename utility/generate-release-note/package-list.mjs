@@ -8,6 +8,7 @@ const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Copy Markdown
+
 async function CopyMarkdown(out, name) {
 	const content = await fs.promises.readFile(
 		path.resolve(__dirname, `release-note-fragments/${name}`),
@@ -15,8 +16,10 @@ async function CopyMarkdown(out, name) {
 	);
 	out.log(content);
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // PACKAGE LIST
+
 const Spacings = {
 	// spacingDesc, ligation
 	type: ["Default", true],
@@ -38,7 +41,7 @@ async function GeneratePackageList(argv, out) {
 		const ttcName = buildName("-", "PkgTTC", groupID, argv.version);
 		const proportionPrefix = gr.quasiProportional ? "Quasi-proportional" : "Monospace";
 		const desc = `<i>${proportionPrefix}, ${prime.desc}</i>`;
-		const img = ImgX(`${imagePrefix}/${groupID}`);
+		const img = ImgX(`${imagePrefix}/package-sample-${groupID}`);
 
 		let ttcCells = [`<td colspan="4">&nbsp;</td>`];
 		const hasSpacings = Object.entries(gr.subGroups).length > 1;
