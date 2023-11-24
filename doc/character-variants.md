@@ -1982,6 +1982,8 @@
 </tr>
 <tr>
 <td rowspan="2"><code>cv59</code></td>
+<td><img src="../images/cv-lower-iota-tailless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-tailless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-iota-tailless-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-tailless-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-iota-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-zshaped.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-iota-hooky-bottom.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-hooky-bottom.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-iota-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -1992,7 +1994,6 @@
 <td><img src="../images/cv-lower-iota-serifed-diagonal-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-serifed-diagonal-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-iota-semi-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-semi-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-iota-serifed-semi-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-serifed-semi-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="2"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -2005,7 +2006,8 @@
 <td>8</td>
 <td>9</td>
 <td>10</td>
-<td colspan="2"> </td>
+<td>11</td>
+<td>12</td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv60</code></td>
