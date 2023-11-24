@@ -1055,7 +1055,7 @@ const ReleaseNotesFile = file.make(
 		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
 		const [changeFiles] = await t.need(ChangeFileList());
 		await t.need(changeFiles.map(fu));
-		await node("utility/generate-release-note/release-note.mjs", {
+		await node("utility/amend-readme/generate-release-note.mjs", {
 			version,
 			outputPath: out.full
 		});
@@ -1070,7 +1070,7 @@ const ChangeLogMd = file(`CHANGELOG.md`, async (t, out) => {
 	await t.need(UtilScripts, de(ARCHIVE_DIR));
 	const [changeFiles] = await t.need(ChangeFileList());
 	await t.need(changeFiles.map(fu));
-	await node("utility/generate-release-note/change-log.mjs", { version, outputPath: out.full });
+	await node("utility/amend-readme/generate-change-log.mjs", { version, outputPath: out.full });
 });
 const ChangeFileList = oracle.make(
 	() => `release:change-file-list`,
