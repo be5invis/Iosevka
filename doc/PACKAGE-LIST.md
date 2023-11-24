@@ -1,3 +1,6 @@
+<!-- BEGIN Section-Package-List -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
+
 # Package list of Release 28.0.0-alpha.2
 ## Prebuilt Packages
 
@@ -161,3 +164,5 @@ Iosevka provides various packaging formats, here is the list of them:
 <tr><td colspan="8"><img src="https://raw.githubusercontent.com/be5invis/Iosevka/v28.0.0-alpha.2/images/package-sample-IosevkaEtoile.light.svg#gh-light-mode-only"/><img src="https://raw.githubusercontent.com/be5invis/Iosevka/v28.0.0-alpha.2/images/package-sample-IosevkaEtoile.dark.svg#gh-dark-mode-only"/></td></tr>
 </table>
 
+
+<!-- END Section-Package-List -->
