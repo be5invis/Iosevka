@@ -123,6 +123,9 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `--wolfram-equality-inequality--`: Default ligation set would be assigned to undefined.
   - `--erlang-equality-inequality--`: Default ligation set would be assigned to undefined.
   - `--default-kern--`: Default ligation set would be assigned to undefined.
+  - `--default-chaining--`: Default ligation set would be assigned to undefined.
+  - `--fast-chaining--`: Default ligation set would be assigned to undefined.
+  - `--c-like-chaining--`: Default ligation set would be assigned to undefined.
   - `default-calt`: Inherit default ligation set.
   - `dlig`: Default ligation set would be assigned to Discretionary ligatures.
   - `clike`: Default ligation set would be assigned to C-Like.
@@ -191,7 +194,6 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `ltgt-slash-tag`: Enable ligation for `</`, `/>` and `</>`.
   - `brst`: Center asterisk in `(*` and `*)`.
   - `slash-asterisk`: Shift asterisk in `/*` and `*/`.
-  - `plusplus`: Enable ligation for `++` and further plus-chaining.
   - `kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`.
   - `kern-bars`: Move consecutive bars closer, like for `||`, `|||` and `//`.
   - `logic`: Enable ligation for `/\` and `\/`.
@@ -201,10 +203,16 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow.
   - `brace-bar`: Enable ligation for `{|` and `|}`.
   - `brack-bar`: Enable ligation for `[|` and `|]`.
-  - `connected-underscore`: Make contiguous underscores (like `__`) connected.
-  - `connected-number-sign`: Make contiguous number signs (like `##`) connected.
-  - `connected-tilde-as-wave`: Make contiguous ASCII tildes (like `~~`) connected as a wave line.
-  - `connected-hyphen`: Make contiguous hyphen-minuses (like `--`) connected as a straight solid line.
+  - `tilde-tilde`: Make 2 or more contiguous ASCII tildes (like `~~`, `~~~` and `~~~~`) connected as a wave line.
+  - `tilde-tilde-tilde`: Make 3 or more contiguous ASCII tildes (like `~~~` and `~~~~`) connected as a wave line.
+  - `minus-minus`: Make 2 or more contiguous hyphen-minuses (like `--`, `---` and `----`) connected as a straight solid line.
+  - `minus-minus-minus`: Make 3 or more contiguous hyphen-minuses (like `---` and `----`) connected as a straight solid line.
+  - `plus-plus`: Make 2 or more contiguous plus signs (like `++`, `+++` and `++++`) connected..
+  - `plus-plus-plus`: Make 3 or more contiguous plus signs (like `+++` and `++++`) connected..
+  - `underscore-underscore`: Make 2 or more contiguous underscores (like `__`, `___` and `____`) connected.
+  - `underscore-underscore-underscore`: Make 3 or more contiguous underscores (like `___` and `____`) connected.
+  - `hash-hash`: Make 2 or more contiguous hash signs (number signs) (like `##`, `###` and `####`) connected.
+  - `hash-hash-hash`: Make 3 or more contiguous hash signs (number signs) (like `##` and `###`) connected.
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
