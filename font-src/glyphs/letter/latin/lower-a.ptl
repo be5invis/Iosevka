@@ -109,16 +109,16 @@ glyph-block Letter-Latin-Lower-A : begin
 			__                      : ArcMask df 0 nothing nothing sw
 
 	define DoubleStoreyConfig : object
-		doubleStoreySerifless                         { DoubleStorey.Serifless         (RightSB )          1 }
-		doubleStoreySerifed                           { DoubleStorey.Serifed           (RightSB + SideJut) 1 }
-		doubleStoreyTailed                            { DoubleStorey.Tailed            (RightSB + SideJut) 1 }
-		doubleStoreyToothlessCorner                   { DoubleStorey.ToothlessCorner   nothing             1 }
-		doubleStoreyToothlessRounded                  { DoubleStorey.ToothlessRounded  nothing             1 }
-		doubleStoreyHookInwardSerifedSerifless        { DoubleStorey.Serifless         (RightSB )          2 }
-		doubleStoreyHookInwardSerifedSerifed          { DoubleStorey.Serifed           (RightSB + SideJut) 2 }
-		doubleStoreyHookInwardSerifedTailed           { DoubleStorey.Tailed            (RightSB + SideJut) 2 }
-		doubleStoreyHookInwardSerifedToothlessCorner  { DoubleStorey.ToothlessCorner   nothing             2 }
-		doubleStoreyHookInwardSerifedToothlessRounded { DoubleStorey.ToothlessRounded  nothing             2 }
+		doubleStoreySerifless                    { DoubleStorey.Serifless         (RightSB )          1 }
+		doubleStoreySerifed                      { DoubleStorey.Serifed           (RightSB + SideJut) 1 }
+		doubleStoreyTailed                       { DoubleStorey.Tailed            (RightSB + SideJut) 1 }
+		doubleStoreyToothlessCorner              { DoubleStorey.ToothlessCorner   nothing             1 }
+		doubleStoreyToothlessRounded             { DoubleStorey.ToothlessRounded  nothing             1 }
+		doubleStoreyCornerHookedSerifless        { DoubleStorey.Serifless         (RightSB )          2 }
+		doubleStoreyCornerHookedSerifed          { DoubleStorey.Serifed           (RightSB + SideJut) 2 }
+		doubleStoreyCornerHookedTailed           { DoubleStorey.Tailed            (RightSB + SideJut) 2 }
+		doubleStoreyCornerHookedToothlessCorner  { DoubleStorey.ToothlessCorner   nothing             2 }
+		doubleStoreyCornerHookedToothlessRounded { DoubleStorey.ToothlessRounded  nothing             2 }
 
 	foreach { suffix { body xTrailing hookStyle } } [Object.entries DoubleStoreyConfig] : do
 		create-glyph "a.\(suffix)" : glyph-proc
@@ -220,21 +220,36 @@ glyph-block Letter-Latin-Lower-A : begin
 		export : define [SerifedBar df height mask sw] : glyph-proc
 			include : SeriflessBar df height mask sw
 			include [SerifFrame.fromDf df height 0 (swSerif -- sw)].rb.outer
+		export : define [TopSerifedBar df height mask sw] : glyph-proc
+			include : SeriflessBar df height mask sw
+			include [SerifFrame.fromDf df height 0 (swSerif -- sw)].rt.outer
+		export : define [DoubleSerifedBar df height mask sw] : glyph-proc
+			include : SerifedBar df height mask sw
+			include [SerifFrame.fromDf df height 0 (swSerif -- sw)].rt.outer
 		export : define [TailedBar df height mask sw] : glyph-proc
 			set-base-anchor 'trailing' (df.rightSB + SideJut) 0
 			include : difference
 				RightwardTailedBar df.rightSB 0 height sw
 				mask df height sw
-
-		set SeriflessBar.inv SeriflessBar
-		set SerifedBar.inv : function [df height mask sw] : glyph-proc
-			include : SeriflessBar df height mask sw
+		export : define [TailedSerifedBar df height mask sw] : glyph-proc
+			include : TailedBar df height mask sw
 			include [SerifFrame.fromDf df height 0 (swSerif -- sw)].rt.outer
+
+		set SeriflessBar.inv     SeriflessBar
+		set SerifedBar.inv       TopSerifedBar
+		set TopSerifedBar.inv    SerifedBar
+		set DoubleSerifedBar.inv DoubleSerifedBar
 		set TailedBar.inv : function [df height mask sw] : glyph-proc
 			set-base-anchor 'trailing' (df.rightSB + SideJut) 0
 			include : difference
 				InvRightwardTailedBar df.rightSB 0 height sw
 				mask df height sw
+		set TailedSerifedBar.inv : function [df height mask sw] : glyph-proc
+			set-base-anchor 'trailing' (df.rightSB + SideJut) 0
+			include : difference
+				InvRightwardTailedBar df.rightSB 0 height sw
+				mask df height sw
+			include [SerifFrame.fromDf df height 0 (swSerif -- sw)].rb.outer
 
 
 		export : define [ScriptCut df y sw] : spiro-outline
@@ -253,9 +268,12 @@ glyph-block Letter-Latin-Lower-A : begin
 			singleStoreyEarlessRounded   SingleStorey.EarlessRoundedBody
 
 		object # bar
-			serifless  SingleStorey.SeriflessBar
-			serifed    SingleStorey.SerifedBar
-			tailed     SingleStorey.TailedBar
+			serifless        SingleStorey.SeriflessBar
+			serifed          SingleStorey.SerifedBar
+			topSerifed       SingleStorey.TopSerifedBar
+			doubleSerifed    SingleStorey.DoubleSerifedBar
+			tailed           SingleStorey.TailedBar
+			tailedSerifed    SingleStorey.TailedSerifedBar
 
 	foreach { suffix { body bar } } [Object.entries SingleStoreyConfig] : do
 		create-glyph "a.\(suffix)" : glyph-proc
