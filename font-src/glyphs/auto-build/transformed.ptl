@@ -721,13 +721,14 @@ glyph-block Autobuild-Transformed-Texture : begin
 			if [not : query-glyph targetNameMap.(glyphid)] : begin
 				define glyphT : forked.queryByName glyphid
 				define glyphO : glyphStore.queryByName glyphid
-				if (glyphT && glyphO) : begin
-					if (glyphT.advanceWidth != glyphO.advanceWidth) : begin
-						gr.set glyphO targetNameMap.(glyphid)
+				if (glyphT && glyphO && glyphT.advanceWidth != glyphO.advanceWidth) : begin
+					gr.set glyphO targetNameMap.(glyphid)
 					create-glyph targetNameMap.(glyphid) unicode : glyph-proc
 						include glyphT AS_BASE ALSO_METRICS
 						set-width Width
-						if extL : currentGlyph.applyTransform [Translate (-extL * Width) 0] true
+						if extL : begin
+							local shift : (glyphT.advanceWidth - Width) * extL / (extL + extR)
+							currentGlyph.applyTransform [Translate (-shift) 0] true
 
 		# Do NOT need this, as texture variants are applied AFTER cv/ss
 		# link-relations relSets
