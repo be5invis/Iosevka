@@ -1,5 +1,10 @@
 ## Modifications since last major version
 
+### 28.0.0-beta.2
+
+* Fix broken TTCs in beta.1 (#2108).
+
+
 ### 28.0.0-beta.1
 
 * \[**BREAKING**\] The filenames and package filenames are changed.
