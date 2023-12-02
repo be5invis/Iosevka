@@ -404,7 +404,7 @@ const DistUnhintedTTF = file.make(
 			// The font is a spacing variant, and is derivable form an existing
 			// normally-spaced variant.
 
-			const noGcTtfPath = file.getPathOf(BuildNoGcTtfImpl(gr, fn));
+			const noGcTtfPath = file.getPathOf(BuildNoGcUnhintedTtfImpl(gr, fn));
 
 			const spD = fi.spacingDerive;
 			const [deriveFrom] = await target.need(
@@ -469,6 +469,12 @@ const BuildCM = file.make(
 );
 const BuildTtfaControls = file.make(
 	(gr, f) => `${BUILD}/TTF/${gr}/${f}.ttfa.txt`,
+	async (target, output, gr, f) => {
+		await target.need(DistUnhintedTTF(gr, f));
+	}
+);
+const BuildNoGcUnhintedTtfImpl = file.make(
+	(gr, f) => `${BUILD}/TTF/${gr}/${f}.no-gc.ttf`,
 	async (target, output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
 	}
