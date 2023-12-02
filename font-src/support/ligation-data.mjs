@@ -5,8 +5,9 @@ export function applyLigationData(data, para, argv) {
 	const hives = {};
 	hives["default"] = { caltBuildup: [] };
 	for (const gr in data.simple) {
-		hives[`ligset-enable-${gr}`] = { appends: { caltBuildup: [data.simple[gr].ligGroup] } };
-		hives[`ligset-disable-${gr}`] = { removes: { caltBuildup: [data.simple[gr].ligGroup] } };
+		const lg = data.simple[gr];
+		hives[`ligset-enable-${gr}`] = { appends: { caltBuildup: [gr] } };
+		hives[`ligset-disable-${gr}`] = { removes: { caltBuildup: [gr] } };
 	}
 	for (const gr in data.composite) {
 		const comp = data.composite[gr];
@@ -39,16 +40,18 @@ export function applyLigationData(data, para, argv) {
 
 export function createBuildup(simple, composite, buildup) {
 	let sink = new Set();
-	createBuildupImpl(sink, simple, composite, buildup);
+	createBuildupImpl(false, sink, simple, composite, buildup);
 	return Array.from(sink);
 }
 
-function createBuildupImpl(sink, simple, composite, buildup) {
+function createBuildupImpl(fSimpleOnly, sink, simple, composite, buildup) {
 	for (const s of buildup) {
 		if (simple[s]) {
-			sink.add(simple[s].ligGroup);
-		} else if (composite[s]) {
-			createBuildupImpl(sink, simple, composite, composite[s].buildup);
+			sink.add(s);
+			const gr = simple[s];
+			if (gr.implies) createBuildupImpl(true, sink, simple, composite, gr.implies);
+		} else if (!fSimpleOnly && composite[s]) {
+			createBuildupImpl(fSimpleOnly, sink, simple, composite, composite[s].buildup);
 		} else {
 			throw new Error("Cannot find simple ligation group " + s);
 		}

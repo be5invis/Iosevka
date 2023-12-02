@@ -927,26 +927,54 @@ const AmendReadme = task("amend-readme", async target => {
 		AmendReadmeFor("doc/custom-build.md"),
 		AmendReadmeFor("doc/language-specific-ligation-sets.md"),
 		AmendReadmeFor("doc/cv-influences.md"),
+		AmendReadmeFor("doc/PACKAGE-LIST.md"),
 		AmendLicenseYear
 	);
 });
 const AmendReadmeFor = task.make(
 	f => `amend-readme::for::${f}`,
 	async (target, f) => {
-		await target.need(Parameters, UtilScripts);
+		const [version] = await target.need(Version, Parameters, UtilScripts);
+		const [rpFiles] = await target.need(ReleaseNotePackagesFile);
 		const [cm, cmi, cmo] = await target.need(
 			BuildCM("Iosevka", "Iosevka-Regular"),
 			BuildCM("Iosevka", "Iosevka-Italic"),
 			BuildCM("Iosevka", "Iosevka-Oblique")
 		);
 		return node(`utility/amend-readme/index.mjs`, {
+			version,
 			mdFilePath: f,
+			releasePackagesJsonPath: rpFiles.full,
 			charMapPath: cm.full,
 			charMapItalicPath: cmi.full,
 			charMapObliquePath: cmo.full
 		});
 	}
 );
+const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t, out) => {
+	const [cp] = await t.need(CollectPlans);
+	const [{ buildPlans }] = await t.need(BuildPlans);
+	let releaseNoteGroups = {};
+	for (const [k, plan] of Object.entries(cp)) {
+		if (!plan.inRelease || plan.isAmended) continue;
+		const primePlan = buildPlans[plan.groupDecomposition[0]];
+		let subGroups = {};
+		for (const gr of plan.groupDecomposition) {
+			const bp = buildPlans[gr];
+			subGroups[gr] = {
+				family: bp.family,
+				desc: bp.desc,
+				spacing: buildPlans[gr].spacing || "type"
+			};
+		}
+		releaseNoteGroups[k] = {
+			subGroups,
+			slab: primePlan.serifs === "slab",
+			quasiProportional: primePlan.spacing === "quasi-proportional"
+		};
+	}
+	await FS.promises.writeFile(out.full, JSON.stringify(releaseNoteGroups, null, "  "));
+});
 const AmendLicenseYear = task("amend-readme:license-year", async target => {
 	return node(`utility/amend-readme/license-year.mjs`, {
 		path: "LICENSE.md"
@@ -1019,7 +1047,7 @@ const ScreenShotImpl = file.make(
 
 const ReleaseNotes = task(`release:release-note`, async t => {
 	const [version] = await t.need(Version);
-	await t.need(ReleaseNotesFile(version), PackageListFile(version));
+	await t.need(ReleaseNotesFile(version));
 });
 const ReleaseNotesFile = file.make(
 	version => `${ARCHIVE_DIR}/release-notes-${version}.md`,
@@ -1027,49 +1055,13 @@ const ReleaseNotesFile = file.make(
 		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
 		const [changeFiles] = await t.need(ChangeFileList());
 		await t.need(changeFiles.map(fu));
-		await node("utility/generate-release-note/release-note.mjs", {
+		await node("utility/amend-readme/generate-release-note.mjs", {
 			version,
-			outputPath: out.full
-		});
-	}
-);
-const PackageListFile = file.make(
-	version => `doc/PACKAGE-LIST.md`,
-	async (t, out, version) => {
-		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
-		const [rpFiles] = await t.need(ReleaseNotePackagesFile);
-		await node("utility/generate-release-note/package-list.mjs", {
-			version,
-			releasePackagesJsonPath: rpFiles.full,
 			outputPath: out.full
 		});
 	}
 );
 
-const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t, out) => {
-	const [cp] = await t.need(CollectPlans);
-	const [{ buildPlans }] = await t.need(BuildPlans);
-	let releaseNoteGroups = {};
-	for (const [k, plan] of Object.entries(cp)) {
-		if (!plan.inRelease || plan.isAmended) continue;
-		const primePlan = buildPlans[plan.groupDecomposition[0]];
-		let subGroups = {};
-		for (const gr of plan.groupDecomposition) {
-			const bp = buildPlans[gr];
-			subGroups[gr] = {
-				family: bp.family,
-				desc: bp.desc,
-				spacing: buildPlans[gr].spacing || "type"
-			};
-		}
-		releaseNoteGroups[k] = {
-			subGroups,
-			slab: primePlan.serifs === "slab",
-			quasiProportional: primePlan.spacing === "quasi-proportional"
-		};
-	}
-	await FS.promises.writeFile(out.full, JSON.stringify(releaseNoteGroups, null, "  "));
-});
 const ChangeLog = task(`release:change-log`, async t => {
 	await t.need(ChangeLogMd);
 });
@@ -1078,7 +1070,7 @@ const ChangeLogMd = file(`CHANGELOG.md`, async (t, out) => {
 	await t.need(UtilScripts, de(ARCHIVE_DIR));
 	const [changeFiles] = await t.need(ChangeFileList());
 	await t.need(changeFiles.map(fu));
-	await node("utility/generate-release-note/change-log.mjs", { version, outputPath: out.full });
+	await node("utility/amend-readme/generate-change-log.mjs", { version, outputPath: out.full });
 });
 const ChangeFileList = oracle.make(
 	() => `release:change-file-list`,

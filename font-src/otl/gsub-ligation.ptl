@@ -967,7 +967,7 @@ define [buildLigationsImpl gsub para $LigGroup$] : begin
 				greaterAndEquiv ~> [just 'greater.lig.tag-slash']
 
 	# :>
-	LigGroup "colon-less-greater" : if [hasLG 'colon-greater'] : begin
+	LigGroup "colon-less-greater" : if [hasLG 'colon-greater-as-colon-arrow'] : begin
 		CreateLigationLookup : list
 			chain-rule
 				{'colon/mid'}   ~> look-around
@@ -990,23 +990,45 @@ define [buildLigationsImpl gsub para $LigGroup$] : begin
 				{'braceRight'}   ~> {'ligExtBraceRight'}
 
 	# +++++++++
-	LigGroup "Plus chains" : if [hasLG 'plusplus'] : begin
-		CreateLigationLookup : list
-			chain-rule
-				{'plus.lig.cf' 'plus.lig.zf'} ~> look-around
-				{'plus'} ~> [lsx 'zf']
-			chain-rule
-				{'plus'} ~> [lsx 'fc']
-				{'plus'} ~> [lsx 'cc']
-				{'plus'} ~> [lsx 'cc']
-				{'plus'} ~> [lsx 'cf']
-			chain-rule
-				{'plus'} ~> [lsx 'fc']
-				{'plus'} ~> [lsx 'cc']
-				{'plus'} ~> [lsx 'cf']
-			chain-rule
-				{'plus'} ~> [lsx 'fc']
-				{'plus'} ~> [lsx 'cf']
+	define ChainingConfig : object
+		'plus'  { 'plus'   'plus'     }
+		'minus' { 'hyphen' 'hyphen'   }
+		'tilde' { 'asciiTilde' 'wave' }
+
+	foreach { gr { gnFrom gnTo } } [Object.entries ChainingConfig] : begin
+		define [sfx suffix] : [lsx suffix] { gnTo }
+		define [src]          { gnFrom }
+
+		LigGroup "Chaining \(gr)" : if [hasLG "\(gr)-\(gr)-\(gr)"] : begin
+			CreateLigationLookup : list
+				chain-rule # Extension
+					[{}.concat [sfx "cf"] [sfx "zf"]] ~> look-around
+					[src] ~> [sfx "zf"]
+				chain-rule # Start 4
+					[src] ~> [sfx "fc"]
+					[src] ~> [sfx "cc"]
+					[src] ~> [sfx "cc"]
+					[src] ~> [sfx "cf"]
+				chain-rule # Start 3
+					[src] ~> [sfx "fc"]
+					[src] ~> [sfx "cc"]
+					[src] ~> [sfx "cf"]
+				chain-rule # Start 2
+					[src] ~> [if [hasLG "\(gr)-\(gr)"] [sfx "fc"] advance]
+					[src] ~> [if [hasLG "\(gr)-\(gr)"] [sfx "cf"] advance]
+			CreateLigationLookup : list
+				chain-rule
+					{[sfx "jf"]} ~> {[sfx "jc"]}
+					[src]        ~> {[sfx "cc"]}
+					{[sfx "fj"]} ~> {[sfx "cj"]}
+				chain-rule
+					{[sfx "jf"]} ~> {[sfx "jc"]}
+					{[sfx "fc"]} ~> {[sfx "cc"]}
+				chain-rule
+					{[sfx "zf"]} ~> {[sfx "zc"]}
+					{[sfx "fj"]} ~> {[sfx "cj"]}
+
+	LigGroup "Chaining plus adjustments" : if [hasLG 'plus-plus-plus'] : begin
 		CreateLigationLookup : list
 			chain-rule # +++
 				{'plus.lig.fc'} ~> {'plus.lig.fc.s'}
@@ -1016,46 +1038,41 @@ define [buildLigationsImpl gsub para $LigGroup$] : begin
 				{'plus.lig.fc'} ~> {'plus.lig.fc.s'}
 				{'plus.lig.cf'} ~> {'plus.lig.cf.s'}
 
-	LigGroup "Underscore chains" : if [hasLG 'connected-underscore'] : begin
+	LigGroup "Underscore chains" : if [hasLG 'underscore-underscore-underscore'] : begin
 		CreateLigationLookup : list
-			chain-rule
-				[underscore.concat : [lsx 'zf'] underscore] ~> look-around
-				underscore                                  ~> [lsx 'zf']
+			chain-rule # Extension
+				[[lsx 'zf'] underscore] ~> look-around
+				underscore ~> [lsx 'zf']
+			chain-rule # Start 4
+				underscore ~> advance
+				underscore ~> [lsx 'zf']
+				underscore ~> [lsx 'zf']
+				underscore ~> [lsx 'zf']
+			chain-rule # Start 3
+				underscore ~> advance
+				underscore ~> [lsx 'zf']
+				underscore ~> [lsx 'zf']
+			chain-rule # Start 2
+				underscore ~> advance
+				underscore ~> [if [hasLG 'underscore-underscore'] [lsx 'zf'] advance]
 
-	LigGroup "Tilde chains" : if [hasLG 'connected-tilde-as-wave'] : begin
+	LigGroup "Number sign chains" : if [hasLG 'hash-hash-hash'] : begin
 		CreateLigationLookup : list
-			chain-rule
-				{'wave.lig.cf' 'wave.lig.zf'} ~> look-around
-				{'asciiTilde'} ~> {'wave.lig.zf'}
-			chain-rule
-				{'asciiTilde'} ~> {"wave.lig.fc"}
-				{'asciiTilde'} ~> {"wave.lig.cf"}
-
-	LigGroup "Hyphen chains" : if [hasLG 'connected-hyphen'] : begin
-		CreateLigationLookup : list
-			chain-rule
-				{'hyphen.lig.zf'} ~> look-around
-				{'hyphen'}        ~> {'hyphen.lig.zf'}
-			chain-rule
-				{'hyphen'}        ~> {"hyphen.lig.fc"}
-				{'hyphen'}        ~> {"hyphen.lig.zf"}
-		CreateLigationLookup : list
-			chain-rule
-				{'hyphen.lig.jf'} ~> {'hyphen.lig.jc'}
-				{'hyphen'}        ~> {'hyphen.lig.cc'}
-				{'hyphen.lig.fj'} ~> {'hyphen.lig.cj'}
-			chain-rule
-				{'hyphen.lig.jf'} ~> {'hyphen.lig.jc'}
-				{'hyphen.lig.fc'} ~> {'hyphen.lig.cc'}
-			chain-rule
-				{'hyphen.lig.zf'} ~> {'hyphen.lig.zc'}
-				{'hyphen.lig.fj'} ~> {'hyphen.lig.cj'}
-
-	LigGroup "Number sign chains" : if [hasLG 'connected-number-sign'] : begin
-		CreateLigationLookup : list
-			chain-rule
-				{'numberSign' 'numberSign.jr'} ~> look-around
-				{'numberSign'} ~> {'numberSign.jr'}
+			chain-rule # Extension
+				{'numberSign.jr'} ~> look-around
+				{'numberSign'}    ~> [csx 'jr']
+			chain-rule # Start 4
+				{'numberSign'}    ~> advance
+				{'numberSign'}    ~> [csx 'jr']
+				{'numberSign'}    ~> [csx 'jr']
+				{'numberSign'}    ~> [csx 'jr']
+			chain-rule # Start 3
+				{'numberSign'}    ~> advance
+				{'numberSign'}    ~> [csx 'jr']
+				{'numberSign'}    ~> [csx 'jr']
+			chain-rule # Start 2
+				{'numberSign'}    ~> advance
+				{'numberSign'}    ~> [if [hasLG 'hash-hash'] [csx 'jr'] advance]
 
 	LigGroup "Kern Bars" : if [hasLG 'kern-bars'] : foreach chBar [items-of anyBar] : begin
 		define dp           { chBar }

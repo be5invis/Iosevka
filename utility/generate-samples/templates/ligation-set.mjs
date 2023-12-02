@@ -15,7 +15,7 @@ function* makeSample(theme, args) {
 				} else {
 					sat[rankT].required += 1;
 				}
-				if (groupSet.has(lg.ligGroup)) {
+				if (groupSet.has(lgName)) {
 					sat[rankT].satisfied += 1;
 				}
 			}

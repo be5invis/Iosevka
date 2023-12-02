@@ -4,7 +4,7 @@ import url from "url";
 
 import semver from "semver";
 
-import { Output } from "./shared/index.mjs";
+import { MdCol } from "./md-format-tools.mjs";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
@@ -27,7 +27,7 @@ async function GenerateChangeList(argv, out) {
 	}
 }
 export default (async function main(argv) {
-	const out = new Output();
+	const out = new MdCol();
 	await GenerateChangeList(argv, out);
-	await fs.promises.writeFile(argv.outputPath, out.buffer);
+	await fs.promises.writeFile(argv.outputPath, out.data);
 });

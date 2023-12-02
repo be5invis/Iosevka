@@ -4,13 +4,15 @@ import url from "url";
 
 import SemVer from "semver";
 
-import { Output } from "./shared/index.mjs";
+import { MdCol } from "./md-format-tools.mjs";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // CHANGE LIST
+
 async function GenerateChangeList(argv, out) {
 	const changeFiles = await fs.promises.readdir(ChangeFileDir);
 	const fragments = new Map();
@@ -34,7 +36,7 @@ async function GenerateChangeList(argv, out) {
 	}
 }
 export default (async function main(argv) {
-	const out = new Output();
+	const out = new MdCol("Release-Note");
 	let baseUrl = `https://github.com/be5invis/Iosevka/blob/v${argv.version}/doc`;
 	await GenerateChangeList(argv, out);
 	out.log(
@@ -47,5 +49,5 @@ export default (async function main(argv) {
 			`</td></tr>` +
 			`</table>`
 	);
-	await fs.promises.writeFile(argv.outputPath, out.buffer);
+	await fs.promises.writeFile(argv.outputPath, out.data);
 });

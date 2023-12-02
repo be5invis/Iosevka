@@ -1,39 +1,23 @@
 import fs from "fs";
 import path from "path";
-import url from "url";
 
-import { Output } from "./shared/index.mjs";
+import { ImgX, MdCol } from "../md-format-tools.mjs";
 
-const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// Copy Markdown
-
-async function CopyMarkdown(out, name) {
-	const content = await fs.promises.readFile(
-		path.resolve(__dirname, `release-note-fragments/${name}`),
-		"utf8"
-	);
-	out.log(content);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// PACKAGE LIST
-
-const Spacings = {
-	// spacingDesc, ligation
-	type: ["Default", true],
-	term: ["Terminal", true],
-	fixed: ["Fixed", false],
-	"quasi-proportional": ["Default", false]
-};
 const ImagePrefixNoVersion = `https://raw.githubusercontent.com/be5invis/Iosevka`;
 const DownloadLinkPrefixNoVersion = `https://github.com/be5invis/Iosevka/releases/download`;
-async function GeneratePackageList(argv, out) {
+
+export default async function processPackageList(argv, dirs) {
 	const imagePrefix = `${ImagePrefixNoVersion}/v${argv.version}/images`;
 	const pkgShapesData = JSON.parse(await fs.promises.readFile(argv.releasePackagesJsonPath));
 	const DownloadLinkPrefix = `${DownloadLinkPrefixNoVersion}/v${argv.version}`;
-	out.log(`<table>`);
+
+	const md = new MdCol("Section-Package-List");
+	md.log(`# Package list of Release ${argv.version}`);
+
+	const headerPath = path.resolve(dirs.fragments, "packages-desc.md");
+	md.log(await fs.promises.readFile(headerPath, "utf-8"));
+
+	md.log(`<table>`);
 	for (let [groupID, gr] of Object.entries(pkgShapesData)) {
 		const prime = gr.subGroups[groupID];
 		const familyName = buildName("\u00a0", ...prime.family.split(" "));
@@ -55,13 +39,13 @@ async function GeneratePackageList(argv, out) {
 			];
 		}
 
-		out.log(
+		md.log(
 			`<tr>`,
 			`<td colspan="3"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
 			...ttcCells,
 			`</tr>`
 		);
-		out.log(
+		md.log(
 			`<tr>`,
 			`<td><b>&nbsp;&nbsp;└ Sub-packages</b></td>`,
 			`<td><b>Spacing</b></td>`,
@@ -83,7 +67,7 @@ async function GeneratePackageList(argv, out) {
 			const leader = "&nbsp;&nbsp;&nbsp;&nbsp;" + (subGroupID === lastSubGroupID ? "└" : "├");
 			const superTtcPrefix = hasSpacings ? "SuperTTC-SGr" : "SuperTTC";
 			const ttcPrefix = hasSpacings ? "PkgTTC-SGr" : "PkgTTC";
-			out.log(
+			md.log(
 				`<tr>`,
 				`<td>${leader}&nbsp;<b>${noBreak(subGr.family)}</b></td>`,
 				`<td>${spacingDesc}</td>`,
@@ -97,30 +81,25 @@ async function GeneratePackageList(argv, out) {
 				`</tr>`
 			);
 		}
-		out.log(`<tr>`, `<td colspan="8">${img}</td>`, `</tr>`);
+		md.log(`<tr>`, `<td colspan="8">${img}</td>`, `</tr>`);
 	}
-	out.log(`</table>\n`);
-}
-function noBreak(s) {
-	return s.replace(/ /g, "\u00a0");
+	md.log(`</table>\n`);
+
+	return md;
 }
 function buildName(j, ...parts) {
 	return parts.filter(x => !!x).join(j);
 }
+function noBreak(s) {
+	return s.replace(/ /g, "\u00a0");
+}
+const Spacings = {
+	// spacingDesc, ligation
+	type: ["Default", true],
+	term: ["Terminal", true],
+	fixed: ["Fixed", false],
+	"quasi-proportional": ["Default", false]
+};
 function flag(f) {
 	return f ? "<b>Yes</b>" : "No";
 }
-function ImgX(path, w) {
-	const widthProp = w ? ` width=${w}` : ``;
-	return (
-		`<img src="${path}.light.svg#gh-light-mode-only"${widthProp}/>` +
-		`<img src="${path}.dark.svg#gh-dark-mode-only"${widthProp}/>`
-	);
-}
-export default (async function main(argv) {
-	const out = new Output();
-	out.log(`# Package list of Release ${argv.version}`);
-	await CopyMarkdown(out, "packages-desc.md");
-	await GeneratePackageList(argv, out);
-	await fs.promises.writeFile(argv.outputPath, out.buffer);
-});
