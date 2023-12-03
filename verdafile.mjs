@@ -412,10 +412,11 @@ const DistUnhintedTTF = file.make(
 				de(charMapPath.dir)
 			);
 
-			echo.action(echo.hl.command(`Hint TTF`), out.full);
+			echo.action(echo.hl.command(`Create TTF`), out.full);
 			await silently.node(`packages/font/src/derive-spacing.mjs`, {
 				i: deriveFrom.full,
 				o: out.full,
+				paramsDir: Path.resolve("params"),
 				oNoGc: noGcTtfPath.full,
 				...fi
 			});
@@ -507,7 +508,7 @@ const DistHintedTTF = file.make(
 				de(noGcTtfPath.dir)
 			);
 
-			echo.action(echo.hl.command(`Create TTF`), out.full);
+			echo.action(echo.hl.command(`Hint TTF`), out.full);
 			await silently.node(`packages/font/src/derive-spacing.mjs`, {
 				i: deriveFrom.full,
 				oNoGc: noGcTtfPath.full,

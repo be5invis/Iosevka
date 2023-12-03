@@ -1,14 +1,11 @@
 import fs from "fs";
 import path from "path";
-import url from "url";
 
 import * as Toml from "@iarna/toml";
 import { CliProc, Ot } from "ot-builder";
 
 import { readTTF, saveTTF } from "./font-io/index.mjs";
 import { assignFontNames, createNamingDictFromArgv } from "./naming/index.mjs";
-
-const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 export default main;
 async function main(argv) {
@@ -24,12 +21,12 @@ async function main(argv) {
 		case "fontconfig-mono":
 			await deriveTerm(font);
 			await deriveFixed_DropWideChars(font);
-			await deriveFixed_DropFeatures(font, false);
+			await deriveFixed_DropFeatures(font, argv, false);
 			break;
 		case "fixed":
 			await deriveTerm(font);
 			await deriveFixed_DropWideChars(font);
-			await deriveFixed_DropFeatures(font, true);
+			await deriveFixed_DropFeatures(font, argv, true);
 			break;
 	}
 
@@ -86,7 +83,7 @@ async function deriveFixed_DropWideChars(font) {
 	}
 }
 
-async function deriveFixed_DropFeatures(font, fFixed) {
+async function deriveFixed_DropFeatures(font, argv, fFixed) {
 	if (!font.gsub) return;
 
 	const dropFeatureTagSet = new Set();
@@ -94,7 +91,7 @@ async function deriveFixed_DropFeatures(font, fFixed) {
 	dropFeatureTagSet.add("WWID");
 
 	if (fFixed) {
-		const LIGATIONS_TOML = path.resolve(__dirname, "../params/ligation-set.toml");
+		const LIGATIONS_TOML = path.resolve(argv.paramsDir, "ligation-set.toml");
 		const rawLigationData = Toml.parse(await fs.promises.readFile(LIGATIONS_TOML, "utf-8"));
 		for (const [_, comp] of Object.entries(rawLigationData.composite)) {
 			dropFeatureTagSet.add(comp.tag);
