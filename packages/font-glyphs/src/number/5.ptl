@@ -1,0 +1,106 @@
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Digits-Five : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
+
+	define [FiveFlatStroke xLeft archTop pShapeHeight sw] : dispiro
+		widths.rhs sw
+		flat (xLeft + [HSwToV sw]) archTop
+		curl [Math.max (xLeft + 0.01) (Middle - CorrectionOMidX * sw)] archTop
+		archv
+		g4 (RightSB - OX) [YSmoothMidR archTop 0 ArchDepthA ArchDepthB]
+		hookend O
+		g4 SB (Hook * pShapeHeight)
+
+	define [FiveArcStroke xLeft archTop pShapeHeight sw] : dispiro
+		widths.rhs sw
+		g4 xLeft (archTop - AHook * pShapeHeight)
+		hookstart (archTop - O)
+		g4 (RightSB - OX) [YSmoothMidR archTop 0 ArchDepthA ArchDepthB]
+		hookend O
+		g4 SB (Hook * pShapeHeight)
+
+	define [FiveArcStrokeMask xLeft archTop pShapeHeight sw] : spiro-outline
+		g4 (xLeft + 1) (archTop - AHook * pShapeHeight)
+		hookstart (archTop - O - 1)
+		g4 (RightSB - OX - 1) [YSmoothMidR archTop 0 ArchDepthA ArchDepthB]
+		hookend (O + 1)
+		g4 (SB + 1) (Hook * pShapeHeight)
+
+	define [FiveShape] : with-params [
+			top bp pBarPosSwAdj [sw Stroke] [bbd 0] [obl 0] [zt 0]
+			[bottomShape FiveArcStroke] [pXLeft 0.025]
+		] : glyph-proc
+		local t1 : (top * bp + sw * pBarPosSwAdj) * 0.8
+		local t2 : (top * bp + sw * pBarPosSwAdj) * 1.0
+		local xLeft : [mix SB RightSB pXLeft] + zt
+		local xRight : [mix RightSB SB 0.05] - (OX - O)
+
+		local kGap : 0.144 - 0.1 * sw / t2
+
+		include : difference
+			glyph-proc
+				local fiveStroke : include : bottomShape xLeft t2 (top / CAP) sw
+				local firstKnot fiveStroke.rhsKnots.0
+
+				local oblCor : Math.hypot 1 obl
+				local xVBar : firstKnot.x - oblCor * [HSwToV sw]
+				local xVBarOffset : (top - firstKnot.y) * obl
+				include : HBar.t [if zt SB (xVBar + xVBarOffset)] xRight top sw
+				include : union
+					intersection [Rect (firstKnot.y + sw) firstKnot.y 0 Width] : dispiro
+						flat xVBar firstKnot.y [widths.rhs.heading (sw) Upward]
+						flat (xVBar + xVBarOffset) top [heading Upward]
+					intersection [Rect top (firstKnot.y + sw) 0 Width] : dispiro
+						flat xVBar firstKnot.y [widths.rhs.heading (oblCor * sw) Upward]
+						flat (xVBar + xVBarOffset) top [heading Upward]
+
+				if bbd : let [mask : FiveArcStrokeMask xLeft t2 (top / CAP) sw] : begin
+					include : intersection mask [VBar.r (RightSB - OX - bbd) 0 CAP sw]
+					include : difference [VBar.r (firstKnot.x + bbd) 0 CAP sw] mask [Rect (t2 / 2) 0 0 Width]
+
+			Rect (t2 / 2 + t2 * kGap) (t2 / 2 - t2 * kGap) 0 Middle
+
+		if (!bbd && SLAB) : include : VSerif.dr xRight top [Math.min VJut ((top - t2) * 0.8)]
+
+	define FiveConfig : SuffixCfg.weave
+		object # upper-left-bar
+			"upright" 0
+			"oblique" (1 / 12)
+		object # middle
+			"arched"  { FiveArcStroke  DesignParameters.fiveBarPos           0     0.025 }
+			"flat"    { FiveFlatStroke (7 / 8 * DesignParameters.fiveBarPos) (1/3) 0.05  }
+
+	foreach { suffix { obl { bottomShape pBarPos pBarPosSwAdj pXLeft } } } [pairs-of FiveConfig] : do
+		create-glyph "five.lnum.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (obl -- obl) (pXLeft -- pXLeft)
+
+		create-glyph "five.onum.\(suffix)" : glyph-proc
+			include : OnumMarks.p
+			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (obl -- obl) (pXLeft -- pXLeft)
+			include : ShiftDown
+
+		create-glyph "zhuangToneFive.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (zt -- ((RightSB - SB) * 0.05)) (pXLeft -- pXLeft)
+
+		create-glyph "zhuangtonefive.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : FiveShape XH pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (zt -- ((RightSB - SB) * 0.05)) (pXLeft -- pXLeft)
+
+	select-variant 'five.lnum' [CodeLnum '5'] (follow -- 'five')
+	select-variant 'five.onum' [CodeOnum '5'] (follow -- 'five')
+	select-variant 'zhuangToneFive' 0x1BC
+	select-variant 'zhuangtonefive' 0x1BD (follow -- 'zhuangToneFive')
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/five' 0x1D7DD : glyph-proc
+		include : MarkSet.capital
+		include : FiveShape CAP DesignParameters.fiveBarPos 0 (sw -- BBS) (bbd -- BBD)

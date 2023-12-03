@@ -1,0 +1,39 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+
+glyph-module
+
+glyph-block Letter-Latin-OU : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [OuShape top yBar gapL gapR] : glyph-proc
+		include : OShape (yBar + HalfStroke) 0 SB RightSB nothing ArchDepthA ArchDepthB
+
+		local xLeft : clamp (SB + [HSwToV : 1.25 * Stroke]) [mix SB RightSB 0.4] (Middle - Width * 0.05)
+		local d : 0.25 * TanSlope * (RightSB - SB)
+		include : dispiro
+			widths.lhs
+			g4.left.start (xLeft - CorrectionOMidS) (top - gapL)
+			archv
+			g4.down.mid SB ([mix (yBar - HalfStroke) (top - gapL) 0.5] + d)
+			arcvh
+			g4 (Middle + CorrectionOMidS) (yBar - O - HalfStroke + (Stroke * (1 - CThin))) [widths.lhs (Stroke * CThin)]
+			archv
+			g4.up.mid RightSB ([mix (yBar - HalfStroke) (top - gapR) 0.5] - d) [widths.lhs]
+			arcvh
+			g4.left.end (Width - xLeft - CorrectionOMidS) (top - gapR)
+
+	create-glyph 'OU' 0x222 : glyph-proc
+		include : MarkSet.capital
+		include : OuShape CAP (CAP * HBarPos) (CAP * 0.05) 0
+
+	create-glyph 'smcpOU' 0x1D15 : glyph-proc
+		include : MarkSet.e
+		include : OuShape XH (XH * HBarPos) 0 0
+
+	create-glyph 'ou' 0x223 : glyph-proc
+		include : MarkSet.b
+		include : OuShape Ascender (Ascender * [mix HBarPos (XH / CAP) 0.5]) 0 0

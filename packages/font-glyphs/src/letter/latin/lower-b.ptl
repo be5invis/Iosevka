@@ -1,0 +1,104 @@
+$$include '../../meta/macros.ptl'
+
+import [mix fallback SuffixCfg] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-B : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
+	glyph-block-import Letter-Shared : CreateAccentedComposition
+	glyph-block-import Letter-Shared-Shapes : OBarLeft DToothlessRise DMBlend TopHook
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
+
+	define [ToothedBody yTop] : union
+		OBarLeft.shape
+		VBar.l SB 0 yTop
+
+	define [ToothlessCornerBody yTop] : union
+		OBarLeft.toothless (rise -- DToothlessRise) (mBlend -- DMBlend)
+		VBar.l SB DToothlessRise yTop
+
+	define [ToothlessRoundedBody yTop] : OBarLeft.rounded (yTerminal -- yTop)
+
+	define [LTSerifs] : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
+	define [LBSerifs] : tagged 'serifLB' : HSerif.lb SB 0 SideJut
+	define [FullSerifs] : composite-proc [LTSerifs] [LBSerifs]
+
+	define BConfig : SuffixCfg.weave
+		object # body
+			toothed           ToothedBody
+			toothlessCorner   ToothlessCornerBody
+			toothlessRounded  ToothlessRoundedBody
+		object # serifs
+			serifless       { no-shape   false  }
+			motionSerifed   { LTSerifs   true   }
+			bottomSerifed   { LBSerifs   false  }
+			serifed         { FullSerifs true   }
+
+	foreach { suffix { Body {Serifs doTS} }} [Object.entries BConfig] : do
+		local yOverlay : mix XH (Ascender - [if doTS Stroke 0]) 0.5
+		create-glyph "b.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : Body Ascender
+			include : Serifs
+			include : LeaningAnchor.Above.VBar.l SB
+			set-base-anchor 'overlayOnExtension' (SB + [HSwToV : 0.5 * Stroke]) yOverlay
+			set-base-anchor 'overlay' Middle (XH / 2)
+
+		create-glyph "bStroke.\(suffix)" : glyph-proc
+			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
+			include : LetterBarOverlay.l.in SB XH (Ascender - [if doTS Stroke 0])
+
+		create-glyph "bSlash.\(suffix)" : glyph-proc
+			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
+			include : dispiro
+				widths.center OverlayStroke
+				flat [mix SB 0       0.7]   (yOverlay - Ascender * 0.1)
+				curl [mix SB RightSB 0.625] (yOverlay + Ascender * 0.05)
+
+		create-glyph "latn/be.\(suffix)" : glyph-proc
+			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
+			include : HBar.t (SB - O) [mix SB RightSB 0.9] Ascender
+			if doTS : include : VSerif.dr [mix SB RightSB 0.9] Ascender VJut
+
+		create-glyph "bHookTop.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : Body XH
+			include : TopHook.lBarInner SB (XH / 2) Ascender
+			include : Serifs
+			eject-contour 'serifLT'
+
+	select-variant 'b'       'b'
+	select-variant 'bStroke' 0x180  (follow -- 'b')
+	select-variant 'bSlash'  0x2422 (follow -- 'b')
+	select-variant 'latn/be' 0x183  (follow -- 'b')
+
+	derive-composites 'bPalatalHook' 0x1D80 'b' : PalatalHook.r
+		x -- [mix (Middle + CorrectionOMidS) RightSB 0.75]
+		y -- 0
+		yAttach -- [mix O SmallArchDepthA : archv.yFromX 0.75]
+
+	link-reduced-variant 'b/sansSerif' 'b' MathSansSerif
+	CreateAccentedComposition 'bTildeOver' 0x1D6C 'b' 'tildeOverOnExension'
+	select-variant 'bHookTop' 0x253
+
+	derive-multi-part-glyphs 'bDot' 0x1E03 {'b' 'dotAbove'} : lambda [srcs gr] : glyph-proc
+		local { base mark } srcs
+		include : refer-glyph mark
+		include : Translate (Width + [HSwToV HalfStroke]) 0
+		include [refer-glyph base] AS_BASE
+		include : LeaningAnchor.Above.VBar.l Middle
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
+	create-glyph 'mathbb/b' 0x1D553 : glyph-proc
+		include : MarkSet.b
+		include : BBBarLeft SB 0 Ascender
+		include : intersection
+			OShapeOutline.NoOvershoot XH 0 (SB + BBD + [HSwToV BBS]) RightSB
+			VBar.r (RightSB - BBD - OX) 0 XH BBS
+		include : OBarLeft.shape
+			left -- SB + BBD
+			sw -- BBS

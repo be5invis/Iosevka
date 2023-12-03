@@ -1,0 +1,351 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Yeri : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Metrics : BowlXDepth
+	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotLhsRev RightwardTailedBar
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay UpwardHookShape VerticalHook SerifFrame
+
+	define DefaultBarPos 0.55
+
+	glyph-block-export CyrlYeriUprightShape
+	define [CyrlYeriUprightShape] : with-params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar DefaultBarPos] [yStart top]] : glyph-proc
+		local bowl : top * pBar + HalfStroke
+		local turnRadius : BowlXDepth bowl 0 left right stroke
+		local ada : ArchDepthAOf ArchDepth (right - left + SB * 2)
+		local adb : ArchDepthBOf ArchDepth (right - left + SB * 2)
+		local fine : stroke * CThinB
+
+		local yTurnBottomL : YSmoothMidL bowl 0 ada adb
+		local yTurnBottomR : YSmoothMidR bowl 0 ada adb
+
+		include : union
+			dispiro
+				widths.lhs stroke
+				flat (left + Stroke * 0.2) 0 [heading Rightward]
+				curl ([Math.max (left + stroke * TanSlope) (right - turnRadius)] + CorrectionOMidX * stroke) 0
+				archv 8
+				g4   (right - OX) yTurnBottomR
+				arcvh 8
+				flat ([Math.max (left + stroke * TanSlope) (right - turnRadius)] - CorrectionOMidX * stroke) bowl
+				curl (left + Stroke * 0.2) bowl [heading Leftward]
+			VBar.l left 0 yStart stroke
+
+		if SLAB : begin
+			include : tagged 'serifYeriLB' : HSerif.lb left 0 (jut - [HSwToV : 0.5 * stroke]) stroke
+			include : tagged 'serifYeriLT' : HSerif.mt (left + [HSwToV : 0.5 * stroke]) top jut stroke
+
+	glyph-block-export CyrlYeriRoundShape
+	define [CyrlYeriRoundShape] : with-params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar DefaultBarPos] [yStart top]] : glyph-proc
+		local bowl : top * pBar + HalfStroke
+		local turnRadius : BowlXDepth bowl 0 left right stroke
+		local ada : ArchDepthAOf ArchDepth (right - left + SB * 2)
+		local adb : ArchDepthBOf ArchDepth (right - left + SB * 2)
+		local fine : stroke * CThinB
+
+		local yTurnBottomL : YSmoothMidL bowl 0 ada adb
+		local yTurnBottomR : YSmoothMidR bowl 0 ada adb
+
+		include : dispiro
+			flat left [Math.max yStart (yTurnBottomL + 0.1)] [widths.lhs.heading stroke Downward]
+			curl left yTurnBottomL
+			arcvh
+			g4 ([mix left right 0.5] + CorrectionOMidX * stroke) O
+			archv
+			g4 (right - OX) yTurnBottomR
+			arcvh
+			flat ([mix left right 0.5] - CorrectionOMidX * stroke) bowl
+			curl (left + Stroke * 0.2) bowl [heading Leftward]
+
+		if SLAB : begin
+			include : tagged 'serifYeriLT' : HSerif.lt left top (jut - [HSwToV : 0.5 * stroke]) stroke
+
+	glyph-block-export CyrlYeriCursiveShape
+	define [CyrlYeriCursiveShape] : with-params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar DefaultBarPos] [yStart top]] : glyph-proc
+		local bowl : top * pBar + HalfStroke
+		local turnRadius : BowlXDepth bowl 0 left right stroke
+		local ada : ArchDepthAOf ArchDepth (right - left + SB * 2)
+		local adb : ArchDepthBOf ArchDepth (right - left + SB * 2)
+		local fine : stroke * CThinB
+
+		local yTurnBottomL : YSmoothMidL bowl 0 ada adb
+		local yTurnBottomR : YSmoothMidR bowl 0 ada adb
+
+		include : dispiro
+			flat left [Math.max yStart (yTurnBottomL + 0.1)] [widths.lhs.heading stroke Downward]
+			curl left yTurnBottomL
+			arcvh
+			g4 ([mix left right 0.5] + CorrectionOMidX * stroke) O
+			archv
+			g4 (right - OX) yTurnBottomR
+			arcvh
+			ShoulderMidKnotLhsRev [mix left right 0.5] bowl fine stroke (-1) (-1)
+			archv
+			g4.down.end (left + (stroke - fine) * HVContrast) yTurnBottomL [widths.lhs.heading fine Downward]
+
+		if SLAB : begin
+			include : tagged 'serifYeriLT' : HSerif.lt left top (jut - [HSwToV : 0.5 * stroke]) stroke
+
+	define [RevCyrYeriShape] : with-params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar DefaultBarPos]] : glyph-proc
+		local bowl : top * pBar + HalfStroke
+		local turnRadius : bowl * 0.45
+		local turnbottom : mix 0 bowl (ArchDepthB / (ArchDepthA + ArchDepthB))
+		local trShrink [Math.pow ((right - left) / (RightSB - SB)) 0.5]
+		include : dispiro
+			widths.rhs stroke
+			flat (right - Stroke * 0.2) 0 [heading Leftward]
+			curl (left + turnRadius * trShrink + CorrectionOMidX * stroke) 0
+			archv
+			g4   (left + O) turnbottom
+			arcvh
+			flat (left + turnRadius * trShrink - CorrectionOMidX * stroke) bowl
+			curl (right - Stroke * 0.2) bowl [heading Rightward]
+		include : VBar.r right 0 top stroke
+		if SLAB : begin
+			include : tagged 'serifYeriRB'
+				HSerif.rb right 0 (jut - [HSwToV : 0.5 * stroke]) stroke
+			include : tagged 'serifYeriRT'
+				HSerif.mt (right - [HSwToV : 0.5 * stroke]) top jut stroke
+
+	define [RevCyrYeriRoundShape] : with-params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar DefaultBarPos] [yStart top]] : glyph-proc
+		local bowl : top * pBar + HalfStroke
+		local turnRadius : BowlXDepth bowl 0 left right stroke
+		local ada : ArchDepthAOf ArchDepth (right - left + SB * 2)
+		local adb : ArchDepthBOf ArchDepth (right - left + SB * 2)
+		local fine : stroke * CThinB
+
+		local yTurnBottomL : YSmoothMidL bowl 0 ada adb
+		local yTurnBottomR : YSmoothMidR bowl 0 ada adb
+
+		include : dispiro
+			flat right [Math.max yStart (yTurnBottomR + 0.1)] [widths.rhs.heading stroke Downward]
+			curl right yTurnBottomR
+			arcvh
+			g4 ([mix left right 0.5] + CorrectionOMidX * stroke) O
+			archv
+			g4 (left + OX) yTurnBottomL
+			arcvh
+			flat ([mix left right 0.5] - CorrectionOMidX * stroke) bowl
+			curl (right - Stroke * 0.2) bowl [heading Rightward]
+
+	define [CyrBackYerShape] : with-params [Yeri top left right [stroke Stroke] [jut Jut] [pBar DefaultBarPos]] : glyph-proc
+		local xLeftBarLeftEdge : Math.max (right - (RightSB - SB)) : if SLAB
+			[mix left right 0.35] - [HSwToV : 0.50 * stroke]
+			[mix left right 0.20] - [HSwToV : 0.25 * stroke]
+		local xTopBarLeftEnd : mix 0 left [if SLAB 0.25 0.375]
+
+		include : HBar.t xTopBarLeftEnd (Stroke * 0.1 + xLeftBarLeftEdge) top stroke
+		include : Yeri top
+			left   -- xLeftBarLeftEdge
+			right  -- right
+			stroke -- stroke
+			jut    -- jut
+			pBar   -- pBar
+
+		if SLAB : begin
+			include : VSerif.dl xTopBarLeftEnd top VJut
+				Math.min (VJutStroke * stroke / Stroke) (0.625 * (xLeftBarLeftEdge - xTopBarLeftEnd))
+
+	define [CyrNeutralYerShape] : with-params [Yeri top left right [stroke Stroke] [jut Jut]] : glyph-proc
+		local xLeftBarLeftEdge : Math.max (right - (RightSB - SB)) : if SLAB
+			[mix left right 0.35] - [HSwToV : 0.50 * stroke]
+			[mix left right 0.20] - [HSwToV : 0.25 * stroke]
+		local xTopBarLeftEnd : mix 0 left [if SLAB 0.25 0.375]
+
+		include : Yeri top
+			left   -- xLeftBarLeftEdge
+			right  -- right
+			stroke -- stroke
+			jut    -- jut
+			yStart -- (top - TailY - 0.5 * stroke)
+		eject-contour 'serifYeriLT'
+		include : VerticalHook.l xLeftBarLeftEdge (top - TailY - 0.5 * stroke) (xTopBarLeftEnd - xLeftBarLeftEdge - 0.5 * stroke) (-TailY) stroke
+
+	define [CyrYeryShape Yeri df top fBackYer fTail] : glyph-proc
+		local sw : if fBackYer [AdviceStroke 3.25 df.div] df.mvs
+
+		local jut : Math.min Jut : [Math.pow (sw / Stroke) 0.5] * Jut
+		local xm : mix (df.rightSB - [HSwToV sw]) (df.middle + [HSwToV : 0.5 * sw]) 0.75
+
+		include : if fBackYer
+			CyrBackYerShape Yeri
+				top    -- top
+				left   -- df.leftSB
+				right  -- xm
+				stroke -- sw
+				jut    -- jut
+			Yeri
+				top    -- top
+				left   -- df.leftSB
+				right  -- xm
+				stroke -- sw
+				jut    -- jut
+
+		include : if fTail
+			RightwardTailedBar df.rightSB 0 top sw
+			VBar.r df.rightSB 0 top sw
+
+		if SLAB : begin
+			include : tagged 'serifRT' : if (Yeri !== CyrlYeriUprightShape)
+				then : glyph-proc
+				else : HSerif.mt (df.rightSB - [HSwToV : 0.5 * sw]) top jut sw
+			if (!fTail) : include : tagged 'serifRB' : if (Yeri !== CyrlYeriUprightShape)
+				then : HSerif.rb df.rightSB 0 (jut - [HSwToV : 0.5 * sw]) sw
+				else : HSerif.mb (df.rightSB - [HSwToV : 0.5 * sw]) 0 jut sw
+
+	define [ZhuangToneSixShape Yeri top] : glyph-proc
+		local xLeft : [mix SB RightSB 0.20] - [HSwToV : 0.125 * Stroke]
+		include : Yeri top (left -- xLeft) (right -- RightSB)
+		eject-contour 'serifYeriLT'
+		include : dispiro
+			corner xLeft top [widths.lhs : AdviceStroke 5.5]
+			corner (0.25 * xLeft) (top - xLeft)
+
+	glyph-block-export YeriConfig
+	define YeriConfig : object
+		corner        { CyrlYeriUprightShape }
+		round         { CyrlYeriRoundShape   }
+		cursive       { CyrlYeriCursiveShape }
+
+	define YeryConfig : object
+		corner        { CyrlYeriUprightShape false }
+		round         { CyrlYeriRoundShape   false }
+		cursive       { CyrlYeriCursiveShape false }
+		cornerTailed  { CyrlYeriUprightShape true  }
+		roundTailed   { CyrlYeriRoundShape   true  }
+		cursiveTailed { CyrlYeriCursiveShape true  }
+
+	define [YeriOverlayBar df top] : begin
+		local stroke : AdviceStroke2 2 3 top
+		return : LetterBarOverlay.l.in
+			x   -- df.leftSB
+			bot -- top * DefaultBarPos + stroke / 2
+			top -- top - [if SLAB Stroke 0]
+
+	foreach { suffix { Yeri } } [Object.entries YeriConfig] : do
+		create-glyph "cyrl/Yeri.\(suffix)" : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : Yeri (left -- df.leftSB) (right -- df.rightSB) CAP
+		create-glyph "cyrl/yeri.\(suffix)" : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.e
+			include : Yeri (left -- df.leftSB) (right -- df.rightSB) XH
+		create-glyph "cyrl/YeriBar.\(suffix)" : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : Yeri (left -- df.leftSB) (right -- df.rightSB) CAP
+			include : YeriOverlayBar df CAP
+		create-glyph "cyrl/yeriBar.\(suffix)" : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.e
+			include : Yeri (left -- df.leftSB) (right -- df.rightSB) XH
+			include : YeriOverlayBar df XH
+		create-glyph "cyrl/Yer.\(suffix)" : glyph-proc
+			local df : include : DivFrame [mix 1 para.diversityM 0.5]
+			include : df.markSet.capital
+			include : CyrBackYerShape Yeri CAP (left -- df.leftSB) (right -- df.rightSB)
+		create-glyph "cyrl/yer.\(suffix)" : glyph-proc
+			local df : include : DivFrame [mix 1 para.diversityM 0.5]
+			include : df.markSet.e
+			include : CyrBackYerShape Yeri XH (left -- df.leftSB) (right -- df.rightSB)
+		create-glyph "cyrl/yerTall.\(suffix)" : glyph-proc
+			local df : include : DivFrame [mix 1 para.diversityM 0.5]
+			include : df.markSet.b
+			include : CyrBackYerShape Yeri Ascender (left -- df.leftSB) (right -- df.rightSB) (pBar -- DefaultBarPos * XH / Ascender)
+		create-glyph "cyrl/YerNeutral.\(suffix)" : glyph-proc
+			local df : include : DivFrame [mix 1 para.diversityM 0.5]
+			include : df.markSet.capital
+			include : CyrNeutralYerShape Yeri CAP (left -- df.leftSB) (right -- df.rightSB)
+		create-glyph "cyrl/yerNeutral.\(suffix)" : glyph-proc
+			local df : include : DivFrame [mix 1 para.diversityM 0.5]
+			include : df.markSet.e
+			include : CyrNeutralYerShape Yeri XH (left -- df.leftSB) (right -- df.rightSB)
+		create-glyph "ZhuangToneSix.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : ZhuangToneSixShape Yeri CAP
+		create-glyph "zhuangToneSix.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : ZhuangToneSixShape Yeri XH
+
+	foreach { suffix { Yeri fTail } } [Object.entries YeryConfig] : do
+		create-glyph "cyrl/Yery.\(suffix)" : glyph-proc
+			local df : include : DivFrame [mix 1 para.diversityM 1.5] 3
+			include : df.markSet.capital
+			include : CyrYeryShape Yeri df CAP false fTail
+		create-glyph "cyrl/yery.\(suffix)" : glyph-proc
+			local df : include : DivFrame [mix 1 para.diversityM 1.5] 3
+			include : df.markSet.e
+			include : CyrYeryShape Yeri df XH false fTail
+		create-glyph "cyrl/YeryBack.\(suffix)" : glyph-proc
+			local df : include : DivFrame [mix 1 para.diversityM 1.5] 3
+			include : df.markSet.capital
+			include : CyrYeryShape Yeri df CAP true fTail
+		create-glyph "cyrl/yeryBack.\(suffix)" : glyph-proc
+			local df : include : DivFrame [mix 1 para.diversityM 1.5] 3
+			include : df.markSet.e
+			include : CyrYeryShape Yeri df XH true fTail
+
+	select-variant 'cyrl/Yer'  0x42A
+	select-variant 'cyrl/yer'  0x44A
+	select-variant 'cyrl/yer.BGR' (shapeFrom -- 'cyrl/yer')
+	select-variant 'cyrl/yerTall' 0x1C86 (follow -- 'cyrl/yer')
+
+	select-variant 'cyrl/Yery' 0x42B
+	select-variant 'cyrl/yery' 0x44B
+	select-variant 'cyrl/Yeri' 0x42C
+	select-variant 'cyrl/yeri' 0x44C
+	select-variant 'cyrl/yeri.BGR' (shapeFrom -- 'cyrl/yeri')
+	select-variant 'cyrl/YeriBar' 0x48C (follow -- 'cyrl/Yeri')
+	select-variant 'cyrl/yeriBar' 0x48D (follow -- 'cyrl/yeri')
+	select-variant 'cyrl/YerNeutral' 0xA64E (follow -- 'cyrl/Yer')
+	select-variant 'cyrl/yerNeutral' 0xA64F (follow -- 'cyrl/yer')
+	select-variant 'cyrl/YeryBack' 0xA650 (follow -- 'cyrl/Yery')
+	select-variant 'cyrl/yeryBack' 0xA651 (follow -- 'cyrl/yery')
+
+	select-variant 'ZhuangToneSix' 0x184 (follow -- 'cyrl/Yer')
+	select-variant 'zhuangToneSix' 0x185 (follow -- 'cyrl/yer')
+
+	create-glyph 'cyrl/Be' 0x411 : glyph-proc
+		include : MarkSet.capital
+		include : CyrlYeriUprightShape CAP
+		include : HBar.m SB [mix SB RightSB 0.9] (CAP - HalfStroke)
+		if SLAB : begin
+			include : VSerif.dr [mix SB RightSB 0.9] CAP VJut
+
+	alias 'latn/Be' 0x182 'cyrl/Be'
+
+	create-glyph 'latn/De' 0x18B : glyph-proc
+		include : MarkSet.capital
+		include : RevCyrYeriShape CAP
+		include : HBar.t [mix RightSB SB 0.9] (RightSB + O) CAP
+		if SLAB : begin
+			include : VSerif.dl [mix RightSB SB 0.9] CAP VJut
+
+	create-glyph 'cyrl/DeKomi' 0x500 : glyph-proc
+		include : MarkSet.capital
+		include : RevCyrYeriShape CAP
+
+	create-glyph 'cyrl/DjeKomi' 0x502 : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.capital
+
+		local xm : df.middle + [HSwToV : 0.5 * df.mvs]
+		include : RevCyrYeriRoundShape CAP df.leftSB xm df.mvs
+		include : UpwardHookShape
+			left -- df.middle - [HSwToV : 0.5 * df.mvs]
+			right -- df.rightSB
+			ybegin -- CAP
+			yend -- (CAP / 2)
+			ada -- (SmallArchDepthA * 0.6 * df.div)
+			adb -- (SmallArchDepthB * 0.6 * df.div)
+			sw -- df.mvs
+		if SLAB : begin
+			include : HSerif.mt df.middle CAP Jut df.mvs
+			local sf2 : [SerifFrame.fromDf df (CAP / 2) 0].slice 1 2
+			include sf2.rt.full

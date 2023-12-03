@@ -1,0 +1,44 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Fita : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define FitaWave : XH / 16
+	define [FitaLeft  sw] : SB      + [HSwToV : 0.5 * sw]
+	define [FitaRight sw] : RightSB - [HSwToV : 0.5 * sw]
+	define [FitaCrossbar y sw swc] : dispiro
+		widths.center swc
+		g4.right.mid [mix [FitaLeft sw] Middle (-1)] y
+		g4.right.mid [mix [FitaLeft sw] Middle (-0.5)] (y - FitaWave)
+		g4 [FitaLeft sw] y
+		g4.right.mid [mix [FitaLeft sw] Middle 0.5] (y + FitaWave)
+		g4 Middle y
+		g4.right.mid [mix [FitaRight sw] Middle 0.5] (y - FitaWave)
+		g4 [FitaRight sw] y
+		g4.right.mid [mix [FitaRight sw] Middle (-0.5)] (y + FitaWave)
+		g4.right.mid [mix [FitaRight sw] Middle (-1)] y
+
+	create-glyph 'cyrl/Fita' 0x472 : glyph-proc
+		define sw  : AdviceStroke2 2 3 CAP
+		define swc : Math.min (FitaWave * 2) [AdviceStroke2 3 4 CAP]
+		include : MarkSet.capital
+		include : union
+			OShape CAP 0 SB RightSB sw ArchDepthA ArchDepthB
+			intersection
+				OShapeOutline.NoOvershoot CAP 0 SB RightSB sw ArchDepthA ArchDepthB
+				FitaCrossbar (CAP / 2) sw swc
+
+	create-glyph 'cyrl/fita' 0x473 : glyph-proc
+		define sw  : AdviceStroke2 2 3 XH
+		define swc : Math.min (FitaWave * 2) [AdviceStroke2 3 4 XH]
+		include : MarkSet.e
+		include : union
+			OShape XH 0 SB RightSB sw SmallArchDepthA SmallArchDepthA
+			intersection
+				OShapeOutline.NoOvershoot XH 0 SB RightSB sw SmallArchDepthA SmallArchDepthA
+				FitaCrossbar (XH / 2) sw swc

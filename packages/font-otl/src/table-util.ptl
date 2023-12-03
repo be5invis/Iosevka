@@ -1,0 +1,237 @@
+import toposort from 'toposort'
+import [AnyCv] from "@iosevka/glyph/relation"
+
+extern Map
+extern Set
+
+export : define [CreateEmptyTable] : new LayoutTable
+
+class LayoutTable
+	public [new] : begin
+		set this.languages   {.}
+		set this.features    {.}
+		set this.lookups     {.}
+		set this.lookupDep   {}
+		set this.lookupOrder {}
+
+	public [pickLanguage tag] : begin
+		if this.languages.(tag) : return this.languages.(tag)
+		define lang : new LayoutLanguage tag
+		set this.languages.(tag) lang
+		return lang
+
+	public [copyLanguage tag tagFrom] : begin
+		define langFrom : this.pickLanguage tagFrom
+		define langTo : this.pickLanguage tag
+		foreach [feat : items-of langFrom.features] : langTo.features.push feat
+		return langTo
+
+	public [createFeature tag] : begin
+		local feature : new LayoutFeature tag
+		local n 0
+		while true : begin
+			if [not this.features.(tag + '_' + n)] : begin
+				set feature.name : tag + '_' + n
+				set this.features.(tag + '_' + n) feature
+				return feature
+			set n : n + 1
+
+	public [addCommonFeature fea] : begin
+		define dfltDflt : this.pickLanguage 'DFLT_DFLT'
+		define latnDflt : this.pickLanguage 'latn_DFLT'
+		define grekDflt : this.pickLanguage 'grek_DFLT'
+		define cyrlDflt : this.pickLanguage 'cyrl_DFLT'
+
+		dfltDflt.addFeature fea
+		latnDflt.addFeature fea
+		grekDflt.addFeature fea
+		cyrlDflt.addFeature fea
+
+		return fea
+
+	public [createLookup data _prefix] : begin
+		local prefix : _prefix || 'lookup/'
+		local n 0
+		while true : begin
+			if [not this.lookups.(prefix + n)] : begin
+				return : this.addLookupNoCheck (prefix + n) data
+			set n : n + 1
+
+	public [pickLookup name fallback] : begin
+		if this.lookups.(name) : return this.lookups.(name)
+		return : this.addLookupNoCheck name fallback
+
+	public [addLookupNoCheck name data] : begin
+		local lookup : Object.fromEntries : Object.entries data
+		set lookup.name name
+		set this.lookups.(name) lookup
+		return lookup
+
+	public [setDependency a b] : begin
+		if [not a.name] : throw : new Error "Invalid lookup"
+		if [not b.name] : throw : new Error "Invalid lookup"
+
+		this.lookupDep.push { a.name b.name }
+
+	public [beginBlock] : begin
+		return : object
+			existingLookupNames : new Set : Object.keys this.lookups
+
+	public [endBlock rec] : begin
+		local currentLookupNames : new Set : Object.keys this.lookups
+		foreach existing rec.existingLookupNames : foreach current currentLookupNames
+			if (![IsUtilityLookupId existing] && ![IsUtilityLookupId current] && ![rec.existingLookupNames.has current])
+				this.lookupDep.push { existing current }
+
+	public [endBlockAtFront rec] : begin
+		local currentLookupNames : new Set : Object.keys this.lookups
+		foreach existing rec.existingLookupNames : foreach current currentLookupNames
+			if (![IsUtilityLookupId existing] && ![IsUtilityLookupId current] && ![rec.existingLookupNames.has current])
+				this.lookupDep.push { current existing }
+
+	public [finalize] : begin
+		local lns : new Set : Object.keys this.lookups
+		foreach [front lns] : foreach [rear lns]
+			if (![IsUtilityLookupId front] && [IsUtilityLookupId rear])
+				this.lookupDep.push { front rear }
+
+		set this.lookupOrder : toposort this.lookupDep
+		foreach [{key lang} : pairs-of this.languages] : begin
+			if lang.features : lang.features.sort
+
+	public [ChainRuleBuilder] : begin
+		local table this
+
+		define [createNewLookup f t] : begin
+			local subst {.}
+			foreach [j : range 0 f.length] : set subst.(f.(j)) t.(j)
+			return : table.createLookup {.type 'gsub_single' .substitutions subst} UtilityLookupPrefix
+
+		define [getSubLookup left right] : piecewise
+			[not right] null
+			([typeof right] === "string") : throw : new Error "Invalid substitution"
+			(right <@ Function) : getSubLookup left [right left]
+			true : begin
+				local found    null
+				local maxMatch 0
+
+				local lookupKeys : [Object.keys table.lookups].reverse
+				foreach [name : items-of lookupKeys] : if [IsUtilityLookupId name] : begin
+					local lookup table.lookups.(name)
+					local st lookup.substitutions
+
+					local compatible true
+					local matchCount 0
+					foreach [j : range 0 left.length] : begin
+						if (st.(left.(j)) && st.(left.(j)) !== right.(j)) : set compatible false
+						if (st.(left.(j)) === right.(j)) : inc matchCount
+
+					if (compatible && (!found || matchCount > maxMatch)) : begin
+						set found    lookup
+						set maxMatch matchCount
+
+				if found : begin
+					local st found.substitutions
+					foreach [j : range 0 left.length] : set st.(left.(j)) right.(j)
+					return found
+
+				return : createNewLookup left right
+
+		define [chain-rule] : begin
+			local terms : [{}.slice.call arguments 0].map (x -> [if x.left x {.left x .right null}])
+			local rule {.match {} .apply {} .inputBegins 0 .inputEnds 0}
+			local foundi false
+			local founde false
+			foreach [j : range 0 terms.length] : if (!foundi && terms.(j).right) : begin
+				set rule.inputBegins j
+				set foundi true
+			foreach [j : range (terms.length - 1) downtill 0] : if (!founde && terms.(j).right) : begin
+				set rule.inputEnds (j + 1)
+				set founde true
+			foreach [j : range 0 terms.length] : begin
+				local term terms.(j)
+				rule.match.push : Array.from : new Set term.left
+				local lookup : getSubLookup term.left term.right
+				if lookup : rule.apply.push {.at j .lookup {.name lookup.name}}
+			return rule
+
+		define [reverse-rule] : begin
+			local terms : [{}.slice.call arguments 0].map (x -> [if x.left x {.left x .right null}])
+			local rule {.match {} .to {} .inputIndex 0}
+			local foundi false
+
+			foreach [j : range 0 terms.length] : begin
+				local term terms.(j)
+				local subst : new Map
+				foreach [g : items-of term.left] : subst.set g g
+
+				if term.right : begin
+					if foundi : throw : new Error "Duplicate substitutions in one reverse rule"
+					set foundi true
+					set rule.inputIndex j
+					local toGlyphs : piecewise
+						(term.right <@ Function) [term.right term.left]
+						true                     term.right
+					foreach [k : range 0 term.left.length]
+						subst.set term.left.(k) (toGlyphs.(k) || term.left.(k))
+
+					set rule.to : Array.from [subst.values]
+
+				set rule.match.(j) : Array.from [subst.keys]
+
+			return rule
+
+		return {chain-rule reverse-rule}
+
+class LayoutFeature
+	public [new tag] : begin
+		set this.tag     tag
+		set this.name    tag
+		set this.lookups {}
+
+	public [addLookup lookup] : begin
+		if [not lookup.name] : throw : new Error "Invalid lookup"
+		define index : this.lookups.indexOf lookup.name
+		if (index < 0) : this.lookups.push lookup.name
+		return lookup
+
+class LayoutLanguage
+	public [new tag] : begin
+		set this.tag       tag
+		set this.features  {}
+
+	public [addFeature feature] : begin
+		if [not feature.name] : throw : new Error "Invalid feature"
+		define index : this.features.indexOf feature.name
+		if (index < 0) : this.features.push feature.name
+		return feature
+
+define UtilityLookupPrefix '.utility-single/'
+define [IsUtilityLookupId name] : [name.slice 0 UtilityLookupPrefix.length] === UtilityLookupPrefix
+
+export : define [QueryRelatedGlyphs glyphs para entries] : begin
+	define sink {}
+	foreach [gid : items-of entries] : if glyphs.(gid) : begin
+		sink.push gid
+		if para.enableCvSs : foreach [gr : items-of : AnyCv.query glyphs.(gid)] : begin
+			sink.push : gr.get glyphs.(gid)
+	return sink
+
+export : define [FinalizeTable table] : begin
+	set table.lookupOrder : toposort table.lookupDep
+	foreach [{key lang} : pairs-of table.languages] : begin
+		if lang.features : lang.features.sort
+
+export : define [UkMapToLookup m] : begin
+	local l {}
+	local r {}
+	foreach { k v } [Object.entries m] : begin
+		l.push k
+		r.push v
+	return { .left l .right r }
+
+export : define [UkMap2ToLookup mm] : begin
+	local res {}
+	foreach { g1 second } [Object.entries mm] : foreach { g2 gTo } [Object.entries second] : begin
+		res.push {.from {g1 g2} .to gTo}
+	return res

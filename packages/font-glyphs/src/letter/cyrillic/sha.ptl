@@ -1,0 +1,63 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Sha : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar CyrDescender SerifFrame
+
+	define [CyrShaShape top df fInv] : glyph-proc
+		include : union
+			[if fInv HBar.t HBar.b] df.leftSB df.rightSB [if fInv top 0]
+			VBar.l df.leftSB 0 top df.mvs
+			VBar.r df.rightSB 0 top df.mvs
+			VBar.m df.middle 0 top df.mvs
+
+		if SLAB : begin
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- df.mvs)
+
+			if fInv : then : begin
+				include : composite-proc sf.lt.outer sf.rt.outer
+				if sf.enoughSpaceForFullSerifs
+					include : composite-proc sf.lb.full sf.mb.full sf.rb.full
+					include : composite-proc sf.lb.outer sf.rb.outer
+			: else : begin
+				include : composite-proc sf.lb.outer sf.rb.outer
+				if sf.enoughSpaceForFullSerifs
+					include : composite-proc sf.lt.full sf.mt.full sf.rt.full
+					include : composite-proc sf.lt.outer sf.rt.outer
+
+	create-glyph 'cyrl/Sha' 0x428 : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.capital
+		include : CyrShaShape CAP df false
+
+	create-glyph 'cyrl/sha.upright' : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.e
+		include : CyrShaShape XH df false
+
+	create-glyph 'cyrl/teThreeLeg.upright' : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.e
+		include : CyrShaShape XH df true
+
+	alias 'smcpMTurned' 0xA7FA 'cyrl/sha.upright'
+
+	define [CyrShchaShape top df] : glyph-proc
+		include : CyrShaShape top df
+		#eject-contour 'serifRB'
+		include : CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
+
+	create-glyph 'cyrl/Shcha' 0x429 : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.capital
+		include : CyrShchaShape CAP df
+
+	create-glyph 'cyrl/shcha.upright' : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.e
+		include : CyrShchaShape XH df

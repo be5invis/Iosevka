@@ -1,0 +1,47 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [Point] from "@iosevka/geometry/point"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Lje : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : LegShape
+	glyph-block-import Letter-Cyrillic-Yeri : YeriConfig
+
+	define [CyrLjeShape Yeri df top] : glyph-proc
+		local rightSB : df.width - df.leftSB
+		local l : df.leftSB + 0
+		local r : rightSB - 0
+		local middle : df.width / 2
+		local xTopLeft : mix l r 0.025
+		local jut : Math.min Jut : Jut * 0.75 * df.div
+		include : LegShape
+			ztop -- [Point.fromXY Point.Type.Corner xTopLeft top]
+			zbot -- [Point.fromXY Point.Type.Corner [mix l 0 [if SLAB 1 0.75]] 0]
+			xb   -- xTopLeft
+			fine -- df.mvs
+		include : Yeri top
+			left -- (middle - [HSwToV : 0.5 * df.mvs])
+			right -- (r - O)
+			stroke -- df.mvs
+			jut -- jut
+		include : HBar.t xTopLeft middle top df.mvs
+		if SLAB : begin
+			include : HSerif.lt xTopLeft top (jut - [HSwToV : 0.5 * df.mvs]) df.mvs
+
+	foreach { suffix { Yeri } } [Object.entries YeriConfig] : do
+		create-glyph "cyrl/Lje.\(suffix)"  : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : CyrLjeShape Yeri df CAP
+
+		create-glyph "cyrl/lje.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+			include : CyrLjeShape Yeri df XH
+
+	select-variant 'cyrl/Lje' 0x409
+	select-variant 'cyrl/lje' 0x459

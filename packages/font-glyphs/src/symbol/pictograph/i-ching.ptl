@@ -1,0 +1,70 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [maskBit] from "@iosevka/util/mask-bit"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-I-Ching : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'iChing/barYin' : glyph-proc
+		local bar : AdviceStroke 3
+		local gap : Math.max (Width / 8) [AdviceStroke 5]
+		include : HBar.m SB (Middle - [HSwToV : 0.5 * gap]) 0 bar
+		include : HBar.m (Middle + [HSwToV : 0.5 * gap]) RightSB 0 bar
+
+	create-glyph 'iChing/barYang' : glyph-proc
+		local bar : AdviceStroke 3
+		include : HBar.m SB RightSB 0 bar
+
+	create-glyph 'iChing/barRen' : glyph-proc
+		local bar : AdviceStroke 3
+		local gap : Math.max (Width / 8) [AdviceStroke 5]
+		local width : (RightSB - SB - [HSwToV : 2 * gap]) / 3
+		include : HBar.m SB (SB + width) 0 bar
+		include : HBar.m (Middle - 0.5 * width) (Middle + 0.5 * width) 0 bar
+		include : HBar.m (RightSB - width) RightSB 0 bar
+
+	define [patterns n su] : foreach [offset: range 0 [Math.pow 2 n]] : begin
+		create-glyph ('iChing/Pattern/' + n + '/' + offset) (su + offset) : glyph-proc
+			local offsetY : (2 / 3) * (OperBot - PictTop) / n
+			local startY : SymbolMid - offsetY * (n - 1) / 2
+			foreach [bit : range 0 n] : begin
+				include : with-transform [ApparentTranslate 0 (startY + offsetY * bit)]
+					refer-glyph : if [not : maskBit offset bit] 'iChing/barYang' 'iChing/barYin'
+
+	define [hexagramPatterns su order] : foreach [offset: range 0 64] : begin
+		create-glyph ('iChing/Pattern/6/' + offset) (su + offset) : glyph-proc
+			local offsetY : (PictBot - PictTop) / 6
+			local startY : SymbolMid - offsetY * (6 - 1) / 2
+			foreach [bit : range 0 6] : begin
+				include : with-transform [ApparentTranslate 0 (startY + offsetY * bit)]
+					refer-glyph : if [not : maskBit order.(offset) bit] 'iChing/barYang' 'iChing/barYin'
+
+	define [stringPattern pat] : glyph-proc
+		local n pat.length
+		local offsetY : [if (n >= 4) 1 (2 / 3)] * (OperBot - PictTop) / n
+		local startY : SymbolMid - offsetY * (n - 1) / 2
+		foreach [bit : range 0 n] : begin
+			include : with-transform [ApparentTranslate 0 (startY + offsetY * bit)]
+				refer-glyph : match pat.(bit)
+					[Just '0'] 'iChing/barYang'
+					[Just '1'] 'iChing/barYin'
+					__         'iChing/barRen'
+
+	define [stringPatterns su pats] : foreach [offset: range 0 pats.length] : begin
+		local pat pats.(offset)
+		create-glyph ('iChing/Pattern/txj/' + pat) (su + offset) : stringPattern pat
+
+	define [ternaryPatterns n su] : foreach [offset: range 0 [Math.pow 3 n]] : begin
+		local pat : [offset.toString 3].padStart n '0'
+		create-glyph ('iChing/Pattern/txj/' + pat) (su + offset) : stringPattern pat
+
+	patterns 1 0x268A
+	patterns 2 0x268C
+	patterns 3 0x2630
+	hexagramPatterns 0x4DC0 : list 0 63 29 46 5 40 47 61 4 8 7 56 16 2 55 59 25 38 15 60 26 22 62 31 24 6 30 33 45 18 49 35 48 3 58 23 20 10 53 43 14 28 1 32 57 39 41 37 17 34 27 54 52 11 19 50 36 9 44 13 12 51 21 42
+	stringPatterns 0x1D300 : list '2' '02' '12' '20' '21' '22'
+	ternaryPatterns 4 0x1D306

@@ -1,0 +1,180 @@
+### Punctuation symbols
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+
+glyph-block Symbol-Punctuation-At : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [ThreeFoldShape height fSolidInner] : glyph-proc
+		local top : SymbolMid + height / 2
+		local bot : SymbolMid - height / 2
+		local otop : mix bot top 0.75
+		local obot : mix top bot 0.8
+
+		local sw : AdviceStroke 3.5
+		local m1 : if fSolidInner [mix SB RightSB 0.5] : [mix (SB + sw) (RightSB - sw) 0.47] - sw / 2
+		local m2 : [mix m1 RightSB 0.52] + TanSlope * sw
+
+		local ada : ArchDepthA * ((RightSB - m1) / (RightSB - SB) * 1.1)
+		local adb : ArchDepthB * ((RightSB - m1) / (RightSB - SB) * 1.1)
+
+		include : union
+			[if fSolidInner spiro-outline dispiro]
+				widths.lhs sw
+				flat RightSB (otop - O) [heading Leftward]
+				curl m2 (otop - O)
+				archv
+				flat m1 (otop - ada)
+				curl m1 (obot + adb)
+				arcvh
+				g4   m2 (obot + O)
+				archv
+				flat RightSB (obot + ada)
+				curl RightSB (otop - O)
+			dispiro
+				widths.lhs sw
+				flat RightSB (obot + ada)
+				curl RightSB (top - ArchDepthB)
+				arcvh
+				g4   [ArchXAdjust.top Middle sw] (top - O) [widths.lhs Stroke]
+				archv
+				flat SB (top - ArchDepthA) [widths.lhs sw]
+				curl SB (bot + ArchDepthB)
+				arcvh
+				flat [ArchXAdjust.bot Middle sw] (bot + O) [widths Stroke 0 ]
+				curl (RightSB - HalfStroke + TanSlope * sw) (bot + O)
+
+	define [FourFoldShape height fSolidInner] : glyph-proc
+		local df : include : DivFrame para.diversityM [if fSolidInner 3.25 4]
+
+		local top : SymbolMid + height / 2
+		local bot : SymbolMid - height / 2
+		local otop : mix bot top 0.75
+		local obot : mix top bot 0.8
+
+		local sw  : AdviceStroke [if fSolidInner 3.25 4]    df.div
+		local swh : AdviceStroke [if fSolidInner 3.25 3.75] df.div
+
+		local kM12   : if fSolidInner 0.40 (1 / 3)
+		local kM12Sw : if fSolidInner 0.25 0.5
+		local m1 : [mix (df.leftSB + [HSwToV (sw / 2)]) (df.rightSB - [HSwToV (sw / 2)]) kM12      ] - [HSwToV (sw * kM12Sw)]
+		local m2 : [mix (df.leftSB + [HSwToV (sw / 2)]) (df.rightSB - [HSwToV (sw / 2)]) (1 - kM12)] + [HSwToV (sw * kM12Sw)]
+
+		local ad : ArchDepth * [Math.sqrt df.div]
+		local ada : ArchDepthAOf ad df.width
+		local adb : ArchDepthBOf ad df.width
+
+		local adInner : Math.max (ad * (m2 - m1) / (df.rightSB - df.leftSB)) (sw * 1.25)
+		local adaInner : ArchDepthAOf adInner (m2 - m1 + df.leftSB * 2)
+		local adbInner : ArchDepthBOf adInner (m2 - m1 + df.leftSB * 2)
+
+		include : union
+			dispiro
+				widths.lhs sw
+				if fSolidInner
+				: then { }
+				: else : list
+					flat m2 (obot - O) [heading Upward]
+					curl m2 (otop - adbInner)
+					arcvh
+					g4   [ArchXAdjust.top df.middle sw] (otop - O)
+					archv
+					flat m1 (otop - adaInner)
+					curl m1 (obot + adbInner)
+					arcvh
+				flat df.middle obot
+				curl (df.rightSB - [Math.max ((m2 - m1) / 2) [HSwToV : 1.5 * sw]]) obot
+				archv
+				flat df.rightSB (obot + [Math.max adaInner (sw * 1.5)])
+				curl df.rightSB (top - adb)
+				arcvh
+				g4   [ArchXAdjust.top df.middle sw] (top - O) [widths.lhs swh]
+				archv
+				flat df.leftSB (top - ada) [widths.lhs sw]
+				curl df.leftSB (bot + adb)
+				arcvh
+				flat [ArchXAdjust.bot df.middle sw] (bot + O) [widths swh 0 ]
+				curl (df.rightSB - HalfStroke + TanSlope * sw) (bot + O)
+
+			if fSolidInner
+				spiro-outline
+					corner m2 obot
+					curl   m2 (otop - adbInner)
+					arcvh
+					g4     [ArchXAdjust.top df.middle sw] otop
+					archv
+					flat   m1 (otop - adaInner)
+					curl   m1 (obot + adbInner)
+					arcvh
+					flat   df.middle obot
+				glyph-proc
+
+	define [CompactShape] : glyph-proc
+		local top  CAP
+		local obot 0
+		local otop [mix obot top 0.675]
+
+		local sw : AdviceStroke 3.5
+		local m1 : [mix (SB + sw) (RightSB - sw) 0.53] + sw / 2
+		local m2 : [mix SB m1 0.5] + TanSlope * sw
+
+		local ada : ArchDepthA * ((m1 - SB) / (RightSB - SB) * 1.1)
+		local adb : ArchDepthB * ((m1 - SB) / (RightSB - SB) * 1.1)
+		local atTurnBot (obot - ada / 4)
+
+		local shrink 0.6
+
+		include : dispiro
+			straight.up.start (m1 - (sw * (1 - shrink) * HVContrast)) (otop - adb) [widths.heading (sw * shrink) 0 Upward]
+			arcvh
+			g4 (m2 - sw * TanSlope) (otop - O) [widths.heading sw 0 Leftward]
+			archv
+			flat SB (otop - ada)
+			curl SB (obot + adb)
+			arcvh
+			g4 (m2 - sw * TanSlope) (obot + O) [heading Rightward]
+			archv
+			straight.up.end (m1 - (sw * (1 - shrink) * HVContrast)) (obot + ada) [widths.heading (sw * shrink) 0 Upward]
+
+		include : dispiro
+			widths.lhs sw
+			corner m1 (atTurnBot + ada) [heading Upward]
+			corner m1 (otop - adb) [heading Upward]
+			corner m1 otop [widths.heading (sw * shrink) 0 Upward]
+
+		include : dispiro
+			widths.lhs (sw * shrink)
+			straight.down.start (m1 - sw * [HSwToV shrink]) (atTurnBot + ada) [heading Downward]
+			arcvh
+			g4 [ArchXAdjust.bot [mix (m1 - [HSwToV sw]) RightSB 0.5] sw] (atTurnBot + O) [widths.lhs sw]
+			archv
+			flat RightSB (atTurnBot + ada)
+			curl RightSB (top - ArchDepthB)
+			hookend (top - O)
+			g4 SB (top - Hook)
+
+	define NormalHeight : mix (OperTop - OperBot) (ParenTop - ParenBot) 0.600
+	define TallHeight   : mix (OperTop - OperBot) (ParenTop - ParenBot) 0.875
+
+	define AtConfig : object
+		threefold               { ThreeFoldShape NormalHeight false }
+		threefoldTall           { ThreeFoldShape TallHeight   false }
+		threefoldSolidInner     { ThreeFoldShape NormalHeight true  }
+		threefoldSolidInnerTall { ThreeFoldShape TallHeight   true  }
+
+		fourfold                { FourFoldShape  NormalHeight false }
+		fourfoldTall            { FourFoldShape  TallHeight   false }
+		fourfoldSolidInner      { FourFoldShape  NormalHeight true  }
+		fourfoldSolidInnerTall  { FourFoldShape  TallHeight   true  }
+
+		compact                 { CompactShape   CAP          false }
+
+	foreach { suffix { body height fSolidInner } } [Object.entries AtConfig] : do
+		create-glyph "at.\(suffix)" : body height fSolidInner
+
+	select-variant 'at' '@'

@@ -1,0 +1,212 @@
+$$include '../../meta/macros.ptl'
+
+import [mix fallback SuffixCfg] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-M : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame CyrTailDescender PalatalHook
+
+	define FORM-FLAT      0
+	define FORM-HANGING   1
+	define FORM-TURN-W    2
+	define FORM-SAN       3
+	define FORM-SAN-SMALL 4
+
+	define SLAB-NONE            0
+	define SLAB-AUTO            1
+	define SLAB-MOTION          2
+	define SLAB-SMALL-CYRILLIC  3
+	define SLAB-FULL            4
+
+	glyph-block-export MShape
+	define [MShape] : with-params [top df form slabType slanted [kMidHang df.div]] : glyph-proc
+		local sidesSlope : if slanted 0.04 0
+		local xLeftTop  : df.leftSB  + top * sidesSlope
+		local xRightTop : df.rightSB - top * sidesSlope
+
+		local fHasBottomInnerSerif : match slabType
+			[Just SLAB-FULL]     true
+			[Just SLAB-AUTO]     SLAB
+			__                   false
+
+		local swSideBot : match form
+			[Just FORM-SAN-SMALL] : AdviceStroke 2.5  df.div
+			[Just FORM-SAN]       : AdviceStroke 2.5  df.div
+			[Just FORM-TURN-W]    : AdviceStroke 2.5  df.div
+			[Just FORM-HANGING]   : AdviceStroke 2.5  df.div
+			__                    : AdviceStroke 2.75 df.div
+		local swSideTop : match form
+			[Just FORM-SAN-SMALL] : AdviceStroke 3 df.div
+			[Just FORM-SAN]       : AdviceStroke 3 df.div
+			[Just FORM-TURN-W]    : AdviceStroke 3 df.div
+			__                    : AdviceStroke 4 df.div
+		local swMiddle : AdviceStroke 4.5 df.div
+		local middleY : match form
+			[Just FORM-SAN-SMALL] : top * 0.55
+			[Just FORM-SAN]       : top * 0.55
+			[Just FORM-TURN-W]    : top * 0.45
+			[Just FORM-HANGING]   : top * 0.3 / (kMidHang * kMidHang)
+			__                    : if fHasBottomInnerSerif swSideBot 0
+		local kMidShift : match form
+			[Just FORM-FLAT] 0.75
+			__               0.5
+		local kMidBotStrokeShrink : match form
+			[Just FORM-FLAT] : mix 1 df.div (-0.5)
+			__               1
+		local swMiddleShrunk (kMidBotStrokeShrink * swMiddle)
+
+		include : tagged 'strokeLeftBar' : dispiro
+			flat df.leftSB [if (form === FORM-SAN-SMALL) Descender 0] [widths.heading 0 swSideBot Upward]
+			curl [mix df.leftSB xLeftTop 0.2] (top * 0.2) [heading Upward]
+			straight.up.end xLeftTop top [widths.heading 0 swSideTop Upward]
+		include : tagged 'strokeRightBar' : dispiro
+			flat df.rightSB 0 [widths.heading swSideBot 0 Upward]
+			curl [mix df.rightSB xRightTop 0.2] (top * 0.2) [heading Upward]
+			straight.up.end xRightTop top [widths.heading swSideTop 0 Upward]
+		include : dispiro
+			flat (xLeftTop + kMidShift * [HSwToV swSideTop]) top [widths.lhs.heading swMiddle Downward]
+			curl (df.middle - [HSwToV : 0.5 * swMiddleShrunk]) middleY [widths.lhs.heading swMiddleShrunk Downward]
+		include : dispiro
+			flat (xRightTop - kMidShift * [HSwToV swSideTop]) top [widths.rhs.heading swMiddle Downward]
+			curl (df.middle + [HSwToV : 0.5 * swMiddleShrunk]) middleY [widths.rhs.heading swMiddleShrunk Downward]
+
+		local sfT : SerifFrame top 0 xLeftTop  xRightTop  (swRef -- swSideBot) (hSplit -- 3) (fForceSymmetric -- (form !== FORM-FLAT))
+		local sfB : SerifFrame top 0 df.leftSB df.rightSB (swRef -- swSideBot) (hSplit -- 3) (fForceSymmetric -- (form !== FORM-FLAT))
+		include : match slabType
+			[Just SLAB-NONE] : no-shape
+			[Just SLAB-FULL] : composite-proc sfT.lt.outer sfT.rt.outer sfB.lb.full sfB.rb.full
+			[Just SLAB-AUTO] : NeedSlab SLAB
+				composite-proc sfT.lt.outer sfT.rt.outer sfB.lb.full sfB.rb.full
+			[Just SLAB-MOTION] : composite-proc sfT.lt.outer
+			[Just SLAB-SMALL-CYRILLIC] : composite-proc sfT.lt.outer
+				if para.isItalic [no-shape]   sfT.rt.outer
+				if para.isItalic sfB.lb.outer sfB.lb.full
+				if para.isItalic sfB.rb.outer sfB.rb.full
+
+		return : object [swSideBot]
+
+	define [CyrSoftEmShape] : with-params [top df form slabType slanted] : glyph-proc
+		local subDf : df.slice 4 3
+		local sidesSlope : if slanted 0.04 0
+		local xRightTop : subDf.rightSB - top * sidesSlope
+
+		local swSideBot : match form
+			[Just FORM-SAN-SMALL] : AdviceStroke 2.5  subDf.div
+			[Just FORM-SAN]       : AdviceStroke 2.5  subDf.div
+			[Just FORM-TURN-W]    : AdviceStroke 2.5  subDf.div
+			[Just FORM-HANGING]   : AdviceStroke 2.5  subDf.div
+			__                    : AdviceStroke 2.75 subDf.div
+
+		include : MShape top subDf form slabType slanted (kMidHang -- df.div)
+
+		include : HBar.t xRightTop df.rightSB top swSideBot
+		if SLAB : include : VSerif.dr df.rightSB top VJut (swSideBot * VJutStroke / Stroke)
+
+
+
+	define MConfig : SuffixCfg.combine
+		SuffixCfg.weave
+			object # sides
+				""            false
+				slantedSides  true
+			object # middle
+				hanging       FORM-HANGING
+				flatBottom    FORM-FLAT
+			object # serifs
+				serifless     SLAB-NONE
+				motionSerifed SLAB-MOTION
+				smallCyrl     SLAB-SMALL-CYRILLIC
+				serifed       SLAB-FULL
+		object # Greek San variants
+			grekCapitalSan { false FORM-SAN       SLAB-AUTO }
+			grekSmallSan   { false FORM-SAN-SMALL SLAB-NONE }
+
+	foreach { suffix { slanted form slab } } [Object.entries MConfig] : do
+		create-glyph "M.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : MShape CAP df form slab slanted
+
+		create-glyph "Meng.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			local ret_M : include : MShape CAP df form slab slanted
+			eject-contour 'serifRB'
+			include : PalatalHook.rExt df.rightSB 0 (sw -- ret_M.swSideBot)
+
+		create-glyph "smcpM.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+			include : MShape XH df form slab slanted
+
+		create-glyph "smcpMWithDescender.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.p
+			include : MShape XH df form slab slanted
+
+		create-glyph "cyrl/EmSoft.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : CyrSoftEmShape CAP df form slab slanted
+
+		create-glyph "cyrl/emSoft.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+			include : CyrSoftEmShape XH df form slab slanted
+
+	select-variant 'M' 'M'
+	link-reduced-variant 'M/sansSerif' 'M' MathSansSerif
+	select-variant 'Meng' 0x2C6E (follow -- 'M')
+	select-variant 'smcpM' 0x1D0D (follow -- 'M')
+	select-variant 'cyrl/em' 0x43C (shapeFrom -- 'smcpM')
+	alias 'grek/Mu' 0x39C 'M'
+	alias-reduced-variant 'grek/Mu/sansSerif' 'grek/Mu' 'M/sansSerif' MathSansSerif
+	alias 'cyrl/Em' 0x41C 'M'
+	select-variant 'cyrl/EmSoft' 0xA666 (follow -- 'M')
+	select-variant 'cyrl/emSoft' 0xA667 (follow -- 'cyrl/em')
+
+	derive-composites 'cyrl/EmTail' 0x4CD 'cyrl/Em' : do
+		local df : DivFrame para.diversityM 3
+		CyrTailDescender.rSideJut df.rightSB 0 (sw -- df.mvs)
+	derive-composites 'cyrl/emTail' 0x4CE 'cyrl/em' : do
+		local df : DivFrame para.diversityM 3
+		CyrTailDescender.rSideJut df.rightSB 0 (sw -- df.mvs)
+
+	alias 'grek/San' 0x3FA 'M.grekCapitalSan'
+	alias 'grek/san' 0x3FB 'smcpMWithDescender.grekSmallSan'
+
+	turned 'turnM' null 'M' HalfAdvance (CAP / 2)
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
+	create-glyph 'mathbb/M' 0x1D544 : glyph-proc
+		local df : DivFrame 1 3
+		local bbs : AdviceStroke 8
+		local bbd : BBD * [Math.min (3 / 4) (bbs / BBS)]
+		local kDiag : DiagCorDs CAP (df.rightSB - df.leftSB) bbd
+		local yTurnPos : CAP * 0.25
+
+		include : MarkSet.capital
+		include : VBar.l df.leftSB 0 CAP bbs
+		include : BBBarRight df.rightSB  0 CAP (bbd -- bbd) (bbs -- bbs)
+		local xLeft : df.leftSB + [HSwToV : 0.5 * bbs]
+		local xRight : df.rightSB - bbd - [HSwToV : 0.5 * bbs]
+		local xMiddle : mix xLeft xRight 0.5
+		include : HBar.t xLeft (xLeft + kDiag * bbd) CAP bbs
+		include : intersection
+			Rect CAP yTurnPos xLeft xRight
+			ExtLineCenter 2 bbs xRight CAP xMiddle yTurnPos
+		include : difference
+			intersection
+				Rect CAP yTurnPos xLeft xRight
+				union
+					ExtLineCenter 2 bbs xLeft CAP xMiddle yTurnPos
+					ExtLineCenter 2 bbs (xLeft + kDiag * bbd) CAP (xMiddle + kDiag * bbd) yTurnPos
+			spiro-outline
+				corner (Width * 4)  [mix CAP yTurnPos (-1)]
+				corner [mix xRight xMiddle (-1)] [mix CAP yTurnPos (-1)]
+				corner [mix xRight xMiddle (2)]  [mix CAP yTurnPos (2)]
+				corner (Width * 4)  [mix CAP yTurnPos (2)]

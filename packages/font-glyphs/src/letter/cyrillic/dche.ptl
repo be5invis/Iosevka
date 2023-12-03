@@ -1,0 +1,49 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Dche : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor ExtendBelowBaseAnchors
+	glyph-block-import Letter-Cyrillic-Che : CyrCheShape ItalicConfig BODY SERIFS
+	glyph-block-import Letter-Cyrillic-De : CyrDeBottom BottomExtension CyrDeItalicShapeT
+
+	create-glyph 'cyrl/Dche' 0x52C : glyph-proc
+		include : MarkSet.capital
+		include : ExtendBelowBaseAnchors BottomExtension
+		include : CyrCheShape [DivFrame 1] CAP [if SLAB 0.5 0.4] BODY.STRAIGHT
+			if SLAB SERIFS.TOP SERIFS.NONE
+		include : CyrDeBottom SB RightSB
+
+		local fine : AdviceStroke 3.5
+		include : dispiro
+			flat SB Stroke [widths.rhs fine]
+			curl (RightSB - [HSwToV Stroke]) (CAP - [if SLAB Stroke 0])
+
+	create-glyph 'cyrl/dche.upright' : glyph-proc
+		include : MarkSet.e
+		include : ExtendBelowBaseAnchors BottomExtension
+		include : CyrCheShape [DivFrame 1] XH [if SLAB 0.5 0.4] BODY.STRAIGHT
+			if SLAB SERIFS.TOP SERIFS.NONE
+		include : CyrDeBottom SB RightSB
+
+		local fine : AdviceStroke 3.5
+		include : dispiro
+			flat SB Stroke [widths.rhs fine]
+			curl (RightSB - [HSwToV Stroke]) (XH - [if SLAB Stroke 0])
+
+	foreach { suffix { body slabUpright slabUprightBGR slabItalic } } [pairs-of ItalicConfig] : do
+		create-glyph "cyrl/dche.italic.\(suffix)" : glyph-proc
+			define df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+
+			local subDf : df.slice 3 2 OX
+			include : CyrDeItalicShapeT dispiro subDf df.mvs
+			include : difference
+				CyrCheShape df XH 0.5 body [if SLAB slabItalic SERIFS.NONE] (sw -- df.mvs)
+				MaskLeft df.middle
+
+	select-variant 'cyrl/dche.italic' (follow -- 'cyrl/che')

@@ -1,0 +1,69 @@
+### Punctuation symbols
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Ascii-Marks : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Shared-Metrics : markExtend
+	glyph-block-import Mark-Above : aboveMarkTop aboveMarkMid RingShape
+	glyph-block-import Symbol-Punctuation-Quotes-And-Primes
+
+	define [MarkZoom w] : glyph-proc
+		include : Ungizmo
+		include : Translate (-w / 2) (-XH - AccentStackOffset)
+		include : Scale ((RightSB - SB) / (markExtend * 3))
+		include : Translate (w / 2) (XH + AccentStackOffset)
+		include : Regizmo
+
+	create-glyph 'asciiTilde.low' : composite-proc
+		refer-glyph 'asciiTilde.high'
+		ApparentTranslate 0 (SymbolMid - XH - AccentStackOffset)
+		MarkSet.plus
+	create-glyph 'asciiCaret.medium' : composite-proc
+		refer-glyph 'asciiCaret.high'
+		ApparentTranslate 0 ((SymbolMid - XH) / 2)
+		MarkSet.plus
+	create-glyph 'asciiCaret.low' : composite-proc
+		refer-glyph 'asciiCaret.high'
+		ApparentTranslate 0 (SymbolMid - XH)
+		MarkSet.plus
+	create-glyph 'caretAtBaseline' 0x2038 : composite-proc
+		refer-glyph 'asciiCaret.high'
+		ApparentTranslate 0 (0 - aboveMarkTop)
+		MarkSet.plus
+
+	select-variant 'asciiTilde' '~'
+	select-variant 'asciiCaret' '^'
+
+	create-glyph 'ringTilde' 0x2E1B : glyph-proc
+		include : refer-glyph 'asciiTilde.symbolMid'
+		include : RingShape Middle (PlusTop + AccentClearance)
+
+	WithDotVariants 'dotTilde' 0x2E1E : function [DrawAt kr ov] : composite-proc
+		refer-glyph 'asciiTilde.symbolMid'
+		DrawAt Middle PlusTop (DotRadius * kr * OperatorStroke / Stroke - ov)
+
+	turned 'tildeDot' 0x2E1F 'dotTilde' Middle SymbolMid
+
+	for-width-kinds WideWidth1
+		create-glyph [MangleName 'swungDash'] [MangleUnicode 0x2053] : glyph-proc
+			include [refer-glyph : MangleName 'swungDash.high'] AS_BASE ALSO_METRICS
+			include : ApparentTranslate 0 (SymbolMid - XH - AccentStackOffset)
+
+	create-glyph 'degree' 0xB0 : glyph-proc
+		include [refer-glyph 'markBaseSpace'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'ringAbove']
+		include : MarkZoom currentGlyph.advanceWidth
+
+	do "spacing centered marks"
+		define shift : ApparentTranslate 0 (SymbolMid - aboveMarkMid)
+		derive-composites 'mdfMidGrave'       0x2F4 'markBaseSpace' 'graveAbove'       shift
+		derive-composites 'mdfMidDoubleGrave' 0x2F5 'markBaseSpace' 'doubleGraveAbove' shift
+		derive-composites 'mdfMidDoubleAcute' 0x2F6 'markBaseSpace' 'doubleAcuteAbove' shift
+
+		derive-composites 'mdfShelf'     0x2FD 'markBaseSpace' 'shelfBelow'
+		derive-composites 'mdfOpenShelf' 0x2FE 'markBaseSpace' 'openShelfBelow'

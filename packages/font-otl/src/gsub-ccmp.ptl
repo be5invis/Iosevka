@@ -1,0 +1,333 @@
+$$include './meta/macros.ptl'
+
+import [UkMapToLookup UkMap2ToLookup] from "./table-util.mjs"
+import [Dotless TieMark TieGlyph OgonekTrY IsSuperscript IsSubscript LeaningMark LeaningMarkSpacer] from "@iosevka/glyph/relation"
+import as UnicodeKnowledge from "@iosevka/font-glyphs/unicode-knowledge"
+
+extern Set
+
+define-macro Ccmp-Group : syntax-rules
+	`[Ccmp-Group @description @body]
+		dirty `[$ExecCcmpGroup$ [function [export-lookup chain-rule] @[formOf body]]]
+
+export : define [buildCCMP gsub glyphStore markGlyphs] : begin
+	local anyMark : Array.from markGlyphs.all
+	local aboveMark : filterMarkByClass markGlyphs 'above'
+
+	define ccmp : gsub.addCommonFeature : gsub.createFeature 'ccmp'
+
+	define [$ExecCcmpGroup$ fn] : begin
+		local addedLookups {}
+		define [export-lookup lookup] : begin
+			ccmp.addLookup lookup
+			addedLookups.push lookup
+
+
+		local rec : gsub.beginBlock
+		define {chain-rule} : gsub.ChainRuleBuilder
+
+		fn export-lookup chain-rule
+
+		for [local j 1] (j < addedLookups.length) [inc j] : begin
+			gsub.setDependency addedLookups.(j - 1) addedLookups.(j)
+
+		gsub.endBlock rec
+
+	Ccmp-Group "Mark transforms" : begin
+
+		define groupGrekUpperTonos {}
+		define groupLF             {}
+		define dotlessFrom         {}
+		define dotlessTo           {}
+
+		foreach { gn g } [glyphStore.namedEntries] : if (gn.(0) !== "."): begin
+			if g.baseAnchors.lf             : groupLF.push gn
+			if g.baseAnchors.grekUpperTonos : groupGrekUpperTonos.push gn
+			if [Dotless.get g] : begin
+				dotlessFrom.push gn
+				dotlessTo.push   [Dotless.get g]
+
+		define [IotaLF]           : UkMapToLookup UnicodeKnowledge.iotaBelowToLfTf
+		define [GrekUpperTonosTf] : UkMapToLookup UnicodeKnowledge.upperGrekMarkToTonosTf
+
+		# Dotless transform
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_chaining'
+			.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'above']
+			.rules : list
+				chain-rule (dotlessFrom ~> dotlessTo) (aboveMark ~> null)
+				chain-rule groupGrekUpperTonos [GrekUpperTonosTf]
+
+		# Iota transform
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_chaining'
+			.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'below']
+			.rules : list
+				chain-rule groupLF [IotaLF]
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_ligature'
+			.substitutions : UkMap2ToLookup UnicodeKnowledge.markCompositionTf
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_multiple'
+			.substitutions : object
+				'parenAbove' { 'leftParenAbove' 'rightParenAbove' }
+				'doubleParenAbove' { 'leftDoubleParenAbove' 'rightDoubleParenAbove' }
+				'brackAbove' { 'leftBrackAbove' 'rightBrackAbove' }
+				'parenBelow' { 'leftParenBelow' 'rightParenBelow' }
+
+	Ccmp-Group "Tie Mark Transform" : begin
+		define TieMarkFrom         {}
+		define TieMarkTo           {}
+		define TieGlyphs           {}
+
+		foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== ".") : begin
+			if [TieGlyph.get g] : TieGlyphs.push gid
+			if [TieMark.get g] : begin
+				TieMarkFrom.push gid
+				TieMarkTo.push   [TieMark.get g]
+
+		define lookupTieMarkLigature : gsub.createLookup : object
+			.type 'gsub_ligature'
+			.substitutions : {}.concat
+				TieMarkFrom.map : lambda [gnFrom idx]
+					object [from {'cgj' gnFrom}] [to TieMarkTo.(idx)]
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_chaining'
+			.rules : list : object
+				match {[TieGlyphs.concat TieMarkTo] {'cgj'} TieMarkFrom}
+				inputBegins 1
+				inputEnds 3
+				apply {{.at 1 .lookup lookupTieMarkLigature}}
+
+	Ccmp-Group "Special dot-above transformation" : begin
+		# b-dot, d-dot, h-dot, k-dot
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_ligature'
+			.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'above']
+			.substitutions : list
+				object [from : list "b" "dotAbove"] [to "bDot"]
+				object [from : list "d" "dotAbove"] [to "dDot"]
+				object [from : list "h" "dotAbove"] [to "hDot"]
+				object [from : list "k" "dotAbove"] [to "kDot"]
+
+	Ccmp-Group "Leaning Mark Trasnform" : begin
+		define LeaningAnchorMap : list
+			list 'above' 'leaningAbove'
+			list 'below' 'leaningBelow'
+
+		foreach { mkCenter mkLeaning } [items-of LeaningAnchorMap] : begin
+			local basesToConsider {}
+			local markFrom        {}
+			local markTo          {}
+			local markSpacer      {}
+			local splitMapping    {}
+
+			foreach { gn g } [glyphStore.namedEntries] : if (gn.(0) !== ".") : begin
+				if (![markGlyphs.all.has gn] && g.baseAnchors.(mkLeaning)) : basesToConsider.push gn
+				if (g.markAnchors.(mkCenter) && [LeaningMark.get g] && [LeaningMarkSpacer.get g]) : begin
+					markFrom.push       gn
+					markTo.push         [LeaningMark.get g]
+					markSpacer.push     [LeaningMarkSpacer.get g]
+					splitMapping.push   { gn {[LeaningMarkSpacer.get g] [LeaningMark.get g]} }
+
+			define lookupTurnMarkIntoLeaningAndSpacer : gsub.createLookup : object
+				.type 'gsub_multiple'
+				.substitutions : Object.fromEntries splitMapping
+
+			export-lookup : gsub.createLookup : object
+				.type 'gsub_chaining'
+				.ignoreGlyphs [filterMarkByClassNegated markGlyphs mkCenter]
+				.rules : list
+					object
+						.match         { [basesToConsider.concat markSpacer] markFrom }
+						.inputBegins   1
+						.inputEnds     2
+						.apply         {{.at 1 .lookup lookupTurnMarkIntoLeaningAndSpacer}}
+
+
+
+	Ccmp-Group "Rhotic Hook Transform" : begin
+		define superscripts        {}
+		define subscripts          {}
+
+		foreach { gn g } [glyphStore.namedEntries] : if (gn.(0) !== ".") : begin
+			if [IsSuperscript.get g] : superscripts.push gn
+			if [IsSubscript.get g]   : subscripts.push gn
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_chaining'
+			.ignoreGlyphs anyMark
+			.rules : list
+				chain-rule superscripts ({"rhoticHook"} ~> {"rhoticHook/sup"})
+				chain-rule subscripts   ({"rhoticHook"} ~> {"rhoticHook/sub"})
+
+	Ccmp-Group "Tone Transform" : begin
+		define [ToneToToneStart toneEnd] : begin
+			local f {}
+			local e {}
+			foreach toneStart [range 4 downtill 0] : begin
+				f.push ('tone' + toneStart)
+				e.push ('toneStart' + toneStart + toneEnd)
+			return (f ~> e)
+
+		define [ToneToToneEnd toneStart] : begin
+			local f {}
+			local e {}
+			foreach toneEnd [range 4 downtill 0] : begin
+				f.push ('tone' + toneEnd)
+				e.push ('toneEnd' + toneStart + toneEnd)
+			return (f ~> e)
+
+		define [ToneStartOrMidAt y]: begin
+			local f {}
+			foreach toneEnd [range 4 downtill 0] : begin
+				f.push ('toneStart' + y + toneEnd)
+			foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+				f.push ('toneMid' + toneStart + y + toneEnd)
+			return f
+
+		define [ToneStartToToneMid toneStart] : begin
+			local f {}
+			local e {}
+			foreach toneMid [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+				f.push ('toneStart' + toneMid + toneEnd)
+				e.push ('toneMid' + toneStart + toneMid + toneEnd)
+			return (f ~> e)
+
+		define [ToneSandhiToToneStart toneEnd] : begin
+			local f {}
+			local e {}
+			foreach toneStart [range 4 downtill 0] : begin
+				f.push ('toneSandhi' + toneStart)
+				e.push ('toneSandhiStart' + toneStart + toneEnd)
+			return (f ~> e)
+
+		define [ToneSandhiToToneEnd toneStart] : begin
+			local f {}
+			local e {}
+			foreach toneEnd [range 4 downtill 0] : begin
+				f.push ('toneSandhi' + toneEnd)
+				e.push ('toneSandhiEnd' + toneStart + toneEnd)
+			return (f ~> e)
+
+		define [ToneSandhiStartOrMidAt y]: begin
+			local f {}
+			foreach toneEnd [range 4 downtill 0] : begin
+				f.push ('toneSandhiStart' + y + toneEnd)
+			foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+				f.push ('toneSandhiMid' + toneStart + y + toneEnd)
+			return f
+
+		define [ToneSandhiStartToToneMid toneStart] : begin
+			local f {}
+			local e {}
+			foreach toneMid [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+				f.push ('toneSandhiStart' + toneMid + toneEnd)
+				e.push ('toneSandhiMid' + toneStart + toneMid + toneEnd)
+			return (f ~> e)
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_chaining'
+			.rules : list
+				chain-rule [ToneToToneStart 0] {'tone0'}
+				chain-rule [ToneToToneStart 1] {'tone1'}
+				chain-rule [ToneToToneStart 2] {'tone2'}
+				chain-rule [ToneToToneStart 3] {'tone3'}
+				chain-rule [ToneToToneStart 4] {'tone4'}
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_chaining'
+			.rules : list
+				chain-rule [ToneStartOrMidAt 0] [ToneStartToToneMid 0]
+				chain-rule [ToneStartOrMidAt 1] [ToneStartToToneMid 1]
+				chain-rule [ToneStartOrMidAt 2] [ToneStartToToneMid 2]
+				chain-rule [ToneStartOrMidAt 3] [ToneStartToToneMid 3]
+				chain-rule [ToneStartOrMidAt 4] [ToneStartToToneMid 4]
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_chaining'
+			.rules : list
+				chain-rule [ToneStartOrMidAt 0] [ToneToToneEnd 0]
+				chain-rule [ToneStartOrMidAt 1] [ToneToToneEnd 1]
+				chain-rule [ToneStartOrMidAt 2] [ToneToToneEnd 2]
+				chain-rule [ToneStartOrMidAt 3] [ToneToToneEnd 3]
+				chain-rule [ToneStartOrMidAt 4] [ToneToToneEnd 4]
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_chaining'
+			.rules : list
+				chain-rule [ToneSandhiToToneStart 0] {'toneSandhi0'}
+				chain-rule [ToneSandhiToToneStart 1] {'toneSandhi1'}
+				chain-rule [ToneSandhiToToneStart 2] {'toneSandhi2'}
+				chain-rule [ToneSandhiToToneStart 3] {'toneSandhi3'}
+				chain-rule [ToneSandhiToToneStart 4] {'toneSandhi4'}
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_chaining'
+			.rules : list
+				chain-rule [ToneSandhiStartOrMidAt 0] [ToneSandhiStartToToneMid 0]
+				chain-rule [ToneSandhiStartOrMidAt 1] [ToneSandhiStartToToneMid 1]
+				chain-rule [ToneSandhiStartOrMidAt 2] [ToneSandhiStartToToneMid 2]
+				chain-rule [ToneSandhiStartOrMidAt 3] [ToneSandhiStartToToneMid 3]
+				chain-rule [ToneSandhiStartOrMidAt 4] [ToneSandhiStartToToneMid 4]
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_chaining'
+			.rules : list
+				chain-rule [ToneSandhiStartOrMidAt 0] [ToneSandhiToToneEnd 0]
+				chain-rule [ToneSandhiStartOrMidAt 1] [ToneSandhiToToneEnd 1]
+				chain-rule [ToneSandhiStartOrMidAt 2] [ToneSandhiToToneEnd 2]
+				chain-rule [ToneSandhiStartOrMidAt 3] [ToneSandhiToToneEnd 3]
+				chain-rule [ToneSandhiStartOrMidAt 4] [ToneSandhiToToneEnd 4]
+
+	return ccmp
+
+export : define [buildCCMPPostCvSs gsub ccmp glyphStore markGlyphs] : begin
+	local anyMark : Array.from markGlyphs.all
+	local rec : gsub.beginBlock
+
+	define triggerGlyphs_Normal { }
+	define triggerGlyphs_Y      { }
+	foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== "."): begin
+		if g.baseAnchors.trailing : piecewise
+			[OgonekTrY.get g] : triggerGlyphs_Y.push      gid
+			true              : triggerGlyphs_Normal.push gid
+
+	define ogonekSpacerNormal : gsub.createLookup : object
+		.type 'gsub_multiple'
+		.substitutions UnicodeKnowledge.ogonekBelowToTRTf
+	define ogonekSpacerY : gsub.createLookup : object
+		.type 'gsub_single'
+		.substitutions UnicodeKnowledge.ogonekBelowToTRTf_Y
+
+	ccmp.addLookup : gsub.createLookup : object
+		.type 'gsub_chaining'
+		.ignoreGlyphs [filterMarkByClassNegated markGlyphs 'below']
+		.rules : list
+			object
+				.match { triggerGlyphs_Y [Object.keys UnicodeKnowledge.ogonekBelowToTRTf_Y] }
+				.inputBegins   1
+				.inputEnds     2
+				.apply         {{.at 1 .lookup ogonekSpacerY}}
+			object
+				.match { triggerGlyphs_Normal [Object.keys UnicodeKnowledge.ogonekBelowToTRTf] }
+				.inputBegins   1
+				.inputEnds     2
+				.apply         {{.at 1 .lookup ogonekSpacerNormal}}
+
+	gsub.endBlock rec
+
+define [objectIsNotEmpty obj] : obj && [Object.keys obj].length
+
+define [filterMarkByClass markGlyphs c] : begin
+	local marks {}
+	foreach { gn m } markGlyphs.markAttachClassDef : if (m == c) : marks.push gn
+	return marks
+
+define [filterMarkByClassNegated markGlyphs c] : begin
+	local marks {}
+	foreach { gn m } markGlyphs.markAttachClassDef : if (m != c) : marks.push gn
+	return marks

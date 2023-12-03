@@ -1,0 +1,174 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Symbol-Geometric-Stars : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+	# Pentagram is not defined here
+	define StarCfg : list
+		* { .name 'sixPointedBlackStar'                   .unicode 0x2736 .sides 6  .skip 1 .pMag 1.05 .phase 0     .pShrink 0.4  }
+		* { .name 'eightPointedBlackStar'                 .unicode 0x2734 .sides 8  .skip 1 .pMag 1.15 .phase 0     .pShrink 0.25 }
+		* { .name 'eightPointedRectilinearBlackStar'      .unicode 0x2737 .sides 8  .skip 1 .pMag 1.05 .phase (1/8) .pShrink 0.4  }
+		* { .name 'heavyEightPointedRectilinearBlackStar' .unicode 0x2738 .sides 8  .skip 1 .pMag 1.05 .phase (1/8) .pShrink 0.5  }
+		* { .name 'twelvePointedBlackStar'                .unicode 0x2739 .sides 12 .skip 1 .pMag 1.05 .phase 0     .pShrink 0.5  }
+	foreach [[object sides skip name unicode pMag phase pShrink] : items-of StarCfg] : do
+		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
+			set-width Geom.Width
+			local corners {}
+			foreach [j : range 0 (2 * sides)] : begin
+				local angle : Math.PI * (j * skip / sides + phase)
+				local mag : [if (j % 2) pShrink 1] * pMag
+				corners.push : corner
+					Geom.MidX + Geom.Size * mag * [Math.sin angle]
+					Geom.MidY + Geom.Size * mag * [Math.cos angle]
+			include : spiro-outline corners
+
+	define extThinSw    : UnicodeWeightGrade 1    Geom.Scalar
+	define extLightSw   : UnicodeWeightGrade 2    Geom.Scalar
+	define lightSw      : UnicodeWeightGrade 3    Geom.Scalar
+	define semiLightSw  : UnicodeWeightGrade 3.5  Geom.Scalar
+	define normalSw     : UnicodeWeightGrade 4    Geom.Scalar
+	define mediumSw     : UnicodeWeightGrade 5    Geom.Scalar
+	define semiBoldSw   : UnicodeWeightGrade 6    Geom.Scalar
+	define boldSw       : UnicodeWeightGrade 7    Geom.Scalar
+	define exBoldSw     : UnicodeWeightGrade 8    Geom.Scalar
+	define heavySw      : UnicodeWeightGrade 9    Geom.Scalar
+	define veryHeavySw  : UnicodeWeightGrade 10   Geom.Scalar
+	define exHeavySw    : UnicodeWeightGrade 11   Geom.Scalar
+
+	define AsteriskCfg : list
+		* { .name 'saltire'               .unicode 0x2613  .sides  4 .phase (1/8) .sw normalSw                }
+
+		* { .name 'heavyGreekCross'       .unicode 0x271A  .sides  4 .phase 0     .sw heavySw                 }
+		* { .name 'heavyAsterisk'         .unicode 0x2731  .sides  6 .phase 0     .sw heavySw     .cThin 0.9  }
+		* { .name 'eightSpokedAsterisk'   .unicode 0x2733  .sides  8 .phase 0     .sw normalSw    .cThin 0.75 }
+		* { .name 'sixteenSpokedAsterisk' .unicode 0x273A  .sides 16 .phase 0     .sw semiLightSw .cThin 0.75 }
+		* { .name 'crossMark'             .unicode 0x274C  .sides  4 .phase (1/8) .sw heavySw     .pMag  [GeometricSizes Geom].Large.size }
+		* { .name 'lightVertBar'          .unicode 0x2758  .sides  2 .phase 0     .sw lightSw                 }
+		* { .name 'mediumVertBar'         .unicode 0x2759  .sides  2 .phase 0     .sw mediumSw                }
+		* { .name 'heavyVertBar '         .unicode 0x275A  .sides  2 .phase 0     .sw heavySw                 }
+
+		* { .name 'thinGreekCross'        .unicode 0x1F7A1 .sides  4 .phase 0     .sw extLightSw              }
+		* { .name 'lightGreekCross'       .unicode 0x1F7A2 .sides  4 .phase 0     .sw lightSw                 }
+		* { .name 'mediumGreekCross'      .unicode 0x1F7A3 .sides  4 .phase 0     .sw mediumSw                }
+		* { .name 'boldGreekCross'        .unicode 0x1F7A4 .sides  4 .phase 0     .sw boldSw                  }
+		* { .name 'exBoldGreekCross'      .unicode 0x1F7A5 .sides  4 .phase 0     .sw exBoldSw                }
+		* { .name 'veryHeavyGreekCross'   .unicode 0x1F7A6 .sides  4 .phase 0     .sw veryHeavySw             }
+		* { .name 'exHeavyGreekCross'     .unicode 0x1F7A7 .sides  4 .phase 0     .sw exHeavySw               }
+		* { .name 'thinSaltire'           .unicode 0x1F7A8 .sides  4 .phase (1/8) .sw extLightSw              }
+		* { .name 'lightSaltire'          .unicode 0x1F7A9 .sides  4 .phase (1/8) .sw lightSw                 }
+		* { .name 'mediumSaltire'         .unicode 0x1F7AA .sides  4 .phase (1/8) .sw mediumSw                }
+		* { .name 'boldSaltire'           .unicode 0x1F7AB .sides  4 .phase (1/8) .sw boldSw                  }
+		* { .name 'heavySaltire'          .unicode 0x1F7AC .sides  4 .phase (1/8) .sw heavySw                 }
+		* { .name 'veryHeavySaltire'      .unicode 0x1F7AD .sides  4 .phase (1/8) .sw veryHeavySw             }
+		* { .name 'exHeavySaltire'        .unicode 0x1F7AE .sides  4 .phase (1/8) .sw exHeavySw               }
+		* { .name 'lightAsterisk5'        .unicode 0x1F7AF .sides  5 .phase 0     .sw lightSw                 }
+		* { .name 'mediumAsterisk5'       .unicode 0x1F7B0 .sides  5 .phase 0     .sw mediumSw                }
+		* { .name 'boldAsterisk5'         .unicode 0x1F7B1 .sides  5 .phase 0     .sw boldSw                  }
+		* { .name 'heavyAsterisk5'        .unicode 0x1F7B2 .sides  5 .phase 0     .sw heavySw                 }
+		* { .name 'veryHeavyAsterisk5'    .unicode 0x1F7B3 .sides  5 .phase 0     .sw veryHeavySw             }
+		* { .name 'exHeavyAsterisk5'      .unicode 0x1F7B4 .sides  5 .phase 0     .sw exHeavySw               }
+		* { .name 'lightAsterisk6'        .unicode 0x1F7B5 .sides  6 .phase 0     .sw lightSw     .cThin 0.9  }
+		* { .name 'mediumAsterisk6'       .unicode 0x1F7B6 .sides  6 .phase 0     .sw mediumSw    .cThin 0.9  }
+		* { .name 'boldAsterisk6'         .unicode 0x1F7B7 .sides  6 .phase 0     .sw boldSw      .cThin 0.9  }
+		* { .name 'heavyAsterisk6'        .unicode 0x1F7B8 .sides  6 .phase 0     .sw heavySw     .cThin 0.9  }
+		* { .name 'veryHeavyAsterisk6'    .unicode 0x1F7B9 .sides  6 .phase 0     .sw veryHeavySw .cThin 0.9  }
+		* { .name 'exHeavyAsterisk6'      .unicode 0x1F7BA .sides  6 .phase 0     .sw exHeavySw   .cThin 0.9  }
+		* { .name 'lightAsterisk8'        .unicode 0x1F7BB .sides  8 .phase 0     .sw lightSw     .cThin 0.75 }
+		* { .name 'mediumAsterisk8'       .unicode 0x1F7BC .sides  8 .phase 0     .sw mediumSw    .cThin 0.75 }
+		* { .name 'boldAsterisk8'         .unicode 0x1F7BD .sides  8 .phase 0     .sw boldSw      .cThin 0.75 }
+		* { .name 'heavyAsterisk8'        .unicode 0x1F7BE .sides  8 .phase 0     .sw exBoldSw    .cThin 0.75 }
+		* { .name 'veryHeavyAsterisk8'    .unicode 0x1F7BF .sides  8 .phase 0     .sw heavySw     .cThin 0.75 }
+
+	foreach [[object sides name unicode phase sw cThin pMag] : items-of AsteriskCfg] : do
+		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
+			set-width Geom.Width
+			foreach [j : range 0 sides] : begin
+				local angle : 2 * Math.PI * (j / sides + phase)
+				local mag : fallback pMag 1
+				include : dispiro
+					corner Geom.MidX Geom.MidY [widths.center (sw * [fallback cThin 1])]
+					corner
+						Geom.MidX + Geom.Size * mag * [Math.sin (-angle)]
+						Geom.MidY + Geom.Size * mag * [Math.cos (-angle)]
+						widths.center sw
+
+	# Dingbat
+	create-glyph [MangleName "crystalFlower"] [MangleUnicode 0xEF10] : glyph-proc
+		set-width Geom.Width
+
+		define [createPetals] : with-params [fnSelect fill kSw rotate expansion sw size] : glyph-proc
+			local sizeIn  : size * 0.45
+			local sizeExt : size * 1.0 - O
+			foreach [j : range 0 6] : if [fnSelect j] : begin
+				local anglePre  : 2 * Math.PI * ((j - expansion + rotate) / 6)
+				local angle     : 2 * Math.PI * ((j             + rotate) / 6)
+				local anglePost : 2 * Math.PI * ((j + expansion + rotate) / 6)
+
+				local z1x : sizeIn  * [Math.cos anglePre]
+				local z1y : sizeIn  * [Math.sin anglePre]
+				local z2x : sizeExt * [Math.cos angle]
+				local z2y : sizeExt * [Math.sin angle]
+				local z3x : sizeIn  * [Math.cos anglePost]
+				local z3y : sizeIn  * [Math.sin anglePost]
+
+				local outline : spiro-outline
+					corner 0 0
+					corner z3x z3y
+					corner z2x z2y
+					corner z1x z1y
+
+				if fill
+				: then : include outline
+				: else : include : intersection outline : union
+					ExtLineLhs 1 (kSw * sw) 0   0   z1x z1y
+					ExtLineLhs 1 sw         z1x z1y z2x z2y
+					ExtLineLhs 1 sw         z2x z2y z3x z3y
+					ExtLineLhs 1 (kSw * sw) z3x z3y 0   0
+
+		define [makeOverlay gap shape] : glyph-proc
+			foreach [j : range 0 6] : begin
+				local angle : 2 * Math.PI * (j / 6)
+				local tx : gap * [Math.cos angle]
+				local ty : gap * [Math.sin angle]
+				include : with-transform [ApparentTranslate tx ty] shape
+
+		local swOuter : AdviceStroke 10 [Math.sqrt Geom.Scalar]
+		local swInner : AdviceStroke 16 [Math.sqrt Geom.Scalar]
+		local gap : Math.min [AdviceStroke 12] (Geom.Size / 12)
+		include : union
+			createPetals
+				fnSelect  -- [function x : x % 2 == 0]
+				rotate    -- (-0.5)
+				expansion -- 0.6
+				fill      -- false
+				kSw       -- 1
+				sw        -- swInner
+				size      -- (0.625 * Geom.Size + swInner)
+			difference
+				createPetals
+					fnSelect  -- [function x true]
+					rotate    -- 0
+					expansion -- 0.5
+					fill      -- false
+					kSw       -- 0.5
+					sw        -- swOuter
+					size      -- Geom.Size
+				makeOverlay gap : createPetals
+					fnSelect  -- [function x : x % 2 == 0]
+					rotate    -- (-0.5)
+					expansion -- 0.6
+					fill      -- true
+					kSw       -- 1
+					sw        -- (swInner + gap)
+					size      -- (0.625 * Geom.Size + swInner)
+
+		include : ApparentTranslate Geom.MidX Geom.MidY

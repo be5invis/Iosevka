@@ -1,0 +1,215 @@
+$$include '../../meta/macros.ptl'
+
+import [mix fallback SuffixCfg] from "@iosevka/util"
+
+import [maskBits] from "@iosevka/util/mask-bit"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-Eszet : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth PalatalHook CyrDescender SerifFrame
+	glyph-block-import Letter-Latin-S : AdviceSArchDepth
+	glyph-block-import Letter-Latin-Lower-F : fbar
+
+	define NO-TAIL    0
+	define DESCENDING 1
+	define TAILED     2
+
+	define SERIF-NONE    0
+	define SERIF-BOT     1
+	define SERIF-MID     2
+	define SERIF-MID-XH  4
+
+	define SERIF-DUAL    : SERIF-BOT + SERIF-MID
+	define SERIF-DUAL-XH : SERIF-BOT + SERIF-MID-XH
+
+	define [EszetSerifs df fTraditional slab] : glyph-proc
+		local sf : SerifFrame.fromDf [DivFrame 1] fbar 0
+		local lb : if fTraditional sf.lb.full sf.lb.outer
+		if [maskBits slab SERIF-BOT] : include lb
+		if [maskBits slab SERIF-MID] : include sf.lt.outer
+
+		local sfXH : SerifFrame.fromDf [DivFrame 1] XH 0
+		if [maskBits slab SERIF-MID-XH] : include sfXH.lt.outer
+
+	define [Traditional fFlathook] : function [slab tail] : glyph-proc
+		include : MarkSet.bp
+		local l : SB * 1
+		local xHook : [mix SB RightSB 0.75] + [HSwToV HalfStroke]
+		local hd : FlatHookDepth [DivFrame 1]
+		if fFlathook
+		: then : include : dispiro
+			flat xHook Ascender [widths.lhs]
+			curl (l + hd.x) Ascender
+			archv
+			flat l (Ascender - hd.y)
+			curl l 0 [heading Downward]
+		: else : include : dispiro
+			widths.lhs
+			g4 xHook (Ascender - Hook)
+			hookstart (Ascender - O)
+			flat l XH
+			curl l 0 [heading Downward]
+		local t : mix 0 Ascender 0.7
+		local tm : [mix Descender t 0.625] + HalfStroke
+		local tl : [mix l RightSB 0.35] + [HSwToV HalfStroke]
+		include : HBar.t (l + 1) (RightSB - HalfStroke * 1.2 - OX) t
+		include : dispiro
+			widths.rhs
+			flat tl tm [heading Rightward]
+			curl (tl + 1) tm [heading Rightward]
+			g2 (RightSB - OX * 1.5) [mix Descender tm 0.70]
+			g2 (RightSB - OX * 1.5) [mix Descender tm 0.67]
+			alsoThru 0.5 0.75
+			g4 ([mix SB RightSB 0.35] + [if tail 0.625 0] * [HSwToV Stroke]) Descender
+		include : dispiro
+			widths.center (Stroke * 1.1)
+			corner tl (tm - Stroke) [heading Upward]
+			corner (RightSB - HalfStroke * 1.2 - OX) t [heading Upward]
+
+		include : EszetSerifs [DivFrame 1] true slab
+		include : match tail
+			[Just DESCENDING] : VBar.l l Descender 0
+			[Just TAILED] : PalatalHook.lExt l 0
+			__ : glyph-proc
+
+
+	define [Sulzbacher slab tail] : glyph-proc
+		define ymiddle : [mix 0 Ascender 0.5] - HalfStroke
+		define xFinal : Math.max
+			mix (SB + [HSwToV Stroke]) RightSB 0.1
+			mix SB RightSB 0.3
+		define xMiddle : Math.max xFinal (SB + [HSwToV : 1.2 * Stroke]) (RightSB - ymiddle / 2 - Stroke * 0.75)
+		define xMiddleBot : Math.max xMiddle (xFinal + 0.01 + TanSlope * Stroke)
+
+		include : MarkSet.b
+		include : dispiro
+			widths.rhs
+			flat SB 0 [heading Upward]
+			curl SB XH
+			arcvh
+			g4 (Middle - CorrectionOMidS) (Ascender - O)
+			archv
+			g4 (RightSB + O * 2) [YSmoothMidR ymiddle Ascender]
+			g4.left.end xMiddle ymiddle [heading Leftward]
+		include : dispiro
+			widths.rhs
+			g4.right.start xMiddle (ymiddle + Stroke) [heading Rightward]
+			archv
+			g4   (RightSB - O) [YSmoothMidR (ymiddle + Stroke) 0]
+			arcvh
+			flat xMiddleBot 0 [heading Leftward]
+			curl xFinal 0 [heading Leftward]
+
+		include : EszetSerifs [DivFrame 1] false slab
+		include : match tail
+			[Just DESCENDING] : VBar.l SB Descender 0
+			[Just TAILED] : PalatalHook.lExt SB 0
+			__ : glyph-proc
+
+
+	define [LongSSLig slab tail] : glyph-proc
+		include : MarkSet.b
+
+		define swOuter : AdviceStroke2 2 3 Ascender
+		define strokeCoeff : StrokeWidthBlend 0 1 swInner
+		define sEndX : Math.max
+			mix (SB + [HSwToV Stroke]) RightSB 0.1
+			mix SB RightSB 0.3
+		define swInner : AdviceStroke2 2.5 3 Ascender
+		define ess: swInner * EssLower / Stroke
+		define sTurnX : Math.max sEndX [mix SB RightSB 0.3]
+		define sBotX : Math.max (sEndX + 1) [mix sEndX RightSB 0.30]
+		define sTopX : sTurnX + (RightSB - sBotX)
+
+		define sTopHookX : sTopX + [HSwToV : 0.5 * swInner]
+		define archDepthATop : ArchDepthAOf (ArchDepth * (sTopHookX - SB - swInner * 0.5) / (RightSB - SB)) (Width - (RightSB - sTopHookX))
+		define archDepthBTop : ArchDepthBOf (ArchDepth * (sTopHookX - SB - swInner * 0.5) / (RightSB - SB)) (Width - (RightSB - sTopHookX))
+		define innerSmoothB : 1 * archDepthBTop # ArchDepthBOf (0.5 * swInner + (widthInner / Width) * [AdviceSArchDepth XH (-1) swInner]) widthInner
+
+
+		include : dispiro
+			widths.rhs swOuter
+			flat SB 0 [heading Upward]
+			curl SB (Ascender - archDepthATop)
+			arcvh
+			g4 ([mix SB sTopHookX 0.52] - CorrectionOMidX * swOuter) (Ascender - O) [widths.rhs : mix swOuter swInner 0.5]
+			archv
+			g4.down.mid sTopHookX (Ascender - archDepthBTop + TanSlope * swInner) [widths.rhs.heading swInner Downward]
+			alsoThru.g2 0.5 0.50 [widths.center swInner]
+			g4 sTurnX [mix innerSmoothB (Ascender - archDepthBTop) 0.5] [widths.lhs.heading swInner Downward]
+			alsoThru.g2 0.5 0.50 [widths.center swInner]
+			g4 (RightSB - OX) (innerSmoothB - 2 * TanSlope * swInner) [widths.rhs.heading swInner Downward]
+			arcvh
+			flat ([Math.max (sEndX + 0.1 + TanSlope * swInner) : Math.min (RightSB - innerSmoothB) [mix sEndX RightSB 0.375]] + CorrectionOMidX * swInner / 2 + TanSlope * swInner ) 0
+			curl sEndX 0 [heading Leftward]
+
+		include : EszetSerifs [DivFrame 1] false slab
+		include : match tail
+			[Just DESCENDING] : VBar.l SB Descender 0 swOuter
+			[Just TAILED] : PalatalHook.lExt SB 0 (sw -- swOuter)
+			__ : no-shape
+
+	define EszetConfig : SuffixCfg.weave
+		object # body
+			traditional           : Traditional false
+			traditionalFlatHook   : Traditional true
+			sulzbacher              Sulzbacher
+			longSSLig               LongSSLig
+		object # terminal
+			''                      NO-TAIL
+			'descending'            DESCENDING
+			'tailed'                TAILED
+		object # serifs
+			serifless               SERIF-NONE
+			bottomSerifed           SERIF-BOT
+			middleSerifed           SERIF-MID
+			dualSerifed             SERIF-DUAL
+			middleSerifedXH         SERIF-MID-XH
+			dualSerifedXH           SERIF-DUAL-XH
+
+	foreach { suffix { Base tail serif } } [pairs-of EszetConfig] : do
+		create-glyph "eszet.\(suffix)" : Base serif tail
+
+	select-variant 'eszet' 0xDF
+
+glyph-block Letter-Latin-Upper-Eszet : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+
+	create-glyph 'Eszet' 0x1E9E : glyph-proc
+		include : MarkSet.capital
+
+		define ymiddle : [mix 0 CAP 0.5] - HalfStroke
+		define ymiddleCap : [mix 0 CAP 0.54] - HalfStroke
+		define xFinal : Math.max
+			mix (SB + [HSwToV Stroke]) RightSB 0.1
+			mix SB RightSB 0.3
+		define xMiddle : Math.max xFinal (SB + [HSwToV : 1.2 * Stroke]) (RightSB - ymiddle / 2 - Stroke * 0.75)
+		define xMiddleBot : Math.max xMiddle (xFinal + 0.01 + TanSlope * Stroke)
+		define rightTopX : RightSB + O
+
+		include : dispiro
+			widths.lhs
+			flat rightTopX CAP [heading Leftward]
+			curl Middle CAP
+			archv
+			flat SB XH
+			curl SB 0 [heading Downward]
+		include : dispiro
+			widths.rhs
+			g4   xMiddle (ymiddleCap + Stroke) [heading Rightward]
+			archv
+			g4   (RightSB - O * 2) [YSmoothMidR (ymiddleCap + Stroke) 0]
+			arcvh
+			flat xMiddleBot 0
+			curl xFinal 0 [heading Leftward]
+		include : dispiro
+			widths.rhs
+			g4 rightTopX (CAP - Stroke)
+			g4 xMiddle (ymiddleCap + Stroke) [widths.lhs Stroke]
+
+		if SLAB : include : HSerif.lb SB 0 SideJut

@@ -1,0 +1,111 @@
+$$include '../meta/macros.ptl'
+
+import [mix fallback SuffixCfg] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Digits-Seven : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
+
+	define SevenXLeft : mix SB RightSB 0.28
+	define [StraightBody top] : union [HBar.t SB RightSB top] : intersection
+		Rect (top - Stroke) 0 SB RightSB
+		dispiro
+			widths.rhs
+			corner RightSB (top - Stroke)
+			corner [mix RightSB (SevenXLeft + [HSwToV : 0.75 * Stroke]) 2] [mix (top - Stroke) 0 2]
+
+	define SevenXLeftBend : mix SB RightSB 0.38
+	define [BendBody top] : union [HBar.t SB RightSB top] : intersection
+		MaskBelow (top - Stroke)
+		MaskAbove 0
+		dispiro
+			widths.rhs
+			g4 RightSB (top - Stroke)
+			g4.down.mid (SevenXLeftBend + [HSwToV : 0.6 * Stroke]) 0 [heading Downward]
+			g4 RightSB (-top + Stroke)
+
+	define [CurlyBody top] : union [HBar.t SB (RightSB - HalfStroke) top] : intersection
+		MaskBelow top
+		MaskAbove 0
+		dispiro
+			g4.down.start RightSB top [widths.rhs.heading Stroke Downward]
+			alsoThru.g2 0.5 0.5
+			g4.down.mid (SevenXLeftBend + [HSwToV : 0.6 * Stroke]) 0 [heading Downward]
+			alsoThru.g2 0.5 0.5
+			g4.down.end RightSB (-top) [widths.rhs.heading Stroke Downward]
+
+	define [StartSerif top] : VSerif.dl (SB + (OX - O)) top VJut
+	define [StartSerifThick top] : VSerif.dl (SB + (OX - O)) top VJut [AdviceStroke 2.75]
+
+	define [Crossbar top] : glyph-proc
+		local m : mix SevenXLeft (RightSB - [HSwToV HalfStroke]) 0.5
+		include : HBar.m
+			m - [HSwToV : 0.25 * Stroke] - LongJut * 0.8
+			m + [HSwToV : 0.25 * Stroke] + LongJut * 0.7
+			mix 0 (top - Stroke * 0.25) 0.5
+
+	define [BendCrossbar top] : glyph-proc
+		local m : [mix SevenXLeftBend (RightSB - [HSwToV HalfStroke]) 0.25] + 0.125 * Stroke
+		include : HBar.m
+			m - [HSwToV : 0.25 * Stroke] - LongJut * 0.8
+			m + [HSwToV : 0.25 * Stroke] + LongJut * 0.7
+			mix 0 (top - Stroke * 0.25) 0.5
+
+	define [CurlyCrossbar top] : glyph-proc
+		local m : mix SevenXLeftBend (RightSB - [HSwToV HalfStroke]) 0.375
+		include : HBar.m
+			m - [HSwToV : 0.25 * Stroke] - LongJut * 0.8
+			m + [HSwToV : 0.25 * Stroke] + LongJut * 0.7
+			mix 0 (top - Stroke * 0.25) 0.5
+
+	local SevenConfig : SuffixCfg.weave
+		object # body
+			straight              StraightBody
+			bend                  BendBody
+			curly                 CurlyBody
+		object # serif
+			serifless             nothing
+			serifed               StartSerif
+		function [body] : object # crossbar
+			""                    nothing
+			crossbar : match body
+				[Just "straight"] Crossbar
+				[Just "bend"]     BendCrossbar
+				[Just "curly"]    CurlyCrossbar
+
+	foreach { suffix { Body Serif Crossbar } } [Object.entries SevenConfig] : do
+		create-glyph "seven.lnum.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			if Body : include : Body CAP
+			if Serif : include : Serif CAP
+			if Crossbar : include : Crossbar CAP
+
+		create-glyph "seven.onum.\(suffix)" : glyph-proc
+			include : OnumMarks.p
+			include : refer-glyph "seven.lnum.\(suffix)"
+			include : ShiftDown
+
+	select-variant 'seven.lnum' [CodeLnum '7'] (follow -- 'seven')
+	select-variant 'seven.onum' [CodeOnum '7'] (follow -- 'seven')
+
+	link-reduced-variant 'seven/sansSerif.lnum' 'seven.lnum' MathSansSerif (follow -- 'seven/sansSerif')
+	link-reduced-variant 'seven/sansSerif.onum' 'seven.onum' MathSansSerif (follow -- 'seven/sansSerif')
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/seven' 0x1D7DF : glyph-proc
+		include : MarkSet.capital
+		local tr : RightSB - BBS / 2
+		local kDiag : DiagCorDs (CAP - BBS) (tr - SevenXLeft) (BBD * 0.75)
+		local xTerm : SevenXLeft - 0.25 * kDiag * BBD
+		include : union
+			HBar.t SB RightSB CAP BBS
+			intersection
+				Rect CAP 0 0 RightSB
+				union
+					HBar.b xTerm (xTerm + kDiag * BBD) 0 BBS
+					ExtLineCenter 2 BBS tr         (CAP - BBS) (xTerm + kDiag * BBD) 0
+					ExtLineCenter 2 BBS (tr - BBD) (CAP - BBS) xTerm                 0

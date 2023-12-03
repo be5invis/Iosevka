@@ -1,0 +1,33 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Atom : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim
+
+	for-width-kinds WideWidth1 : do
+		define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+		define pEllipse : 3 / 7
+		define N    3
+		define NN : 4 * N
+		create-glyph [MangleName 'atomSymbol'] [MangleUnicode 0x269B] : glyph-proc
+			set-width Geom.Width
+			local sw : AdviceStroke 12 [Math.sqrt Geom.Scalar]
+			foreach k [range 0 N] : do
+				define theta : Math.PI * (k / N)
+				local knots { }
+				foreach m [range 0 NN] : begin
+					local phi : 2 * Math.PI * (m / NN)
+					local px : pEllipse * Geom.Size * [Math.cos phi]
+					local py :            Geom.Size * [Math.sin phi]
+
+					knots.push : g2
+						Geom.MidX + [Math.cos theta] * px - [Math.sin theta] * py
+						Geom.MidY + [Math.sin theta] * px + [Math.cos theta] * py
+
+				include : dispiro [widths.rhs sw] knots [close]
+			include : DotAt Geom.MidX Geom.MidY (Geom.Size * 0.2)
