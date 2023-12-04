@@ -513,6 +513,7 @@ const DistHintedTTF = file.make(
 				i: deriveFrom.full,
 				oNoGc: noGcTtfPath.full,
 				o: out.full,
+				paramsDir: Path.resolve("params"),
 				...fi
 			});
 		} else {
