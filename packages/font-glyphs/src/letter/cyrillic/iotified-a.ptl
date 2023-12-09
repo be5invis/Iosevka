@@ -1,0 +1,172 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [bitOr] from "@iosevka/util/mask-bit"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Iotified-A : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Latin-Lower-AE-OE : SubDfAndShift
+
+	define SLAB-NONE		0
+	define SLAB-FULL		1
+	define SLAB-OUTWARD		2
+
+	glyph-block-export Iotified
+	define Iotified : namespace
+		export : define [Shape] : with-params [df top hBarRight [hBarY (top / 2)] [slabTop false] [slabBottom false] [swSerif df.mvs]] : glyph-proc
+			include : VBar.l df.leftSB 0 top df.mvs
+			if (hBarRight > df.leftSB)
+				include : HBar.m df.leftSB hBarRight hBarY df.mvs
+
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- swSerif)
+			if SLAB : begin
+				include : tagged "serifLT" : match slabTop
+					[Just SLAB-FULL] : begin sf.lt.full
+					[Just SLAB-OUTWARD] : begin sf.lt.outer
+					__ : glyph-proc
+				include : tagged "serifLB" : match slabBottom
+					[Just SLAB-FULL] : begin sf.lb.full
+					[Just SLAB-OUTWARD] : begin sf.lb.outer
+					__ : glyph-proc
+
+		export : define [RevShape] : with-params [df top hBarLeft [hBarY (top / 2)] [slabTop false] [slabBottom false] [swSerif df.mvs]] : glyph-proc
+			include : VBar.r df.rightSB 0 top df.mvs
+			if (hBarLeft < df.rightSB)
+				include : HBar.m hBarLeft df.rightSB hBarY df.mvs
+
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- swSerif)
+			if SLAB : begin
+				include : tagged "serifRT" : match slabTop
+					[Just SLAB-FULL] : begin sf.rt.full
+					[Just SLAB-OUTWARD] : begin sf.rt.outer
+					__ : glyph-proc
+				include : tagged "serifRB" : match slabBottom
+					[Just SLAB-FULL] : begin sf.rb.full
+					[Just SLAB-OUTWARD] : begin sf.rb.outer
+					__ : glyph-proc
+
+		# "Default" version
+		export : define [full] : with-params [df top hBarRight hBarY [fCapital false] [swSerif df.mvs]] : begin
+			local useItalicShape : [not fCapital] && para.isItalic
+			Shape
+				df -- df
+				top -- top
+				hBarRight -- hBarRight
+				hBarY -- hBarY
+				slabTop -- [if useItalicShape SLAB-OUTWARD SLAB-FULL]
+				slabBottom -- [if useItalicShape SLAB-NONE SLAB-FULL]
+				swSerif -- swSerif
+
+		# Outwards only
+		export : define [outer] : with-params [df top hBarRight hBarY [fCapital false] [swSerif df.mvs]] : begin
+			local useItalicShape : [not fCapital] && para.isItalic
+			Shape
+				df -- df
+				top -- top
+				hBarRight -- hBarRight
+				hBarY -- hBarY
+				slabTop -- SLAB-OUTWARD
+				slabBottom -- [if useItalicShape SLAB-NONE SLAB-OUTWARD]
+				swSerif -- swSerif
+
+		# Iotified A-shaped glyphs
+		export : define [A] : with-params [df top hBarRight hBarY [fCapital false] [swSerif df.mvs]] : begin
+			local useItalicShape : [not fCapital] && para.isItalic
+			Shape
+				df -- df
+				top -- top
+				hBarRight -- hBarRight
+				hBarY -- hBarY
+				slabTop -- [if useItalicShape SLAB-OUTWARD SLAB-FULL]
+				slabBottom -- [if useItalicShape SLAB-NONE SLAB-OUTWARD]
+				swSerif -- swSerif
+
+		# Used for Bulgarian Lower Yu
+		export : define [ascender] : with-params [df top hBarRight hBarY [fCapital false] [swSerif df.mvs]] : begin
+			local useItalicShape : [not fCapital] && para.isItalic
+			Shape
+				df -- df
+				top -- top
+				hBarRight -- hBarRight
+				hBarY -- hBarY
+				slabTop -- SLAB-OUTWARD
+				slabBottom -- [if useItalicShape SLAB-NONE SLAB-FULL]
+				swSerif -- swSerif
+
+	do "iotified A"
+		glyph-block-import Letter-Latin-Upper-A : AMaskShape ALetterShape AConfig
+
+		foreach { suffix { fStraightBar slabKind } } [Object.entries AConfig] : do
+			create-glyph "cyrl/AIotified.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3.5
+				include : df.markSet.capital
+
+				local gap : (df.width - 2 * df.leftSB - 4 * df.mvs) / 3
+				local divSub : (df.width - gap - df.mvs) / Width
+				local subDf : DivFrame divSub 2 (df.leftSB / SB) df.mvs 0
+
+				local shift : Width * (df.div - divSub)
+				local xIotifiedBarRight : df.leftSB + [HSwToV df.mvs]
+				local botGap : Math.max ((df.rightSB - df.leftSB) * 0.08) [AdviceStroke 6]
+				include : difference
+					with-transform [ApparentTranslate shift 0]
+						ALetterShape subDf fStraightBar slabKind CAP df.mvs
+					intersection [MaskBelow df.mvs]
+						MaskLeft : mix xIotifiedBarRight [Math.min (subDf.leftSB + shift) (xIotifiedBarRight + botGap)] 0.5
+
+				include : difference
+					Iotified.A df CAP [mix df.leftSB df.rightSB (3 / 4)] (CAP / 2) (fCapital -- true)
+					with-transform [ApparentTranslate shift 0]
+						AMaskShape subDf fStraightBar CAP df.mvs
+
+	do "iotified a"
+		glyph-block-import Letter-Latin-Lower-A : DoubleStorey DoubleStoreyConfig SingleStorey SingleStoreyConfig
+
+		foreach { suffix { body xTrailing hookStyle } } [Object.entries DoubleStoreyConfig] : do
+			create-glyph "cyrl/aIotified.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3
+				include : df.markSet.e
+
+				local { subDf shift } : SubDfAndShift 1 df
+				include : with-transform [ApparentTranslate shift 0] [body subDf hookStyle df.mvs]
+
+				include : difference
+					Iotified.full df XH [mix df.leftSB df.rightSB (3 / 4)] (XH / 2)
+					with-transform [ApparentTranslate shift 0] [DoubleStorey.GetMask body df df.mvs]
+
+		foreach { suffix { body bar } } [Object.entries SingleStoreyConfig] : do
+			create-glyph "cyrl/aIotified.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3
+				include : df.markSet.e
+
+				local { subDf shift } : SubDfAndShift 1 df
+				include : with-transform [ApparentTranslate shift 0] [body subDf XH bar no-shape df.mvs]
+
+				include : Iotified.full df XH (shift + subDf.leftSB + [HSwToV : 0.5 * df.mvs]) (XH / 2)
+
+	do "iotified e"
+		glyph-block-import Letter-Latin-Lower-E : SmallEShape SmallERoundedShape
+
+		define [EShape pShift df body] : begin
+
+		define Config : object
+			flatCrossbar { SmallEShape        }
+			rounded      { SmallERoundedShape }
+
+		foreach { suffix { body } } [Object.entries Config] : do
+			create-glyph "latn/eIotified.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3
+				include : df.markSet.e
+
+				local { subDf shift } : SubDfAndShift 1 df OX
+				include : with-transform [ApparentTranslate shift 0] [body subDf XH df.mvs]
+
+				include : Iotified.full df XH df.middle (XH / 2)
+
+	select-variant 'cyrl/AIotified' 0xA656 (follow -- 'A')
+	select-variant 'cyrl/aIotified' 0xA657 (follow -- 'a')
+	select-variant 'latn/eIotified' 0xAB61 (follow -- 'e')

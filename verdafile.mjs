@@ -412,10 +412,11 @@ const DistUnhintedTTF = file.make(
 				de(charMapPath.dir)
 			);
 
-			echo.action(echo.hl.command(`Hint TTF`), out.full);
-			await silently.node(`font-src/derive-spacing.mjs`, {
+			echo.action(echo.hl.command(`Create TTF`), out.full);
+			await silently.node(`packages/font/src/derive-spacing.mjs`, {
 				i: deriveFrom.full,
 				o: out.full,
+				paramsDir: Path.resolve("params"),
 				oNoGc: noGcTtfPath.full,
 				...fi
 			});
@@ -435,9 +436,10 @@ const DistUnhintedTTF = file.make(
 			);
 
 			echo.action(echo.hl.command(`Create TTF`), out.full);
-			const { cacheUpdated } = await silently.node("font-src/index.mjs", {
+			const { cacheUpdated } = await silently.node("packages/font/src/index.mjs", {
 				o: out.full,
 				...(fi.buildCharMap ? { oCharMap: charMapPath.full } : {}),
+				paramsDir: Path.resolve("params"),
 				oTtfaControls: ttfaControlsPath.full,
 				cacheFreshAgeKey: ageKey,
 				iCache: cachePath,
@@ -449,7 +451,7 @@ const DistUnhintedTTF = file.make(
 			if (cacheUpdated) {
 				const lock = build.locks.alloc(cacheFileName);
 				await lock.acquire();
-				await silently.node(`font-src/merge-cache.mjs`, {
+				await silently.node(`packages/font/src/merge-cache.mjs`, {
 					base: cachePath,
 					diff: cacheDiffPath,
 					version: fi.menu.version,
@@ -506,11 +508,12 @@ const DistHintedTTF = file.make(
 				de(noGcTtfPath.dir)
 			);
 
-			echo.action(echo.hl.command(`Create TTF`), out.full);
-			await silently.node(`font-src/derive-spacing.mjs`, {
+			echo.action(echo.hl.command(`Hint TTF`), out.full);
+			await silently.node(`packages/font/src/derive-spacing.mjs`, {
 				i: deriveFrom.full,
 				oNoGc: noGcTtfPath.full,
 				o: out.full,
+				paramsDir: Path.resolve("params"),
 				...fi
 			});
 		} else {
@@ -548,7 +551,7 @@ const DistWoff2 = file.make(
 
 		const [from] = await target.need(Ctor(group, f), de`${out.dir}`);
 		echo.action(echo.hl.command("Create WOFF2"), out.full, echo.hl.operator("<-"), from.full);
-		await silently.node(`utility/ttf-to-woff2.mjs`, from.full, out.full);
+		await silently.node(`tools/misc/src/ttf-to-woff2.mjs`, from.full, out.full);
 	}
 );
 
@@ -599,7 +602,14 @@ async function createWebFontCssImpl(target, output, gr, formats, unhinted) {
 	const [bp, ts] = await target.need(BuildPlanOf(gr), GroupFontsOf(gr));
 	const hs = await target.need(...ts.map(FontInfoOf));
 	echo.action(echo.hl.command(`Create WebFont CSS`), output, echo.hl.operator("<-"), gr);
-	await silently.node("utility/make-webfont-css.mjs", output, bp.family, hs, formats, unhinted);
+	await silently.node(
+		"tools/misc/src/make-webfont-css.mjs",
+		output,
+		bp.family,
+		hs,
+		formats,
+		unhinted
+	);
 }
 
 // Content files
@@ -876,16 +886,19 @@ const PagesDir = oracle(`pages-dir-path`, async t => {
 });
 
 const PagesDataExport = task(`pages:data-export`, async t => {
+	const [version] = await t.need(Version);
 	const [pagesDir] = await t.need(PagesDir, Version, Parameters, UtilScripts);
 	const [cm, cmi, cmo] = await t.need(
 		BuildCM("Iosevka", "Iosevka-Regular"),
 		BuildCM("Iosevka", "Iosevka-Italic"),
 		BuildCM("Iosevka", "Iosevka-Oblique")
 	);
-	await node(`utility/export-tokenized-sample-code.mjs`, {
+	await node(`tools/generate-samples/src/tokenized-sample-code.mjs`, {
 		output: Path.resolve(pagesDir, "shared/tokenized-sample-code/alphabet.txt.json")
 	});
-	await node(`utility/export-data/index.mjs`, {
+	await node(`tools/data-export/src/index.mjs`, {
+		version,
+		paramsDir: Path.resolve("params"),
 		charMapPath: cm.full,
 		charMapItalicPath: cmi.full,
 		charMapObliquePath: cmo.full,
@@ -947,8 +960,10 @@ const AmendReadmeFor = task.make(
 			BuildCM("Iosevka", "Iosevka-Italic"),
 			BuildCM("Iosevka", "Iosevka-Oblique")
 		);
-		return node(`utility/amend-readme/index.mjs`, {
+		return node(`tools/amend-readme/src/index.mjs`, {
 			version,
+			projectRoot: Path.resolve("."),
+			paramsDir: Path.resolve("params"),
 			mdFilePath: f,
 			releasePackagesJsonPath: rpFiles.full,
 			charMapPath: cm.full,
@@ -982,7 +997,7 @@ const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t,
 	await FS.promises.writeFile(out.full, JSON.stringify(releaseNoteGroups, null, "  "));
 });
 const AmendLicenseYear = task("amend-readme:license-year", async target => {
-	return node(`utility/amend-readme/license-year.mjs`, {
+	return node(`tools/amend-readme/src/license-year.mjs`, {
 		path: "LICENSE.md"
 	});
 });
@@ -1010,8 +1025,9 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 		BuildCM("Iosevka", "Iosevka-Italic"),
 		BuildCM("Iosevka", "Iosevka-Oblique")
 	);
-	return await node("utility/generate-samples/index.mjs", {
+	return await node("tools/generate-samples/src/index.mjs", {
 		version,
+		paramsDir: Path.resolve("params"),
 		outputDir: IMAGE_TASKS,
 		packageSnapshotTasks: await PackageSnapshotConfig(target),
 		fontGroups: fontGroups,
@@ -1061,7 +1077,7 @@ const ReleaseNotesFile = file.make(
 		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
 		const [changeFiles] = await t.need(ChangeFileList());
 		await t.need(changeFiles.map(fu));
-		await node("utility/amend-readme/generate-release-note.mjs", {
+		await node("tools/amend-readme/src/generate-release-note.mjs", {
 			version,
 			outputPath: out.full
 		});
@@ -1076,7 +1092,7 @@ const ChangeLogMd = file(`CHANGELOG.md`, async (t, out) => {
 	await t.need(UtilScripts, de(ARCHIVE_DIR));
 	const [changeFiles] = await t.need(ChangeFileList());
 	await t.need(changeFiles.map(fu));
-	await node("utility/amend-readme/generate-change-log.mjs", { version, outputPath: out.full });
+	await node("tools/amend-readme/src/generate-change-log.mjs", { version, outputPath: out.full });
 });
 const ChangeFileList = oracle.make(
 	() => `release:change-file-list`,
@@ -1104,7 +1120,7 @@ const Release = task(`release`, async target => {
 });
 
 const ReleaseArchives = task(`release:archives`, async target => {
-	const [version, collectPlans] = await target.need(Version, CollectPlans);
+	const [version, collectPlans] = await target.need(Version, CollectPlans, UtilScriptFiles);
 	let goals = [];
 	for (const [cgr, plan] of Object.entries(collectPlans)) {
 		if (!plan.inRelease) continue;
@@ -1120,28 +1136,27 @@ const ReleaseArchives = task(`release:archives`, async target => {
 	}
 	const [archiveFiles] = await target.need(goals);
 	// Create hash of packages
-	await target.need(fu`utility/create-sha-file.mjs`);
-	await node("utility/create-sha-file.mjs", "doc/packages-sha.txt", archiveFiles);
+	await node("tools/misc/src/create-sha-file.mjs", "doc/packages-sha.txt", archiveFiles);
 });
 
 ///////////////////////////////////////////////////////////
 //////               Script Building                 //////
 ///////////////////////////////////////////////////////////
 
-const MARCOS = [fu`font-src/meta/macros.ptl`];
+const MARCOS = [
+	fu`packages/font-glyphs/src/meta/macros.ptl`,
+	fu`packages/font-otl/src/meta/macros.ptl`
+];
 const ScriptsUnder = oracle.make(
 	(ext, dir) => `${ext}-scripts-under::${dir}`,
 	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target)
 );
 const UtilScriptFiles = computed("util-script-files", async target => {
-	const [mjs, md] = await target.need(
-		ScriptsUnder("mjs", "utility"),
-		ScriptsUnder("md", "utility")
-	);
+	const [mjs, md] = await target.need(ScriptsUnder("mjs", "tools"), ScriptsUnder("md", "tools"));
 	return [...mjs, ...md];
 });
 const ScriptFiles = computed.group("script-files", async (target, ext) => {
-	const [ss] = await target.need(ScriptsUnder(ext, `font-src`));
+	const [ss] = await target.need(ScriptsUnder(ext, `packages`));
 	return ss;
 });
 const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {

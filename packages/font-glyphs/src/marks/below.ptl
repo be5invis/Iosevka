@@ -1,0 +1,265 @@
+$$include '../meta/macros.ptl'
+
+import [Arcs Quadify ShapeConv] from "typo-geom"
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [ScheduleLeaningMark] from "@iosevka/glyph/relation"
+import [Box] from "@iosevka/geometry/box"
+
+glyph-module
+
+glyph-block Mark-Below : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
+	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
+
+	glyph-block-export belowMarkBot belowMarkTop belowMarkMid belowMarkStack
+	define belowMarkBot   (0 - AccentClearance - AccentHeight)
+	define belowMarkTop   (0 - AccentClearance)
+	define belowMarkMid   [mix belowMarkBot belowMarkTop 0.5]
+	define belowMarkStack (0 - AccentStackOffset)
+
+	define StdAnchors : namespace
+		export : define [impl padding k fLeaning] : glyph-proc
+			set-mark-anchor 'below' markMiddle (0 + padding * AccentHeight) markMiddle (belowMarkStack - padding * AccentHeight)
+			set-base-anchor 'belowBraceL' (markMiddle - k * markExtend) belowMarkMid
+			set-base-anchor 'belowBraceR' (markMiddle + k * markExtend) belowMarkMid
+			if fLeaning : ScheduleLeaningMark.set currentGlyph
+
+		export : define [narrow]       : impl 0 0    true
+		export : define [mediumNarrow] : impl 0 0.25 true
+		export : define [medium]       : impl 0 0.5  true
+		export : define [mediumWide]   : impl 0 0.75
+		export : define [wide]         : impl 0 1
+
+	### Below marks
+	create-glyph 'blankBelow' : glyph-proc
+		set-width 0
+		include : StdAnchors.narrow
+
+	create-glyph 'blankLeaningBelow' : glyph-proc
+		set-width 0
+		set-mark-anchor 'leaningBelow' markMiddle 0 markMiddle belowMarkStack
+		set-base-anchor 'belowBraceL' (markMiddle - 0.5 * markExtend) belowMarkMid
+		set-base-anchor 'belowBraceR' (markMiddle + 0.5 * markExtend) belowMarkMid
+
+	define [CedillaShape ext] : begin
+		local fine : Math.min [AdviceStroke 6] (0.75 * (belowMarkTop - belowMarkBot - markStroke))
+		local cedillaTop (belowMarkTop + 0.875 * fine)
+		local cedillaBot  belowMarkBot
+		return : union
+			VBar.m markMiddle ext (cedillaTop - fine) markStroke
+			dispiro
+				flat (markMiddle - [HSwToV : 0.5 * markStroke]) cedillaTop [widths.rhs.heading fine Rightward]
+				curl markMiddle cedillaTop [heading Rightward]
+				archv
+				g4   (markMiddle + markExtend - O) [mix cedillaTop cedillaBot 0.5] [widths.rhs.heading [mix fine markStroke 0.5] {.x HVContrast .y (-0.5 * (markStroke - fine) / markStroke)}]
+				arcvh
+				flat markMiddle cedillaBot [widths.rhs.heading markStroke Leftward]
+				curl (markMiddle - markExtend) cedillaBot [heading Leftward]
+
+	create-glyph 'cedillaExtShapeBelow' : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		include : CedillaShape (4 * Stroke)
+
+	create-glyph 'cedillaExtShapeBelowOArc' : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		include : CedillaShape (Stroke + O)
+
+	create-glyph 'cedillaExtShapeBelowSOArc' : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		include : CedillaShape ([AdviceStroke2 2 3 XH] + O)
+
+	create-glyph 'cedillaBelow' 0x327 : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		include : CedillaShape 0
+
+	create-glyph 'iotaBelow' 0x345 : glyph-proc
+		set-width 0
+		include : StdAnchors.narrow
+		include : VBar.m markMiddle belowMarkBot belowMarkTop markStroke
+
+	create-glyph 'iotaLF' : glyph-proc
+		set-width 0
+		set-mark-anchor 'lf' markMiddle 0 markMiddle belowMarkStack
+		include : VBar.m markMiddle belowMarkBot belowMarkTop markStroke
+
+	create-glyph 'leftTackBelow' 0x318 : glyph-proc
+		set-width 0
+		include : StdAnchors.mediumWide
+
+		include : VBar.r (markMiddle + markExtend) belowMarkBot belowMarkTop (markFine * 2)
+		include : HBar.m (markMiddle - markExtend) (markMiddle + markExtend) [mix belowMarkTop belowMarkBot 0.5] (markFine * 2)
+
+	create-glyph 'rightTackBelow' 0x319 : glyph-proc
+		set-width 0
+		include : StdAnchors.mediumWide
+
+		include : VBar.l (markMiddle - markExtend) belowMarkBot belowMarkTop (markFine * 2)
+		include : HBar.m (markMiddle - markExtend) (markMiddle + markExtend) [mix belowMarkTop belowMarkBot 0.5] (markFine * 2)
+
+	create-glyph 'leftAngleBelow' 0x349 : glyph-proc
+		set-width 0
+		include : StdAnchors.mediumWide
+
+		include : VBar.r (markMiddle + markExtend) belowMarkBot belowMarkTop (markFine * 2)
+		include : HBar.t (markMiddle - markExtend) (markMiddle + markExtend) belowMarkTop (markFine * 2)
+
+	create-glyph 'bridgeBelow' 0x32A : glyph-proc
+		set-width 0
+		include : StdAnchors.wide
+
+		include : VBar.m (markMiddle - markExtend) belowMarkBot belowMarkTop (markFine * 2)
+		include : VBar.m (markMiddle + markExtend) belowMarkBot belowMarkTop (markFine * 2)
+		include : HBar.t (markMiddle - markExtend) (markMiddle + markExtend) belowMarkTop (markFine * 2)
+
+	create-glyph 'boxBelow' 0x33B : glyph-proc
+		set-width 0
+		include : StdAnchors.wide
+
+		local boxsw : Math.min (markFine * 2) ((belowMarkTop - belowMarkBot) / 3)
+
+		include : VBar.m (markMiddle - markExtend) belowMarkBot belowMarkTop (markFine * 2)
+		include : VBar.m (markMiddle + markExtend) belowMarkBot belowMarkTop (markFine * 2)
+		include : HBar.b (markMiddle - markExtend) (markMiddle + markExtend) belowMarkBot boxsw
+		include : HBar.t (markMiddle - markExtend) (markMiddle + markExtend) belowMarkTop boxsw
+
+	create-glyph 'equalBelow' 0x347 : glyph-proc
+		set-width 0
+		include : StdAnchors.mediumWide
+
+		local boxsw : Math.min (markFine * 2) ((belowMarkTop - belowMarkBot) / 3)
+
+		include : HBar.b (markMiddle - markExtend) (markMiddle + markExtend) belowMarkBot boxsw
+		include : HBar.t (markMiddle - markExtend) (markMiddle + markExtend) belowMarkTop boxsw
+
+	create-glyph 'shelfBelow' : glyph-proc
+		set-width 0
+		include : StdAnchors.impl 0 1.5
+
+		include : VBar.m (SB - Width) belowMarkBot belowMarkTop (markFine * 2)
+		include : VBar.m (RightSB - Width) belowMarkBot belowMarkTop (markFine * 2)
+		include : HBar.b (SB - Width) (RightSB - Width) belowMarkBot (markFine * 2)
+
+	create-glyph 'openShelfBelow' : glyph-proc
+		set-width 0
+		include : StdAnchors.impl 0 1.5
+
+		include : VBar.m (SB - Width) belowMarkBot belowMarkTop (markFine * 2)
+		include : HBar.b (SB - Width) (RightSB - Width) belowMarkBot (markFine * 2)
+
+	define [mirrorAnchor gs gt srcCls dstCls] : begin
+		if gs.markAnchors.(srcCls) : begin
+			local a : gs.gizmo.unapply gs.markAnchors.(srcCls)
+			gt.setMarkAnchor dstCls [mix markMiddle a.x (-1)] [mix (XH/2) a.y (-1)]
+		if gs.baseAnchors.(srcCls) : begin
+			local a : gs.gizmo.unapply gs.baseAnchors.(srcCls)
+			gt.setBaseAnchor dstCls [mix markMiddle a.x (-1)] [mix (XH/2) a.y (-1)]
+
+	# Turned below marks
+	define [TurnAboveMarkToBelow gnBelowMark unicodeBelowMark gnAboveMark] : begin
+		derive-glyphs gnBelowMark unicodeBelowMark gnAboveMark : function [src gr] : glyph-proc
+			set-width 0
+			include : refer-glyph src
+			include : FlipAround markMiddle (XH / 2)
+			local aboveGlyph : query-glyph src
+			if aboveGlyph : begin
+				mirrorAnchor aboveGlyph currentGlyph 'above' 'below'
+				mirrorAnchor aboveGlyph currentGlyph 'aboveBraceL' 'belowBraceR'
+				mirrorAnchor aboveGlyph currentGlyph 'aboveBraceR' 'belowBraceL'
+			if [ScheduleLeaningMark.get aboveGlyph] : ScheduleLeaningMark.set currentGlyph
+
+	TurnAboveMarkToBelow 'graveBelow'              0x316  'graveAbove'
+	TurnAboveMarkToBelow 'acuteBelow'              0x317  'acuteAbove'
+	TurnAboveMarkToBelow 'leftHalfCircleBelow'     0x31C  'rightHalfCircleAbove'
+	TurnAboveMarkToBelow 'upTackBelow'             0x31D  'downTackAbove'
+	TurnAboveMarkToBelow 'downTackBelow'           0x31E  'upTackAbove'
+	TurnAboveMarkToBelow 'plusBelow'               0x31F  'plusAbove'
+	TurnAboveMarkToBelow 'minusBelow'              0x320  'minusAbove'
+	TurnAboveMarkToBelow 'dotBelow'                0x323  'dotAbove'
+	TurnAboveMarkToBelow 'dieresisBelow'           0x324  'dieresisAbove'
+	TurnAboveMarkToBelow 'ringBelow'               0x325  'ringAbove'
+	TurnAboveMarkToBelow 'commaBelow'              0x326  'turnCommaAbove'
+	TurnAboveMarkToBelow 'ogonekBelow'             0x328  'ogonekAbove'
+	TurnAboveMarkToBelow 'barBelow'                0x329  'barAbove'
+	TurnAboveMarkToBelow 'dblBreveBelow'           0x32B  'dblArchAbove'
+	TurnAboveMarkToBelow 'caronBelow'              0x32C  'circumflexAbove'
+	TurnAboveMarkToBelow 'circumflexBelow'         0x32D  'caronAbove'
+	TurnAboveMarkToBelow 'breveBelow'              0x32E  'archAbove'
+	TurnAboveMarkToBelow 'archBelow'               0x32F  'breveAbove'
+	TurnAboveMarkToBelow 'tildeBelow'              0x330  'tildeAbove'
+	TurnAboveMarkToBelow 'macronBelow'             0x331  'macronAbove'
+	TurnAboveMarkToBelow 'underlineBelow'          0x332  'overlineAbove'
+	TurnAboveMarkToBelow 'dblUnderlineBelow'       0x333  'dblOverlineAbove'
+	TurnAboveMarkToBelow 'rightHalfCircleBelow'    0x339  'leftHalfCircleAbove'
+	TurnAboveMarkToBelow 'invBridgeBelow'          0x33A  'bridgeAbove'
+	TurnAboveMarkToBelow 'dblArchBelow'            0x33C  'dblBreveAbove'
+	TurnAboveMarkToBelow 'dblBarBelow'             0x348  'dblBarAbove'
+	TurnAboveMarkToBelow 'lrArrowBelow'            0x34D  'lrArrowAbove'
+	TurnAboveMarkToBelow 'upArrowBelow'            0x34E  'downArrowAbove'
+	TurnAboveMarkToBelow 'crossBelow'              0x353  'crossAbove'
+	TurnAboveMarkToBelow 'lessBelow'               0x354  'greaterAbove'
+	TurnAboveMarkToBelow 'greaterBelow'            0x355  'lessAbove'
+	TurnAboveMarkToBelow 'dblRingBelow'            0x35A  'dblRingAbove'
+	TurnAboveMarkToBelow 'dblPlusBelow'            0x1ACA 'dblPlusAbove'
+	TurnAboveMarkToBelow 'zigzagBelow'             0x1DCF 'zigzagAbove'
+	TurnAboveMarkToBelow 'wideInvertedBridgeBelow' 0x1DF9 'wideBridgeAbove'
+	TurnAboveMarkToBelow 'dblTildeBelow'           0x1DFD 'dblTildeAbove'
+	TurnAboveMarkToBelow 'elipsisBelow'            0x20E8 'elipsisAbove'
+	TurnAboveMarkToBelow 'leftArrowBelow'          0x20EE 'rightArrowAbove'
+	TurnAboveMarkToBelow 'rightArrowBelow'         0x20EF 'leftArrowAbove'
+	TurnAboveMarkToBelow 'upArrowHeadBelow'        null   'downArrowHeadAbove'
+	TurnAboveMarkToBelow 'downArrowHeadBelow'      null   'upArrowHeadAbove'
+	TurnAboveMarkToBelow 'descenderBarBelow'       null   'ascenderBarAbove'
+	TurnAboveMarkToBelow 'sbRsbUnderlineBelow'     null   'sbRsbOverlineAbove'
+
+	create-glyph 'greaterAndUpArrowheadBelow' 0x0356 : glyph-proc
+		set-width 0
+		include : with-transform [Translate (-markExtend) 0] : refer-glyph 'greaterBelow'
+		include : with-transform [Translate (+markExtend) 0] : refer-glyph 'upArrowHeadBelow'
+		include : StdAnchors.impl 0 1.5
+
+	create-glyph 'greaterAndDownArrowheadBelow' 0x1DFF : glyph-proc
+		set-width 0
+		include : with-transform [Translate (-markExtend) 0] : refer-glyph 'greaterBelow'
+		include : with-transform [Translate (+markExtend) 0] : refer-glyph 'downArrowHeadBelow'
+		include : StdAnchors.impl 0 1.5
+
+	create-glyph 'dblCrossBelow' 0x1AB5 : glyph-proc
+		set-width 0
+		include : with-transform [Translate (-markExtend) 0] : refer-glyph 'crossBelow'
+		include : with-transform [Translate (+markExtend) 0] : refer-glyph 'crossBelow'
+		include : StdAnchors.impl 0 1.5
+
+	create-glyph 'leftParenBelow' 0x1AC3 : glyph-proc
+		set-width 0
+		set-mark-anchor 'belowBraceL' markMiddle belowMarkMid (markMiddle - markExtend) belowMarkMid
+		local braceDepth : markExtend * 0.25
+		local left : markMiddle - 1.5 * markExtend
+		include : dispiro
+			widths.lhs markFine
+			g4 (left + braceDepth) (belowMarkTop + markFine)
+			g4 (left + OX)         belowMarkMid
+			g4 (left + braceDepth) (belowMarkBot - markFine)
+
+	create-glyph 'rightParenBelow' 0x1AC4 : glyph-proc
+		set-width 0
+		set-mark-anchor 'belowBraceR' markMiddle belowMarkMid (markMiddle + markExtend) belowMarkMid
+		local braceDepth : markExtend * 0.25
+		local right : markMiddle + 1.5 * markExtend
+		include : dispiro
+			widths.rhs markFine
+			g4 (right - braceDepth) (belowMarkTop + markFine)
+			g4 (right - OX)         belowMarkMid
+			g4 (right - braceDepth) (belowMarkBot - markFine)
+
+	create-glyph 'parenBelow' 0x1ABD : glyph-proc
+		set-width 0
+		include : refer-glyph 'leftParenBelow'
+		include : refer-glyph 'rightParenBelow'
+		# No need to setup anchors -- ccmp will help us

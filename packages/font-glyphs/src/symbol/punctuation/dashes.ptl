@@ -1,0 +1,83 @@
+### Punctuation symbols
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [Joining] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Dashes : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Math-Relation-Common : EqualHalfSpace
+
+	do 'underscore'
+		define openBoxGap : Math.max (Stroke * 1.25) (XH / 4)
+		define [OpenBoxSide y] : union
+			VBar.l SB      y (y + openBoxGap) OperatorStroke
+			VBar.r RightSB y (y + openBoxGap) OperatorStroke
+		define [OpenBoxShoulderSide y] : union
+			OpenBoxSide y
+			HBar.t [mix 0     SB      0.25] SB      (y + openBoxGap) OperatorStroke
+			HBar.t [mix Width RightSB 0.25] RightSB (y + openBoxGap) OperatorStroke
+
+		glyph-block-export UnderScoreConfig
+		define UnderScoreConfig : object
+			aboveBaseline { 0         }
+			high          { (-Stroke) }
+			low           { Descender }
+
+		define joiningOverlap (-Width / 6)
+
+		foreach { suffix { yBar } } [Object.entries UnderScoreConfig] : do
+			create-glyph "underscore.\(suffix)" : HBar.b SB RightSB yBar
+			create-glyph "doubleUnderscore.\(suffix)" : composite-proc
+				HBar.b SB RightSB yBar
+				HBar.b SB RightSB (yBar - openBoxGap)
+			create-glyph "openBox.\(suffix)" : composite-proc
+				HBar.b SB RightSB yBar
+				OpenBoxSide (yBar + Stroke / 2)
+			create-glyph "openBoxShoulder.\(suffix)" : composite-proc
+				HBar.b SB RightSB yBar
+				OpenBoxShoulderSide (yBar + Stroke / 2)
+
+		select-variant 'underscore'       '_'
+		select-variant 'openBox'          0x2423 (follow -- 'underscore')
+		select-variant 'openBoxShoulder'  0x237D (follow -- 'underscore')
+		select-variant 'doubleUnderscore' 0x2017 (follow -- 'underscore')
+
+	create-glyph 'hyphen' '-' : glyph-proc
+		local df : include : DivFrame para.diversityF
+		include : HBar.m df.leftSB df.rightSB SymbolMid
+
+	alias 'softhyphen' 0xAD  'hyphen'
+	alias 'gpHyphen' 0x2010 'hyphen'
+	alias 'nbHyphen' 0x2011 'hyphen'
+	alias 'hyphenBullet' 0x2043 'hyphen'
+
+	create-glyph 'figureDash' 0x2012 : HBar.m SB RightSB SymbolMid
+	create-glyph 'overline' 0x203E : HBar.t SB RightSB CAP
+
+	create-glyph 'enDash' 0x2013 : glyph-proc
+		set-width Width
+		include : HBar.m [mix 0 SB 0.5] [mix Width RightSB 0.5] SymbolMid
+
+	for-width-kinds WideWidth1
+		define emDashWidth : if (para.isQuasiProportional && MosaicWidthScalar > 1) UPM MosaicWidth
+		create-glyph [MangleName 'emDash'] [MangleUnicode 0x2014] : glyph-proc
+			set-width emDashWidth
+			include : HBar.m 0 emDashWidth SymbolMid
+
+		alias [MangleName 'horizontalBar'] [MangleUnicode 0x2015] [MangleName 'emDash']
+
+	derive-multi-part-glyphs 'hyphenDieresis' 0x2E1A { 'figureDash' 'dieresisAbove'}
+		function [src sel] : composite-proc
+			refer-glyph src.0
+			MarkSet.plus
+			refer-glyph src.1
+			clear-anchors
+
+	create-glyph 'dblHyphen' 0x2E40 : glyph-proc
+		local df : include : DivFrame para.diversityF
+		include : HBar.m df.leftSB df.rightSB (SymbolMid + EqualHalfSpace)
+		include : HBar.m df.leftSB df.rightSB (SymbolMid - EqualHalfSpace)

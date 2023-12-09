@@ -1,11 +1,6 @@
 ## Modifications since last major version
 
-### 28.0.0-beta.2
-
-* Fix broken TTCs in beta.1 (#2108).
-
-
-### 28.0.0-beta.1
+### 28.0.0-beta.3
 
 * \[**BREAKING**\] The filenames and package filenames are changed.
    - They will now use PascalCase instead of kebab-case.
@@ -34,7 +29,9 @@
   - CYRILLIC CAPITAL LETTER LHA (`U+0514`) ... CYRILLIC SMALL LETTER YAE (`U+0519`) (#2018).
   - GEORGIAN PARAGRAPH SEPARATOR (`U+10FB`).
   - COMBINING BREVE-MACRON (`U+1DCB`) ... COMBINING MACRON-BREVE (`U+1DCC`) (#1880).
+  - COMBINING DOUBLE CIRCUMFLEX ABOVE (`U+1DCD`).
   - COMBINING LATIN SMALL LETTER FLATTENED OPEN A ABOVE (`U+1DD3`).
+  - COMBINING DELETION MARK (`U+1DFB`).
   - LINE SEPARATOR (`U+2028`) ... PARAGRAPH SEPARATOR (`U+2029`).
   - TRIANGLE-HEADED RIGHTWARDS ARROW (`U+279D`).
   - LONG RIGHTWARDS SQUIGGLE ARROW (`U+27FF`).

@@ -1,0 +1,104 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Letter-Greek-Pi : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft BBBarRight
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar SerifFrame nShoulder
+	glyph-block-import Letter-Shared-Shapes : CyrDescender MidHook
+
+	glyph-block-export PiShape
+	define [PiShape] : with-params [df top bottom [shrinkRate 0.05] [fine Stroke] [doSerif false] [endShrink 0] [tailed false]] : glyph-proc
+		local shrink : if doSerif 0 (shrinkRate * (df.rightSB - df.leftSB))
+		local endexpand : if doSerif 0 (- endShrink * (df.rightSB - df.leftSB) || shrink / 2)
+		include : HBar.t (df.leftSB - endexpand) (df.rightSB + endexpand) top fine
+		include : VBar.l (df.leftSB + shrink) bottom (top - fine / 2) fine
+		if tailed
+			include : RightwardTailedBar (df.rightSB - shrink) bottom top
+			include : VBar.r (df.rightSB - shrink) bottom (top - fine / 2) fine
+
+		if doSerif : begin
+			local sf : SerifFrame top bottom (df.leftSB + shrink) (df.rightSB - shrink) (swRef -- fine)
+			include : composite-proc sf.lt.outer sf.rt.outer sf.lb.full sf.rb.full
+
+	define [MathBBPiShape] : with-params [df top bottom [shrinkRate 0.05] [endShrink 0]] : glyph-proc
+		local shrink : shrinkRate * (df.rightSB - df.leftSB)
+		local endexpand : -endShrink * (df.rightSB - df.leftSB) || shrink / 2
+		include : HBar.t (df.leftSB - endexpand) (df.rightSB + endexpand) top BBS
+		include : BBBarLeft (df.leftSB + shrink) bottom top
+		include : BBBarRight (df.rightSB - shrink) bottom top
+
+	create-glyph 'grek/Pi' 0x3A0 : glyph-proc
+		include : MarkSet.capital
+		include : PiShape [DivFrame 1] CAP 0 (shrinkRate -- 0) (doSerif -- SLAB)
+	alias 'cyrl/Pe' 0x41F 'grek/Pi'
+
+	create-glyph 'grek/smcpPi' 0x1D28 : glyph-proc
+		include : MarkSet.e
+		include : PiShape [DivFrame 1] XH 0 (shrinkRate -- 0) (doSerif -- SLAB)
+
+	create-glyph 'mathbb/grek/Pi' 0x213F : glyph-proc
+		include : MarkSet.capital
+		include : MathBBPiShape [DivFrame 1] CAP 0 (shrinkRate -- 0)
+
+	create-glyph 'cyrl/pe.upright' : glyph-proc
+		include : MarkSet.e
+		include : PiShape [DivFrame 1] XH 0 (shrinkRate -- 0) (doSerif -- SLAB)
+
+	derive-composites 'cyrl/PeDescender' 0x524 'cyrl/Pe' [CyrDescender.rSideJut RightSB 0]
+	derive-composites 'cyrl/peDescender.upright' null 'cyrl/pe.upright' [CyrDescender.rSideJut RightSB 0]
+
+	define SmallPiShrink : 1/6 - [HSwToV : 0.25 * Stroke] / (RightSB - SB)
+
+	define SmallPiConfig : object
+		smallCap { {0             SLAB  } false }
+		tailless { {SmallPiShrink false } false }
+		tailed   { {SmallPiShrink false } true  }
+
+	foreach { suffix { { shrink slab } tail } } [pairs-of SmallPiConfig] : do
+		create-glyph "grek/pi.\(suffix)" : glyph-proc
+			define df : include : DivFrame 1
+			include : df.markSet.e
+			include : PiShape df XH 0 (shrinkRate -- shrink) (doSerif -- slab) (tailed -- tail)
+
+	select-variant 'grek/pi' 0x3C0
+
+	create-glyph 'mathbb/grek/pi' 0x213C : glyph-proc
+		include : MarkSet.e
+		include : MathBBPiShape [DivFrame 1] XH 0 (shrinkRate -- 0.06)
+
+	define [CyrlPeHookShape df top] : glyph-proc
+		local xm : df.middle + [HSwToV : 0.5 * df.mvs]
+		include : HBar.t df.leftSB xm top df.mvs
+		include : VBar.l df.leftSB 0 (top - df.mvs / 2) df.mvs
+		include : VBar.r xm 0 (top - df.mvs / 2) df.mvs
+		include : MidHook.m df top
+
+		if SLAB : begin
+			local sf : [SerifFrame.fromDf df top 0].slice 0 1
+			if (df.width > para.refJut * 7)
+			: then
+				include sf.lt.outer
+				include sf.rt.outer
+				include sf.lb.full
+				include sf.rb.full
+			: else
+				include sf.lt.outer
+				include sf.rt.outer
+				include sf.lb.outer
+				include sf.rb.outer
+
+	create-glyph 'cyrl/PeMidHook' 0x4A6 : glyph-proc
+		define df : include : DivFrame para.diversityM 3
+		include : df.markSet.capDesc
+		include : CyrlPeHookShape df CAP
+
+	create-glyph 'cyrl/peMidHook.upright' : glyph-proc
+		define df : include : DivFrame para.diversityM 3
+		include : df.markSet.p
+		include : CyrlPeHookShape df XH

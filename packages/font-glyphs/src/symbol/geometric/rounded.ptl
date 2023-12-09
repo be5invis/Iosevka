@@ -1,0 +1,64 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Symbol-Geometric-Rounded : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+	define Size : GeometricSizes Geom
+
+	create-glyph [MangleName 'roundwhitesquare'] [MangleUnicode 0x25A2] : glyph-proc
+		set-width Geom.Width
+		define cr : Geom.Size - GeometryStroke * 2
+		include : dispiro
+			widths.lhs GeometryStroke
+			flat (Geom.MidX + 1) (Geom.MidY + Geom.Size) [heading Leftward]
+			curl (Geom.MidX - cr) (Geom.MidY + Geom.Size) [heading Leftward]
+			archv
+			flat (Geom.MidX - Geom.Size) (Geom.MidY + cr) [heading Downward]
+			curl (Geom.MidX - Geom.Size) (Geom.MidY - cr) [heading Downward]
+			arcvh
+			flat (Geom.MidX - cr) (Geom.MidY - Geom.Size) [heading Rightward]
+			curl (Geom.MidX + cr) (Geom.MidY - Geom.Size) [heading Rightward]
+			archv
+			flat (Geom.MidX + Geom.Size) (Geom.MidY - cr) [heading Upward]
+			curl (Geom.MidX + Geom.Size) (Geom.MidY + cr) [heading Upward]
+			arcvh
+			flat (Geom.MidX + cr) (Geom.MidY + Geom.Size) [heading Leftward]
+			curl (Geom.MidX - 1) (Geom.MidY + Geom.Size) [heading Leftward]
+
+	define [ThickRoundedArrowBar x1 y1 x2 y2 r w] : glyph-proc
+		include : PointingTo x1 y1 x2 y2 : lambda [mag] : spiro-outline
+			g4 (-r) 0
+			arcvh
+			flat 0 r
+			curl mag r
+			archv
+			g4 (mag + r) 0
+			arcvh
+			flat mag (-r)
+			curl 0 (-r)
+			archv
+			close
+
+	create-glyph [MangleName "whiteHeavySaltireWithRoundedCorners"] [MangleUnicode 0x1FBC0 WideWidth4] : glyph-proc
+		set-width Geom.Width
+		local inner : [Math.max [AdviceStroke 3] (Width / 8)] / 2
+		local thick : AdviceStroke 4
+		local left : Geom.Left + (inner + thick)
+		local right : Geom.Right - (inner + thick)
+		local bot : Geom.Bot + (inner + thick)
+		local top : Geom.Top - (inner + thick)
+		include : difference
+			union
+				ThickRoundedArrowBar left top right bot (inner + thick) 0
+				ThickRoundedArrowBar right top left bot (inner + thick) 0
+			union
+				ThickRoundedArrowBar left top right bot inner 0
+				ThickRoundedArrowBar right top left bot inner 0

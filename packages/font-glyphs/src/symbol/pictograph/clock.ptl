@@ -1,0 +1,42 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Symbol-Geometric-Clock : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+	define pHour 0.6
+	define pMin 0.8
+
+	define lightSw      : UnicodeWeightGrade 3    Geom.Scalar
+	define mediumSw     : UnicodeWeightGrade 5    Geom.Scalar
+
+	define [patterns min su] : foreach [hr: range 0 12] : begin
+			local name : 'clock' + [(hr + 1).toString 10 :.padStart 2 '0'] + [min.toString 10 :.padStart 2 '0']
+			create-glyph [MangleName name] [MangleUnicode (su + hr)] : glyph-proc
+				set-width MosaicWidth
+
+				include : RingStrokeAt Geom.MidX Geom.MidY Geom.Size mediumSw
+				include : CircleRingAt Geom.MidX Geom.MidY [Math.max (0.6 * mediumSw) (0.1 * Geom.Size)]
+				local minAngle : 2 * Math.PI * (min / 60)
+				include : dispiro
+					corner Geom.MidX Geom.MidY [widths.center lightSw]
+					corner
+						Geom.MidX + (Geom.Size - mediumSw) * pMin * [Math.sin minAngle]
+						Geom.MidY + (Geom.Size - mediumSw) * pMin * [Math.cos minAngle]
+				local hrAngle : 2 * Math.PI * ((min / 60 + hr + 1) / 12)
+				include : dispiro
+					corner Geom.MidX Geom.MidY [widths.center mediumSw]
+					corner
+						Geom.MidX + (Geom.Size - mediumSw) * pHour * [Math.sin hrAngle]
+						Geom.MidY + (Geom.Size - mediumSw) * pHour * [Math.cos hrAngle]
+
+	patterns 0 0x1F550
+	patterns 30 0x1F55C

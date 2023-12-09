@@ -1,0 +1,71 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Math-Large-Operators : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-Long-S : LongSShape
+	glyph-block-import Letter-Latin-U : UShape
+	glyph-block-import Letter-Greek-Upper-Sigma : SigmaShape
+	glyph-block-import Letter-Greek-Pi : PiShape
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	define MosaicTop    fontMetrics.os2.sTypoAscender
+	define MosaicBottom fontMetrics.os2.sTypoDescender
+	define MosaicHeight : MosaicTop - MosaicBottom
+
+	define diversityLargeOperators : Math.max para.diversityM (MosaicWidth / Width)
+	define df : DivFrame diversityLargeOperators 0 [if FMosaicWide diversityLargeOperators 1]
+
+	create-glyph [MangleName 'sum'] [MangleUnicode 0x2211] : glyph-proc
+		set-width df.width
+		include : SigmaShape df BgOpTop BgOpBot OperatorStroke
+
+	create-glyph [MangleName 'sumUpper'] [MangleUnicode 0x23B2] : glyph-proc
+		set-width df.width
+		include : intersection
+			MaskAbove MosaicBottom
+			SigmaShape df BgOpTop (BgOpBot - MosaicHeight * 2) OperatorStroke (pCenter -- 0.75)
+
+	create-glyph [MangleName 'sumLower'] [MangleUnicode 0x23B3] : glyph-proc
+		set-width df.width
+		include : intersection
+			MaskBelow MosaicTop
+			SigmaShape df (BgOpTop + MosaicHeight * 2) BgOpBot OperatorStroke (pCenter -- 0.75)
+
+	create-glyph [MangleName 'mathbb/sum'] [MangleUnicode 0x2140] : glyph-proc
+		set-width df.width
+		local kDiag : DiagCorDs (BgOpTop - BgOpBot) (df.rightSB - df.leftSB) BBD
+		include : SigmaShape df BgOpTop BgOpBot BBS (noSerif -- true)
+		include : SigmaShape df BgOpTop BgOpBot BBS (noSerif -- true) (offsetLeft -- kDiag * BBD)
+
+	create-glyph [MangleName 'product'] [MangleUnicode 0x220F] : glyph-proc
+		set-width df.width
+		include : PiShape df BgOpTop BgOpBot (shrinkRate -- 0) (fine -- OperatorStroke) (doSerif -- SLAB)
+
+	turned [MangleName 'coproduct'] [MangleUnicode 0x2210] [MangleName 'product'] df.middle SymbolMid
+
+	create-glyph [MangleName 'Vee'] [MangleUnicode 0x22C1] : glyph-proc
+		set-width df.width
+		include : dispiro
+			widths.center OperatorStroke
+			flat df.leftSB BgOpTop
+			curl df.middle BgOpBot [heading Downward]
+		include : dispiro
+			widths.center OperatorStroke
+			flat df.rightSB BgOpTop
+			curl df.middle BgOpBot [heading Downward]
+
+	turned [MangleName 'Wedge'] [MangleUnicode 0x22C0] [MangleName 'Vee'] df.middle SymbolMid
+
+	create-glyph [MangleName 'Cup'] [MangleUnicode 0x22C3] : glyph-proc
+		set-width df.width
+		include : UShape df BgOpTop BgOpBot
+			stroke -- OperatorStroke
+			ada -- [ArchDepthAOf (ArchDepth * [Math.sqrt df.div]) (df.width)]
+			adb -- [ArchDepthBOf (ArchDepth * [Math.sqrt df.div]) (df.width)]
+
+	turned [MangleName 'Cap'] [MangleUnicode 0x22C2] [MangleName 'Cup'] df.middle SymbolMid

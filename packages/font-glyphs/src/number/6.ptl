@@ -1,0 +1,110 @@
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Digits-Six : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : CodeLnum CodeOnum
+
+	glyph-block-export OpenContourSixShape
+	define [OpenContourSixShape charTop] : glyph-proc
+		local oTop : charTop * 0.55 + Stroke / 2
+		local fine   : Stroke * CThinB
+		local coFine : Math.max [AdviceStroke 3.5] (Stroke - fine / 2)
+		include : dispiro
+			widths.rhs fine
+			KnotAdj.ArchBot.o (ty -- g4.left.start) (Middle - TanSlope * (Stroke - fine)) (Stroke - fine)
+			archv
+			KnotAdj.BowlLeft.o g4 (SB + (Stroke - fine) * HVContrast) (oTop / 2)
+			arcvh
+			KnotAdj.ArchTop.o Middle oTop [widths.rhs]
+			archv
+			KnotAdj.BowlRight.o g4.down.mid RightSB (oTop / 2)
+			arcvh
+			KnotAdj.ArchBot.o (ty -- g4.left.mid) Middle 0
+			archv
+			KnotAdj.BowlLeft.o g4.up.mid SB (oTop / 2 + Stroke * 0.3) [widths.rhs coFine]
+			quadControls 0 0.85
+			g4 ([mix SB RightSB 0.85] - [HSwToV : 0.25 * Stroke]) (charTop - O) [widths.rhs]
+
+	glyph-block-export ClosedContourSixShape
+	define [ClosedContourSixShape top] : glyph-proc
+		local oTop : Math.max (2 * SmallArchDepth + 0.1) (top * 0.55 + HalfStroke)
+		include : dispiro
+			widths.rhs (Stroke * CThinB)
+			KnotAdj.BowlLeft.o straight.up.start (SB + Stroke * (1 - CThinB) * HVContrast) (oTop - SmallArchDepth)
+			arcvh
+			KnotAdj.ArchTop.o Middle oTop [widths.rhs Stroke]
+			archv
+			KnotAdj.BowlRight.o flat RightSB (oTop - SmallArchDepth)
+			KnotAdj.BowlRight.o curl RightSB (0    + SmallArchDepth)
+			arcvh
+			KnotAdj.ArchBot.o Middle 0
+			archv
+			KnotAdj.BowlLeft.o flat SB SmallArchDepth
+			KnotAdj.BowlLeft.o curl SB (top - SmallArchDepth)
+			hookend (top - O)
+			g4 RightSB (top - Hook)
+
+	glyph-block-export StraightBarSixShape
+	define [StraightBarSixShape] : with-params [charTop [sw Stroke] [bbd 0]] : glyph-proc
+		local oTop : charTop * 0.55 + sw / 2
+		local fine   : sw * CThin
+		local coFine : Math.max (sw * CThin) (sw - fine / 2)
+
+		local xMockBarStart   0
+		local yMockBarStart : KnotAdj.BowlLeft.yOf : oTop / 2 + sw * 0.3
+		local xTerminal0 : [mix SB RightSB 0.6] - [HSwToV : 0.5 * sw]
+		local kDiagBbd : DiagCorDs (charTop - yMockBarStart) (xTerminal0 - xMockBarStart) bbd
+		local xTerminal : xTerminal0 + (kDiagBbd * bbd / 2)
+		local pStraightBarStart : 0.75 - (sw / charTop)
+		include : intersection
+			Rect charTop (-charTop) (-Width) (2 * Width)
+			dispiro
+				widths.rhs fine
+				KnotAdj.ArchBot.o (ty -- g4.left.start) (Middle + bbd / 2 - TanSlope * (sw - fine)) (sw - fine + 1/16)
+				archv
+				KnotAdj.BowlLeft.o g4.up.mid (SB + bbd + (sw - fine) * HVContrast + 1/16) (oTop / 2)
+				arcvh
+				KnotAdj.ArchTop.o (Middle + bbd / 2) oTop [widths.rhs sw]
+				archv
+				KnotAdj.BowlRight.o g4.down.mid RightSB (oTop / 2)
+				arcvh
+				KnotAdj.ArchBot.o (ty -- g4.left.mid) (Middle + bbd / 2) 0
+				archv
+				KnotAdj.BowlLeft.o g4.up.mid (SB + bbd) (oTop / 2 + sw * 0.3) [widths.rhs coFine]
+				flat [mix (xMockBarStart + bbd) xTerminal pStraightBarStart] [mix yMockBarStart charTop pStraightBarStart] [widths.rhs sw]
+				curl [mix (xMockBarStart + bbd) xTerminal 2]                 [mix yMockBarStart charTop 2]
+
+		if bbd : include : HBar.t (xTerminal - kDiagBbd * bbd) xTerminal charTop sw
+		if bbd : include : intersection
+			Rect charTop (-charTop) (-Width) (2 * Width)
+			dispiro
+				KnotAdj.ArchBot.o (ty -- g4.left.mid) (Middle + bbd / 2) 0 [widths.rhs sw]
+				archv
+				KnotAdj.BowlLeft.o g4.up.mid SB (oTop / 2 + sw * 0.3)
+				flat [mix xMockBarStart (xTerminal - kDiagBbd * bbd) pStraightBarStart] [mix yMockBarStart charTop pStraightBarStart]
+				curl [mix xMockBarStart (xTerminal - kDiagBbd * bbd) 2]                 [mix yMockBarStart charTop 2]
+
+	create-glyph 'six.lnum.openContour' : glyph-proc
+		include : MarkSet.capital
+		include : OpenContourSixShape CAP
+
+	create-glyph 'six.lnum.closedContour' : glyph-proc
+		include : MarkSet.capital
+		include : ClosedContourSixShape CAP
+
+	create-glyph 'six.lnum.straightBar' : glyph-proc
+		include : MarkSet.capital
+		include : StraightBarSixShape CAP
+
+	select-variant 'six.lnum' [CodeLnum '6'] (follow -- 'six')
+	alias          'six.onum' [CodeOnum '6'] 'six.lnum'
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/six' 0x1D7DE : glyph-proc
+		include : MarkSet.capital
+		include : StraightBarSixShape CAP (sw -- BBS) (bbd -- BBD)

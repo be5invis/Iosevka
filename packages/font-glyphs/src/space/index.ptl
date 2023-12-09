@@ -1,0 +1,71 @@
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [Joining] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Spaces : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph '.null' : glyph-proc
+		set-width 0
+		set currentGlyph.glyphRank   (9998)
+
+	create-glyph 'space' ' ' : glyph-proc
+		local df : include : DivFrame para.diversityI
+
+	alias 'nbsp' 0xA0 'space'
+
+	create-glyph 'markDemoBaseSpace' 0xE00E : glyph-proc
+		local df : include : DivFrame 1
+		include : df.markSet.plus
+
+	create-glyph 'markBaseSpace' 0xE00D : glyph-proc
+		local df : include : DivFrame para.diversityI
+		include : df.markSet.e
+
+	create-glyph 'sp1' : glyph-proc
+		local df : include : DivFrame 1
+
+	alias 'enquad'           0x2000 'sp1'
+	alias 'ensp'             0x2002 'sp1'
+	alias 'brailleBlank'     0x2800 'sp1'
+	alias 'figureSpace'      0x2007 'sp1'
+	alias 'punctuationSpace' 0x2008 'sp1'
+
+	create-glyph 'zwsp' 0x200B : glyph-proc
+		set-width 0
+
+	alias 'nonmarkingreturn'   0x000D 'zwsp'
+	alias 'lineSeparator'      0x2028 'zwsp'
+	alias 'paragraphSeparator' 0x2029 'zwsp'
+	alias 'wj'                 0x2060 'zwsp'
+	alias 'funcApp'            0x2061 'zwsp'
+	alias 'invisibleTimes'     0x2062 'zwsp'
+	alias 'invisibleSeparator' 0x2063 'zwsp'
+	alias 'invisiblePlus'      0x2064 'zwsp'
+
+	create-glyph 'cgj' 0x34F : glyph-proc
+		set-width 0
+		Joining.set currentGlyph Joining.Classes.Mid
+
+	# The following spaces has explicit em-number. They will follow the em-number
+	# in quasiproportional, and identical to SPACE in monospace
+	define [FractionEmSp name code d] : create-glyph name code : glyph-proc
+		local df : include : DivFrame [if (para.diversityII < 1) (2 / d) 1]
+
+	FractionEmSp 'threePerEmSp' 0x2004 3
+	FractionEmSp 'fourPerEmsp'  0x2005 4
+	FractionEmSp 'sixPerEmsp'   0x2006 6
+	FractionEmSp 'thinSp'       0x2009 6
+	FractionEmSp 'hairSp'       0x200A 12
+	FractionEmSp 'mediumSp'     0x205F 4.5
+
+	alias 'nnbsp' 0x202F 'thinSp'
+
+	for-width-kinds WideWidth1
+		create-glyph [MangleName 'emsp'] [MangleUnicode 0x2003] : glyph-proc
+			set-width : if (para.isQuasiProportional && MosaicWidthScalar > 1) UPM MosaicWidth
+		alias [MangleName 'emquad'] [MangleUnicode 0x2001] [MangleName 'emsp']

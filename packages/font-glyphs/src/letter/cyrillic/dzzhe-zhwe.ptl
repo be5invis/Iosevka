@@ -1,0 +1,156 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Greek-Lower-Epsilon : CyrZe
+
+	glyph-block-export SubDfDimBy4
+	define [SubDfDimBy4 pShift keeps df _o] : begin
+		local subDf : df.slice 4 keeps _o
+		local subDfFullShift : (df.rightSB - subDf.rightSB) / (4 - keeps)
+		local shift : pShift * subDfFullShift
+		local sw : AdviceStroke 3.3 [df.slice 4 3 _o].div
+		return : object subDf shift sw
+
+	do "de subglyph"
+		glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
+		glyph-block-import Letter-Cyrillic-De : CyrDeShape CyrDeItalicShapeT
+
+		define [CyrDzzheDeShape df top] : glyph-proc
+			local [object subDf sw] : SubDfDimBy4 0 2 df OX
+			local left : if SLAB (subDf.leftSB + 0.5 * SideJut) subDf.leftSB
+			include : CyrDeShape top left subDf.rightSB sw
+
+		define [CyrDzzheDeItalicShape df] : glyph-proc
+			local [object subDf sw] : SubDfDimBy4 0 2 df OX
+			include : CyrDeItalicShapeT dispiro subDf sw
+
+		create-glyph "cyrl/Dzzhe/left" : glyph-proc
+			define df : include : DivFrame para.diversityM 3.5
+			include : df.markSet.capital
+			include : ExtendBelowBaseAnchors (-LongJut + 0.5 * Stroke)
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrDzzheDeShape df CAP
+
+		create-glyph "cyrl/dzzhe.upright/left" : glyph-proc
+			define df : include : DivFrame para.diversityM 3.5
+			include : df.markSet.e
+			include : ExtendBelowBaseAnchors (-LongJut + 0.5 * Stroke)
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrDzzheDeShape df XH
+
+		create-glyph "cyrl/dzzhe.italic/left" : glyph-proc
+			define df : include : DivFrame para.diversityM 3.5
+			include : df.markSet.b
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrDzzheDeItalicShape df
+
+	do "ze subglyph"
+		define SLAB-NONE       0
+		define SLAB-CLASSICAL  1
+		define SLAB-INWARD     2
+
+		define ZeConfig : object
+			serifless               { SLAB-NONE      SLAB-NONE      }
+			unilateralSerifed       { SLAB-CLASSICAL SLAB-NONE      }
+			bilateralSerifed        { SLAB-CLASSICAL SLAB-CLASSICAL }
+			unilateralInwardSerifed { SLAB-INWARD    SLAB-NONE      }
+			bilateralInwardSerifed  { SLAB-INWARD    SLAB-INWARD    }
+
+		define [CyrZhweZeShape slabTop slabBot df top hook] : glyph-proc
+			local [object subDf sw] : SubDfDimBy4 0 2 df OX
+			local ze : CyrZe slabTop slabBot top 0 subDf.leftSB subDf.rightSB 0.65 hook sw
+			include : ze.Shape
+			include : ze.AutoStartSerifL
+			include : ze.AutoEndSerifL
+
+		foreach { suffix { slabTop slabBot } } [Object.entries ZeConfig] : do
+			create-glyph "cyrl/Zhwe/left.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3.5
+				include : df.markSet.capital
+				set-base-anchor 'cvDecompose' 0 0
+				include : CyrZhweZeShape slabTop slabBot df CAP Hook
+
+			create-glyph "cyrl/zhwe/left.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3.5
+				include : df.markSet.e
+				set-base-anchor 'cvDecompose' 0 0
+				include : CyrZhweZeShape slabTop slabBot df XH SHook
+
+	do "zhe subglyphs"
+		glyph-block-import Letter-Cyrillic-Zhe : Zhe
+		define [CyrRightZheShape legShape fSlab fMidSlab df top barLeft] : glyph-proc
+			local [object subDf shift sw] : SubDfDimBy4 1 3 df OX
+			include : with-transform [ApparentTranslate shift 0] : Zhe.HalfShape legShape fSlab fMidSlab subDf 0 top top
+			include : HBar.m barLeft (shift + subDf.middle) (0.5 * top) sw
+
+		define [DzzheLeft df] : begin
+			local [object subDf sw] : SubDfDimBy4 0 2 df OX
+			local swInner : sw * [AdviceStroke 2.75] / Stroke
+			return : [mix subDf.leftSB subDf.rightSB : StrokeWidthBlend 0.95 0.96] - [HSwToV : 0.5 * swInner]
+
+		define [ZhweZheShape legShape fSlab fMidSlab df top hook] : glyph-proc
+			local [object subDf sw] : SubDfDimBy4 0 2 df OX
+			local ze : CyrZe 0 0 top 0 subDf.leftSB subDf.rightSB 0.65 hook (0.5 * sw)
+			include : difference [CyrRightZheShape legShape fSlab fMidSlab df top subDf.middle] [ze.ShapeMask]
+
+		glyph-block-import Letter-Cyrillic-De : CyrDeItalicShapeT
+		define [DzzheZheItalicShape legShape fSlab fMidSlab df top] : glyph-proc
+			local [object subDf sw] : SubDfDimBy4 0 2 df OX
+			include : difference
+				CyrRightZheShape legShape fSlab fMidSlab df top subDf.middle
+				CyrDeItalicShapeT spiro-outline subDf sw
+
+		define ZheConfig : object
+			straight            { Zhe.StraightLegs   SLAB  SLAB }
+			curly               { Zhe.CurlyLegs      SLAB  SLAB }
+			symmetricTouching   { Zhe.TouchingLegs   SLAB  SLAB }
+			symmetricConnected  { Zhe.ConnectingLegs SLAB  SLAB }
+			cursive             { Zhe.CursiveLegs    false SLAB }
+
+		foreach { suffix { legShape fSlab fMidSlab } } [Object.entries ZheConfig] : do
+			create-glyph "cyrl/Dzzhe/right.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3.5
+				include : df.markSet.capital
+				include : CyrRightZheShape legShape fSlab fMidSlab df CAP : DzzheLeft df
+
+			create-glyph "cyrl/dzzhe.upright/right.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3.5
+				include : df.markSet.e
+				include : CyrRightZheShape legShape fSlab fMidSlab df XH : DzzheLeft df
+
+			create-glyph "cyrl/dzzhe.italic/right.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3.5
+				include : df.markSet.e
+				include : DzzheZheItalicShape legShape fSlab fMidSlab df XH
+
+			create-glyph "cyrl/Zhwe/right.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3.5
+				include : df.markSet.capital
+				set-base-anchor 'cvDecompose' 0 0
+				include : ZhweZheShape legShape fSlab fMidSlab df CAP Hook
+
+			create-glyph "cyrl/zhwe/right.\(suffix)" : glyph-proc
+				define df : include : DivFrame para.diversityM 3.5
+				include : df.markSet.e
+				set-base-anchor 'cvDecompose' 0 0
+				include : ZhweZheShape legShape fSlab fMidSlab df XH SHook
+
+	select-variant "cyrl/Dzzhe/right" (follow -- "cyrl/Zhe")
+	select-variant "cyrl/dzzhe.upright/right" (follow -- "cyrl/zhe")
+	select-variant "cyrl/dzzhe.italic/right" (follow -- "cyrl/zhe")
+	select-variant "cyrl/Zhwe/right" (follow -- "cyrl/Zhe")
+	select-variant "cyrl/zhwe/right" (follow -- "cyrl/zhe")
+	select-variant "cyrl/Zhwe/left" (follow -- "cyrl/Ze")
+	select-variant "cyrl/zhwe/left" (follow -- "cyrl/ze")
+
+	derive-composites 'cyrl/Dzzhe' 0x52A  'cyrl/Dzzhe/left' 'cyrl/Dzzhe/right'
+	derive-composites 'cyrl/dzzhe.upright' null 'cyrl/dzzhe.upright/left' 'cyrl/dzzhe.upright/right'
+	derive-composites 'cyrl/dzzhe.italic' null 'cyrl/dzzhe.italic/left' 'cyrl/dzzhe.italic/right'
+	derive-composites 'cyrl/Zhwe'  0xA684 'cyrl/Zhwe/left' 'cyrl/Zhwe/right'
+	derive-composites 'cyrl/zhwe'  0xA685 'cyrl/zhwe/left' 'cyrl/zhwe/right'

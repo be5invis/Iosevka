@@ -1,0 +1,59 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Symbol-Cross : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+	define Size : GeometricSizes Geom
+
+	define mediumSw     : UnicodeWeightGrade 5    Geom.Scalar
+	define heavySw      : UnicodeWeightGrade 9    Geom.Scalar
+
+	define pBottom 2
+	define pShortBar 0.6
+	define pRing 0.6
+
+	define crossHeight : Geom.Size * Size.Large.size * 2
+	define shortSize : crossHeight / (pBottom + 1)
+	define yTop : Geom.MidY + 0.5 * crossHeight
+	define yBot : Geom.MidY - 0.5 * crossHeight
+	define yCenter : yTop - shortSize
+
+	define [LatinCross sw fSecondBar] : glyph-proc
+		include : dispiro
+			corner Geom.MidX yTop [widths.center sw]
+			corner Geom.MidX yBot
+		include : dispiro
+			corner (Geom.MidX - shortSize) yCenter [widths.center sw]
+			corner (Geom.MidX + shortSize) yCenter
+		if fSecondBar : include : dispiro
+			corner (Geom.MidX - pShortBar * shortSize) [mix yCenter yTop 0.5] [widths.center sw]
+			corner (Geom.MidX + pShortBar * shortSize) [mix yCenter yTop 0.5]
+
+	create-glyph [MangleName 'latinCross'] [MangleUnicode 0x271D] : glyph-proc
+		set-width Geom.Width
+		include : LatinCross mediumSw false
+	create-glyph [MangleName 'heavyLatinCross'] [MangleUnicode 0x1F547] : glyph-proc
+		set-width Geom.Width
+		include : LatinCross heavySw false
+
+	create-glyph [MangleName 'lorraineCross'] [MangleUnicode 0x2628] : glyph-proc
+		set-width Geom.Width
+		include : LatinCross mediumSw true
+	create-glyph [MangleName 'orthodoxCross'] [MangleUnicode 0x2626] : glyph-proc
+		set-width Geom.Width
+		include : LatinCross mediumSw true
+		include : dispiro
+			corner (Geom.MidX - pShortBar * shortSize) [mix yBot yCenter 0.45] [widths.center mediumSw]
+			corner (Geom.MidX + pShortBar * shortSize) [mix yBot yCenter 0.3]
+	create-glyph [MangleName 'celticCross'] [MangleUnicode 0x1F548] : glyph-proc
+		set-width Geom.Width
+		include : LatinCross mediumSw false
+		include : RingStrokeAt Geom.MidX yCenter (pRing * shortSize + 0.5 * mediumSw) mediumSw

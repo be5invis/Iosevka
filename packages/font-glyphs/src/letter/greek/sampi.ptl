@@ -1,0 +1,88 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Letter-Greek-Arachaic-Sampi : begin
+	glyph-block-import CommonShapes
+
+	define KSampiDepth 0.45
+	define [SampiShape df top bottom fDoSerifs] : glyph-proc
+		include : VBar.l  df.leftSB  top [mix (top - Stroke) bottom KSampiDepth] df.mvs
+		include : VBar.r df.rightSB top [mix (top - Stroke) bottom KSampiDepth] df.mvs
+		include : VBar.m      df.middle  top  bottom                                 df.mvs
+		include : HBar.t df.leftSB df.rightSB top
+		if (fDoSerifs && SLAB) : include : HSerif.mb df.middle 0 MidJutSide
+
+	create-glyph 'grek/SampiArchaic' 0x372 : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.capital
+		include : SampiShape df CAP 0 true
+
+	create-glyph 'grek/sampiArchaic' 0x373 : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.p
+		include : SampiShape df XH Descender false
+
+glyph-block Letter-Greek-Sampi : begin
+	glyph-block-import CommonShapes
+
+	create-glyph 'grek/Sampi' 0x3E0 : glyph-proc
+		include : MarkSet.capital
+		define sw   : AdviceStroke 3
+		define fine : AdviceStroke 4.25
+		define rightStrokeShift : HSwToV : 0.45 * sw
+		define leftStrokeShift : HSwToV : 0.45 * fine
+		define [LeftSideMask] : spiro-outline
+			corner (RightSB - [HSwToV HalfStroke] + O) 0
+			corner Middle CAP
+			corner (-2 * Width) CAP
+			corner (-2 * Width) 0
+		include : intersection
+			MaskBelow CAP
+			MaskAbove 0
+			ExtLineCenter 2 sw (RightSB - rightStrokeShift) 0 Middle CAP
+		include : intersection [LeftSideMask] : union
+			ExtLineCenter 2 fine (SB + leftStrokeShift) 0 Middle CAP
+			ExtLineCenter 2 fine [mix SB RightSB 0.45] 0 ([mix SB RightSB 0.95] - leftStrokeShift) CAP
+
+		if SLAB : include : difference
+			HSerif.mb (RightSB - [HSwToV : 0.5 * sw]) 0 Jut
+			LeftSideMask
+
+	create-glyph 'grek/sampi' 0x3E1 : glyph-proc
+		include : MarkSet.p
+		define x1 : mix SB RightSB 0.95
+		define [SampiKnots offset] : list
+			g4 SB (XH - O + offset)
+			g4 [mix SB RightSB 0.5] [mix (XH + offset) (Descender - offset) 0.125]
+			g4.down.mid (RightSB - OX + offset) [mix Descender XH 0.25]
+			g4 x1 (Descender + O - offset)
+		include : dispiro [widths.rhs] [SampiKnots 0]
+		include : intersection
+			spiro-outline [SampiKnots O] [close]
+			union
+				dispiro
+					widths.center (Stroke * 1.5 + XH / 6)
+					flat   SB (XH - O)
+					curl   x1 (Descender + O)
+				spiro-outline
+					corner SB CAP
+					corner SB (XH - O)
+					corner x1 (Descender - O)
+					corner (2 * Width) (Descender - O)
+					corner (2 * Width) CAP
+					close
+			union
+				ExtLineCenter 2 Stroke
+					[mix SB x1 0.35] + 0
+					[mix XH Descender 0.35] + 0
+					[mix SB x1 0.35] + (XH - Descender)
+					[mix XH Descender 0.35] + (x1 - SB)
+				ExtLineCenter 2 Stroke
+					[mix SB x1 0.65] + 0
+					[mix XH Descender 0.65] + 0
+					[mix SB x1 0.65] + (XH - Descender)
+					[mix XH Descender 0.65] + (x1 - SB)

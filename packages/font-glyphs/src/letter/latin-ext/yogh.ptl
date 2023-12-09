@@ -1,0 +1,68 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Latin-Yogh : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifedArcStart InwardSlabArcStart ArcStartSerif
+
+	define SLAB-NONE       0
+	define SLAB-CLASSICAL  1
+	define SLAB-INWARD     2
+
+	define [PhantomBotYOfUpperHalf top bot] : [mix bot top OverlayPos] - 0.25 * Stroke
+	define [TopYOfLowerHalf top bot] : [mix bot top OverlayPos] + 0.06 * Stroke
+
+	define [UpperHalfT sink slab offset top bot] : begin
+		local py : PhantomBotYOfUpperHalf top bot
+		local yRightHalf : YSmoothMidR top py
+		local yBottomTerminal : mix top py 1.2
+		return : sink
+			match slab
+				[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs SB Middle (top - offset) Stroke Hook
+				[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs SB Middle (top - offset) Stroke Hook
+				__ : list [g4 SB (top - Hook) [widths.rhs]] [hookstart (top - offset - O)]
+			g4 (RightSB - offset) yRightHalf
+			alsoThruThem {{0.5 0.8} {0.75 0.92}} important
+			[if (sink == dispiro) g4 corner] ([mix SB RightSB 0.1] + Stroke * 0.25) yBottomTerminal
+
+	define [LowerHalfT sink top bot] : begin
+		local pyt : mix bot [TopYOfLowerHalf top bot] 1.2
+		local pyb : mix bot [TopYOfLowerHalf top bot] 0.2
+
+		return : sink
+			g4 (Middle - CorrectionOMidS) pyt [widths.rhs]
+			archv
+			g4 RightSB [YSmoothMidR pyt pyb]
+			alsoThruThem {{0.25 [StrokeWidthBlend 0.63 0.66]} {0.5 [StrokeWidthBlend 0.84 0.85]}} important
+			g4 (SB + 0.1 * HVContrast * Stroke) (bot + O)
+
+	define [YoghShape slab top bot] : glyph-proc
+		include : UpperHalfT dispiro slab 0 top bot
+		include : difference
+			LowerHalfT dispiro top bot
+			UpperHalfT spiro-outline slab 0.1 top bot
+
+		include : match slab
+			[Just SLAB-CLASSICAL] : ArcStartSerif.L SB top Stroke Hook
+			[Just SLAB-INWARD] : ArcStartSerif.InwardL SB top Stroke Hook
+			__ : no-shape
+
+	define Config : object
+		serifless               { SLAB-NONE      }
+		unilateralSerifed       { SLAB-CLASSICAL }
+		unilateralInwardSerifed { SLAB-INWARD    }
+
+	foreach { suffix { slabTop } } [Object.entries Config] : do
+		create-glyph "Yogh.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : YoghShape slabTop CAP 0
+		create-glyph "yogh.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : YoghShape slabTop XH Descender
+
+	select-variant 'Yogh' 0x21C
+	select-variant 'yogh' 0x21D

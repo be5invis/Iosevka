@@ -1,0 +1,89 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-E : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Shared-Metrics : markHalfStroke
+	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateOgonekComposition
+	glyph-block-import Letter-Latin-Upper-F : xMidBarShrink yMidBar EFVJutLength
+
+	define kSB 1
+	define xEBarLeft     : SB * kSB - O
+	define xRevEBarRight : Width - SB * kSB + O
+	define [EShape] : with-params [top pyBar serifLT serifLB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+		include : VBar.l (xEBarLeft) 0 top stroke
+		include : HBar.t (xEBarLeft - O) RightSB top stroke
+		include : HBar.m (xEBarLeft - O) (RightSB - [xMidBarShrink serifV]) [yMidBar top pyBar] stroke
+		include : HBar.b (xEBarLeft - O) RightSB 0 stroke
+		if serifLT : include : HSerif.lt xEBarLeft top SideJut
+		if serifLB : include : HSerif.lb xEBarLeft 0 SideJut
+		if serifV : begin
+			local { jutTop jutBot } : EFVJutLength top pyBar stroke
+			include : VSerif.dr RightSB top jutTop
+			include : VSerif.ur RightSB 0 jutBot
+
+	glyph-block-export RevEShape
+	define [RevEShape] : with-params [top pyBar serifRT serifRB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+		include : VBar.r (xRevEBarRight) 0 top stroke
+		include : HBar.t SB (xRevEBarRight + O) top stroke
+		include : HBar.m (SB + [xMidBarShrink serifV]) (xRevEBarRight + O) [yMidBar top pyBar] stroke
+		include : HBar.b SB (xRevEBarRight + O) 0 stroke
+		if serifRT : include : HSerif.rt xRevEBarRight top SideJut
+		if serifRB : include : HSerif.rb xRevEBarRight 0 SideJut
+		if serifV : begin
+			local { jutTop jutBot } : EFVJutLength top pyBar stroke
+			include : VSerif.dl SB top jutTop
+			include : VSerif.ul SB 0 jutBot
+
+	define EConfig : object
+		serifless      { false false false }
+		topLeftSerifed { true false false  }
+		serifed        { true true true    }
+
+	foreach { suffix { lt lb v } } [Object.entries EConfig] : do
+		create-glyph "E.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : EShape CAP (serifLT -- lt) (serifLB -- lb) (serifV -- v)
+			set-base-anchor 'trailing' RightSB 0
+
+		create-glyph "grek/Epsilon.\(suffix)" : glyph-proc
+			include [refer-glyph "E.\(suffix)"] AS_BASE ALSO_METRICS
+			include : SetGrekUpperTonos [if lt (-SideJut) 0]
+
+		create-glyph "smcpE.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : EShape XH (serifLT -- lt) (serifLB -- lb) (serifV -- v)
+			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+		create-glyph "revE.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : RevEShape CAP (serifRT -- lt) (serifRB -- lb) (serifV -- v)
+
+
+	select-variant 'E' 'E'
+	link-reduced-variant 'E/sansSerif' 'E' MathSansSerif
+	select-variant 'grek/Epsilon' 0x395 (follow -- 'E')
+	link-reduced-variant 'grek/Epsilon/sansSerif' 'grek/Epsilon' MathSansSerif (follow -- 'E/sansSerif')
+
+	select-variant 'smcpE' 0x1D07 (follow -- 'E')
+	alias 'cyrl/Ie' 0x415 'E'
+
+	select-variant 'revE' 0x18E (follow -- 'E')
+	turned 'turnSmcpE' 0x2C7B 'smcpE' Middle (XH / 2)
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/E' 0x1D53C : glyph-proc
+		include : MarkSet.capital
+		include : union
+			difference
+				EShape CAP (serif -- false) (stroke -- BBS)
+				Rect (CAP - BBS) BBS (xEBarLeft + [HSwToV BBS]) (xEBarLeft + BBD)
+			VBar.l (xEBarLeft + BBD) 0 CAP BBS
+
+	# Ognoek shapes
+	CreateOgonekComposition 'EOgonek' 0x118 'E'

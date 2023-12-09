@@ -1,0 +1,86 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [Box] from "@iosevka/geometry/box"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Suit-Cards : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Pictograph-Heart : HeartShapeImpl
+
+	define df : DivFrame para.diversityM
+	define sw : AdviceStroke 4.25
+	define suit : new Box
+		mix SymbolMid PictTop 0.75
+		mix SymbolMid PictBot 0.75
+		df.middle - [mix RightSB Width (1 / 2)] + Middle
+		df.middle + [mix RightSB Width (1 / 2)] - Middle
+
+	define [wrap g] : glyph-proc
+		set-width df.width
+		include g AS_BASE
+
+	create-glyph 'heartSuit' 0x2665 : wrap
+		HeartShapeImpl suit 0 0 0
+
+	create-glyph 'whiteHeartSuit' 0x2661 : wrap : difference [refer-glyph 'heartSuit']
+		HeartShapeImpl suit sw 1.75 0.8
+
+	create-glyph 'spadeSuit' 0x2660 : wrap : union
+		create-glyph : glyph-proc
+			include : HeartShapeImpl [suit.withTop : suit.mixY (1 / 0.975)] 0 0 0
+			include : Ungizmo
+			include : Translate (-suit.xMid) (-suit.bottom)
+			include : Scale 1 (-0.75)
+			include : Translate suit.xMid suit.top
+			include : Regizmo
+		HBar.b [mix df.leftSB df.rightSB 0.25] [mix df.rightSB df.leftSB 0.25] suit.bottom sw
+		VBar.m suit.xMid suit.bottom [suit.mixY (1 - 0.75 * 0.75)] sw
+
+	create-glyph 'whiteSpadeSuit' 0x2664 : wrap : difference [refer-glyph 'spadeSuit'] : create-glyph : glyph-proc
+		include : HeartShapeImpl [suit.withTop : suit.mixY (1 / 0.975)] sw 2 0
+		include : Ungizmo
+		include : Translate (-suit.xMid) (-suit.bottom)
+		include : Scale 1 (-0.75)
+		include : Translate suit.xMid suit.top
+		include : Regizmo
+
+	local clubTopY : suit.mixY 0.78
+	local clubTriangleHeight : (suit.top - suit.bottom) * 0.3
+	define [ClubTriangles r] : union
+		RingAt suit.xMid clubTopY r
+		RingAt (suit.xMid - clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight) r
+		RingAt (suit.xMid + clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight) r
+		spiro-outline
+			corner suit.xMid clubTopY
+			corner (suit.xMid - clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight)
+			corner (suit.xMid + clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight)
+
+	define [ClubShape r] : create-glyph : union
+		ClubTriangles r
+		HBar.b [mix df.leftSB df.rightSB 0.25] [mix df.rightSB df.leftSB 0.25] suit.bottom sw
+		VBar.m suit.xMid suit.bottom [suit.mixY 0.45] sw
+
+	local circleRadius : (suit.top - suit.bottom) * 0.18
+
+	create-glyph 'clubSuit' 0x2663 : wrap : ClubShape circleRadius
+
+	create-glyph 'whiteClubSuit' 0x2667 : wrap : glyph-proc
+		local ro : circleRadius + sw / 2
+		local ri : circleRadius - sw / 2
+		include : difference [ClubShape ro] [ClubTriangles ri]
+
+	create-glyph 'diamondSuit' 0x2666 : wrap : spiro-outline
+		corner suit.xMid suit.top
+		corner (suit.right - O) SymbolMid
+		corner suit.xMid suit.bottom
+		corner (suit.left + O) SymbolMid
+
+	create-glyph 'whiteDiamondSuit' 0x2662 : wrap : intersection [refer-glyph 'diamondSuit']
+		union
+			dispiro [widths.rhs sw] [flat suit.xMid suit.top] [curl (suit.right - O) SymbolMid]
+			dispiro [widths.rhs sw] [flat (suit.right - O) SymbolMid] [curl suit.xMid suit.bottom]
+			dispiro [widths.rhs sw] [flat suit.xMid suit.bottom] [curl (suit.left + O) SymbolMid]
+			dispiro [widths.rhs sw] [flat (suit.left + O) SymbolMid] [curl suit.xMid suit.top]

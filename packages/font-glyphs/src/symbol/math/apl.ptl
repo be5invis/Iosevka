@@ -1,0 +1,276 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+import [Point] from "@iosevka/geometry/point"
+import [AplForm] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Symbol-Math-APL : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-U : UShape
+
+	# Dimensions
+	define aplBoxInnerTop BgOpTop
+	define aplBoxInnerBot BgOpBot
+	define aplBoxSW : AdviceStroke 4.5
+	define aplBoxTop : mix SymbolMid aplBoxInnerTop 1.1
+	define aplBoxBot : mix SymbolMid aplBoxInnerBot 1.1
+	define aplBoxInnerScale : Math.min ((Width - aplBoxSW * 1.75) / Width) ((aplBoxInnerTop - aplBoxInnerBot) / (ParenTop - ParenBot))
+
+	define [Overlay fnOverlay fnBackground] : glyph-proc
+		define sw : [AdviceStroke 6] / 2
+		local candidates {}
+		define segs 3
+
+		define overlay    : new-glyph : glyph-proc : include fnOverlay    AS_BASE ALSO_METRICS
+		define background : new-glyph : glyph-proc : include fnBackground AS_BASE ALSO_METRICS
+
+		local corners : new-glyph : glyph-proc
+			set this.gizmo : Translate 0 0
+			foreach [c : items-of : overlay.geometry.asContours] : foreach [z : items-of c] : do
+				if (z.type === Point.Type.Corner) : begin
+					define x z.x
+					define y z.y
+					include : spiro-outline
+						corner (x - sw) (y - sw)
+						corner (x + sw) (y - sw)
+						corner (x + sw) (y + sw)
+						corner (x - sw) (y + sw)
+
+		foreach [r : range (0 - segs) till (segs)] : foreach [c : range (0 - segs) till (segs)] : do
+			define dx : r / segs * sw
+			define dy : c / segs * sw
+			candidates.push : new-glyph : glyph-proc
+				include overlay
+				include : Translate dx dy
+
+		include : difference background corners [union.apply null candidates]
+		include overlay
+
+	create-glyph 'apl/quad' 0x2395 : glyph-proc
+		local l [mix 0 SB (1 / 3)]
+		local r [mix Width RightSB (1 / 3)]
+		include : HBar.t    l r aplBoxTop aplBoxSW
+		include : HBar.b l r aplBoxBot aplBoxSW
+		include : VBar.l   l aplBoxTop aplBoxBot aplBoxSW
+		include : VBar.r  r aplBoxTop aplBoxBot aplBoxSW
+
+	create-glyph 'apl/quadShadow' : glyph-proc
+		local l [mix 0 SB (1 / 3)]
+		local r [mix Width RightSB (1 / 3)]
+		include : spiro-outline
+			corner l aplBoxTop
+			corner r aplBoxTop
+			corner r aplBoxBot
+			corner l aplBoxBot
+
+	create-glyph 'apl/iBar' 0x2336 : glyph-proc
+		local l [mix 0 SB (1 / 3)]
+		local r [mix Width RightSB (1 / 3)]
+		include : HBar.t l r OperTop OperatorStroke
+		include : HBar.b l r OperBot OperatorStroke
+		include : VBar.m Middle OperTop OperBot OperatorStroke
+
+	create-glyph 'apl/squish' 0x2337 : glyph-proc
+		local l : mix SB RightSB (1 / 8)
+		local r : mix RightSB SB (1 / 8)
+		include : union
+			HBar.t    l r aplBoxTop aplBoxSW
+			HBar.b l r aplBoxBot aplBoxSW
+			VBar.l   l aplBoxTop aplBoxBot aplBoxSW
+			VBar.r  r aplBoxTop aplBoxBot aplBoxSW
+
+	create-glyph 'apl/lamp' 0x235D : glyph-proc
+		local shift : OperTop - 2 * ArchDepth - OperBot
+		local fine : CThin * [AdviceStroke 4]
+		local [InnerCircleMask sw] : spiro-outline
+			corner (SB + HVContrast * (Stroke - fine)) (OperTop + shift)
+			curl   (SB + HVContrast * (Stroke - fine)) (OperBot + ArchDepthB + shift)
+			arcvh
+			g4     (Middle + CorrectionOMidX * OperatorStroke) (OperBot + (OperatorStroke - sw) + shift + O)
+			archv
+			flat   (RightSB - HVContrast * (Stroke - fine)) (OperBot + ArchDepthA + shift)
+			corner (RightSB - HVContrast * (Stroke - fine)) (OperTop + shift)
+		include : union
+			composite-proc
+				UShape [DivFrame 1] OperTop OperBot (stroke -- OperatorStroke)
+				FlipAround Middle SymbolMid
+			intersection
+				UShape [DivFrame 1] (OperTop + shift) (OperBot + shift) (stroke -- OperatorStroke)
+				InnerCircleMask OperatorStroke
+				composite-proc [InnerCircleMask fine] [FlipAround Middle (OperTop - ArchDepth)]
+
+	create-glyph 'apl/bar' : glyph-proc
+		include : VBar.m Middle aplBoxTop aplBoxBot aplBoxSW
+
+	create-glyph 'apl/longBar' : glyph-proc
+		include : VBar.m Middle aplBoxTop aplBoxBot aplBoxSW
+
+	create-glyph 'apl/minus' : glyph-proc
+		include : dispiro
+			widths.center aplBoxSW
+			flat RightSB  [mix OperTop OperBot 0.5]
+			curl SB       [mix OperTop OperBot 0.5]
+
+	create-glyph 'apl/backSlash' : glyph-proc
+		include : dispiro
+			widths.center aplBoxSW
+			flat SB       OperTop
+			curl RightSB  OperBot
+
+	define [aplBoxed shape] : Overlay [refer-glyph 'apl/quad'] : glyph-proc
+		include : intersection [refer-glyph 'apl/quadShadow'] shape
+		include : ScaleAround Middle SymbolMid aplBoxInnerScale
+
+
+	define [centerSmallPunctuations] : glyph-proc
+		include : ApparentTranslate (Width / 2 - currentGlyph.advanceWidth / 2) 0
+		set-width Width
+
+	define [aplBoxedInner gn] : new-glyph : glyph-proc
+		include [refer-glyph gn] AS_BASE ALSO_METRICS
+		include : centerSmallPunctuations
+
+	# Aliases
+	alias 'apl/iota'  0x2373 'grek/iota'
+	alias 'apl/rho'   0x2374 'grek/rho'
+	alias 'apl/omega' 0x2375 'grek/omega'
+	alias 'apl/alpha' 0x237A 'grek/alpha'
+
+	# Boxed
+	define [DeriveBoxed src] : aplBoxed : aplBoxedInner src
+	derive-glyphs 'uni2338' 0x2338 'equal'                          DeriveBoxed
+	derive-glyphs 'uni233A' 0x233A 'whiteDiamondOperator'           DeriveBoxed
+	derive-glyphs 'uni233B' 0x233B 'mathSmallCircle'                DeriveBoxed
+	derive-glyphs 'uni233C' 0x233C 'whiteCircle.NWID'               DeriveBoxed
+	derive-glyphs 'uni2341' 0x2341 'slash'                          DeriveBoxed
+	derive-glyphs 'uni2342' 0x2342 'backslash'                      DeriveBoxed
+	derive-glyphs 'uni2343' 0x2343 'less'                           DeriveBoxed
+	derive-glyphs 'uni2344' 0x2344 'greater'                        DeriveBoxed
+	derive-glyphs 'uni2347' 0x2347 'arrowLeft.NWID'                 DeriveBoxed
+	derive-glyphs 'uni2348' 0x2348 'arrowRight.NWID'                DeriveBoxed
+	derive-glyphs 'uni234C' 0x234C 'vee'                            DeriveBoxed
+	derive-glyphs 'uni234D' 0x234D 'increment.aplForm'              DeriveBoxed
+	derive-glyphs 'uni2350' 0x2350 'arrowUp.NWID'                   DeriveBoxed
+	derive-glyphs 'uni2353' 0x2353 'wedge'                          DeriveBoxed
+	derive-glyphs 'uni2354' 0x2354 'nabla.aplForm'                  DeriveBoxed
+	derive-glyphs 'uni2357' 0x2357 'arrowDown.NWID'                 DeriveBoxed
+	derive-glyphs 'uni235E' 0x235E 'asciiSingleQuote/body/straight' DeriveBoxed
+	derive-glyphs 'uni236F' 0x236F 'notequal'                       DeriveBoxed
+	derive-glyphs 'uni2339' 0x2339 'divide'                         DeriveBoxed
+	derive-glyphs 'uni2360' 0x2360 'colon/mid'                      DeriveBoxed
+	derive-glyphs 'uni2370' 0x2370 'question'                       DeriveBoxed
+
+	# Simple Composites
+	create-glyph 0x233D : composite-proc [refer-glyph 'apl/bar'] [refer-glyph 'whiteCircle.NWID']
+	create-glyph 0x233E : composite-proc [refer-glyph 'whiteCircle.NWID'] [refer-glyph 'whiteSmallCircle.NWID']
+	create-glyph 0x233F : composite-proc [refer-glyph 'apl/minus'] [refer-glyph 'slash']
+	create-glyph 0x2340 : composite-proc [refer-glyph 'apl/minus'] [refer-glyph 'backslash']
+	create-glyph 0x2349 : composite-proc [refer-glyph 'apl/backSlash'] [refer-glyph 'whiteCircle.NWID']
+	derive-composites 'apl/deltaStile' 0x234B  'increment.aplThin' 'apl/longBar'
+	create-glyph 0x234F : composite-proc [refer-glyph 'arrowUp.NWID'] [refer-glyph 'minus']
+	derive-composites 'apl/delStile'   0x2352  'nabla.aplThin'     'apl/longBar'
+	create-glyph 0x2356 : composite-proc [refer-glyph 'arrowDown.NWID'] [refer-glyph 'minus']
+	derive-composites 'apl/deltaUnderbar' 0x2359 'increment.aplForm' 'underlineBelow'
+	create-glyph 0x2366 : composite-proc [refer-glyph 'cup'] [refer-glyph 'apl/bar']
+	create-glyph 0x236D : composite-proc [refer-glyph 'overlayTildeOperator'] [refer-glyph 'bar']
+
+	derive-composites 'apl/barComma' 0x236A 'comma' [centerSmallPunctuations] 'minus'
+	derive-composites 'apl/zeroTilde' 0x236C 'zero.lnum/forceUnslashed' 'overlayTildeOperator'
+
+	# Dieresis & underscore
+	define [AplAccented u part1 part2 marks]
+		derive-multi-part-glyphs [NameUni u] u {part1 part2} : function [srcs gr] : composite-proc
+			refer-glyph srcs.0
+			centerSmallPunctuations
+			begin marks
+			refer-glyph srcs.1
+			clear-anchors
+
+	AplAccented 0x2362 'nabla.aplForm'                     'dieresisAbove'  [MarkSet.tack]
+	AplAccented 0x2361 'top'                               'dieresisAbove'  [MarkSet.tack]
+	AplAccented 0x2363 'asterisk.pentaSMid'                'dieresisAbove'  [MarkSet.plus]
+	AplAccented 0x2364 'mathSmallCircle'                   'dieresisAbove'  [MarkSet.plus]
+	AplAccented 0x2365 'whiteCircle.NWID'                  'dieresisAbove'  [MarkSet.plus]
+	AplAccented 0x2368 'asciiTilde.low'                    'dieresisAbove'  [MarkSet.plus]
+	AplAccented 0x2369 'greater.narrow'                    'dieresisAbove'  [MarkSet.plus]
+	AplAccented 0x234A 'bot'                               'underlineBelow' [MarkSet.tack]
+	AplAccented 0x2358 'asciiSingleQuote/body/straight'    'underlineBelow' [MarkSet.plus]
+	AplAccented 0x235A 'whiteDiamondOperator'              'underlineBelow' [MarkSet.plus]
+	AplAccented 0x235B 'mathSmallCircle'                   'underlineBelow' [MarkSet.plus]
+	AplAccented 0x235C 'whiteCircle.NWID'                  'underlineBelow' [MarkSet.plus]
+	AplAccented 0x2377 'smallElement.aplForm'              'underlineBelow' [MarkSet.e]
+
+	derive-composites 'apl/alphaBar' 0x2376 'grek/alpha' [refer-glyph 'underlineBelow'] [clear-anchors]
+	derive-composites 'apl/iotaBar'  0x2378 'grek/iota'  [refer-glyph 'underlineBelow'] [clear-anchors]
+	derive-composites 'apl/omegaBar' 0x2379 'grek/omega' [refer-glyph 'underlineBelow'] [clear-anchors]
+
+	# Overline
+	create-glyph 0x2351 : composite-proc [refer-glyph 'top'] [MarkSet.tack] [refer-glyph 'sbRsbOverlineAbove'] [clear-anchors]
+
+	# Overlay
+	create-glyph 0x2345 : composite-proc : Overlay [refer-glyph 'arrowLeft.NWID'] [refer-glyph 'apl/bar']
+	create-glyph 0x2346 : composite-proc : Overlay [refer-glyph 'arrowRight.NWID'] [refer-glyph 'apl/bar']
+
+	# Circled
+	derive-multi-part-glyphs 'uni235F' 0x235F { 'mathOOutline' 'opAsterisk.penta' 'mathO' } : function [srcs sel] : glyph-proc
+		local { outline asterisk mathO } srcs
+		include : union [refer-glyph mathO] : intersection [refer-glyph outline] [refer-glyph asterisk]
+
+	# Underlined
+	derive-glyphs 'apl/barSemicolon' 0x236E 'semicolon'
+		function [src gr] : Overlay [aplBoxedInner src] [refer-glyph 'underscore.high']
+
+	# Complex Composition
+	create-glyph 0x2367 : composite-proc [refer-glyph 'apl/bar'] : union
+		intersection [MaskLeft Middle] [refer-glyph 'subst/aplLeft']
+		intersection [MaskRight Middle] [refer-glyph 'subst']
+
+	define [DeriveTiledOverlay srcs gr] : composite-proc [refer-glyph 'overlayTildeOperator'] : union
+		difference   [refer-glyph srcs.0] [refer-glyph 'overlayTildeOperatorAboveMask']
+		intersection [refer-glyph srcs.1] [refer-glyph 'overlayTildeOperatorAboveMask']
+
+	derive-multi-part-glyphs 'uni236B' 0x236B { 'nabla.aplThin' 'nabla.aplForm' } DeriveTiledOverlay
+	derive-multi-part-glyphs 'uni2371' 0x2371 { 'vee/aplThin'   'vee'           } DeriveTiledOverlay
+	derive-multi-part-glyphs 'uni2372' 0x2372 { 'wedge/aplThin' 'wedge'         } DeriveTiledOverlay
+
+	# APL uses White Circle and Arrows as operators, this function links them as APL form
+	# and fixes Unicode assignments
+	glyph-block-export LinkAplFormForNwidWwid
+	define [LinkAplFormForNwidWwid gn] : begin
+		define gWwid : query-glyph "\(gn).WWID"
+		define gNwid : query-glyph "\(gn).NWID"
+		if (gWwid && gNwid) : begin
+			AplForm.set gWwid "\(gn).NWID"
+			if (para.variantSelector.__enableAplForm === 'enable') : begin
+				local us : glyphStore.queryUnicodeOf gWwid
+				if us : begin
+					glyphStore.deleteUnicodeAssignmentsOf gWwid
+					foreach u us : glyphStore.encodeGlyph u gNwid
+
+	LinkAplFormForNwidWwid 'whiteCircle'
+	LinkAplFormForNwidWwid 'arrowLeft'
+	LinkAplFormForNwidWwid 'arrowRight'
+	LinkAplFormForNwidWwid 'arrowUp'
+	LinkAplFormForNwidWwid 'arrowDown'
+
+	# BQN symbols
+	LinkAplFormForNwidWwid 'arrowUpDown'
+	LinkAplFormForNwidWwid 'arrowUpLeft'
+	LinkAplFormForNwidWwid 'arrowDownLeft'
+	LinkAplFormForNwidWwid 'hookArrowLeft'
+	LinkAplFormForNwidWwid 'arrowLeftRightHR'
+	LinkAplFormForNwidWwid 'dblArrowLeft'
+	LinkAplFormForNwidWwid 'uni231C'
+	LinkAplFormForNwidWwid 'uni2389'
+	LinkAplFormForNwidWwid 'uni238A'
+	LinkAplFormForNwidWwid 'uni25F6'
+	LinkAplFormForNwidWwid 'uni2687'
+
+	# Uiua symbols
+	LinkAplFormForNwidWwid 'uni238B'
+	LinkAplFormForNwidWwid 'uni2335'
+	LinkAplFormForNwidWwid 'telephoneRecorder'

@@ -1,0 +1,218 @@
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Digits-Eight : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : CodeLnum CodeOnum
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	local EightPr : StrokeWidthBlend 0.85 0.925
+	define [EightShape top] : begin
+		local stroke : AdviceStroke2 2 3 CAP
+		local p 0.96
+		local l (SB + OX)
+		local r (RightSB - OX)
+		return : dispiro
+			widths.rhs stroke
+			g4.right.mid (Middle - CorrectionOMidS) (top - O)
+			archv
+			g4 [mix l r p] (top - [ArchDepthBOf (ArchDepth * EightPr * p) Width])
+			alsoThru.g2 0.5 0.5 [widths.center stroke]
+			g4 (l) [ArchDepthBOf (ArchDepth * EightPr) Width] [widths.lhs stroke]
+			arcvh
+			g4.right.mid (Middle + CorrectionOMidS) (O)
+			archv
+			g4 (r) [ArchDepthAOf (ArchDepth * EightPr) Width] [widths.lhs stroke]
+			alsoThru.g2 0.5 0.5 [widths.center stroke]
+			g4 [mix r l p] (top - [ArchDepthAOf (ArchDepth * EightPr * p) Width]) [widths.rhs stroke]
+			arcvh
+			close
+
+	create-glyph 'eight.lnum.crossing' : glyph-proc
+		include : MarkSet.capital
+		include : EightShape CAP
+
+	define [EightCirclesShape stroke top] : begin
+		local pShrink 1.00
+		local pSizeDiffY : StrokeWidthBlend 0.95 0.94
+		local pSizeDiffX : StrokeWidthBlend 0.95 0.96
+
+		local yMid : top / (1 + pSizeDiffY)
+		local ada : ArchDepthAOf (ArchDepth * 0.9) Width
+		local adb : ArchDepthBOf (ArchDepth * 0.9) Width
+		local adaTop : ArchDepthAOf (ArchDepth * 0.9 * pSizeDiffY) Width
+		local adbTop : ArchDepthBOf (ArchDepth * 0.9 * pSizeDiffY) Width
+
+		local botLeft  : mix SB RightSB (1 - pShrink)
+		local botRight : mix SB RightSB pShrink
+		local topLeft  : mix SB RightSB (1 - pShrink * pSizeDiffX)
+		local topRight : mix SB RightSB (pShrink * pSizeDiffX)
+
+		local fine : stroke * CThin
+		local mc : CorrectionOMidX * stroke
+		local coFine : stroke / 2 - (stroke - fine)
+		local spT : StrokeWidthBlend 2.08 2.20
+		local spB : StrokeWidthBlend 2.18 2.20
+
+		return : union
+			dispiro
+				widths.rhs stroke
+				g4 (Middle - mc) (top - O)
+				archv.superness spB
+				g4 (topRight - OX) [YSmoothMidR (top - O) (yMid - coFine) adaTop adbTop]
+				arcvh.superness spT
+				g4 (Middle + mc) (yMid - coFine) [widths.rhs fine]
+				archv.superness spT
+				g4 (topLeft + OX) [YSmoothMidL (top - O) (yMid - coFine) adaTop adbTop] [widths.rhs stroke]
+				arcvh.superness spB
+				close
+			dispiro
+				widths.rhs stroke
+				g4 (Middle + mc) O
+				archv.superness spB
+				g4 (botLeft + OX) [YSmoothMidL (yMid + coFine) O ada adb]
+				arcvh.superness spT
+				g4 (Middle - mc) (yMid + coFine) [widths.rhs fine]
+				archv.superness spT
+				g4 (botRight - OX) [YSmoothMidR (yMid + coFine) O ada adb] [widths.rhs stroke]
+				arcvh.superness spB
+				close
+
+
+	create-glyph 'eight.lnum.twoCircles' : glyph-proc
+		include : MarkSet.capital
+		include : EightCirclesShape [AdviceStroke2 2 3 CAP] CAP
+
+	define [EightCrossingAsymmetricShape top] : begin
+		define stroke : AdviceStroke2 2 3 CAP
+		define fine   : AdviceStroke2 3 4 CAP
+		define p 0.96
+		define l : SB + OX
+		define r : RightSB - OX
+		define arch : ArchDepth * [mix 1 EightPr 0.5]
+
+		define gap : (r - l) * 0.25
+
+		define [Spine kty] : list
+			kty (Middle - CorrectionOMidS) (top - O) [widths.lhs stroke]
+			archv
+			g4 [mix r l p] (top - [ArchDepthAOf (arch * p) Width])
+			alsoThruThem { {0.34 0.45 (2 / 3)} {0.66 0.55 (1 / 3)} } : object
+				blend : function [rt] : widths (stroke * rt) (stroke * (1 - rt))
+			g4 r [ArchDepthAOf arch Width] [widths.rhs stroke]
+			arcvh
+			kty (Middle + CorrectionOMidS) (O)
+
+		define [CoSpineMask xFar] : spiro-outline
+			corner xFar (2 * CAP)
+			corner (Middle - CorrectionOMidS) (2 * CAP)
+			Spine corner
+			corner (Middle + CorrectionOMidS) (-CAP)
+			corner xFar (-CAP)
+
+		return : union
+			difference
+				dispiro
+					g4.right.mid (Middle - CorrectionOMidS) (top - O) [widths.rhs stroke]
+					g4.down.mid [mix l r p] (top - [ArchDepthBOf (arch * p) Width])
+					straight.left.end 0 (top * 0.4 - stroke * 0.5) [widths.rhs fine]
+				CoSpineMask (-Width * 4)
+				MaskBelow arch
+			difference
+				dispiro
+					straight.left.start Width (top * 0.6 + stroke * 0.5) [widths.lhs fine]
+					g4.down.mid l [ArchDepthBOf arch Width] [widths.lhs stroke]
+					g4.right.mid (Middle + CorrectionOMidS) (O)
+				CoSpineMask (Width * 4)
+				MaskAbove (top - arch * p)
+			dispiro : Spine g4.left.mid
+
+	create-glyph 'eight.lnum.crossingAsymmetric' : glyph-proc
+		include : MarkSet.capital
+		include : EightCrossingAsymmetricShape CAP
+
+	select-variant 'eight.lnum' [CodeLnum '8'] (follow -- 'eight')
+	alias 'eight.onum' [CodeOnum '8'] 'eight.lnum'
+
+
+	# There is an "eight without lower contour" shape used for /propto
+	create-glyph 'rotatedPropto' : glyph-proc # rotatedPropto
+		local p 0.96
+		local py 0.4
+		local l (SB + OX)
+		local r (RightSB - OX)
+		include : dispiro
+			widths.lhs
+			straight.up.start r 0 [heading Upward]
+			alsoThru 0.5 (1 - py) [widths (Stroke * py) (Stroke * (1 - py))]
+			g4 [mix r l p] (CAP - ArchDepthA * p * EightPr) [widths.rhs]
+			arcvh
+			g4 (Middle - CorrectionOMidS) (CAP - O)
+			archv
+			g4 [mix l r p] (CAP - ArchDepthB * p * EightPr)
+			alsoThru 0.5 py [widths (Stroke * py) (Stroke * (1 - py))]
+			straight.down.end l 0 [widths.heading Stroke 0 Downward]
+
+
+	define [BBEightSd] : with-params [top swStart swEnd kTop sign OffsetLT OffsetRB OffsetC] : begin
+		define stroke : Math.max swStart swEnd
+		define fine   : Math.min swStart swEnd
+		define soStart : stroke - swStart
+		define soEnd   : stroke - swEnd
+		define bbOvershoot : BBD / 8
+		define xLeftTop  : [mix SB RightSB (1 - kTop)] - bbOvershoot
+		define xRightTop : mix SB RightSB kTop
+		define xLeftBot  : SB + OX
+		define xRightBot : RightSB - OX + bbOvershoot
+		define ada : ArchDepthAOf (ArchDepth * EightPr) Width
+		define adb : ArchDepthBOf (ArchDepth * EightPr) Width
+
+		define NcCenterX   : mix xLeftTop     xRightBot   0.5
+		define NcCenterY   : mix (top - ada)  (ada)       0.5
+
+		define [Center s] : object
+			x : mix (xLeftTop + [OffsetLT s].x) (xRightBot - [OffsetRB s].x) 0.5
+			y : mix (top - ada)                 (ada)                        0.5
+
+		return : dispiro
+			g2   ([Center 1].x + [OffsetC 1].x) ([Center 1].y + [OffsetC 1].y) [widths.center stroke]
+			g4   (xRightTop - [HSwToV soStart]) (top - adb) [widths.lhs fine]
+			arcvh
+			g4   (Middle - CorrectionOMidX * stroke - bbOvershoot / 2) (top - O - soStart)
+			archv
+			g4   (xLeftTop + [OffsetLT sign].x) (top - ada + [OffsetLT sign].y)
+			g2   ([Center sign].x + [OffsetC sign].x) ([Center sign].y + [OffsetC sign].y) [widths.center stroke]
+			g4   (xRightBot - [OffsetRB sign].x) (ada + [OffsetRB sign].y) [widths.rhs fine]
+			arcvh
+			g4   (Middle + CorrectionOMidX * stroke + bbOvershoot / 2) (O + soEnd)
+			archv
+			g4   (xLeftBot + [HSwToV soEnd]) adb [widths.rhs fine]
+			g2   ([Center (-1)].x + [OffsetC (-1)].x) ([Center (-1)].y + [OffsetC (-1)].y) [widths.center stroke]
+
+	create-glyph 'mathbb/eight' 0x1D7E0 : glyph-proc
+		include : MarkSet.capital
+		define theta : Math.PI / 4
+		foreach sign [items-of { 1 (-1) }] : begin
+			include : BBEightSd
+				top     -- CAP
+				swStart -- BBS * [if (sign > 0) CThin 1]
+				swEnd   -- BBS * [if (sign < 0) CThin 1]
+				kTop    -- 0.96
+				ess     -- BBD
+				sign    -- sign
+				OffsetC -- [lambda [s] {
+					.x (0.5 * s * BBD * [Math.sin theta])
+					.y (0.5 * s * BBD * [Math.cos theta])
+				}]
+				OffsetLT -- [lambda [s] {
+					.x [if (s > 0) (BBD / 2) 0]
+					.y ([if (s > 0) 0.25 0.375] * s * BBD * [Math.cos theta])
+				}]
+				OffsetRB -- [lambda [s] {
+					.x [if (s < 0) (BBD / 2) 0]
+					.y ([if (s < 0) 0.25 0.375] * s * BBD * [Math.cos theta])
+				}]

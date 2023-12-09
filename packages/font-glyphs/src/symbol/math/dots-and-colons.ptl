@@ -1,0 +1,58 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Math-Dots-And-Colons : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+		local radius1 : PeriodRadius * kDotRadius * OperatorStroke / Stroke
+		local radius : Math.min radius1 (0.5 * [AdviceStroke 3.5 (Width / kDotRadius)] * PeriodSize * kDotRadius / Stroke)
+		local left : mix 0 Width (1 / 4)
+		local right : mix 0 Width (3 / 4)
+
+		define yUpperColon : SymbolMid + XH / 2 - radius
+		define yLowerColon : SymbolMid - XH / 2 + radius
+		create-glyph "therefore.\(suffix)" : glyph-proc
+			include : DrawAt Middle yUpperColon (radius - overshoot)
+			include : DrawAt left   yLowerColon (radius - overshoot)
+			include : DrawAt right  yLowerColon (radius - overshoot)
+
+		create-glyph "because.\(suffix)" : glyph-proc
+			include : DrawAt Middle yLowerColon (radius - overshoot)
+			include : DrawAt left   yUpperColon (radius - overshoot)
+			include : DrawAt right  yUpperColon (radius - overshoot)
+
+		create-glyph "mathcolon.\(suffix)" : glyph-proc
+			include : DrawAt Middle yLowerColon (radius - overshoot)
+			include : DrawAt Middle yUpperColon (radius - overshoot)
+
+		create-glyph "coloncolon.\(suffix)" : glyph-proc
+			include : DrawAt left   yUpperColon (radius - overshoot)
+			include : DrawAt right  yUpperColon (radius - overshoot)
+			include : DrawAt left   yLowerColon (radius - overshoot)
+			include : DrawAt right  yLowerColon (radius - overshoot)
+
+		create-glyph "mathCDot.\(suffix)" : glyph-proc
+			include : DrawAt Middle SymbolMid (radius - overshoot)
+
+		create-glyph "mathCDotInner.\(suffix)" : glyph-proc
+			include : DrawAt Middle SymbolMid (radius * OperatorStroke / Stroke - overshoot)
+
+		for-width-kinds WideWidth1
+			create-glyph "\[MangleName 'mathCDotBig'].\(suffix)" : glyph-proc
+				set-width MosaicWidth
+				include : DrawAt MosaicMiddle SymbolMid (radius1 - overshoot)
+
+	select-variant 'therefore' 0x2234 (follow -- 'punctuationDot')
+	select-variant 'because' 0x2235 (follow -- 'punctuationDot')
+	select-variant 'mathcolon' 0x2236 (follow -- 'punctuationDot')
+	select-variant 'coloncolon' 0x2237 (follow -- 'punctuationDot')
+	select-variant 'mathCDot' 0x22C5 (follow -- 'punctuationDot')
+	select-variant 'mathCDotInner' (follow -- 'punctuationDot')
+
+	for-width-kinds WideWidth1
+		select-variant [MangleName 'mathCDotBig'] (follow -- 'punctuationDot')

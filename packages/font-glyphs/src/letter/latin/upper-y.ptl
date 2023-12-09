@@ -1,0 +1,178 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-Y : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateAccentedComposition
+	glyph-block-import Letter-Latin-X : HalfXStrand
+	glyph-block-import Letter-Shared : SetGrekUpperTonos
+	glyph-block-import Letter-Shared-Shapes : SerifFrame WithSerifOverflowMask
+
+	define BODY-CURLY    0
+	define BODY-STRAIGHT 1
+
+	define SLAB-NONE   0
+	define SLAB-ALL    1
+	define SLAB-BASE   2
+	define SLAB-MOTION 3
+
+	define [YCrossPos top bot] : mix bot top 0.4
+
+	define [YSlabs slabType top bot] : glyph-proc
+		local sf : SerifFrame.fromDf [DivFrame 1] top 0
+		match slabType
+			[Just SLAB-ALL] : begin
+				include : composite-proc sf.lt.full sf.rt.full
+				include : HSerif.mb Middle bot MidJutSide
+			[Just SLAB-MOTION] : include sf.lt.outer
+			[Just SLAB-BASE] : include : HSerif.mb Middle bot MidJutSide
+
+	define [YShape bodyType slabType top bot] : glyph-proc
+		local cross : YCrossPos top bot
+		local maskLT : slabType == SLAB-ALL || slabType == SLAB-MOTION
+		local maskRT : slabType == SLAB-ALL
+
+		include : tagged 'strokeLT' : WithSerifOverflowMask maskLT top bot SB RightSB
+			HalfXStrand bodyType SLAB SB top Middle cross 0.1 0.4 0.28
+		include : tagged 'strokeRT' : WithSerifOverflowMask maskRT top bot SB RightSB
+			HalfXStrand bodyType SLAB RightSB top Middle cross 0.1 0.4 0.28
+		include : tagged 'strokeVMid' : VBar.m Middle bot (cross + HalfStroke)
+		set-base-anchor 'overlay' Middle cross
+
+	define [YenOverlayShape slabType] : glyph-proc
+		define { ks bot } : match slabType
+			([Just SLAB-ALL] || [Just SLAB-BASE])  { 0.25 Stroke }
+			otherwise                              { 0    0      }
+		include : HOverlayBar SB RightSB ([mix bot [YCrossPos CAP 0] 0.5] - OverlayStroke * ks)
+		include : HOverlayBar SB RightSB [mix bot [YCrossPos CAP 0] 1.0]
+
+	define [YHookLeftHookedStroke top bot] : begin
+		local cross : YCrossPos top bot
+		return : dispiro
+			widths.lhs
+			straight.right.start (SB - TailX / 3) (top - Stroke - O)
+			g4 (SB + TailX / 3) (top - TailY) [widths.lhs : AdviceStroke 2.75]
+			quadControls 0.55 0.7 32 unimportant
+			g4 (Middle - [HSwToV : 0.5 * Stroke]) cross [widths.lhs : AdviceStroke 3.5]
+
+	define [YHookRightHookedStroke top bot] : begin
+		local cross : YCrossPos top bot
+		return : dispiro
+			widths.rhs
+			straight.left.start (RightSB + TailX / 3) (top - Stroke - O)
+			g4 (RightSB - TailX / 3) (top - TailY) [widths.rhs : AdviceStroke 2.75]
+			quadControls 0.55 0.7 32 unimportant
+			g4 (Middle + [HSwToV : 0.5 * Stroke]) cross [widths.rhs : AdviceStroke 3.5]
+
+	define [YHookTopShape bodyType slabType top bot] : glyph-proc
+		include : YShape bodyType slabType top bot
+		eject-contour 'strokeRT'
+		include : YHookRightHookedStroke top bot
+
+	define [UpsilonHookedSymbolShape top bot] : glyph-proc
+		local cross : YCrossPos top bot
+
+		include : VBar.m Middle bot (cross + HalfStroke)
+		include : YHookLeftHookedStroke top bot
+		include : YHookRightHookedStroke top bot
+
+	define YConfig : object
+		straightSerifless     { BODY-STRAIGHT SLAB-NONE   }
+		curlySerifless        { BODY-CURLY    SLAB-NONE   }
+		straightBaseSerifed   { BODY-STRAIGHT SLAB-BASE   }
+		curlyBaseSerifed      { BODY-CURLY    SLAB-BASE   }
+		straightMotionSerifed { BODY-STRAIGHT SLAB-MOTION }
+		curlyMotionSerifed    { BODY-CURLY    SLAB-MOTION }
+		straightSerifed       { BODY-STRAIGHT SLAB-ALL    }
+		curlySerifed          { BODY-CURLY    SLAB-ALL    }
+
+	foreach { suffix { bodyType slabType } } [Object.entries YConfig] : do
+		create-glyph "Y.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : YShape bodyType slabType CAP 0
+			include : YSlabs slabType CAP 0
+
+		create-glyph "grek/Upsilon.\(suffix)" : glyph-proc
+			include [refer-glyph "Y.\(suffix)"] AS_BASE ALSO_METRICS
+			include : SetGrekUpperTonos
+				if (slabType === SLAB-NONE || slabType === SLAB-BASE) OX (OX - SideJut)
+
+		create-glyph "smcpY.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : YShape bodyType slabType XH 0
+			include : YSlabs slabType XH 0
+
+		create-glyph "YHookTop.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : YHookTopShape bodyType slabType CAP 0
+			include : YSlabs slabType CAP 0
+			eject-contour 'serifRT'
+
+		if (slabType !== SLAB-BASE) : begin
+			create-glyph "cyrl/ue.\(suffix)" : glyph-proc
+				include : MarkSet.p
+				include : YShape bodyType slabType XH Descender
+				include : YSlabs slabType XH Descender
+
+		if ((slabType === SLAB-NONE || slabType === SLAB-BASE) && bodyType === BODY-STRAIGHT) : begin
+			create-glyph "grek/UpsilonHookTop.\(suffix)" : glyph-proc
+				include : MarkSet.capital
+				include : UpsilonHookedSymbolShape CAP 0
+				include : YSlabs slabType CAP 0
+				eject-contour 'serifLT'
+				eject-contour 'serifRT'
+				include : SetGrekUpperTonos (OX - TailX / 3)
+
+		create-glyph "currency/yenSign.\(suffix)" : glyph-proc
+			include [refer-glyph "Y.\(suffix)"] AS_BASE ALSO_METRICS
+			include : YenOverlayShape slabType
+
+	select-variant 'Y' 'Y'
+	link-reduced-variant 'Y/sansSerif' 'Y' MathSansSerif
+	select-variant 'smcpY' 0x28F (follow -- 'Y')
+	select-variant 'YHookTop' 0x1B3 (follow -- 'Y')
+
+	select-variant 'grek/Upsilon' 0x3A5 (follow -- 'Y')
+	link-reduced-variant 'grek/Upsilon/sansSerif' 'grek/Upsilon' MathSansSerif (follow -- 'Y/sansSerif')
+	select-variant 'grek/UpsilonHookTop' 0x3D2
+
+	alias 'cyrl/Ue' 0x4AE 'Y'
+	select-variant 'cyrl/ue' 0x4AF
+	CreateAccentedComposition 'cyrl/KazakhShortU' 0x4B0 'cyrl/Ue' 'barOver'
+	CreateAccentedComposition 'cyrl/KazakhShortu' 0x4B1 'cyrl/ue' 'barOver'
+
+	create-glyph 'YStrokeOverlay' : HOverlayBar ([mix 0 SB 0.5]) ([mix Width RightSB 0.5]) [mix 0 CAP 0.75]
+	derive-composites 'YStroke' 0x24E 'Y' 'YStrokeOverlay'
+
+	select-variant 'currency/yenSign' 0xA5 (follow -- 'Y')
+
+	# Blackboard
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/Y' 0x1D550 : glyph-proc
+		local yCross : CAP * 0.4
+
+		include : MarkSet.capital
+		include : HBar.t SB (SB + BBD) CAP BBS
+		include : intersection
+			Rect CAP 0 (-Width) (2 * Width)
+			union
+				difference
+					ExtLineCenter 1 BBS  SB         CAP (Middle - BBD / 2) yCross
+					Rect CAP 0 (Middle - BBD / 2 + [HSwToV : 0.5 * BBS]) (Width * 2)
+				difference
+					ExtLineCenter 1 BBS  (SB + BBD) CAP (Middle + BBD / 2) yCross
+					Rect CAP 0 (Middle + BBD / 2 + [HSwToV : 0.5 * BBS]) (Width * 2)
+
+		include : intersection
+			Rect CAP yCross (-Width) (2 * Width)
+			ExtLineCenter 1 BBS  RightSB CAP (Middle + BBD / 2) yCross
+
+		include : HBar.b (Middle - BBD / 2) (Middle + BBD / 2) 0 BBS
+		include : union
+			VBar.m (Middle - BBD / 2) 0 yCross BBS
+			VBar.m (Middle + BBD / 2) 0 yCross BBS

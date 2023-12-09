@@ -1,0 +1,101 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Nje : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateDependentComposite
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Cyrillic-Yeri : YeriConfig
+
+	define SLAB-NONE                   0
+	define SLAB-TOP-LEFT               1
+	define SLAB-TOP-LEFT-BOTTOM-RIGHT  2
+	define SLAB-TAILED-CYRILLIC        3
+	define SLAB-ALL                    4
+
+	define [LeftHalf slabType df top] : glyph-proc
+		local dfSub : df.slice 3 2
+		include : VBar.l dfSub.leftSB 0 top dfSub.mvs
+		include : HBar.m dfSub.leftSB dfSub.rightSB (top / 2)
+
+		local sf : SerifFrame.fromDf dfSub top 0
+		include : match slabType
+			[Just SLAB-NONE]   : glyph-proc
+			[Just SLAB-TOP-LEFT] : begin sf.lt.outer
+			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : composite-proc sf.lt.outer sf.rb.outer
+			[Just SLAB-TAILED-CYRILLIC] : if sf.enoughSpaceForFullSerifs
+				composite-proc sf.lt.full  sf.rt.full  sf.lb.full
+				composite-proc sf.lt.outer sf.rt.outer sf.lb.outer
+			[Just SLAB-ALL] : if sf.enoughSpaceForFullSerifs
+				composite-proc sf.lt.full  sf.rt.full  sf.lb.full  sf.rb.inner
+				composite-proc sf.lt.outer sf.rt.outer sf.lb.outer
+
+	define [RightHalf Yeri df top] : glyph-proc
+		include : Yeri top
+			left -- (df.middle - [HSwToV : 0.5 * df.mvs])
+			right -- (df.rightSB - O)
+			stroke -- df.mvs
+		eject-contour 'serifYeriLT'
+		eject-contour 'serifYeriLB'
+
+	define NjeReduction : object
+		serifed 'serifedExceptBottomRight'
+
+	define LeftHalfConfig : object
+		serifless                        { SLAB-NONE                  }
+		topLeftSerifed                   { SLAB-TOP-LEFT              }
+		topLeftBottomRightSerifed        { SLAB-TOP-LEFT-BOTTOM-RIGHT }
+		serifed                          { SLAB-ALL                   }
+		serifedExceptBottomRight         { SLAB-TAILED-CYRILLIC       }
+
+	foreach { suffix { slabType } } [Object.entries LeftHalfConfig] : do
+		create-glyph "cyrl/Nje/leftHalf.\(suffix)"  : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : LeftHalf slabType df CAP
+
+		create-glyph "cyrl/nje/leftHalf.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+			include : LeftHalf slabType df XH
+
+	foreach { suffix { Yeri } } [Object.entries YeriConfig] : do
+		create-glyph "cyrl/Nje/rightHalf.\(suffix)"  : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : RightHalf Yeri df CAP
+			DependentSelector.set currentGlyph : if (suffix === "corner") 'full' 'reduced'
+
+		create-glyph "cyrl/nje/rightHalf.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+			include : RightHalf Yeri df XH
+			DependentSelector.set currentGlyph : if (suffix === "corner") 'full' 'reduced'
+
+	select-variant 'cyrl/Nje/leftHalf/full'
+		follow -- 'cyrl/Nje/leftHalf'
+		shapeFrom -- 'cyrl/Nje/leftHalf'
+	select-variant 'cyrl/nje/leftHalf/full'
+		follow -- 'cyrl/nje/leftHalf'
+		shapeFrom -- 'cyrl/nje/leftHalf'
+	select-variant 'cyrl/Nje/leftHalf/reduced'
+		follow -- 'cyrl/Nje/leftHalf/reduced'
+		shapeFrom -- 'cyrl/Nje/leftHalf'
+	select-variant 'cyrl/nje/leftHalf/reduced'
+		follow -- 'cyrl/nje/leftHalf/reduced'
+		shapeFrom -- 'cyrl/nje/leftHalf'
+
+	select-variant 'cyrl/Nje/rightHalf'
+	select-variant 'cyrl/nje/rightHalf'
+
+	CreateDependentComposite 'cyrl/Nje' 0x40A 'cyrl/Nje/rightHalf' : object
+		full    'cyrl/Nje/leftHalf/full'
+		reduced 'cyrl/Nje/leftHalf/reduced'
+	CreateDependentComposite 'cyrl/nje' 0x45A 'cyrl/nje/rightHalf' : object
+		full    'cyrl/nje/leftHalf/full'
+		reduced 'cyrl/nje/leftHalf/reduced'

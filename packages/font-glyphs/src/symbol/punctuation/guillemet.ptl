@@ -1,0 +1,63 @@
+### Punctuation symbols
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Guillemet : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'singleGuillemetLeft.straight' : glyph-proc
+		local top : mix SymbolMid ParenTop 0.5
+		local bot : mix SymbolMid ParenBot 0.5
+		local mid : mix bot top 0.5
+		local extension 0.55
+
+		local sw : AdviceStroke 3
+		local fine : AdviceStroke 4
+
+		include : intersection [MaskAbove mid] : dispiro
+			flat [mix Middle SB extension] mid [widths.rhs sw]
+			curl [mix Middle RightSB extension] top [widths.center fine]
+
+		include : intersection [MaskBelow mid] : dispiro
+			flat [mix Middle SB extension] mid [widths.lhs sw]
+			curl [mix Middle RightSB extension] bot [widths.center fine]
+
+		include : Translate (-(RightSB - SB) * 0.05) 0
+
+	create-glyph 'singleGuillemetLeft.curly' : glyph-proc
+		local top : mix SymbolMid ParenTop 0.5
+		local bot : mix SymbolMid ParenBot 0.5
+		local mid : mix bot top 0.5
+		local extension 0.55
+
+		local sw : AdviceStroke 3
+		local fine : AdviceStroke 4
+
+		include : intersection [MaskAbove mid] : dispiro
+			g4 [mix Middle SB extension] (mid + sw * 0.25) [widths.rhs sw]
+			quadControls 0.6 0.3
+			g4 [mix Middle RightSB extension] top [widths.center fine]
+
+		include : intersection [MaskBelow mid] : dispiro
+			g4 [mix Middle SB extension] (mid - sw * 0.25) [widths.lhs sw]
+			quadControls 0.6 0.3
+			g4 [mix Middle RightSB extension] bot [widths.center fine]
+
+		include : VBar.l [mix Middle SB extension] (mid - sw * 0.25) (mid + sw * 0.25) sw
+
+		include : Translate (-(RightSB - SB) * 0.05) 0
+
+	select-variant 'singleGuillemetLeft' 0x2039 (follow -- 'guillemet')
+
+	derive-glyphs 'guillemetLeft' 0xAB 'singleGuillemetLeft' : function [src sel] : glyph-proc
+		include : refer-glyph src
+		include : Translate ((RightSB - SB) * 0.5) 0
+		include : refer-glyph src
+		include : Translate (-(RightSB - SB) * 0.25) 0
+
+	turned 'singleGuillemetRight' 0x203A "singleGuillemetLeft" Middle SymbolMid
+	turned 'guillemetRight' 0xBB "guillemetLeft" Middle SymbolMid

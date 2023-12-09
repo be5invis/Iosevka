@@ -1,0 +1,135 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-SmallYus : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Latin-Upper-A : LambdaShape DeltaShape AMaskShape
+	glyph-block-import Letter-Cyrillic-Iotified-A : Iotified
+
+	define [CyrSmallYusShape df top straightBar _fine] : glyph-proc
+		local fine : fallback _fine : AdviceStroke 3.3 df.div
+		include : LambdaShape
+			df -- df
+			fBarStraight -- straightBar
+			top -- top
+			sw -- fine
+			slabKind -- 0
+		include : intersection
+			HBar.t df.leftSB df.rightSB (top / 2) fine
+			AMaskShape df straightBar top fine
+		include : VBar.m df.middle (top / 2) 0 fine
+
+		if SLAB : begin
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- fine)
+			include : tagged 'serifLB' sf.lb.outer
+			include : tagged 'serifRB' sf.rb.outer
+			if sf.enoughSpaceForFullSerifs
+				include : tagged 'serifMB' sf.mb.full
+
+	define [CyrClosedSmallYusShape df top straightBar _fine] : glyph-proc
+		local fine : fallback _fine : AdviceStroke 2.75 df.div
+		include : DeltaShape
+			df -- df
+			top -- top
+			sw -- fine
+			fBarStraight -- straightBar
+			slab -- false
+		include : intersection
+			HBar.t df.leftSB df.rightSB (top / 2) fine
+			AMaskShape df straightBar top fine
+
+		if SLAB : begin
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- fine)
+			include : tagged 'serifLB' sf.lb.outer
+			include : tagged 'serifRB' sf.rb.outer
+
+	create-glyph : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.capital
+		create-forked-glyph 'cyrl/SmallYus.straight' : CyrSmallYusShape df CAP true
+		create-forked-glyph 'cyrl/SmallYus.curly' : CyrSmallYusShape df CAP false
+
+	create-glyph : glyph-proc
+		local df : include : DivFrame 1 3
+		include : df.markSet.e
+		create-forked-glyph 'cyrl/smallYus.straight' : CyrSmallYusShape df XH true
+		create-forked-glyph 'cyrl/smallYus.curly' : CyrSmallYusShape df XH false
+
+	create-glyph : glyph-proc
+		local df : include : DivFrame 1
+		include : df.markSet.capital
+		create-forked-glyph 'cyrl/SmallYusClosed.straight' : CyrClosedSmallYusShape df CAP true
+		create-forked-glyph 'cyrl/SmallYusClosed.curly' : CyrClosedSmallYusShape df CAP false
+
+	create-glyph : glyph-proc
+		local df : include : DivFrame 1
+		include : df.markSet.e
+		create-forked-glyph 'cyrl/smallYusClosed.straight' : CyrClosedSmallYusShape df XH true
+		create-forked-glyph 'cyrl/smallYusClosed.curly' : CyrClosedSmallYusShape df XH false
+
+	select-variant 'cyrl/SmallYus' 0x466 (follow -- 'cyrl/Yus')
+	select-variant 'cyrl/smallYus' 0x467 (follow -- 'cyrl/Yus')
+	select-variant 'cyrl/SmallYusClosed' 0xA658 (follow -- 'grek/Delta')
+	select-variant 'cyrl/smallYusClosed' 0xA659 (follow -- 'grek/Delta')
+
+	define [CyrIotifiedSmallYusShape fClosed fCapital df top straightBar] : glyph-proc
+		local gap : (df.width - 2 * df.leftSB - 4 * df.mvs) / 3
+		define divSub : (df.width - gap - df.mvs) / Width
+		define dfSub : DivFrame divSub 3
+		if fClosed
+			include : CyrClosedSmallYusShape dfSub top straightBar df.mvs
+			include : CyrSmallYusShape dfSub top straightBar df.mvs
+		if [not fClosed] : eject-contour 'serifMB'
+		eject-contour 'serifRB'
+		include : Translate (Width * (df.div - divSub)) 0
+
+		include : Iotified.A df top
+			hBarRight -- [mix df.leftSB df.rightSB (2 / 3)]
+			hBarY -- top / 2 - df.mvs * 0.5
+			fCapital -- fCapital
+
+		if SLAB : begin
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- df.mvs)
+			include sf.rb.outer
+
+	create-glyph : glyph-proc
+		local df : include : DivFrame para.diversityM 4
+		include : df.markSet.capital
+		create-forked-glyph 'cyrl/SmallYusIotified.straight'
+			CyrIotifiedSmallYusShape false true df CAP true
+		create-forked-glyph 'cyrl/SmallYusIotified.curly'
+			CyrIotifiedSmallYusShape false true df CAP false
+
+	create-glyph : glyph-proc
+		local df : include : DivFrame para.diversityM 4
+		include : df.markSet.e
+		create-forked-glyph 'cyrl/smallYusIotified.straight'
+			CyrIotifiedSmallYusShape false false df XH true
+		create-forked-glyph 'cyrl/smallYusIotified.curly'
+			CyrIotifiedSmallYusShape false false df XH false
+
+	create-glyph : glyph-proc
+		local df : include : DivFrame para.diversityM 4
+		include : df.markSet.capital
+		create-forked-glyph 'cyrl/SmallYusClosedIotified.straight'
+			CyrIotifiedSmallYusShape true true df CAP true
+		create-forked-glyph 'cyrl/SmallYusClosedIotified.curly'
+			CyrIotifiedSmallYusShape true true df CAP false
+
+	create-glyph : glyph-proc
+		local df : include : DivFrame para.diversityM 4
+		include : df.markSet.e
+		create-forked-glyph 'cyrl/smallYusClosedIotified.straight'
+			CyrIotifiedSmallYusShape true false df XH true
+		create-forked-glyph 'cyrl/smallYusClosedIotified.curly'
+			CyrIotifiedSmallYusShape true false df XH false
+
+	select-variant 'cyrl/SmallYusIotified' 0x468 (follow -- 'cyrl/Yus')
+	select-variant 'cyrl/smallYusIotified' 0x469 (follow -- 'cyrl/Yus')
+	select-variant 'cyrl/SmallYusClosedIotified' 0xA65C (follow -- 'grek/Delta')
+	select-variant 'cyrl/smallYusClosedIotified' 0xA65D (follow -- 'grek/Delta')

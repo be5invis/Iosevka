@@ -1,0 +1,101 @@
+### Punctuation symbols
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Ellipsis : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	glyph-block-export  EllipsisDotRadius
+	define [EllipsisDotRadius nDots space] : begin
+		return : 0.5 * [AdviceStroke (nDots + 1.5) (space / Width)] * PeriodSize / Stroke
+
+	define [VThreeDotsShape DrawAt radius overshoot l r p bottom top] : glyph-proc
+		local xMid : mix l r 0.5
+		local yMid : mix bottom top 0.5
+		include : DrawAt [mix xMid l p] (bottom + radius) (radius - overshoot)
+		include : DrawAt xMid           yMid              (radius - overshoot)
+		include : DrawAt [mix xMid r p] (top - radius)    (radius - overshoot)
+
+	define [VFourDotShape DrawAt radius overshoot xMid bottom top] : glyph-proc
+		local [yp p] : mix (bottom + radius) (top - radius) p
+		include : DrawAt xMid [yp 0]       (radius - overshoot)
+		include : DrawAt xMid [yp (1 / 3)] (radius - overshoot)
+		include : DrawAt xMid [yp (2 / 3)] (radius - overshoot)
+		include : DrawAt xMid [yp 1]       (radius - overshoot)
+
+	for-width-kinds WideWidth1 "Ellipsis"
+		foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+			create-glyph "\[MangleName 'onedotLeader'].\(suffix)" : glyph-proc
+				local width : MosaicWidth * [mix para.diversityF para.diversityII (MosaicWidthScalar - 1)]
+				set-width width
+				local radius : [EllipsisDotRadius 2 MosaicWidth] * kDotRadius
+				include : DrawAt (width / 2) radius (radius - overshoot)
+
+			create-glyph "\[MangleName 'twodotsLEader'].\(suffix)" : glyph-proc
+				local width : MosaicWidth * [mix 1 para.diversityF (MosaicWidthScalar - 1)]
+				set-width width
+				local radius : [EllipsisDotRadius 2 MosaicWidth] * kDotRadius
+				local left : mix 0 width (1 / 4)
+				local right : mix 0 width (3 / 4)
+				include : DrawAt left radius (radius - overshoot)
+				include : DrawAt right radius (radius - overshoot)
+
+			create-glyph "\[MangleName 'ellipsis'].\(suffix)" : glyph-proc
+				set-width MosaicWidth
+				local radius : [EllipsisDotRadius 3 MosaicWidth] * kDotRadius
+				local left : mix 0 MosaicWidth (1 / 6)
+				local right : mix 0 MosaicWidth (5 / 6)
+				include : VThreeDotsShape DrawAt radius overshoot left right (+1) 0 (2 * radius)
+				create-forked-glyph "\[MangleName 'mathCDots'].\(suffix)"
+					ApparentTranslate 0 (SymbolMid - radius)
+
+			create-glyph : glyph-proc
+				set-width MosaicWidth
+				local left : mix 0 MosaicWidth (1 / 6)
+				local right : mix 0 MosaicWidth (5 / 6)
+				local top : SymbolMid + [Math.max (right - [mix left right 0.5]) ([mix PlusTop OperTop 0.5] - SymbolMid)]
+				local bot : SymbolMid - [Math.max ([mix left right 0.5] - left) (SymbolMid - [mix PlusBot OperBot 0.5])]
+				local radius : [EllipsisDotRadius 3 : Math.min MosaicWidth (top - bot)] * kDotRadius
+				create-forked-glyph "\[MangleName 'mathCVDots'].\(suffix)" : begin
+					VThreeDotsShape DrawAt radius overshoot left right 0 (bot - radius) (top + radius)
+				create-forked-glyph "\[MangleName 'mathCD1Dots'].\(suffix)" : begin
+					VThreeDotsShape DrawAt radius overshoot left right (-1) (bot - radius) (top + radius)
+				create-forked-glyph "\[MangleName 'mathCD2Dots'].\(suffix)" : begin
+					VThreeDotsShape DrawAt radius overshoot left right (+1) (bot - radius) (top + radius)
+
+		select-variant [MangleName 'onedotLeader'] [MangleUnicode 0x2024] (follow -- 'punctuationDot')
+		select-variant [MangleName 'twodotsLEader'] [MangleUnicode 0x2025] (follow -- 'punctuationDot')
+		select-variant [MangleName 'ellipsis'] [MangleUnicode 0x2026] (follow -- 'punctuationDot')
+		select-variant [MangleName 'mathCDots'] [MangleUnicode 0x22EF] (follow -- 'punctuationDot')
+		select-variant [MangleName 'mathCVDots'] [MangleUnicode 0x22EE] (follow -- 'punctuationDot')
+		select-variant [MangleName 'mathCD1Dots'] [MangleUnicode 0x22F1] (follow -- 'punctuationDot')
+		select-variant [MangleName 'mathCD2Dots'] [MangleUnicode 0x22F0] (follow -- 'punctuationDot')
+
+
+	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+		define radius : kDotRadius * [EllipsisDotRadius 3 XH]
+
+		create-glyph "triColon.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityF
+			include : VThreeDotsShape DrawAt radius overshoot 0 df.width 0 0 XH
+
+		create-glyph "mathTriColon.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityF
+			include : VThreeDotsShape DrawAt radius overshoot 0 df.width 0 (SymbolMid - XH / 2) (SymbolMid + XH / 2)
+
+		create-glyph "quadColon.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityF
+			include : VFourDotShape DrawAt radius overshoot df.middle (-XH / 6) (XH * 7 / 6)
+
+		create-glyph "mathQuadColon.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityF
+			include : VFourDotShape DrawAt radius overshoot df.middle (SymbolMid - XH * 2 / 3) (SymbolMid + XH * 2 / 3)
+
+	select-variant "triColon"  0x205D (follow -- 'punctuationDot')
+	select-variant "quadColon" 0x205E (follow -- 'punctuationDot')
+	select-variant "mathTriColon" 0x2AF6 (follow -- 'punctuationDot')
+	select-variant "mathQuadColon" 0x2999 (follow -- 'punctuationDot')
