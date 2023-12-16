@@ -966,10 +966,10 @@
 <tr>
 <td rowspan="4"><code>cv34</code></td>
 <td><img src="../images/cv-i-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-i-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-zshaped.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-i-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-i-hooky.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-hooky.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-i-hooky-bottom.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-hooky-bottom.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-i-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-zshaped.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-i-serifed-asymmetric.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-serifed-asymmetric.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-i-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-i-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -1099,8 +1099,8 @@
 <td><img src="../images/cv-l-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-l-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-l-hooky.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-hooky.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-l-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-zshaped.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-l-hooky-bottom.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-hooky-bottom.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-l-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-zshaped.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-l-serifed-asymmetric.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-serifed-asymmetric.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-l-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-l-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -1996,8 +1996,8 @@
 <td rowspan="2"><code>cv59</code></td>
 <td><img src="../images/cv-lower-iota-tailless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-tailless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-iota-tailless-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-tailless-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-lower-iota-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-zshaped.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-iota-hooky-bottom.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-hooky-bottom.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-iota-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-zshaped.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-iota-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-iota-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-iota-flat-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-flat-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
