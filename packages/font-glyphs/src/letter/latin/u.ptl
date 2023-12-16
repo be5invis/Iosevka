@@ -1,0 +1,383 @@
+$$include '../../meta/macros.ptl'
+
+import [mix fallback SuffixCfg] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Latin-U : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Shared-Metrics : markHalfStroke
+	glyph-block-import Letter-Shared : CreateAccentedComposition CreateOgonekComposition
+	glyph-block-import Letter-Shared : SetGrekUpperTonos
+	glyph-block-import Letter-Shared-Shapes : nShoulder RightwardTailedBar DToothlessRise SerifFrame
+	glyph-block-import Letter-Shared-Shapes : CyrTailDescender RetroflexHook VerticalHook
+
+	glyph-block-export UShape USerifs
+
+	define [UArcT] : with-params [sink df top bottom [stroke Stroke] [ada ArchDepthA] [adb ArchDepthB] [offset 0]] : sink
+		widths.lhs stroke
+		[if (sink == spiro-outline) corner flat] (df.leftSB + offset) top [heading Downward]
+		curl (df.leftSB + offset) (bottom + adb + offset)
+		arcvh
+		g4   (df.middle + CorrectionOMidX * stroke) (bottom + O + offset)
+		archv
+		flat (df.rightSB - offset) (bottom + ada + offset)
+		[if (sink == spiro-outline) corner curl] (df.rightSB - offset) top [heading Upward]
+
+	define [UShape] : with-params [df top bottom [stroke Stroke] [ada ArchDepthA] [adb ArchDepthB] [offset 0]] : glyph-proc
+		include : UArcT dispiro
+			df -- df
+			top -- top
+			bottom -- bottom
+			stroke -- stroke
+			ada -- ada
+			adb -- adb
+			offset -- offset
+
+	define [UToothed df top fHookLeft] : glyph-proc
+		set-base-anchor 'trailing' df.rightSB 0
+		include : nShoulder
+			top -- top
+			bottom -- [if fHookLeft (TailY + HalfStroke) 0]
+			left -- (df.leftSB + [HSwToV Stroke])
+			right -- df.rightSB
+			fine -- ShoulderFine
+		if fHookLeft : include : RetroflexHook.rExt df.rightSB (TailY + HalfStroke)
+		include : FlipAround df.middle (top / 2)
+		include : VBar.r df.rightSB 0 top
+
+	define [UTailed df top fHookLeft] : glyph-proc
+		set-base-anchor 'trailing' (df.rightSB + SideJut) 0
+		include : nShoulder
+			top -- top
+			bottom -- [if fHookLeft (TailY + HalfStroke) 0]
+			left -- (df.leftSB + [HSwToV Stroke])
+			right -- df.rightSB
+			fine -- ShoulderFine
+		if fHookLeft : include : RetroflexHook.rExt df.rightSB (TailY + HalfStroke)
+		include : FlipAround df.middle (top / 2)
+		include : RightwardTailedBar df.rightSB 0 top
+
+	define [UToothlessRounded df top] : glyph-proc
+		include : UShape df top 0
+
+	define [UToothlessRoundedSmall df top fHookLeft] : glyph-proc
+		if fHookLeft : begin
+			include : dispiro
+				widths.rhs
+				flat df.leftSB 0 [heading Upward]
+				curl df.leftSB (top - SmallArchDepthA)
+				arcvh
+				g4 (df.middle - CorrectionOMidS) (top - O)
+				archv
+				flat df.rightSB (top - SmallArchDepthB)
+				curl df.rightSB (TailY + HalfStroke) [heading Downward]
+			include : RetroflexHook.rExt df.rightSB (TailY + HalfStroke)
+			include : FlipAround df.middle (top / 2)
+		: else : include : UShape df top 0 (ada -- SmallArchDepthA) (adb -- SmallArchDepthB)
+
+	define [UToothlessCorner df top] : glyph-proc
+		include : VBar.l df.leftSB 0 (top - DToothlessRise)
+		include : dispiro
+			widths.rhs
+			g4 df.leftSB (top - DToothlessRise)
+			g4 (df.middle - CorrectionOMidS) (top - O)
+			archv
+			flat df.rightSB (top - ArchDepthB)
+			curl df.rightSB 0 [heading Downward]
+		include : FlipAround df.middle (top / 2)
+
+	define [UToothlessCornerSmall df top fHookLeft] : glyph-proc
+		include : VBar.l df.leftSB 0 (top - DToothlessRise)
+		include : dispiro
+			widths.rhs
+			g4 df.leftSB (top - DToothlessRise)
+			g4 (df.middle - CorrectionOMidS) (top - O)
+			archv
+			flat df.rightSB (top - SmallArchDepthB)
+			curl df.rightSB [if fHookLeft (TailY + HalfStroke) 0] [heading Downward]
+		if fHookLeft : include : RetroflexHook.rExt df.rightSB (TailY + HalfStroke)
+		include : FlipAround df.middle (top / 2)
+
+	define [UTopLeftSerif df yTop _sw]  : tagged 'serifLT'
+		HSerif.lt df.leftSB yTop SideJut _sw
+
+	define [UTopRightSerif df yTop _sw] : tagged 'serifRT'
+		HSerif.lt (df.rightSB - [HSwToV Stroke]) yTop SideJut _sw
+
+	define [UBottomRightSerif df yTop _sw] : glyph-proc
+		include : tagged 'serifRB' : HSerif.rb df.rightSB 0 SideJut _sw
+		define trAnchor currentGlyph.baseAnchors.trailing
+		if trAnchor : begin
+			set-base-anchor 'trailing' (trAnchor.x + SideJut) trAnchor.y
+
+	define USerifs : namespace
+		export : define [Toothed df top _sw] : glyph-proc
+			include : UTopLeftSerif df top _sw
+			include : UTopRightSerif df top _sw
+			include : UBottomRightSerif df top _sw
+
+		export : define [RTBase df top _sw] : glyph-proc
+			include : UTopLeftSerif df top _sw
+			include : UTopRightSerif df top _sw
+
+		export : define [Tailed df top _sw] : glyph-proc
+			include : UTopLeftSerif df top _sw
+			include : UTopRightSerif df top _sw
+
+		export : define [BilateralMotion df top _sw] : glyph-proc
+			include : HSerif.lt df.leftSB top SideJut _sw
+			include : HSerif.rt df.rightSB top SideJut _sw
+
+		export : define [SmallToothless df top _sw] : glyph-proc
+			include : UTopLeftSerif df top _sw
+			include : UTopRightSerif df top _sw
+
+		export : define [MotionToothed df top _sw] : glyph-proc
+			include : UTopLeftSerif df top _sw
+			include : UBottomRightSerif df top _sw
+
+		export : define [BottomRight df top _sw] : glyph-proc
+			include : UBottomRightSerif df top _sw
+
+		export : define [MotionToothless df top _sw] : glyph-proc
+			include : UTopLeftSerif df top _sw
+
+		export : define [Toothless df top _sw] : begin
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- _sw)
+			return : composite-proc sf.lt.full sf.rt.full
+
+	define CapitalUConfig : SuffixCfg.weave
+		object # body
+			toothed           UToothed
+			tailed            UTailed
+			toothlessCorner   UToothlessCorner
+			toothlessRounded  UToothlessRounded
+		function [body] : object # serifs
+			serifless               { no-shape                false }
+			bottomRightSerifed      { USerifs.BottomRight     false }
+			bilateralMotionSerifed  { USerifs.BilateralMotion true  }
+			unilateralMotionSerifed : match body
+				[Just 'toothed']    { USerifs.MotionToothed   true  }
+				__                  { USerifs.MotionToothless true  }
+			serifed : match body
+				[Just 'toothed']    { USerifs.Toothed         true  }
+				[Just 'tailed']     { USerifs.Tailed          true  }
+				__                  { USerifs.Toothless       true  }
+
+	foreach { suffix { Base {Slabs fLTSlab} } } [Object.entries CapitalUConfig] : do
+		create-glyph "U.\(suffix)" : glyph-proc
+			local df : DivFrame 1
+			include : MarkSet.capital
+			include : Base df CAP
+			include : Slabs df CAP
+
+		create-glyph "U/withTonos.\(suffix)" : glyph-proc
+			include [refer-glyph "U.\(suffix)"] AS_BASE ALSO_METRICS
+			include : SetGrekUpperTonos [if fLTSlab (-SideJut) 0]
+
+		create-glyph "smcpU.\(suffix)" : glyph-proc
+			local df : DivFrame 1
+			include : MarkSet.e
+			include : Base df XH
+			include : Slabs df XH
+
+	define SmallUConfig : SuffixCfg.weave
+		object # body
+			toothed           UToothed
+			tailed            UTailed
+			toothlessCorner   UToothlessCornerSmall
+			toothlessRounded  UToothlessRoundedSmall
+			urtBase           UToothed
+		function [body] : object # serifs
+			serifless              no-shape
+			bottomRightSerifed     USerifs.BottomRight
+			motionSerifed : match body
+				[Just 'toothed']   USerifs.MotionToothed
+				__                 USerifs.MotionToothless
+			serifed : match body
+				[Just 'toothed']   USerifs.Toothed
+				[Just 'tailed']    USerifs.Tailed
+				[Just 'urtBase']   USerifs.RTBase
+				__                 USerifs.SmallToothless
+
+	foreach { suffix { Base Slabs } } [Object.entries SmallUConfig] : do
+		create-glyph "u.\(suffix)" : glyph-proc
+			local df : DivFrame 1
+			include : MarkSet.e
+			include : Base df XH
+			include : Slabs df XH
+
+		create-glyph "grek/mu.\(suffix)" : glyph-proc
+			local df : DivFrame 1
+			include : MarkSet.p
+			include : Base df XH
+			include : dispiro
+				widths.rhs
+				flat SB Descender [heading Upward]
+				curl SB (Descender / 2) [heading Upward]
+				straight.up.end SB SmallArchDepthB [widths.heading 0 [AdviceStroke 4] Upward]
+			include : Slabs df XH
+
+		create-glyph "uHookLeft.\(suffix)" : glyph-proc
+			local df : DivFrame 1
+			include : MarkSet.e
+			include : Base df XH true
+			include : Slabs df XH
+			eject-contour 'serifLT'
+
+		create-glyph "uSideways.\(suffix)" : glyph-proc
+			local df : DivFrame (XH / Width) 2 (XH * 0.1 / SB)
+			include : df.markSet.e
+			include : PointingTo Width XH Width 0 : function [] : glyph-proc
+				include : Base  df (Width - SB)
+				include : Slabs df (Width - SB)
+				include : Translate 0 (SB / 2)
+
+		create-glyph "uDieresisSidewaysBase.\(suffix)" : glyph-proc
+			local df : DivFrame (XH / Width) 2 (XH * 0.1 / SB)
+			include : df.markSet.e
+			local ww : Width * para.diversityM
+			set-width ww
+			include : PointingTo ww XH ww 0 : function [] : glyph-proc
+				include : Base  df (ww - SB - 0.75 * para.diversityM * AccentHeight)
+				include : Slabs df (ww - SB - 0.75 * para.diversityM * AccentHeight)
+				include : Translate 0 (SB / 2)
+
+	select-variant 'U' 'U'
+	select-variant 'U/withTonos' (follow -- 'U')
+	link-reduced-variant 'U/sansSerif' 'U' MathSansSerif
+	select-variant 'smcpU' 0x1D1C (follow -- 'U')
+	select-variant 'u' 'u'
+	link-reduced-variant 'u/sansSerif' 'u' MathSansSerif
+	select-variant 'u/uRTailBase' (shapeFrom -- 'u')
+	select-variant 'uHookLeft' 0xAB52
+
+	select-variant 'grek/mu' 0x3BC
+	link-reduced-variant 'grek/mu/sansSerif' 'grek/mu' MathSansSerif
+	select-variant 'micro'   0xB5  (shapeFrom -- 'grek/mu')
+
+	select-variant 'cyrl/i.italic' (shapeFrom -- 'u')
+	select-variant 'cyrl/i.italic.reduced' (shapeFrom -- 'u')
+	alias 'cyrl/i.BGR' null 'cyrl/i.italic'
+	select-variant 'uSideways' 0x1D1D (follow -- 'u')
+	select-variant 'uDieresisSidewaysBase' null (follow -- 'u')
+
+	derive-glyphs 'cyrl/ibreve.BGR' null 'cyrl/i.BGR' : lambda [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include [refer-glyph 'breveAbove']
+
+	derive-glyphs 'cyrl/igrave.BGR' null 'cyrl/i.BGR' : lambda [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include [refer-glyph 'graveAbove']
+
+	derive-composites 'cyrl/iShortTail.italic' null  'cyrl/i.italic.reduced'
+		refer-glyph 'breveAbove'
+		CyrTailDescender.rSideJut RightSB 0
+
+	derive-glyphs 'cyrl/pe.SRB' null 'cyrl/i.italic' : lambda [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include [refer-glyph 'macronAbove']
+
+	derive-composites 'uRTailBR' 0x1D99 'u/uRTailBase'
+		RetroflexHook.rSideJut RightSB 0 (yOverflow -- Stroke)
+
+	do "Labiodental Approximant"
+		local df : DivFrame 1
+		define [VHookTopShape top ada adb] : glyph-proc
+			include : dispiro
+				widths.lhs
+				flat df.leftSB top [heading Downward]
+				curl df.leftSB adb
+				arcvh
+				g4 (Middle + CorrectionOMidS) O
+				archv
+				flat df.rightSB ada
+				curl df.rightSB (top - Hook - HalfStroke) [heading Upward]
+			include : VerticalHook.r
+				x -- df.rightSB
+				y -- (top - Hook - HalfStroke)
+				xDepth -- (-(RightSB - [HSwToV HalfStroke] - Middle))
+				yDepth -- (-Hook)
+
+		create-glyph 'VHookTop.serifless' : glyph-proc
+			include : MarkSet.capital
+			include : VHookTopShape CAP ArchDepthA ArchDepthB
+
+		create-glyph 'VHookTop.serifed' : glyph-proc
+			include [refer-glyph "VHookTop.serifless"] AS_BASE ALSO_METRICS
+			include : UTopLeftSerif df CAP
+
+		select-variant 'VHookTop' 0x1B2
+
+		create-glyph 'vHookTop.serifless' : glyph-proc
+			include : MarkSet.e
+			include : VHookTopShape XH SmallArchDepthA SmallArchDepthB
+
+		create-glyph 'vHookTop.serifed' : glyph-proc
+			include [refer-glyph "vHookTop.serifless"] AS_BASE ALSO_METRICS
+			include : UTopLeftSerif df XH
+
+		select-variant 'vHookTop' 0x28B
+
+	derive-glyphs 'uWithLightCentralizationStroke' null 'u' : function [src gr] : glyph-proc
+		include : MarkSet.p
+		include : refer-glyph src
+		local fine      : AdviceStroke 4
+		local outStand  : SB * 0.75 + fine * 0.25
+		local outStandY : SmallArchDepthB / 2 - Descender * 0.6
+		local yTurn     : SmallArchDepthB / 2
+		include : difference
+			dispiro
+				widths.lhs fine
+				corner (SB + outStand) (yTurn + outStandY)
+				corner (SB - outStand) (yTurn - outStandY)
+			spiro-outline
+				corner (SB - O) XH
+				curl (SB - O) SmallArchDepthB
+				arcvh
+				g4   (Middle + CorrectionOMidS) (-O)
+				archv
+				flat (RightSB + O) SmallArchDepthA
+				corner (RightSB + O) XH
+		if SLAB : begin
+			include : HSerif.lt SB XH SideJut
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
+	create-glyph 'mathbb/U' 0x1D54C : glyph-proc
+		include : MarkSet.capital
+		include : HBar.t SB (SB + BBD) CAP BBS
+		include : UShape [DivFrame 1] CAP 0
+			stroke -- BBS
+		include : intersection
+			VBar.l (SB + BBD) 0 CAP BBS
+			UArcT spiro-outline [DivFrame 1] CAP 0
+				stroke -- BBS
+				oper -- true
+				offset -- 1
+
+	create-glyph 'mathbb/u' 0x1D566 : glyph-proc
+		local df : DivFrame 1 2
+		include : df.markSet.e
+		include [refer-glyph 'mathbb/n']
+		include : FlipAround Middle (XH / 2)
+
+	CreateAccentedComposition 'uDieresis' 0xFC 'u' 'dieresisAbove'
+	CreateAccentedComposition 'uLongBarOver' 0x289 'u' 'hStrike'
+	CreateAccentedComposition 'smcpUStroke' 0x1D7E 'smcpU' 'hStrike'
+
+	# Sideways dieresis for U+1D1E
+	derive-glyphs "uDieresisSidewaysMark" null "dieresisAboveAlwaysUpright" : function [gns] : glyph-proc
+		local ww : Width * para.diversityM
+		set-width 0
+		include : PointingTo ww XH ww 0 : function [] : glyph-proc
+			include : refer-glyph gns
+			include : Translate (XH / 2 + Width / 2) (ww - SB - XH - AccentHeight)
+			include : Translate 0 (SB / 2)
+
+	CreateAccentedComposition 'uDieresisSideways' 0x1D1E 'uDieresisSidewaysBase' 'uDieresisSidewaysMark'
+
+	CreateOgonekComposition 'UOgonek' 0x172 'U'
+	CreateOgonekComposition 'uOgonek' 0x173 'u'

@@ -1,0 +1,47 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Latin-Wynn : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame SerifedArcStart
+
+	define [SerifLT top bot] : return [SerifFrame.fromDf [DivFrame 1] top bot].lt.outer
+	define [SerifLB top bot] : return [SerifFrame.fromDf [DivFrame 1] top bot].lb.fullSide
+
+	define [FullSerifs top bot] : composite-proc [SerifLT top bot] [SerifLB top bot]
+	define [MotionSerif top bot] : SerifLT top bot
+
+	define [WynnShape bot top] : glyph-proc
+		include : VBar.l SB bot top
+
+		local bowlBottom : 0.5 * Stroke + [mix bot top 0.15]
+		local bowlStartDepth : 0.15 * (top - bowlBottom)
+		local yCounterPesudoBottom : mix bowlBottom top 0.333
+
+		include : dispiro
+			SerifedArcStart.LtrRhs SB Middle top Stroke [Math.max Hook bowlStartDepth] Stroke
+			g4 (RightSB - O) (top - [ArchDepthBOf (0.5 * (top - yCounterPesudoBottom)) Width]) [widths.rhs]
+			alsoThru 0.25 0.45 important
+			g4 (SB + [HSwToV Stroke]) bowlBottom
+
+	define WynnConfig : object
+		serifless     { no-shape    false }
+		motionSerifed { MotionSerif false }
+		serifed       { FullSerifs  true  }
+
+	foreach { suffix { Serifs doBS } } [Object.entries WynnConfig] : do
+		create-glyph "wynn.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : WynnShape Descender XH
+			include : Serifs XH Descender
+
+	select-variant 'wynn' 0x1BF
+
+	create-glyph 'Wynn' 0x1F7 : glyph-proc
+		include : MarkSet.capital
+		include : WynnShape 0 CAP
+		if SLAB : include : FullSerifs CAP 0

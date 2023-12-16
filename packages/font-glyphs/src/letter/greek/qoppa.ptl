@@ -1,0 +1,69 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Letter-Greek-Qoppa : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/Qoppa' 0x3DE : glyph-proc
+		include : MarkSet.capital
+		define x1   : SB + [HSwToV : 0.25 * Stroke] - O
+		define x1co : Width - x1
+		define x2   : mix SB RightSB 0.3
+		define x2co : Width - x2
+		include : intersection
+			MaskAbove (CAP / 2 - HalfStroke)
+			MaskBelow  CAP
+			ExtLineCenter 2 Stroke x1 (CAP / 2 - HalfStroke) x2 CAP
+		include : intersection
+			MaskAbove  0
+			MaskBelow (CAP / 2 + HalfStroke)
+			ExtLineCenter 2 Stroke x1co (CAP / 2 + HalfStroke) x2co 0
+		include : HBar.m (x1 + [HSwToV HalfStroke]) (x1co - [HSwToV HalfStroke]) (CAP / 2)
+		if SLAB : begin
+			define kSerifShift : 0.45 * ((0.3 * (RightSB - SB)) / (CAP / 2 + HalfStroke))
+			include : HSerif.mb (x2co + kSerifShift * Stroke) 0    Jut
+			include : HSerif.mt (x2   - kSerifShift * Stroke) CAP  Jut
+
+	create-glyph 'grek/qoppa' 0x3DF : glyph-proc
+		include : MarkSet.b
+		local y1   : mix 0 Ascender 0.4
+		local y1co : mix 0 Ascender 0.6
+		include : intersection
+			VBar.l SB 0 Ascender
+			spiro-outline
+				corner SB y1
+				corner SB Ascender
+				corner RightSB Ascender
+				corner RightSB y1co
+		include : intersection
+			VBar.r RightSB 0 Ascender
+			spiro-outline
+				corner SB y1
+				corner SB 0
+				corner RightSB 0
+				corner RightSB y1co
+		include : intersection
+			ExtLineCenter 2 Stroke SB y1 RightSB y1co
+			MaskRight SB
+			MaskLeft  RightSB
+
+glyph-block Letter-Greek-Qoppa-Archaic : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/QoppaArchaic' 0x3D8 : glyph-proc
+		include : MarkSet.capital
+		define yAttach : [if SLAB Stroke 0] + XH * 0.2
+		include : OShape CAP yAttach SB RightSB Stroke ArchDepthA ArchDepthB
+		include : VBar.m Middle 0 (yAttach + HalfStroke)
+		if SLAB : include : HSerif.mb Middle 0 MidJutSide
+
+	create-glyph 'grek/qoppaArchaic' 0x3D9 : glyph-proc
+		include : MarkSet.p
+		include : OShape XH 0 SB RightSB
+		include : VBar.m Middle Descender HalfStroke

@@ -1,0 +1,64 @@
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Digits-Three : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : OnumHeight OnumMarks ShiftDown CodeLnum CodeOnum
+	glyph-block-import Letter-Latin-Ezh : EzhShape
+
+	define [ThreeShapeT sink offset sw top] : glyph-proc
+		local barcenter : top * HBarPos
+		local xMid : mix SB RightSB 0.4
+		local fine : sw * CThin
+
+		include : sink
+			widths.rhs sw
+			g4 (SB + offset - O) (top - Hook)
+			hookstart (top - offset - O)
+			g4 (RightSB - offset) [YSmoothMidR (top - offset - O) (barcenter - sw / 2) ArchDepthA ArchDepthB]
+			flat (xMid + 0.01) (barcenter - (fine - sw / 2)) [widths.rhs.heading fine Leftward]
+			curl xMid (barcenter - (fine - sw / 2)) [heading Leftward]
+		include : sink
+			widths.rhs fine
+			flat xMid (barcenter + (fine - sw / 2)) [heading Rightward]
+			curl (xMid + 0.01) (barcenter + (fine - sw / 2)) [heading Rightward]
+			g4 (RightSB - offset - O * 2) [YSmoothMidR (barcenter + sw / 2) (offset + O) ArchDepthA ArchDepthB] [widths.rhs sw]
+			hookend (offset + O)
+			g4 (SB + offset + O) Hook
+
+	define [ThreeShape top] : ThreeShapeT dispiro 0 Stroke top
+
+	create-glyph 'three.lnum.twoArcs' : glyph-proc
+		include : MarkSet.capital
+		include : ThreeShape CAP
+	create-glyph 'three.lnum.flatTop' : glyph-proc
+		include : MarkSet.capital
+		include : EzhShape CAP 0 0.25 0.975
+	create-glyph 'three.onum.twoArcs' : glyph-proc
+		include : OnumMarks.p
+		include : ThreeShape CAP
+		include : ShiftDown
+	create-glyph 'three.onum.flatTop' : glyph-proc
+		include : OnumMarks.p
+		include : EzhShape CAP 0 0.25 0.975
+		include : ShiftDown
+
+	select-variant 'three.lnum' [CodeLnum '3'] (follow -- 'three')
+	select-variant 'three.onum' [CodeOnum '3'] (follow -- 'three')
+
+	turned 'turnDigitThree' 0x218B 'three.lnum' Middle (CAP / 2)
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/three' 0x1D7DB : glyph-proc
+		include : MarkSet.capital
+		include : union
+			ThreeShapeT dispiro 0 BBS CAP
+			intersection
+				ThreeShapeT spiro-outline 1 BBS CAP
+				union
+					VBar.r (RightSB - BBD)         (CAP * HBarPos) CAP BBS
+					VBar.r (RightSB - BBD - O * 2) 0 (CAP * HBarPos)   BBS

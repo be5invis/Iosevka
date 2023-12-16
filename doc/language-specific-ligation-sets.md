@@ -68,11 +68,18 @@
 <td colspan="2"><img src="../images/ligset-HSKL-1.light.svg#gh-light-mode-only"/><img src="../images/ligset-HSKL-1.dark.svg#gh-dark-mode-only"/></td>
 </tr>
 <tr>
-<td><code>IDRS</code>; <code>ELMX</code>; <code>PURS</code></td>
-<td>Idris, Elm, PureScript</td>
+<td><code>IDRS</code></td>
+<td>Idris</td>
 </tr>
 <tr>
 <td colspan="2"><img src="../images/ligset-IDRS-1.light.svg#gh-light-mode-only"/><img src="../images/ligset-IDRS-1.dark.svg#gh-dark-mode-only"/></td>
+</tr>
+<tr>
+<td><code>ELMX</code>; <code>PURS</code></td>
+<td>Elm, PureScript</td>
+</tr>
+<tr>
+<td colspan="2"><img src="../images/ligset-ELMX-1.light.svg#gh-light-mode-only"/><img src="../images/ligset-ELMX-1.dark.svg#gh-dark-mode-only"/></td>
 </tr>
 <tr>
 <td><code>SWFT</code></td>

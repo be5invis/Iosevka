@@ -1,0 +1,46 @@
+$$include './meta/macros.ptl'
+
+import [NumeratorForm DenominatorForm] from "@iosevka/glyph/relation"
+
+# Name-driven feature pairs
+export : define [buildFrac gsub glyphStore] : begin
+	local rec : gsub.beginBlock
+
+	define frac : gsub.addCommonFeature : gsub.createFeature 'frac'
+	define { chain-rule reverse-rule } : gsub.ChainRuleBuilder
+
+	define subSolidus : gsub.createLookup : object
+		.type 'gsub_single'
+		.substitutions : object ['solidus' 'fractionBar'] ['slash' 'fractionBar']
+
+	define digitSet { }
+	define numSet   { }
+	define denSet   { }
+
+	foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== ".") : begin
+		local numForm : NumeratorForm.get   g
+		local denForm : DenominatorForm.get g
+		if (numForm && denForm) : begin
+			digitSet.push gid
+			numSet.push   numForm
+			denSet.push   denForm
+
+	define subDen : gsub.createLookup : object
+		.type 'gsub_chaining'
+		.rules : list
+			chain-rule [{'fractionBar'}.concat denSet] [digitSet ~> denSet]
+
+	define subNum : gsub.createLookup : object
+		.type 'gsub_reverse'
+		.rules : list
+			reverse-rule [digitSet ~> numSet] [{'fractionBar'}.concat numSet]
+
+	frac.addLookup subSolidus
+	frac.addLookup subDen
+	frac.addLookup subNum
+	gsub.setDependency subSolidus subDen
+	gsub.setDependency subSolidus subNum
+
+	gsub.endBlock rec
+
+define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

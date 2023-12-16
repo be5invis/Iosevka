@@ -1,0 +1,175 @@
+### Punctuation symbols
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Emotion : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : RetroflexHook
+
+	local emotionBottom : Math.max (CAP * 0.3) (DotSize * 1.5)
+
+	do "Exclamation"
+		foreach { suffix { DrawAt kdr overshoot } } [Object.entries DotVariants] : do
+			local dr : DotRadius * kdr
+			create-glyph "exclam.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.diversityF
+				include : df.markSet.capital
+				include : VBar.m df.middle [clamp 0 (CAP * 0.4) (emotionBottom * 1.18)] CAP
+				include : DrawAt df.middle dr (dr - overshoot)
+
+			create-glyph "question/dotPart.\(suffix)" : glyph-proc
+				set-width 0
+				include : DrawAt (Middle - Width) dr (dr - overshoot)
+				set-mark-anchor 'cvDecompose' (0 - Width) 0
+
+			create-glyph "questionDown/dotPart.\(suffix)" : glyph-proc
+				set-width 0
+				include : DrawAt (Middle - Width) (XH - dr) (dr - overshoot)
+				set-mark-anchor 'cvDecompose' (0 - Width) 0
+
+		select-variant 'exclam' '!' (follow -- 'punctuationDot')
+		select-variant 'question/dotPart' (follow -- 'punctuationDot')
+		select-variant 'questionDown/dotPart' (follow -- 'punctuationDot')
+
+		derive-glyphs 'retroflexClickHook' 0x1DF0A 'exclam' : function [src sel] : glyph-proc
+			local df : DivFrame para.diversityF
+			include : df.markSet.capDesc
+			include : refer-glyph src
+			include : RetroflexHook.m
+				x -- df.middle
+				y -- 0
+				yAttach -- DotRadius
+
+		alias 'alveolarclick'       0x1C3 'exclam'
+		turned 'exclamDown'         0xA1  'exclam'  [DivFrame para.diversityF].middle (XH / 2)
+		turned 'alveolarpercussive' null  'exclam'  [DivFrame para.diversityF].middle (CAP / 2)
+
+	do "Question"
+		local [YConnectT top emotionBottom] : mix emotionBottom (top - HalfStroke) 0.375
+
+		define [SmoothShape top emotionBottom left right] : glyph-proc
+			define strokeEndCor : Math.hypot 1 TanSlope
+			include : dispiro
+				widths.rhs
+				g4 left (top - Hook)
+				hookstart (top - O)
+				g4 right (top - ArchDepthB * 0.9)
+				alsoThru.g2 0.5 0.45 [widths.center EssQuestion]
+				straight.down.end ([mix left right 0.5] - [HSwToV HalfStroke] * strokeEndCor) emotionBottom [widths.lhs.heading (Stroke * strokeEndCor) Downward]
+
+		define [RevSmoothShape top emotionBottom left right] : glyph-proc
+			define strokeEndCor : Math.hypot 1 TanSlope
+			include : dispiro
+				widths.lhs
+				g4 right (top - Hook)
+				hookstart (top - O)
+				g4 left (top - ArchDepthA * 0.9)
+				alsoThru.g2 0.5 0.45 [widths.center EssQuestion]
+				straight.down.end ([mix left right 0.5] + [HSwToV HalfStroke] * strokeEndCor) emotionBottom [widths.rhs.heading (Stroke * strokeEndCor) Downward]
+
+		define [CornerShape top emotionBottom left right] : glyph-proc
+			local questionYConnect : YConnectT top emotionBottom
+			include : dispiro
+				widths.rhs
+				g4 left (top - Hook)
+				hookstart (top - O)
+				g4 (right - OX) [YSmoothMidR top (questionYConnect - Stroke) ArchDepthA ArchDepthB]
+				arcvh
+				straight.left.end [mix left right 0.5] (questionYConnect - Stroke) [heading Leftward]
+			include : VBar.m [mix left right 0.5] emotionBottom questionYConnect
+
+		define [RevCornerShape top emotionBottom left right] : glyph-proc
+			local questionYConnect : YConnectT top emotionBottom
+			include : dispiro
+				widths.lhs
+				g4 right (top - Hook)
+				hookstart (top - O)
+				g4 (left + OX) [YSmoothMidL top (questionYConnect - Stroke) ArchDepthA ArchDepthB]
+				arcvh
+				straight.right.end [mix left right 0.5] (questionYConnect - Stroke) [heading Rightward]
+			include : VBar.m [mix left right 0.5] emotionBottom questionYConnect
+
+		define [CornerFlatShape top emotionBottom left right] : glyph-proc
+			local questionYConnect : YConnectT top emotionBottom
+			local depth : Math.max (Stroke * 1.5) ((right - left) * 0.5)
+			include : dispiro
+				widths.rhs
+				flat [mix left right 0.125] top [heading Rightward]
+				curl (right - depth - CorrectionOMidS) top
+				archv
+				g4 (right - OX) [YSmoothMidR top (questionYConnect - Stroke) ArchDepthA ArchDepthB]
+				arcvh
+				straight.left.end [mix left right 0.5] (questionYConnect - Stroke) [heading Leftward]
+			include : VBar.m [mix left right 0.5] emotionBottom questionYConnect
+
+		define [RevCornerFlatShape top emotionBottom left right] : glyph-proc
+			local questionYConnect : YConnectT top emotionBottom
+			local depth : Math.max (Stroke * 1.5) ((right - left) * 0.5)
+			include : dispiro
+				widths.lhs
+				flat [mix right left 0.125] top [heading Leftward]
+				curl (left + depth + CorrectionOMidS) top
+				archv
+				g4 (left + OX) [YSmoothMidL top (questionYConnect - Stroke) ArchDepthA ArchDepthB]
+				arcvh
+				straight.right.end [mix left right 0.5] (questionYConnect - Stroke) [heading Rightward]
+			include : VBar.m [mix left right 0.5] emotionBottom questionYConnect
+
+		define Config : object
+			smooth           { SmoothShape     RevSmoothShape }
+			corner           { CornerShape     RevCornerShape }
+			cornerFlatHooked { CornerFlatShape RevCornerFlatShape }
+
+		foreach { suffix { Body RevBody } } [Object.entries Config] : do
+			create-glyph "question/hookPart.\(suffix)" : glyph-proc
+				include : Body CAP emotionBottom SB RightSB
+				set-base-anchor 'cvDecompose' 0 0
+
+			create-glyph "questionDown/hookPart.\(suffix)" : glyph-proc
+				include : Body CAP emotionBottom SB RightSB
+				include : FlipAround Middle (XH / 2)
+				set-base-anchor 'cvDecompose' 0 0
+
+			create-glyph "revQuestion/hookPart.\(suffix)" : glyph-proc
+				include : RevBody CAP emotionBottom SB RightSB
+				set-base-anchor 'cvDecompose' 0 0
+
+			define [InterroBangBodyImpl] : glyph-proc
+				local angle : 12 / 180 * Math.PI
+				include : Body CAP emotionBottom [mix Middle SB 0.75] RightSB
+				include : Translate (-Middle) (-DotRadius)
+				include : Rotate (-2 * angle)
+				include : Translate Middle DotRadius
+				include : VBar.m Middle emotionBottom CAP
+				include : Translate (-Middle) (-DotRadius)
+				include : Rotate (1.2 * angle)
+				include : Translate Middle DotRadius
+
+			create-glyph "interrobang/bodyPart.\(suffix)" : glyph-proc
+				include : InterroBangBodyImpl
+				set-base-anchor 'cvDecompose' 0 0
+
+			create-glyph "interrobangDown/bodyPart.\(suffix)" : glyph-proc
+				include : InterroBangBodyImpl
+				include : FlipAround Middle (XH / 2)
+				set-base-anchor 'cvDecompose' 0 0
+
+		select-variant 'question/hookPart' (follow -- 'question')
+		derive-composites 'question' '?' 'question/hookPart' 'question/dotPart'
+
+		select-variant 'questionDown/hookPart' (follow -- 'question')
+		derive-composites 'questionDown' 0xBF 'questionDown/hookPart' 'questionDown/dotPart'
+
+		select-variant 'revQuestion/hookPart' (follow -- 'question')
+		derive-composites 'revQuestion' 0x2E2E 'revQuestion/hookPart' 'question/dotPart'
+		alias 'symbolForSubstituteFormTwo' 0x2426 'revQuestion'
+
+		select-variant 'interrobang/bodyPart' (follow -- 'question')
+		derive-composites 'interrobang' 0x203D 'interrobang/bodyPart' 'question/dotPart'
+
+		select-variant 'interrobangDown/bodyPart' (follow -- 'question')
+		derive-composites 'gnaborretni'  0x2E18 'interrobangDown/bodyPart' 'questionDown/dotPart'

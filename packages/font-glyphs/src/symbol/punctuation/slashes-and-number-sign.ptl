@@ -1,0 +1,173 @@
+### Punctuation symbols
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [Joining] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Shared-Metrics : markStroke markExtend
+
+	glyph-block-export slashDefautLeft
+	glyph-block-export slashDefaultRight
+
+	define slashDefautLeft   : SB + HalfStroke
+	define slashDefaultRight : RightSB - HalfStroke
+
+	define [SlashShape l r _t _b _w] : glyph-proc
+		local w : fallback _w Stroke
+		local t : fallback _t ParenTop
+		local b : fallback _b ParenBot
+		local cor : (1 / 2) * HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - Stroke) / (t - b)) 2])]
+		include : spiro-outline
+			corner (r - w * cor) t
+			corner (r + w * cor) t
+			corner (l + w * cor) b
+			corner (l - w * cor) b
+
+	create-glyph 'slash' '/' : glyph-proc
+		include : SlashShape slashDefautLeft slashDefaultRight
+
+	alias 'solidus'      0x2044 'slash'
+	alias 'fractionBar'  null   'slash'
+	alias 'mathDivSlash' 0x2215 'slash'
+
+	create-glyph 'doubleSlash' 0x2AFD : glyph-proc
+		define w : AdviceStroke 3
+		define b : Math.max w (Width * 0.15)
+		include : SlashShape (slashDefautLeft - b) (slashDefaultRight - b) nothing nothing w
+		include : SlashShape (slashDefautLeft + b) (slashDefaultRight + b) nothing nothing w
+
+	create-glyph 'slash.left' : glyph-proc
+		Joining.set currentGlyph Joining.Classes.Right
+		include : SlashShape slashDefautLeft Width
+
+	create-glyph 'slash.right' : glyph-proc
+		Joining.set currentGlyph Joining.Classes.Left
+		include : SlashShape 0 slashDefaultRight
+
+	create-glyph 'slantedParallel' : glyph-proc
+		define w : AdviceStroke 3
+		define b : Math.max w (Width * 0.15)
+		include : SlashShape (slashDefautLeft - b) (slashDefaultRight - b) TackTop TackBot w
+		include : SlashShape (slashDefautLeft + b) (slashDefaultRight + b) TackTop TackBot w
+
+	local backslashWidth : (slashDefaultRight - slashDefautLeft) * (1 + TanSlope * 2)
+	define [BackslashShape l r] : glyph-proc
+		local cor : (1 / 2) * HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - Stroke) / (ParenTop - ParenBot)) 2])]
+		include : spiro-outline
+			corner (l - Stroke * cor) ParenTop
+			corner (l + Stroke * cor) ParenTop
+			corner (r + Stroke * cor) ParenBot
+			corner (r - Stroke * cor) ParenBot
+
+	create-glyph 'backslash' "\\" : glyph-proc
+		include : BackslashShape (Middle - backslashWidth / 2) (Middle + backslashWidth / 2)
+
+	alias 'mathSetMinus'  0x2216 'backslash'
+	alias 'mathBackslash' 0x29F5 'backslash'
+
+	create-glyph 'slashOverbar' 0x29F6 : glyph-proc
+		include : refer-glyph "slash"
+		include : HBar.t (Middle - markExtend) (Middle + markExtend) (ParenTop + AccentClearance) markStroke
+
+	create-glyph 'backslashBar' 0x29F7 : glyph-proc
+		include : refer-glyph "backslash"
+		include : HBar.m SB RightSB SymbolMid OverlayStroke
+
+	create-glyph 'backslash.left' : glyph-proc
+		Joining.set currentGlyph Joining.Classes.Right
+		include : BackslashShape (Middle - backslashWidth / 2) Width
+
+	create-glyph 'backslash.right' : glyph-proc
+		Joining.set currentGlyph Joining.Classes.Left
+		include : BackslashShape 0 (Middle + backslashWidth / 2)
+
+	do "number sign"
+		define fine : AdviceStroke 2.75
+
+		define [HspT l r] : ((r - l) - [HSwToV : 2 * fine]) * 0.3
+
+		define [UprightHBars height lx l r p] : begin
+			define { nsTop nsBot } height
+			return : union
+				HBar.m lx r [mix nsTop nsBot 0.3]
+				HBar.m lx r [mix nsTop nsBot 0.7]
+
+		define [UprightHBarsOpen height lx l r p] : begin
+			define { nsTop nsBot } height
+			define hsp : HspT l r
+			return : difference
+				UprightHBars height lx l r p
+				Rect nsTop nsBot
+					l + hsp + fine * (0.5 + p)
+					r - hsp - fine * (0.5 + p)
+
+		define [UprightVBars height lx l r p] : begin
+			define { nsTop nsBot } height
+			define hsp : HspT l r
+			return : union
+				VBar.l  (l + hsp + p * fine) nsBot nsTop fine
+				VBar.r (r - hsp - p * fine) nsBot nsTop fine
+
+		define [SlantedDim l r] : begin
+			define hsp : HspT l r
+			define x : hsp + [HSwToV : 0.5 * fine]
+			define w : (r - l) * 0.15
+			define shift : w / 3
+			return : object hsp x w shift
+
+		define [SlantedHBars height lx l r p] : begin
+			define { nsTop nsBot } height
+			define [object shift] : SlantedDim l r
+			return : union
+				HBar.m (lx + shift) (r + shift) [mix nsTop nsBot 0.3]
+				HBar.m (lx - shift) (r - shift) [mix nsTop nsBot 0.7]
+		define [SlantedHBarsOpen height lx l r p] : begin
+			define { nsTop nsBot } height
+			define [object x w] : SlantedDim l r
+			return : difference
+				SlantedHBars height lx l r p
+				spiro-outline
+					corner (l + x + w + p * fine) nsTop
+					corner (r - x + w - p * fine) nsTop
+					corner (r - x - w - p * fine) nsBot
+					corner (l + x - w + p * fine) nsBot
+		define [SlantedVBars height lx l r p] : begin
+			define { nsTop nsBot } height
+			define [object x w] : SlantedDim l r
+			return : union
+				SlashShape (l + x - w + p * fine) (l + x + w + p * fine) nsTop nsBot fine
+				SlashShape (r - x - w - p * fine) (r - x + w - p * fine) nsTop nsBot fine
+
+		define normalHeight  { [mix 0 CAP 0.975]          [mix 0 CAP 0.025]          }
+		define tallHeight    { [mix OperTop ParenTop 0.8] [mix OperBot ParenBot 0.8] }
+		define NumberSignConfig : object
+			upright         { UprightHBars     UprightVBars  0      normalHeight }
+			uprightOpen     { UprightHBarsOpen UprightVBars (1 / 8) normalHeight }
+			slanted         { SlantedHBars     SlantedVBars  0      normalHeight }
+			slantedOpen     { SlantedHBarsOpen SlantedVBars (1 / 8) normalHeight }
+			uprightTall     { UprightHBars     UprightVBars  0      tallHeight   }
+			uprightOpenTall { UprightHBarsOpen UprightVBars (1 / 8) tallHeight   }
+			slantedTall     { SlantedHBars     SlantedVBars  0      tallHeight   }
+			slantedOpenTall { SlantedHBarsOpen SlantedVBars (1 / 8) tallHeight   }
+
+		foreach { suffix { FHBars FVBars p height } } [Object.entries NumberSignConfig] : do
+
+			define l : SB - fine / 2
+			define r : RightSB + fine / 2
+
+			create-glyph "numberSign.\(suffix)" : union
+				FHBars height l l r p
+				FVBars height l l r p
+			create-glyph "numberSign.jr.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Right
+				include : union
+					FHBars height (r - Width) l r p
+					FVBars height (r - Width) l r p
+
+		select-variant 'numberSign' '#'
+		select-variant 'numberSign.jr' (follow -- 'numberSign')

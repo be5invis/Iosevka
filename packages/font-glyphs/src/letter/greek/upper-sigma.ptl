@@ -1,0 +1,37 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Letter-Greek-Upper-Sigma : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	glyph-block-export SigmaShape
+	define [SigmaShape] : with-params [df top bottom fine [noSerif false] [pCenter 0.5] [offsetLeft 0]] : glyph-proc
+		local cor : DiagCor (top - bottom) (df.rightSB - df.leftSB)
+		local midx : [mix df.leftSB df.rightSB pCenter] - fine / 2
+
+		include : union
+			HBar.t (offsetLeft + df.leftSB) df.rightSB top fine
+			HBar.b (offsetLeft + df.leftSB) df.rightSB bottom fine
+			spiro-outline
+				corner (df.leftSB + offsetLeft) (bottom + fine)
+				corner (df.leftSB + offsetLeft + fine * cor) (bottom + fine)
+				corner (midx + offsetLeft + fine * cor) [mix bottom top 0.5]
+				corner (df.leftSB + offsetLeft + fine * cor) (top - fine)
+				corner (df.leftSB + offsetLeft) (top - fine)
+				corner (midx + offsetLeft) [mix bottom top 0.5]
+
+		if (!noSerif && SLAB) : begin
+			include : VSerif.dr df.rightSB top VJut
+			include : VSerif.ur df.rightSB bottom VJut
+
+	create-glyph 'grek/Sigma' 0x3A3 : glyph-proc
+		set-width Width
+		include : MarkSet.capital
+		include : SigmaShape [DivFrame 1] CAP 0 Stroke
+
+	alias 'latinSigma' 0x1A9 'grek/Sigma'

@@ -1,0 +1,232 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Math-VAndCup : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-U : UShape
+	glyph-block-import Letter-Greek-Pi : PiShape
+	glyph-block-import Symbol-Arrow : ArrowShape
+	glyph-block-import Symbol-Math-Relation-Common : EqualHalfSpace
+	glyph-block-import NotGlyphFn : NotGlyphSw
+
+	define [VeeShape top bot sw] : union
+		dispiro
+			widths.lhs [fallback sw OperatorStroke]
+			flat SB top [heading Downward]
+			curl (Middle - [HSwToV HalfStroke]) bot [heading Downward]
+		dispiro
+			widths.rhs [fallback sw OperatorStroke]
+			flat RightSB top [heading Downward]
+			curl (Middle + [HSwToV HalfStroke]) bot [heading Downward]
+
+	define [WedgeShape top bot sw] : new-glyph : glyph-proc
+		include : VeeShape top bot sw
+		include : FlipAround Middle [mix top bot 0.5]
+
+	create-glyph 'wedge' 0x2227 : WedgeShape OperTop OperBot
+	create-glyph 'vee' 0x2228 : VeeShape OperTop OperBot
+
+	create-glyph 'wedge/aplThin' : WedgeShape OperTop OperBot [AdviceStroke 4]
+	create-glyph 'vee/aplThin' : VeeShape OperTop OperBot [AdviceStroke 4]
+
+	define [WedgeBarGap] : Math.max [AdviceStroke 4] ((OperTop - OperBot) / 8)
+
+	create-glyph 'math/logic/xor' 0x22BB : let [gap : WedgeBarGap] : union
+		HBar.b SB RightSB OperBot OperatorStroke
+		VeeShape OperTop (OperBot + OperatorStroke + gap)
+
+	create-glyph 'math/logic/nand' 0x22BC : let [gap : WedgeBarGap] : union
+		HBar.t SB RightSB OperTop OperatorStroke
+		WedgeShape (OperTop - OperatorStroke - gap) OperBot
+
+	create-glyph 'math/logic/nor' 0x22BD : let [gap : WedgeBarGap] : union
+		HBar.t SB RightSB OperTop OperatorStroke
+		VeeShape (OperTop - OperatorStroke - gap) OperBot
+
+	create-glyph 'curlyVee' 0x22CE : glyph-proc
+		local fine : CThin * OperatorStroke
+		include : dispiro
+			g4 SB OperTop [widths.center OperatorStroke]
+			straight.down.end (Middle - [HSwToV : 0.5 * OperatorStroke]) OperBot [widths.heading fine 0 Downward]
+
+		include : dispiro
+			widths.center OperatorStroke
+			g4 RightSB OperTop [widths.center OperatorStroke]
+			straight.down.end (Middle + [HSwToV : 0.5 * OperatorStroke]) OperBot [widths.heading 0 fine Downward]
+
+	turned 'curlyWedge' 0x22CF 'curlyVee' Middle SymbolMid
+
+	create-glyph 'mt/projection' 0x2305 : union
+		HBar.t SB RightSB OperTop OperatorStroke
+		WedgeShape (OperTop - OperatorStroke) OperBot
+
+	create-glyph 'mt/perspective' 0x2306 : let [gap : WedgeBarGap] : union
+		HBar.t SB RightSB OperTop OperatorStroke
+		HBar.t SB RightSB (OperTop - OperatorStroke - gap) OperatorStroke
+		WedgeShape (OperTop - 2 * OperatorStroke - gap) OperBot
+
+	create-glyph 'doubleVee' 0x2A54 : glyph-proc
+		define sw : AdviceStroke 6
+		include : dispiro
+			widths.center sw
+			flat SB OperTop [heading Downward]
+			curl Middle OperBot [heading Downward]
+
+		include : dispiro
+			widths.center sw
+			flat RightSB OperTop [heading Downward]
+			curl Middle OperBot [heading Downward]
+
+		define offsetRatio : 1 / 4
+		define bias : (RightSB - SB) * offsetRatio
+		define a : dispiro
+			widths.center sw
+			flat (SB + bias) OperTop [heading Downward]
+			curl (Middle + bias) OperBot [heading Downward]
+		define b : dispiro
+			widths.center sw
+			flat (RightSB - bias) OperTop [heading Downward]
+			curl (Middle - bias) OperBot [heading Downward]
+
+		include : union
+			intersection a b
+			difference
+				union a b
+				spiro-outline
+					corner 0 OperBot
+					corner Width OperBot
+					corner Width [mix OperBot OperTop (1 - 2 * offsetRatio)]
+					corner 0 [mix OperBot OperTop (1 - 2 * offsetRatio)]
+
+	turned 'doubleWedge' 0x2A53 'doubleVee' Middle SymbolMid
+
+	create-glyph 'math/logic/equalAnd' 0x2A5E : let [gap : WedgeBarGap] : union
+		HBar.t SB RightSB (OperTop + EqualHalfSpace * 0.75) OperatorStroke
+		HBar.t SB RightSB (OperTop - EqualHalfSpace * 0.75) OperatorStroke
+		WedgeShape (OperTop - OperatorStroke - EqualHalfSpace * 0.75 - gap) OperBot
+
+	create-glyph 'math/logic/xand' 0x2A5F : let [gap : WedgeBarGap] : union
+		HBar.b SB RightSB OperBot OperatorStroke
+		WedgeShape OperTop (OperBot + OperatorStroke + gap)
+
+	create-glyph 'math/logic/andEqual' 0x2A60 : let [gap : WedgeBarGap] : union
+		HBar.b SB RightSB (OperBot - EqualHalfSpace * 0.75) OperatorStroke
+		HBar.b SB RightSB (OperBot + EqualHalfSpace * 0.75) OperatorStroke
+		WedgeShape OperTop (OperBot + OperatorStroke + EqualHalfSpace * 0.75 + gap)
+
+	alias  'veeUnderbar'        0x2A61 'math/logic/xor'
+	turned 'math/logic/equalOr' 0x2A62 'math/logic/andEqual' Middle SymbolMid
+	turned 'math/logic/orEqual' 0x2A63 'math/logic/equalAnd' Middle SymbolMid
+
+	create-glyph 'cup' 0x222A : glyph-proc
+		include : UShape [DivFrame 1] OperTop OperBot (stroke -- OperatorStroke)
+
+	turned 'cap' 0x2229 'cup' Middle SymbolMid
+
+	define ThinCupStroke : AdviceStroke 4
+	create-glyph 'thinCup' : glyph-proc
+		include : UShape [DivFrame 1] OperTop OperBot (stroke -- ThinCupStroke)
+
+	WithDotVariants 'cupDot' 0x228D : function [DrawAt kdr overshoot ]: glyph-proc
+		include [refer-glyph 'thinCup'] AS_BASE ALSO_METRICS
+		include : DrawAt Middle (OperBot + ArchDepth) ([Math.min (DotRadius * kdr) ((RightSB - SB - [HSwToV : 2 * ThinCupStroke]) * (1 / 3))] - overshoot)
+
+	create-glyph 'cupArrowLeft' 0x228C : glyph-proc
+		include [refer-glyph 'thinCup'] AS_BASE ALSO_METRICS
+		local mockUpscale : ThinCupStroke / [AdviceStroke 6]
+		local arrowLength : mockUpscale * [Math.min (RightSB - SB - [HSwToV : 2 * ThinCupStroke]) (Width * 0.6)]
+		include : new-glyph : glyph-proc
+			include : ArrowShape
+				Middle + arrowLength / 2
+				OperBot + ArchDepth
+				Middle - arrowLength / 2
+				OperBot + ArchDepth
+				arrowLength * 0.5
+			include : Ungizmo
+			include : Translate (-Middle) (-OperBot - ArchDepth)
+			include : Scale (1 / mockUpscale) (1 / mockUpscale)
+			include : Translate Middle (OperBot + ArchDepth)
+			include : Regizmo
+
+	define cupInnerPlusSw : AdviceStroke 6
+	define cupInnerPlusSize : Math.min (RightSB - SB - [HSwToV ThinCupStroke] * (2 + 0.5 * cupInnerPlusSw / ThinCupStroke)) ((RightSB - SB) * 0.8)
+	create-glyph 'cupPlus' 0x228E : glyph-proc
+		include [refer-glyph 'thinCup'] AS_BASE ALSO_METRICS
+		include : dispiro
+			widths.center cupInnerPlusSw
+			corner (Middle - cupInnerPlusSize / 2) (OperBot + ArchDepth)
+			corner (Middle + cupInnerPlusSize / 2) (OperBot + ArchDepth)
+		include : dispiro
+			widths.center cupInnerPlusSw
+			corner Middle (OperBot + ArchDepth - cupInnerPlusSize / 2)
+			corner Middle (OperBot + ArchDepth + cupInnerPlusSize / 2)
+
+	create-glyph 'doubleCup' 0x22D3 : glyph-proc
+		local sw : AdviceStroke 6
+		local gap : Math.max (Width / 8) (sw / 2)
+		include : UShape [DivFrame 1] OperTop OperBot (stroke -- sw)
+		include : UShape [DivFrame 1] OperTop OperBot
+			stroke -- sw
+			offset -- (sw + gap)
+			ada -- [ArchDepthAOf (ArchDepth - sw - gap) Width]
+			adb -- [ArchDepthBOf (ArchDepth - sw - gap) Width]
+
+	turned 'doubleCap' 0x22D2 'doubleCup' Middle SymbolMid
+
+	define pitchForkTop : [mix OperBot OperTop 1.2] + Stroke / 4
+	define pitchForkSw  : AdviceStroke 3.25
+
+	create-glyph 'pitchFork' 0x22D4 : composite-proc
+		UShape [DivFrame 1] OperTop OperBot (stroke -- pitchForkSw)
+		FlipAround Middle SymbolMid
+		VBar.m Middle OperBot pitchForkTop pitchForkSw
+
+	create-glyph 'elementUp' 0x27D2 : glyph-proc
+		include [refer-glyph 'thinCup'] AS_BASE ALSO_METRICS
+		include : VBar.m Middle OperBot OperTop ThinCupStroke
+
+	turned 'capDot' 0x2A40 'cupDot' Middle SymbolMid
+
+	create-glyph 'cupMinus' 0x2A41 : glyph-proc
+		include [refer-glyph 'thinCup'] AS_BASE ALSO_METRICS
+		include : HBar.m (Middle - cupInnerPlusSize / 2) (Middle + cupInnerPlusSize / 2) (OperBot + ArchDepth) cupInnerPlusSw
+
+	create-glyph 'cupOverbar' 0x2A42 : let [gap : WedgeBarGap] : glyph-proc
+		include : UShape [DivFrame 1] (OperTop - OperatorStroke - gap) OperBot (stroke -- OperatorStroke)
+		include : HBar.t SB RightSB OperTop OperatorStroke
+
+	create-glyph 'capOverbar' 0x2A43 : let [gap : WedgeBarGap] : glyph-proc
+		include : UShape [DivFrame 1] OperTop (OperBot + OperatorStroke + gap) (stroke -- OperatorStroke)
+		include : FlipAround Middle SymbolMid
+		include : HBar.t SB RightSB OperTop OperatorStroke
+
+	turned 'elementDown' 0x2AD9 'elementUp' Middle SymbolMid
+
+	create-glyph 'transversalIntersection' 0x2ADB : composite-proc
+		UShape [DivFrame 1] OperTop OperBot (stroke -- pitchForkSw)
+		FlipAround Middle SymbolMid
+		VBar.m Middle (OperBot + OperTop - pitchForkTop) pitchForkTop pitchForkSw
+
+	create-glyph 'pitchForkTee' 0x2ADA : glyph-proc
+		include [refer-glyph 'pitchFork'] AS_BASE ALSO_METRICS
+		include : HBar.t SB RightSB pitchForkTop pitchForkSw
+
+	create-glyph 'nonForking' 0x2ADD : glyph-proc
+		include : UShape [DivFrame 1] SymbolMid OperBot (stroke -- pitchForkSw)
+		include : VBar.m Middle OperBot OperTop pitchForkSw
+
+	create-glyph 'forking' 0x2ADC : glyph-proc
+		include [refer-glyph 'nonForking'] AS_BASE ALSO_METRICS
+		include : dispiro
+			widths.center NotGlyphSw
+			flat SB OperBot
+			curl RightSB OperTop
+
+	create-glyph 'squareCap' 0x2293 : glyph-proc
+		include : PiShape [DivFrame 1] OperTop OperBot (shrinkRate -- 0) (fine -- OperatorStroke) (doSerif -- false)
+
+	turned 'squareCup' 0x2294 'squareCap' Middle SymbolMid

@@ -1,0 +1,72 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-E : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-C : CLetterForm CConfig
+	glyph-block-import Letter-Cyrillic-Iotified-A : Iotified
+
+	foreach { suffix { sty styBot } } [Object.entries CConfig] : do
+		create-glyph "cyrl/E.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
+			include : lf.revFull
+			include : HBar.m [mix SB RightSB 0.35] RightSB (CAP / 2) [AdviceStroke2 2 3 CAP]
+
+		create-glyph "cyrl/e.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			set-base-anchor 'cvDecompose' 0 0
+			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
+				ada -- SmallArchDepthA
+				adb -- SmallArchDepthB
+			include : lf.revFull
+			include : HBar.m [mix SB RightSB 0.35] RightSB (XH / 2) [AdviceStroke2 2 3 XH]
+
+		create-glyph "cyrl/Ye.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
+			include : lf.full
+			include : HBar.m SB [mix RightSB SB 0.35] (CAP / 2) [AdviceStroke2 2 3 CAP]
+
+		create-glyph "cyrl/ye.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			set-base-anchor 'cvDecompose' 0 0
+			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
+				ada -- SmallArchDepthA
+				adb -- SmallArchDepthB
+			include : lf.full
+			include : HBar.m SB [mix RightSB SB 0.35] (XH / 2) [AdviceStroke2 2 3 XH]
+
+		define [IotifiedEShape fCapital df top ada adb] : glyph-proc
+			local gap : 0.25 * (df.width - 2 * df.leftSB - 2.5 * df.mvs)
+			define divSub : (df.width - gap - df.mvs) / Width
+			define dfSub : DivFrame divSub 2
+
+			local lf : CLetterForm dfSub sty styBot top 0 (ada -- ada) (adb -- adb) (sw -- df.mvs)
+			include : with-transform [ApparentTranslate (Width * (df.div - divSub)) 0] : lf.full
+
+			include : Iotified.full df top
+				hBarRight -- [mix df.leftSB df.rightSB (3 / 4)]
+				hBarY -- (top / 2)
+				fCapital -- fCapital
+
+		create-glyph "cyrl/EIotified.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : IotifiedEShape true df CAP ArchDepthA ArchDepthB
+
+		create-glyph "cyrl/eIotified.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+			include : IotifiedEShape false df XH SmallArchDepthA SmallArchDepthB
+
+	select-variant 'cyrl/E' 0x42D (follow -- 'C')
+	select-variant 'cyrl/e' 0x44D (follow -- 'c')
+	select-variant 'cyrl/Ye' 0x404 (follow -- 'C')
+	select-variant 'cyrl/ye' 0x454 (follow -- 'c')
+	select-variant "cyrl/EIotified" 0x464 (follow -- 'C')
+	select-variant "cyrl/eIotified" 0x465 (follow -- 'c')

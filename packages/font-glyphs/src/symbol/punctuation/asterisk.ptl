@@ -1,0 +1,89 @@
+### Punctuation symbols
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Asterisk : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define yHigh    : ParenTop - LongJut * 2
+	define yHigh_DT : ParenTop - LongJut * 1.5
+	define yLow     : mix SymbolMid yHigh (-1)
+	define yLow_DT  : mix SymbolMid yHigh_DT (-1)
+
+	define asteriskKinds : list
+		#  sides  size  rot  pFine stroke              name             dual            triple         high            slashTop      sMid             midXH    slashBot
+		list { 5  1.2   0    0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'pentaHigh'     'pentaST'     'pentaSMid'      'midXH'  'pentaSB'     }
+		list { 6  1.2   0    0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'hexHigh'       'hexST'       'hexSMid'        ''       'hexSB'       }
+		list { 5  1.2   1    0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'turnPentaHigh' 'turnPentaST' 'turnPentaSMid'  ''       'turnPentaSB' }
+		list { 6  1.2   0.5  0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'turnHexHigh'   'turnHexST'   'turnHexSMid'    ''       'turnHexSB'   }
+		list { 5  1.2   0    0.4   GeometryStroke  } { 'opAsterisk'     ''              ''         } { ''              ''            'penta'          ''       ''            }
+		list { 6  1.2   0    0.4   GeometryStroke  } { 'opAsterisk'     ''              ''         } { ''              ''            'hex'            ''       ''            }
+		list { 5  1.2   1    0.4   GeometryStroke  } { 'opAsterisk'     ''              ''         } { ''              ''            'turnPenta'      ''       ''            }
+		list { 6  1.2   0.5  0.4   GeometryStroke  } { 'opAsterisk'     ''              ''         } { ''              ''            'turnHex'        ''       ''            }
+		list { 8  1.2   0.5  0.4  [AdviceStroke 3] } { 'flower'         ''              ''         } { 'high'          'ST'          'sMid'           ''       ''            }
+
+	foreach [{{ sides size rot pFine stroke } { name dual triple } { high slashTop sMid midXH slashBot } } : items-of asteriskKinds] : begin
+		create-glyph (name + '.' + sMid) : glyph-proc
+			local radius : LongJut * size
+			local fine : stroke * pFine
+			local final : 0.5 * [Math.min stroke (radius * Math.PI / sides)]
+
+			foreach j [range 0 sides] : begin
+				local s : Math.sin ((2 * j / sides + rot) * Math.PI)
+				local c : Math.cos ((2 * j / sides + rot) * Math.PI)
+				include : dispiro
+					flat Middle SymbolMid [widths.center : 2 * fine]
+					curl (Middle + radius * s) (SymbolMid + radius * c) [widths.center : 2 * final]
+
+		if high : create-glyph (name + '.' + high) : composite-proc
+			refer-glyph (name + '.' + sMid)
+			ApparentTranslate 0 (2 * (yHigh - SymbolMid))
+
+		if slashTop : create-glyph (name + '.' + slashTop) : composite-proc
+			refer-glyph (name + '.' + sMid)
+			ApparentTranslate 0 (yHigh - SymbolMid)
+
+		if midXH : create-glyph (name + '.' + midXH) : composite-proc
+			refer-glyph (name + '.' + sMid)
+			ApparentTranslate 0 (XH / 2 - SymbolMid)
+
+		if slashBot : create-glyph (name + '.' + slashBot) : composite-proc
+			refer-glyph (name + '.' + sMid)
+			ApparentTranslate 0 (yLow - SymbolMid)
+
+		if dual : create-glyph (dual + '.' + sMid) : composite-proc
+			with-transform [ApparentTranslate 0 (yHigh_DT - SymbolMid)] : refer-glyph (name + '.' + sMid)
+			with-transform [ApparentTranslate 0 (yLow_DT - SymbolMid)]  : refer-glyph (name + '.' + sMid)
+
+		if triple : for-width-kinds WideWidth1
+			local scale : Math.sqrt (MosaicWidthScalar / 2)
+			create-glyph ([MangleName triple] + '.' + sMid) : glyph-proc
+				set-width MosaicWidth
+				include : new-glyph : composite-proc
+					refer-glyph (name + '.' + sMid)
+					ScaleAround Middle SymbolMid scale scale
+					ApparentTranslate (MosaicWidth * 0.5  - Width / 2) (yHigh_DT - SymbolMid)
+				include : new-glyph : composite-proc
+					refer-glyph (name + '.' + sMid)
+					ScaleAround Middle SymbolMid scale scale
+					ApparentTranslate (MosaicWidth * 0.75 - Width / 2) (yLow_DT - SymbolMid)
+				include : new-glyph : composite-proc
+					refer-glyph (name + '.' + sMid)
+					ScaleAround Middle SymbolMid scale scale
+					ApparentTranslate (MosaicWidth * 0.25 - Width / 2) (yLow_DT - SymbolMid)
+
+	select-variant 'asterisk' '*'
+	select-variant 'asterisk/slashTop' (shapeFrom -- 'asterisk')
+	select-variant 'asterisk/slashBot' 0x204E (shapeFrom -- 'asterisk')
+	select-variant 'asterisk/sMid' (shapeFrom -- 'asterisk')
+	select-variant 'asterisk/sMid/ligComment' (shapeFrom -- 'asterisk') (follow -- 'asterisk/sMid')
+	select-variant 'dualAsterisk' 0x2051 (follow -- 'asterisk/sMid')
+	select-variant 'flower' 0x2055
+	select-variant 'opAsterisk' 0x2217
+
+	for-width-kinds WideWidth1
+		select-variant [MangleName 'asterism'] [MangleUnicode 0x2042] (follow -- 'asterisk/sMid')

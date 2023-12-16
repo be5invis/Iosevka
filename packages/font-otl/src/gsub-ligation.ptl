@@ -1,0 +1,1113 @@
+$$include './meta/macros.ptl'
+
+extern Map
+extern Set
+
+define [arrowBarX s] : lambda [t] : t.map : lambda [x] "\(x).arrowBar.\(s)"
+define [lsx s] : lambda [t] : t.map : lambda [x] "\(x).lig.\(s)"
+define [csx s] : lambda [t] : t.map : lambda [x] "\(x).\(s)"
+define [just s] : lambda [t] : t.map : lambda [x] s
+define look-around null
+define advance : lambda [t] null
+define ident : lambda [t] : t.map : lambda [x] x
+
+export : define [buildLigations gsub para plm] : begin
+	# Initialize features
+	define features : new Map
+	foreach [ { featureTag } : pairs-of plm] : begin
+		local feature : gsub.addCommonFeature : gsub.createFeature featureTag
+		features.set featureTag feature
+
+	buildLigationsImpl gsub para [DoLigGroupT gsub plm features]
+
+define [DoLigGroupT gsub plm features] : function [F] : begin
+	define deDupeGroups : new Map
+
+	# Groupwise deduplicate of the lookups we just added
+	# Push the lookups if they are indeed new
+	define [deDupe lookupsToPush] : begin
+		local h : JSON.stringify lookupsToPush
+		local g : deDupeGroups.get h
+		if g : return { false g }
+
+		# We now actually push the lookups
+
+		local results {}
+		local rec : gsub.beginBlock
+
+		local lastLookupInGroup null
+		foreach raw [items-of lookupsToPush] : begin
+			local lookup : gsub.createLookup raw
+			if lastLookupInGroup : gsub.setDependency lastLookupInGroup lookup
+			set lastLookupInGroup lookup
+			results.push lookup
+
+		gsub.endBlock rec
+
+		deDupeGroups.set h results
+		return { true results }
+
+	# Execute body function F, collect lookups and add them into the GSUB
+	foreach [ { featureTag groups } : pairs-of plm] : begin
+		define feature : features.get featureTag
+		define { fUnique lookups } : deDupe : DoFeatureLigGroup gsub feature groups F
+		foreach lookup [items-of lookups] : feature.addLookup lookup
+
+define [DoFeatureLigGroup gsub feature groups F] : begin
+	define [hasLG ln] : [groups.indexOf ln] >= 0
+	define lookupNamePrefix : 'lig_' + feature.tag + '_'
+	define lookupsToPush {}
+
+	define [filterNulls _rules] : begin
+		if [not _rules] : return _rules
+		define rules {}
+		foreach [rule : items-of _rules] : if rule : rules.push rule
+		return rules
+
+	define [CreateLigationLookup _rules] : begin
+		define rules : filterNulls _rules
+		if (rules && rules.length) : lookupsToPush.push
+			.type 'gsub_chaining'
+			.rules rules
+
+	define [CreateReverseLigationLookup _rules] : begin
+		define rules : filterNulls _rules
+		if (rules && rules.length) : lookupsToPush.push
+			.type 'gsub_reverse'
+			.rules rules
+
+	F hasLG CreateLigationLookup CreateReverseLigationLookup
+
+	return lookupsToPush
+
+define-macro LigGroup : syntax-rules
+	`[LigGroup @description @body]
+		dirty `[$LigGroup$
+			[function [hasLG CreateLigationLookup CreateReverseLigationLookup] @[formOf body]]]
+
+###################################################################################################
+###################################################################################################
+
+define [buildLigationsImpl gsub para $LigGroup$] : begin
+	define { chain-rule reverse-rule } : gsub.ChainRuleBuilder
+
+	define less {'less'}
+	define lessAndEquiv {'less' 'less.lig.shift0' 'less.lig.shift0.anti'}
+	define greater {'greater'}
+	define greaterAndEquiv {'greater' 'greater.lig.shift0' 'greater.lig.shift0.anti'}
+	define lessOrGreater         : {}.concat less         greater
+	define lessOrGreaterAndEquiv : {}.concat lessAndEquiv greaterAndEquiv
+
+	define hyphen {'hyphen'}
+	define equal {'equal'}
+	define anyStraightRod { 'hyphen' 'equal' }
+	define anyWave {'asciiTilde' 'asciiTilde.low' 'asciiTilde.high'}
+
+	define bar {'bar'}
+	define slash {'slash'}
+	define exclam {'exclam'}
+	define backslash {'backslash'}
+	define underscore {'underscore'}
+	define anyBar {'bar' 'slash' 'backslash'}
+
+	define regexLookAround [less.concat hyphen equal exclam greater anyBar]
+
+	LigGroup "Bracket-star" : if [hasLG 'brst'] : begin
+		CreateLigationLookup : list
+			chain-rule # (*
+				{'parenLeft'}  ~> look-around
+				{'asterisk'}   ~> {'asterisk/sMid'}
+			chain-rule # *)
+				{'asterisk'}   ~> {'asterisk/sMid'}
+				{'parenRight'} ~> look-around
+
+	LigGroup "Bracket-Colon" : if [hasLG 'center-ops'] : begin
+		CreateLigationLookup : list
+			chain-rule # (:
+				{'parenLeft' 'bracketLeft' 'braceLeft'}    ~> look-around
+				{'colon'}                                  ~>  {'colon/mid'}
+			chain-rule # :)
+				{'colon'}                                  ~>  {'colon/mid'}
+				{'parenRight' 'bracketRight' 'braceRight'} ~> look-around
+
+	LigGroup "Operator centering" : if [hasLG 'center-ops'] : begin
+		define triggerL {}
+		define triggerR {}
+		define skipL    { 'slash' 'backslash' 'at' 'ampersand' 'percent' 'numberSign' }
+		define skipR    { 'slash' 'backslash' 'at' 'ampersand' 'percent' 'numberSign' }
+
+		if [hasLG 'center-op-trigger-plus-minus-l'] : triggerL.push 'plus' 'minus' 'hyphen'
+		if [hasLG 'center-op-trigger-plus-minus-r'] : triggerR.push 'plus' 'minus' 'hyphen'
+		if [hasLG 'center-op-trigger-equal-l']      : triggerL.push 'equal' 'ident'
+		if [hasLG 'center-op-trigger-equal-r']      : triggerR.push 'equal' 'ident'
+		if [hasLG 'center-op-trigger-bar-l']        : triggerL.push 'bar'
+		if [hasLG 'center-op-trigger-bar-r']        : triggerR.push 'bar'
+		if [hasLG 'center-op-trigger-slash-l']      : triggerL.push 'slash' 'backslash'
+		if [hasLG 'center-op-trigger-slash-r']      : triggerR.push 'slash' 'backslash'
+		if [hasLG 'center-op-trigger-angle-inside']
+			begin [triggerR.push 'less'] [triggerL.push 'greater']
+		if [hasLG 'center-op-trigger-angle-outside']
+			begin [triggerL.push 'less'] [triggerR.push 'greater']
+
+		if [not : hasLG 'center-op-trigger-bar-l']        : skipL.push 'bar'
+		if [not : hasLG 'center-op-trigger-bar-r']        : skipR.push 'bar'
+
+
+		define [acops]  : if [hasLG 'bar-triggers-op-centering']
+			begin {'less' 'greater' 'hyphen' 'equal' 'plus' 'slash' 'bar' 'backslash'}
+			begin {'less' 'greater' 'hyphen' 'equal' 'plus'}
+		define [acskip] : if [hasLG 'bar-triggers-op-centering']
+			begin {'at' 'ampersand' 'percent' 'numberSign'}
+			begin {'slash' 'bar' 'backslash' 'at' 'ampersand' 'percent' 'numberSign'}
+
+		define opcGroups : list
+			{'asterisk'}    ~>  {'asterisk/sMid'}
+			{'asciiTilde'}  ~>  {'asciiTilde.low'}
+
+		if [hasLG 'center-op-influence-dot']   : opcGroups.push : {'period'} ~> {'period/mid'}
+		if [hasLG 'center-op-influence-colon'] : opcGroups.push : {'colon'}  ~> {'colon/mid'}
+
+		define opcFrom : opcGroups.map : x => x.left.0
+		define opcTo   : opcGroups.map : x => x.right.0
+		define C       : opcFrom ~> opcTo
+
+		# Triggering
+		CreateLigationLookup : list
+			chain-rule C C skipL skipL triggerL         # **##+
+			chain-rule C C skipL triggerL               # **#+
+			chain-rule C C triggerL                     # **+
+			chain-rule C skipL skipL triggerL           # *##+
+			chain-rule C skipL triggerL                 # *#+
+			chain-rule C triggerL                       # *+
+			chain-rule triggerR skipR skipR C           # +##*
+			chain-rule triggerR skipR C                 # +#*
+			chain-rule triggerR C                       # +*
+
+		# Extension
+		CreateLigationLookup : list
+			chain-rule opcTo skipR skipR C              # *##* --->
+			chain-rule opcTo skipR C                    # *#*  --->
+			chain-rule opcTo C                          # **   --->
+
+		CreateReverseLigationLookup : list
+			reverse-rule C skipL skipL opcTo            # *##* <---
+			reverse-rule C skipL opcTo                  # *#*  <---
+			reverse-rule C opcTo                        # **   <---
+
+		# AAPL FIX
+		# Apple (still) have problem when dealing with reverse chaining lookup
+		# They give up at run beginning. Fix them.
+		CreateLigationLookup : list
+			chain-rule C skipR skipR opcTo
+			chain-rule C skipR opcTo
+			chain-rule C opcTo
+
+	LigGroup "slash-asterisk" : if [hasLG 'slash-asterisk'] : begin
+		CreateLigationLookup : list
+			chain-rule # /*
+				{'slash'}                    ~> look-around
+				{'asterisk'}                 ~> [just 'asterisk/slashTop']
+			chain-rule # */
+				{'asterisk'}                 ~> [just 'asterisk/slashBot']
+				{'slash'}                    ~> look-around
+		CreateReverseLigationLookup : list
+			reverse-rule
+				{'asterisk'}                 ~> [just 'asterisk/slashBot']
+				{'asterisk/slashBot'}        ~> look-around
+			reverse-rule
+				{'asterisk/slashTop'}        ~> [just 'asterisk/sMid/ligComment']
+				{'asterisk/slashBot'}        ~> look-around
+		CreateLigationLookup : list
+			chain-rule
+				{'asterisk/slashTop'}        ~> look-around
+				{'asterisk'}                 ~> {'asterisk/slashTop'}
+			chain-rule
+				{'asterisk/sMid/ligComment'} ~> look-around
+				{'asterisk' 'asterisk/slashBot'}  ~> [just 'asterisk/sMid/ligComment']
+
+	LigGroup "Kern Dotty" : if [hasLG 'kern-dotty'] : begin
+		define dottyPunctuationSets : list
+			list { "period" "period/mid" } { "colon" "colon/mid" "question" "exclam" }
+			list { "comma" }               { "semicolon" }
+		define dottyConnected : list
+			list
+				* 'equal'
+				* 'hyphen'
+				* 'plus'
+				* 'less'
+				* 'greater'
+				* 'asterisk'
+				* 'asciiTilde'
+				* 'asciiCaret'
+			list
+				* 'parenLeft'
+				* 'parenRight'
+				* 'bracketLeft'
+				* 'bracketRight'
+				* 'braceLeft'
+				* 'braceRight'
+				* 'numberSign'
+				* 'ampersand'
+				* 'slash'
+				* 'bar'
+
+		foreach { dpShort dpTall } [items-of dottyPunctuationSets] : begin
+			define dp : {}.concat dpShort dpTall
+			define dLeft      : [lsx 'dLeft']  dp
+			define dRight     : [lsx 'dRight'] dp
+			define dLeftHalf  : [lsx 'dLeftHalf']  dp
+			define dRightHalf : [lsx 'dRightHalf'] dp
+			define dMid       : [lsx 'dMid']       dp
+
+			CreateLigationLookup : list
+				chain-rule
+					[dRight.concat dMid] ~> look-around
+					dp ~> dMid
+					dp ~> look-around
+				chain-rule
+					[dRight.concat dMid] ~> look-around
+					dp ~> dLeft
+				chain-rule
+					dp ~> dRight
+					dp ~> look-around
+
+			foreach boundary [items-of dottyConnected] : do
+				define dg : if (boundary == dottyConnected.0) dp dpTall
+				define dgLeft      : [lsx 'dLeftHalf']  dg
+				define dgRight     : [lsx 'dRightHalf'] dg
+				define dgLeftHalf  : [lsx 'dLeftHalf']  dg
+				define dgRightHalf : [lsx 'dRightHalf'] dg
+				define dgMid       : [lsx 'dMid']       dg
+				CreateLigationLookup : list
+					chain-rule
+						boundary               ~> look-around
+						dgRight                ~> dgMid
+						dgLeft                 ~> dgMid
+						boundary               ~> look-around
+					chain-rule
+						boundary               ~> look-around
+						dgRight                ~> dgMid
+						[dgMid.concat dgLeft]  ~> look-around
+					chain-rule
+						[dgMid.concat dgRight] ~> look-around
+						dgLeft                 ~> dgMid
+						boundary               ~> look-around
+
+			CreateLigationLookup : list
+				chain-rule
+					dRight ~> look-around
+					dMid   ~> dRightHalf
+					dMid   ~> dLeftHalf
+					dLeft  ~> look-around
+				chain-rule
+					dRight ~> look-around
+					dMid   ~> dRightHalf
+					dMid   ~> look-around
+				chain-rule
+					dMid   ~> look-around
+					dMid   ~> dLeftHalf
+					dLeft  ~> look-around
+				chain-rule
+					dRight ~> dRightHalf
+					dLeft  ~> dLeftHalf
+
+	LigGroup "triangles" : if [hasLG 'trig'] : begin
+		CreateLigationLookup : list
+			chain-rule # <|
+				less    ~> [lsx 'trig']
+				{'bar'} ~> [lsx 'trig']
+			chain-rule # |>
+				{'bar'} ~> [lsx 'trig']
+				greater ~> [lsx 'trig']
+			chain-rule # |>
+				[[lsx 'trig'] {'bar'}] ~> look-around
+				greater                ~> [lsx 'trig']
+			chain-rule # <||||
+				[[lsx 'trig'] {'bar'}] ~> look-around
+				{'bar'}                ~> [lsx 'trig']
+		CreateReverseLigationLookup : list
+			reverse-rule
+				{'bar'}                ~> [[lsx 'trig'] {'bar'}]
+				[[lsx 'trig'] {'bar'}] ~> look-around
+		# Apple fix
+		CreateLigationLookup : list
+			chain-rule
+				{'bar'}                ~> [[lsx 'trig'] {'bar'}]
+				[[lsx 'trig'] {'bar'}] ~> look-around
+
+	LigGroup "shift-eq operators (<<= and >>=)" : if [hasLG 'llggeq']  : begin
+		CreateLigationLookup : list
+			chain-rule # =<<<=
+				equal      ~> look-around
+				less       ~> advance
+				less       ~> advance
+				less       ~> advance
+				equal      ~> look-around
+			chain-rule # <<<==
+				less       ~> advance
+				less       ~> advance
+				less       ~> advance
+				equal      ~> look-around
+				equal      ~> look-around
+			chain-rule # <<<=
+				less       ~> [lsx 'shiftN0h']
+				less       ~> look-around
+				less       ~> [lsx 'shift0h']
+				equal      ~> look-around
+			chain-rule # =>>>=
+				equal      ~> look-around
+				greater    ~> advance
+				greater    ~> advance
+				greater    ~> advance
+				equal      ~> look-around
+			chain-rule # >>>==
+				greater    ~> advance
+				greater    ~> advance
+				greater    ~> advance
+				equal      ~> look-around
+				equal      ~> look-around
+			chain-rule # >>>=
+				greater    ~> [lsx 'shift0h']
+				greater    ~> look-around
+				greater    ~> [lsx 'shiftN0h']
+				equal      ~> look-around
+			chain-rule # =<<=
+				equal      ~> look-around
+				less       ~> advance
+				less       ~> advance
+				equal      ~> look-around
+			chain-rule # <<==
+				less       ~> advance
+				less       ~> advance
+				equal      ~> look-around
+				equal      ~> look-around
+			chain-rule # <<=
+				less       ~> [lsx 'shiftN0h']
+				less       ~> [lsx 'shift0h']
+				equal      ~> look-around
+			chain-rule # =>>=
+				equal      ~> look-around
+				greater    ~> advance
+				greater    ~> advance
+				equal      ~> look-around
+			chain-rule # >>==
+				greater    ~> advance
+				greater    ~> advance
+				equal      ~> look-around
+				equal      ~> look-around
+			chain-rule # >>=
+				greater    ~> [lsx 'shift0h']
+				greater    ~> [lsx 'shiftN0h']
+				equal      ~> look-around
+
+	LigGroup "HTML Comment" : if [hasLG 'html-comment'] : begin
+		CreateLigationLookup : list
+			chain-rule # <!---
+				less   ~> look-around
+				exclam ~> [lsx 'htmlcommentstart']
+				hyphen ~> [lsx 'lxc']
+				hyphen ~> [lsx 'cc']
+				hyphen ~> [lsx 'cf']
+			chain-rule # <!--
+				less   ~> look-around
+				exclam ~> [lsx 'htmlcommentstart']
+				hyphen ~> [lsx 'lxc']
+				hyphen ~> [lsx 'cf']
+
+	LigGroup "Arrows" : begin
+		define singular : hyphen.concat anyWave
+		define [CBarSingular k] : begin
+			local hyphenSet : new Set hyphen
+			local fHyphen : arrowBarX k
+			local fWave   : just "wave.lig.\(k)"
+			return : lambda [t] : begin
+				local hyphenResults : fHyphen t
+				local waveResults   : fWave   t
+				return : t.map : lambda [x j]
+					if [hyphenSet.has x] hyphenResults.(j) waveResults.(j)
+
+		define ArrowFormationConfig : list
+			#    rod      dbl  ltgt  FBarCls
+			list equal    1    1     arrowBarX
+			list singular 0    0     CBarSingular
+
+		define ArrowExtensionConfig : list
+			#    rod      FBarCls
+			list equal    arrowBarX
+			list hyphen   arrowBarX
+			list anyWave  [lambda [k] [just "wave.lig.\(k)"]]
+
+		foreach [{rodCls dbl ltgt CRod} : items-of ArrowFormationConfig] : do
+			define heads {}
+			define rods  {}
+
+			define doLT    : [not ltgt] || [hasLG 'arrow-l']         && ![hasLG 'lteq'] && ![hasLG 'lteq-separate']
+			define doLTAlt : [not ltgt] || [hasLG 'counter-arrow-l'] && ![hasLG 'eqlt'] && ![hasLG 'eqlt-separate']
+			define doRT    : [not ltgt] || [hasLG 'counter-arrow-r'] && ![hasLG 'gteq'] && ![hasLG 'gteq-separate']
+
+			# Disable regular expression lookaheads
+			heads.push : chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			heads.push : chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			heads.push : chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+
+			define [CJoinHeadForce]         : if dbl [lsx 'dblhead']        [lsx 'shift0.head']
+			define [CJoinHeadMid]           : if dbl [lsx 'dblhead.mid']    [lsx 'shift0.mid']
+			define [CJoinHeadForceShift1]   : if dbl [lsx 'dblhead.shift1'] [lsx 'shift1.head']
+			define [CAntiHeadForce]         : if dbl [lsx 'hole']           [lsx 'shift0.anti']
+			define [CAntiHeadForceShiftN1]  : if dbl [lsx 'hole.shiftN1']   [lsx 'shiftN1.anti']
+
+			define [LJoinHeadForce]         : if [hasLG 'arrow-l']                          [CJoinHeadForce]        advance
+			define [LJoinHeadForceLR]       : if ([hasLG 'arrow-l'] || [hasLG 'arrow-lr'])  [CJoinHeadForce]        advance
+			define [LJoinHeadForceShift1]   : if [hasLG 'arrow-l']                          [CJoinHeadForceShift1]  advance
+			define [LJoinHeadForceShift1LR] : if ([hasLG 'arrow-l'] || [hasLG 'arrow-lr'])  [CJoinHeadForce]        advance
+			define [LMiddleHead]            : if [hasLG 'counter-arrow-l']                  [CJoinHeadMid] : if [hasLG 'arrow-l'] [LJoinHeadForce] advance
+			define [LAntiHeadForce]         : if [hasLG 'counter-arrow-l']                  [CAntiHeadForce]        advance
+			define [LAntiHeadForceShiftN1]  : if [hasLG 'counter-arrow-l']                  [CAntiHeadForceShiftN1] advance
+
+			define [RJoinHeadForce]         : if [hasLG 'arrow-r']                          [CJoinHeadForce]        advance
+			define [RJoinHeadForceLR]       : if ([hasLG 'arrow-r'] || [hasLG 'arrow-lr'])  [CJoinHeadForce]        advance
+			define [RJoinHeadForceShift1]   : if [hasLG 'arrow-r']                          [CJoinHeadForceShift1]  advance
+			define [RJoinHeadForceShift1LR] : if ([hasLG 'arrow-r'] || [hasLG 'arrow-lr'])  [CJoinHeadForce]        advance
+			define [RMiddleHead]            : if [hasLG 'counter-arrow-r']                  [CJoinHeadMid] : if [hasLG 'arrow-r'] [RJoinHeadForce] advance
+			define [RAntiHeadForce]         : if [hasLG 'counter-arrow-r']                  [CAntiHeadForce]        advance
+			define [RAntiHeadForceShiftN1]  : if [hasLG 'counter-arrow-r']                  [CAntiHeadForceShiftN1] advance
+
+			# Ambiguous
+			define [LAntiHeadAmbig] : if doLTAlt [LAntiHeadForce] advance
+			define RJoinHeadAmbig     RJoinHeadForce
+			define [LJoinHeadAmbig] : if doLT [LJoinHeadForce] advance
+			define [RAntiHeadAmbig] : if doRT [RAntiHeadForce] advance
+
+			define [CollectApply ck fns] : begin
+				local a : new Set
+				foreach [fnT : items-of fns] : begin
+					define fn [fnT]
+					define transformed : if fn [fn ck] ck
+					foreach [g : items-of transformed] : begin
+						a.add g
+				return : Array.from a
+
+			local arrowIndicator : anyBar.concat : CollectApply [less.concat greater]
+				list [lambda [] ident] CJoinHeadForce CJoinHeadForceShift1 CAntiHeadForce CAntiHeadForceShiftN1 CJoinHeadMid
+
+			# Arrow head identifier
+			begin "Central"
+				heads.push : chain-rule # = > > =
+					rodCls  ~> look-around
+					greater ~> [RJoinHeadForceShift1]
+					greater ~> [RAntiHeadForce]
+					rodCls  ~> look-around
+				heads.push : chain-rule # = < < =
+					rodCls  ~> look-around
+					less    ~> [LAntiHeadForce]
+					less    ~> [LJoinHeadForceShift1]
+					rodCls  ~> look-around
+				heads.push : chain-rule # = > < =
+					rodCls  ~> look-around
+					greater ~> [RJoinHeadForce]
+					less    ~> [LJoinHeadForce]
+					rodCls  ~> look-around
+				heads.push : chain-rule # = < > =
+					rodCls  ~> look-around
+					less    ~> [LAntiHeadForce]
+					greater ~> [RAntiHeadForce]
+					rodCls  ~> look-around
+				heads.push : chain-rule # = > =
+					rodCls  ~> look-around
+					greater ~> [RMiddleHead]
+					rodCls  ~> look-around
+				heads.push : chain-rule # = < =
+					rodCls  ~> look-around
+					less    ~> [LMiddleHead]
+					rodCls  ~> look-around
+
+			begin "Dual / Spaceship"
+				heads.push : chain-rule # < < = > >
+					less    ~> look-around
+					less    ~> [LJoinHeadForceShift1LR]
+					rodCls  ~> look-around
+					greater ~> [RJoinHeadForceShift1LR]
+					greater ~> look-around
+				heads.push : chain-rule # < < = >
+					less    ~> look-around
+					less    ~> [LJoinHeadForceShift1LR]
+					rodCls  ~> look-around
+					greater ~> [RJoinHeadForceLR]
+				heads.push : chain-rule # < = > >
+					less    ~> [LJoinHeadForceLR]
+					rodCls  ~> look-around
+					greater ~> [RJoinHeadForceShift1LR]
+					greater ~> look-around
+				heads.push : chain-rule # < = >
+					less    ~> [LJoinHeadForceLR]
+					rodCls  ~> look-around
+					greater ~> [RJoinHeadForceLR]
+
+			begin "Boundary"
+				heads.push : chain-rule # = > >
+					rodCls  ~> look-around
+					greater ~> [RJoinHeadForceShift1]
+					greater ~> look-around
+				heads.push : chain-rule # = < <
+					rodCls  ~> look-around
+					less    ~> [LAntiHeadForceShiftN1]
+					less    ~> look-around
+				heads.push : chain-rule # > > =
+					greater ~> look-around
+					greater ~> [RAntiHeadForceShiftN1]
+					rodCls  ~> look-around
+				heads.push : chain-rule # < < =
+					less    ~> look-around
+					less    ~> [LJoinHeadForceShift1]
+					rodCls  ~> look-around
+				heads.push : chain-rule # = = >
+					rodCls  ~> look-around
+					rodCls  ~> look-around
+					greater ~> [RJoinHeadForce]
+				heads.push : chain-rule # = = <
+					rodCls  ~> look-around
+					rodCls  ~> look-around
+					less    ~> [LAntiHeadForce]
+				heads.push : chain-rule # > = =
+					greater ~> [RAntiHeadForce]
+					rodCls  ~> look-around
+					rodCls  ~> look-around
+				heads.push : chain-rule # < = =
+					less    ~> [LJoinHeadForce]
+					rodCls  ~> look-around
+					rodCls  ~> look-around
+				heads.push : chain-rule # * = >
+					arrowIndicator ~> look-around
+					rodCls  ~> look-around
+					greater ~> [RJoinHeadForce]
+				heads.push : chain-rule # * = <
+					arrowIndicator ~> look-around
+					rodCls  ~> look-around
+					less    ~> [LAntiHeadForce]
+				heads.push : chain-rule # > = *
+					greater ~> [RAntiHeadForce]
+					rodCls  ~> look-around
+					arrowIndicator ~> look-around
+				heads.push : chain-rule # < = *
+					less    ~> [LJoinHeadForce]
+					rodCls  ~> look-around
+					arrowIndicator ~> look-around
+
+			begin "Ambiguous"
+				heads.push : chain-rule # = >
+					rodCls  ~> look-around
+					greater ~> [RJoinHeadAmbig]
+				heads.push : chain-rule # = <
+					rodCls  ~> look-around
+					less    ~> [LAntiHeadAmbig]
+				heads.push : chain-rule # > =
+					greater ~> [RAntiHeadAmbig]
+					rodCls  ~> look-around
+				heads.push : chain-rule # < =
+					less    ~> [LJoinHeadAmbig]
+					rodCls  ~> look-around
+
+			# Rod transformer
+			define kindLeftMid  : list
+				list false 'l'  : CollectApply less    : list CJoinHeadForce CJoinHeadMid
+				list false 'l1' : CollectApply less    : list CJoinHeadForceShift1
+				list false 'j'  : CollectApply greater : list CAntiHeadForce CJoinHeadMid
+				list true  'm'    anyBar
+				list false 'j1' : CollectApply greater : list CAntiHeadForceShiftN1
+			define kindRightMid : list
+				list false 'r'  : CollectApply greater : list CJoinHeadForce CJoinHeadMid
+				list false 'r1' : CollectApply greater : list CJoinHeadForceShift1
+				list false 'j'  : CollectApply less    : list CAntiHeadForce CJoinHeadMid
+				list true  'm'    anyBar
+				list false 'j1' : CollectApply less    : list CAntiHeadForceShiftN1
+
+			# console.log featureName rodCls kindLeftMid kindRightMid
+
+			foreach [{ lBar kl envL } : items-of kindLeftMid] : begin
+				foreach [{ rBar kr envR } : items-of kindRightMid] : begin
+					if (!lBar || !rBar) : begin
+						rods.push : chain-rule	# < - >
+							envL   ~> look-around
+							rodCls ~> [CRod "\(kl)\(kr)"]
+							envR   ~> look-around
+
+			foreach [{ lBar kl envL } : items-of kindLeftMid] : begin
+				if (!lBar) : begin
+					rods.push : chain-rule	# < -
+						envL   ~> look-around
+						rodCls ~> [CRod "\(kl)f"]
+
+			foreach [{ rBar kr envR } : items-of kindRightMid] : begin
+				if (!rBar) : begin
+					rods.push : chain-rule	# - >
+						rodCls ~> [CRod "f\(kr)"]
+						envR   ~> look-around
+
+			CreateLigationLookup heads
+			CreateLigationLookup rods
+
+		foreach [{rodCls CRod} : items-of ArrowExtensionConfig] : do "Extended arrow sticks"
+			# Extension
+			local rodTermLeft  {}
+			local rodConnLeft  {}
+			foreach [lc : items-of {'l' 'l1' 'j' 'j1' 'c' 'z' 'm'}] : begin
+				set rodTermLeft : rodTermLeft.concat : [CRod "\(lc)f"] rodCls
+				set rodConnLeft : rodConnLeft.concat : [CRod "\(lc)c"] rodCls
+
+			local rodTermRight {}
+			local rodConnRight {}
+			foreach [rc : items-of {'r' 'r1' 'j' 'j1' 'c' 'z' 'm'}] : begin
+				set rodTermRight : rodTermRight.concat : [CRod "f\(rc)"] rodCls
+				set rodConnRight : rodConnRight.concat : [CRod "c\(rc)"] rodCls
+
+			CreateLigationLookup : list
+				chain-rule
+					rodTermLeft  ~> look-around
+					rodCls       ~> [CRod 'zf']
+
+			CreateReverseLigationLookup : list
+				reverse-rule
+					rodCls       ~> [CRod 'fz']
+					rodTermRight ~> look-around
+
+			# Fix for Apple : arrow bar at line start won't join with the rest (#548)
+			CreateLigationLookup : list
+				chain-rule
+					rodCls       ~> [CRod 'fz']
+					rodTermRight ~> look-around
+
+			CreateLigationLookup : list
+				chain-rule
+					rodTermLeft          ~> look-around
+					[[CRod 'zf'] rodCls] ~> [[CRod 'zm'] rodCls]
+					anyBar               ~> [lsx 'dMid']
+				chain-rule
+					anyBar               ~> [lsx 'dMid']
+					[[CRod 'fz'] rodCls] ~> [[CRod 'mz'] rodCls]
+					rodTermRight         ~> look-around
+
+			# Gap filling
+			CreateLigationLookup : list
+				chain-rule
+					rodTermLeft  ~> rodConnLeft
+					rodTermRight ~> rodConnRight
+
+	# <<, >>, <<<, >>>
+	LigGroup "Less/Greater Chaining" : if [hasLG 'llgg'] : begin
+		CreateLigationLookup : list
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			chain-rule # <<<
+				less       ~> [lsx 'shiftN0h']
+				less       ~> look-around
+				less       ~> [lsx 'shift0h']
+			chain-rule # >>>
+				greater    ~> [lsx 'shift0h']
+				greater    ~> look-around
+				greater    ~> [lsx 'shiftN0h']
+			chain-rule # <<
+				less       ~> [lsx 'shiftN0h']
+				less       ~> [lsx 'shift0h']
+			chain-rule # >>
+				greater    ~> [lsx 'shift0h']
+				greater    ~> [lsx 'shiftN0h']
+
+		# Cancel alternates of < and > shapes if there are more after them
+		local lAll  { "less"    "less.lig.shift0h"    "less.lig.shiftN0h"    }
+		local lNeut { "less"    "less"                "less"                 }
+		local gAll  { "greater" "greater.lig.shift0h" "greater.lig.shiftN0h" }
+		local gNeut { "greater" "greater"             "greater"              }
+		local lgAll  : lAll.concat  gAll
+		local lgNeut : lNeut.concat gNeut
+		CreateLigationLookup : list
+			chain-rule
+				lgAll ~> lgNeut
+				lgAll ~> lgNeut
+				lgAll ~> lgNeut
+				lgAll ~> look-around
+		CreateLigationLookup : list
+			chain-rule
+				lgAll ~> look-around
+				lgAll ~> look-around
+				lgAll ~> look-around
+				lgAll ~> lgNeut
+		CreateLigationLookup : list
+			chain-rule
+				lAll ~> lNeut
+				lAll ~> lNeut
+				gAll ~> gNeut
+			chain-rule
+				gAll ~> gNeut
+				gAll ~> gNeut
+				lAll ~> lNeut
+			chain-rule
+				lAll ~> lNeut
+				gAll ~> gNeut
+				gAll ~> gNeut
+			chain-rule
+				gAll ~> gNeut
+				lAll ~> lNeut
+				lAll ~> lNeut
+
+	# /\ and \/
+	LigGroup "logical" : if [hasLG 'logic'] : begin
+		CreateLigationLookup : list
+			chain-rule
+				slash          ~> [csx 'left']
+				backslash      ~> [csx 'right']
+			chain-rule
+				backslash      ~> [csx 'left']
+				slash          ~> [csx 'right']
+			chain-rule
+				bar            ~> [lsx "dMid"]
+				anyStraightRod ~> [lsx 'mf']
+			chain-rule
+				anyStraightRod ~> [lsx 'fm']
+				bar            ~> [lsx "dMid"]
+			chain-rule
+				underscore     ~> [lsx 'fm']
+				bar            ~> [lsx 'bottomMid']
+				underscore     ~> [lsx 'mf']
+
+	# == and !=, and other related
+	LigGroup "equals" : begin
+		define AnyEqualEnding {'equal' 'equal.lig.cf' 'equal.lig.jf' 'equal.lig.xf' 'ident.lig.cf' 'ident.lig.yf'}
+		CreateLigationLookup : list
+			piecewise
+				[hasLG 'eqeq'] : chain-rule
+					{'equal.lig.cf' 'equal.lig.zf'} ~> look-around
+					equal                           ~> [lsx 'zf']
+			piecewise
+				[hasLG 'eqexeq'] : chain-rule
+					equal       ~> [just 'ident.lig.fc']
+					exclam      ~> {'neq.allow-dot.1m'}
+					equal       ~> [just 'ident.lig.yf']
+				[hasLG 'eqexeq-dl'] : chain-rule
+					equal       ~> [lsx 'fc']
+					exclam      ~> {'neq.allow-dot.1m'}
+					equal       ~> [lsx 'yf']
+				true : chain-rule
+					AnyEqualEnding ~> look-around
+					exclam         ~> advance
+					equal          ~> look-around
+			piecewise
+				[hasLG 'exeqeqeq'] : chain-rule
+					exclam      ~> {'neq.allow-dot.4l'}
+					equal       ~> [just 'ident.lig.xc']
+					equal       ~> [just 'ident.lig.cc']
+					equal       ~> [just 'ident.lig.cf']
+				[hasLG 'exeq'] : chain-rule
+					exclam      ~> {'neq.allow-dot.4l'}
+					equal       ~> [lsx 'xc']
+					equal       ~> [lsx 'cc']
+					equal       ~> [lsx 'cf']
+			piecewise
+				[hasLG 'eqeq'] : chain-rule
+					equal       ~> [lsx 'fc']
+					equal       ~> [lsx 'cc']
+					equal       ~> [lsx 'cc']
+					equal       ~> [lsx 'cf']
+			piecewise
+				[hasLG 'exeqeq'] : chain-rule
+					exclam      ~> {'neq.allow-dot.3l'}
+					equal       ~> [just 'ident.lig.xc']
+					equal       ~> [just 'ident.lig.cf']
+				[hasLG 'exeq'] : chain-rule
+					exclam      ~> {'neq.allow-dot.3l'}
+					equal       ~> [lsx 'xc']
+					equal       ~> [lsx 'cf']
+			piecewise
+				[hasLG 'eqslasheq'] : chain-rule
+					equal       ~> [just 'ident.lig.fc']
+					slash       ~> {'neq.bar-only.1m'}
+					equal       ~> [just 'ident.lig.yf']
+				[hasLG 'slasheq'] : chain-rule
+					equal       ~> [lsx 'fc']
+					slash       ~> {'neq.bar-only.1m'}
+					equal       ~> [lsx 'yf']
+			piecewise
+				[hasLG 'eqeqeq'] : chain-rule
+					equal       ~> [just 'ident.lig.fc']
+					equal       ~> [just 'ident.lig.cc']
+					equal       ~> [just 'ident.lig.cf']
+				[hasLG 'eqeq'] : chain-rule
+					equal       ~> [lsx 'fc']
+					equal       ~> [lsx 'cc']
+					equal       ~> [lsx 'cf']
+			piecewise
+				[hasLG 'tildeeq'] : chain-rule
+					anyWave     ~> [just 'neq.bar-only.2l']
+					equal       ~> [lsx 'xf']
+			piecewise
+				[hasLG 'slasheq'] : chain-rule
+					slash       ~> {'neq.bar-only.2l'}
+					equal       ~> [lsx 'xf']
+			piecewise
+				[hasLG 'exeq'] : chain-rule
+					exclam      ~> {'neq.allow-dot.2l'}
+					equal       ~> [lsx 'xf']
+			piecewise
+				[hasLG 'eqeq'] : chain-rule
+					equal       ~> [lsx 'fc']
+					equal       ~> [lsx 'cf']
+
+	# <= and >=
+	LigGroup "inequals" : if ([hasLG 'lteq'] || [hasLG 'eqlt'] || [hasLG 'gteq']) : begin
+		define acops {'less' 'greater' 'hyphen' 'equal' 'plus' 'slash' 'bar' 'backslash'}
+		CreateLigationLookup : list
+			# Disable regular expression lookaheads
+			chain-rule
+				{'parenLeft'} ~>look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+
+			if [hasLG 'lteq'] : chain-rule
+				acops                 ~> look-around
+				lessAndEquiv          ~> advance
+				equal                 ~> advance
+			if [hasLG 'lteq'] : chain-rule
+				lessAndEquiv          ~> advance
+				equal                 ~> advance
+				acops                 ~> look-around
+			if [hasLG 'lteq'] : chain-rule
+				lessAndEquiv          ~> [just 'less.lig2']
+				equal                 ~> {'eq.at-lteq.lig2'}
+
+			if [hasLG 'eqlt'] : chain-rule
+				acops                 ~> look-around
+				equal                 ~> advance
+				lessAndEquiv          ~> advance
+			if [hasLG 'eqlt'] : chain-rule
+				equal                 ~> advance
+				lessAndEquiv          ~> advance
+				acops                 ~> look-around
+			if [hasLG 'eqlt'] : chain-rule
+				equal                 ~> [just 'less.lig2']
+				lessAndEquiv          ~> {'eq.at-lteq.lig2'}
+
+			if [hasLG 'gteq'] : chain-rule
+				acops                 ~> look-around
+				greaterAndEquiv       ~> advance
+				equal                 ~> advance
+			if [hasLG 'gteq'] : chain-rule
+				greaterAndEquiv       ~> advance
+				equal                 ~> advance
+				acops                 ~> look-around
+			if [hasLG 'gteq'] : chain-rule
+				greaterAndEquiv       ~> [just 'greater.lig2']
+				equal                 ~> {'eq.at-gteq.lig2'}
+
+	# <>
+	LigGroup "less-greater" : begin
+		CreateLigationLookup : list
+			piecewise
+				[hasLG 'ltgt-diamond'] : chain-rule
+					lessAndEquiv    ~> [just 'less.lig.diamond']
+					greaterAndEquiv ~> [just 'greater.lig.diamond']
+				[hasLG 'ltgt-diamond-tag'] : chain-rule
+					lessAndEquiv    ~> [just 'less.lig.diamond.tag']
+					greaterAndEquiv ~> [just 'greater.lig.diamond.tag']
+				[hasLG 'ltgt-ne'] : chain-rule
+					lessAndEquiv    ~> [just 'neq.bar-only.2l']
+					greaterAndEquiv ~> [just 'equal.lig.xf']
+
+	# </, /> and </>
+	LigGroup "ltgt-slash-tag" : begin
+		CreateLigationLookup : list
+			if [hasLG 'ltgt-slash-tag'] : chain-rule
+				lessAndEquiv    ~> [just 'less.lig.tag-slash']
+				slash           ~> look-around
+			if [hasLG 'ltgt-slash-tag'] : chain-rule
+				slash           ~> look-around
+				greaterAndEquiv ~> [just 'greater.lig.tag-slash']
+
+	# :>
+	LigGroup "colon-less-greater" : if [hasLG 'colon-greater-as-colon-arrow'] : begin
+		CreateLigationLookup : list
+			chain-rule
+				{'colon/mid'}   ~> look-around
+				greaterAndEquiv ~> [just 'greaterArrow']
+
+	# [| |] {| |}
+	LigGroup "Bracket and bar" : begin
+		CreateLigationLookup : list
+			if [hasLG 'brack-bar'] : chain-rule
+				{'bracketLeft'}  ~> {'ligExtBracketLeft'}
+				{'bar'}          ~> {'ligBarInsideBracketLeft'}
+			if [hasLG 'brack-bar'] : chain-rule
+				{'bar'}          ~> {'ligBarInsideBracketRight'}
+				{'bracketRight'} ~> {'ligExtBracketRight'}
+			if [hasLG 'brace-bar'] : chain-rule
+				{'braceLeft'}    ~> {'ligExtBraceLeft'}
+				{'bar'}          ~> {'ligBarInsideBracketLeft'}
+			if [hasLG 'brace-bar'] : chain-rule
+				{'bar'}          ~> {'ligBarInsideBracketRight'}
+				{'braceRight'}   ~> {'ligExtBraceRight'}
+
+	# +++++++++
+	define ChainingConfig : object
+		'plus'  { 'plus'   'plus'     }
+		'minus' { 'hyphen' 'hyphen'   }
+		'tilde' { 'asciiTilde' 'wave' }
+
+	foreach { gr { gnFrom gnTo } } [Object.entries ChainingConfig] : begin
+		define [sfx suffix] : [lsx suffix] { gnTo }
+		define [src]          { gnFrom }
+
+		LigGroup "Chaining \(gr)" : if [hasLG "\(gr)-\(gr)-\(gr)"] : begin
+			CreateLigationLookup : list
+				chain-rule # Extension
+					[{}.concat [sfx "cf"] [sfx "zf"]] ~> look-around
+					[src] ~> [sfx "zf"]
+				chain-rule # Start 4
+					[src] ~> [sfx "fc"]
+					[src] ~> [sfx "cc"]
+					[src] ~> [sfx "cc"]
+					[src] ~> [sfx "cf"]
+				chain-rule # Start 3
+					[src] ~> [sfx "fc"]
+					[src] ~> [sfx "cc"]
+					[src] ~> [sfx "cf"]
+				chain-rule # Start 2
+					[src] ~> [if [hasLG "\(gr)-\(gr)"] [sfx "fc"] advance]
+					[src] ~> [if [hasLG "\(gr)-\(gr)"] [sfx "cf"] advance]
+			CreateLigationLookup : list
+				chain-rule
+					{[sfx "jf"]} ~> {[sfx "jc"]}
+					[src]        ~> {[sfx "cc"]}
+					{[sfx "fj"]} ~> {[sfx "cj"]}
+				chain-rule
+					{[sfx "jf"]} ~> {[sfx "jc"]}
+					{[sfx "fc"]} ~> {[sfx "cc"]}
+				chain-rule
+					{[sfx "zf"]} ~> {[sfx "zc"]}
+					{[sfx "fj"]} ~> {[sfx "cj"]}
+
+	LigGroup "Chaining plus adjustments" : if [hasLG 'plus-plus-plus'] : begin
+		CreateLigationLookup : list
+			chain-rule # +++
+				{'plus.lig.fc'} ~> {'plus.lig.fc.s'}
+				{'plus.lig.cc'} ~> look-around
+				{'plus.lig.cf'} ~> {'plus.lig.cf.s'}
+			chain-rule # ++
+				{'plus.lig.fc'} ~> {'plus.lig.fc.s'}
+				{'plus.lig.cf'} ~> {'plus.lig.cf.s'}
+
+	LigGroup "Underscore chains" : if [hasLG 'underscore-underscore-underscore'] : begin
+		CreateLigationLookup : list
+			chain-rule # Extension
+				[[lsx 'zf'] underscore] ~> look-around
+				underscore ~> [lsx 'zf']
+			chain-rule # Start 4
+				underscore ~> advance
+				underscore ~> [lsx 'zf']
+				underscore ~> [lsx 'zf']
+				underscore ~> [lsx 'zf']
+			chain-rule # Start 3
+				underscore ~> advance
+				underscore ~> [lsx 'zf']
+				underscore ~> [lsx 'zf']
+			chain-rule # Start 2
+				underscore ~> advance
+				underscore ~> [if [hasLG 'underscore-underscore'] [lsx 'zf'] advance]
+
+	LigGroup "Number sign chains" : if [hasLG 'hash-hash-hash'] : begin
+		CreateLigationLookup : list
+			chain-rule # Extension
+				{'numberSign.jr'} ~> look-around
+				{'numberSign'}    ~> [csx 'jr']
+			chain-rule # Start 4
+				{'numberSign'}    ~> advance
+				{'numberSign'}    ~> [csx 'jr']
+				{'numberSign'}    ~> [csx 'jr']
+				{'numberSign'}    ~> [csx 'jr']
+			chain-rule # Start 3
+				{'numberSign'}    ~> advance
+				{'numberSign'}    ~> [csx 'jr']
+				{'numberSign'}    ~> [csx 'jr']
+			chain-rule # Start 2
+				{'numberSign'}    ~> advance
+				{'numberSign'}    ~> [if [hasLG 'hash-hash'] [csx 'jr'] advance]
+
+	LigGroup "Kern Bars" : if [hasLG 'kern-bars'] : foreach chBar [items-of anyBar] : begin
+		define dp           { chBar }
+		define dLeft      : [lsx 'dLeft']  dp
+		define dRight     : [lsx 'dRight'] dp
+		define dLeftHalf  : [lsx 'dLeftHalf']  dp
+		define dRightHalf : [lsx 'dRightHalf'] dp
+		define dMid       : [lsx 'dMid']       dp
+
+		CreateLigationLookup : list
+			chain-rule
+				[dRight.concat dMid] ~> look-around
+				dp ~> dMid
+				[dp.concat dMid] ~> look-around
+			chain-rule
+				[dRight.concat dMid] ~> look-around
+				dp ~> dLeft
+			chain-rule
+				dp ~> dRight
+				[dp.concat dMid] ~> look-around
+
+		CreateLigationLookup : list
+			chain-rule
+				dRight ~> look-around
+				dMid   ~> dRightHalf
+				dMid   ~> dLeftHalf
+				dLeft  ~> look-around
+			chain-rule
+				dRight ~> look-around
+				dMid   ~> dRightHalf
+				dMid   ~> look-around
+			chain-rule
+				dMid   ~> look-around
+				dMid   ~> dLeftHalf
+				dLeft  ~> look-around
+			chain-rule
+				dRight ~> dRightHalf
+				dLeft  ~> dLeftHalf

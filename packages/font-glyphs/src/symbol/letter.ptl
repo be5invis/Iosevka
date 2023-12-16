@@ -1,0 +1,332 @@
+###### Letter-like symbols
+
+$$include '../meta/macros.ptl'
+
+import [Box] from "@iosevka/geometry/box"
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Symbol-Currency : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
+
+	create-glyph 'currency' 0xA4 : glyph-proc
+		local sw : AdviceStroke 3.5
+		local radius : (RightSB - SB) / 2
+		include : OShape (SymbolMid + radius * 0.9) (SymbolMid - radius * 0.9) (Middle - radius * 0.9) (Middle + radius * 0.9) sw
+		foreach j [range 0 4] : begin
+			local angle : Math.PI * (j / 2 + 1 / 4)
+			include : dispiro
+				widths.center sw
+				flat (Middle + radius * 0.87 * [Math.cos angle]) (SymbolMid + radius * 0.87 * [Math.sin angle])
+				curl (Middle + radius * [Math.sqrt 2] * [Math.cos angle]) (SymbolMid + radius * [Math.sqrt 2] * [Math.sin angle])
+
+	do "Sterling"
+		define xBarLeft : [mix SB RightSB 0.2] - Stroke * 0.1
+		define [BaseShape] : glyph-proc
+			local xBarLeft : [mix SB RightSB 0.2] - Stroke * 0.1
+			local hookEndX : Math.max (xBarLeft + [HSwToV : 2.25 * Stroke]) [mix SB RightSB 0.95]
+			include : union
+				dispiro
+					g4 hookEndX (CAP - Hook * 0.85) [widths.lhs]
+					hookstart (CAP - O) (tight -- true)
+					flat xBarLeft [CAP - ArchDepthA * 0.75]
+					curl xBarLeft [mix Stroke CAP 0.3]
+					g4   SB Stroke
+				HBar.b SB RightSB 0
+
+		create-glyph 'currency/sterlingSign' 0xA3 : glyph-proc
+			set-width Width
+			include : BaseShape
+			include : LetterBarOverlay.l xBarLeft (CAP * 0.5)
+
+		create-glyph 'currency/liraSymbolSign' 0x20A4 : glyph-proc
+			set-width Width
+			include : BaseShape
+			include : LetterBarOverlay.l xBarLeft (CAP * 0.37)
+			include : LetterBarOverlay.l xBarLeft (CAP * 0.60 - OverlayStroke * 0.25)
+
+glyph-block Symbol-Currency-Letter-Derived : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	derive-composites 'currency/colonSign' 0x20A1 'C' 'dblLongSlash'
+	derive-composites 'currency/millSign' 0x20A5 'm' 'shortSlash'
+
+	create-glyph 'currency/overlay/NS' : glyph-proc
+		define sw : Math.min OverlayStroke : AdviceStroke2 2 4 CAP
+		define gap : Math.max (CAP / 8) (sw / 2)
+		include : HBar.b [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 + gap / 2) sw
+		include : HBar.t    [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 - gap / 2) sw
+
+	derive-composites 'currency/nairaSign' 0x20A6 'currency/nairaSignBase' 'currency/overlay/NS'
+	derive-composites 'currency/hryvniaSign' 0x20B4 'revS' 'currency/overlay/NS'
+
+	create-glyph 'currency/overlay/W' : glyph-proc
+		local df : DivFrame para.diversityM 3
+		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.6)
+		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.35)
+
+	derive-composites 'currency/wonSign' 0x20A9 'W' 'currency/overlay/W'
+
+	derive-composites 'currency/dongSign' 0x20AB 'dStroke' 'sbRsbUnderlineBelow'
+	derive-composites 'currency/kipSign' 0x20AD 'K' 'hStrike'
+
+	create-glyph 'currency/tugrikOverride' : glyph-proc
+		local l : mix (Middle - [HSwToV HalfStroke]) SB       0.75
+		local r : mix (Middle + [HSwToV HalfStroke]) RightSB  0.75
+		local kSlope 0.05
+		set-width 0
+		set-mark-anchor 'overlay' [mix l r 0.5] (CAP * 0.5)
+		include : intersection [Rect 0 CAP l r] : union
+			ExtLineCenter 4 OverlayStroke l (CAP * (0.6 - kSlope)) r (CAP * (0.6 + kSlope))
+			ExtLineCenter 4 OverlayStroke l (CAP * (0.35 - kSlope)) r (CAP * (0.35 + kSlope))
+
+	derive-composites 'currency/tugrikSign' 0x20AE 'T' 'currency/tugrikOverride'
+
+	derive-composites 'currency/guaraniSign' 0x20B2 'G' 'longVStrokeOver'
+	derive-composites 'currency/cediSign' 0x20B5 'C' 'longVStrokeOver'
+
+	derive-composites 'currency/somSign' 0x20C0 'cyrl/es' 'sbRsbUnderlineBelow'
+
+glyph-block Symbol-Letter : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-X : XStrand
+	glyph-block-import Symbol-Geometric-Shared : UnicodeWeightGrade
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth
+
+	alias 'eulerConst' 0x2107 'latn/Epsilon'
+	alias 'scruple' 0x2108 'cyrl/E'
+
+	create-glyph 'ell' 0x2113 : glyph-proc
+		include : MarkSet.b
+		local fine : AdviceStroke 3.5
+		local radius : Math.max fine (Width * 0.15)
+		local middle : Middle - fine / 2
+		local left : middle - radius * 1.25
+		local right : middle + radius * 1.5
+		local ada : ArchDepthA * 0.6
+		local adb : ArchDepthB * 0.6
+		include : dispiro
+			widths.center fine
+			g2   left [mix 0 CAP 0.33]
+			quadControls 1 0.6
+			g2   right [mix 0 CAP 0.8]
+			arcvh
+			g2   [mix middle right 0.5] (CAP - O - fine / 2)
+			archv
+			flat middle (CAP - ada)
+			curl middle (ArchDepthB * 0.5 + fine / 2)
+			hookend (O + fine / 2)
+			g2   (middle + radius * 2) SHook
+
+	create-glyph 'weierstrassP' 0x2118 : glyph-proc
+		include : MarkSet.p
+
+		local thick : AdviceStroke 2.75
+		local extSw : AdviceStroke 4
+		local fine  : AdviceStroke 5.5
+		local tip   : AdviceStroke 6.5
+
+		local bowl : CursiveBuilder [new Box XH 0         SB RightSB]               thick
+		local extn : CursiveBuilder [new Box XH Descender SB [mix SB RightSB 0.3]]  extSw
+		local bowT : bowl.withSw tip
+		local extF : extn.withSw fine
+		local extT : extn.withSw tip
+
+		include : dispiro
+			g2           [extT.x  0.25  0.5  0    ]  [extT.y  1     0     0    ]  [extT.s 0.5]
+			g2.down.mid  [extF.x  0     0    O    ]  [extF.y  0.8   0     0    ]  [extF.s 0]
+			alsoThru.g2  0.5                         0.5                          [extn.s 0.5]
+			g2.down.mid  [extF.x  1     0.4  (-O) ]  [extn.y  0.2 (-TanSlope) 0]  [extn.s (fine / extSw)]
+			arcvh
+			g2           [extF.xAB 0.5  0.2  0    ]  [extF.y  0     0     O    ]  [extF.s 1]
+			archv
+			g2.up.mid    [extF.x  0     0    O    ]  [extF.y  0.2   0     0    ]  [extF.s 1]
+			bezControls  0  0.5  0.4  1  16
+			g2           [bowl.xAT  0.7 (-0.3) 0  ]  [bowl.y  1     0     (-O) ]  [bowl.s 1]
+			archv
+			straight.down.mid [bowl.x  1  0  (-O) ]  [bowl.y  0.5   0     0    ]
+			arcvh
+			g2           [bowl.xAB  0.7 (-0.2) 0  ]  [bowl.y  0     0     O    ]
+			archv
+			g2           [bowT.x  0.4   0    0    ]  [bowT.y  0.3   0     0    ]  [bowT.s 1 Upward]
+
+	alias 'Ohm' 0x2126 'grek/Omega'
+	turned 'Mho' 0x2127 'Ohm' Middle (CAP / 2)
+	turned 'turniota' 0x2129 'grek/iota' HalfAdvance (XH / 2)
+	alias 'letterLike/kelvinSign' 0x212A 'K'
+
+	create-glyph 'estimated' 0x212E : glyph-proc
+		include : MarkSet.capital
+		local fineArc : CAP * 0.0300
+		local fineBar : CAP * 0.0278
+		local thickBarWidth : (0.183 / [Math.sqrt 0.9]) * [Math.sqrt (CAP * (RightSB - SB))]
+		define smA : ArchDepthAOf (ArchDepth * (CAP / XH)) Width
+		define smB : ArchDepthBOf (ArchDepth * (CAP / XH)) Width
+		include : union
+			HBar.b SB RightSB (CAP * 0.5) fineBar
+			difference
+				union
+					difference
+						OShapeOutline CAP 0 SB RightSB fineArc smA smB
+						OShapeOutline (CAP - fineArc) (0 + fineArc) [mix SB RightSB 0.077] [mix RightSB SB 0.077] fineArc (smA - fineArc) (smB - fineArc)
+					intersection
+						OShapeOutline.NoOvershoot CAP 0 SB RightSB fineArc smA smB
+						union
+							Rect CAP 0 SB (SB + thickBarWidth)
+							Rect CAP (CAP * 0.5) (RightSB - thickBarWidth) RightSB
+				Rect (CAP * 0.5) (CAP * 0.208) Middle Width
+
+	create-glyph 'mathAleph' 0x2135 : glyph-proc
+		include : MarkSet.capital
+		define p 0.3
+		include : XStrand true false SB CAP RightSB 0 0.1 0.4 0.28
+		include : intersection
+			dispiro
+				widths.rhs
+				g4.down.start RightSB CAP
+				g4 [mix SB RightSB p] 0
+			spiro-outline
+				corner SB CAP
+				corner RightSB CAP
+				corner RightSB 0
+		include : intersection
+			dispiro
+				widths.rhs
+				g4.up.start SB 0
+				g4 [mix SB RightSB (1 - p)] CAP
+			spiro-outline
+				corner SB 0
+				corner RightSB 0
+				corner SB CAP
+
+	create-glyph 'mathBeth' 0x2136 : glyph-proc
+		include : MarkSet.capital
+		define pX 0.7
+		define pY 0.8
+		define turnX : mix SB RightSB pY
+		include : dispiro
+			widths.rhs
+			flat SB CAP
+			curl [Math.min (turnX - [HSwToV : 1.5 * Stroke]) [mix SB turnX pX]] CAP
+			archv
+			flat turnX [Math.min (CAP - Stroke * 1.5) [mix 0 CAP pY]]
+			curl turnX 0
+		include : HBar.b SB RightSB 0
+
+	create-glyph 'mathGimel' 0x2137 : glyph-proc
+		local df : include : DivFrame para.diversityF
+		local hd : FlatHookDepth df
+
+		local xStart : mix df.leftSB df.rightSB 0.1
+		local xVertBar : [mix df.leftSB df.rightSB 0.625] + [HSwToV : 0.375 * Stroke]
+		local yBranch : mix 0 CAP 0.5
+
+		include : df.markSet.capital
+
+		include : intersection [MaskAbove 0] : dispiro [widths.rhs]
+			flat xStart CAP
+			curl [Math.max (xStart + 0.01) (xVertBar - hd.x)] CAP
+			archv
+			flat xVertBar (CAP - hd.y)
+			curl xVertBar yBranch
+			flat df.rightSB 0
+			curl [mix xVertBar df.rightSB 2] [mix yBranch 0 2]
+
+		include : dispiro [widths.rhs]
+			g4.down.start xVertBar yBranch
+			g4 (df.leftSB + [HSwToV : 0.2 * Stroke]) O
+
+	create-glyph 'mathDalet' 0x2138 : glyph-proc
+		include : MarkSet.capital
+		include : HBar.t SB RightSB CAP
+		include : VBar.r [mix SB RightSB 0.75] 0 CAP
+
+	create-glyph 'informationSource' 0x2139 : glyph-proc
+		include : MarkSet.b
+		local sw : UnicodeWeightGrade 9 1
+		include : VBar.m Middle 0 XH sw
+		include : HSerif.lt (Middle - [HSwToV : 0.5 * sw]) XH (LongJut / 2)
+		include : HSerif.lb (Middle - [HSwToV : 0.5 * sw]) 0  (LongJut / 2)
+		include : HSerif.rb (Middle + [HSwToV : 0.5 * sw]) 0  (LongJut / 2)
+		include : DotAt Middle (XH + AccentStackOffset) (DotRadius * sw / Stroke)
+
+	turned 'turnG/sansSerif' 0x2141 'G/sansSerif' Middle (CAP / 2)
+	turned 'turnL/sansSerif' 0x2142 'L/sansSerif' Middle (CAP / 2)
+	turned 'revL/sansSerif' 0x2143 'grek/Gamma/sansSerif' Middle (CAP / 2)
+	turned 'turnY/sansSerif' 0x2144 'Y/sansSerif' Middle (CAP / 2)
+
+	turned 'turnAmpersand' 0x214B 'ampersand' Middle (CAP / 2)
+
+	do "Tironian Et"
+		define [TironianEtTopBarShape y] : intersection
+			Rect (y - O) 0 SB RightSB
+			dispiro
+				widths.rhs
+				g4 (SB + O) (y - O)
+				g4 Middle (y + O)
+				g4 RightSB (y - O)
+
+		create-glyph 'tironianEt' 0x204A : glyph-proc
+			include : TironianEtTopBarShape XH
+			include : intersection
+				Rect (XH - O - Stroke) (-Stroke) SB RightSB
+				dispiro
+					widths.rhs
+					flat RightSB (XH - O - Stroke)
+					curl (Middle + [HSwToV : 0.125 * Stroke]) O
+
+		create-glyph 'TironianEt' 0x2E52 : glyph-proc
+			include : TironianEtTopBarShape CAP
+			include : dispiro
+				widths.rhs
+				flat RightSB (CAP - HalfStroke) [heading Downward]
+				curl RightSB ArchDepthB
+				hookend O
+				g4 SB Hook
+
+	do "Roman Numerals"
+		create-glyph 'romanFiftyEarlyForm' 0x2186 : glyph-proc
+			include : MarkSet.capital
+			include : VBar.m Middle 0 CAP
+			include : dispiro
+				flat (Middle - [HSwToV HalfStroke]) 0 [widths.rhs : AdviceStroke 3]
+				curl (SB + O) [mix 0 CAP 0.375]
+			include : dispiro
+				flat (Middle + [HSwToV HalfStroke]) 0 [widths.lhs : AdviceStroke 3]
+				curl (RightSB - O) [mix 0 CAP 0.375]
+
+glyph-block Symbol-Cyrl-Thousands : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	create-glyph 'cyrlThousandsSign' 0x482 : glyph-proc
+		define fine : AdviceStroke 3
+		include : ExtLineCenter (-0.1) fine SB Descender RightSB XH
+		include : ExtLineCenter (-0.1) fine [mix SB RightSB 0.1] [mix Descender XH 0.8] [mix SB RightSB 1.1] [mix Descender XH 0.5]
+		include : ExtLineCenter (-0.1) fine [mix SB RightSB (-0.1)] [mix Descender XH 0.5] [mix SB RightSB 0.9] [mix Descender XH 0.2]
+
+glyph-block Symbol-Letter-Phonetic : begin
+	create-glyph 'modifierArchBreve' 0xAB5B : glyph-proc
+		include : MarkSet.e
+		local archHeight : XH * 0.45
+
+		include : dispiro
+			widths.rhs
+			g4.up.start (SB + OX) 0 [heading Upward]
+			arcvh
+			g4.right.mid (Middle - CorrectionOMidS) archHeight
+			archv
+			g4.down.end (RightSB - OX) 0 [heading Downward]
+
+		include : dispiro
+			widths.lhs
+			g4.down.start (SB + OX) XH [heading Downward]
+			arcvh
+			g4.right.mid (Middle + CorrectionOMidS) (XH - archHeight)
+			archv
+			g4.up.end (RightSB - OX) XH [heading Upward]

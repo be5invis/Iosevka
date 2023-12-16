@@ -1,0 +1,162 @@
+$$include '../../meta/macros.ptl'
+
+import [mix fallback SuffixCfg] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-G : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise ShoulderMidKnotLhs
+	glyph-block-import Letter-Shared-Shapes : SerifedArcStart TopHook
+	glyph-block-import Letter-Shared-Shapes : ArcStartSerif LetterBarOverlay SerifFrame
+
+	define TOOTHED            0
+	define TOOTHLESS-CORNER   1
+	define TOOTHLESS-ROUNDED  2
+
+	define CROSSBAR-NONE      0
+	define CROSSBAR-HOOKED    1
+	define CROSSBAR-CAPPED    2
+
+	define SLAB-NONE          0
+	define SLAB-LETTER        1
+	define SLAB-INWARD        2
+	define SLAB-HOOK-TOP     10
+
+	define [GShape toothShape slabShape crossBarShape top ada adb _yBarOverride] : glyph-proc
+		local yBar : fallback _yBarOverride (top * 0.52 + Stroke * 0.25)
+		local fine ShoulderFine
+
+		local knots : match slabShape
+			([Just SLAB-LETTER] || [Just SLAB-HOOK-TOP]) : SerifedArcStart.RtlLhs RightSB Middle top Stroke Hook (slabShape === SLAB-HOOK-TOP)
+			[Just SLAB-INWARD] : list [g4 RightSB (top - DToothlessRise) [widths.lhs]] [g4 (Middle - CorrectionOMidS) (top - O)] [archv]
+			__ : list [widths.lhs] [g4 RightSB (top - Hook)] [hookstart (top - O)]
+
+		knots.push
+			flat (SB + OX) (top - ada)
+			curl (SB + OX) adb
+			arcvh
+
+		match toothShape
+			[Just TOOTHED] : knots.push
+				ShoulderMidKnotLhs Middle O fine Stroke 1 1
+				archv
+				straight.up.end (RightSB - (Stroke - fine) * HVContrast) ada [widths.heading fine 0 Upward]
+			[Just TOOTHLESS-CORNER] : knots.push
+				g4   (Middle + CorrectionOMidS) O
+				g4   RightSB  DToothlessRise
+			[Just TOOTHLESS-ROUNDED] : knots.push
+				g4   (Middle + CorrectionOMidS) O
+				flat RightSB ada
+				curl RightSB yBar [heading Upward]
+
+		include : union
+			dispiro.apply null knots
+			if (slabShape === SLAB-LETTER) [ArcStartSerif.R RightSB top Stroke Hook] [glyph-proc]
+			if (slabShape === SLAB-INWARD) [ArcStartSerif.InwardR RightSB top Stroke Hook] [glyph-proc]
+			match crossBarShape
+				[Just CROSSBAR-NONE]   : glyph-proc
+				[Just CROSSBAR-HOOKED] : HBar.t Middle RightSB yBar
+				[Just CROSSBAR-CAPPED] : HBar.t Middle [mix RightSB Width 0.625] yBar
+			match toothShape
+				[Just TOOTHED] : union
+					VBar.r RightSB (ada + O) yBar
+					VBar.r RightSB ada 0 [Math.max [AdviceStroke 5] (Stroke - fine / 2)]
+				[Just TOOTHLESS-CORNER]  : VBar.r RightSB DToothlessRise yBar
+				[Just TOOTHLESS-ROUNDED] : glyph-proc
+
+	create-glyph 'GBarOverlay' : LetterBarOverlay.r.in
+		x     -- RightSB
+		bot   -- 0
+		top   -- (CAP / 2)
+		space -- { (SB + [HSwToV Stroke]) Width }
+
+	define GConfig : SuffixCfg.weave
+		object
+			toothed          TOOTHED
+			toothlessCorner  TOOTHLESS-CORNER
+			toothlessRounded TOOTHLESS-ROUNDED
+		object
+			serifless        SLAB-NONE
+			serifed          SLAB-LETTER
+			inwardSerifed    SLAB-INWARD
+		object
+			hookless         CROSSBAR-NONE
+			hooked           CROSSBAR-HOOKED
+			capped           CROSSBAR-CAPPED
+
+	foreach { suffix { shape slabType crossBarShape } } [Object.entries GConfig] : begin
+		create-glyph "G.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : GShape shape slabType crossBarShape CAP ArchDepthA ArchDepthB
+		create-glyph "GHookTop.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : GShape shape SLAB-HOOK-TOP crossBarShape CAP ArchDepthA ArchDepthB
+			include : TopHook.arcStart RightSB CAP Hook
+			include : ExtendAboveBaseAnchors (CAP + Ascender - XH)
+		create-glyph "smcpG.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : GShape shape slabType crossBarShape XH ArchDepthA ArchDepthB
+		create-glyph "smcpGHookTop.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : GShape shape SLAB-HOOK-TOP crossBarShape XH ArchDepthA ArchDepthB
+			include : TopHook.arcStart RightSB XH Hook
+			include : ExtendAboveBaseAnchors Ascender
+
+	select-variant 'G' 'G'
+	link-reduced-variant 'G/sansSerif' 'G' MathSansSerif
+	select-variant 'smcpG' 0x262 (follow -- 'G')
+	select-variant 'GHookTop' 0x193
+	select-variant 'smcpGHookTop' 0x29B (follow -- 'GHookTop')
+	turned 'turnSmcpG' 0x1DF02 'smcpG' Middle (XH / 2)
+
+	derive-composites 'Gbar' 0x1E4 'G' 'GBarOverlay'
+
+	do "Komi sje"
+		define Config : object
+				serifless               { SLAB-NONE   }
+				unilateralSerifed       { SLAB-LETTER }
+				unilateralInwardSerifed { SLAB-INWARD }
+
+		foreach { suffix { slabType } } [Object.entries Config] : begin
+			create-glyph "cyrl/SjeKomi.\(suffix)" : glyph-proc
+				include : MarkSet.capital
+				include : GShape TOOTHLESS-ROUNDED slabType CROSSBAR-NONE CAP ArchDepthA ArchDepthB (CAP / 2)
+				if SLAB : begin
+					local sf2 : SerifFrame.fromDf [DivFrame 1] (CAP / 2) 0
+					include sf2.rt.full
+
+			create-glyph "cyrl/sjeKomi.\(suffix)" : glyph-proc
+				include : MarkSet.e
+				include : GShape TOOTHLESS-ROUNDED slabType CROSSBAR-NONE XH SmallArchDepthA SmallArchDepthB (XH / 2)
+				if SLAB : begin
+					local sf2 : SerifFrame.fromDf [DivFrame 1] (XH / 2) 0
+					include sf2.rt.full
+
+		select-variant 'cyrl/SjeKomi' 0x50C (follow -- 'CTopSerifOnly')
+		select-variant 'cyrl/sjeKomi' 0x50D (follow -- 'cTopSerifOnly')
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
+	define [BBGArcT sink offset top ada adb xTerm yTerm] : sink
+		widths.lhs BBS
+		g4 (RightSB - offset) (top - Hook)
+		hookstart (top - O - offset)
+		flat (SB + OX + offset) (top - ada)
+		curl (SB + OX + offset) adb
+		arcvh
+		g4   ([mix SB xTerm 0.5] + CorrectionOMidS) (O + offset)
+		archv
+		flat (xTerm - offset) ada
+		curl (xTerm - offset) yTerm [heading Upward]
+
+	create-glyph 'mathbb/G' 0x1D53E : glyph-proc
+		local yBar : CAP * 0.52 + BBS * 0.25
+		include : MarkSet.capital
+		include : BBGArcT dispiro 0 CAP ArchDepthA ArchDepthB (RightSB - BBD) yBar
+		include : intersection
+			BBGArcT spiro-outline 1 CAP ArchDepthA ArchDepthB (RightSB - BBD) yBar
+			VBar.l (SB + OX + BBD) 0 CAP BBS
+		include : BBBarRight RightSB 0 yBar

@@ -1,0 +1,69 @@
+$$include '../meta/macros.ptl'
+
+import [clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Recursive-Build : begin
+	define [Fork gs ps] : begin
+		local glyphs {}
+		foreach [glyphid : items-of gs] : begin
+			local g : glyphStore.queryByName glyphid
+			if g : glyphs.push g
+
+		local gs : buildGlyphs ps [$Exec$.dependencyManager.traverseDependencies glyphs]
+		return gs.glyphStore
+
+	define [MiniatureParaT] : with-params [pp crowd scale [sbscale (Width / UPM)] [mono false] [mono2 false] [forceUpright false]] : begin
+		local forkedPara : Object.assign {.} pp
+		forkedPara.stroke = [AdviceStroke crowd : Math.pow [clamp 0 1 (HalfUPM / Width)] 0.5] / scale
+		forkedPara.dotSize = pp.dotSize * forkedPara.stroke / pp.stroke
+		forkedPara.periodSize = pp.periodSize * forkedPara.stroke / pp.stroke
+		forkedPara.sb = SB * sbscale
+		if forceUpright : begin
+			forkedPara.slopeAngle  = 0
+		if mono : begin
+			forkedPara.diversityM  = 1
+		if mono2 : begin
+			forkedPara.diversityF  = 1
+			forkedPara.diversityI  = 1
+			forkedPara.diversityII = 1
+
+		return forkedPara
+
+	define [Miniature glyphs] : begin
+		return : Fork glyphs : MiniatureParaT.apply null { para :: [{}.slice.call arguments 1] }
+
+	define [Thinner] : with-params [glyphs p fMono crowd crowdAdjScale] : begin
+		local forkedPara : Object.assign {.} para
+
+		if (crowd && crowdAdjScale) : begin
+			forkedPara.stroke = [AdviceStroke crowd] / crowdAdjScale
+			forkedPara.dotSize = para.dotSize * forkedPara.stroke / para.stroke
+			forkedPara.periodSize = para.periodSize * forkedPara.stroke / para.stroke
+
+		forkedPara.unitWidthScalar = para.unitWidthScalar * p
+		forkedPara.width = Width * p
+		forkedPara.accentWidth = AccentWidth * p
+		forkedPara.jut = Jut * p
+		forkedPara.longjut = LongJut * p
+		forkedPara.diversityM = 1
+		if fMono : begin
+			forkedPara.diversityF  = 1
+			forkedPara.diversityI  = 1
+			forkedPara.diversityII = 1
+		#forkedPara.hookx = HookX * p
+		return : Fork glyphs forkedPara
+
+	define [Widen glyphs p psb] : begin
+		local forkedPara : Object.assign {.} para
+		forkedPara.unitWidthScalar = para.unitWidthScalar * p
+		forkedPara.width = Width * p
+		forkedPara.sb = SB * [fallback psb p]
+		forkedPara.accentWidth = AccentWidth * p
+		forkedPara.jut = Jut * p
+		forkedPara.longjut = LongJut * p
+		forkedPara.hookx = HookX * p
+		return : Fork glyphs forkedPara
+
+	glyph-block-export Fork Miniature MiniatureParaT Thinner Widen

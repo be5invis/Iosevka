@@ -1,0 +1,223 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-Q : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Letter-Latin-O
+
+	define TailDepth : 0 - Hook
+
+	# Bodies
+
+	define [QStdBody df top sw] : OShape top 0 df.leftSB df.rightSB sw ArchDepthA ArchDepthB
+	define [QHorizontalTailedBody df top sw] : begin
+		define fine : mix ShoulderFine sw 0.125
+		return : dispiro
+			flat (df.middle - sw * TanSlope + O) (sw - fine) [widths.lhs fine]
+			curl (df.middle + CorrectionOMidX * fine) (sw - fine)
+			archv
+			flat df.rightSB ArchDepthA [widths.lhs sw]
+			curl df.rightSB (top - ArchDepthB)
+			arcvh
+			g4 (df.middle - CorrectionOMidS) (top - O)
+			archv
+			flat df.leftSB (top - ArchDepthA)
+			curl df.leftSB ArchDepthB
+			arcvh
+			straight.right.end (df.middle + CorrectionOMidS) 0
+
+	define [QOpenSwashyBody df top] : glyph-proc
+		define fine : AdviceStroke 3.5
+		define xLB0 : mix df.leftSB df.rightSB (1 / 16)
+		define xLB : xLB0 + [HSwToV : 0.6 * fine]
+		define yLB : [mix 0 Descender (1 - 1 / 32)] + O
+		define xMBArc : mix df.rightSB xLB 0.5
+		define yMBArc : [mix ArchDepthA yLB 0.625] + Stroke * (1 / 16)
+		define xRB0 : mix df.rightSB df.width 0.7
+		define xRB : xRB0 - [HSwToV : 0.75 * Stroke]
+		define yRingStart : XH / 12
+		define notchOffset : (-Descender * 0.625) + Stroke * 0.625 + yRingStart / 2
+		define tailSlope : 0.2 + 0.5 * (1 - fine / Stroke)
+		# Lower part
+		include : difference
+			dispiro
+				flat df.width (yRingStart + O) [widths.rhs.heading fine Leftward]
+				curl (df.middle + CorrectionOMidS) (yRingStart + O)
+				archv
+				flat (df.leftSB + OX) (yRingStart + ArchDepthB) [widths.rhs Stroke]
+				curl (df.leftSB + OX) [mix yRingStart top 0.5] [heading Upward]
+			MaskBelowLine
+				mix xMBArc xLB0 4
+				[mix yMBArc yLB 4] + notchOffset
+				mix xLB0 xMBArc 4
+				[mix yLB yMBArc 4] + notchOffset
+		include : dispiro
+			flat (df.leftSB + OX) [mix yRingStart top 0.5] [widths.rhs.heading Stroke Upward]
+			curl (df.leftSB + OX) (top - ArchDepthA)
+			arcvh
+			g4 (df.middle - CorrectionOMidS) (top - O)
+			archv
+			flat (df.rightSB - OX) (top - ArchDepthB)
+			curl (df.rightSB - OX) ArchDepthA
+			alsoThru.g2 0.5 0.8 [widths.rhs : 0.9 * [mix Stroke fine 0.25]]
+			g2 xMBArc yMBArc [widths.rhs : 0.8 * [mix Stroke fine 0.5]]
+			alsoThru.g2 0.55 0.35 [widths.rhs : 0.9 * [mix Stroke fine 0.75]]
+			g2 xLB yLB [widths.rhs fine]
+		include : difference
+			dispiro
+				g2 xLB yLB [widths.lhs (fine * CThin)]
+				g2.right.mid [mix xLB xRB (1 / 4)] (yLB - Descender / 4 - Stroke * (1 / 16)) [widths.lhs.heading (fine * CThin) {.x (TanSlope + tailSlope) .y 1}]
+				alsoThru.g2 0.5 0.5
+				g2.right.mid ([mix xLB xRB (3 / 4)] + Stroke * tailSlope) (Descender + O) [widths.lhs.heading Stroke {.x (TanSlope - tailSlope) .y 1}]
+				archv
+				g2 xRB0 [mix Descender xLB 0.5] [widths.lhs.heading fine Upward]
+			MaskLeft xLB
+
+	# Tails
+	define [QStaraightTail df] : begin
+		local shift : StrokeWidthBlend 0 0.25
+		return : dispiro
+			widths.rhs
+			flat (df.middle - [HSwToV Stroke] * shift - TailDepth * 0.25) TailDepth [heading Upward]
+			curl (df.middle - [HSwToV Stroke] * shift) 0
+
+	define [QCurlyTail df] : begin
+		local shift : StrokeWidthBlend 0.5 0.6
+		local startx : df.middle + (Stroke * shift) * HVContrast
+		return : dispiro
+			widths.rhs
+			flat startx HalfStroke [heading Downward]
+			curl startx 0 [heading Downward]
+			arcvh
+			flat [Math.min (df.middle + HookX - 1) (startx - TailDepth - [HSwToV Stroke])] (Stroke + TailDepth)
+			curl (df.middle + HookX) (Stroke + TailDepth)
+
+	define [QCrossingCurlyTail df top sw] : union
+		VBar.m df.middle HalfStroke [mix Descender HalfStroke 1.75] sw
+		dispiro
+			widths.rhs
+			flat (df.middle + [HSwToV HalfStroke]) HalfStroke [heading Downward]
+			curl (df.middle + [HSwToV HalfStroke]) 0 [heading Downward]
+			arcvh
+			flat [Math.min (df.middle + HookX - 1) (df.middle - [HSwToV HalfStroke] - TailDepth)] (Stroke + TailDepth)
+			curl (df.middle + HookX) (Stroke + TailDepth)
+
+	define [QCrossing df top sw] : begin
+		define k 1.5
+		define cor : DiagCor (k * (df.rightSB - df.middle)) (df.rightSB - df.middle - OX)
+		define shift : XH * (-0.1)
+		return : dispiro
+			widths.center (cor * sw)
+			flat df.rightSB shift [heading Upward]
+			curl (df.middle + OX) (k * (df.rightSB - df.middle) + shift) [heading Upward]
+
+	define [QCrossingBaseline df top sw] : begin
+		define cor : DiagCor (0.5 * (top - Stroke)) (df.rightSB - df.middle - OX)
+		return : dispiro
+			widths.center (cor * sw)
+			flat df.rightSB 0 [heading Upward]
+			curl (df.middle + OX) (0.5 * (top - Stroke)) [heading Upward]
+
+	define [QVerticalCrossing df top sw] : begin
+		return : union
+			VBar.m df.middle [mix Descender HalfStroke 1.75] 0 sw
+			VBar.m df.middle 0 TailDepth
+
+	define [QHorizontalTail df tio sw] : dispiro
+		flat (df.middle + CorrectionOMidS) 0 [widths.lhs : AdviceStroke 3]
+		curl [mix df.rightSB df.width 0.5] 0
+
+	define detachedTailGap : Math.max (-0.25 * Descender) [AdviceStroke 12]
+	define yObliqueTailStart : 0 - detachedTailGap - Stroke * 0.875
+	define yObliqueTailEnd : [mix 0 Descender 0.75] - Stroke * 0.5
+	define [xDetachedTailEnd df] : mix df.rightSB df.width 0.75
+	define kBendStartPartLeftLength 0.5
+	define [xBendTailStart df] : mix df.middle df.leftSB kBendStartPartLeftLength
+	define yBendTailStart : mix yObliqueTailStart yObliqueTailEnd kBendStartPartLeftLength
+
+	define [QDetachedTail df] : dispiro
+		widths.lhs Stroke
+		corner df.middle             yObliqueTailStart [heading Rightward]
+		corner [xDetachedTailEnd df] yObliqueTailEnd   [heading Rightward]
+
+	define [QDetachedBendTail df] : union [QDetachedTail df] : dispiro
+		widths.lhs Stroke
+		corner [xBendTailStart df] yBendTailStart    [heading Rightward]
+		corner df.middle           yObliqueTailStart [heading Rightward]
+
+	define [QSwashyTail] : return : glyph-proc
+
+	###################################
+
+	define QInnerVertSw : Math.min [AdviceStroke 3.5] ((RightSB - SB - [HSwToV : 2 * Stroke]) / (2 * HVContrast))
+	define QConfig : object
+		straight            { QStdBody                Stroke             QStaraightTail     'bp'      'p' }
+		curlyTailed         { QStdBody                Stroke             QCurlyTail         'bp'      'p' }
+		crossingCurlyTailed { QStdBody                QInnerVertSw       QCrossingCurlyTail 'bp'      'p' }
+		crossing            { QStdBody               [AdviceStroke 4]    QCrossing          'capital' 'e' }
+		crossingBaseline    { QStdBody               [AdviceStroke 4]    QCrossingBaseline  'capital' 'e' }
+		verticalCrossing    { QStdBody                QInnerVertSw       QVerticalCrossing  'bp'      'p' }
+		horizontalTailed    { QHorizontalTailedBody  [AdviceStroke 3]    QHorizontalTail    'capital' 'e' }
+		detachedTailed      { QStdBody                Stroke             QDetachedTail      'bp'      'p' }
+		detachedBendTailed  { QStdBody                Stroke             QDetachedBendTail  'bp'      'p' }
+		openSwash           { QOpenSwashyBody         Stroke             QSwashyTail        'bp'      'p' }
+
+
+	foreach { suffix { body swTailInner tailShape mkCapital mkSmcp } } [Object.entries QConfig] : do
+		create-glyph "Q.\(suffix)" : glyph-proc
+			local df : DivFrame 1
+			include : MarkSet.(mkCapital)
+			include : body df CAP Stroke
+			include : tailShape df CAP swTailInner
+
+		create-glyph "smcpQ.\(suffix)" : glyph-proc
+			local df : DivFrame 1
+			include : MarkSet.(mkSmcp)
+			include : body df XH Stroke
+			include : tailShape df XH swTailInner
+
+		create-glyph "QSideways.\(suffix)" : glyph-proc
+			local df : DivFrame (XH / Width) 2 (XH * 0.1 / SB)
+			include : PointingTo Width XH Width 0 : function [] : glyph-proc
+				include : body df (Width - SB) Stroke
+				include : tailShape df (Width - SB) swTailInner
+
+	select-variant 'Q' 'Q'
+	alias 'cyrl/Qa' 0x51A 'Q'
+
+	select-variant 'smcpQ' 0xA7AF (follow -- 'Q')
+
+	select-variant 'QSideways' 0x213A (follow -- 'Q')
+
+	create-glyph 'mathbb/Q' 0x211A : glyph-proc
+		define [QInner] : OShapeOutline.NoOvershoot CAP 0 SB RightSB BBS ArchDepthA ArchDepthB
+
+		include : MarkSet.capDesc
+		include : OShape CAP 0 SB RightSB BBS ArchDepthA ArchDepthB
+		include : intersection
+			QInner
+			union
+				VBar.l  (SB + BBD) 0 CAP BBS
+				VBar.r (RightSB - BBD) 0 CAP BBS
+
+		define terminalX : Middle + HookX
+		define tailDeltaX : BBD / 2
+		define qTerminalY : BBS - Hook - BBD / 4
+		define [QTail x] : dispiro
+			widths.center BBS
+			flat (x) (CAP / 2)
+			curl (x) 0
+			arcvh
+			flat [Math.min (terminalX - 1) (x - qTerminalY)] qTerminalY
+			curl terminalX qTerminalY
+		include : difference
+			union
+				QTail (Middle - tailDeltaX)
+				QTail (Middle + tailDeltaX)
+			QInner

@@ -1,0 +1,52 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Multiocular-O : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	glyph-block-import Mark-Overlay : InnerDot
+
+	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
+
+		create-glyph "cyrl/multiocularO.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 6
+			include : df.markSet.bp
+
+			local subDf : df.slice 5 2
+
+			local pMidRowBottom     0.327
+			local pMidRowSw         (-0.25)
+			local middleRowBottom : [mix Descender Ascender pMidRowBottom] + pMidRowSw * df.mvs
+			local middleRowTop    : [mix Descender Ascender (1 - pMidRowBottom)] - pMidRowSw * df.mvs
+
+			local [SingleEye pX pY] : begin
+				local yBot : middleRowBottom + pY * (middleRowBottom - Descender)
+				local yTop : middleRowTop + pY * (Ascender - middleRowTop)
+				local xLeft : subDf.leftSB + (pX / 3) * (df.width - subDf.width)
+				local xRight : subDf.rightSB + (pX / 3) * (df.width - subDf.width)
+				local ada : subDf.archDepthA SmallArchDepth
+				local adb : subDf.archDepthB SmallArchDepth
+
+				local dotSpace : InnerDot.spaceOfDf subDf
+				local kHeight2 : [Math.sqrt ([InnerDot.spaceOfDf : DivFrame 1] / dotSpace)] * 1.5
+
+				return : union
+					OShape.NoOvershoot yTop yBot xLeft xRight subDf.mvs ada adb
+					InnerDot [mix xLeft xRight 0.5] [mix yTop yBot 0.5] kHeight2 (DrawAt === DotAt) kdr dotSpace 5
+
+			include : SingleEye 0 0
+			include : SingleEye 1 0
+			include : SingleEye 2 0
+			include : SingleEye 3 0
+			include : SingleEye 0.5 (+1)
+			include : SingleEye 1.5 (+1)
+			include : SingleEye 2.5 (+1)
+			include : SingleEye 0.5 (-1)
+			include : SingleEye 1.5 (-1)
+			include : SingleEye 2.5 (-1)
+
+	select-variant 'cyrl/multiocularO' 0xA66E (follow -- 'diacriticDot')

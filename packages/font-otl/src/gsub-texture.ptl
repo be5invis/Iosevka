@@ -1,0 +1,102 @@
+$$include './meta/macros.ptl'
+
+extern Set
+
+import [Texture CvDecompose] from "@iosevka/glyph/relation"
+
+# Name-driven feature pairs
+export : define [buildGsubTexture gsub glyphStore markGlyphs cvs] : begin
+	local anyMark : Array.from markGlyphs.all
+	local rec : gsub.beginBlock
+
+	define txtr : gsub.addCommonFeature : gsub.createFeature 'TXTR'
+	define { chain-rule reverse-rule } : gsub.ChainRuleBuilder
+	define look-around null
+
+	local extLFrom  { }
+	local extRFrom  { }
+	local extLRFrom { }
+	local extLTo    { }
+	local extRTo    { }
+	local extLRTo   { }
+
+	local shrLFrom  { }
+	local shrRFrom  { }
+	local shrLRFrom { }
+	local shrLTo    { }
+	local shrRTo    { }
+	local shrLRTo   { }
+
+	local anyInfluence : new Set
+
+	foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== ".") : begin
+		local extL : Texture.ExtL.get g
+		local extR : Texture.ExtR.get g
+		local extLR : Texture.ExtLR.get g
+		local shrL : Texture.ShrL.get g
+		local shrR : Texture.ShrR.get g
+		local shrLR : Texture.ShrLR.get g
+
+		if extL : begin [extLFrom.push gid] [extLTo.push extL]
+		if extR : begin [extRFrom.push gid] [extRTo.push extR]
+		if extLR : begin [extLRFrom.push gid] [extLRTo.push extLR]
+		if (extL || extR || extLR) : begin [anyInfluence.add gid]
+
+		if shrL : begin [shrLFrom.push gid] [shrLTo.push shrL]
+		if shrR : begin [shrRFrom.push gid] [shrRTo.push shrR]
+		if shrLR : begin [shrLRFrom.push gid] [shrLRTo.push shrLR]
+
+	# Build the lookup by case-analysis
+	# Backtracks will be the "target"/"to" glyphs, while look-aheads will be the "from" glyphs
+	define sub : gsub.createLookup
+		.type 'gsub_chaining'
+		.ignoreGlyphs anyMark
+		.rules : list
+			chain-rule # Extension to both sides
+				[{}.concat shrRTo shrLRTo]     ~> look-around
+				extLRFrom                      ~> extLRTo
+				[{}.concat shrLFrom shrLRFrom] ~> look-around
+			chain-rule # Shrink to both sides
+				[{}.concat extRTo extLRTo]     ~> look-around
+				shrLRFrom                      ~> shrLRTo
+				[{}.concat extLFrom extLRFrom] ~> look-around
+			chain-rule # Extension to the left
+				[{}.concat shrRTo shrLRTo]     ~> look-around
+				extLFrom                       ~> extLTo
+			chain-rule # Shrink to the left
+				[{}.concat extRTo extLRTo]     ~> look-around
+				shrLFrom                       ~> shrLTo
+			chain-rule # Extension to the right
+				extRFrom                       ~> extRTo
+				[{}.concat shrLFrom shrLRFrom] ~> look-around
+			chain-rule # Shrink to the right
+				shrRFrom                       ~> shrRTo
+				[{}.concat extLFrom extLRFrom] ~> look-around
+
+	txtr.addLookup sub
+
+	# Decompose everything if we enable TXTR
+	if cvs
+	: then : begin
+		# Reuse existing Cvdecompose data
+		foreach cv [cvs.values] : begin
+			if cv.decompositionLookup : begin
+				txtr.addLookup cv.decompositionLookup
+				gsub.setDependency cv.decompositionLookup sub
+	: else : begin
+		# Built it from scratch
+		local decompose : gsub.createLookup
+			.type 'gsub_multiple'
+			.substitutions {.}
+
+		foreach { gn glyph } [glyphStore.namedEntries] : begin
+			local parts : CvDecompose.get glyph
+			if parts : begin
+				local influenced : anyInfluence.has gn
+				foreach part [items-of parts] : if [anyInfluence.has part] : set influenced true
+				if influenced : set decompose.substitutions.(gn) parts
+
+		txtr.addLookup decompose
+		gsub.setDependency decompose sub
+
+	gsub.endBlock rec

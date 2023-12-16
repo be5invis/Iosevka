@@ -1,0 +1,117 @@
+$$include '../../meta/macros.ptl'
+
+import [mix fallback SuffixCfg] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-Q : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Shared-Metrics : markHalfStroke
+	glyph-block-import Mark-Adjustment : LeaningAnchor
+	glyph-block-import Letter-Shared-Shapes : OBarLeft OBarRight RightwardTailedBar DToothlessRise
+	glyph-block-import Letter-Shared-Shapes : DMBlend DiagTail
+	glyph-block-import Letter-Shared-Shapes : TopHook RetroflexHook
+
+	define TERMINAL-NORMAL  0
+	define TERMINAL-TAILED  1
+	define TERMINAL-DIAG    2
+	define [RDiagTailedBar x0 yb yt] : begin
+		local df : DivFrame 1
+		local xMid : x0 - [HSwToV HalfStroke]
+		return : dispiro
+			flat xMid yt [widths.center.heading Stroke Downward]
+			DiagTail.R xMid yb (0.875 * Hook - Stroke * 0.375) Stroke
+
+	define [EaredBody terminal top bottom] : glyph-proc
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
+		include : OBarRight.shape (top -- top)
+		include : match terminal
+			[Just TERMINAL-NORMAL] : VBar.r          RightSB bottom top
+			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom top
+			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom top
+
+	define [EarlessCornerBody terminal top bottom] : glyph-proc
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
+		include : OBarLeft.toothless (top -- top) (rise -- DToothlessRise) (mBlend -- DMBlend)
+		include : FlipAround Middle (top / 2)
+		include : match terminal
+			[Just TERMINAL-NORMAL] : VBar.r          RightSB bottom (top - DToothlessRise)
+			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - DToothlessRise)
+			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - DToothlessRise)
+
+	define [EarlessRoundedBody terminal top bottom] : glyph-proc
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
+		include : OBarLeft.rounded (top -- top) (yTerminal -- (SmallArchDepthB - O))
+		include : FlipAround Middle (top / 2)
+		include : match terminal
+			[Just TERMINAL-NORMAL] : VBar.r          RightSB bottom (top - SmallArchDepthB)
+			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - SmallArchDepthB)
+			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - SmallArchDepthB)
+
+	define [RtSerif y] : tagged 'serifRT' : HSerif.rt RightSB y SideJut
+	define [RtSerifAuto y] : NeedSlab SLAB : RtSerif y
+	define [RbSerif y] : tagged 'serifRB' : union
+		HSerif.lb (RightSB - [HSwToV HalfStroke]) y MidJutSide
+		HSerif.rb (RightSB - [HSwToV HalfStroke]) y Jut
+	define [RbSerifAuto y] : NeedSlab SLAB : RbSerif y
+
+	define QConfig : SuffixCfg.weave
+		object # body
+			""                   EaredBody
+			earlessCorner        EarlessCornerBody
+			earlessRounded       EarlessRoundedBody
+		object # tail
+			straight             TERMINAL-NORMAL
+			tailed               TERMINAL-TAILED
+			diagonalTailed       TERMINAL-DIAG
+		object # serifs
+			serifless          { nothing nothing }
+			motionSerifed      { RtSerif nothing }
+			bottomSerifed      { nothing RbSerif }
+			serifed            { RtSerif RbSerif }
+
+	foreach { suffix { Body terminal {sRT sRB} } } [Object.entries QConfig] : do
+		create-glyph "q.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : Body terminal XH Descender
+			if sRT : include : sRT XH
+			if sRB : include : sRB Descender
+			include : LeaningAnchor.Below.VBar.r RightSB
+
+		create-glyph "QRTail.\(suffix)" : glyph-proc
+			include : MarkSet.capDesc
+			include : Body terminal CAP 0
+			include : RetroflexHook.rExt RightSB 0
+			if sRT : include : sRT CAP
+
+		create-glyph "qRTail.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : Body terminal XH 0
+			include : RetroflexHook.rExt RightSB 0
+			if sRT : include : sRT XH
+
+	select-variant 'q' 'q'
+	link-reduced-variant 'q/sansSerif' 'q' MathSansSerif
+	alias 'cyrl/qa' 0x51B 'q'
+	select-variant 'QRTail' 0x24A (follow -- 'qRTail')
+	select-variant 'qRTail' 0x24B
+	select-variant "q/hookTopBase" (shapeFrom -- 'q')
+
+	derive-glyphs 'qHookTop' 0x2A0 "q/hookTopBase" : function [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : VBar.r RightSB 0 XH
+		include : TopHook.rBarOuter RightSB 0 XH
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
+	create-glyph 'mathbb/q' 0x1D562 : glyph-proc
+		include : MarkSet.p
+		include : BBBarRight RightSB Descender XH
+		include : intersection
+			OShapeOutline.NoOvershoot XH 0 SB (RightSB - BBD - [HSwToV BBS])
+			VBar.l (SB + BBD + OX) 0 XH BBS
+		include : OBarRight.shape
+			left -- SB
+			right -- RightSB - BBD
+			sw -- BBS
