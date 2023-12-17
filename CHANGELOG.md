@@ -1,5 +1,12 @@
 ## Modifications since last major version
 
+### 28.0.1
+
+* Add italic form of CYRILLIC SMALL LETTER TE WITH MIDDLE HOOK (`U+A68B`) (#2119).
+* Add missing feature tag to chaining plus ligation (#2118).
+* Make the central part of Cyrillic Twe to follow lowercase Tau variants (#2122).
+
+
 ### 28.0.0
 
 * \[**BREAKING**\] The filenames and package filenames are changed.

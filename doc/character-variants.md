@@ -3399,6 +3399,17 @@
 <td colspan="10"> </td>
 </tr>
 <tr>
+<td rowspan="2"><code>VXAA</code></td>
+<td><img src="../images/cv-lig-plus-chain-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-plus-chain-with-notch.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lig-plus-chain-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-plus-chain-without-notch.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
 <td rowspan="2"><code>VLAE</code></td>
 <td><img src="../images/cv-lig-double-arrow-bar-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-double-arrow-bar-with-notch.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lig-double-arrow-bar-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-double-arrow-bar-without-notch.dark.svg#gh-dark-mode-only" width=32/></td>
