@@ -34,6 +34,11 @@ glyph-block Symbol-Ligation : begin
 	local dblExtend : clamp 0 Width (RightSB - EqualHalfSpace * arrowheadSlope)
 	local dblArrowJ : clamp 0 Width (SB + EqualHalfSpace * arrowheadSlope)
 
+	define [HyphenNotch x] : union
+		VBar.m x (SymbolMid + OperatorStroke / 3) (SymbolMid + OperatorStroke) EqualHoleWidth
+		VBar.m x (SymbolMid - OperatorStroke / 3) (SymbolMid - OperatorStroke) EqualHoleWidth
+
+
 	do "Arrow Bar"
 		define [ArrowBarConfig extend kern join doubleBar] : begin
 			define cleft O
@@ -79,9 +84,6 @@ glyph-block Symbol-Ligation : begin
 			return result
 
 		define [HyphenShape l r] : HBar.m l r SymbolMid OperatorStroke
-		define [HyphenNotch x] : union
-			VBar.m x (SymbolMid + OperatorStroke / 3) (SymbolMid + OperatorStroke) EqualHoleWidth
-			VBar.m x (SymbolMid - OperatorStroke / 3) (SymbolMid - OperatorStroke) EqualHoleWidth
 
 		define Shapes : object
 			'plus'   { PlusShape   HyphenNotch { arrowExtend arrowheadsKern arrowJ    0 } }
@@ -421,12 +423,24 @@ glyph-block Symbol-Ligation : begin
 				MaskRightLine (slashDefautLeft - Width) ParenBot (slashDefaultRight - Width) ParenTop
 
 	do "Chaining Plus (shifted middle bars)"
-		create-glyph 'plus.lig.fc.s' : glyph-proc
-			Joining.set currentGlyph Joining.Classes.Right
-			include : PlusShape SB (Width - O) SB
-		create-glyph 'plus.lig.cf.s' : glyph-proc
-			Joining.set currentGlyph Joining.Classes.Left
-			include : PlusShape O RightSB (-SB)
+		define NotchConfig : object
+			'withoutNotch' { false }
+			'withNotch'    { true  }
+
+		foreach { suffix { fNotch } } [pairs-of NotchConfig] : do
+			create-glyph "plus.lig.fc.s.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Right
+				include : difference
+					PlusShape SB (Width - O) SB
+					if fNotch [HyphenNotch Width] [no-shape]
+			create-glyph "plus.lig.cf.s.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Left
+				include : difference
+					PlusShape O RightSB (-SB)
+					if fNotch [HyphenNotch 0] [no-shape]
+
+		select-variant 'plus.lig.fc.s' (follow -- 'lig-plus')
+		select-variant 'plus.lig.cf.s' (follow -- 'lig-plus')
 
 	do 'Less / Greater as arrow'
 		create-glyph 'greaterArrow' : composite-proc

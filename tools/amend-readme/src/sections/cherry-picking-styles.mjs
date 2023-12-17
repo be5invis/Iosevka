@@ -10,7 +10,7 @@ import { sampleImageCountEmOfCv } from "./cv-ot.mjs";
 export default async function processCherryPickingStyles(argv, dirs) {
 	const variantsData = await parseVariantsData(argv);
 	const md = new MdCol("Section-Cherry-Picking-Styles");
-	const headerPath = path.resolve(dirs.fragments, "description-cheery-picking-styles.md");
+	const headerPath = path.resolve(dirs.fragments, "description-cherry-picking-styles.md");
 	md.log(await fs.promises.readFile(headerPath, "utf-8"));
 	for (const cv of [...variantsData.specials, ...variantsData.primes]) {
 		if (!cv.tag && !cv.isSpecial) continue;
