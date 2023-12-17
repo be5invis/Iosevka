@@ -16,7 +16,7 @@ glyph-block Letter-Latin-Upper-T : begin
 	define [TLeftX df]  : df.leftSB  + 0.75 * OX
 	define [TRightX df] : df.rightSB - 0.75 * OX
 	define [TShape df top doTopSerifs doBottomSerifs] : glyph-proc
-		include : VBar.m df.middle 0 top
+		include : tagged 'strokeV' : VBar.m df.middle 0 top
 		local l : TLeftX df
 		local r : TRightX df
 		include : tagged 'strokeLT' : HBar.t l df.middle top
@@ -53,18 +53,9 @@ glyph-block Letter-Latin-Upper-T : begin
 		local sf2 : [SerifFrame.fromDf df (top / 2) 0].slice 1 2
 		if SLAB : include sf2.rt.full
 
-	define [TweShape df top doTopSerifs] : glyph-proc
-		local hd : FlatHookDepth df
-		include : difference
-			TShape df top doTopSerifs false
-			MaskBelow hd.y
-
-		include : dispiro
-			widths.center
-			straight.down.start df.middle hd.y [heading Downward]
-			arcvh.superness DesignParameters.tightHookSuperness
-			flat (df.middle + hd.x - [HSwToV HalfStroke]) HalfStroke
-			curl (df.middle + [Math.max (hd.x - [HSwToV HalfStroke] + 1) (LongJut * 1.05)] + HalfStroke * TanSlope) HalfStroke
+	define [TweUpperShape df top doTopSerifs] : glyph-proc
+		include : TShape df top doTopSerifs false
+		eject-contour 'strokeV'
 
 	define [CyrlTallTeShape df top doTopSerifs doBottomSerifs] : glyph-proc
 		local xRight : df.width - 1.5 * df.leftSB
@@ -120,15 +111,17 @@ glyph-block Letter-Latin-Upper-T : begin
 			set-base-anchor 'bottomRight' (df.middle + [HSwToV HalfStroke]) 0
 			include : TShape df XH doST doSB
 
-		create-glyph "cyrl/Twe.\(suffix)" : glyph-proc
+		create-glyph "cyrl/Twe/upper.\(suffix)" : glyph-proc
 			set-width df.width
 			include : df.markSet.capital
-			include : TweShape df CAP doST doSB
+			include : TweUpperShape df CAP doST doSB
+			set-base-anchor 'cvDecompose' (df.width / 2) CAP
 
-		create-glyph "cyrl/twe.\(suffix)" : glyph-proc
+		create-glyph "cyrl/twe/upper.\(suffix)" : glyph-proc
 			set-width df.width
 			include : df.markSet.e
-			include : TweShape df XH doST doSB
+			include : TweUpperShape df XH doST doSB
+			set-base-anchor 'cvDecompose' (df.width / 2) XH
 
 		create-glyph "currency/tengeSign.\(suffix)" : glyph-proc
 			set-width df.width
@@ -187,8 +180,10 @@ glyph-block Letter-Latin-Upper-T : begin
 
 	select-variant 'cyrl/TjeKomi' 0x50E (follow -- 'T/rtailBase')
 	select-variant 'cyrl/tjeKomi.upright' null (follow -- 'T/rtailBase')
-	select-variant 'cyrl/Twe' 0xA68C (follow -- 'T/rtailBase')
-	select-variant 'cyrl/twe' 0xA68D (follow -- 'T/rtailBase')
+	select-variant 'cyrl/Twe/upper' (follow -- 'T/rtailBase')
+	select-variant 'cyrl/twe/upper' (follow -- 'T/rtailBase')
+	derive-composites 'cyrl/Twe' 0xA68C 'cyrl/Twe/upper' 'cyrl/Twe/middle'
+	derive-composites 'cyrl/twe' 0xA68D 'cyrl/twe/upper' 'cyrl/twe/middle'
 
 	select-variant 'currency/tengeSign' 0x20B8 (follow -- 'T')
 
