@@ -88,16 +88,20 @@ class SimplifyGeometry extends Geom.GeometryBase {
 		this.m_geom = g;
 	}
 	asContours() {
-		const source = this.m_geom.asContours();
+		// Produce simplified arcs
+		let arcs = CurveUtil.convertShapeToArcs(this.m_geom.asContours());
+		if (!this.m_geom.producesSimpleContours()) {
+			arcs = TypoGeom.Boolean.removeOverlap(
+				arcs,
+				TypoGeom.Boolean.PolyFillType.pftNonZero,
+				CurveUtil.BOOLE_RESOLUTION
+			);
+		}
+
+		// Convert to TT curves
 		const sink = new QuadifySink();
 		TypoGeom.ShapeConv.transferGenericShape(
-			TypoGeom.Fairize.fairizeBezierShape(
-				TypoGeom.Boolean.removeOverlap(
-					CurveUtil.convertShapeToArcs(source),
-					TypoGeom.Boolean.PolyFillType.pftNonZero,
-					CurveUtil.BOOLE_RESOLUTION
-				)
-			),
+			TypoGeom.Fairize.fairizeBezierShape(arcs),
 			sink,
 			CurveUtil.GEOMETRY_PRECISION
 		);

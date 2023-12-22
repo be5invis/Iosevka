@@ -16,6 +16,9 @@ export class GeometryBase {
 	asReferences() {
 		throw new Error("Unimplemented");
 	}
+	producesSimpleContours() {
+		return false;
+	}
 	getDependencies() {
 		throw new Error("Unimplemented");
 	}
@@ -217,6 +220,9 @@ export class ReferenceGeometry extends GeometryBase {
 		if (this.isEmpty()) return [];
 		return [{ glyph: this.m_glyph, x: this.m_x, y: this.m_y }];
 	}
+	producesSimpleContours() {
+		return this.unwrap().producesSimpleContours();
+	}
 	getDependencies() {
 		return [this.m_glyph];
 	}
@@ -252,6 +258,9 @@ export class TaggedGeometry extends GeometryBase {
 	}
 	asReferences() {
 		return this.m_geom.asReferences();
+	}
+	producesSimpleContours() {
+		return this.m_geom.producesSimpleContours();
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -297,6 +306,9 @@ export class TransformedGeometry extends GeometryBase {
 		for (const { glyph, x, y } of rs)
 			result.push({ glyph, x: x + this.m_transform.x, y: y + this.m_transform.y });
 		return result;
+	}
+	producesSimpleContours() {
+		return this.m_geom.producesSimpleContours();
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -349,6 +361,9 @@ export class RadicalGeometry extends GeometryBase {
 	}
 	asReferences() {
 		return null;
+	}
+	producesSimpleContours() {
+		return this.m_geom.producesSimpleContours();
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -405,6 +420,11 @@ export class CombineGeometry extends GeometryBase {
 			}
 		}
 		return results;
+	}
+	producesSimpleContours() {
+		if (this.m_parts.length === 0) return true;
+		if (this.m_parts.length > 1) return false;
+		return this.m_parts[0].producesSimpleContours();
 	}
 	getDependencies() {
 		let results = [];
@@ -468,21 +488,43 @@ export class BooleanGeometry extends GeometryBase {
 	}
 	asContoursImpl() {
 		if (this.m_operands.length === 0) return [];
-		let arcs = CurveUtil.convertShapeToArcs(this.m_operands[0].asContours());
-		for (let j = 1; j < this.m_operands.length; j++) {
-			arcs = TypoGeom.Boolean.combine(
-				this.m_operator,
-				arcs,
-				CurveUtil.convertShapeToArcs(this.m_operands[j].asContours()),
-				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				CurveUtil.BOOLE_RESOLUTION
-			);
-		}
+
+		const stack = [];
+		this.asOpStackImpl(stack);
+		const arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
 		const ctx = new CurveUtil.BezToContoursSink();
 		TypoGeom.ShapeConv.transferBezArcShape(arcs, ctx);
 		return ctx.contours;
 	}
+	asOpStackImpl(sink) {
+		if (this.m_operands.length === 0) {
+			sink.push({
+				type: "operand",
+				fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+				shape: []
+			});
+			return;
+		}
+
+		for (const [i, operand] of this.m_operands.entries()) {
+			// Push operand
+			if (operand instanceof BooleanGeometry) {
+				operand.asOpStackImpl(sink);
+			} else {
+				sink.push({
+					type: "operand",
+					fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+					shape: CurveUtil.convertShapeToArcs(operand.asContours())
+				});
+			}
+			// Push operator if i > 0
+			if (i > 0) sink.push({ type: "operator", operator: this.m_operator });
+		}
+	}
+	producesSimpleContours() {
+		return this.m_operands.length > 1;
+	}
+
 	asReferences() {
 		return null;
 	}
