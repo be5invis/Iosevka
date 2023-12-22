@@ -1,3 +1,4 @@
+import * as Geom from "@iosevka/geometry";
 import { Point } from "@iosevka/geometry/point";
 import * as Gr from "@iosevka/glyph/relation";
 import { Ot } from "ot-builder";
@@ -41,15 +42,18 @@ class MappedGlyphStore {
 	fill(name, source) {
 		const g = this.queryBySourceGlyph(source);
 		if (!g) throw new Error("Unreachable");
+
 		// Fill metrics
 		g.horizontal = { start: 0, end: source.advanceWidth };
+
 		// Fill Geometry
-		if (source.geometry.isEmpty()) return;
-		const rs = source.geometry.asReferences();
-		if (rs) {
-			this.fillReferences(g, rs);
-		} else {
-			this.fillContours(g, source.geometry.asContours());
+		if (!source.geometry.isEmpty()) {
+			const rs = source.geometry.asReferences();
+			if (rs) {
+				this.fillReferences(g, rs);
+			} else {
+				this.fillContours(g, source.geometry.asContours());
+			}
 		}
 	}
 	fillOtGlyphNames() {
