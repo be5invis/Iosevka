@@ -12,6 +12,7 @@ glyph-block Letter-Latin-Upper-AA-AO : begin
 
 	do "A glyphs"
 		glyph-block-import Letter-Latin-Upper-A : AConfig AMaskShape ALetterShape
+		glyph-block-import Letter-Latin-Upper-A : ABottomRightRemoved ABarPosition
 
 		define [AHalfShape pShift df top fStraightBar slabKind] : begin
 			local { subDf shift } : SubDfAndShift pShift df
@@ -63,6 +64,18 @@ glyph-block Letter-Latin-Upper-AA-AO : begin
 					set-mark-anchor 'cvDecompose' 0 0 0 0
 					include : AHalfShapeMask 1 df height fStraightBar skRight
 
+				create-glyph "\(prefix)/AU/Left.\(suffix)" : glyph-proc
+					define df : include : DivFrame para.diversityM 3.5
+					local { subDf shift } : SubDfAndShift 1 df
+					include : ABottomRightRemoved subDf fStraightBar slabKind CAP df.mvs
+				create-glyph "\(prefix)/AU/LeftMask.\(suffix)" : glyph-proc
+					define df : include : DivFrame para.diversityM 3.5
+					local { subDf shift } : SubDfAndShift 1 df
+					include : union
+						MaskAbove : [ABarPosition slabKind CAP] - df.mvs
+						MaskLeft  : subDf.width / 2
+					include : ABottomRightRemoved subDf fStraightBar slabKind CAP df.mvs
+
 			select-variant "\(prefix)/Left"      (follow -- 'A')
 			select-variant "\(prefix)/LeftMask"  (follow -- 'A')
 			select-variant "\(prefix)/Right"     (follow -- 'A')
@@ -93,6 +106,30 @@ glyph-block Letter-Latin-Upper-AA-AO : begin
 				define { left leftMask right } srcs
 				include [refer-glyph left] AS_BASE ALSO_METRICS
 				include : difference [refer-glyph right] [refer-glyph leftMask]
+
+	do "U subglyphs"
+		glyph-block-import Letter-Latin-U : CapitalUConfig
+		foreach { suffix { Base {Slabs fLTSlab} } } [Object.entries CapitalUConfig] : do
+			create-glyph "AU/Right.\(suffix)" : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				local { subDf shift } : SubDfAndShift 1 df
+				include : with-transform [ApparentTranslate shift 0]
+					union [Base subDf CAP df.mvs] [Slabs subDf CAP]
+
+		select-variant "AU/Right" (follow -- 'U/noTopLeftSerif')
+
+	do "AU"
+		select-variant 'AA/AU/Left' (follow -- 'A')
+		select-variant 'AA/AU/LeftMask' (follow -- 'A')
+		derive-multi-part-glyphs 'AU' 0xA736 {'AA/AU/Left' 'AA/AU/LeftMask' 'AU/Right'}
+			function [srcs gr] : glyph-proc
+				define df : include : DivFrame para.diversityM 3.5
+				local { subDf shift } : SubDfAndShift 1 df
+				include : df.markSet.capital
+				define { left mask right } srcs
+				include [refer-glyph left]
+				include : difference [refer-glyph right]
+					intersection [refer-glyph mask] [MaskLeft (subDf.width / 2 + shift)]
 
 	do "RHA"
 		glyph-block-import Letter-Shared-Shapes : SerifFrame WithSerifOverflowMask

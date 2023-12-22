@@ -133,31 +133,35 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				include : InvEShape 1 df revbody
 
 	do "u subglyphs"
-		define [ueUPart df fSlab] : new-glyph : glyph-proc
-			local { subDf } : SubDfAndShift 0 df 0
-			local ada : subDf.archDepthA SmallArchDepth df.mvs
-			local adb : subDf.archDepthB SmallArchDepth df.mvs
+		glyph-block-import Letter-Latin-U : UShapeGroup SmallUConfigT
 
-			local abarRight : df.middle + [HSwToV : 0.5 * df.mvs]
-			include : nShoulder
-				left -- abarRight
-				right -- (df.rightSB - OX)
-				stroke -- df.mvs
-				ada -- adb
-				adb -- adb
-			include : FlipAround df.middle (XH / 2)
-			if fSlab : include : HSerif.lt df.leftSB XH SideJut
+		define df : DivFrame para.diversityM 3
+		define { subDf shift } : SubDfAndShift 1 df 0
+		local ada : subDf.archDepthA SmallArchDepth df.mvs
+		local adb : subDf.archDepthB SmallArchDepth df.mvs
+		define sg : UShapeGroup ada adb
 
-		define Config : object
-			"serifed"          { true   }
-			"serifless"        { false  }
-
-		foreach { suffix { fSlab } } [Object.entries Config] : do
+		foreach { suffix { Base Slabs } } [Object.entries : SmallUConfigT sg] : do
 			create-glyph "ue/u.\(suffix)" : glyph-proc
-				local df : include : DivFrame para.diversityM 3
+				include df
 				include : df.markSet.e
 				set-base-anchor 'cvDecompose' 0 0
-				include : ueUPart df fSlab
+				include : Base subDf XH df.mvs
+				include : Slabs subDf XH
+
+				eject-contour 'strokeR'
+				eject-contour 'serifRT'
+				eject-contour 'serifRB'
+
+			create-glyph "au/u.\(suffix)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : difference
+					Base subDf XH df.mvs
+					intersection [MaskLeft subDf.middle] [MaskAbove (XH - adb)]
+				include : Slabs subDf XH
+				include : ApparentTranslate shift 0
+				eject-contour 'serifLT'
 
 	do "c subglyphs"
 		glyph-block-import Letter-Latin-C : CLetterForm CConfig
@@ -378,6 +382,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	select-variant "ae/e" (follow -- 'e')
 	select-variant "aeInvE/right" (follow -- 'e')
 	select-variant "ue/u"
+	select-variant "au/u"
 	select-variant "oeOpenO/left" (follow -- 'c')
 	select-variant "cyrl/yae/left"
 	select-variant "cyrl/rha/left" (follow -- 'cyrl/er')
@@ -389,6 +394,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	derive-composites 'oe' 0x153  'oe/o' 'ae/e'
 	derive-composites 'ue' 0x1D6B 'ue/u' 'ae/e'
 	derive-composites 'ao' 0xA735 'ae/a' 'ao/o'
+	derive-composites 'au' 0xA737 'ae/a' 'au/u'
 	derive-composites 'oo' 0xA74F 'oe/o' 'ao/o'
 	derive-composites 'uo' 0xAB63 'ue/u' 'ao/o'
 	derive-composites 'oeOpenO' 0xAB62 'oeOpenO/left' 'ae/e'
