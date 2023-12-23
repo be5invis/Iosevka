@@ -1,9 +1,10 @@
 import fs from "fs";
 import zlib from "zlib";
 
+import * as CurveUtil from "@iosevka/geometry/curve-util";
 import { encode, decode } from "@msgpack/msgpack";
 
-const Edition = 29;
+const Edition = 31;
 const MAX_AGE = 16;
 class GfEntry {
 	constructor(age, value) {
@@ -23,7 +24,8 @@ class Cache {
 		this.historyAgeKeys = rep.ageKeys.slice(0, MAX_AGE);
 		const ageKeySet = new Set(this.historyAgeKeys);
 		for (const [k, e] of Object.entries(rep.gf)) {
-			if (ageKeySet.has(e.age)) this.gf.set(k, new GfEntry(e.age, e.value));
+			if (ageKeySet.has(e.age))
+				this.gf.set(k, new GfEntry(e.age, CurveUtil.repToShape(e.value)));
 		}
 	}
 	toRep(version, diffOnly) {

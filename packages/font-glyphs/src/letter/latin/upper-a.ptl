@@ -3,6 +3,7 @@ $$include '../../meta/macros.ptl'
 import [mix fallback SuffixCfg] from "@iosevka/util"
 import [MathSansSerif] from "@iosevka/glyph/relation"
 import [maskBits bitOr] from "@iosevka/util/mask-bit"
+import [Seg] from "@iosevka/geometry/segment"
 
 glyph-module
 
@@ -12,7 +13,7 @@ glyph-block Letter-Latin-Upper-A : begin
 	glyph-block-import Mark-Shared-Metrics : markHalfStroke
 	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateOgonekComposition
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
-	glyph-block-import Letter-Latin-V : VShapeOutline VShape
+	glyph-block-import Letter-Latin-V : VShapeOutline VShape VCornerHalfWidth
 
 	define SLAB-NONE    0
 	define SLAB-TOP     1
@@ -24,7 +25,10 @@ glyph-block Letter-Latin-Upper-A : begin
 		include : VShapeOutline df fBarStraight top sw
 		include : FlipAround (df.width / 2) (top / 2)
 
-	define [ABarPosition fBaseSlabs top] : mix [if fBaseSlabs Stroke 0] top (XH / 2 / CAP)
+	glyph-block-export ABarPosition
+	define [ABarPosition slabKind top] : begin
+		local fBaseSlabs : maskBits slabKind : bitOr SLAB-LEFT SLAB-RIGHT
+		return : mix [if fBaseSlabs Stroke 0] top (XH / 2 / CAP)
 
 	glyph-block-export AConfig
 	define AConfig : SuffixCfg.weave
@@ -45,15 +49,53 @@ glyph-block Letter-Latin-Upper-A : begin
 		if [maskBits slabKind SLAB-TOP] : include : intersection [MaskLeft df.middle]
 			if [maskBits slabKind : bitOr SLAB-LEFT SLAB-RIGHT]
 			: then : HSerif.lt df.middle top (MidJutSide + [HSwToV : 0.25 * sw]) sf.swSerif
-			: else : HSerif.lt df.middle top [mix MidJutSide LongJut 0.5]          sf.swSerif
+			: else : HSerif.lt df.middle top [mix MidJutSide LongJut 0.5]        sf.swSerif
+
+	glyph-block-export ABottomRightRemoved
+	define [ABottomRightRemoved] : with-params [df fStraightBar slabKind top sw] : new-glyph : glyph-proc
+		define yBar : ABarPosition slabKind top
+		include : VShape df fStraightBar top sw
+		eject-contour 'strokeDown'
+		include : FlipAround df.middle (top / 2)
+
+		local rightStrokeKnots : begin
+			local s : Seg (df.middle + VCornerHalfWidth * sw / Stroke) top df.rightSB (yBar - sw)
+			list
+				s.z (-1) flat
+				s.z 0    flat
+				s.zz 0.55 [StrokeWidthBlend 0.48 0.45] [if fStraightBar curl g4]
+				s.z 1 straight.down.end
+
+		include : intersection
+			MaskBelow top
+			MaskAbove (yBar - sw)
+			dispiro [widths.rhs sw] rightStrokeKnots
+
+		include : tagged 'crossBar'
+			intersection
+				HBar.t 0 df.width yBar sw
+				union
+					AMaskShape df fStraightBar top sw
+					intersection
+						MaskRight df.middle
+						MaskAbove (yBar - sw)
+						spiro-outline rightStrokeKnots
+							corner df.rightSB 0
+							corner 0 0
+							corner 0 top
+
+		include : ASerifs df top sw slabKind
+		eject-contour 'serifRB'
+
+		return : yBar - sw
 
 	glyph-block-export ALetterShape
 	define [ALetterShape] : with-params [df fStraightBar slabKind top sw] : new-glyph : glyph-proc
 		include : VShape df fStraightBar top sw
 		include : FlipAround df.middle (top / 2)
-		define yBar : ABarPosition [maskBits slabKind : bitOr SLAB-LEFT SLAB-RIGHT] top
+		define yBar : ABarPosition slabKind top
 		include : tagged 'crossBar'
-			intersection [HBar.t 0 df.width yBar] [AMaskShape df fStraightBar top sw]
+			intersection [HBar.t 0 df.width yBar sw] [AMaskShape df fStraightBar top sw]
 		include : ASerifs df top sw slabKind
 
 	glyph-block-export LambdaShape
@@ -78,7 +120,7 @@ glyph-block Letter-Latin-Upper-A : begin
 				slabKind -- slabKind
 
 			if fOverlays : begin
-				define yBar : ABarPosition [maskBits slabKind : bitOr SLAB-LEFT SLAB-RIGHT] top
+				define yBar : ABarPosition slabKind top
 				eject-contour 'crossBar'
 				include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] (yBar - HalfStroke + 0.5 * OverlayStroke)
 				include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix yBar top 0.25]
