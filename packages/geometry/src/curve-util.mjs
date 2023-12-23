@@ -67,7 +67,6 @@ function convertContourToArcs(contour) {
 	return newContour;
 }
 
-export const SPIRO_PRECISION = 1 / 2;
 export const OCCURRENT_PRECISION = 1 / 16;
 export const GEOMETRY_PRECISION = 1 / 4;
 export const BOOLE_RESOLUTION = 0x4000;

@@ -6,6 +6,7 @@ import * as TypoGeom from "typo-geom";
 
 import * as CurveUtil from "./curve-util.mjs";
 import { Point } from "./point.mjs";
+import { QuadifySink } from "./quadify.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
 import { Transform } from "./transform.mjs";
 
@@ -15,6 +16,9 @@ export class GeometryBase {
 	}
 	asReferences() {
 		throw new Error("Unimplemented");
+	}
+	producesSimpleContours() {
+		return false;
 	}
 	getDependencies() {
 		throw new Error("Unimplemented");
@@ -36,19 +40,15 @@ export class GeometryBase {
 	}
 }
 
-export class ContourGeometry extends GeometryBase {
-	constructor(points) {
+export class InvalidGeometry extends GeometryBase {}
+
+export class ContourSetGeometry extends GeometryBase {
+	constructor(contours) {
 		super();
-		this.m_points = [];
-		for (const z of points) {
-			this.m_points.push(Point.from(z.type, z));
-		}
+		this.m_contours = contours;
 	}
 	asContours() {
-		if (this.isEmpty()) return [];
-		let c1 = [];
-		for (const z of this.m_points) c1.push(Point.from(z.type, z));
-		return [c1];
+		return this.m_contours;
 	}
 	asReferences() {
 		return null;
@@ -60,16 +60,19 @@ export class ContourGeometry extends GeometryBase {
 		return this;
 	}
 	isEmpty() {
-		return !this.m_points.length;
+		return !this.m_contours.length;
 	}
 	measureComplexity() {
-		for (const z of this.m_points) {
+		for (const z of this.m_contours) {
 			if (!isFinite(z.x) || !isFinite(z.y)) return 0xffff;
 		}
-		return this.m_points.length;
+		return this.m_contours.length;
 	}
 	toShapeStringOrNull() {
-		return Format.struct(`ContourGeometry`, Format.list(this.m_points.map(Format.typedPoint)));
+		return Format.struct(
+			`ContourSetGeometry`,
+			Format.list(this.m_contours.map(c => Format.list(c.map(Format.typedPoint))))
+		);
 	}
 }
 
@@ -87,7 +90,12 @@ export class SpiroGeometry extends GeometryBase {
 	asContours() {
 		if (this.m_cachedContours) return this.m_cachedContours;
 		const s = new CurveUtil.BezToContoursSink(this.m_gizmo);
-		SpiroJs.spiroToBezierOnContext(this.m_knots, this.m_closed, s, CurveUtil.SPIRO_PRECISION);
+		SpiroJs.spiroToBezierOnContext(
+			this.m_knots,
+			this.m_closed,
+			s,
+			CurveUtil.GEOMETRY_PRECISION
+		);
 		this.m_cachedContours = s.contours;
 		return this.m_cachedContours;
 	}
@@ -217,6 +225,9 @@ export class ReferenceGeometry extends GeometryBase {
 		if (this.isEmpty()) return [];
 		return [{ glyph: this.m_glyph, x: this.m_x, y: this.m_y }];
 	}
+	producesSimpleContours() {
+		return this.unwrap().producesSimpleContours();
+	}
 	getDependencies() {
 		return [this.m_glyph];
 	}
@@ -252,6 +263,9 @@ export class TaggedGeometry extends GeometryBase {
 	}
 	asReferences() {
 		return this.m_geom.asReferences();
+	}
+	producesSimpleContours() {
+		return this.m_geom.producesSimpleContours();
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -297,6 +311,9 @@ export class TransformedGeometry extends GeometryBase {
 		for (const { glyph, x, y } of rs)
 			result.push({ glyph, x: x + this.m_transform.x, y: y + this.m_transform.y });
 		return result;
+	}
+	producesSimpleContours() {
+		return this.m_geom.producesSimpleContours();
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -349,6 +366,9 @@ export class RadicalGeometry extends GeometryBase {
 	}
 	asReferences() {
 		return null;
+	}
+	producesSimpleContours() {
+		return this.m_geom.producesSimpleContours();
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -405,6 +425,11 @@ export class CombineGeometry extends GeometryBase {
 			}
 		}
 		return results;
+	}
+	producesSimpleContours() {
+		if (this.m_parts.length === 0) return true;
+		if (this.m_parts.length > 1) return false;
+		return this.m_parts[0].producesSimpleContours();
 	}
 	getDependencies() {
 		let results = [];
@@ -468,21 +493,43 @@ export class BooleanGeometry extends GeometryBase {
 	}
 	asContoursImpl() {
 		if (this.m_operands.length === 0) return [];
-		let arcs = CurveUtil.convertShapeToArcs(this.m_operands[0].asContours());
-		for (let j = 1; j < this.m_operands.length; j++) {
-			arcs = TypoGeom.Boolean.combine(
-				this.m_operator,
-				arcs,
-				CurveUtil.convertShapeToArcs(this.m_operands[j].asContours()),
-				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				CurveUtil.BOOLE_RESOLUTION
-			);
-		}
+
+		const stack = [];
+		this.asOpStackImpl(stack);
+		const arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
 		const ctx = new CurveUtil.BezToContoursSink();
 		TypoGeom.ShapeConv.transferBezArcShape(arcs, ctx);
 		return ctx.contours;
 	}
+	asOpStackImpl(sink) {
+		if (this.m_operands.length === 0) {
+			sink.push({
+				type: "operand",
+				fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+				shape: []
+			});
+			return;
+		}
+
+		for (const [i, operand] of this.m_operands.entries()) {
+			// Push operand
+			if (operand instanceof BooleanGeometry) {
+				operand.asOpStackImpl(sink);
+			} else {
+				sink.push({
+					type: "operand",
+					fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+					shape: CurveUtil.convertShapeToArcs(operand.asContours())
+				});
+			}
+			// Push operator if i > 0
+			if (i > 0) sink.push({ type: "operator", operator: this.m_operator });
+		}
+	}
+	producesSimpleContours() {
+		return this.m_operands.length > 1;
+	}
+
 	asReferences() {
 		return null;
 	}
@@ -531,6 +578,58 @@ export class BooleanGeometry extends GeometryBase {
 	}
 }
 
+// This special geometry type is used in the finalization phase to create TTF contours.
+export class SimplifyGeometry extends GeometryBase {
+	constructor(g) {
+		super();
+		this.m_geom = g;
+	}
+	asContours() {
+		// Produce simplified arcs
+		let arcs = CurveUtil.convertShapeToArcs(this.m_geom.asContours());
+		if (!this.m_geom.producesSimpleContours()) {
+			arcs = TypoGeom.Boolean.removeOverlap(
+				arcs,
+				TypoGeom.Boolean.PolyFillType.pftNonZero,
+				CurveUtil.BOOLE_RESOLUTION
+			);
+		}
+
+		// Convert to TT curves
+		const sink = new QuadifySink();
+		TypoGeom.ShapeConv.transferGenericShape(
+			TypoGeom.Fairize.fairizeBezierShape(arcs),
+			sink,
+			CurveUtil.GEOMETRY_PRECISION
+		);
+		return sink.contours;
+	}
+	asReferences() {
+		return null;
+	}
+	getDependencies() {
+		return this.m_geom.getDependencies();
+	}
+	unlinkReferences() {
+		return new SimplifyGeometry(this.m_geom.unlinkReferences());
+	}
+	filterTag(fn) {
+		return new SimplifyGeometry(this.m_geom.filterTag(fn));
+	}
+	isEmpty() {
+		return this.m_geom.isEmpty();
+	}
+	measureComplexity() {
+		return this.m_geom.measureComplexity();
+	}
+	toShapeStringOrNull() {
+		const sTarget = this.m_geom.unlinkReferences().toShapeStringOrNull();
+		if (!sTarget) return null;
+		return `SimplifyGeometry{${sTarget}}`;
+	}
+}
+
+// Utility functions
 export function combineWith(a, b) {
 	if (a instanceof CombineGeometry) {
 		return a.with(b);
