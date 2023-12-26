@@ -10,7 +10,8 @@ glyph-block Letter-Latin-Lower-P : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors LeaningAnchor
 	glyph-block-import Letter-Shared : CreateAccentedComposition
-	glyph-block-import Letter-Shared-Shapes : OBarLeft DToothlessRise DMBlend
+	glyph-block-import Letter-Shared-Shapes : OBarLeft LetterBarOverlay
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
 	glyph-block-import Letter-Shared-Shapes : TopHook PalatalHook SerifFrame
 
 
@@ -55,12 +56,12 @@ glyph-block Letter-Latin-Lower-P : begin
 			earlessCorner        EarlessCornerBody
 			earlessRounded       EarlessRoundedBody
 		object # serifs
-			serifless           { no-shape     false }
-			motionSerifed       { MotionSerif  false }
-			bottomSerifed       { BottomSerif  true  }
-			serifed             { FullSerifs   true  }
+			serifless           { no-shape     false false }
+			motionSerifed       { MotionSerif  true  false }
+			bottomSerifed       { BottomSerif  false true  }
+			serifed             { FullSerifs   true  true  }
 
-	foreach { suffix { Body {Serifs doBS} }} [Object.entries PConfig] : do
+	foreach { suffix { Body {Serifs doTS doBS} }} [Object.entries PConfig] : do
 		local yOverlay : mix 0 (Descender + [if doBS Stroke 0]) 0.5
 		local df : DivFrame 1
 
@@ -72,6 +73,13 @@ glyph-block Letter-Latin-Lower-P : begin
 			set-base-anchor 'overlayOnExtension' (SB + [HSwToV : 0.5 * Stroke]) yOverlay
 			set-base-anchor 'strike' Middle (XH / 2)
 
+		create-glyph "pStrokeBot.\(suffix)" : glyph-proc
+			include [refer-glyph "p.\(suffix)"] AS_BASE ALSO_METRICS
+			include : LetterBarOverlay.l.in
+				x   -- SB
+				bot -- (Descender + [if doBS Stroke 0])
+				top -- 0
+
 		create-glyph "thorn.\(suffix)" : glyph-proc
 			include : MarkSet.bp
 			include : SmallThornEaredBody
@@ -80,6 +88,17 @@ glyph-block Letter-Latin-Lower-P : begin
 			include : LeaningAnchor.Below.VBar.l SB
 			set-base-anchor 'overlayOnExtension' (SB + [HSwToV : 0.5 * Stroke]) yOverlay
 			set-base-anchor 'strike' Middle (XH / 2)
+
+		create-glyph "thornStroke.\(suffix)" : glyph-proc
+			include [refer-glyph "thorn.\(suffix)"] AS_BASE ALSO_METRICS
+			include : LetterBarOverlay.l.in SB XH (Ascender - [if doTS Stroke 0])
+
+		create-glyph "thornStrokeBot.\(suffix)" : glyph-proc
+			include [refer-glyph "thorn.\(suffix)"] AS_BASE ALSO_METRICS
+			include : LetterBarOverlay.l.in
+				x   -- SB
+				bot -- (Descender + [if doBS Stroke 0])
+				top -- 0
 
 		create-glyph "pPalatalHook.\(suffix)" : glyph-proc
 			include [refer-glyph "p.\(suffix)"] AS_BASE ALSO_METRICS
@@ -99,10 +118,16 @@ glyph-block Letter-Latin-Lower-P : begin
 	link-reduced-variant 'p/sansSerif' 'p' MathSansSerif
 	link-reduced-variant 'p/hookTopBase' 'p'
 	select-variant 'cyrl/er' 0x440 (shapeFrom -- 'p')
-	select-variant "pPalatalHook" 0x1D88 (follow -- 'p')
+	select-variant 'pPalatalHook' 0x1D88 (follow -- 'p')
+
+	CreateAccentedComposition 'pStroke' 0x1D7D 'p' 'hStrike'
+	select-variant 'pStrokeBot' 0xA751 (follow -- 'p')
 
 	select-variant 'thorn' 0xFE
 	alias 'grek/sho' 0x3F8 'thorn.earedSerifless'
+
+	select-variant 'thornStroke' 0xA765 (follow -- 'thorn')
+	select-variant 'thornStrokeBot' 0xA767 (follow -- 'thorn')
 
 	CreateAccentedComposition 'pTildeOver' 0x1D71 'p' 'tildeOverOnExension'
 
