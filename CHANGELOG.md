@@ -1,5 +1,19 @@
 ## Modifications since last major version
 
+### 28.0.3
+
+* Add characters:
+  - COMBINING SUSPENSION MARK (`U+1DC3`).
+  - FROWN (`U+2322`).
+  - SMILE (`U+2323`).
+  - CIRCLE WITH HORIZONTAL BAR (`U+29B5`).
+  - LATIN CAPITAL LETTER P WITH STROKE THROUGH DESCENDER (`U+A750`) (#1797).
+  - LATIN SMALL LETTER P WITH STROKE THROUGH DESCENDER (`U+A751`) (#1797).
+* Remove tailless variants for Latin Iota (`U+0196`, `U+0269`) and Cyrillic Iota (`U+A646`, `U+A647`).
+* Fix slash ligations when `frac` feature is enabled (#2130).
+* Fix leaning marks of turned `r` (#2133).
+
+
 ### 28.0.2
 
 * Add characters:
