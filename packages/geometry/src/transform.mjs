@@ -55,6 +55,10 @@ export class Transform {
 		this.unapplyToSink(pt, sink);
 		return sink;
 	}
+	unapplyIfPresent(pt) {
+		if (pt) return this.unapply(pt);
+		else return null;
+	}
 	inverse() {
 		const denom = this.xx * this.yy - this.xy * this.yx;
 		return new Transform(

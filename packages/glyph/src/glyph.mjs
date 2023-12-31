@@ -18,6 +18,7 @@ export class Glyph {
 		this.gizmo = Transform.Id();
 		// Metrics
 		this.advanceWidth = 500;
+		this.divFrameParams = null;
 		this.markAnchors = {};
 		this.baseAnchors = {};
 		// Tracking

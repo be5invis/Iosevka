@@ -24,6 +24,38 @@ glyph-block Mark-Adjustment : begin
 			local a : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.leaningAbove
 			if (a.y < y) : set-base-anchor 'leaningAbove' a.x y
 
+	glyph-block-export TurnMarks
+	define [TurnMarks cx cy _df] : glyph-proc
+		# Get position of existing marks, prior to flipping
+		local bAbove        : currentGlyph.gizmo.unapplyIfPresent currentGlyph.baseAnchors.above
+		local bBelow        : currentGlyph.gizmo.unapplyIfPresent currentGlyph.baseAnchors.below
+		local bLeaningAbove : currentGlyph.gizmo.unapplyIfPresent currentGlyph.baseAnchors.leaningAbove
+		local bLeaningBelow : currentGlyph.gizmo.unapplyIfPresent currentGlyph.baseAnchors.leaningBelow
+
+		# If there are no marks, or if there are no marks above or below, do nothing
+		if (!bAbove || !bBelow) : return nothing
+
+		# Apply the new mark set, with flipped dimensions
+		local df : _df || [if currentGlyph.divFrameParams
+			[DivFrame.fromParams currentGlyph.divFrameParams]
+			[DivFrame (currentGlyph.advanceWidth / Width)]]
+		local topAfterFlip : mix cy bBelow.y (-1)
+		local botAfterFlip : mix cy bAbove.y (-1)
+		local markSet : df.markSet.OfZone { .top topAfterFlip .bot botAfterFlip }
+		include : markSet
+
+		# Set the new marks' X coordinates to the flipped X coordinates of the old marks
+		if (bBelow && currentGlyph.baseAnchors.above)
+			set-base-anchor 'above' [mix cx bBelow.x (-1)] currentGlyph.baseAnchors.above.y
+		if (bAbove && currentGlyph.baseAnchors.below)
+			set-base-anchor 'below' [mix cx bAbove.x (-1)] currentGlyph.baseAnchors.below.y
+
+		# Handle leaning marks
+		if (bLeaningBelow && currentGlyph.baseAnchors.above)
+			set-base-anchor 'leaningAbove' [mix cx bLeaningBelow.x (-1)] currentGlyph.baseAnchors.above.y
+		if (bLeaningAbove && currentGlyph.baseAnchors.below)
+			set-base-anchor 'leaningBelow' [mix cx bLeaningAbove.x (-1)] currentGlyph.baseAnchors.below.y
+
 	glyph-block-export LeaningAnchor
 	define LeaningAnchor : namespace
 		define [SetProcImpl mkCenter mkLeaning x] : glyph-proc
