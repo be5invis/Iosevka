@@ -14,7 +14,7 @@ export function finalizeGlyphs(cache, para, glyphStore) {
 function regulateGlyphStore(cache, skew, glyphStore) {
 	const compositeMemo = new Map();
 	for (const g of glyphStore.glyphs()) {
-		if (g.geometry.isEmpty()) continue;
+		if (!(g.geometry.measureComplexity() & Geom.CPLX_NON_EMPTY)) continue;
 		if (!regulateCompositeGlyph(glyphStore, compositeMemo, g)) {
 			g.geometry = g.geometry.unlinkReferences();
 		}

@@ -80,6 +80,9 @@ export class Transform {
 	static isIdentity(tfm) {
 		return this.isTranslate(tfm) && tfm.x === 0 && tfm.y === 0;
 	}
+	static isPositive(tfm) {
+		return tfm.xx * tfm.yy - tfm.xy * tfm.yx > 0;
+	}
 	static Combine(...tfms) {
 		let z00 = new Vec2(0, 0);
 		let z10 = new Vec2(1, 0);
