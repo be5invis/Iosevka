@@ -9,6 +9,7 @@ glyph-module
 glyph-block Letter-Shared : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : TurnMarks
 
 	glyph-block-export CreateAccentedComposition
 	define [CreateAccentedComposition dst u srcGid accentGid]
@@ -80,6 +81,14 @@ glyph-block Letter-Shared : begin
 	define [SetGrekUpperTonos kern] : glyph-proc
 		set-base-anchor 'grekUpperTonos' kern (CAP - 0.75 * AccentStackOffset)
 
+	glyph-block-export CreateTurnedLetter
+	define [CreateTurnedLetter dstGid unicode srcGid _cx _cy _df] : begin
+		derive-glyphs dstGid unicode srcGid : lambda [src gr] : glyph-proc
+			include [refer-glyph src] AS_BASE ALSO_METRICS
+			define cx : if (_cx <@ Function) [_cx.call currentGlyph] _cx
+			define cy : if (_cy <@ Function) [_cy.call currentGlyph] _cy
+			include : FlipAround cx cy
+			include : TurnMarks cx cy _df
 
 glyph-block Letter-Blackboard : begin
 	glyph-block-import CommonShapes

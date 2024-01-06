@@ -4,7 +4,7 @@ import zlib from "zlib";
 import * as CurveUtil from "@iosevka/geometry/curve-util";
 import { encode, decode } from "@msgpack/msgpack";
 
-const Edition = 31;
+const Edition = 32;
 const MAX_AGE = 16;
 class GfEntry {
 	constructor(age, value) {
