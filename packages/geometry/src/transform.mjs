@@ -55,6 +55,10 @@ export class Transform {
 		this.unapplyToSink(pt, sink);
 		return sink;
 	}
+	unapplyIfPresent(pt) {
+		if (pt) return this.unapply(pt);
+		else return null;
+	}
 	inverse() {
 		const denom = this.xx * this.yy - this.xy * this.yx;
 		return new Transform(
@@ -75,6 +79,9 @@ export class Transform {
 	}
 	static isIdentity(tfm) {
 		return this.isTranslate(tfm) && tfm.x === 0 && tfm.y === 0;
+	}
+	static isPositive(tfm) {
+		return tfm.xx * tfm.yy - tfm.xy * tfm.yx > 0;
 	}
 	static Combine(...tfms) {
 		let z00 = new Vec2(0, 0);

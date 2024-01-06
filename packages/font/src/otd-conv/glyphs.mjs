@@ -47,7 +47,7 @@ class MappedGlyphStore {
 		g.horizontal = { start: 0, end: source.advanceWidth };
 
 		// Fill Geometry
-		if (!source.geometry.isEmpty()) {
+		if (source.geometry.measureComplexity() & Geom.CPLX_NON_EMPTY) {
 			const rs = source.geometry.asReferences();
 			if (rs) {
 				this.fillReferences(g, rs);

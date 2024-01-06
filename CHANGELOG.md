@@ -1,5 +1,15 @@
 ## Modifications since last major version
 
+### 28.0.4
+
+* Fix leaning marks of turned capital F/L (#2137).
+* Fix overlay bar placement of Z with Hook and Z with Swash Tail (#2141).
+* Fix attachment of descender parts of Cyrillic Lower Ha/X under `x` = `cursive` (#2142).
+* Make the Eng part in LATIN SMALL LETTER FENG DIGRAPH always connected to the f part (#2143).
+* Fix top bar shape in CYRILLIC CAPITAL LETTER DJE (#2145).
+* Fix leaning marks placement for reversed k/F/P (#2150).
+
+
 ### 28.0.3
 
 * Add characters:

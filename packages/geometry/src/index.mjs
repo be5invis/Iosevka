@@ -10,15 +10,17 @@ import { QuadifySink } from "./quadify.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
 import { Transform } from "./transform.mjs";
 
+export const CPLX_NON_EMPTY = 0x01; // A geometry tree that is not empty
+export const CPLX_NON_SIMPLE = 0x02; // A geometry tree that contains non-simple contours
+export const CPLX_BROKEN = 0x04; // A geometry tree that contains broken contours, like having points with NaN coordinates
+export const CPLX_UNKNOWN = 0xff;
+
 export class GeometryBase {
 	asContours() {
 		throw new Error("Unimplemented");
 	}
 	asReferences() {
 		throw new Error("Unimplemented");
-	}
-	producesSimpleContours() {
-		return false;
 	}
 	getDependencies() {
 		throw new Error("Unimplemented");
@@ -29,11 +31,8 @@ export class GeometryBase {
 	filterTag(fn) {
 		return this;
 	}
-	isEmpty() {
-		return true;
-	}
 	measureComplexity() {
-		return 0;
+		return CPLX_UNKNOWN;
 	}
 	toShapeStringOrNull() {
 		return null;
@@ -59,14 +58,14 @@ export class ContourSetGeometry extends GeometryBase {
 	filterTag(fn) {
 		return this;
 	}
-	isEmpty() {
-		return !this.m_contours.length;
-	}
 	measureComplexity() {
-		for (const z of this.m_contours) {
-			if (!isFinite(z.x) || !isFinite(z.y)) return 0xffff;
+		let cp = this.m_contours.length > 0 ? CPLX_NON_EMPTY : 0;
+		for (const c of this.m_contours) {
+			for (const z of c) {
+				if (!isFinite(z.x) || !isFinite(z.y)) cp |= CPLX_BROKEN;
+			}
 		}
-		return this.m_contours.length;
+		return cp;
 	}
 	toShapeStringOrNull() {
 		return Format.struct(
@@ -108,14 +107,12 @@ export class SpiroGeometry extends GeometryBase {
 	filterTag(fn) {
 		return this;
 	}
-	isEmpty() {
-		return !this.m_knots.length;
-	}
 	measureComplexity() {
+		let cplx = CPLX_NON_EMPTY | CPLX_NON_SIMPLE;
 		for (const z of this.m_knots) {
-			if (!isFinite(z.x) || !isFinite(z.y)) return 0xffff;
+			if (!isFinite(z.x) || !isFinite(z.y)) cplx |= CPLX_BROKEN;
 		}
-		return this.m_knots.length;
+		return cplx;
 	}
 	toShapeStringOrNull() {
 		return Format.struct(
@@ -183,14 +180,12 @@ export class DiSpiroGeometry extends GeometryBase {
 	filterTag(fn) {
 		return this;
 	}
-	isEmpty() {
-		return !this.m_biKnots.length;
-	}
 	measureComplexity() {
+		let cplx = CPLX_NON_EMPTY | CPLX_NON_SIMPLE;
 		for (const z of this.m_biKnots) {
-			if (!isFinite(z.x) || !isFinite(z.y)) return 0xffff;
+			if (!isFinite(z.x) || !isFinite(z.y)) cplx |= CPLX_BROKEN;
 		}
-		return this.m_biKnots.length;
+		return cplx;
 	}
 	toShapeStringOrNull() {
 		return Format.struct(
@@ -218,26 +213,16 @@ export class ReferenceGeometry extends GeometryBase {
 		);
 	}
 	asContours() {
-		if (this.isEmpty()) return [];
 		return this.unwrap().asContours();
 	}
 	asReferences() {
-		if (this.isEmpty()) return [];
 		return [{ glyph: this.m_glyph, x: this.m_x, y: this.m_y }];
-	}
-	producesSimpleContours() {
-		return this.unwrap().producesSimpleContours();
 	}
 	getDependencies() {
 		return [this.m_glyph];
 	}
 	filterTag(fn) {
-		if (this.isEmpty()) return null;
 		return this.unwrap().filterTag(fn);
-	}
-	isEmpty() {
-		if (!this.m_glyph || !this.m_glyph.geometry) return true;
-		return this.m_glyph.geometry.isEmpty();
 	}
 	measureComplexity() {
 		return this.m_glyph.geometry.measureComplexity();
@@ -264,18 +249,12 @@ export class TaggedGeometry extends GeometryBase {
 	asReferences() {
 		return this.m_geom.asReferences();
 	}
-	producesSimpleContours() {
-		return this.m_geom.producesSimpleContours();
-	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
 	}
 	filterTag(fn) {
 		if (!fn(this.m_tag)) return null;
 		else return new TaggedGeometry(this.m_geom.filterTag(fn), this.m_tag);
-	}
-	isEmpty() {
-		return this.m_geom.isEmpty();
 	}
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
@@ -312,9 +291,6 @@ export class TransformedGeometry extends GeometryBase {
 			result.push({ glyph, x: x + this.m_transform.x, y: y + this.m_transform.y });
 		return result;
 	}
-	producesSimpleContours() {
-		return this.m_geom.producesSimpleContours();
-	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
 	}
@@ -323,11 +299,11 @@ export class TransformedGeometry extends GeometryBase {
 		if (!e) return null;
 		return new TransformedGeometry(e, this.m_transform);
 	}
-	isEmpty() {
-		return this.m_geom.isEmpty();
-	}
 	measureComplexity() {
-		return this.m_geom.measureComplexity();
+		return (
+			(Transform.isPositive(this.m_transform) ? 0 : CPLX_NON_SIMPLE) |
+			this.m_geom.measureComplexity()
+		);
 	}
 	unlinkReferences() {
 		const unwrapped = this.m_geom.unlinkReferences();
@@ -367,9 +343,6 @@ export class RadicalGeometry extends GeometryBase {
 	asReferences() {
 		return null;
 	}
-	producesSimpleContours() {
-		return this.m_geom.producesSimpleContours();
-	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
 	}
@@ -377,9 +350,6 @@ export class RadicalGeometry extends GeometryBase {
 		const e = this.m_geom.filterTag(fn);
 		if (!e) return null;
 		return new RadicalGeometry(e);
-	}
-	isEmpty() {
-		return this.m_geom.isEmpty();
 	}
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
@@ -426,11 +396,6 @@ export class CombineGeometry extends GeometryBase {
 		}
 		return results;
 	}
-	producesSimpleContours() {
-		if (this.m_parts.length === 0) return true;
-		if (this.m_parts.length > 1) return false;
-		return this.m_parts[0].producesSimpleContours();
-	}
 	getDependencies() {
 		let results = [];
 		for (const part of this.m_parts) {
@@ -448,13 +413,10 @@ export class CombineGeometry extends GeometryBase {
 		}
 		return new CombineGeometry(filtered);
 	}
-	isEmpty() {
-		for (const part of this.m_parts) if (!part.isEmpty()) return false;
-		return true;
-	}
 	measureComplexity() {
 		let s = 0;
-		for (const part of this.m_parts) s += part.measureComplexity();
+		for (const part of this.m_parts) s |= part.measureComplexity();
+		return s;
 	}
 	unlinkReferences() {
 		let parts = [];
@@ -526,10 +488,6 @@ export class BooleanGeometry extends GeometryBase {
 			if (i > 0) sink.push({ type: "operator", operator: this.m_operator });
 		}
 	}
-	producesSimpleContours() {
-		return this.m_operands.length > 1;
-	}
-
 	asReferences() {
 		return null;
 	}
@@ -550,13 +508,10 @@ export class BooleanGeometry extends GeometryBase {
 		}
 		return new BooleanGeometry(this.m_operator, filtered);
 	}
-	isEmpty() {
-		for (const operand of this.m_operands) if (!operand.isEmpty()) return false;
-		return true;
-	}
 	measureComplexity() {
-		let s = 0;
-		for (const operand of this.m_operands) s += operand.measureComplexity();
+		let s = CPLX_NON_SIMPLE;
+		for (const operand of this.m_operands) s |= operand.measureComplexity();
+		return s;
 	}
 	unlinkReferences() {
 		if (this.m_operands.length === 0) return new CombineGeometry([]);
@@ -587,7 +542,7 @@ export class SimplifyGeometry extends GeometryBase {
 	asContours() {
 		// Produce simplified arcs
 		let arcs = CurveUtil.convertShapeToArcs(this.m_geom.asContours());
-		if (!this.m_geom.producesSimpleContours()) {
+		if (this.m_geom.measureComplexity() & CPLX_NON_SIMPLE) {
 			arcs = TypoGeom.Boolean.removeOverlap(
 				arcs,
 				TypoGeom.Boolean.PolyFillType.pftNonZero,
@@ -615,9 +570,6 @@ export class SimplifyGeometry extends GeometryBase {
 	}
 	filterTag(fn) {
 		return new SimplifyGeometry(this.m_geom.filterTag(fn));
-	}
-	isEmpty() {
-		return this.m_geom.isEmpty();
 	}
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
