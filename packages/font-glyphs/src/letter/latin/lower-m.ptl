@@ -315,19 +315,20 @@ glyph-block Letter-Latin-Lower-M : begin
 	select-variant 'mCrossedTail' 0xAB3A (follow -- 'meng')
 
 	define TurnMConfig : SuffixCfg.weave
-		object
-			"toothed"            { SmallMArches                        0 0 }
-			"tailed"             { SmallMArches                        0 1 }
-			"toothlessCorner"    { EarlessCornerDoubleArchSmallMShape  1 0 }
-			"toothlessRounded"   { EarlessRoundedDoubleArchSmallMShape 1 0 }
-		object
-			"serifless"          { no-shape        0 }
-			"serifed"            { FullTurnMSerifs 1 }
-			"topLeftSerifed"     { RbSerifs        0 } # The name-shaping mapping is swapped by design
-			"bottomRightSerifed" { LtSerifs        1 } # The name-shaping mapping is swapped by design
-			"motionSerifed"      { LtRbSerifs      1 }
+		object # body
+			toothed            { SmallMArches                        0 0 }
+			tailed             { SmallMArches                        0 1 }
+			toothlessCorner    { EarlessCornerDoubleArchSmallMShape  1 0 }
+			toothlessRounded   { EarlessRoundedDoubleArchSmallMShape 1 0 }
+		function [body] : object # serifs
+			serifless          { no-shape         }
+			serifed            { FullTurnMSerifs  }
+			bottomRightSerifed { LtSerifs         } # The name-shaping mapping is swapped by design
+			motionSerifed : match body
+				[Just 'toothed'] { LtRbSerifs }
+				__               { RbSerifs   } # The name-shaping mapping is swapped by design
 
-	foreach { suffix { {Body toothless tailed} {Serifs doBottomSerif} } } [pairs-of TurnMConfig] : do
+	foreach { suffix { {Body toothless tailed} {Serifs} } } [pairs-of TurnMConfig] : do
 		define [turnMShapeBody df top] : glyph-proc
 			include : Body df top 0 0 0
 			include : Serifs df top 0 0 0 0 toothless
@@ -347,14 +348,14 @@ glyph-block Letter-Latin-Lower-M : begin
 			include : df.markSet.capital
 			include : turnMShapeBody df CAP
 
-		if (!toothless && !tailed) : begin
+		if (!tailed) : begin
 			create-glyph "turnmLeg.\(suffix)" : glyph-proc
 				local df : include : DivFrame para.diversityM 3
 				include : df.markSet.p
 				include : turnMShapeBody df XH
 				eject-contour 'serifLT'
 				include : VBar.r df.rightSB Descender XH df.mvs
-				if doBottomSerif : begin
+				if (Serifs !== no-shape) : begin
 					local sf : SerifFrame.fromDf df XH Descender
 					include sf.rb.fullSide
 				include : LeaningAnchor.Below.VBar.r df.rightSB
@@ -369,12 +370,13 @@ glyph-block Letter-Latin-Lower-M : begin
 				include : turnMShapeBody df (Width - SB)
 				include : Translate 0 (SB / 2)
 
-		create-glyph "cyrl/shcha.italic.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.diversityM 3
-			include : df.markSet.e
-			include : turnMShapeBody df XH
-			eject-contour 'serifLT'
-			include : CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
+		if (!tailed) : begin
+			create-glyph "cyrl/shcha.italic.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.diversityM 3
+				include : df.markSet.e
+				include : turnMShapeBody df XH
+				eject-contour 'serifLT'
+				include : CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
 
 	select-variant 'turnm' 0x26F
 	select-variant 'capitalTurnm' 0x19C (follow -- 'turnm')
