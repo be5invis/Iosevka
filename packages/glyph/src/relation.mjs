@@ -300,6 +300,7 @@ export function createGrDisplaySheet(glyphStore, gid) {
 	displayQueryPairFeatures(glyphStore, gid, "Width", Nwid, Wwid, typographicFeatures);
 	displayQueryPairFeatures(glyphStore, gid, "Number Form", Lnum, Onum, typographicFeatures);
 	displayQuerySingleFeature(glyphStore, gid, "APL Form", AplForm, typographicFeatures);
+	displayQuerySingleFeature(glyphStore, gid, "Slashed Zero", Zero, typographicFeatures);
 
 	// Query selected character variants
 	let charVariantFeatures = [];
