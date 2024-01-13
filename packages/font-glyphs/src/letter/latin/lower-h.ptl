@@ -30,23 +30,6 @@ glyph-block Letter-Latin-Lower-H : begin
 	define [SmallHTopLeftSerifs tailed hookTop] : glyph-proc
 		if [not hookTop] : include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
 
-	define [SmallTurnHSerifs tailed hookTop] : glyph-proc : begin
-		include : SmallTurnHLeftSerifs tailed hookTop
-		if [not tailed] : include : tagged 'serifRB' : HSerif.rb RightSB 0 SideJut
-
-	define [SmallTurnHLeftSerifs tailed hookTop] : glyph-proc : begin
-		include : SmallTurnHTopLeftSerifs tailed hookTop
-		include : tagged 'serifLB' : HSerif.rb (SB + [HSwToV HalfStroke]) 0 Jut
-
-	define [SmallTurnHMotionSerifs tailed hookTop] : glyph-proc
-		include : SmallTurnHTopLeftSerifs tailed hookTop
-		if [not tailed] : include : tagged 'serifRB' : HSerif.rb RightSB 0 SideJut
-
-	define [SmallTurnHTopLeftSerifs tailed hookTop] : glyph-proc
-		if [not hookTop] : include : tagged 'serifLT' : union
-			HSerif.lt (SB + [HSwToV HalfStroke]) Ascender Jut
-			HSerif.rt (SB + [HSwToV HalfStroke]) Ascender MidJutSide
-
 	define [HBar.mOverlay fHasTopSerif] : glyph-proc
 		local barSpaceTop : Ascender - [if fHasTopSerif Stroke 0]
 		local s : Math.min OverlayStroke (0.625 * (barSpaceTop - XH))
@@ -125,7 +108,8 @@ glyph-block Letter-Latin-Lower-H : begin
 	select-variant 'heng' 0xA727
 	select-variant 'cyrl/dje' 0x452 (follow -- 'heng') (shapeFrom -- 'hengStroke')
 
-	select-variant 'cyrl/shha' 0x4BB (shapeFrom -- 'h')
+	alias 'cyrl/shha' 0x4BB 'h'
+	alias 'cyrl/tshe' 0x45B 'hStroke'
 
 	derive-composites 'hPalatalHook' 0xA795 'h/descBase' [PalatalHook.rSideJut RightSB 0]
 	derive-composites 'hDescender' 0x2C68 'h/descBase' [CyrDescender.rSideJut RightSB 0]
@@ -146,54 +130,6 @@ glyph-block Letter-Latin-Lower-H : begin
 		include : MarkSet.bp
 		set-base-anchor 'belowBraceL' ((-Middle) + shift - 0.5 * markExtend) belowMarkMid
 		set-base-anchor 'belowBraceR' ((-Middle) + shift + 0.5 * markExtend) belowMarkMid
-
-	alias 'cyrl/tshe' 0x45B 'hStroke'
-
-	define TurnHConfig : object
-		toothedSerifless     { no-shape                }
-		toothedSerifed       { SmallTurnHSerifs        }
-		toothedMotionSerifed { SmallTurnHMotionSerifs  }
-
-	foreach { suffix { Serifs } } [Object.entries TurnHConfig] : do
-		create-glyph "turnh.\(suffix)" : glyph-proc
-			include : nShoulder
-				left -- (SB + [HSwToV Stroke])
-				right -- RightSB
-				bottom -- 0
-			include : VBar.l SB 0 Ascender
-			include : Serifs false false
-			include : FlipAround Middle (XH / 2)
-			include : MarkSet.p
-			include : LeaningAnchor.Below.VBar.r RightSB
-
-		create-glyph "turnhHookLeft.\(suffix)" : glyph-proc
-			include : nShoulder
-				left -- (SB + [HSwToV Stroke])
-				right -- RightSB
-				bottom -- (TailY + HalfStroke)
-			include : VBar.l SB 0 Ascender
-			include : RetroflexHook.rExt RightSB (TailY + HalfStroke)
-			include : Serifs true false
-			include : FlipAround Middle (XH / 2)
-			include : MarkSet.p
-			include : LeaningAnchor.Below.VBar.r RightSB
-
-		if (Serifs !== SmallTurnHMotionSerifs) : begin
-			create-glyph "turnhHookLeftRTail.\(suffix)" : glyph-proc
-				include : nShoulder
-					left -- (SB + [HSwToV Stroke])
-					right -- RightSB
-					bottom -- (TailY + HalfStroke)
-				include : VBar.l SB 0 XH
-				include : RetroflexHook.rExt RightSB (TailY + HalfStroke)
-				include : Serifs true true
-				include : FlipAround Middle (XH / 2)
-				include : RetroflexHook.rExt RightSB (Descender + TailY + HalfStroke) (yAttach -- 0)
-				include : MarkSet.p
-
-	select-variant 'turnh' 0x265
-	select-variant 'turnhHookLeft' 0x2AE
-	select-variant 'turnhHookLeftRTail' 0x2AF
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/h' 0x1D559 : glyph-proc
