@@ -71,42 +71,55 @@ glyph-block Letter-Greek-Upper-Phi : begin
 	define [MtSerif df y] : tagged 'serifMT' : HSerif.lt df.middle y Jut
 	define [MbSerif df y] : tagged 'serifMB' : HSerif.mb df.middle y Jut
 
-	define [GrekCapitalPhiImpl fFlatTB df] : glyph-proc
-		local y1 : mix [if SLAB Stroke 0] [if SLAB (CAP - Stroke) CAP] 0.125
-		local y2 : mix [if SLAB Stroke 0] [if SLAB (CAP - Stroke) CAP] 0.875
-		include : VarPhiRing fFlatTB df y1 y2
-		include : StraightBar df 0 y1 y2 CAP
+	define CyrlCapitalEfConfig : SuffixCfg.weave
+		object # bowl
+			""         VarPhiRing
+			splitBowl  CyrlEfSplitRing
+		object # serifs
+			serifless  false
+			serifed    true
 
-		if SLAB : begin
-			include : tagged 'serifMT' : HSerif.mt df.middle CAP MidJutSide
-			include : tagged 'serifMB' : HSerif.mb df.middle 0 MidJutSide
+	foreach { suffix { Bowl Serifs } } [Object.entries CyrlCapitalEfConfig] : do
+		define [GrekCapitalPhiImpl fFlatTB df slab] : glyph-proc
+			local y1 : mix [if slab Stroke 0] [if slab (CAP - Stroke) CAP] 0.125
+			local y2 : mix [if slab Stroke 0] [if slab (CAP - Stroke) CAP] 0.875
+			include : Bowl fFlatTB df y1 y2
+			include : StraightBar df 0 y1 y2 CAP
 
-	create-glyph 'grek/Phi' 0x3A6 : glyph-proc
-		local df : include : DivFrame para.diversityM 3
-		include : df.markSet.capital
-		include : GrekCapitalPhiImpl 0 df
+			if slab : begin
+				include : tagged 'serifMT' : HSerif.mt df.middle CAP MidJutSide
+				include : tagged 'serifMB' : HSerif.mb df.middle 0 MidJutSide
 
-	create-glyph 'cyrl/Ef' 0x424 : glyph-proc
-		local df : include : DivFrame para.diversityM 3
-		include : df.markSet.capital
-		include : GrekCapitalPhiImpl 1 df
+		create-glyph "grek/Phi.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : GrekCapitalPhiImpl 0 df Serifs
 
-	create-glyph 'cyrl/Ef.BGR' : glyph-proc
-		local df : include : DivFrame para.diversityM 3
-		include : df.markSet.capital
+		create-glyph "cyrl/Ef.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : GrekCapitalPhiImpl 1 df Serifs
 
-		local top : CAP + LongJut - HalfStroke
-		local bot : 0   - LongJut + HalfStroke
+		create-glyph "cyrl/Ef.BGR.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
 
-		include : ExtendAboveBaseAnchors top
-		include : ExtendBelowBaseAnchors bot
+			local top : CAP + LongJut - HalfStroke
+			local bot : 0   - LongJut + HalfStroke
 
-		include : VarPhiRing 0 df 0 CAP
-		include : StraightBar df bot 0 CAP top
+			include : ExtendAboveBaseAnchors top
+			include : ExtendBelowBaseAnchors bot
 
-		if SLAB : begin
-			include : tagged 'serifMT' : HSerif.mt df.middle top MidJutSide
-			include : tagged 'serifMB' : HSerif.mb df.middle bot MidJutSide
+			include : VarPhiRing 0 df 0 CAP
+			include : StraightBar df bot 0 CAP top
+
+			if Serifs : begin
+				include : tagged 'serifMT' : HSerif.mt df.middle top MidJutSide
+				include : tagged 'serifMB' : HSerif.mb df.middle bot MidJutSide
+
+	select-variant 'grek/Phi' 0x3A6
+	select-variant 'cyrl/Ef' 0x424
+	select-variant 'cyrl/Ef.BGR'
 
 	create-glyph 'grek/varphi' 0x3D5 : glyph-proc
 		local df : include : DivFrame para.diversityM 3
@@ -123,7 +136,7 @@ glyph-block Letter-Greek-Upper-Phi : begin
 			include : tagged 'serifMT' : HSerif.mt df.middle Ascender Jut
 			include : tagged 'serifMB' : HSerif.mb df.middle Descender Jut
 
-	define CyrlEfConfig : SuffixCfg.weave
+	define CyrlLowerEfConfig : SuffixCfg.weave
 		object # bowl
 			""                  VarPhiRing
 			splitBowl           CyrlEfSplitRing
@@ -133,7 +146,7 @@ glyph-block Letter-Greek-Upper-Phi : begin
 			serifed            { StraightBar MtSerif MbSerif }
 			cursive            { CursiveBar  nothing nothing }
 
-	foreach { suffix { Bowl { Bar sMT sMB } } } [Object.entries CyrlEfConfig] : do
+	foreach { suffix { Bowl { Bar sMT sMB } } } [Object.entries CyrlLowerEfConfig] : do
 		create-glyph "cyrl/ef.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 3
 			include : df.markSet.bp
