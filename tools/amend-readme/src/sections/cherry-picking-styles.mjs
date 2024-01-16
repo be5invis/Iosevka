@@ -49,7 +49,8 @@ export default async function processCherryPickingStyles(argv, dirs) {
 
 function formatCv(md, dirs, info) {
 	const INDENT = `    `;
-	md.log(`  - <details><summary>${info.introMD}</summary>`);
+	md.log(`  - ${info.introMD}`);
+	md.log(`${INDENT}<details><summary>${info.alternatives.length} variants</summary>`);
 	const imgWidth = 32 * info.sampleImageCountEm;
 	let sTable = INDENT + "<table>" + "\n";
 	for (const alt of info.alternatives) {

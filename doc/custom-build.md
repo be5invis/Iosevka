@@ -237,21 +237,24 @@ Subsection `variants` is used to configure character variants in the font. Prope
   
   The valid combinations include:
 
-  - <details><summary>Default digit form</summary>
+  - Default digit form
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="348"><img src="../images/cv-digit-form-lining.light.svg#gh-light-mode-only" width=320/><img src="../images/cv-digit-form-lining.dark.svg#gh-dark-mode-only" width=320/></td><td><code>digit-form = 'lining'</code></td></tr>
     <tr><td>Lining (default)</td></tr>
     <tr><td rowspan="2" width="348"><img src="../images/cv-digit-form-old-style.light.svg#gh-light-mode-only" width=320/><img src="../images/cv-digit-form-old-style.dark.svg#gh-dark-mode-only" width=320/></td><td><code>digit-form = 'old-style'</code></td></tr>
     <tr><td>Old-style</td></tr>
     </table></details>
-  - <details><summary>APL form</summary>
+  - APL form
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="284"><img src="../images/cv-apl-form-none.light.svg#gh-light-mode-only" width=256/><img src="../images/cv-apl-form-none.dark.svg#gh-dark-mode-only" width=256/></td><td><code>apl-form = 'none'</code></td></tr>
     <tr><td>Disable APL-specific forms (default)</td></tr>
     <tr><td rowspan="2" width="284"><img src="../images/cv-apl-form-enable.light.svg#gh-light-mode-only" width=256/><img src="../images/cv-apl-form-enable.dark.svg#gh-dark-mode-only" width=256/></td><td><code>apl-form = 'enable'</code></td></tr>
     <tr><td>Enable harmonized alternate forms APL operators</td></tr>
     </table></details>
-  - <details><summary>Styles for `A`</summary>
+  - Styles for `A`
+    <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-a-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-a = 'straight-serifless'</code>, <code>cv01 = 1</code></td></tr>
     <tr><td><code>A</code> with straight shape; without serifs (default for Sans)</td></tr>
@@ -270,7 +273,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-a-curly-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-curly-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-a = 'curly-tri-serifed'</code>, <code>cv01 = 8</code></td></tr>
     <tr><td><code>A</code> with curly shape, and serifs at both top and base</td></tr>
     </table></details>
-  - <details><summary>Styles for `B`</summary>
+  - Styles for `B`
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-b-standard-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-b-standard-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-b = 'standard-serifless'</code>, <code>cv02 = 1</code></td></tr>
     <tr><td><code>B</code> with mostly symmetric shape; without serifs (default for Sans)</td></tr>
@@ -297,7 +301,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-b-more-asymmetric-interrupted-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-b-more-asymmetric-interrupted-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-b = 'more-asymmetric-interrupted-bilateral-serifed'</code>, <code>cv02 = 12</code></td></tr>
     <tr><td><code>B</code> with more asymmetric shape, interrupted middle bar, and serifs at both top and bottom</td></tr>
     </table></details>
-  - <details><summary>Styles for `C`</summary>
+  - Styles for `C`
+    <details><summary>5 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-c-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-c-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-c = 'serifless'</code>, <code>cv03 = 1</code></td></tr>
     <tr><td>Serifless <code>C</code> (default for Sans)</td></tr>
@@ -310,7 +315,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-c-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-c-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-c = 'bilateral-inward-serifed'</code>, <code>cv03 = 5</code></td></tr>
     <tr><td><code>C</code> with inward serif at both top and bottom</td></tr>
     </table></details>
-  - <details><summary>Styles for `D`</summary>
+  - Styles for `D`
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-d-standard-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-d-standard-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-d = 'standard-serifless'</code>, <code>cv04 = 1</code></td></tr>
     <tr><td><code>D</code> with standard shape; without serifs (default for Sans)</td></tr>
@@ -325,7 +331,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-d-more-rounded-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-d-more-rounded-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-d = 'more-rounded-bilateral-serifed'</code>, <code>cv04 = 6</code></td></tr>
     <tr><td><code>D</code> with more rounded shape, and serifs at both top and bottom</td></tr>
     </table></details>
-  - <details><summary>Styles for `E`</summary>
+  - Styles for `E`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-e-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-e-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-e = 'serifless'</code>, <code>cv05 = 1</code></td></tr>
     <tr><td>E without serifs (default for Sans)</td></tr>
@@ -334,7 +341,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-e-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-e-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-e = 'serifed'</code>, <code>cv05 = 3</code></td></tr>
     <tr><td>E with serifs (default for Slab)</td></tr>
     </table></details>
-  - <details><summary>Styles for `F`</summary>
+  - Styles for `F`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-f-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-f-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-f = 'serifless'</code>, <code>cv06 = 1</code></td></tr>
     <tr><td>F without serifs (default for Sans)</td></tr>
@@ -343,7 +351,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-f-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-f-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-f = 'serifed'</code>, <code>cv06 = 3</code></td></tr>
     <tr><td>F with serifs (default for Slab)</td></tr>
     </table></details>
-  - <details><summary>Styles for `G`</summary>
+  - Styles for `G`
+    <details><summary>27 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-g-toothed-serifless-hookless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-g-toothed-serifless-hookless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-g = 'toothed-serifless-hookless'</code>, <code>cv07 = 1</code></td></tr>
     <tr><td><code>G</code> with toothed body; without top serif, and hooks</td></tr>
@@ -400,7 +409,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-g-toothless-rounded-inward-serifed-capped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-g-toothless-rounded-inward-serifed-capped.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-g = 'toothless-rounded-inward-serifed-capped'</code>, <code>cv07 = 27</code></td></tr>
     <tr><td><code>G</code> with tootheless (rounded) body, inward top serif, and capped terminal</td></tr>
     </table></details>
-  - <details><summary>Styles for `H`</summary>
+  - Styles for `H`
+    <details><summary>4 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-h-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-h-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-h = 'serifless'</code>, <code>cv08 = 1</code></td></tr>
     <tr><td>H without serifs (default for Sans)</td></tr>
@@ -411,7 +421,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-h-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-h-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-h = 'serifed'</code>, <code>cv08 = 4</code></td></tr>
     <tr><td>H with serifs (default for Slab)</td></tr>
     </table></details>
-  - <details><summary>Styles for `I`</summary>
+  - Styles for `I`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-i-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-i-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-i = 'serifed'</code>, <code>cv09 = 1</code></td></tr>
     <tr><td>I with standard (long) serifs (default)</td></tr>
@@ -420,7 +431,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-i-short-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-i-short-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-i = 'short-serifed'</code>, <code>cv09 = 3</code></td></tr>
     <tr><td>I with short serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `J`</summary>
+  - Styles for `J`
+    <details><summary>14 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-j-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-j-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-j = 'serifless'</code>, <code>cv10 = 1</code></td></tr>
     <tr><td><code>J</code> without serifs</td></tr>
@@ -451,7 +463,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-j-descending-flat-hook-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-j-descending-flat-hook-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-j = 'descending-flat-hook-serifed'</code>, <code>cv10 = 14</code></td></tr>
     <tr><td><code>J</code> with descending height, flat hook, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `K`</summary>
+  - Styles for `K`
+    <details><summary>20 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'straight-serifless'</code>, <code>cv11 = 1</code></td></tr>
     <tr><td><code>K</code> with straight shape; without serifs (default for Sans)</td></tr>
@@ -494,7 +507,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-symmetric-connected-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-symmetric-connected-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'symmetric-connected-serifed'</code>, <code>cv11 = 20</code></td></tr>
     <tr><td><code>K</code> with symmetric legs connected to the vertical bar, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `L`</summary>
+  - Styles for `L`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-l-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-l-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-l = 'serifless'</code>, <code>cv12 = 1</code></td></tr>
     <tr><td>Serifless <code>L</code> (default for Sans)</td></tr>
@@ -503,7 +517,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-l-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-l-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-l = 'serifed'</code>, <code>cv12 = 3</code></td></tr>
     <tr><td><code>L</code> with serifs (default for Slab)</td></tr>
     </table></details>
-  - <details><summary>Styles for `M`</summary>
+  - Styles for `M`
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-m-hanging-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-m-hanging-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-m = 'hanging-serifless'</code>, <code>cv13 = 1</code></td></tr>
     <tr><td><code>M</code> with middle being hanging off baseline; without serifs (default for Sans)</td></tr>
@@ -530,7 +545,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-m-slanted-sides-flat-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-m-slanted-sides-flat-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-m = 'slanted-sides-flat-bottom-serifed'</code>, <code>cv13 = 12</code></td></tr>
     <tr><td><code>M</code> with slanted sides, middle aligned to baseline, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `N`</summary>
+  - Styles for `N`
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-n-standard-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-n-standard-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-n = 'standard-serifless'</code>, <code>cv14 = 1</code></td></tr>
     <tr><td><code>N</code> with standard shape; without serifs (default for Sans)</td></tr>
@@ -545,7 +561,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-n-asymmetric-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-n-asymmetric-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-n = 'asymmetric-serifed'</code>, <code>cv14 = 6</code></td></tr>
     <tr><td><code>N</code> with asymmetric shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `P`</summary>
+  - Styles for `P`
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-p-closed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-p-closed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-p = 'closed-serifless'</code>, <code>cv15 = 1</code></td></tr>
     <tr><td><code>P</code> with closed shape; without serifs (default for Sans)</td></tr>
@@ -560,7 +577,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-p-open-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-p-open-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-p = 'open-serifed'</code>, <code>cv15 = 6</code></td></tr>
     <tr><td><code>P</code> with open shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `Q`</summary>
+  - Styles for `Q`
+    <details><summary>10 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-q-curly-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-q-curly-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-q = 'curly-tailed'</code>, <code>cv16 = 1</code></td></tr>
     <tr><td><code>Q</code> with a curly tail (default)</td></tr>
@@ -583,7 +601,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-q-open-swash.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-q-open-swash.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-q = 'open-swash'</code>, <code>cv16 = 10</code></td></tr>
     <tr><td><code>Q</code> with open contour and swash-y shape</td></tr>
     </table></details>
-  - <details><summary>Styles for `R`</summary>
+  - Styles for `R`
+    <details><summary>30 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-r-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-r-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-r = 'straight-serifless'</code>, <code>cv17 = 1</code></td></tr>
     <tr><td><code>R</code> with straight leg; without serifs (default for Sans)</td></tr>
@@ -646,7 +665,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-r-standing-open-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-r-standing-open-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-r = 'standing-open-serifed'</code>, <code>cv17 = 30</code></td></tr>
     <tr><td><code>R</code> with standing leg (like Helvetica), open contour, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `S`</summary>
+  - Styles for `S`
+    <details><summary>5 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-s-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-s-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-s = 'serifless'</code>, <code>cv18 = 1</code></td></tr>
     <tr><td>Serifless <code>S</code> (default for Sans)</td></tr>
@@ -659,7 +679,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-s-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-s-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-s = 'bilateral-inward-serifed'</code>, <code>cv18 = 5</code></td></tr>
     <tr><td><code>S</code> with inward serifs at both end</td></tr>
     </table></details>
-  - <details><summary>Styles for `T`</summary>
+  - Styles for `T`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-t-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-t-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-t = 'serifless'</code>, <code>cv19 = 1</code></td></tr>
     <tr><td>Serifless T (default for Sans)</td></tr>
@@ -668,7 +689,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-t-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-t-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-t = 'serifed'</code>, <code>cv19 = 3</code></td></tr>
     <tr><td>Serifed T (default for Slab)</td></tr>
     </table></details>
-  - <details><summary>Styles for `U`</summary>
+  - Styles for `U`
+    <details><summary>15 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-u-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-u-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-u = 'toothed-serifless'</code>, <code>cv20 = 1</code></td></tr>
     <tr><td><code>U</code> with toothed shape; without serifs</td></tr>
@@ -701,7 +723,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-u-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-u-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-u = 'toothless-rounded-serifed'</code>, <code>cv20 = 15</code></td></tr>
     <tr><td><code>U</code> with toothless (rounded) shape, and serifs (default for Slab)</td></tr>
     </table></details>
-  - <details><summary>Styles for `V`</summary>
+  - Styles for `V`
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-v-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-v-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-v = 'straight-serifless'</code>, <code>cv21 = 1</code></td></tr>
     <tr><td><code>V</code> with straight shape; without serifs (default for Sans)</td></tr>
@@ -716,7 +739,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-v-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-v-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-v = 'curly-serifed'</code>, <code>cv21 = 6</code></td></tr>
     <tr><td><code>V</code> with curly shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `W`</summary>
+  - Styles for `W`
+    <details><summary>18 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-serifless'</code>, <code>cv22 = 1</code></td></tr>
     <tr><td><code>W</code> with standard, straight body; without serifs (default for Sans)</td></tr>
@@ -755,7 +779,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-vertical-sides-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-vertical-sides-serifed'</code>, <code>cv22 = 18</code></td></tr>
     <tr><td><code>W</code> with body shape with vertical sides, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `X`</summary>
+  - Styles for `X`
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-x-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-x-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-x = 'straight-serifless'</code>, <code>cv23 = 1</code></td></tr>
     <tr><td><code>X</code> with straight shape; without serifs (default for Sans)</td></tr>
@@ -770,7 +795,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-x-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-x-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-x = 'curly-serifed'</code>, <code>cv23 = 6</code></td></tr>
     <tr><td><code>X</code> with curly shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `Y`</summary>
+  - Styles for `Y`
+    <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-y-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-y-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-y = 'straight-serifless'</code>, <code>cv24 = 1</code></td></tr>
     <tr><td><code>Y</code> with straight shape; without serifs (default for Sans)</td></tr>
@@ -789,7 +815,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-y-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-y-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-y = 'curly-serifed'</code>, <code>cv24 = 8</code></td></tr>
     <tr><td><code>Y</code> with curly shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `Z`</summary>
+  - Styles for `Z`
+    <details><summary>27 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-serifless'</code>, <code>cv25 = 1</code></td></tr>
     <tr><td><code>Z</code> with straight body shape; without serifs (default for Sans)</td></tr>
@@ -846,7 +873,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-cursive-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-cursive-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'cursive-with-horizontal-crossbar'</code>, <code>cv25 = 27</code></td></tr>
     <tr><td><code>Z</code> with cursive body shape, and a horizontal crossbar</td></tr>
     </table></details>
-  - <details><summary>Styles for `a`</summary>
+  - Styles for `a`
+    <details><summary>21 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-a-double-storey-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-double-storey-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'double-storey-serifless'</code>, <code>cv26 = 1</code></td></tr>
     <tr><td><code>a</code> with double-storey body, and serifless hook; without serif at terminal (default for Sans Upright)</td></tr>
@@ -891,7 +919,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-a-single-storey-earless-rounded-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-earless-rounded-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'single-storey-earless-rounded-tailed'</code>, <code>cv26 = 21</code></td></tr>
     <tr><td><code>a</code> with single-storey body, earless (rounded top-right), and curly tail</td></tr>
     </table></details>
-  - <details><summary>Styles for `b`</summary>
+  - Styles for `b`
+    <details><summary>7 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-b-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'toothed-serifless'</code>, <code>cv27 = 1</code></td></tr>
     <tr><td><code>b</code> with toothed shape; without serifs (default for Sans)</td></tr>
@@ -908,7 +937,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-b-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'toothless-rounded-serifed'</code>, <code>cv27 = 7</code></td></tr>
     <tr><td><code>b</code> with toothless (rounded) shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `c`</summary>
+  - Styles for `c`
+    <details><summary>5 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-c-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-c-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>c = 'serifless'</code>, <code>cv28 = 1</code></td></tr>
     <tr><td>Serifless <code>c</code> (default for Sans)</td></tr>
@@ -921,7 +951,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-c-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-c-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>c = 'bilateral-inward-serifed'</code>, <code>cv28 = 5</code></td></tr>
     <tr><td><code>c</code> with inward serif at both top and bottom</td></tr>
     </table></details>
-  - <details><summary>Styles for `d`</summary>
+  - Styles for `d`
+    <details><summary>10 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-d-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-d-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>d = 'toothed-serifless'</code>, <code>cv29 = 1</code></td></tr>
     <tr><td><code>d</code> with toothed shape; without serifs (default for Sans Upright)</td></tr>
@@ -944,14 +975,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-d-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-d-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>d = 'toothless-rounded-serifed'</code>, <code>cv29 = 10</code></td></tr>
     <tr><td><code>d</code> with toothless (rounded) shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `e`</summary>
+  - Styles for `e`
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-e-flat-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-e-flat-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>e = 'flat-crossbar'</code>, <code>cv30 = 1</code></td></tr>
     <tr><td><code>e</code> with flat crossbar (default for Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-e-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-e-rounded.dark.svg#gh-dark-mode-only" width=32/></td><td><code>e = 'rounded'</code>, <code>cv30 = 2</code></td></tr>
     <tr><td><code>e</code> with more rounded shape (default for Italic)</td></tr>
     </table></details>
-  - <details><summary>Styles for `f`</summary>
+  - Styles for `f`
+    <details><summary>20 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-f-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'serifless'</code>, <code>cv31 = 1</code></td></tr>
     <tr><td><code>f</code> without bottom serif, hook or extension (default for Sans Upright)</td></tr>
@@ -994,7 +1027,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-f-flat-hook-diagonal-tailed-crossbar-at-x-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-flat-hook-diagonal-tailed-crossbar-at-x-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'flat-hook-diagonal-tailed-crossbar-at-x-height'</code>, <code>cv31 = 20</code></td></tr>
     <tr><td><code>f</code> with flat top hook, diagonal tail, and crossbar at X-height</td></tr>
     </table></details>
-  - <details><summary>Styles for `g`</summary>
+  - Styles for `g`
+    <details><summary>10 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-g-double-storey.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-double-storey.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'double-storey'</code>, <code>cv32 = 1</code></td></tr>
     <tr><td><code>g</code> with double-storey shape</td></tr>
@@ -1017,7 +1051,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-g-single-storey-flat-hook-earless-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-flat-hook-earless-rounded.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'single-storey-flat-hook-earless-rounded'</code>, <code>cv32 = 10</code></td></tr>
     <tr><td><code>g</code> with single-storey shape, flat bottom hook, and earless (rounded top-right)</td></tr>
     </table></details>
-  - <details><summary>Styles for `h`</summary>
+  - Styles for `h`
+    <details><summary>7 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-h-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-h-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>h = 'straight-serifless'</code>, <code>cv33 = 1</code></td></tr>
     <tr><td><code>h</code> with straight terminal; without serifs (default for Sans)</td></tr>
@@ -1034,7 +1069,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-h-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-h-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>h = 'tailed-serifed'</code>, <code>cv33 = 7</code></td></tr>
     <tr><td><code>h</code> with curly tailed terminal, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `i`</summary>
+  - Styles for `i`
+    <details><summary>14 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-i-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'serifed'</code>, <code>cv34 = 1</code></td></tr>
     <tr><td>Serifed <code>i</code> (default for Upright)</td></tr>
@@ -1065,7 +1101,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-i-serifed-semi-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-serifed-semi-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'serifed-semi-tailed'</code>, <code>cv34 = 14</code></td></tr>
     <tr><td><code>i</code> with top serif and slightly curly tail</td></tr>
     </table></details>
-  - <details><summary>Styles for `j`</summary>
+  - Styles for `j`
+    <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-j-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-j-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>j = 'serifless'</code>, <code>cv35 = 1</code></td></tr>
     <tr><td><code>j</code> without serif</td></tr>
@@ -1084,7 +1121,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-j-diagonal-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-j-diagonal-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>j = 'diagonal-tailed-serifed'</code>, <code>cv35 = 8</code></td></tr>
     <tr><td><code>j</code> with top serif and diagonal tail</td></tr>
     </table></details>
-  - <details><summary>Styles for `k`</summary>
+  - Styles for `k`
+    <details><summary>27 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-k-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'straight-serifless'</code>, <code>cv36 = 1</code></td></tr>
     <tr><td><code>k</code> with standard shape; without serifs (default for Sans Upright)</td></tr>
@@ -1141,7 +1179,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-k-diagonal-tailed-cursive-top-left-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-diagonal-tailed-cursive-top-left-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'diagonal-tailed-cursive-top-left-serifed'</code>, <code>cv36 = 27</code></td></tr>
     <tr><td><code>k</code> with cursive loop plus diagonal tail, and serifs at top left (default for Slab Italic)</td></tr>
     </table></details>
-  - <details><summary>Styles for `l`</summary>
+  - Styles for `l`
+    <details><summary>14 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-l-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'serifed'</code>, <code>cv37 = 1</code></td></tr>
     <tr><td>Serifed <code>l</code> (default for Upright)</td></tr>
@@ -1172,7 +1211,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-l-serifed-semi-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-serifed-semi-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'serifed-semi-tailed'</code>, <code>cv37 = 14</code></td></tr>
     <tr><td><code>l</code> with top serif and slightl curly tail</td></tr>
     </table></details>
-  - <details><summary>Styles for `m`</summary>
+  - Styles for `m`
+    <details><summary>44 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-m-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-m-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>m = 'serifless'</code>, <code>cv38 = 1</code></td></tr>
     <tr><td><code>m</code> with eared body shape, and normal middle leg; without serifs (default for Sans)</td></tr>
@@ -1263,7 +1303,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-m-earless-single-arch-short-leg-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-m-earless-single-arch-short-leg-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>m = 'earless-single-arch-short-leg-tailed-serifed'</code>, <code>cv38 = 44</code></td></tr>
     <tr><td><code>m</code> with earless (corner top-left) body shape, shorter middle leg (like Ubuntu Mono), tail, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `n`</summary>
+  - Styles for `n`
+    <details><summary>17 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-n-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-n-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>n = 'straight-serifless'</code>, <code>cv39 = 1</code></td></tr>
     <tr><td><code>n</code> with straight terminal; without serifs (default for Sans)</td></tr>
@@ -1300,7 +1341,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-n-earless-rounded-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-n-earless-rounded-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>n = 'earless-rounded-tailed-serifed'</code>, <code>cv39 = 17</code></td></tr>
     <tr><td><code>n</code> with earless (rounded top-left) body shape, tailed terminal, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `p`</summary>
+  - Styles for `p`
+    <details><summary>7 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-p-eared-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-p-eared-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>p = 'eared-serifless'</code>, <code>cv40 = 1</code></td></tr>
     <tr><td><code>p</code> with eared shape; without serifs (default for Sans)</td></tr>
@@ -1317,7 +1359,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-p-earless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-p-earless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>p = 'earless-rounded-serifed'</code>, <code>cv40 = 7</code></td></tr>
     <tr><td><code>p</code> with earless (rounded) shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `q`</summary>
+  - Styles for `q`
+    <details><summary>16 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-serifless'</code>, <code>cv41 = 1</code></td></tr>
     <tr><td><code>q</code> with straight terminal; without serifs (default for Sans)</td></tr>
@@ -1352,7 +1395,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-earless-rounded-diagonal-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-earless-rounded-diagonal-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'earless-rounded-diagonal-tailed-serifless'</code>, <code>cv41 = 16</code></td></tr>
     <tr><td><code>q</code> with earless (rounded) shape, and diagonally tailed terminal; without serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `r`</summary>
+  - Styles for `r`
+    <details><summary>20 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-r-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-r-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>r = 'serifless'</code>, <code>cv42 = 1</code></td></tr>
     <tr><td><code>r</code> with normal body shape; without serifs (default for Sans)</td></tr>
@@ -1395,7 +1439,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-r-compact-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-r-compact-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>r = 'compact-serifed'</code>, <code>cv42 = 20</code></td></tr>
     <tr><td><code>r</code> with compact body shape (identical to 'hookless' for monospace fonts), and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `s`</summary>
+  - Styles for `s`
+    <details><summary>5 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-s-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-s-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>s = 'serifless'</code>, <code>cv43 = 1</code></td></tr>
     <tr><td>Serifless <code>s</code> (default for Sans)</td></tr>
@@ -1408,7 +1453,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-s-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-s-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>s = 'bilateral-inward-serifed'</code>, <code>cv43 = 5</code></td></tr>
     <tr><td><code>s</code> with inward serifs at both end (default for Slab Italic)</td></tr>
     </table></details>
-  - <details><summary>Styles for `t`</summary>
+  - Styles for `t`
+    <details><summary>24 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-t-bent-hook.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-t-bent-hook.dark.svg#gh-dark-mode-only" width=32/></td><td><code>t = 'bent-hook'</code>, <code>cv44 = 1</code></td></tr>
     <tr><td><code>t</code> with bent hook, and crossbar at both sides of the vertical stem (default)</td></tr>
@@ -1459,7 +1505,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-t-hookless-asymmetric-short-neck2.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-t-hookless-asymmetric-short-neck2.dark.svg#gh-dark-mode-only" width=32/></td><td><code>t = 'hookless-asymmetric-short-neck2'</code>, <code>cv44 = 24</code></td></tr>
     <tr><td><code>t</code> without hook or tail; with crossbar at only right side of the vertical stem, and a more shorter neck</td></tr>
     </table></details>
-  - <details><summary>Styles for `u`</summary>
+  - Styles for `u`
+    <details><summary>13 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-u-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-u-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>u = 'toothed-serifless'</code>, <code>cv45 = 1</code></td></tr>
     <tr><td><code>u</code> with toothed shape; without serifs (default for Sans Upright)</td></tr>
@@ -1488,7 +1535,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-u-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-u-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>u = 'toothless-rounded-serifed'</code>, <code>cv45 = 13</code></td></tr>
     <tr><td><code>u</code> with toothless (rounded) shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `v`</summary>
+  - Styles for `v`
+    <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-v-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-v-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>v = 'straight-serifless'</code>, <code>cv46 = 1</code></td></tr>
     <tr><td><code>v</code> with straight body; without serifs (default for Sans)</td></tr>
@@ -1507,7 +1555,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-v-cursive-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-v-cursive-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>v = 'cursive-serifed'</code>, <code>cv46 = 8</code></td></tr>
     <tr><td><code>v</code> with cursive body, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `w`</summary>
+  - Styles for `w`
+    <details><summary>20 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-serifless'</code>, <code>cv47 = 1</code></td></tr>
     <tr><td><code>w</code> with standard, straight body; without serifs (default for Sans)</td></tr>
@@ -1550,7 +1599,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-cursive-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-cursive-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'cursive-serifed'</code>, <code>cv47 = 20</code></td></tr>
     <tr><td><code>w</code> with cursive shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `x`</summary>
+  - Styles for `x`
+    <details><summary>10 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-x-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'straight-serifless'</code>, <code>cv48 = 1</code></td></tr>
     <tr><td><code>x</code> with straight shape; without serifs (default for Sans)</td></tr>
@@ -1573,7 +1623,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-x-chancery.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-chancery.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'chancery'</code>, <code>cv48 = 10</code></td></tr>
     <tr><td><code>x</code> with Chancery shape</td></tr>
     </table></details>
-  - <details><summary>Styles for `y`</summary>
+  - Styles for `y`
+    <details><summary>18 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-y-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-y-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>y = 'straight-serifless'</code>, <code>cv49 = 1</code></td></tr>
     <tr><td><code>y</code> with straight shape; without serifs (default for Sans Upright)</td></tr>
@@ -1612,7 +1663,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-y-cursive-flat-hook-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-y-cursive-flat-hook-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>y = 'cursive-flat-hook-serifed'</code>, <code>cv49 = 18</code></td></tr>
     <tr><td><code>y</code> with cursive shape, a flat terminal hook, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `z`</summary>
+  - Styles for `z`
+    <details><summary>27 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-serifless'</code>, <code>cv50 = 1</code></td></tr>
     <tr><td><code>z</code> with straight body shape; without serifs (default for Sans)</td></tr>
@@ -1669,7 +1721,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-cursive-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-cursive-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'cursive-with-horizontal-crossbar'</code>, <code>cv50 = 27</code></td></tr>
     <tr><td><code>z</code> with cursive body shape, and a horizontal crossbar</td></tr>
     </table></details>
-  - <details><summary>Styles for `ſ` (Long-S)</summary>
+  - Styles for `ſ` (Long-S)
+    <details><summary>30 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-bent-hook-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-bent-hook-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'bent-hook-serifless'</code>, <code>cv51 = 1</code></td></tr>
     <tr><td>Long S (<code>ſ</code>) with bending top hook; without serifs (default for Sans Upright)</td></tr>
@@ -1732,7 +1785,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-flat-hook-diagonal-tailed-middle-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-flat-hook-diagonal-tailed-middle-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'flat-hook-diagonal-tailed-middle-serifed-xh'</code>, <code>cv51 = 30</code></td></tr>
     <tr><td>Long S (<code>ſ</code>) with flat top hook, terminal has a diagonal tail, and middle serif at x-height</td></tr>
     </table></details>
-  - <details><summary>Styles for `ß` (Eszet)</summary>
+  - Styles for `ß` (Eszet)
+    <details><summary>40 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-traditional-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'traditional-serifless'</code>, <code>cv52 = 1</code></td></tr>
     <tr><td>Eszet (<code>ß</code>) with traditional, Fraktur-like shape</td></tr>
@@ -1815,14 +1869,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-longs-s-lig-tailed-middle-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-tailed-middle-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'longs-s-lig-tailed-middle-serifed-xh'</code>, <code>cv52 = 40</code></td></tr>
     <tr><td>Eszet (<code>ß</code>) with ligature of long-S (<code>ſ</code>) and <code>s</code>, terminal containing tail, and serif at middle at x-height</td></tr>
     </table></details>
-  - <details><summary>Styles for `ð` (Lowercase Eth (`ð`))</summary>
+  - Styles for `ð` (Lowercase Eth (`ð`))
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-eth-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eth-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-eth = 'straight-bar'</code>, <code>cv53 = 1</code></td></tr>
     <tr><td>Lowercase Eth (<code>ð</code>) with a straight bar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-eth-curly-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eth-curly-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-eth = 'curly-bar'</code>, <code>cv53 = 2</code></td></tr>
     <tr><td>Lowercase Eth (<code>ð</code>) with a curly bar (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `þ` (Lowercase Thorn (`þ`))</summary>
+  - Styles for `þ` (Lowercase Thorn (`þ`))
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-thorn-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-thorn-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-thorn = 'serifless'</code>, <code>cv54 = 1</code></td></tr>
     <tr><td>Lowercase Thorn (<code>þ</code>) without serifs (default for Sans)</td></tr>
@@ -1831,7 +1887,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-thorn-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-thorn-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-thorn = 'serifed'</code>, <code>cv54 = 3</code></td></tr>
     <tr><td>Lowercase Thorn (<code>þ</code>) with serifs (default for Slab)</td></tr>
     </table></details>
-  - <details><summary>Styles for `α` (Greek lower Alpha)</summary>
+  - Styles for `α` (Greek lower Alpha)
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-alpha-crossing.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-crossing.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-alpha = 'crossing'</code>, <code>cv55 = 1</code></td></tr>
     <tr><td>Greek lower Alpha (<code>α</code>) with cross-like shape at right (default)</td></tr>
@@ -1858,7 +1915,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-alpha-barred-earless-rounded-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-earless-rounded-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-alpha = 'barred-earless-rounded-tailed'</code>, <code>cv55 = 12</code></td></tr>
     <tr><td>Greek lower Alpha (<code>α</code>) with straight right bar, earless (rounded top-right), and curly tail</td></tr>
     </table></details>
-  - <details><summary>Styles for `Γ` (Greek capital Gamma)</summary>
+  - Styles for `Γ` (Greek capital Gamma)
+    <details><summary>4 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-gamma-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-gamma-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-gamma = 'serifless'</code>, <code>cv56 = 1</code></td></tr>
     <tr><td>Standard capital Gamma (<code>Γ</code>) without serifs (default for Sans)</td></tr>
@@ -1869,21 +1927,24 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-gamma-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-gamma-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-gamma = 'serifed'</code>, <code>cv56 = 4</code></td></tr>
     <tr><td>Standard capital Gamma (<code>Γ</code>) with motion serifs at top and bottom (default for Slab)</td></tr>
     </table></details>
-  - <details><summary>Styles for `Δ` (Greek capital Delta (`Δ`))</summary>
+  - Styles for `Δ` (Greek capital Delta (`Δ`))
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-delta-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-delta-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-delta = 'straight'</code>, <code>cv57 = 1</code></td></tr>
     <tr><td>Standard, straight Greek capital Delta (<code>Δ</code>) (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-delta-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-delta-curly.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-delta = 'curly'</code>, <code>cv57 = 2</code></td></tr>
     <tr><td>Slightly curly Greek capital Delta (<code>Δ</code>), like Iosevka 2.x</td></tr>
     </table></details>
-  - <details><summary>Styles for `δ` (Greek lower Delta)</summary>
+  - Styles for `δ` (Greek lower Delta)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-delta-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-delta-rounded.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-delta = 'rounded'</code>, <code>cv58 = 1</code></td></tr>
     <tr><td>Greek lower Delta (<code>δ</code>) with rounded top (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-delta-flat-top.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-delta-flat-top.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-delta = 'flat-top'</code>, <code>cv58 = 2</code></td></tr>
     <tr><td>Greek lower Delta (<code>δ</code>) with flat top</td></tr>
     </table></details>
-  - <details><summary>Styles for `ι` (Greek lower Iota)</summary>
+  - Styles for `ι` (Greek lower Iota)
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-iota-tailless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-tailless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-iota = 'tailless'</code>, <code>cv59 = 1</code></td></tr>
     <tr><td>Greek lower Iota (<code>ι</code>) like a straight line</td></tr>
@@ -1910,7 +1971,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-iota-serifed-semi-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-serifed-semi-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-iota = 'serifed-semi-tailed'</code>, <code>cv59 = 12</code></td></tr>
     <tr><td>Greek lower Iota (<code>ι</code>) with top serif and a slightly curly tail (default for Upright)</td></tr>
     </table></details>
-  - <details><summary>Styles for `Λ` (Greek capital Lambda (`Λ`))</summary>
+  - Styles for `Λ` (Greek capital Lambda (`Λ`))
+    <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-lambda-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-lambda-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-lambda = 'straight-serifless'</code>, <code>cv60 = 1</code></td></tr>
     <tr><td>Greek capital Lambda (<code>Λ</code>) with straight shape; without serifs (default for Sans)</td></tr>
@@ -1929,7 +1991,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-lambda-curly-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-lambda-curly-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-lambda = 'curly-tri-serifed'</code>, <code>cv60 = 8</code></td></tr>
     <tr><td>Greek capital Lambda (<code>Λ</code>) with curly shape, and serifs at both top and base</td></tr>
     </table></details>
-  - <details><summary>Styles for `λ` (Greek small Lambda)</summary>
+  - Styles for `λ` (Greek small Lambda)
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'straight'</code>, <code>cv61 = 1</code></td></tr>
     <tr><td>More-straight Greek small Lambda (<code>λ</code>) (default for Sans Upright, Sans Italic, Slab Italic)</td></tr>
@@ -1944,7 +2007,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-curly-tailed-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-curly-tailed-turn.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'curly-tailed-turn'</code>, <code>cv61 = 6</code></td></tr>
     <tr><td>More curly Greek small Lambda (<code>λ</code>), with a tail turns leftward at top, a tail turns right at bottom-right, and curly bottom-left leg</td></tr>
     </table></details>
-  - <details><summary>Styles for `μ` (Greek small Mu)</summary>
+  - Styles for `μ` (Greek small Mu)
+    <details><summary>13 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-serifless'</code>, <code>cv62 = 1</code></td></tr>
     <tr><td>Greek small Mu (<code>μ</code>) with toothed shape; without serifs</td></tr>
@@ -1973,14 +2037,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothless-rounded-serifed'</code>, <code>cv62 = 13</code></td></tr>
     <tr><td>Greek small Mu (<code>μ</code>) with toothless (rounded) shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `ξ` (Greek lower Xi)</summary>
+  - Styles for `ξ` (Greek lower Xi)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-rounded.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'rounded'</code>, <code>cv63 = 1</code></td></tr>
     <tr><td>Greek lower Xi (<code>ξ</code>) with rounded top</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-flat-top.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-flat-top.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'flat-top'</code>, <code>cv63 = 2</code></td></tr>
     <tr><td>Greek lower Xi (<code>ξ</code>) with flat top (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `π` (Greek lower Pi)</summary>
+  - Styles for `π` (Greek lower Pi)
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-pi-tailless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-pi-tailless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-pi = 'tailless'</code>, <code>cv64 = 1</code></td></tr>
     <tr><td>Greek lower Pi (<code>π</code>) with a tailless shape</td></tr>
@@ -1989,7 +2055,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-pi-small-capital.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-pi-small-capital.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-pi = 'small-capital'</code>, <code>cv64 = 3</code></td></tr>
     <tr><td>Greek lower Pi (<code>π</code>) with a small-capital shape</td></tr>
     </table></details>
-  - <details><summary>Styles for `τ` (Greek lower Tau)</summary>
+  - Styles for `τ` (Greek lower Tau)
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-tau-tailless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-tau-tailless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-tau = 'tailless'</code>, <code>cv65 = 1</code></td></tr>
     <tr><td>Greek lower Tau (<code>τ</code>) with a tailless shape</td></tr>
@@ -2004,7 +2071,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-tau-semi-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-tau-semi-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-tau = 'semi-tailed'</code>, <code>cv65 = 6</code></td></tr>
     <tr><td>Greek lower Tau (<code>τ</code>) with a slightly curly tail (default for Upright)</td></tr>
     </table></details>
-  - <details><summary>Styles for `χ` (Greek lower Chi)</summary>
+  - Styles for `χ` (Greek lower Chi)
+    <details><summary>9 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'straight-serifless'</code>, <code>cv66 = 1</code></td></tr>
     <tr><td>Greek lower Chi (<code>χ</code>) with straight shape; without serifs (default for Sans)</td></tr>
@@ -2025,7 +2093,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-chancery.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-chancery.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'chancery'</code>, <code>cv66 = 9</code></td></tr>
     <tr><td>Greek lower Chi (<code>χ</code>) with Chancery shape</td></tr>
     </table></details>
-  - <details><summary>Styles for `Ж` (Cyrillic Capital Zhe)</summary>
+  - Styles for `Ж` (Cyrillic Capital Zhe)
+    <details><summary>5 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-zhe-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-zhe-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-zhe = 'straight'</code>, <code>cv67 = 1</code></td></tr>
     <tr><td>Cyrillic Capital Zhe (<code>Ж</code>) with straight legs</td></tr>
@@ -2038,7 +2107,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-zhe-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-zhe-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-zhe = 'cursive'</code>, <code>cv67 = 5</code></td></tr>
     <tr><td>Cyrillic Capital Zhe (<code>Ж</code>) with cursive legs</td></tr>
     </table></details>
-  - <details><summary>Styles for `ж` (Cyrillic Zhe)</summary>
+  - Styles for `ж` (Cyrillic Zhe)
+    <details><summary>5 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-zhe-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-zhe-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-zhe = 'straight'</code>, <code>cv68 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Zhe (<code>ж</code>) with straight legs</td></tr>
@@ -2051,7 +2121,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-zhe-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-zhe-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-zhe = 'cursive'</code>, <code>cv68 = 5</code></td></tr>
     <tr><td>Cyrillic Lower Zhe (<code>ж</code>) with cursive legs</td></tr>
     </table></details>
-  - <details><summary>Styles for `З` (Cyrillic Capital Ze)</summary>
+  - Styles for `З` (Cyrillic Capital Ze)
+    <details><summary>5 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'serifless'</code>, <code>cv69 = 1</code></td></tr>
     <tr><td>Serifless Cyrillic Capital Ze (<code>З</code>) (default for Sans)</td></tr>
@@ -2064,7 +2135,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'bilateral-inward-serifed'</code>, <code>cv69 = 5</code></td></tr>
     <tr><td>Cyrillic Capital Ze (<code>З</code>) with inward serif at both top and bottom</td></tr>
     </table></details>
-  - <details><summary>Styles for `з` (Cyrillic Lower Ze)</summary>
+  - Styles for `з` (Cyrillic Lower Ze)
+    <details><summary>5 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'serifless'</code>, <code>cv70 = 1</code></td></tr>
     <tr><td>Serifless Cyrillic Lower Ze (<code>з</code>) (default for Sans)</td></tr>
@@ -2077,7 +2149,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'bilateral-inward-serifed'</code>, <code>cv70 = 5</code></td></tr>
     <tr><td>Cyrillic Lower Ze (<code>з</code>) with inward serif at both top and bottom</td></tr>
     </table></details>
-  - <details><summary>Styles for `К` (Cyrillic Capital Ka)</summary>
+  - Styles for `К` (Cyrillic Capital Ka)
+    <details><summary>20 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'straight-serifless'</code>, <code>cv71 = 1</code></td></tr>
     <tr><td>Cyrillic Capital Ka (<code>К</code>) with straight shape; without serifs</td></tr>
@@ -2120,7 +2193,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-symmetric-connected-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-symmetric-connected-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'symmetric-connected-serifed'</code>, <code>cv71 = 20</code></td></tr>
     <tr><td>Cyrillic Capital Ka (<code>К</code>) with symmetric legs connected to the vertical bar, and serifs (default for Slab)</td></tr>
     </table></details>
-  - <details><summary>Styles for `к` (Cyrillic Ka)</summary>
+  - Styles for `к` (Cyrillic Ka)
+    <details><summary>20 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'straight-serifless'</code>, <code>cv72 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Ka (<code>к</code>) with straight shape; without serifs</td></tr>
@@ -2163,14 +2237,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-symmetric-connected-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-symmetric-connected-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'symmetric-connected-serifed'</code>, <code>cv72 = 20</code></td></tr>
     <tr><td>Cyrillic Lower Ka (<code>к</code>) with symmetric legs connected to the vertical bar, and serifs (default for Slab Upright)</td></tr>
     </table></details>
-  - <details><summary>Styles for `л` (Cyrillic Lower El)</summary>
+  - Styles for `л` (Cyrillic Lower El)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-el-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-el-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-el = 'straight'</code>, <code>cv73 = 1</code></td></tr>
     <tr><td>Cyrillic Lower El (<code>л</code>) with standard shape (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-el-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-el-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-el = 'tailed'</code>, <code>cv73 = 2</code></td></tr>
     <tr><td>Cyrillic Lower El (<code>л</code>) with tail shape</td></tr>
     </table></details>
-  - <details><summary>Styles for `м` (Cyrillic Lower Em)</summary>
+  - Styles for `м` (Cyrillic Lower Em)
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-hanging-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-hanging-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'hanging-serifless'</code>, <code>cv74 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline; without serifs (default for Sans)</td></tr>
@@ -2197,7 +2273,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-slanted-sides-flat-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-slanted-sides-flat-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'slanted-sides-flat-bottom-serifed'</code>, <code>cv74 = 12</code></td></tr>
     <tr><td>Cyrillic Lower Em (<code>м</code>) with slanted sides, middle aligned to baseline, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `н` (Cyrillic Lower En)</summary>
+  - Styles for `н` (Cyrillic Lower En)
+    <details><summary>7 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-en-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-en-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-en = 'serifless'</code>, <code>cv75 = 1</code></td></tr>
     <tr><td>Cyrillic Lower En (<code>н</code>) without serifs (default for Sans)</td></tr>
@@ -2214,7 +2291,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-en-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-en-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-en = 'tailed-serifed'</code>, <code>cv75 = 7</code></td></tr>
     <tr><td>Cyrillic Lower En (<code>н</code>) with tail, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `р` (Cyrillic Lower Er)</summary>
+  - Styles for `р` (Cyrillic Lower Er)
+    <details><summary>7 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-er-eared-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-eared-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-er = 'eared-serifless'</code>, <code>cv76 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Er (<code>р</code>) with eared shape; without serifs (default for Sans)</td></tr>
@@ -2231,7 +2309,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-er-earless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-earless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-er = 'earless-rounded-serifed'</code>, <code>cv76 = 7</code></td></tr>
     <tr><td>Cyrillic Lower Er (<code>р</code>) with earless (rounded) shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `У` (Cyrillic Capital U)</summary>
+  - Styles for `У` (Cyrillic Capital U)
+    <details><summary>18 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-u-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-u-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-u = 'straight-serifless'</code>, <code>cv77 = 1</code></td></tr>
     <tr><td>Cyrillic Capital U (<code>У</code>) with straight shape; without serifs (default for Sans)</td></tr>
@@ -2270,7 +2349,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-u-cursive-flat-hook-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-u-cursive-flat-hook-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-u = 'cursive-flat-hook-serifed'</code>, <code>cv77 = 18</code></td></tr>
     <tr><td>Cyrillic Capital U (<code>У</code>) with cursive shape, a flat terminal hook, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `у` (Cyrillic Lower U)</summary>
+  - Styles for `у` (Cyrillic Lower U)
+    <details><summary>18 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-u-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-u = 'straight-serifless'</code>, <code>cv78 = 1</code></td></tr>
     <tr><td>Cyrillic Lower U (<code>у</code>) with straight shape; without serifs (default for Sans Upright)</td></tr>
@@ -2309,7 +2389,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-u-cursive-flat-hook-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-u-cursive-flat-hook-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-u = 'cursive-flat-hook-serifed'</code>, <code>cv78 = 18</code></td></tr>
     <tr><td>Cyrillic Lower U (<code>у</code>) with cursive shape, a flat terminal hook, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `ф` (Cyrillic Lower Ef)</summary>
+  - Styles for `ф` (Cyrillic Lower Ef)
+    <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ef-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ef = 'serifless'</code>, <code>cv79 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Ef (<code>ф</code>) with straight bar; without serifs (default for Sans Upright)</td></tr>
@@ -2328,14 +2409,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ef-split-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ef = 'split-cursive'</code>, <code>cv79 = 8</code></td></tr>
     <tr><td>Cyrillic Lower Ef (<code>ф</code>) with split bowl, and cursive bar</td></tr>
     </table></details>
-  - <details><summary>Styles for `ч` (Cyrillic Lower Che)</summary>
+  - Styles for `ч` (Cyrillic Lower Che)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-che-standard.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-che-standard.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-che = 'standard'</code>, <code>cv80 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Che (<code>ч</code>) with standard shape (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-che-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-che-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-che = 'tailed'</code>, <code>cv80 = 2</code></td></tr>
     <tr><td>Cyrillic Lower Che (<code>ч</code>) with tail</td></tr>
     </table></details>
-  - <details><summary>Styles for `ь` (Cyrillic Lower Yeri and related letters)</summary>
+  - Styles for `ь` (Cyrillic Lower Yeri and related letters)
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-yeri-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yeri-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-yeri = 'corner'</code>, <code>cv81 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Yeri (<code>ь</code>) with corner at bottom left (default for Upright)</td></tr>
@@ -2344,7 +2427,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-yeri-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yeri-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-yeri = 'cursive'</code>, <code>cv81 = 3</code></td></tr>
     <tr><td>Cyrillic Lower Yeri (<code>ь</code>) with cursive shape (default for Slab Italic)</td></tr>
     </table></details>
-  - <details><summary>Styles for `ы` (Cyrillic Lower Yery)</summary>
+  - Styles for `ы` (Cyrillic Lower Yery)
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-yery-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yery-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-yery = 'corner'</code>, <code>cv82 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Yery (<code>ы</code>) with corner at bottom left (default for Upright)</td></tr>
@@ -2359,7 +2443,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-yery-cursive-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yery-cursive-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-yery = 'cursive-tailed'</code>, <code>cv82 = 6</code></td></tr>
     <tr><td>Cyrillic Lower Yery (<code>ы</code>) with cursive shape and tail</td></tr>
     </table></details>
-  - <details><summary>Styles for `Я` (Cyrillic Capital Ya)</summary>
+  - Styles for `Я` (Cyrillic Capital Ya)
+    <details><summary>18 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ya-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ya-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ya = 'straight-serifless'</code>, <code>cv83 = 1</code></td></tr>
     <tr><td>Cyrillic Capital Ya (<code>Я</code>) with straight leg; without serifs (default for Sans)</td></tr>
@@ -2398,7 +2483,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ya-standing-open-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ya-standing-open-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ya = 'standing-open-serifed'</code>, <code>cv83 = 18</code></td></tr>
     <tr><td>Cyrillic Capital Ya (<code>Я</code>) with standing leg (like Helvetica), open contour, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `я` (Cyrillic Lower Ya)</summary>
+  - Styles for `я` (Cyrillic Lower Ya)
+    <details><summary>36 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ya-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ya-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ya = 'straight-serifless'</code>, <code>cv84 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Ya (<code>я</code>) with straight leg; without serifs (default for Sans)</td></tr>
@@ -2473,7 +2559,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ya-standing-open-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ya-standing-open-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ya = 'standing-open-tailed-serifed'</code>, <code>cv84 = 36</code></td></tr>
     <tr><td>Cyrillic Lower Ya (<code>я</code>) with standing leg (like Helvetica), open contour, tail, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `0`</summary>
+  - Styles for `0`
+    <details><summary>54 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-zero-unslashed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-zero-unslashed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>zero = 'unslashed'</code>, <code>cv85 = 1</code></td></tr>
     <tr><td>Zero (<code>0</code>) with standard body shape; without slash</td></tr>
@@ -2584,7 +2671,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-zero-diamond-top-right-cutout.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-zero-diamond-top-right-cutout.dark.svg#gh-dark-mode-only" width=32/></td><td><code>zero = 'diamond-top-right-cutout'</code>, <code>cv85 = 54</code></td></tr>
     <tr><td>Zero (<code>0</code>) with diamond body shape, and the top-right bit cutout</td></tr>
     </table></details>
-  - <details><summary>Styles for `1`</summary>
+  - Styles for `1`
+    <details><summary>9 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-one-line.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-one-line.dark.svg#gh-dark-mode-only" width=32/></td><td><code>one = 'line'</code>, <code>cv86 = 1</code></td></tr>
     <tr><td><code>1</code> drawn just like a straight line</td></tr>
@@ -2605,21 +2693,24 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-one-base-top-cut.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-one-base-top-cut.dark.svg#gh-dark-mode-only" width=32/></td><td><code>one = 'base-top-cut'</code>, <code>cv86 = 9</code></td></tr>
     <tr><td><code>1</code> with bottom serif and a diagonal cut at top</td></tr>
     </table></details>
-  - <details><summary>Styles for `2`</summary>
+  - Styles for `2`
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-two-straight-neck.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-two-straight-neck.dark.svg#gh-dark-mode-only" width=32/></td><td><code>two = 'straight-neck'</code>, <code>cv87 = 1</code></td></tr>
     <tr><td><code>2</code> with straight neck</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-two-curly-neck.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-two-curly-neck.dark.svg#gh-dark-mode-only" width=32/></td><td><code>two = 'curly-neck'</code>, <code>cv87 = 2</code></td></tr>
     <tr><td><code>2</code> with curly neck (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `3`</summary>
+  - Styles for `3`
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-three-flat-top.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-three-flat-top.dark.svg#gh-dark-mode-only" width=32/></td><td><code>three = 'flat-top'</code>, <code>cv88 = 1</code></td></tr>
     <tr><td>Flat top <code>3</code> (Like Museo Sans / Montserrat)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-three-two-arcs.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-three-two-arcs.dark.svg#gh-dark-mode-only" width=32/></td><td><code>three = 'two-arcs'</code>, <code>cv88 = 2</code></td></tr>
     <tr><td>Arched top <code>3</code> (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `4`</summary>
+  - Styles for `4`
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-four-closed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-closed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'closed'</code>, <code>cv89 = 1</code></td></tr>
     <tr><td><code>4</code> with closed contour</td></tr>
@@ -2634,7 +2725,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-four-open-non-crossing.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-open-non-crossing.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'open-non-crossing'</code>, <code>cv89 = 6</code></td></tr>
     <tr><td><code>4</code> with open contour but the horizontal bar does not overflow the vertical bar</td></tr>
     </table></details>
-  - <details><summary>Styles for `5`</summary>
+  - Styles for `5`
+    <details><summary>4 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-five-upright-arched.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-arched.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'upright-arched'</code>, <code>cv90 = 1</code></td></tr>
     <tr><td><code>5</code> with upright upper-left bar, and arched middle part (default)</td></tr>
@@ -2645,7 +2737,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-flat.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-flat.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-flat'</code>, <code>cv90 = 4</code></td></tr>
     <tr><td><code>5</code> with flat middle part</td></tr>
     </table></details>
-  - <details><summary>Styles for `6`</summary>
+  - Styles for `6`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-six-closed-contour.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-six-closed-contour.dark.svg#gh-dark-mode-only" width=32/></td><td><code>six = 'closed-contour'</code>, <code>cv91 = 1</code></td></tr>
     <tr><td><code>6</code> with a more closed contour</td></tr>
@@ -2654,7 +2747,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-six-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-six-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>six = 'straight-bar'</code>, <code>cv91 = 3</code></td></tr>
     <tr><td><code>6</code> with a straight bar (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `7`</summary>
+  - Styles for `7`
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-seven-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-seven-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>seven = 'straight-serifless'</code>, <code>cv92 = 1</code></td></tr>
     <tr><td><code>7</code> with straight stem; without serifs (default for Sans)</td></tr>
@@ -2681,7 +2775,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-seven-curly-serifed-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-seven-curly-serifed-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>seven = 'curly-serifed-crossbar'</code>, <code>cv92 = 12</code></td></tr>
     <tr><td><code>7</code> with curly stem, serifs, and crossbar</td></tr>
     </table></details>
-  - <details><summary>Styles for `8`</summary>
+  - Styles for `8`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-eight-crossing.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eight-crossing.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eight = 'crossing'</code>, <code>cv93 = 1</code></td></tr>
     <tr><td><code>8</code> with crossing middle part (default)</td></tr>
@@ -2690,7 +2785,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-eight-crossing-asymmetric.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eight-crossing-asymmetric.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eight = 'crossing-asymmetric'</code>, <code>cv93 = 3</code></td></tr>
     <tr><td><code>8</code> looks asymmetric crossing middle part</td></tr>
     </table></details>
-  - <details><summary>Styles for `9`</summary>
+  - Styles for `9`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-nine-closed-contour.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-nine-closed-contour.dark.svg#gh-dark-mode-only" width=32/></td><td><code>nine = 'closed-contour'</code>, <code>cv94 = 1</code></td></tr>
     <tr><td><code>9</code> with a more closed contour</td></tr>
@@ -2699,28 +2795,32 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-nine-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-nine-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>nine = 'straight-bar'</code>, <code>cv94 = 3</code></td></tr>
     <tr><td><code>9</code> with a straight bar (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `öẋ`, `ij` (Dot and Comma shape in diacritics)</summary>
+  - Styles for `öẋ`, `ij` (Dot and Comma shape in diacritics)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="188"><img src="../images/cv-diacritic-dot-round.light.svg#gh-light-mode-only" width=160/><img src="../images/cv-diacritic-dot-round.dark.svg#gh-dark-mode-only" width=160/></td><td><code>diacritic-dot = 'round'</code>, <code>cv95 = 1</code></td></tr>
     <tr><td>Dots and Commas in diacritics are round (default)</td></tr>
     <tr><td rowspan="2" width="188"><img src="../images/cv-diacritic-dot-square.light.svg#gh-light-mode-only" width=160/><img src="../images/cv-diacritic-dot-square.dark.svg#gh-dark-mode-only" width=160/></td><td><code>diacritic-dot = 'square'</code>, <code>cv95 = 2</code></td></tr>
     <tr><td>Dots and Commas in diacritics are square</td></tr>
     </table></details>
-  - <details><summary>Styles for `.,`, `:;` (Dot and Comma shape in punctuations and symbols)</summary>
+  - Styles for `.,`, `:;` (Dot and Comma shape in punctuations and symbols)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="220"><img src="../images/cv-punctuation-dot-round.light.svg#gh-light-mode-only" width=192/><img src="../images/cv-punctuation-dot-round.dark.svg#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'round'</code>, <code>cv96 = 1</code></td></tr>
     <tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use round dots (default)</td></tr>
     <tr><td rowspan="2" width="220"><img src="../images/cv-punctuation-dot-square.light.svg#gh-light-mode-only" width=192/><img src="../images/cv-punctuation-dot-square.dark.svg#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'square'</code>, <code>cv96 = 2</code></td></tr>
     <tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use square dots</td></tr>
     </table></details>
-  - <details><summary>Styles for `~`</summary>
+  - Styles for `~`
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-tilde-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-tilde-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>tilde = 'high'</code>, <code>cv97 = 1</code></td></tr>
     <tr><td>Higher tilde <code>~</code></td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-tilde-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-tilde-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>tilde = 'low'</code>, <code>cv97 = 2</code></td></tr>
     <tr><td>Lower tilde <code>~</code> (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `*`</summary>
+  - Styles for `*`
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-penta-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-penta-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'penta-high'</code>, <code>cv98 = 1</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with five-pointed shape, and high position (default)</td></tr>
@@ -2747,7 +2847,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-hex-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-hex-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-hex-low'</code>, <code>cv98 = 12</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with turned six-pointed shape, and low position</td></tr>
     </table></details>
-  - <details><summary>Styles for `_`</summary>
+  - Styles for `_`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-underscore-above-baseline.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-underscore-above-baseline.dark.svg#gh-dark-mode-only" width=32/></td><td><code>underscore = 'above-baseline'</code>, <code>cv99 = 1</code></td></tr>
     <tr><td>Extra-high <code>_</code>, placed right above baseline</td></tr>
@@ -2756,7 +2857,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-underscore-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-underscore-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>underscore = 'low'</code>, <code>cv99 = 3</code></td></tr>
     <tr><td>Lower underscore <code>_</code>, placed right above descender line</td></tr>
     </table></details>
-  - <details><summary>Styles for `^`</summary>
+  - Styles for `^`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-caret-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'high'</code>, <code>VSAA = 1</code></td></tr>
     <tr><td>Higher circumflex <code>^</code></td></tr>
@@ -2765,7 +2867,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-caret-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'low'</code>, <code>VSAA = 3</code></td></tr>
     <tr><td>Lower circumflex <code>^</code></td></tr>
     </table></details>
-  - <details><summary>Styles for `` ` ``</summary>
+  - Styles for `` ` ``
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-grave-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-grave-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-grave = 'straight'</code>, <code>VSAB = 1</code></td></tr>
     <tr><td>Show ASCII grave (<code>`</code>) as short diagonal straight bar. (default)</td></tr>
@@ -2774,14 +2877,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-grave-raised-turn-comma.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-grave-raised-turn-comma.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-grave = 'raised-turn-comma'</code>, <code>VSAB = 3</code></td></tr>
     <tr><td>Show ASCII grave (<code>`</code>) as raised turned comma, identical to curly open single quote symbols (U+2018).</td></tr>
     </table></details>
-  - <details><summary>Styles for `'`</summary>
+  - Styles for `'`
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-single-quote-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-single-quote-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-single-quote = 'straight'</code>, <code>VSAC = 1</code></td></tr>
     <tr><td>Show ASCII quote (<code>"</code>) as short vertical straight bar. (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-single-quote-raised-comma.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-single-quote-raised-comma.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-single-quote = 'raised-comma'</code>, <code>VSAC = 2</code></td></tr>
     <tr><td>Show ASCII quote (<code>"</code>) as raised comma.</td></tr>
     </table></details>
-  - <details><summary>Styles for `(`, `)`</summary>
+  - Styles for `(`, `)`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="92"><img src="../images/cv-paren-normal.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-paren-normal.dark.svg#gh-dark-mode-only" width=64/></td><td><code>paren = 'normal'</code>, <code>VSAD = 1</code></td></tr>
     <tr><td>Parenthesis with normal contour (default)</td></tr>
@@ -2790,7 +2895,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="92"><img src="../images/cv-paren-flat-arc.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-paren-flat-arc.dark.svg#gh-dark-mode-only" width=64/></td><td><code>paren = 'flat-arc'</code>, <code>VSAD = 3</code></td></tr>
     <tr><td>Parenthesis with flat arc, like that in JetBrains Mono</td></tr>
     </table></details>
-  - <details><summary>Styles for `{`, `}`</summary>
+  - Styles for `{`, `}`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="92"><img src="../images/cv-brace-straight.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-brace-straight.dark.svg#gh-dark-mode-only" width=64/></td><td><code>brace = 'straight'</code>, <code>VSAE = 1</code></td></tr>
     <tr><td>More straight braces</td></tr>
@@ -2799,14 +2905,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="92"><img src="../images/cv-brace-curly-flat-boundary.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-brace-curly-flat-boundary.dark.svg#gh-dark-mode-only" width=64/></td><td><code>brace = 'curly-flat-boundary'</code>, <code>VSAE = 3</code></td></tr>
     <tr><td>Curly braces with flat boundary shape</td></tr>
     </table></details>
-  - <details><summary>Styles for `«`, `»` (Guillemets)</summary>
+  - Styles for `«`, `»` (Guillemets)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="92"><img src="../images/cv-guillemet-straight.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-guillemet-straight.dark.svg#gh-dark-mode-only" width=64/></td><td><code>guillemet = 'straight'</code>, <code>VSAF = 1</code></td></tr>
     <tr><td>Straight Guillemets (<code>« »</code>)</td></tr>
     <tr><td rowspan="2" width="92"><img src="../images/cv-guillemet-curly.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-guillemet-curly.dark.svg#gh-dark-mode-only" width=64/></td><td><code>guillemet = 'curly'</code>, <code>VSAF = 2</code></td></tr>
     <tr><td>Curly Guillemets (<code>« »</code>) (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `#`</summary>
+  - Styles for `#`
+    <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-upright.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-upright.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'upright'</code>, <code>VSAG = 1</code></td></tr>
     <tr><td>Number sign with vertical bars (default)</td></tr>
@@ -2825,7 +2933,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-slanted-open-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-slanted-open-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'slanted-open-tall'</code>, <code>VSAG = 8</code></td></tr>
     <tr><td>Number sign with slanted bars, open inner, and taller than digits</td></tr>
     </table></details>
-  - <details><summary>Styles for `&`</summary>
+  - Styles for `&`
+    <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-closed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-closed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'closed'</code>, <code>VSAH = 1</code></td></tr>
     <tr><td>Ampersand (<code>&amp;</code>) with a closed contour (default)</td></tr>
@@ -2844,7 +2953,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-et-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-et-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'et-tailed'</code>, <code>VSAH = 8</code></td></tr>
     <tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t with tail</td></tr>
     </table></details>
-  - <details><summary>Styles for `@`</summary>
+  - Styles for `@`
+    <details><summary>9 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-at-threefold.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-threefold.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'threefold'</code>, <code>VSAI = 1</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with three-fold body (default)</td></tr>
@@ -2865,7 +2975,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-at-compact.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-compact.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'compact'</code>, <code>VSAI = 9</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with compact body</td></tr>
     </table></details>
-  - <details><summary>Styles for `$`</summary>
+  - Styles for `$`
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'open'</code>, <code>VSAJ = 1</code></td></tr>
     <tr><td>Dollar symbol with open contour</td></tr>
@@ -2880,7 +2991,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'interrupted-cap'</code>, <code>VSAJ = 6</code></td></tr>
     <tr><td>Dollar symbol with interrupted strike-through vertical bar, sized not exceeding baseline and ascender</td></tr>
     </table></details>
-  - <details><summary>Styles for `¢`</summary>
+  - Styles for `¢`
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cent-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'open'</code>, <code>VSAK = 1</code></td></tr>
     <tr><td>Cent sign (<code>¢</code>) with open contour</td></tr>
@@ -2895,7 +3007,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cent-bar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-bar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'bar-interrupted-cap'</code>, <code>VSAK = 6</code></td></tr>
     <tr><td>Cent sign (<code>¢</code>) with vertical bar breaks at center, sized not exceeding baseline and ascender</td></tr>
     </table></details>
-  - <details><summary>Styles for `%`</summary>
+  - Styles for `%`
+    <details><summary>4 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-percent-dots.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-percent-dots.dark.svg#gh-dark-mode-only" width=32/></td><td><code>percent = 'dots'</code>, <code>VSAL = 1</code></td></tr>
     <tr><td>Percent <code>%</code> with rectangular dots</td></tr>
@@ -2906,14 +3019,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-percent-rings-continuous-slash-also-connected.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-percent-rings-continuous-slash-also-connected.dark.svg#gh-dark-mode-only" width=32/></td><td><code>percent = 'rings-continuous-slash-also-connected'</code>, <code>VSAL = 4</code></td></tr>
     <tr><td>Percent <code>%</code> with rings and continuous bar and the slash in <code>%</code> is also connected to the top-left ring</td></tr>
     </table></details>
-  - <details><summary>Styles for `|`, `¦`</summary>
+  - Styles for `|`, `¦`
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="156"><img src="../images/cv-bar-natural-slope.light.svg#gh-light-mode-only" width=128/><img src="../images/cv-bar-natural-slope.dark.svg#gh-dark-mode-only" width=128/></td><td><code>bar = 'natural-slope'</code>, <code>VSAM = 1</code></td></tr>
     <tr><td>Bar punctuations (<code>|</code>) has a natural slope under italics and oblique (default)</td></tr>
     <tr><td rowspan="2" width="156"><img src="../images/cv-bar-force-upright.light.svg#gh-light-mode-only" width=128/><img src="../images/cv-bar-force-upright.dark.svg#gh-dark-mode-only" width=128/></td><td><code>bar = 'force-upright'</code>, <code>VSAM = 2</code></td></tr>
     <tr><td>Bar punctuations (<code>|</code>) is forced upright under italics and oblique</td></tr>
     </table></details>
-  - <details><summary>Styles for `?`</summary>
+  - Styles for `?`
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-question-smooth.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-question-smooth.dark.svg#gh-dark-mode-only" width=32/></td><td><code>question = 'smooth'</code>, <code>VSAN = 1</code></td></tr>
     <tr><td>Smooth question mark (<code>?</code>) (default)</td></tr>
@@ -2922,21 +3037,24 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-question-corner-flat-hooked.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-question-corner-flat-hooked.dark.svg#gh-dark-mode-only" width=32/></td><td><code>question = 'corner-flat-hooked'</code>, <code>VSAN = 3</code></td></tr>
     <tr><td>Question mark (<code>?</code>) with a corner at middle and flat hook</td></tr>
     </table></details>
-  - <details><summary>Styles for `¶`</summary>
+  - Styles for `¶`
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-pilcrow-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>pilcrow = 'high'</code>, <code>VSAO = 1</code></td></tr>
     <tr><td>Higher pilcrow sign <code>¶</code> (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-pilcrow-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>pilcrow = 'low'</code>, <code>VSAO = 2</code></td></tr>
     <tr><td>Lower pilcrow sign <code>¶</code></td></tr>
     </table></details>
-  - <details><summary>Styles for `∂` (Partial derivative symbol)</summary>
+  - Styles for `∂` (Partial derivative symbol)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'straight-bar'</code>, <code>VSAP = 1</code></td></tr>
     <tr><td>The upper bar of the partial derivative symbol is straight</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-curly-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-curly-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'curly-bar'</code>, <code>VSAP = 2</code></td></tr>
     <tr><td>The upper bar of the partial derivative symbol is curly (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `µ` (Micro sign)</summary>
+  - Styles for `µ` (Micro sign)
+    <details><summary>13 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-serifless'</code>, <code>VSAQ = 1</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothed shape; without serifs (default for Sans Upright)</td></tr>
@@ -2965,14 +3083,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-rounded-serifed'</code>, <code>VSAQ = 13</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothless (rounded) shape, and serifs</td></tr>
     </table></details>
-  - <details><summary>Styles for `<=`, `>=` (Less-equal and Greater-equal ligations)</summary>
+  - Styles for `<=`, `>=` (Less-equal and Greater-equal ligations)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="92"><img src="../images/cv-lig-ltgteq-flat.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-lig-ltgteq-flat.dark.svg#gh-dark-mode-only" width=64/></td><td><code>lig-ltgteq = 'flat'</code>, <code>VLAA = 1</code></td></tr>
     <tr><td>The lower bar of <code>&lt;=</code> and <code>&gt;=</code> ligation is flat (default)</td></tr>
     <tr><td rowspan="2" width="92"><img src="../images/cv-lig-ltgteq-slanted.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-lig-ltgteq-slanted.dark.svg#gh-dark-mode-only" width=64/></td><td><code>lig-ltgteq = 'slanted'</code>, <code>VLAA = 2</code></td></tr>
     <tr><td>The lower bar of <code>&lt;=</code> and <code>&gt;=</code> ligation is slanted</td></tr>
     </table></details>
-  - <details><summary>Styles for `!=` (Not-equal ligations)</summary>
+  - Styles for `!=` (Not-equal ligations)
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-neq-vertical.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-vertical.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-neq = 'vertical'</code>, <code>VLAB = 1</code></td></tr>
     <tr><td>The bar in inequality (<code>!=</code>, etc.) ligation is vertical</td></tr>
@@ -2987,35 +3107,40 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-neq-more-slanted-dotted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-more-slanted-dotted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-neq = 'more-slanted-dotted'</code>, <code>VLAB = 6</code></td></tr>
     <tr><td>The bar in inequality (<code>!=</code>, etc.) ligation is more slanted, and with a dot at bottom for ligations built from exclamation sign (<code>!</code>)</td></tr>
     </table></details>
-  - <details><summary>Styles for `==` (Equality ligations)</summary>
+  - Styles for `==` (Equality ligations)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-equal-chain-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-equal-chain-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-equal-chain = 'with-notch'</code>, <code>VLAC = 1</code></td></tr>
     <tr><td>The bars in equality (<code>==</code>, etc.) ligation have notches in the middle (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-equal-chain-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-equal-chain-without-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-equal-chain = 'without-notch'</code>, <code>VLAC = 2</code></td></tr>
     <tr><td>The bars in equality (<code>==</code>, etc.) ligation do not have notches in the middle</td></tr>
     </table></details>
-  - <details><summary>Styles for `--` (Hyphen-minus ligations)</summary>
+  - Styles for `--` (Hyphen-minus ligations)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-hyphen-chain-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-hyphen-chain-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-hyphen-chain = 'with-notch'</code>, <code>VLAD = 1</code></td></tr>
     <tr><td>The bars in connected hyphen-minus (<code>--</code>, etc.) ligation have notches in the middle (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-hyphen-chain-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-hyphen-chain-without-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-hyphen-chain = 'without-notch'</code>, <code>VLAD = 2</code></td></tr>
     <tr><td>The bars in connected hyphen-minus (<code>--</code>, etc.) ligation do not have notches in the middle</td></tr>
     </table></details>
-  - <details><summary>Styles for `++` (Plus ligations)</summary>
+  - Styles for `++` (Plus ligations)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-plus-chain-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-plus-chain-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-plus-chain = 'with-notch'</code>, <code>VXAA = 1</code></td></tr>
     <tr><td>The bars in connected plus (<code>++</code>, etc.) ligation have notches in the middle</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-plus-chain-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-plus-chain-without-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-plus-chain = 'without-notch'</code>, <code>VXAA = 2</code></td></tr>
     <tr><td>The bars in connected plus (<code>++</code>, etc.) ligation do not have notches in the middle (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `=>` (Double arrow ligation)</summary>
+  - Styles for `=>` (Double arrow ligation)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-double-arrow-bar-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-double-arrow-bar-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-double-arrow-bar = 'with-notch'</code>, <code>VLAE = 1</code></td></tr>
     <tr><td>The bars in double arrow (<code>=&gt;</code>, etc.) ligation have notches in the middle</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-double-arrow-bar-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-double-arrow-bar-without-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-double-arrow-bar = 'without-notch'</code>, <code>VLAE = 2</code></td></tr>
     <tr><td>The bars in double arrow (<code>=&gt;</code>, etc.) ligation do not have notches in the middle (default)</td></tr>
     </table></details>
-  - <details><summary>Styles for `->` (Single arrow ligation)</summary>
+  - Styles for `->` (Single arrow ligation)
+    <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-single-arrow-bar-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-single-arrow-bar-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-single-arrow-bar = 'with-notch'</code>, <code>VLAF = 1</code></td></tr>
     <tr><td>The bars in single arrow (<code>=&gt;</code>, etc.) ligation have notches in the middle</td></tr>
