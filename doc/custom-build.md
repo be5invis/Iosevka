@@ -21,26 +21,6 @@ To build Iosevka you should:
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
 
-### Using a Docker container
-
-A Docker container handling the build environment for you can be found [here](https://github.com/avivace/fonts-iosevka).
-
-To pull it from Docker Hub and start a standard build of the latest released version, run
-
-```
-docker run -it -v $(pwd):/build avivace/iosevka-build
-```
-
-If you are using Powershell, run
-
-```
-docker run -it -v ${pwd}:/build avivace/iosevka-build
-```
-
-Fonts files will be placed in the `dist` folder.
-
-You can provide `private-build-plans.toml` for a customized build (place it in your working directory when you run the `docker` command), and/or specify the desired release by appending `-e FONT_VERSION=X.X.X`. to the `docker` command.
-
 ## Customized Build
 
 To create a custom build, you need:
