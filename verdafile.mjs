@@ -1171,7 +1171,7 @@ const CompiledJs = file.make(
 	p => p,
 	async (target, out) => {
 		const ptl = replaceExt(".ptl", out.full);
-		if (/\/glyphs\//.test(out.full)) await target.need(MARCOS);
+		await target.need(MARCOS);
 		await target.need(sfu(ptl));
 		echo.action(echo.hl.command("Compile Script"), ptl);
 		await silently.run(PATEL_C, "--strict", "--esm", ptl, "-o", out.full);
