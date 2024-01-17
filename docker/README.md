@@ -19,7 +19,7 @@ Please refer to the `<BUILD_ARGS>` parameters to [Customized Build](../../dev/do
 `<tag>` can be the following values
 -  `main`    git main branch
 -  `dev`     git dev branch
--  `v8.0.5`  git [release version tags](../../../tags)
+-  `v28.0.5`  git [release version tags](../../../tags)
 
 When this variable is omitted, the tag of the latest release will be selected
 
