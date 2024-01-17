@@ -21,6 +21,8 @@ To build Iosevka you should:
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
 
+To using Docker build, read [docker/README.md](../docker/README.md).
+
 ## Customized Build
 
 To create a custom build, you need:
