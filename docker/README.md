@@ -12,14 +12,14 @@ Note: Make docker image need execute only one time.
 
 ## Usage
 `docker run -it --rm -v $PWD:/work fontcc <BUILD_ARGS>`
-Please refer to the `<BUILD_ARGS>` parameters to [Customized Build](../dev/doc/custom-build.md#customized-build)
+Please refer to the `<BUILD_ARGS>` parameters to [Customized Build](../../dev/doc/custom-build.md#customized-build)
 ### Optional parameters (put them before `fontcc`):
 1. `-e "VERSION_TAG=<tag>"`
 
 `<tag>` can be the following values
 -  `main`    git main branch
 -  `dev`     git dev branch
--  `v8.0.5`  git [release version tags](../../tags)
+-  `v28.0.5`  git [release version tags](../../../tags)
 
 When this variable is omitted, the tag of the latest release will be selected
 
