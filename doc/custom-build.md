@@ -905,9 +905,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-a-single-storey-double-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-double-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'single-storey-double-serifed'</code>, <code>cv26 = 13</code></td></tr>
     <tr><td><code>a</code> with single-storey body, and serifs at top and bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-a-single-storey-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'single-storey-tailed'</code>, <code>cv26 = 14</code></td></tr>
-    <tr><td><code>a</code> with single-storey body, and curly tail (default for Sans Italic)</td></tr>
+    <tr><td><code>a</code> with single-storey body, and curly tail (default for Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-a-single-storey-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'single-storey-tailed-serifed'</code>, <code>cv26 = 15</code></td></tr>
-    <tr><td><code>a</code> with single-storey body, and curly tail; with serifs at top and bottom (default for Slab Italic)</td></tr>
+    <tr><td><code>a</code> with single-storey body, and curly tail; with serifs at top and bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-a-single-storey-earless-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-earless-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'single-storey-earless-corner-serifless'</code>, <code>cv26 = 16</code></td></tr>
     <tr><td><code>a</code> with single-storey body, and earless (cornered top-right); without serif at terminal</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-a-single-storey-earless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-earless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'single-storey-earless-corner-serifed'</code>, <code>cv26 = 17</code></td></tr>
@@ -927,9 +927,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-b-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'toothed-serifless'</code>, <code>cv27 = 1</code></td></tr>
     <tr><td><code>b</code> with toothed shape; without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-b-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'toothed-motion-serifed'</code>, <code>cv27 = 2</code></td></tr>
-    <tr><td><code>b</code> with toothed shape, and motion serifs</td></tr>
+    <tr><td><code>b</code> with toothed shape, and motion serifs (default for Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-b-toothed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'toothed-serifed'</code>, <code>cv27 = 3</code></td></tr>
-    <tr><td><code>b</code> with toothed shape, and serifs (default for Slab)</td></tr>
+    <tr><td><code>b</code> with toothed shape, and serifs (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-b-toothless-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothless-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'toothless-corner-serifless'</code>, <code>cv27 = 4</code></td></tr>
     <tr><td><code>b</code> with toothless (cornered) shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-b-toothless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'toothless-corner-serifed'</code>, <code>cv27 = 5</code></td></tr>
@@ -1037,9 +1037,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-g-double-storey-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-double-storey-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'double-storey-open'</code>, <code>cv32 = 2</code></td></tr>
     <tr><td><code>g</code> with double-storey shape, and open contour</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-g-single-storey-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'single-storey-serifless'</code>, <code>cv32 = 3</code></td></tr>
-    <tr><td><code>g</code> with single-storey shape (default for Sans)</td></tr>
+    <tr><td><code>g</code> with single-storey shape (default for Sans Upright, Sans Italic, Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-g-single-storey-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'single-storey-serifed'</code>, <code>cv32 = 4</code></td></tr>
-    <tr><td><code>g</code> with single-storey shape, and top-right serif (default for Slab)</td></tr>
+    <tr><td><code>g</code> with single-storey shape, and top-right serif (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-g-single-storey-earless-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-earless-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'single-storey-earless-corner'</code>, <code>cv32 = 5</code></td></tr>
     <tr><td><code>g</code> with single-storey shape, and earless (cornered top-right)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-g-single-storey-earless-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-earless-rounded.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'single-storey-earless-rounded'</code>, <code>cv32 = 6</code></td></tr>
@@ -1367,11 +1367,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-serifless'</code>, <code>cv41 = 1</code></td></tr>
     <tr><td><code>q</code> with straight terminal; without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-bottom-serifed'</code>, <code>cv41 = 2</code></td></tr>
-    <tr><td><code>q</code> with straight terminal, and serif at bottom</td></tr>
+    <tr><td><code>q</code> with straight terminal, and serif at bottom (default for Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-motion-serifed'</code>, <code>cv41 = 3</code></td></tr>
     <tr><td><code>q</code> with straight terminal, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-serifed'</code>, <code>cv41 = 4</code></td></tr>
-    <tr><td><code>q</code> with straight terminal, and serifs (default for Slab)</td></tr>
+    <tr><td><code>q</code> with straight terminal, and serifs (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'tailed-serifless'</code>, <code>cv41 = 5</code></td></tr>
     <tr><td><code>q</code> with tailed terminal; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-tailed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-tailed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'tailed-motion-serifed'</code>, <code>cv41 = 6</code></td></tr>
