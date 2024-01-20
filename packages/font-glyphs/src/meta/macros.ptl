@@ -20,16 +20,15 @@ define-macro Just : begin
 
 	return m
 
-define-macro postulate : syntax-rules
-	`[postulate @::$pairs] : begin
-		local ta : env.newt
+define-macro $$InitFlexParameters$$ : syntax-rules
+	`[$$InitFlexParameters$$ @::$pairs] : begin
 		local tb : env.newt
 		local t : env.newt
 
 		local ps `[begin
-			[local @ta : {}.slice.call arguments 0]
+			[local $-flex-arguments : {}.slice.call arguments 0]
 			[local @tb {}]
-			[for [local @t 0] (@t < @ta.length) [inc @t] : if [not : @ta.(@t) <@ $NamedParameterPair$] : @tb.push @ta.(@t)]
+			[for [local @t 0] (@t < $-flex-arguments.length) [inc @t] : if [not : $-flex-arguments.(@t) <@ $NamedParameterPair$] : @tb.push $-flex-arguments.(@t)]
 		]
 
 		local declarations `[begin]
@@ -40,8 +39,6 @@ define-macro postulate : syntax-rules
 		local j 0
 		foreach $pf [items-of $pairs] : begin
 			local name
-			local pf : formOf $pf
-
 			match [formOf $pf]
 				pf [atom pf] : begin
 					declarations.push `[local @pf]
@@ -59,25 +56,54 @@ define-macro postulate : syntax-rules
 					declarations.push `[local @decl]
 					indexAssigns.push `[set @decl : fallback @decl (@tb).(@{".quote" j}) @dflt]
 					set name decl
-				{".operatorPiece" decl '--' dflt} : begin
-					declarations.push `[local @decl]
-					indexAssigns.push `[set @decl : fallback @decl (@tb).(@{".quote" j}) @dflt]
-					set name decl
-				true : throw : new Error "Invalid postulation syntax"
+				{".operatorPiece" :: items} : match [opSegToRegular items [scopeOf $pf]]
+					`(@decl -- @dflt) : begin
+						declarations.push `[local @decl]
+						indexAssigns.push `[set @decl : fallback @decl (@tb).(@{".quote" j}) @dflt]
+						set name decl
+					____ : throw : new Error "Invalid postulation syntax"
+				____ : throw : new Error "Invalid postulation syntax"
 
 			namedAssigns.push `[if (@t && @t <@ $NamedParameterPair$ && @t.left == @{".quote" name})
 				[set @name @t.right]]
 			inc j
 
 		ps.push declarations
-		ps.push `[foreach [@t : items-of @ta] @namedAssigns]
+		ps.push `[foreach [@t : items-of $-flex-arguments] @namedAssigns]
 		ps.push indexAssigns
 		ps.push tearDowns
 
 		return : dirty ps
 
+# TODO: replace this with the new [with-params]
 define-macro with-params : syntax-rules
-	`[with-params @_pairs @body] : dirty `[begin [postulate @::[formOf _pairs]] @[formOf body]]
+	`[with-params @_pairs @body] : dirty `[begin
+		[$$InitFlexParameters$$ @::[formOf _pairs]]
+		@[formOf body]
+	]
+
+define-macro flex-params : syntax-rules
+	`[flex-params @_lam] : begin
+		local lam : formOf _lam
+		local lamArgs lam.1
+		local {lamBodyLeader :: lamBodyStatements} lam.2
+
+		local finalStatements {}
+		
+		foreach stmt [items-of lamBodyStatements] : begin
+			if ([Array.isArray stmt] && stmt.0 == 'local-parameter')
+			: then : begin
+				lamArgs.push stmt.1
+			: else : begin
+				finalStatements.push stmt
+
+		return : dirty {'.lambda'
+			{}
+			`[begin
+				[$$InitFlexParameters$$ @::lamArgs]
+				@{lamBodyLeader :: finalStatements}
+			]
+		}
 
 ### Necessary macros
 # A glyph construction is a function which "modifies" a glyph.

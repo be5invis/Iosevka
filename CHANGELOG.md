@@ -1,5 +1,16 @@
 ## Modifications since last major version
 
+### 28.0.6
+
+* Fix application of `APLF` for several [Uiua](https://www.uiua.org/) operators.
+* Adjust serif shapes for lowercase italic Yeri glyphs with corner body shape (#2151).
+* Adjustments to CV defaults:
+  - Make `a` (`cv26`) use `single-storey-tailed` under slab italic by default.
+  - Make `b` (`cv27`) use `toothed-motion-serifed` under slab italic by default.
+  - Make `g` (`cv32`) use `single-storey-serifless` under slab italic by default.
+  - Make `q` (`cv41`) use `straight-bottom-serifed` under slab italic by default.
+
+
 ### 28.0.5
 
 * Add characters:
