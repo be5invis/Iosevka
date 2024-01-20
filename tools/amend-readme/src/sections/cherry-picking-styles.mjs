@@ -48,19 +48,22 @@ export default async function processCherryPickingStyles(argv, dirs) {
 }
 
 function formatCv(md, dirs, info) {
-	md.log(`  - ${info.introMD}:`);
+	const INDENT = `    `;
+	md.log(`  - ${info.introMD}`);
+	md.log(`${INDENT}<details><summary>${info.alternatives.length} variants</summary>`);
 	const imgWidth = 32 * info.sampleImageCountEm;
-	let sTable = "     <table>";
+	let sTable = INDENT + "<table>" + "\n";
 	for (const alt of info.alternatives) {
 		const imageId = `${dirs.images}/cv-${alt.imageId}`;
 		const image = ImgX(imageId, imgWidth);
 		const selectorText = alt.selectors.map(x => `<code>${x}</code>`).join(", ");
 		sTable +=
+			INDENT +
 			`<tr><td rowspan="2" width="${2 * 14 + imgWidth}">${image}</td>` +
-			`<td>${selectorText}</td></tr>`;
-		sTable += `<tr><td>${alt.description}</td></tr>`;
+			`<td>${selectorText}</td></tr>\n`;
+		sTable += INDENT + `<tr><td>${alt.description}</td></tr>\n`;
 	}
-	sTable += "</table>";
+	sTable += INDENT + "</table></details>";
 	md.log(sTable);
 }
 function formatDescription(s) {
