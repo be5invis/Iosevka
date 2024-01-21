@@ -24,6 +24,14 @@ export const TieMark = LinkedGlyphProp("TieMark");
 export const LeaningMark = LinkedGlyphProp("LeaningMark");
 export const LeaningMarkSpacer = LinkedGlyphProp("LeaningMarkSpacer");
 
+export const LocalizedForm = {
+	SRB: {
+		Upright: LinkedGlyphProp("SerbianLocUpright"),
+		Italic: LinkedGlyphProp("SerbianLocItalic")
+	},
+	BGR: LinkedGlyphProp("BulgarianLoc")
+};
+
 export const Texture = {
 	ExtL: LinkedGlyphProp("TextureExtL"),
 	ExtR: LinkedGlyphProp("TextureExtR"),
@@ -163,6 +171,17 @@ export const HintClass = {
 export const DotlessOrNot = {
 	query(glyph) {
 		if (Dotless.get(glyph)) return [Dotless];
+		return null;
+	}
+};
+
+export const AnyLocalizedForm = {
+	query(glyph) {
+		let grs = [];
+		if (LocalizedForm.SRB.Upright.get(glyph)) grs.push(LocalizedForm.SRB.Upright);
+		if (LocalizedForm.SRB.Italic.get(glyph)) grs.push(LocalizedForm.SRB.Italic);
+		if (LocalizedForm.BGR.get(glyph)) grs.push(LocalizedForm.BGR);
+		if (grs.length) return grs;
 		return null;
 	}
 };
