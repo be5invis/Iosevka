@@ -101,40 +101,6 @@ glyph-block Letter-Latin-Ezh : begin
 
 		return : object yMidBar
 
-	# Used by ampersand
-	glyph-block-export RevEzhShape
-	define [RevEzhShape] : with-params [top bot pleft pright hookless [ada SmallArchDepthA] [adb SmallArchDepthB] [diagCoeff 1.2] [pyBar 0.6]] : glyph-proc
-		local cor : HSwToV diagCoeff
-		local yMidBar : RevEzhShape.yMidBar top bot pyBar
-		local ezhRight : mix SB RightSB [fallback pright 0.8]
-		local ezhLeft : mix SB RightSB [fallback pleft 0.075]
-		include : HBar.t ezhLeft RightSB top
-
-		include : spiro-outline
-			corner ezhRight yMidBar
-			corner (ezhRight - Stroke * cor) (yMidBar - HalfStroke)
-			corner (ezhRight - Stroke * cor) yMidBar
-			corner ezhLeft (top - Stroke)
-			corner (ezhLeft + Stroke * cor) (top - Stroke)
-
-		include : dispiro
-			widths.lhs
-			flat ezhRight yMidBar [heading Leftward]
-			curl (Middle + CorrectionOMidS) yMidBar
-			archv
-			if hookless
-			: then : list
-				g4.down.mid (SB + OX) [RevEzhShape.yLoopLeft top bot pyBar ada adb]
-			: else : list
-				g4   (SB + OX) [RevEzhShape.yLoopLeft top bot pyBar ada adb]
-				hookend bot
-				g4 RightSB (bot + Hook * ((top - bot) / CAP))
-		if SLAB : begin
-			include : VSerif.dr RightSB top VJut
-	set RevEzhShape.yMidBar : lambda [top bot pyBar] : mix bot top pyBar
-	set RevEzhShape.yLoopLeft : lambda [top bot pyBar ada adb]
-		mix [RevEzhShape.yMidBar top bot pyBar] bot (ada / (ada + adb))
-	
 	define EzhConfig : SuffixCfg.weave
 		object # body
 			straight { false }
@@ -236,3 +202,49 @@ glyph-block Letter-Latin-Ezh : begin
 		include : HSerif.lt SB Ascender SideJut
 
 	select-variant 'lyoghRTail' 0x1DF05 (follow -- 'lyogh')
+
+
+	# Used by ampersand only
+	# Current reversed Ezh is generated using a auto-build.
+	glyph-block-export RevEzhShape
+	define flex-params [RevEzhShape] : glyph-proc
+		local-parameter : top
+		local-parameter : bot
+		local-parameter : pLeft -- 0.075
+		local-parameter : pRight -- 0.8
+		local-parameter : hookless -- false
+		local-parameter : ada -- SmallArchDepthA
+		local-parameter : adb -- SmallArchDepthB
+		local-parameter : diagCoeff -- 1.2
+		local-parameter : pyBar -- 0.6
+
+		local cor : HSwToV diagCoeff
+		local yMidBar : RevEzhShape.yMidBar top bot pyBar
+		local ezhRight : mix SB RightSB pRight
+		local ezhLeft : mix SB RightSB pLeft
+		include : HBar.t ezhLeft RightSB top
+
+		include : spiro-outline
+			corner ezhRight yMidBar
+			corner (ezhRight - Stroke * cor) (yMidBar - HalfStroke)
+			corner (ezhRight - Stroke * cor) yMidBar
+			corner ezhLeft (top - Stroke)
+			corner (ezhLeft + Stroke * cor) (top - Stroke)
+
+		include : dispiro
+			widths.lhs
+			flat ezhRight yMidBar [heading Leftward]
+			curl (Middle + CorrectionOMidS) yMidBar
+			archv
+			if hookless
+			: then : list
+				g4.down.mid (SB + OX) [RevEzhShape.yLoopLeft top bot pyBar ada adb]
+			: else : list
+				g4   (SB + OX) [RevEzhShape.yLoopLeft top bot pyBar ada adb]
+				hookend bot
+				g4 RightSB (bot + Hook * ((top - bot) / CAP))
+		if SLAB : begin
+			include : VSerif.dr RightSB top VJut
+	set RevEzhShape.yMidBar : lambda [top bot pyBar] : mix bot top pyBar
+	set RevEzhShape.yLoopLeft : lambda [top bot pyBar ada adb]
+		mix [RevEzhShape.yMidBar top bot pyBar] bot (ada / (ada + adb))
