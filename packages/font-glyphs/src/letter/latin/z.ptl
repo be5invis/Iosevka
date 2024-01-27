@@ -54,11 +54,9 @@ glyph-block Letter-Latin-Z : begin
 	define [SmallZBaseShape mode] : glyph-proc
 		local cor : 1.2 * HVContrast
 		include : tagged 'strokeTop' : HBar.t SB RightSB XH
-		include : spiro-outline
-			corner SB [if (mode === MODE-ZSWASH) 0 Stroke]
-			corner (RightSB - Stroke * cor) (XH - Stroke)
-			corner RightSB (XH - Stroke)
-			corner (SB + Stroke * cor) [if (mode === MODE-ZSWASH) 0 Stroke]
+		include : dispiro
+			corner SB [if (mode === MODE-ZSWASH) 0 Stroke] [widths.rhs (Stroke / HVContrast)]
+			corner RightSB (XH - Stroke)                   [widths.lhs (Stroke / HVContrast)]
 		if [DisplayBottomStroke mode] : include : tagged 'strokeBottom' : HBar.b SB RightSB 0
 		set-base-anchor "trailing" RightSB 0
 
@@ -71,7 +69,7 @@ glyph-block Letter-Latin-Z : begin
 	define [ZCursiveShapeImpl top mode] : glyph-proc
 		define hookTerminalWidth : AdviceStroke 3.5
 		define xDiagWidth : 1 * Stroke
-		define yFootHeight : Math.max (0.15 * top) (Stroke * 0.625)
+		define yFootHeight : [Math.max (0.15 * top) (Stroke * 0.625)] + 0.7 * Stroke
 		define kFoot : 1 + 0.5 * Stroke / yFootHeight
 		define yHookDepth : Hook + Stroke * 0.25
 		define yHookStraightDepth : Math.min (yHookDepth - Stroke * 1.1) (yHookDepth / 3 - Stroke / 4)
@@ -96,23 +94,12 @@ glyph-block Letter-Latin-Z : begin
 				flat [mix (SB + xMockTailDepth) RightSB kTop] (top - kTop * yTailDepth)
 				curl RightSB                                  (top - yTailDepth)
 
-		include : match mode
-			[Just MODE-ZSWASH] : spiro-outline
-				corner SB 0
-				corner (RightSB - xDiagWidth) (top - yFootHeight)
-				corner (RightSB - xDiagWidth) top
-				corner RightSB top
-				corner RightSB (top - kFoot * yFootHeight)
-				corner (SB + xDiagWidth) 0
-			__ : spiro-outline
-				corner SB 0
-				corner SB (kFoot * yFootHeight)
-				corner (RightSB - xDiagWidth) (top - yFootHeight)
-				corner (RightSB - xDiagWidth) top
-				corner RightSB top
-				corner RightSB (top - kFoot * yFootHeight)
-				corner (SB + xDiagWidth) yFootHeight
-				corner (SB + xDiagWidth) 0
+		include : dispiro
+			corner RightSB (top - yFootHeight)                 [widths.rhs (Stroke / HVContrast)]
+			corner SB [if (mode == MODE-ZSWASH) 0 yFootHeight] [widths.lhs (Stroke / HVContrast)]
+		
+		include : VBar.r RightSB top (top - yFootHeight) (xDiagWidth / HVContrast)
+		if (mode != MODE-ZSWASH) : include : VBar.l SB 0 yFootHeight (xDiagWidth / HVContrast)
 
 		include : tagged 'strokeBottom' : match mode
 			[Just MODE-RTAIL] : intersection

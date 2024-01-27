@@ -1,16 +1,18 @@
-# Name-driven feature pairs
-export : define [buildGrFeature gsub glyphStore gr] : begin
-	local rec : gsub.beginBlock
-
+export : define [createGsubLookupFromGr gsub glyphStore gr] : begin
 	local mapping {.}
 	foreach { gnSrc glyph } [glyphStore.namedEntries] : begin
 		local gnDst : gr.get glyph
 		local glyphDst : glyphStore.queryByName gnDst
 		if (glyphDst && ([glyphStore.queryUnicodeOf glyph] || [glyphStore.queryUnicodeOf glyphDst]))
 			set mapping.(gnSrc) gnDst
+	
+	return : gsub.createLookup {.type 'gsub_single' .substitutions mapping}
 
-	if [objectIsNotEmpty mapping] : begin
-		define lookup1 : gsub.createLookup {.type 'gsub_single' .substitutions mapping}
+export : define [buildGrFeature gsub glyphStore gr] : begin
+	local rec : gsub.beginBlock
+
+	local lookup1 : createGsubLookupFromGr gsub glyphStore gr
+	if [objectIsNotEmpty lookup1.substitutions] : begin
 		define feature1 : gsub.addCommonFeature : gsub.createFeature gr.otlTag
 		feature1.addLookup lookup1
 
