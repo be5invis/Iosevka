@@ -2,8 +2,8 @@
 $$include '../meta/macros.ptl'
 
 import [linreg clamp mix fallback] from "@iosevka/util"
-import [getGrTree IsSuperscript IsSubscript] from "@iosevka/glyph/relation"
-import [AnyCv DotlessOrNot CvDecompose MathSansSerif Texture] from "@iosevka/glyph/relation"
+import [getGrTree IsSuperscript IsSubscript AnyCv DotlessOrNot] from "@iosevka/glyph/relation"
+import [AnyLocalizedForm CvDecompose MathSansSerif Texture] from "@iosevka/glyph/relation"
 import [NumeratorForm DenominatorForm] from "@iosevka/glyph/relation"
 import [Transform] from "@iosevka/geometry/transform"
 extern Map
@@ -39,13 +39,18 @@ glyph-block Autobuild-Transformed-Shared : begin
 		local relSets        {}
 		local targetNameMap  {.}
 
+		local TraverseGrList : list
+			* AnyCv
+			* AnyLocalizedForm
+			* DotlessOrNot
+
 		foreach [record : items-of records] : begin
 			local srcName record.1
 
 			local dstName : wrapName groupID srcName
 			suggestMappedName targetNameMap srcName dstName
 
-			local tree : getGrTree srcName { DotlessOrNot AnyCv } query-glyph
+			local tree : getGrTree srcName TraverseGrList query-glyph
 			foreach [{gr origSrcName relSrcName} : items-of tree] : if [query-glyph relSrcName] : begin
 				local origDstName : suggestMappedName targetNameMap origSrcName [wrapName groupID origSrcName]
 				local relDstName  : suggestMappedName targetNameMap relSrcName  [wrapName groupID relSrcName]
@@ -667,6 +672,8 @@ glyph-block Autobuild-Transformed : begin
 
 	do
 		createReversed : list
+			list 0x1B8   'Ezh'
+			list 0x1B9   'ezh'
 			list 0x2143  'L.serifless'
 			list 0xA7FB  'F'
 			list 0xA7FC  'P'

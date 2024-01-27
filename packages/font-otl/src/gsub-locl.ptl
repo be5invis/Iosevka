@@ -1,6 +1,7 @@
 $$include './meta/macros.ptl'
 
-import [CvDecompose] from "@iosevka/glyph/relation"
+import [CvDecompose LocalizedForm] from "@iosevka/glyph/relation"
+import [createGsubLookupFromGr] from "./gsub-gr.mjs"
 
 extern Set
 
@@ -13,53 +14,19 @@ export : define [buildLOCL gsub para glyphStore] : begin
 	define cyrlMKD  : gsub.copyLanguage 'cyrl_MKD ' 'cyrl_DFLT'
 	define cyrlBGR  : gsub.copyLanguage 'cyrl_BGR ' 'cyrl_DFLT'
 	define latnVIT  : gsub.copyLanguage 'latn_VIT ' 'latn_DFLT'
+	define grekIPPH : gsub.copyLanguage 'grek_IPPH ' 'grek_DFLT'
+	define grekAPPH : gsub.copyLanguage 'grek_APPH ' 'grek_DFLT'
 
 	# SRB
 	define loclSRB : gsub.createFeature 'locl'
 	cyrlSRB.addFeature loclSRB
 	cyrlMKD.addFeature loclSRB
-	loclSRB.addLookup : gsub.createLookup
-		.type 'gsub_single'
-		.substitutions : if para.isItalic
-			object
-				'cyrl/be'  : glyphStore.ensureExists 'cyrl/be.SRB'
-				'cyrl/ghe' : glyphStore.ensureExists 'cyrl/ghe.SRB'
-				'cyrl/de'  : glyphStore.ensureExists 'cyrl/de.SRB'
-				'cyrl/gje' : glyphStore.ensureExists 'cyrl/gje.SRB'
-				'cyrl/pe'  : glyphStore.ensureExists 'cyrl/pe.SRB'
-				'cyrl/te'  : glyphStore.ensureExists 'cyrl/te.SRB'
-			object
-				'cyrl/be'  : glyphStore.ensureExists 'cyrl/be.SRB'
+	loclSRB.addLookup : createGsubLookupFromGr gsub glyphStore
+		if [not para.isItalic] LocalizedForm.SRB.Upright LocalizedForm.SRB.Italic
 
 	# BGR
 	define loclBGR : cyrlBGR.addFeature : gsub.createFeature 'locl'
-	loclBGR.addLookup : gsub.createLookup
-		.type 'gsub_single'
-		.substitutions : object
-			'cyrl/ve'      : glyphStore.ensureExists 'cyrl/ve.BGR'
-			'cyrl/ghe'     : glyphStore.ensureExists 'cyrl/ghe.italic'
-			'cyrl/De'      : glyphStore.ensureExists 'cyrl/De.BGR'
-			'cyrl/de'      : glyphStore.ensureExists 'cyrl/de.BGR'
-			'cyrl/zhe'     : glyphStore.ensureExists 'cyrl/zhe.BGR'
-			'cyrl/ze'      : glyphStore.ensureExists 'cyrl/ze.BGR'
-			'cyrl/i'       : glyphStore.ensureExists 'cyrl/i.BGR'
-			'cyrl/ibreve'  : glyphStore.ensureExists 'cyrl/ibreve.BGR'
-			'cyrl/igrave'  : glyphStore.ensureExists 'cyrl/igrave.BGR'
-			'cyrl/ka'      : glyphStore.ensureExists 'cyrl/ka.BGR'
-			'cyrl/El'      : glyphStore.ensureExists 'cyrl/El.BGR'
-			'cyrl/el'      : glyphStore.ensureExists 'cyrl/el.BGR'
-			'cyrl/en'      : glyphStore.ensureExists 'cyrl/en.BGR'
-			'cyrl/pe'      : glyphStore.ensureExists 'cyrl/pe.BGR'
-			'cyrl/te'      : glyphStore.ensureExists 'cyrl/te.BGR'
-			'cyrl/Ef'      : glyphStore.ensureExists 'cyrl/Ef.BGR'
-			'cyrl/ef'      : glyphStore.ensureExists 'cyrl/ef.BGR'
-			'cyrl/che'     : glyphStore.ensureExists 'cyrl/che.BGR'
-			'cyrl/sha'     : glyphStore.ensureExists 'cyrl/sha.BGR'
-			'cyrl/shcha'   : glyphStore.ensureExists 'cyrl/shcha.BGR'
-			'cyrl/yu'      : glyphStore.ensureExists 'cyrl/yu.BGR'
-			'cyrl/tse'     : glyphStore.ensureExists 'cyrl/tse.BGR'
-			'cyrl/yer'     : glyphStore.ensureExists 'cyrl/yer.BGR'
-			'cyrl/yeri'    : glyphStore.ensureExists 'cyrl/yeri.BGR'
+	loclBGR.addLookup : createGsubLookupFromGr gsub glyphStore LocalizedForm.BGR
 
 	# VIT
 	define loclVIT : latnVIT.addFeature : gsub.createFeature 'locl'
@@ -95,5 +62,15 @@ export : define [buildLOCL gsub para glyphStore] : begin
 					{'A' 'a'}                 ~> nothing
 					{'breveAbove'}            ~> nothing
 					viShiftableMarks          ~> [sx 'viCenter']
+
+	# IPPH
+	define loclIPPH : gsub.createFeature 'locl'
+	grekIPPH.addFeature loclIPPH
+	grekAPPH.addFeature loclIPPH
+	loclIPPH.addLookup : gsub.createLookup
+		.type 'gsub_single'
+		.substitutions : object
+			'grek/beta' : glyphStore.ensureExists 'latn/beta'
+			'grek/chi'  : glyphStore.ensureExists 'latn/chi'
 
 	gsub.endBlockAtFront rec
