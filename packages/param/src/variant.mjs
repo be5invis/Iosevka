@@ -134,6 +134,8 @@ class Prime {
 		this.slopeDependent = !!cfg.slopeDependent;
 		this.hotChars = cfg.hotChars ? [...cfg.hotChars] : this.descSampleText;
 
+		this.cherryPicking = cfg.cherryPicking;
+
 		this.variants = new Map();
 
 		let variantConfig = cfg.variants;
