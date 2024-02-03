@@ -1,4 +1,4 @@
-import ucdNames from "@unicode/unicode-15.0.0/Names/index.js";
+import ucdNames from "@unicode/unicode-15.1.0/Names/index.js";
 
 const codes = process.argv
 	.slice(2)
