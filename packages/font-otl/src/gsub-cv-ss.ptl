@@ -1,6 +1,6 @@
 $$include './meta/macros.ptl'
 
-import [AnyCv CvDecompose] from "@iosevka/glyph/relation"
+import [AnyCv CvCherryPickingGrs CvDecompose] from "@iosevka/glyph/relation"
 
 extern Map
 extern Set
@@ -9,13 +9,14 @@ define look-around null
 
 class CvLookupManager
 	public [new table tag feature] : begin
-		set this.table table
-		set this.tag tag
+		set this.table   table
+		set this.tag     tag
 		set this.feature feature
 
-		set this.decompositionLookup null
-		set this.altrenatesLookup null
-		set this.singleSubstLookups {}
+		set this.decompositionLookup  null
+		set this.altrenatesLookup     null
+		set this.singleSubstLookups   {}
+		set this.cherryPickingLookups {}
 
 	public [addDecompositionLookup lookup] : begin
 		this.decompositionLookups.push lookup
@@ -50,16 +51,30 @@ class CvLookupManager
 		set this.singleSubstLookups.(rank) lookup
 		return lookup
 
+	public [createCherryPickingSubst cpTag] : begin
+		define lookupName : 'lookup_cv_single_' + this.tag + '_cp_' + cpTag
+		define lookup : this.table.pickLookup lookupName {.type 'gsub_single' .substitutions {.}}
+		this.cherryPickingLookups.push lookup
+		return lookup
+
 	public [linkDeps] : begin
-		if this.decompositionLookup : begin
+		if (this.decompositionLookup && this.altrenatesLookup) : begin
 			this.table.setDependency this.decompositionLookup this.altrenatesLookup
-		foreach lookup [items-of this.singleSubstLookups] : if lookup : begin
-			this.table.setDependency this.altrenatesLookup lookup
+		if this.altrenatesLookup : begin
+			foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
+				this.table.setDependency this.altrenatesLookup lookupSS
+			foreach lookupCP [items-of this.cherryPickingLookups] : if lookupCP : begin
+				this.table.setDependency lookupCP this.altrenatesLookup
+				foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
+					this.table.setDependency lookupCP lookupSS
 
 	public [linkCrossDeps other] : begin
-		this.table.setDependency this.altrenatesLookup other.altrenatesLookup
-		foreach lookup [items-of this.singleSubstLookups] : if lookup : begin
-			this.table.setDependency lookup other.altrenatesLookup
+		if (this.altrenatesLookup && other.altrenatesLookup) : begin
+			this.table.setDependency this.altrenatesLookup other.altrenatesLookup
+
+		if other.altrenatesLookup : begin
+			foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
+				this.table.setDependency lookupSS other.altrenatesLookup
 
 	static [compare a b] : begin
 		if (a.tag < b.tag) : return (-1)
@@ -122,14 +137,31 @@ export : define [buildCVSS gsub para glyphStore] : begin
 					local cvSingle : [cvs.get gr.tag].createSingleSubstFor gr.rank
 					set cvSingle.substitutions.(gn) : glyphStore.ensureExists subst
 
+	do "CV cherry picking"
+		foreach {name prime} para.variants.primes : if prime.cherryPicking : begin
+			local cv : cvs.get prime.tag
+			foreach cp [items-of prime.cherryPicking] : begin
+				foreach gr [items-of CvCherryPickingGrs] : if (cp.tag === gr.tag) : begin
+					local feature : gsub.addCommonFeature : gsub.createFeature cp.tag
+					local lookup : cv.createCherryPickingSubst cp.tag
+					if cv.decompositionLookup : feature.addLookup cv.decompositionLookup
+					feature.addLookup lookup
+
+					foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
+						local subst : gr.get glyph
+						if (subst && subst != gn) : begin
+							set lookup.substitutions.(gn) : glyphStore.ensureExists subst
+
+
 	do "Cleanup and link dependency"
 		local sortedCvs : Array.from [cvs.values]
 		sortedCvs.sort CvLookupManager.compare
 
 		foreach cv [items-of sortedCvs] : begin
-			local st cv.altrenatesLookup.substitutions
-			foreach { k v } [pairs-of st] : foreach idx [range 0 v.length] : if [not v.(idx)]
-				set v.(idx) k
+			if cv.altrenatesLookup : begin
+				local st cv.altrenatesLookup.substitutions
+				foreach { k v } [pairs-of st] : foreach idx [range 0 v.length] : if [not v.(idx)]
+					set v.(idx) k
 			cv.linkDeps
 
 		for [local i 1] (i < sortedCvs.length) [inc i]

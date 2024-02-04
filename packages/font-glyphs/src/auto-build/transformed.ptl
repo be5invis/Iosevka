@@ -2,8 +2,9 @@
 $$include '../meta/macros.ptl'
 
 import [linreg clamp mix fallback] from "@iosevka/util"
-import [getGrTree IsSuperscript IsSubscript AnyCv DotlessOrNot] from "@iosevka/glyph/relation"
-import [AnyLocalizedForm CvDecompose MathSansSerif Texture] from "@iosevka/glyph/relation"
+import [getGrTree IsSuperscript IsSubscript AnyCvOrCherryPicking] from "@iosevka/glyph/relation"
+import [AnyLocalizedForm DotlessOrNot CvDecompose MathSansSerif Texture] from "@iosevka/glyph/relation"
+import [BooleanGeometry StrokeGeometry] from "@iosevka/geometry"
 import [NumeratorForm DenominatorForm] from "@iosevka/glyph/relation"
 import [Transform] from "@iosevka/geometry/transform"
 extern Map
@@ -40,7 +41,7 @@ glyph-block Autobuild-Transformed-Shared : begin
 		local targetNameMap  {.}
 
 		local TraverseGrList : list
-			* AnyCv
+			* AnyCvOrCherryPicking
 			* AnyLocalizedForm
 			* DotlessOrNot
 
@@ -775,14 +776,13 @@ glyph-block Autobuild-Transformed-Texture : begin
 	createTextureDerivatives Texture.ShrR  0         SHRINK    [jobs 0xF400]
 	createTextureDerivatives Texture.ShrLR SHRINK    SHRINK    [jobs 0xF500]
 
-
 glyph-block Autobuild-Transformed-Mathematical : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Fork
 	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations wrapName
 
-	define [createMathDerivedSeriesImpl groupName tfm _records] : begin
+	define [createMathDerivedSeriesImpl groupName tfm _records postProcessing] : begin
 		local { records relSets targetNameMap } : extendRelatedGlyphs groupName _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local forkedPara : para.createFork tfm
@@ -793,6 +793,7 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 				if [not glyphT] : console.log glyphid
 				include glyphT AS_BASE ALSO_METRICS
 				set currentGlyph.gizmo glyphT.gizmo
+				if postProcessing : include : postProcessing para forkedPara
 
 		link-relations relSets
 
@@ -822,7 +823,7 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 	define Greek2      : Array.from 'Ϝϝ'
 	define ObliqueBlackboardBolds : Array.from '𝔻𝕕𝕖𝕚𝕛'
 
-	define [CreateMathDerivatives groupName tfm gr base letters overrides] : begin
+	define [CreateMathDerivatives groupName tfm gr base letters overrides postProcessing] : begin
 		local jobs {}
 		local overrideMap : new Map (overrides || {})
 		foreach j [range 0 letters.length] : begin
@@ -832,7 +833,7 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 			local dst : base + j
 			if [overrideMap.has letter] : set dst [overrideMap.get letter]
 			if source : jobs.push { dst source }
-		createMathDerivedSeriesImpl groupName tfm jobs
+		createMathDerivedSeriesImpl groupName tfm jobs postProcessing
 
 	define [CreateMathAliasableImpl groupName altGroupName tfm gr base letters overrides] : begin
 		local overrideMap : new Map (overrides || {})
@@ -901,6 +902,16 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 
 	# Italic blackboard bold
 	CreateMathDerivatives 'mathit' tfItalic null 0x2145  ObliqueBlackboardBolds
+
+	# Outlined letters and digits -- for Symbols for Legacy Computing Supplement
+	define [TfOutline para forkedPara] : glyph-proc
+		local g currentGlyph.geometry
+		local sw : forkedPara.stroke / 4
+		local gizmo : currentGlyph.gizmo || GlobalTransform
+		set currentGlyph.geometry : new StrokeGeometry g gizmo sw HVContrast true
+
+	CreateMathDerivatives 'legacyComputingOutlined' tfBold null 0x1CCD6 UpperLatin null TfOutline
+	CreateMathDerivatives 'legacyComputingOutlined' tfBold null 0x1CCF0 Digits     null TfOutline
 
 glyph-block Autobuild-Rhotic : begin
 	glyph-block-import Mark-Shared-Metrics : markFine markstroke

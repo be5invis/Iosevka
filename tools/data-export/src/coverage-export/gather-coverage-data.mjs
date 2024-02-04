@@ -1,7 +1,5 @@
-import ugc from "@unicode/unicode-15.0.0/General_Category/index.js";
-import ucdNames from "@unicode/unicode-15.0.0/Names/index.js";
-
 import { collectBlockData } from "./block-data.mjs";
+import { createCharDataLookup } from "./char-data.mjs";
 
 function findFirstLastChar(lchBlockStart, lchBlockEnd, cov) {
 	let lchFirst = 0,
@@ -25,13 +23,14 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 	const featureSeriesStore = new Map();
 	const unicodeCoverage = [];
 
+	const lookup = await createCharDataLookup();
+
 	for (const [[lchBlockStart, lchBlockEnd], block] of await collectBlockData()) {
 		let blockResults = [];
 		const [lchStart, lchEnd] = findFirstLastChar(lchBlockStart, lchBlockEnd, covUpright);
 		if (!lchStart || !lchEnd) continue;
 		for (let lch = lchStart; lch < lchEnd; lch++) {
-			const chName = ucdNames.get(lch);
-			const gc = ugc.get(lch);
+			const { gc, charName } = lookup.lookup(lch);
 			const cdUpright = covUpright.get(lch);
 			const cdItalic = covItalic.get(lch);
 			const cdOblique = covOblique.get(lch);
@@ -39,10 +38,11 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 				const [glyphName, typoFs, uprightFs] = cdUpright;
 				const [, , italicFs] = cdItalic;
 				const [, , obliqueFs] = cdOblique;
+
 				blockResults.push({
 					lch,
 					gc,
-					charName: chName,
+					charName,
 					inFont: true,
 					glyphName: glyphName,
 					...putFeatSeries(featureSeriesStore, "typographicFeatureSets", typoFs),
@@ -51,13 +51,7 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 					...putFeatSeries(featureSeriesStore, "cvFeatureSetsOblique", obliqueFs)
 				});
 			} else {
-				blockResults.push({
-					lch,
-					gc,
-					charName: chName,
-					inFont: false,
-					glyphName: undefined
-				});
+				blockResults.push({ lch, gc, charName, inFont: false, glyphName: undefined });
 			}
 		}
 		if (blockResults.length) {

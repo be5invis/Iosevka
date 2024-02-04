@@ -1,7 +1,8 @@
 import * as TypoGeom from "typo-geom";
 
-import { Point } from "./point.mjs";
+import { Point, Vec2 } from "./point.mjs";
 import { Transform } from "./transform.mjs";
+import { mix } from "@iosevka/util";
 
 function contourToRep(contour) {
 	let c = [];
@@ -71,6 +72,26 @@ export const OCCURRENT_PRECISION = 1 / 16;
 export const GEOMETRY_PRECISION = 1 / 4;
 export const BOOLE_RESOLUTION = 0x4000;
 
+export function derivativeFromFiniteDifference(c, t) {
+	const DELTA = 1 / 0x10000;
+	const forward2 = c.eval(t + 2 * DELTA);
+	const forward1 = c.eval(t + DELTA);
+	const backward1 = c.eval(t - DELTA);
+	const backward2 = c.eval(t - 2 * DELTA);
+	return new Vec2(
+		((1 / 12) * backward2.x -
+			(2 / 3) * backward1.x +
+			(2 / 3) * forward1.x -
+			(1 / 12) * forward2.x) /
+			DELTA,
+		((1 / 12) * backward2.y -
+			(2 / 3) * backward1.y +
+			(2 / 3) * forward1.y -
+			(1 / 12) * forward2.y) /
+			DELTA
+	);
+}
+
 export class OffsetCurve {
 	constructor(bone, offset, contrast) {
 		this.bone = bone;
@@ -87,25 +108,7 @@ export class OffsetCurve {
 		};
 	}
 	derivative(t) {
-		const DELTA = 1 / 0x10000;
-		const forward = this.eval(t + DELTA);
-		const backward = this.eval(t - DELTA);
-		return {
-			x: (forward.x - backward.x) / (2 * DELTA),
-			y: (forward.y - backward.y) / (2 * DELTA)
-		};
-	}
-}
-
-export class ReverseCurve {
-	constructor(original) {
-		this.m_original = original;
-	}
-	eval(t) {
-		return this.m_original.eval(1 - t);
-	}
-	derivative(t) {
-		return -this.m_original.derivative(1 - t);
+		return derivativeFromFiniteDifference(this, t);
 	}
 }
 
@@ -147,5 +150,51 @@ export class BezToContoursSink {
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.CubicStart, x1, y1));
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.CubicEnd, x2, y2));
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
+	}
+}
+
+export function Bez3FromHermite(zStart, dStart, zEnd, dEnd) {
+	const a = zStart,
+		d = zEnd;
+	const b = new Vec2(a.x + dStart.x / 3, a.y + dStart.y / 3);
+	const c = new Vec2(d.x - dEnd.x / 3, d.y - dEnd.y / 3);
+	return new TypoGeom.Arcs.Bez3(a, b, c, d);
+}
+
+export class RoundCapCurve {
+	constructor(side, contrast, center0, point0, center1, point1) {
+		this.contrast = contrast;
+		this.center0 = center0;
+		this.center1 = center1;
+
+		const theta0 = Math.atan2(point0.y - center0.y, (point0.x - center0.x) / contrast);
+		let theta1 = Math.atan2(point1.y - center1.y, (point1.x - center1.x) / contrast);
+		if (side) {
+			while (theta1 < theta0) theta1 += 2 * Math.PI;
+		} else {
+			while (theta1 > theta0) theta1 -= 2 * Math.PI;
+		}
+		this.theta0 = theta0;
+		this.theta1 = theta1;
+
+		this.r0 = Math.hypot(center0.y - point0.y, (center0.x - point0.x) / contrast);
+		this.r1 = Math.hypot(center1.y - point1.y, (center1.x - point1.x) / contrast);
+	}
+
+	eval(t) {
+		const centerX = mix(this.center0.x, this.center1.x, t);
+		const centerY = mix(this.center0.y, this.center1.y, t);
+		const r = mix(this.r0, this.r1, t);
+		const theta = mix(this.theta0, this.theta1, t);
+
+		return {
+			x: centerX + r * Math.cos(theta) * this.contrast,
+			y: centerY + r * Math.sin(theta)
+		};
+	}
+
+	derivative(t) {
+		// TODO: calculate an exact form instead of using finite difference
+		return derivativeFromFiniteDifference(this, t);
 	}
 }
