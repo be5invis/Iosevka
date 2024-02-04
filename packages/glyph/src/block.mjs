@@ -61,6 +61,26 @@ export class DependencyManager {
 		}
 		s.add(dependency);
 	}
+	hasGlyphToGlyphDependency(dependent, dependency) {
+		return this.hasGlyphToGlyphDependencyImpl(new Set(), dependent, dependency);
+	}
+
+	hasGlyphToGlyphDependencyImpl(alreadyScanned, dependent, dependency) {
+		// Prevent infinite recursion
+		if (alreadyScanned.has(dependent)) return true;
+		alreadyScanned.add(dependent);
+
+		// Check for direct dependency
+		if (!this.glyphToGlyph.has(dependent)) return false;
+		const ds = this.glyphToGlyph.get(dependent);
+		if (ds.has(dependency)) return true;
+
+		// Check for indirect dependency
+		for (const d of ds) {
+			if (this.hasGlyphToGlyphDependencyImpl(alreadyScanned, d, dependency)) return true;
+		}
+		return false;
+	}
 
 	traverseGlyphDependenciesImpl(glyphs, fBlockwiseExpand) {
 		let state = new Map();

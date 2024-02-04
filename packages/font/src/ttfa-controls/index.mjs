@@ -62,7 +62,7 @@ class Alignment {
 
 			for (const [go, gd] of this.allGlyphs) {
 				const cvs = [
-					...Gr.AnyCv.query(go),
+					...Gr.AnyCvOrCherryPicking.query(go),
 					Gr.Texture.ExtL,
 					Gr.Texture.ExtR,
 					Gr.Texture.ExtLR,

@@ -201,6 +201,29 @@ glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 		StdBlackShape TriangleRTFill 'blackTriangleRT' 0x25E5
 		ConvexWhitePolygon TriangleRTFill 'whiteTriangleRT' 0x25F9
 
+		create-glyph [MangleName 'squareCorners'] [MangleUnicode 0x26F6] : glyph-proc
+			set-width Geom.Width
+			include : difference
+				refer-glyph : MangleName 'whiteSquare'
+				union
+					intersection [MaskBelow (Geom.MidY + Geom.Size / 3)] [MaskAbove (Geom.MidY - Geom.Size / 3)]
+					intersection [MaskLeft (Geom.MidX + Geom.Size / 3)] [MaskRight (Geom.MidX - Geom.Size / 3)]
+
+		define [SquareOverlap name unicode rev square1 square2] : begin
+			create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
+				set-width Geom.Width
+				local space : Geom.Width * (1 - Size.Medium.size)
+				local offsetX : space * 0.45 * [if rev (-1) 1]
+				local offsetY : space * 0.45
+				include : union
+					with-transform [Translate (-offsetX) (-offsetY)] : refer-glyph : MangleName [if square1 'blackMediumSquare' 'whiteMediumSquare']
+					with-transform [Translate offsetX offsetY] : refer-glyph : MangleName [if square2 'blackMediumSquare' 'whiteMediumSquare']					
+
+		SquareOverlap 'overlapWWSquareRev' 0x29C9 1 0 0
+		SquareOverlap 'overlapWWSquare' 0x2BBA 0 0 0
+		SquareOverlap 'overlapWBSquare' 0x2BBB 0 0 1
+		SquareOverlap 'overlapBBSquare' 0x2BBC 0 1 1
+
 	do "Rectangle"
 		define [RectangleFill cx cy r] : spiro-outline
 			corner (cx - r) (cy + r / 1.5)

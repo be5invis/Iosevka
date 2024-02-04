@@ -9,6 +9,7 @@ import { Point } from "./point.mjs";
 import { QuadifySink } from "./quadify.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
 import { Transform } from "./transform.mjs";
+import { strokeArcs } from "./stroke.mjs";
 
 export const CPLX_NON_EMPTY = 0x01; // A geometry tree that is not empty
 export const CPLX_NON_SIMPLE = 0x02; // A geometry tree that contains non-simple contours
@@ -530,6 +531,83 @@ export class BooleanGeometry extends GeometryBase {
 			sParts.push(sPart);
 		}
 		return Format.struct("BooleanGeometry", this.m_operator, Format.list(sParts));
+	}
+}
+
+export class StrokeGeometry extends GeometryBase {
+	constructor(geom, gizmo, radius, contrast, fInside) {
+		super();
+		this.m_geom = geom;
+		this.m_gizmo = gizmo;
+		this.m_radius = radius;
+		this.m_contrast = contrast;
+		this.m_fInside = fInside;
+	}
+
+	asContours() {
+		// Produce simplified arcs
+		const nonTransformedGeometry = new TransformedGeometry(this.m_geom, this.m_gizmo.inverse());
+		let arcs = TypoGeom.Boolean.removeOverlap(
+			CurveUtil.convertShapeToArcs(nonTransformedGeometry.asContours()),
+			TypoGeom.Boolean.PolyFillType.pftNonZero,
+			CurveUtil.BOOLE_RESOLUTION
+		);
+
+		// Fairize to get get some arcs that are simple enough
+		const fairizedArcs = TypoGeom.Fairize.fairizeBezierShape(arcs);
+
+		// Stroke the arcs
+		const strokedArcs = strokeArcs(
+			fairizedArcs,
+			this.m_radius,
+			this.m_contrast,
+			this.m_fInside
+		);
+
+		// Convert to Iosevka format
+		let sink = new CurveUtil.BezToContoursSink(this.m_gizmo);
+		TypoGeom.ShapeConv.transferBezArcShape(strokedArcs, sink, CurveUtil.GEOMETRY_PRECISION);
+
+		return sink.contours;
+	}
+	asReferences() {
+		return null;
+	}
+	getDependencies() {
+		return this.m_geom.getDependencies();
+	}
+	unlinkReferences() {
+		return new StrokeGeometry(
+			this.m_geom.unlinkReferences(),
+			this.m_gizmo,
+			this.m_radius,
+			this.m_contrast,
+			this.m_fInside
+		);
+	}
+	filterTag(fn) {
+		return new StrokeGeometry(
+			this.m_geom.filterTag(fn),
+			this.m_gizmo,
+			this.m_radius,
+			this.m_contrast,
+			this.m_fInside
+		);
+	}
+	measureComplexity() {
+		return this.m_geom.measureComplexity() | CPLX_NON_SIMPLE;
+	}
+	toShapeStringOrNull() {
+		const sTarget = this.m_geom.unlinkReferences().toShapeStringOrNull();
+		if (!sTarget) return null;
+		return Format.struct(
+			`StrokeGeometry`,
+			sTarget,
+			Format.gizmo(this.m_gizmo),
+			Format.n(this.m_radius),
+			Format.n(this.m_contrast),
+			this.m_fInside
+		);
 	}
 }
 

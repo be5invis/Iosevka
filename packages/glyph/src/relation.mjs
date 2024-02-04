@@ -71,7 +71,7 @@ export const AplForm = OtlTaggedProp("AplForm", "APLF", "APL form");
 export const NumeratorForm = OtlTaggedProp("Numerator", "numr");
 export const DenominatorForm = OtlTaggedProp("Denominator", "dnom");
 function OtlTaggedProp(key, otlTag, description) {
-	return { ...LinkedGlyphProp(key), otlTag, description };
+	return { ...LinkedGlyphProp(key), tag: otlTag, otlTag, description };
 }
 
 export const CvDecompose = DecompositionProp("CvDecompose");
@@ -225,6 +225,14 @@ export const AnyDerivingCv = {
 	}
 };
 
+export const AnyCvOrCherryPicking = {
+	query(glyph) {
+		let ret = AnyCv.query(glyph);
+		if (Zero.get(glyph)) ret.push(Zero);
+		return ret;
+	}
+};
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 export function getGrTree(gid, grSetList, fnGidToGlyph) {
@@ -311,15 +319,18 @@ function collectGidLists(gidListOrig, gidList, grl, excluded, fnGidToGlyph, sink
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function createGrDisplaySheet(glyphStore, gid) {
-	const glyph = glyphStore.queryByName(gid);
+export function createGrDisplaySheet(glyphStore, gn) {
+	const glyph = glyphStore.queryByName(gn);
 	if (!glyph) return [];
+	const glyphIsHidden = /^\./.test(gn);
+	if (glyphIsHidden) return [];
+
 	// Query selected typographic features -- mostly NWID and WWID
 	let typographicFeatures = [];
-	displayQueryPairFeatures(glyphStore, gid, "Width", Nwid, Wwid, typographicFeatures);
-	displayQueryPairFeatures(glyphStore, gid, "Number Form", Lnum, Onum, typographicFeatures);
-	displayQuerySingleFeature(glyphStore, gid, "APL Form", AplForm, typographicFeatures);
-	displayQuerySingleFeature(glyphStore, gid, "Slashed Zero", Zero, typographicFeatures);
+	displayQueryPairFeatures(glyph, "Width", Nwid, Wwid, typographicFeatures);
+	displayQueryPairFeatures(glyph, "Number Form", Lnum, Onum, typographicFeatures);
+	displayQuerySingleFeature(glyph, AplForm, typographicFeatures);
+	for (const gr of CvCherryPickingGrs) displayQuerySingleFeature(glyph, gr, typographicFeatures);
 
 	// Query selected character variants
 	let charVariantFeatures = [];
@@ -329,10 +340,13 @@ export function createGrDisplaySheet(glyphStore, gid) {
 		for (const componentGn of decomposition) {
 			const component = glyphStore.queryByName(componentGn);
 			if (!component) continue;
+
+			for (const gr of CvCherryPickingGrs)
+				displayQuerySingleFeature(component, gr, typographicFeatures);
 			queryCvFeatureTagsOf(charVariantFeatures, componentGn, component, tagSet);
 		}
 	} else {
-		queryCvFeatureTagsOf(charVariantFeatures, gid, glyph, null);
+		queryCvFeatureTagsOf(charVariantFeatures, gn, glyph, null);
 	}
 
 	sortFeatureDisplaySheet(typographicFeatures);
@@ -348,11 +362,7 @@ function FeatureSeries(name, groups) {
 	return { name, groups };
 }
 
-function displayQueryPairFeatures(gs, gid, name, grCis, grTrans, sink) {
-	const g = gs.queryByName(gid);
-	if (!g) return;
-	const glyphIsHidden = /^\./.test(gid);
-	if (glyphIsHidden) return;
+function displayQueryPairFeatures(g, name, grCis, grTrans, sink) {
 	if (grCis.get(g) || grTrans.get(g)) {
 		sink.push(
 			FeatureSeries(name, [
@@ -364,14 +374,10 @@ function displayQueryPairFeatures(gs, gid, name, grCis, grTrans, sink) {
 		);
 	}
 }
-function displayQuerySingleFeature(gs, gid, name, grCis, sink) {
-	const g = gs.queryByName(gid);
-	if (!g) return;
-	const glyphIsHidden = /^\./.test(gid);
-	if (glyphIsHidden) return;
+function displayQuerySingleFeature(g, grCis, sink) {
 	if (grCis.get(g)) {
 		sink.push(
-			FeatureSeries(name, [
+			FeatureSeries(grCis.description, [
 				[
 					{ css: `'${grCis.otlTag}' 0`, description: grCis.description + " disabled" },
 					{ css: `'${grCis.otlTag}' 1`, description: grCis.description + " enabled" }
@@ -460,3 +466,5 @@ export const SvInheritableRelations = [
 	OgonekTrY,
 	ScheduleLeaningMark
 ];
+
+export const CvCherryPickingGrs = [Zero];

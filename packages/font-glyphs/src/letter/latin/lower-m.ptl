@@ -203,6 +203,13 @@ glyph-block Letter-Latin-Lower-M : begin
 			flat df.rightSB [Math.max (top - [SmallMSmooth df]) (rbot + 0.1)]
 			curl df.rightSB rbot [heading Downward]
 
+	glyph-block-export mShapeBodyImpl
+	define [mShapeBodyImpl df height body earless shortLeg tailed serifs] : glyph-proc
+		include : body df height 0 [if shortLeg [SmallMShortLegHeight height df] 0] [if tailed ([SmallMSmoothHeight height df] + O) 0]
+		if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight height df] (sw -- df.mvs)
+		include : serifs df height 0 [if shortLeg [SmallMShortLegHeight height df] 0] 0 tailed earless
+
+	glyph-block-export SmallMConfig
 	define SmallMConfig : SuffixCfg.weave
 		object
 			""                             { SmallMArches                        0 }
@@ -223,10 +230,8 @@ glyph-block Letter-Latin-Lower-M : begin
 			"topLeftAndBottomRightSerifed" { LtRbSerifs }
 
 	foreach { suffix { {Body earless} {shortLeg} {tailed} {Serifs} } } [pairs-of SmallMConfig] : do
-		define [mShapeBody df height] : glyph-proc
-			include : Body df height 0 [if shortLeg [SmallMShortLegHeight height df] 0] [if tailed ([SmallMSmoothHeight height df] + O) 0]
-			if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight height df] (sw -- df.mvs)
-			include : Serifs df height 0 [if shortLeg [SmallMShortLegHeight height df] 0] 0 tailed earless
+		define [mShapeBody df height] : begin
+			return : mShapeBodyImpl df height Body earless shortLeg tailed Serifs
 
 		create-glyph "m.\(suffix)" : glyph-proc
 			local df : include : dfM
@@ -280,7 +285,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			create-glyph "cyrl/teMidHook.italic.\(suffix)" : glyph-proc
 				local df : include : DivFrame para.diversityM 4
 				include : df.markSet.e
-				local subDf : df.slice 4 3 0	
+				local subDf : df.slice 4 3 0
 				include : mShapeBody subDf XH
 				include : MidHook.general
 					left   -- subDf.rightSB

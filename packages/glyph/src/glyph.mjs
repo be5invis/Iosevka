@@ -2,7 +2,7 @@ import * as util from "util";
 
 import * as Geom from "@iosevka/geometry";
 import { Anchor } from "@iosevka/geometry/anchor";
-import { Point, Vec2 } from "@iosevka/geometry/point";
+import { Vec2 } from "@iosevka/geometry/point";
 import { Transform } from "@iosevka/geometry/transform";
 
 export class Glyph {
@@ -65,6 +65,10 @@ export class Glyph {
 	dependsOn(glyph) {
 		if (!this._m_dependencyManager) return;
 		this._m_dependencyManager.addDependency(this, glyph);
+	}
+	hasDependency(other) {
+		if (!this._m_dependencyManager) return false;
+		return this._m_dependencyManager.hasGlyphToGlyphDependency(this, other);
 	}
 
 	// Copying
@@ -138,6 +142,7 @@ export class Glyph {
 	}
 	tryBecomeMirrorOf(dst, rankSet) {
 		if (rankSet.has(this) || rankSet.has(dst)) return;
+		if (dst.hasDependency(this)) return;
 		const csThis = this.geometry.unlinkReferences().toShapeStringOrNull();
 		const csDst = dst.geometry.unlinkReferences().toShapeStringOrNull();
 		if (csThis && csDst && csThis === csDst) {

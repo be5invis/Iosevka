@@ -2,7 +2,7 @@
 $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
-import [getGrMesh AnyCv CvDecompose Joining hashCv] from "@iosevka/glyph/relation"
+import [getGrMesh AnyCvOrCherryPicking CvDecompose Joining hashCv] from "@iosevka/glyph/relation"
 import [hashGeometry] from "@iosevka/geometry"
 import [Transform] from "@iosevka/geometry/transform"
 extern Map
@@ -37,7 +37,7 @@ glyph-block Autobuild-Enclosure-Shared : begin
 	glyph-block-export EnsureComponentGlyphT
 	define [EnsureComponentGlyphT gnPart fnBuildup] : begin
 		local rs : new Set
-		return : DeriveMeshT { gnPart } AnyCv
+		return : DeriveMeshT { gnPart } AnyCvOrCherryPicking
 			function [gns gr] : fnBuildup gns.0
 			function [gniFrom gniTo] : begin
 				[query-glyph gniFrom].tryBecomeMirrorOf [query-glyph gniTo] rs
@@ -64,7 +64,7 @@ glyph-block Autobuild-Enclosure-Shared : begin
 			local demandDecomposable : para.enableCvSs && globallyDecomposable
 			foreach part [items-of parts] : if [query-glyph part] : begin
 				local g : query-glyph part
-				local relatedGlyphs : AnyCv.query g
+				local relatedGlyphs : AnyCvOrCherryPicking.query g
 				foreach gr [items-of relatedGlyphs] : if [query-glyph : gr.get g] : begin
 					# Multi-part enclosure, proportinal
 					if (allowProportional && [query-glyph : gr.get g].advanceWidth != g.advanceWidth)
@@ -76,19 +76,18 @@ glyph-block Autobuild-Enclosure-Shared : begin
 			local jobsOrig : if demandDecomposable decomposableJobs nonDecomposable
 			jobsOrig.push { origJobGlyphGn unicode parts :: restInfo }
 
-			if para.enableCvSs : begin
-				if demandDecomposable
-				: then : foreach part [items-of parts] : begin
-					local mesh : getGrMesh { part } AnyCv query-glyph
-					foreach {gr fromParts toParts} [items-of mesh] : foreach gn [items-of toParts]
-						decomposableRelGlyphs.add gn
-				: else : begin
-					local mesh : getGrMesh parts AnyCv query-glyph
-					foreach {gr fromParts toParts} [items-of mesh] : do
-						local fromGn : CircNameNoCheck unicode prefix fromParts suffix
-						local toGn   : CircName        unicode prefix toParts   suffix
-						nonDecomposable.push { toGn null toParts :: restInfo }
-						relApplications.push { gr fromGn toGn }
+			if demandDecomposable
+			: then : foreach part [items-of parts] : begin
+				local mesh : getGrMesh { part } AnyCvOrCherryPicking query-glyph
+				foreach {gr fromParts toParts} [items-of mesh] : foreach gn [items-of toParts]
+					decomposableRelGlyphs.add gn
+			: else : begin
+				local mesh : getGrMesh parts AnyCvOrCherryPicking query-glyph
+				foreach {gr fromParts toParts} [items-of mesh] : do
+					local fromGn : CircNameNoCheck unicode prefix fromParts suffix
+					local toGn   : CircName        unicode prefix toParts   suffix
+					nonDecomposable.push { toGn null toParts :: restInfo }
+					relApplications.push { gr fromGn toGn }
 
 		return : object nonDecomposable decomposableJobs decomposableRelGlyphs relApplications
 
