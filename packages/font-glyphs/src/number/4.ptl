@@ -1,6 +1,7 @@
 $$include '../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -9,7 +10,7 @@ glyph-block Digits-Four : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
 
-	define [FourStdShape] : with-params [top open crossing [fine : AdviceStroke 3] [sw Stroke] [bbd 0]] : glyph-proc
+	define [FourStdShape] : with-params [top open crossing [fine : AdviceStroke 3] [sw Stroke] [bbd 0] [slab SLAB]] : glyph-proc
 		local yBar : top * 0.3 + 0.625 * sw
 
 		define xVertBar : [mix SB RightSB : if crossing 0.75 0.9125] - (bbd * 0.75) + [if crossing [HSwToV : 0.375 * sw] 0]
@@ -35,10 +36,16 @@ glyph-block Digits-Four : begin
 			include : VBar.r (xVertBar + bbd) 0 yVertBarTop sw
 			include : HBar.t xVertBar (xVertBar + bbd) CAP sw
 			include : HBar.b xVertBar (xVertBar + bbd) 0 sw
-		if (!bbd && SLAB) : begin
+		if (!bbd && slab) : begin
 			include : HSerif.mb (xVertBar - [HSwToV HalfStroke]) 0 Jut
 
-	define [FourOpenShape top crossing] : glyph-proc
+	define [FourClosedShape top crossing slab] : begin
+		return : FourStdShape top false crossing (slab -- slab)
+
+	define [FourSemiOpenShape top crossing slab] : begin
+		return : FourStdShape top true crossing (fine -- [AdviceStroke 2.75]) (slab -- slab)
+
+	define [FourOpenShape top crossing slab] : glyph-proc
 		local yBar (top * 0.4)
 		local fine : AdviceStroke 3
 
@@ -48,65 +55,36 @@ glyph-block Digits-Four : begin
 		include : HBar.t SB xHBarTerminal yBar
 		include : VBar.r xVertBar 0 [mix (yBar - Stroke) top 0.75]
 		include : VBar.l SB yBar top
-		if SLAB : begin
+		if slab : begin
 			include : HSerif.mb (xVertBar - [HSwToV HalfStroke]) 0 Jut
 
-	create-glyph 'four.lnum.closed' : glyph-proc
-		include : MarkSet.capital
-		include : FourStdShape CAP false true
+	define FourConfig : SuffixCfg.weave
+		object # body
+			"closed"   FourClosedShape
+			"semiOpen" FourSemiOpenShape
+			"open"     FourOpenShape
+		object # crossing
+			"nonCrossing" false
+			"crossing"    true
+		object # slab
+			"serifless" false
+			"serifed"   true
 
-	create-glyph 'four.lnum.closedNonCrossing' : glyph-proc
-		include : MarkSet.capital
-		include : FourStdShape CAP false false
+	foreach { suffix { body crossing slab } } [pairs-of FourConfig] : do
+		create-glyph "four.lnum.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : body CAP crossing slab
 
-	create-glyph 'four.lnum.semiOpen' : glyph-proc
-		include : MarkSet.capital
-		include : FourStdShape CAP true true (fine -- [AdviceStroke 2.75])
-
-	create-glyph 'four.lnum.semiOpenNonCrossing' : glyph-proc
-		include : MarkSet.capital
-		include : FourStdShape CAP true false (fine -- [AdviceStroke 2.75])
-
-	create-glyph 'four.lnum.open' : glyph-proc
-		include : MarkSet.capital
-		include : FourOpenShape CAP true
-
-	create-glyph 'four.lnum.openNonCrossing' : glyph-proc
-		include : MarkSet.capital
-		include : FourOpenShape CAP false
-
-	create-glyph 'four.onum.closed' : glyph-proc
-		include : OnumMarks.p
-		include : FourStdShape CAP false true
-		include : ShiftDown
-
-	create-glyph 'four.onum.closedNonCrossing' : glyph-proc
-		include : OnumMarks.p
-		include : FourStdShape CAP false false
-		include : ShiftDown
-
-	create-glyph 'four.onum.semiOpen' : glyph-proc
-		include : OnumMarks.p
-		include : FourStdShape CAP true true
-		include : ShiftDown
-
-	create-glyph 'four.onum.semiOpenNonCrossing' : glyph-proc
-		include : OnumMarks.p
-		include : FourStdShape CAP true false
-		include : ShiftDown
-
-	create-glyph 'four.onum.open' : glyph-proc
-		include : OnumMarks.p
-		include : FourOpenShape CAP true
-		include : ShiftDown
-
-	create-glyph 'four.onum.openNonCrossing' : glyph-proc
-		include : OnumMarks.p
-		include : FourOpenShape CAP false
-		include : ShiftDown
+		create-glyph "four.onum.\(suffix)" : glyph-proc
+			include : OnumMarks.p
+			include : body CAP crossing slab
+			include : ShiftDown
 
 	select-variant 'four.lnum' [CodeLnum '4'] (follow -- 'four')
 	select-variant 'four.onum' [CodeOnum '4'] (follow -- 'four')
+
+	link-reduced-variant 'four/sansSerif.lnum' 'four.lnum' MathSansSerif (follow -- 'four/sansSerif')
+	link-reduced-variant 'four/sansSerif.onum' 'four.onum' MathSansSerif (follow -- 'four/sansSerif')
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarCenter
 	create-glyph 'mathbb/four' 0x1D7DC : glyph-proc
