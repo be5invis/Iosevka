@@ -58,19 +58,23 @@ class CvLookupManager
 		return lookup
 
 	public [linkDeps] : begin
-		if this.decompositionLookup : begin
+		if (this.decompositionLookup && this.altrenatesLookup) : begin
 			this.table.setDependency this.decompositionLookup this.altrenatesLookup
-		foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
-			this.table.setDependency this.altrenatesLookup lookupSS
-		foreach lookupCP [items-of this.cherryPickingLookups] : if lookupCP : begin
-			this.table.setDependency lookupCP this.altrenatesLookup
+		if this.altrenatesLookup : begin
 			foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
-				this.table.setDependency lookupCP lookupSS
+				this.table.setDependency this.altrenatesLookup lookupSS
+			foreach lookupCP [items-of this.cherryPickingLookups] : if lookupCP : begin
+				this.table.setDependency lookupCP this.altrenatesLookup
+				foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
+					this.table.setDependency lookupCP lookupSS
 
 	public [linkCrossDeps other] : begin
-		this.table.setDependency this.altrenatesLookup other.altrenatesLookup
-		foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
-			this.table.setDependency lookupSS other.altrenatesLookup
+		if (this.altrenatesLookup && other.altrenatesLookup) : begin
+			this.table.setDependency this.altrenatesLookup other.altrenatesLookup
+
+		if other.altrenatesLookup : begin
+			foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
+				this.table.setDependency lookupSS other.altrenatesLookup
 
 	static [compare a b] : begin
 		if (a.tag < b.tag) : return (-1)
@@ -154,9 +158,10 @@ export : define [buildCVSS gsub para glyphStore] : begin
 		sortedCvs.sort CvLookupManager.compare
 
 		foreach cv [items-of sortedCvs] : begin
-			local st cv.altrenatesLookup.substitutions
-			foreach { k v } [pairs-of st] : foreach idx [range 0 v.length] : if [not v.(idx)]
-				set v.(idx) k
+			if cv.altrenatesLookup : begin
+				local st cv.altrenatesLookup.substitutions
+				foreach { k v } [pairs-of st] : foreach idx [range 0 v.length] : if [not v.(idx)]
+					set v.(idx) k
 			cv.linkDeps
 
 		for [local i 1] (i < sortedCvs.length) [inc i]
