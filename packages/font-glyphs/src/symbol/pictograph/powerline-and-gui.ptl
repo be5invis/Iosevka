@@ -153,8 +153,8 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 					MosaicWidthMask
 					RunningManBody (-MosaicWidth)
 
-			define [FolderBody xOffset] : begin
-				local Kit : StickFigureKit [BoxN 2] [Translate xOffset 0] [AdviceStroke 4]
+			define [FolderBody xOffset box] : begin
+				local Kit : StickFigureKit box [Translate xOffset 0] [AdviceStroke 4]
 				return : union
 					Kit.RoundSeg (0 / 16) (1 / 8) (0 / 16) (11 / 16)
 					Kit.RoundSeg (0 / 16) (11 / 16) (3 / 16) (7 / 8) 1 1
@@ -168,13 +168,22 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 				set-width MosaicWidth
 				include : intersection
 					MosaicWidthMask
-					FolderBody 0
+					FolderBody 0 [BoxN 2]
 
 			create-glyph [MangleName 'folderRight'] [MangleUnicode 0x1FBBA] : glyph-proc
 				set-width MosaicWidth
 				include : intersection
 					MosaicWidthMask
-					FolderBody (-MosaicWidth)
+					FolderBody (-MosaicWidth) [BoxN 2]
+
+			create-glyph [MangleName 'folder'] [MangleUnicode 0x1F5C0] : glyph-proc
+				set-width MosaicWidth
+				local hbox : new Box
+					mix SymbolMid uiFigTop (0.5 * MosaicWidthScalar)
+					mix SymbolMid uiFigBot (0.5 * MosaicWidthScalar)
+					SB * (0.5 * MosaicWidthScalar)
+					MosaicWidth - SB * (0.5 * MosaicWidthScalar)
+				include : FolderBody 0 hbox
 
 			define [PointingHandBody xOffset] : begin
 				return : PointingHandShape [BoxN 3] [Translate xOffset 0] [AdviceStroke 4]
@@ -202,6 +211,7 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 			set scaffold.top       uiFigTop
 			set scaffold.bot       uiFigBot
 			set scaffold.xMiddle  : MosaicWidth / 2
+			set scaffold.yMiddle  : mix uiFigBot uiFigTop 0.5
 			set scaffold.headSize : (uiFigTop - uiFigBot) / 2.5
 			set scaffold.legSize  : (Middle - SB) * 2
 			set scaffold.armSize  : (Middle - SB / 2) * 2
@@ -356,6 +366,7 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 			set scaffold.width : (Middle - SB) * 2 * [Math.pow (MosaicWidth / Width) 0.5]
 			set scaffold.left  : (MosaicWidth / 2) - scaffold.width / 2 + scaffold.stroke / 2
 			set scaffold.right : (MosaicWidth / 2) + scaffold.width / 2 - scaffold.stroke / 2
+
 			define [StrokeV x yt yb] : spiro-outline
 				corner x (yt - scaffold.gap)
 				corner (x + scaffold.stroke) (yt - scaffold.gap - scaffold.stroke)
