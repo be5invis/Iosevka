@@ -4,7 +4,7 @@
 
 <p align="center"><a href="https://github.com/be5invis/Iosevka/releases#gh-light-mode-only"><img src="images/button-release.light.svg#gh-light-mode-only" title="Release"></a><a href="https://github.com/be5invis/Iosevka/releases#gh-dark-mode-only"><img src="images/button-release.dark.svg#gh-dark-mode-only" title="Release"></a> <a href="https://be5invis.github.io/Iosevka/customizer#gh-light-mode-only"><img src="images/button-customize.light.svg#gh-light-mode-only" title="Customizer"></a><a href="https://be5invis.github.io/Iosevka/customizer#gh-dark-mode-only"><img src="images/button-customize.dark.svg#gh-dark-mode-only" title="Customizer"></a> <a href="https://be5invis.github.io/Iosevka/specimen#gh-light-mode-only"><img src="images/button-specimen.light.svg#gh-light-mode-only" title="Specimen"></a><a href="https://be5invis.github.io/Iosevka/specimen#gh-dark-mode-only"><img src="images/button-specimen.dark.svg#gh-dark-mode-only" title="Specimen"></a></p>
 
-**Iosevka** is an *open-source*, *sans-serif* + *slab-serif*, *monospace* + *quasi‑proportional* typeface family, designed for *writing code*, using in *terminals*, and preparing *technical documents*.
+**Iosevka** \[ˌjɔˈseβ.kʰa\] is an *open-source*, *sans-serif* + *slab-serif*, *monospace* + *quasi‑proportional* typeface family, designed for *writing code*, using in *terminals*, and preparing *technical documents*.
 
 ## Installation
 
