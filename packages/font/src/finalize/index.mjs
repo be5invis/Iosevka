@@ -3,6 +3,15 @@ import { Nwid, Wwid } from "@iosevka/glyph/relation";
 import { gcFont } from "./gc.mjs";
 import { finalizeGlyphs } from "./glyphs.mjs";
 
+export function finalizeFont(cache, para, glyphStore, excludedCodePoints, restFont) {
+	assignGrAndCodeRank(glyphStore, Wwid, Nwid);
+	assignSubRank(glyphStore);
+	glyphStore = gcFont(glyphStore, excludedCodePoints, restFont);
+	glyphStore = finalizeGlyphs(cache, para, glyphStore);
+	validateMonospace(para, glyphStore);
+	return glyphStore;
+}
+
 function assignGrAndCodeRank(glyphStore, ...flatteners) {
 	for (const g of glyphStore.glyphs()) {
 		g.codeRank = 0xffffffff;
@@ -31,12 +40,4 @@ function validateMonospace(para, glyphStore) {
 	if (!para.isQuasiProportional && !para.compLig && awSet.size > 2) {
 		throw new Error("Unreachable! Building monospace with more than 2 character widths");
 	}
-}
-export function finalizeFont(cache, para, glyphStore, excludedCodePoints, restFont) {
-	assignGrAndCodeRank(glyphStore, Nwid, Wwid);
-	assignSubRank(glyphStore);
-	glyphStore = gcFont(glyphStore, excludedCodePoints, restFont);
-	glyphStore = finalizeGlyphs(cache, para, glyphStore);
-	validateMonospace(para, glyphStore);
-	return glyphStore;
 }

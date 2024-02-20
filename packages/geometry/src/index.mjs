@@ -217,7 +217,12 @@ export class ReferenceGeometry extends GeometryBase {
 		return this.unwrap().asContours();
 	}
 	asReferences() {
-		return [{ glyph: this.m_glyph, x: this.m_x, y: this.m_y }];
+		if (this.m_glyph.geometry.measureComplexity() & CPLX_NON_EMPTY) {
+			return [{ glyph: this.m_glyph, x: this.m_x, y: this.m_y }];
+		} else {
+			// A reference to a space is meaningless, thus return nothing
+			return [];
+		}
 	}
 	getDependencies() {
 		return [this.m_glyph];
