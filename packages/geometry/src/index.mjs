@@ -8,8 +8,8 @@ import * as CurveUtil from "./curve-util.mjs";
 import { Point } from "./point.mjs";
 import { QuadifySink } from "./quadify.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
-import { Transform } from "./transform.mjs";
 import { strokeArcs } from "./stroke.mjs";
+import { Transform } from "./transform.mjs";
 
 export const CPLX_NON_EMPTY = 0x01; // A geometry tree that is not empty
 export const CPLX_NON_SIMPLE = 0x02; // A geometry tree that contains non-simple contours
@@ -79,10 +79,7 @@ export class ContourSetGeometry extends GeometryBase {
 export class SpiroGeometry extends GeometryBase {
 	constructor(gizmo, closed, knots) {
 		super();
-		this.m_knots = [];
-		for (const k of knots) {
-			this.m_knots.push({ type: k.type, x: k.x, y: k.y });
-		}
+		this.m_knots = knots;
 		this.m_closed = closed;
 		this.m_gizmo = gizmo;
 		this.m_cachedContours = null;
@@ -120,7 +117,7 @@ export class SpiroGeometry extends GeometryBase {
 			"SpiroGeometry",
 			Format.gizmo(this.m_gizmo),
 			this.m_closed,
-			Format.list(this.m_knots.map(Format.typedPoint))
+			Format.list(this.m_knots.map(k => k.toShapeString()))
 		);
 	}
 }
@@ -140,17 +137,20 @@ export class DiSpiroGeometry extends GeometryBase {
 		const expandResult = this.expand();
 		const lhs = [...expandResult.lhsUntransformed];
 		const rhs = [...expandResult.rhsUntransformed];
+		// Reverse the RHS
+		for (const k of rhs) k.reverseType();
+		rhs.reverse();
 
 		let rawGeometry;
 		if (this.m_closed) {
 			rawGeometry = new CombineGeometry([
 				new SpiroGeometry(this.m_gizmo, true, lhs),
-				new SpiroGeometry(this.m_gizmo, true, rhs.reverse())
+				new SpiroGeometry(this.m_gizmo, true, rhs)
 			]);
 		} else {
 			lhs[0].type = lhs[lhs.length - 1].type = "corner";
 			rhs[0].type = rhs[rhs.length - 1].type = "corner";
-			const allKnots = lhs.concat(rhs.reverse());
+			const allKnots = lhs.concat(rhs);
 			rawGeometry = new SpiroGeometry(this.m_gizmo, true, allKnots);
 		}
 		this.m_cachedContours = rawGeometry.asContours();
