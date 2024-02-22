@@ -8,7 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Lower-J : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors
+	glyph-block-import Mark-Adjustment : LeaningAnchor ExtendAboveBaseAnchors
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth LetterBarOverlay
 	glyph-block-import Letter-Shared-Shapes : DiagTail TopHook
@@ -67,7 +67,7 @@ glyph-block Letter-Latin-Lower-J : begin
 				serif -- false
 
 		export : define [DiagonalTailed df top xMiddle] : glyph-proc
-			local dfHook : DivFrame [mix para.diversityI para.diversityII 0.5]
+			local dfHook : DivFrame para.diversityI
 			include : dispiro
 				widths.center
 				flat xMiddle top [heading Downward]
@@ -78,23 +78,23 @@ glyph-block Letter-Latin-Lower-J : begin
 		export : define [Long df top xMiddle] : HSerif.lt xMiddle top (LongJut * df.div)
 
 	define Marks : namespace
-		export : define [FullHook df top xMiddle fSerifed] : glyph-proc
-			set-base-anchor 'above' (xMiddle - [if fSerifed 1 0] * Stroke * [HSwToV : 0.166 * df.div]) top
-			set-base-anchor 'overlay' (xMiddle - [if fSerifed 1 0] * Stroke * [HSwToV : 0.166 * df.div]) (top / 2)
+		export : define [Serifed df top xMiddle] : glyph-proc
+			include : Serifless df top xMiddle
+			include : LeaningAnchor.Above.At [mix df.middle xMiddle (7/8)]
 
-		export : define [Straight df top xMiddle fSerifed] : glyph-proc
+		export : define [Serifless df top xMiddle] : glyph-proc
 			set-base-anchor 'above' xMiddle top
 			set-base-anchor 'overlay' xMiddle (top / 2)
 
 	define JConfig : object
-		'serifless'               { "Regular"         null         XMiddle.Regular            Marks.FullHook  1                }
-		'serifed'                 { "Regular"         Serifs.Long  XMiddle.Regular            Marks.FullHook  1                }
-		'straightLine'            { "Straight"        null         XMiddle.Straight           Marks.Straight  para.diversityII }
-		'hooky'                   { "Straight"        Serifs.Long  XMiddle.Hooky              Marks.Straight  para.diversityII }
-		'flatHookSerifless'       { "FlatHook"        null         XMiddle.FlatHookSerifless  Marks.FullHook  para.diversityII }
-		'flatHookSerifed'         { "FlatHook"        Serifs.Long  XMiddle.FlatHookSerifed    Marks.FullHook  para.diversityI  }
-		'diagonalTailedSerifless' { "DiagonalTailed"  null         XMiddle.FlatHookSerifless  Marks.FullHook  para.diversityII }
-		'diagonalTailedSerifed'   { "DiagonalTailed"  Serifs.Long  XMiddle.FlatHookSerifed    Marks.FullHook  para.diversityI  }
+		'serifless'               { "Regular"         null         XMiddle.Regular            Marks.Serifless  1                }
+		'serifed'                 { "Regular"         Serifs.Long  XMiddle.Regular            Marks.Serifed    1                }
+		'straightLine'            { "Straight"        null         XMiddle.Straight           Marks.Serifless  para.diversityII }
+		'hooky'                   { "Straight"        Serifs.Long  XMiddle.Hooky              Marks.Serifed    para.diversityI  }
+		'flatHookSerifless'       { "FlatHook"        null         XMiddle.FlatHookSerifless  Marks.Serifless  para.diversityII }
+		'flatHookSerifed'         { "FlatHook"        Serifs.Long  XMiddle.FlatHookSerifed    Marks.Serifed    para.diversityI  }
+		'diagonalTailedSerifless' { "DiagonalTailed"  null         XMiddle.FlatHookSerifless  Marks.Serifless  para.diversityII }
+		'diagonalTailedSerifed'   { "DiagonalTailed"  Serifs.Long  XMiddle.FlatHookSerifed    Marks.Serifed    para.diversityI  }
 
 	foreach {suffix { shapeId Serif xMiddleT Marks div } } [Object.entries JConfig] : do
 		local df : DivFrame div
@@ -105,7 +105,7 @@ glyph-block Letter-Latin-Lower-J : begin
 			include : df.markSet.p
 			include : Body.(shapeId) df XH xMiddle
 			if Serif : include : tagged 'serifLT' : Serif df XH xMiddle
-			include : Marks df XH xMiddle (!(!Serif))
+			include : Marks df XH xMiddle
 
 		create-glyph "dotlessjBar.\(suffix)" : glyph-proc
 			include [refer-glyph "dotlessj.\(suffix)"] AS_BASE ALSO_METRICS
