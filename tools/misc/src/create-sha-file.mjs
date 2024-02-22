@@ -24,7 +24,7 @@ export default (async function (out, archiveFiles) {
 	const filesToAnalyze = Array.from(new Set(archiveFiles.map(f => f.full))).sort();
 	let s = "";
 	for (const file of filesToAnalyze) {
-		s += `${await hashFile(file)}\t${file.name}\n`;
+		s += `${await hashFile(file)}\t${path.basename(file.full)}\n`;
 	}
 	await fs.promises.writeFile(out, s);
 });
