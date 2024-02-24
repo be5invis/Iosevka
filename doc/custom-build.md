@@ -17,7 +17,7 @@ To build Iosevka you should:
 1. Install [`nodejs`](http://nodejs.org) (≥ 18.0.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/). Make sure that they are accessible from [`PATH` environment variable](https://en.wikipedia.org/wiki/PATH_(variable)).
 2. Open a CLI shell in a terminal, [`cd`](https://en.wikipedia.org/wiki/Cd_(command)) into the directory containing Iosevka source code.
 3. Run `npm install`. This command will install **all** the NPM dependencies.
-4. Run `npm run build -- contents::iosevka`. This command will build your fonts.
+4. Run `npm run build -- contents::Iosevka`. This command will build your fonts.
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
 
