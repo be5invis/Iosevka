@@ -25,7 +25,7 @@
 
 ### Installing via Package Managers
 
-*Be careful: This repository does not maintain any package manager distribution. The packages listed below might be outdated.*
+*Disclaimer: This repository does not maintain any package manager distribution. The packages listed below may not always be up-to-date.*
 
   * **macOS**
     * Standard distribution in Homebrew:
