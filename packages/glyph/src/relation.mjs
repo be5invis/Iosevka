@@ -67,6 +67,7 @@ export const Wwid = OtlTaggedProp("Wwid", "WWID", "Narrow cell");
 export const Lnum = OtlTaggedProp("Lnum", "lnum", "Lining number");
 export const Onum = OtlTaggedProp("Onum", "onum", "Old-style number");
 export const Zero = OtlTaggedProp("Zero", "zero", "Slashed zero");
+export const MosaicForm = OtlTaggedProp("MosaicForm", "MOSC", "Mosaic form");
 export const AplForm = OtlTaggedProp("AplForm", "APLF", "APL form");
 export const NumeratorForm = OtlTaggedProp("Numerator", "numr");
 export const DenominatorForm = OtlTaggedProp("Denominator", "dnom");
@@ -330,6 +331,7 @@ export function createGrDisplaySheet(glyphStore, gn) {
 	displayQueryPairFeatures(glyph, "Width", Nwid, Wwid, typographicFeatures);
 	displayQueryPairFeatures(glyph, "Number Form", Lnum, Onum, typographicFeatures);
 	displayQuerySingleFeature(glyph, AplForm, typographicFeatures);
+	displayQuerySingleFeature(glyph, MosaicForm, typographicFeatures);
 	for (const gr of CvCherryPickingGrs) displayQuerySingleFeature(glyph, gr, typographicFeatures);
 
 	// Query selected character variants
@@ -445,6 +447,14 @@ export function linkSuffixPairGr(gs, tagCis, tagTrans, grCis, grTrans) {
 			grCis.set(gTrans, gnCis);
 		}
 	}
+}
+
+export function linkSingleGlyphPairGr(gs, fromName, toName, gr) {
+	const gFrom = gs.queryByName(fromName);
+	if (!gFrom) return;
+	const gTo = gs.queryByName(toName);
+	if (!gTo) return;
+	gr.set(gFrom, toName);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
