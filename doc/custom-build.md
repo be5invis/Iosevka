@@ -60,8 +60,16 @@ Inside the plan, top-level properties include:
       - As a consequence, the following characters will be **removed**:
         - `U+27F5` LONG LEFTWARDS ARROW
         - `U+27F6` LONG RIGHTWARDS ARROW
+        - `U+27F7` LONG LEFT RIGHT ARROW
+        - `U+27F8` LONG LEFTWARDS DOUBLE ARROW
+        - `U+27F9` LONG RIGHTWARDS DOUBLE ARROW
+        - `U+27FA` LONG LEFT RIGHT DOUBLE ARROW
         - `U+27FB` LONG LEFTWARDS ARROW FROM BAR
         - `U+27FC` LONG RIGHTWARDS ARROW FROM BAR
+        - `U+27FD` LONG LEFTWARDS DOUBLE ARROW FROM BAR
+        - `U+27FE` LONG RIGHTWARDS DOUBLE ARROW FROM BAR
+        - `U+27FF` LONG RIGHTWARDS SQUIGGLE ARROW
+        - `U+2B33` LONG LEFTWARDS SQUIGGLE ARROW
     - Remove `NWID` and `WWID` features typographic features
   - `fixed`: Apply `fontconfig-mono` changes and further remove ligations.
 * `serifs`: Optional, String, configures style of serifs.
