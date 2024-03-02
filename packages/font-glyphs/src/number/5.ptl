@@ -1,6 +1,7 @@
 $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -35,7 +36,7 @@ glyph-block Digits-Five : begin
 
 	define [FiveShape] : with-params [
 			top bp pBarPosSwAdj [sw Stroke] [bbd 0] [obl 0] [zt 0]
-			[bottomShape FiveArcStroke] [pXLeft 0.025]
+			[bottomShape FiveArcStroke] [pXLeft 0.025] [slab SLAB]
 		] : glyph-proc
 		local t1 : (top * bp + sw * pBarPosSwAdj) * 0.8
 		local t2 : (top * bp + sw * pBarPosSwAdj) * 1.0
@@ -67,7 +68,7 @@ glyph-block Digits-Five : begin
 
 			Rect (t2 / 2 + t2 * kGap) (t2 / 2 - t2 * kGap) 0 Middle
 
-		if (!bbd && SLAB) : include : VSerif.dr xRight top [Math.min VJut ((top - t2) * 0.8)]
+		if (!bbd && slab) : include : VSerif.dr xRight top [Math.min VJut ((top - t2) * 0.8)]
 
 	define FiveConfig : SuffixCfg.weave
 		object # upper-left-bar
@@ -76,27 +77,34 @@ glyph-block Digits-Five : begin
 		object # middle
 			"arched"  { FiveArcStroke  DesignParameters.fiveBarPos           0     0.025 }
 			"flat"    { FiveFlatStroke (7 / 8 * DesignParameters.fiveBarPos) (1/3) 0.05  }
+		object # serifs
+			"serifless" false
+			"serifed"   true
 
-	foreach { suffix { obl { bottomShape pBarPos pBarPosSwAdj pXLeft } } } [pairs-of FiveConfig] : do
+	foreach { suffix { obl { bottomShape pBarPos pBarPosSwAdj pXLeft } slab } } [pairs-of FiveConfig] : do
 		create-glyph "five.lnum.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (obl -- obl) (pXLeft -- pXLeft)
+			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (obl -- obl) (pXLeft -- pXLeft) (slab -- slab)
 
 		create-glyph "five.onum.\(suffix)" : glyph-proc
 			include : OnumMarks.p
-			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (obl -- obl) (pXLeft -- pXLeft)
+			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (obl -- obl) (pXLeft -- pXLeft) (slab -- slab)
 			include : ShiftDown
 
 		create-glyph "zhuangToneFive.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (zt -- ((RightSB - SB) * 0.05)) (pXLeft -- pXLeft)
+			include : FiveShape CAP pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (zt -- ((RightSB - SB) * 0.05)) (pXLeft -- pXLeft) (slab -- slab)
 
 		create-glyph "zhuangtonefive.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : FiveShape XH pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (zt -- ((RightSB - SB) * 0.05)) (pXLeft -- pXLeft)
+			include : FiveShape XH pBarPos pBarPosSwAdj (bottomShape -- bottomShape) (zt -- ((RightSB - SB) * 0.05)) (pXLeft -- pXLeft) (slab -- slab)
 
 	select-variant 'five.lnum' [CodeLnum '5'] (follow -- 'five')
 	select-variant 'five.onum' [CodeOnum '5'] (follow -- 'five')
+
+	link-reduced-variant 'five/sansSerif.lnum' 'five.lnum' MathSansSerif (follow -- 'five/sansSerif')
+	link-reduced-variant 'five/sansSerif.onum' 'five.onum' MathSansSerif (follow -- 'five/sansSerif')
+
 	select-variant 'zhuangToneFive' 0x1BC
 	select-variant 'zhuangtonefive' 0x1BD (follow -- 'zhuangToneFive')
 

@@ -1,3 +1,5 @@
+"use strict";
+
 import ucdNames from "@unicode/unicode-15.1.0/Names/index.js";
 
 const codes = process.argv

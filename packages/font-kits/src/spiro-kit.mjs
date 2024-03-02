@@ -1,7 +1,7 @@
 import { DiSpiroGeometry, SpiroGeometry } from "@iosevka/geometry";
 import {
 	BiKnotCollector,
-	ControlKnot,
+	UserControlKnot,
 	Interpolator,
 	TerminateInstruction
 } from "@iosevka/geometry/spiro-control";
@@ -44,7 +44,11 @@ class SpiroOutlineImpl extends SpiroImplBase {
 	applyToGlyph(glyph) {
 		const { gizmo, collector } = this.createCollector(glyph);
 		return glyph.includeGeometry(
-			new SpiroGeometry(gizmo, collector.closed, collector.controls)
+			new SpiroGeometry(
+				gizmo,
+				collector.closed,
+				collector.controls.map(k => k.toMono())
+			)
 		);
 	}
 }
@@ -75,7 +79,7 @@ export function SetupBuilders(bindings) {
 		return (x, y, f) => {
 			if (!isFinite(x)) throw new TypeError("NaN detected for X");
 			if (!isFinite(y)) throw new TypeError("NaN detected for Y");
-			return new ControlKnot(type, x, y, f);
+			return new UserControlKnot(type, x, y, f);
 		};
 	}
 	const g4 = KnotType("g4");
@@ -233,8 +237,8 @@ export function SetupBuilders(bindings) {
 					args.raf && args.raf.blend && rt !== void 0
 						? args.raf.blend(rt)
 						: args.raf
-						  ? args.raf
-						  : unimportant
+							? args.raf
+							: unimportant
 				)
 			);
 		}
@@ -250,8 +254,8 @@ export function SetupBuilders(bindings) {
 					args.raf && args.raf.blend && rt !== void 0
 						? args.raf.blend(rt)
 						: args.raf
-						  ? args.raf
-						  : unimportant
+							? args.raf
+							: unimportant
 				)
 			);
 		}

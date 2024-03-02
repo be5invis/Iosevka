@@ -1,3 +1,5 @@
+"use strict";
+
 import fs from "fs";
 
 import * as wawoff from "wawoff2";

@@ -1,0 +1,111 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Mosaic-Large-Type : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	for-width-kinds WideWidth4
+
+		define top     fontMetrics.os2.sTypoAscender
+		define bottom  fontMetrics.os2.sTypoDescender
+		define left    0
+		define right   MosaicWidth
+
+		local stemleft  : mix left right (1 / 3)
+		local stemright : mix left right (2 / 3)
+		local stemmid   : mix left right 0.5
+		define [yPart n] : return : mix top bottom (n / 5)
+
+		define [Stem start end] : spiro-outline
+			corner stemleft [yPart start]
+			corner stemright [yPart start]
+			corner stemright [yPart (end + 1)]
+			corner stemleft [yPart (end + 1)]
+
+		define [TopBit] : spiro-outline
+			corner stemleft top
+			corner stemright top
+			corner stemmid [mix top bottom 0.1]
+
+		define [BottomBit] : spiro-outline
+			corner stemmid [mix top bottom 0.9]
+			corner stemleft bottom
+			corner stemright bottom
+
+		define [Arm yStart yEnd left right] : spiro-outline
+			corner left [yPart yStart]
+			corner right [yPart yEnd]
+			corner right [yPart (yEnd + 1)]
+			corner left [yPart (yStart + 1)]
+
+		define [Arc yHori yVert fRight] : spiro-outline
+			corner [if fRight right left] [yPart [if fRight yHori (yHori + 1)]]
+			corner [if fRight right left] [yPart [if fRight (yHori + 1) yHori]]
+			corner [if (yHori < yVert) stemright stemleft] [yPart [if (yHori < yVert) (yVert + 1) yVert]]
+			corner [if (yHori < yVert) stemleft stemright] [yPart [if (yHori < yVert) (yVert + 1) yVert]]
+
+		define [MakePiece unicode shape] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include shape
+
+		MakePiece 0x1CE1A : union [Stem 4 4] [Arc 2 3 1]
+		MakePiece 0x1CE1B : union [Stem 2 4] [Arm 2 2 stemright right]
+		MakePiece 0x1CE1C : union [Stem 2 4]
+		MakePiece 0x1CE1D : union [Stem 2 4] [Arm 2 3 stemright right]
+		MakePiece 0x1CE1E : union [Arm 2 2 stemleft right]
+		MakePiece 0x1CE1F : union [Arm 2 2 left right]
+		MakePiece 0x1CE20 : union [Stem 2 4] [Arm 2 2 left right]
+		MakePiece 0x1CE21 : union [Arc 3 4 0] [Arc 3 4 1]
+		MakePiece 0x1CE22 : union [Arc 3 4 0]
+		MakePiece 0x1CE23 : union [Stem 4 4]
+		MakePiece 0x1CE24 : union [Stem 4 4] [Arc 2 3 0]
+		MakePiece 0x1CE25 : union [Arm 2 2 0 stemright]
+		MakePiece 0x1CE26 : union [Stem 2 4] [Arm 3 2 left stemleft]
+		MakePiece 0x1CE27 : union [Stem 2 4] [Arm 2 2 left stemleft]
+		MakePiece 0x1CE28 : union [Stem 0 4] [Arm 2 2 stemright right]
+		MakePiece 0x1CE29 : union [Stem 0 4]
+		MakePiece 0x1CE2A : union [Arc 1 0 1] [Arc 3 4 1]
+		MakePiece 0x1CE2B : union [Arc 1 0 1]
+		MakePiece 0x1CE2C : union [Arc 3 4 1]
+		MakePiece 0x1CE2D : union [Stem 0 0]
+		MakePiece 0x1CE2E : union [Stem 0 0] [Stem 4 4] [Arc 2 1 1] [Arc 2 3 1]
+		MakePiece 0x1CE2F : union [Arm 2 2 left stemmid] [Arm 2 1 stemmid right] [Arm 2 3 stemmid right]
+		MakePiece 0x1CE30 : union [TopBit]
+		MakePiece 0x1CE31 : union [BottomBit]
+		MakePiece 0x1CE32 : union [Arm 1 3 left right] [Arm 3 1 left right]
+		MakePiece 0x1CE33 : union [Stem 3 4] [Arc 1 2 0] [Arc 1 2 1]
+		MakePiece 0x1CE34 : union [Arm 2 2 left right] [Arm 3 1 left right]
+		MakePiece 0x1CE35 : union [Stem 3 4] [Arc 1 2 1]
+		MakePiece 0x1CE36 : union [Stem 0 4] [Arm 2 2 left stemleft]
+		MakePiece 0x1CE37 : union [Stem 0 0] [Stem 4 4] [Arc 2 1 0] [Arc 2 3 0]
+		MakePiece 0x1CE38 : union [Arc 1 0 0] [Arc 3 4 0]
+		MakePiece 0x1CE39 : union [Stem 0 4] [Arm 1 2 left stemleft]
+		MakePiece 0x1CE3A : union [Stem 0 4] [Arm 2 2 left right]
+		MakePiece 0x1CE3B : union [Arc 1 0 0]
+		MakePiece 0x1CE3C : union [Stem 0 2]
+		MakePiece 0x1CE3D : union [Stem 0 2] [Arm 2 2 stemright right]
+		MakePiece 0x1CE3E : union [Stem 0 0] [Arc 2 1 1]
+		MakePiece 0x1CE3F : union [Stem 0 2] [Arm 2 1 stemright right]
+		MakePiece 0x1CE40 : union [Stem 0 2] [Arm 2 2 0 right]
+		MakePiece 0x1CE41 : union [Arm 1 2.5 left stemmid] [Arm 2.5 1 stemmid right]
+		MakePiece 0x1CE42 : union [Arc 1 0 0] [Arc 1 0 1]
+		MakePiece 0x1CE43 : union [Stem 0 0] [Arc 2 1 0]
+		MakePiece 0x1CE44 : union [Stem 0 2] [Arm 2 2 left stemleft]
+		MakePiece 0x1CE45 : union [Stem 0 0] [Arc 2 1 0] [Arm 0 2 left stemright]
+		MakePiece 0x1CE46 : union [Stem 0 2] [Arm 1 2 left stemleft]
+		MakePiece 0x1CE47 : union [Stem 3 4]
+		MakePiece 0x1CE48 : union [Stem 1 4]
+		MakePiece 0x1CE49 : union [Stem 3 3]
+		MakePiece 0x1CE4A : union [Stem 2 3]
+		MakePiece 0x1CE4B : union [Stem 1 3]
+		MakePiece 0x1CE4C : union [Stem 0 3]
+		MakePiece 0x1CE4D : union [Stem 2 2]
+		MakePiece 0x1CE4E : union [Stem 1 2]
+		MakePiece 0x1CE4F : union [Stem 1 1]
+		MakePiece 0x1CE50 : union [Stem 0 1]
