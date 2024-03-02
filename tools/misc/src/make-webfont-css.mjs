@@ -1,3 +1,5 @@
+"use strict";
+
 import fs from "fs";
 
 const WebfontFormatMap = new Map([
