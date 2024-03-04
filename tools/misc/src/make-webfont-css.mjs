@@ -6,7 +6,8 @@ const WebfontFormatMap = new Map([
 	["WOFF2", "woff2"],
 	["TTF", "truetype"]
 ]);
-export default (function (output, family, hs, formats, unhinted) {
+
+export default function (output, family, hs, formats, unhinted) {
 	if (!formats) {
 		fs.writeFileSync(output, "");
 		return;
@@ -48,4 +49,4 @@ export default (function (output, family, hs, formats, unhinted) {
 		}
 	}
 	fs.writeFileSync(output, ans);
-});
+}
