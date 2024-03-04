@@ -14,5 +14,5 @@ export function typedPoint(z) {
 	return tuple(z.type, n(z.x), n(z.y));
 }
 export function gizmo(g) {
-	return tuple(n(g.xx), n(g.xy), n(g.yx), n(g.yy), n(g.x), n(g.y));
+	return tuple(n(g.xx), n(g.xy), n(g.yx), n(g.yy), n(g.tx), n(g.ty));
 }

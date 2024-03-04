@@ -287,7 +287,7 @@ export class TransformedGeometry extends GeometryBase {
 		if (!rs) return null;
 		let result = [];
 		for (const { glyph, x, y } of rs)
-			result.push({ glyph, x: x + this.m_transform.x, y: y + this.m_transform.y });
+			result.push({ glyph, x: x + this.m_transform.tx, y: y + this.m_transform.ty });
 		return result;
 	}
 	getDependencies() {
@@ -316,8 +316,8 @@ export class TransformedGeometry extends GeometryBase {
 			return new TransformedGeometry(
 				unwrapped.m_geom,
 				Transform.Translate(
-					this.m_transform.x + unwrapped.m_transform.x,
-					this.m_transform.y + unwrapped.m_transform.y
+					this.m_transform.tx + unwrapped.m_transform.tx,
+					this.m_transform.ty + unwrapped.m_transform.ty
 				)
 			);
 		} else {
