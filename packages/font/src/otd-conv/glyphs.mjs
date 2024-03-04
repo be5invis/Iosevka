@@ -70,11 +70,11 @@ class MappedGlyphStore {
 
 		// Fill Geometry
 		if (source.geometry.measureComplexity() & Geom.CPLX_NON_EMPTY) {
-			const rs = source.geometry.asReferences();
+			const rs = source.geometry.toReferences();
 			if (rs) {
 				this.fillReferences(g, rs);
 			} else {
-				this.fillContours(g, source.geometry.asContours());
+				this.fillContours(g, source.geometry.toContours());
 			}
 		}
 	}

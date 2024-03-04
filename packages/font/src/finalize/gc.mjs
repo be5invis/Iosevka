@@ -242,7 +242,7 @@ function analyzeReferenceGraph(glyphStore, markedGlyphs) {
 function traverseReferenceTree(depthMap, aliasMap, g, d) {
 	depthMapSet(depthMap, g, d);
 
-	let refs = g.geometry.asReferences();
+	let refs = g.geometry.toReferences();
 	if (!refs) return;
 
 	for (const sr of refs) {
@@ -359,7 +359,7 @@ function rectifyGlyphAndMarkComponents(glyphStore, aliasMap, markedGlyphs, memo,
 	if (memo.has(g)) return;
 	memo.add(g);
 
-	let refs = g.geometry.asReferences();
+	let refs = g.geometry.toReferences();
 	if (refs) {
 		let parts = [];
 		for (let sr of refs) {
