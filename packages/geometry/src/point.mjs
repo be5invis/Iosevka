@@ -33,7 +33,7 @@ export class Point {
 		return new Point(
 			this.type,
 			this.x + scale * (z2.x - this.x),
-			this.y + scale * (z2.y - this.y)
+			this.y + scale * (z2.y - this.y),
 		);
 	}
 	scale(t) {
@@ -74,5 +74,5 @@ Point.Type = {
 	Corner: 0,
 	CubicStart: 1,
 	CubicEnd: 2,
-	Quadratic: 3
+	Quadratic: 3,
 };

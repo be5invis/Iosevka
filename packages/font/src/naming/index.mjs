@@ -7,7 +7,7 @@ export function createNamingDictFromArgv(argv) {
 		version: argv.menu.version,
 		weight: argv.menu.weight - 0,
 		width: argv.menu.width - 0,
-		slope: argv.menu.slope
+		slope: argv.menu.slope,
 	};
 }
 
@@ -105,7 +105,7 @@ export function assignFontNames(font, naming, isQuasiProportional) {
 		[Ot.Head.Flags.LeftSidebearingAtX0, true],
 		[Ot.Head.Flags.InstructionsMayDependOnPointSize, true],
 		[Ot.Head.Flags.ForcePpemToBeInteger, true],
-		[Ot.Head.Flags.InstructionMayAlterAdvanceWidth, true]
+		[Ot.Head.Flags.InstructionMayAlterAdvanceWidth, true],
 	);
 }
 
@@ -139,7 +139,7 @@ function getStyleLinkedStyles(weight, width, slope) {
 	return {
 		style: getStyle(linkWeight, 5, linkSlope),
 		familySuffix: getStyle(nameSuffixWeight, nameSuffixWidth, nameSuffixSlope),
-		familySuffixShort: getShortStyle(nameSuffixWeight, nameSuffixWidth, nameSuffixSlope)
+		familySuffixShort: getShortStyle(nameSuffixWeight, nameSuffixWidth, nameSuffixSlope),
 	};
 }
 
@@ -185,7 +185,7 @@ const weightToMenuStyleMap = {
 	600: "Semibold",
 	700: "Bold",
 	800: "Extrabold",
-	900: "Heavy"
+	900: "Heavy",
 };
 const widthToMenuStyleMap = {
 	1: "Ultra-Condensed",
@@ -196,12 +196,12 @@ const widthToMenuStyleMap = {
 	6: "Semi-Extended",
 	7: "Extended",
 	8: "Extra-Extended",
-	9: "Ultra-Extended"
+	9: "Ultra-Extended",
 };
 const slopeToMenuStyleMap = {
 	normal: "",
 	italic: "Italic",
-	oblique: "Oblique"
+	oblique: "Oblique",
 };
 const weightToMenuStyleMapShort = {
 	100: "Th",
@@ -214,7 +214,7 @@ const weightToMenuStyleMapShort = {
 	600: "SmBd",
 	700: "Bd",
 	800: "XBd",
-	900: "Hv"
+	900: "Hv",
 };
 const widthToMenuStyleMapShort = {
 	1: "UltCn",
@@ -225,12 +225,12 @@ const widthToMenuStyleMapShort = {
 	6: "SmEx",
 	7: "Ex",
 	8: "XEx",
-	9: "UltEx"
+	9: "UltEx",
 };
 const slopeToMenuStyleMapShort = {
 	normal: "",
 	italic: "It",
-	oblique: "Obl"
+	oblique: "Obl",
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

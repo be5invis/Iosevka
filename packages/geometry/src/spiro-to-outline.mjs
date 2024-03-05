@@ -1,4 +1,5 @@
 import * as SpiroJs from "spiro";
+
 import * as CurveUtil from "./curve-util.mjs";
 
 export function spiroToOutline(knots, fClosed, gizmo) {

@@ -9,7 +9,7 @@ export function CreateEmptyFont(argv) {
 		os2: new Ot.Os2.Table(4),
 		post: new Ot.Post.Table(argv.featureControl.exportGlyphNames ? 2 : 3, 0),
 		maxp: Ot.Maxp.Table.TrueType(),
-		name: new Ot.Name.Table()
+		name: new Ot.Name.Table(),
 	};
 	if (process.env.SOURCE_DATE_EPOCH) {
 		font.head.created = new Date(process.env.SOURCE_DATE_EPOCH * 1000);
@@ -34,7 +34,7 @@ export function parseTTF(buf) {
 export function buildTTF(font) {
 	const sfnt = FontIo.writeFont(font, {
 		glyphStore: { statOs2XAvgCharWidth: false },
-		generateDummyDigitalSignature: true
+		generateDummyDigitalSignature: true,
 	});
 	const buf = FontIo.writeSfntOtf(sfnt);
 	return buf;

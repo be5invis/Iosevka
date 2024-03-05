@@ -49,10 +49,10 @@ export default (function (args) {
 					{ "font-size": 24, color: theme.body },
 					{ "font-feature-settings": { calt: 1 } },
 					trimNewline([
-						...makeSample(theme, args.lineBreakMode, args.fontFeatures, args.hotChars)
-					])
-				]
-			}
-		]
+						...makeSample(theme, args.lineBreakMode, args.fontFeatures, args.hotChars),
+					]),
+				],
+			},
+		],
 	};
 });

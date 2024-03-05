@@ -45,7 +45,7 @@ const validMetricOverrideFields = new Set([
 	"essRatioQuestion",
 	"essRatio",
 	"archDepth",
-	"smallArchDepth"
+	"smallArchDepth",
 ]);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

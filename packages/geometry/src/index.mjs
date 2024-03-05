@@ -71,7 +71,7 @@ export class ContourSetGeometry extends GeometryBase {
 	toShapeStringOrNull() {
 		return Format.struct(
 			`ContourSetGeometry`,
-			Format.list(this.m_contours.map(c => Format.list(c.map(Format.typedPoint))))
+			Format.list(this.m_contours.map(c => Format.list(c.map(Format.typedPoint)))),
 		);
 	}
 }
@@ -110,7 +110,7 @@ export class SpiroGeometry extends GeometryBase {
 			"SpiroGeometry",
 			Format.gizmo(this.m_gizmo),
 			this.m_closed,
-			Format.list(this.m_knots.map(k => k.toShapeString()))
+			Format.list(this.m_knots.map(k => k.toShapeString())),
 		);
 	}
 }
@@ -138,7 +138,7 @@ export class DiSpiroGeometry extends GeometryBase {
 		if (this.m_closed) {
 			outlineGeometry = new CombineGeometry([
 				new SpiroGeometry(this.m_gizmo, true, lhs),
-				new SpiroGeometry(this.m_gizmo, true, rhs)
+				new SpiroGeometry(this.m_gizmo, true, rhs),
 			]);
 		} else {
 			lhs[0].type = lhs[lhs.length - 1].type = "corner";
@@ -155,7 +155,7 @@ export class DiSpiroGeometry extends GeometryBase {
 			this.m_gizmo,
 			this.m_contrast,
 			this.m_closed,
-			this.m_biKnots
+			this.m_biKnots,
 		);
 		expander.initializeNormals();
 		expander.iterateNormals();
@@ -187,7 +187,7 @@ export class DiSpiroGeometry extends GeometryBase {
 			Format.gizmo(this.m_gizmo),
 			Format.n(this.m_contrast),
 			this.m_closed,
-			Format.list(this.m_biKnots.map(z => z.toShapeString()))
+			Format.list(this.m_biKnots.map(z => z.toShapeString())),
 		);
 	}
 }
@@ -203,7 +203,7 @@ export class ReferenceGeometry extends GeometryBase {
 	unwrap() {
 		return new TransformedGeometry(
 			this.m_glyph.geometry,
-			Transform.Translate(this.m_x, this.m_y)
+			Transform.Translate(this.m_x, this.m_y),
 		);
 	}
 	toContours() {
@@ -317,8 +317,8 @@ export class TransformedGeometry extends GeometryBase {
 				unwrapped.m_geom,
 				Transform.Translate(
 					this.m_transform.tx + unwrapped.m_transform.tx,
-					this.m_transform.ty + unwrapped.m_transform.ty
-				)
+					this.m_transform.ty + unwrapped.m_transform.ty,
+				),
 			);
 		} else {
 			return new TransformedGeometry(unwrapped, this.m_transform);
@@ -467,7 +467,7 @@ export class BooleanGeometry extends GeometryBase {
 			sink.push({
 				type: "operand",
 				fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
-				shape: []
+				shape: [],
 			});
 			return;
 		}
@@ -480,7 +480,7 @@ export class BooleanGeometry extends GeometryBase {
 				sink.push({
 					type: "operand",
 					fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
-					shape: CurveUtil.convertShapeToArcs(operand.toContours())
+					shape: CurveUtil.convertShapeToArcs(operand.toContours()),
 				});
 			}
 			// Push operator if i > 0
@@ -548,7 +548,7 @@ export class StrokeGeometry extends GeometryBase {
 		let arcs = TypoGeom.Boolean.removeOverlap(
 			CurveUtil.convertShapeToArcs(nonTransformedGeometry.toContours()),
 			TypoGeom.Boolean.PolyFillType.pftNonZero,
-			CurveUtil.BOOLE_RESOLUTION
+			CurveUtil.BOOLE_RESOLUTION,
 		);
 
 		// Fairize to get get some arcs that are simple enough
@@ -559,7 +559,7 @@ export class StrokeGeometry extends GeometryBase {
 			fairizedArcs,
 			this.m_radius,
 			this.m_contrast,
-			this.m_fInside
+			this.m_fInside,
 		);
 
 		// Convert to Iosevka format
@@ -580,7 +580,7 @@ export class StrokeGeometry extends GeometryBase {
 			this.m_gizmo,
 			this.m_radius,
 			this.m_contrast,
-			this.m_fInside
+			this.m_fInside,
 		);
 	}
 	filterTag(fn) {
@@ -589,7 +589,7 @@ export class StrokeGeometry extends GeometryBase {
 			this.m_gizmo,
 			this.m_radius,
 			this.m_contrast,
-			this.m_fInside
+			this.m_fInside,
 		);
 	}
 	measureComplexity() {
@@ -604,7 +604,7 @@ export class StrokeGeometry extends GeometryBase {
 			Format.gizmo(this.m_gizmo),
 			Format.n(this.m_radius),
 			Format.n(this.m_contrast),
-			this.m_fInside
+			this.m_fInside,
 		);
 	}
 }
@@ -622,7 +622,7 @@ export class SimplifyGeometry extends GeometryBase {
 			arcs = TypoGeom.Boolean.removeOverlap(
 				arcs,
 				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				CurveUtil.BOOLE_RESOLUTION
+				CurveUtil.BOOLE_RESOLUTION,
 			);
 		}
 
@@ -631,7 +631,7 @@ export class SimplifyGeometry extends GeometryBase {
 		TypoGeom.ShapeConv.transferGenericShape(
 			TypoGeom.Fairize.fairizeBezierShape(arcs),
 			sink,
-			CurveUtil.GEOMETRY_PRECISION
+			CurveUtil.GEOMETRY_PRECISION,
 		);
 		return sink.contours;
 	}

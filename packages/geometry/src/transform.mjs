@@ -39,7 +39,7 @@ export class Transform {
 	applyOffsetXY(deltaX, deltaY) {
 		return {
 			x: deltaX * this.xx + deltaY * this.xy,
-			y: deltaX * this.yx + deltaY * this.yy
+			y: deltaX * this.yx + deltaY * this.yy,
 		};
 	}
 
@@ -67,7 +67,7 @@ export class Transform {
 			-this.yx / denom,
 			this.xx / denom,
 			-(this.tx * this.yy - this.ty * this.xy) / denom,
-			-(-this.tx * this.yx + this.ty * this.xx) / denom
+			-(-this.tx * this.yx + this.ty * this.xx) / denom,
 		);
 	}
 
@@ -98,7 +98,7 @@ export class Transform {
 			z10.y - z00.y,
 			z01.y - z00.y,
 			z00.x,
-			z00.y
+			z00.y,
 		);
 	}
 }

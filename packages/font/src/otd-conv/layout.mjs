@@ -89,7 +89,7 @@ class ScriptLanguageStore {
 		}
 		return {
 			requiredFeature: this.featureStore.query(data.requiredFeature) || null,
-			features: features
+			features: features,
 		};
 	}
 }
@@ -162,7 +162,7 @@ const GsubSingleHandler = {
 			const to = store.glyphs.queryByName(st[k]);
 			if (from && to) dst.mapping.set(from, to);
 		}
-	}
+	},
 };
 const GsubMultipleHandler = {
 	init() {
@@ -176,13 +176,13 @@ const GsubMultipleHandler = {
 			if (!from || !to) continue;
 			dst.mapping.set(from, to);
 		}
-	}
+	},
 };
 const GsubAlternateHandler = {
 	init() {
 		return new Ot.Gsub.Alternate();
 	},
-	fill: GsubMultipleHandler.fill
+	fill: GsubMultipleHandler.fill,
 };
 const GsubLigatureHandler = {
 	init() {
@@ -196,7 +196,7 @@ const GsubLigatureHandler = {
 			if (!from || !to) continue;
 			dst.mapping.push({ from, to });
 		}
-	}
+	},
 };
 const GsubChainingHandler = {
 	init() {
@@ -221,7 +221,7 @@ const GsubChainingHandler = {
 			}
 			dst.rules.push({ match, inputBegins, inputEnds, applications });
 		}
-	}
+	},
 };
 const GsubReverseHandler = {
 	init() {
@@ -257,7 +257,7 @@ const GsubReverseHandler = {
 			}
 			dst.rules.push({ match, doSubAt, replacement });
 		}
-	}
+	},
 };
 
 function mapGlyphListAll(gl, store) {
@@ -285,7 +285,7 @@ const GsubHandlers = {
 	gsub_alternate: GsubAlternateHandler,
 	gsub_ligature: GsubLigatureHandler,
 	gsub_chaining: GsubChainingHandler,
-	gsub_reverse: GsubReverseHandler
+	gsub_reverse: GsubReverseHandler,
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +298,7 @@ const GposMarkToBaseHandler = {
 		const mm = collectClassMap(src.marks);
 		dst.marks = convertMarkRecords(src.marks, mm, store);
 		dst.bases = convertBaseRecords(src.bases, mm, store);
-	}
+	},
 };
 const GposMarkToMarkHandler = {
 	init() {
@@ -308,7 +308,7 @@ const GposMarkToMarkHandler = {
 		const mm = collectClassMap(src.marks);
 		dst.marks = convertMarkRecords(src.marks, mm, store);
 		dst.baseMarks = convertBaseRecords(src.bases, mm, store);
-	}
+	},
 };
 function collectClassMap(marks) {
 	let n = 0;
@@ -350,5 +350,5 @@ function convertBaseRecords(bases, mm, store) {
 }
 const GposHandlers = {
 	gpos_mark_to_base: GposMarkToBaseHandler,
-	gpos_mark_to_mark: GposMarkToMarkHandler
+	gpos_mark_to_mark: GposMarkToMarkHandler,
 };

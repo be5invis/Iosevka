@@ -42,7 +42,7 @@ class Cache {
 		return {
 			version: version + "@" + Edition,
 			ageKeys: mergedAgeKeys,
-			gf: gfRep
+			gf: gfRep,
 		};
 	}
 	isEmpty() {

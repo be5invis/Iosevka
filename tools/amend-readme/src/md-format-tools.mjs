@@ -4,7 +4,7 @@ export class MdCol {
 		this.sectionName = sectionName;
 		this.matchRegex = new RegExp(
 			`^([ \\t]*)<!-- BEGIN ${sectionName} -->\\n[\\s\\S]*?<!-- END ${sectionName} -->\\n`,
-			`m`
+			`m`,
 		);
 	}
 	log(...s) {

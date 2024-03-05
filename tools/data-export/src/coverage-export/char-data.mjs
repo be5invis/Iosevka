@@ -18,7 +18,7 @@ class CharDataLookup {
 		} else {
 			return {
 				gc: ugc.get(lch),
-				charName: ucdNames.get(lch)
+				charName: ucdNames.get(lch),
 			};
 		}
 	}
@@ -29,7 +29,7 @@ export async function createCharDataLookup() {
 
 	const additionalDataTxt = await fs.promises.readFile(
 		path.join(__dirname, "additional-char-data.txt"),
-		"utf-8"
+		"utf-8",
 	);
 
 	let nameSuffix = "";

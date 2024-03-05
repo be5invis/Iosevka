@@ -83,7 +83,7 @@ class MappedGlyphStore {
 		let rev = new Map();
 		for (const [u, g] of this.m_primaryUnicodeMapping) rev.set(g, u);
 		const glyphsInBuildOrder = Array.from(this.m_mapping).sort(
-			([a], [b]) => a.subRank - b.subRank
+			([a], [b]) => a.subRank - b.subRank,
 		);
 		for (const [gSrc, gOt] of glyphsInBuildOrder) gOt.name = undefined;
 
@@ -101,7 +101,7 @@ class MappedGlyphStore {
 					gSrcBase,
 					gOtBase,
 					this.m_nameMapping,
-					conflictSet
+					conflictSet,
 				);
 			}
 		} while (nNewNames > 0);
@@ -114,7 +114,7 @@ class MappedGlyphStore {
 					gSrcBase,
 					gOtBase,
 					this.m_nameMapping,
-					conflictSet
+					conflictSet,
 				);
 			}
 		} while (nNewNames > 0);
@@ -162,8 +162,8 @@ class MappedGlyphStore {
 						z.y,
 						z.type === Point.Type.Quadratic
 							? Ot.Glyph.PointType.Quad
-							: Ot.Glyph.PointType.Corner
-					)
+							: Ot.Glyph.PointType.Corner,
+					),
 				);
 			}
 			cs.contours.push(c1);

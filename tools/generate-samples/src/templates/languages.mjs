@@ -62,10 +62,10 @@ export default (function (args) {
 					"font-size": EM,
 					"font-weight": 600,
 					"font-style": "italic",
-					color: theme.title
+					color: theme.title,
 				},
-				lang
-			]
+				lang,
+			],
 		});
 		frames.push({
 			top,
@@ -79,10 +79,10 @@ export default (function (args) {
 					"font-family": "Iosevka",
 					"font-size": EM,
 					...(localeId ? { lang: localeId } : {}),
-					color: theme.body
+					color: theme.body,
 				},
-				sample
-			]
+				sample,
+			],
 		});
 	}
 	return { width: canvasWidth, height: canvasHeight, frames };

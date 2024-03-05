@@ -1,11 +1,11 @@
 import * as TypoGeom from "typo-geom";
+
 import {
 	BOOLE_RESOLUTION,
-	Bez3FromHermite,
 	GEOMETRY_PRECISION,
 	OCCURRENT_PRECISION,
 	OffsetCurve,
-	RoundCapCurve
+	RoundCapCurve,
 } from "./curve-util.mjs";
 
 export function strokeArcs(arcs, radius, contrast, fInside) {
@@ -24,7 +24,7 @@ export function strokeArcs(arcs, radius, contrast, fInside) {
 				bezs,
 				TypoGeom.Boolean.PolyFillType.pftNonZero,
 				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				BOOLE_RESOLUTION
+				BOOLE_RESOLUTION,
 			);
 		}
 	}
@@ -37,7 +37,7 @@ export function strokeArcs(arcs, radius, contrast, fInside) {
 				currentArcs,
 				TypoGeom.Boolean.PolyFillType.pftNonZero,
 				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				BOOLE_RESOLUTION
+				BOOLE_RESOLUTION,
 			);
 		} else {
 			return currentArcs;
@@ -72,8 +72,8 @@ function offsetContour(arcs, distance, contrast) {
 					prevOffsetedArc.derivative(1),
 					currentOffsetedArc.bone.eval(0),
 					currentStart,
-					currentOffsetedArc.derivative(0)
-				)
+					currentOffsetedArc.derivative(0),
+				),
 			);
 			// offsetArcs.push(Bez3FromHermite(prevEnd, dPrevEnd, currentStart, dCurrentStart));
 		}
@@ -101,7 +101,7 @@ function createCap(
 	dPrevEnd, // Previous offseted curve's end point's derivative
 	currentStartNoOffset, // Current non-offseted curve's start point
 	currentStart, // Current offseted curve's start point
-	dCurrentStart // Current offseted curve's start point's derivative
+	dCurrentStart, // Current offseted curve's start point's derivative
 ) {
 	return new RoundCapCurve(
 		side,
@@ -109,6 +109,6 @@ function createCap(
 		prevEndNoOffset,
 		prevEnd,
 		currentStartNoOffset,
-		currentStart
+		currentStart,
 	);
 }

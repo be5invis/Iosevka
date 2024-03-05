@@ -4,7 +4,7 @@ import fs from "fs";
 
 const WebfontFormatMap = new Map([
 	["WOFF2", "woff2"],
-	["TTF", "truetype"]
+	["TTF", "truetype"],
 ]);
 
 export default function (output, family, hs, formats, unhinted) {
@@ -22,7 +22,7 @@ export default function (output, family, hs, formats, unhinted) {
 			.map(
 				ext =>
 					`url('${ext}${dirSuffix}/${term.name}.${ext}') ` +
-					`format('${WebfontFormatMap.get(ext)}')`
+					`format('${WebfontFormatMap.get(ext)}')`,
 			)
 			.join(", ");
 		ans += `

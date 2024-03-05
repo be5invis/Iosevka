@@ -65,7 +65,7 @@ function flattenSimpleGlyph(cache, skew, g) {
 				const tfForward = g.gizmo ? g.gizmo : new Transform(1, +skew, 0, 1, 0, 0);
 				gSimplified = new Geom.TransformedGeometry(
 					new Geom.SimplifyGeometry(new Geom.TransformedGeometry(g.geometry, tfBack)),
-					tfForward
+					tfForward,
 				);
 			} else {
 				gSimplified = new Geom.SimplifyGeometry(g.geometry);

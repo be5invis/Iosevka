@@ -41,9 +41,9 @@ export default (function (args) {
 					{ "font-family": args.fontFamily, "font-style": args.fontStyle },
 					{ "font-size": 24, color: theme.body },
 					{ "font-feature-settings": { calt: 1, ...args.fontFeatures } },
-					trimNewline([...makeSample(args.lineBreakMode, args.hotChars)])
-				]
-			}
-		]
+					trimNewline([...makeSample(args.lineBreakMode, args.hotChars)]),
+				],
+			},
+		],
 	};
 });

@@ -89,11 +89,11 @@ const InstalledVersion = computed.make(
 		if (!semver.satisfies(depPkg.version, required)) {
 			fail(
 				`Package version for ${pkg} is outdated:`,
-				`Required ${required}, Installed ${depPkg.version}`
+				`Required ${required}, Installed ${depPkg.version}`,
 			);
 		}
 		return { name: pkg, actual: depPkg.version, required };
-	}
+	},
 );
 
 ///////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ async function tryParseToml(str) {
 		throw new Error(
 			`Failed to parse configuration file ${str}.\n` +
 				`Please validate whether there's syntax error.\n` +
-				`${e}`
+				`${e}`,
 		);
 	}
 }
@@ -202,7 +202,7 @@ function rectifyPlanForSpacingDerive(p) {
 		buildCharMap: false,
 		snapshotFamily: null,
 		snapshotFeature: null,
-		targets: null
+		targets: null,
 	};
 }
 
@@ -250,7 +250,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		spacingDerive = {
 			manner: bp.spacing,
 			prefix: bp.spacingDeriveFrom,
-			fileName: makeFileName(bp.spacingDeriveFrom, fi0.suffix)
+			fileName: makeFileName(bp.spacingDeriveFrom, fi0.suffix),
 		};
 	}
 
@@ -263,7 +263,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			noCvSs: bp.noCvSs || false,
 			noLigation: bp.noLigation || false,
 			exportGlyphNames: bp.exportGlyphNames || false,
-			buildTextureFeature: bp.buildTextureFeature || false
+			buildTextureFeature: bp.buildTextureFeature || false,
 		},
 		// Ligations
 		ligations: bp.ligations || null,
@@ -274,7 +274,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			weight: sfi.shapeWeight,
 			width: sfi.shapeWidth,
 			slope: sfi.shapeSlope,
-			slopeAngle: sfi.shapeSlopeAngle
+			slopeAngle: sfi.shapeSlopeAngle,
 		},
 		// Menu
 		menu: {
@@ -282,13 +282,13 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			version: version,
 			width: sfi.menuWidth,
 			slope: sfi.menuSlope,
-			weight: sfi.menuWeight
+			weight: sfi.menuWeight,
 		},
 		// CSS
 		css: {
 			weight: sfi.cssWeight,
 			stretch: sfi.cssStretch,
-			style: sfi.cssStyle
+			style: sfi.cssStyle,
 		},
 		// Hinting
 		hintParams: bp.hintParams || [],
@@ -303,7 +303,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		excludedCharRanges: bp.excludeChars?.ranges,
 
 		// Spacing derivation -- creating faster build for spacing variants
-		spacingDerive
+		spacingDerive,
 	};
 });
 
@@ -365,7 +365,7 @@ function getSuffixMappingItem(weights, w, slopes, s, widths, wd) {
 		shapeSlope: sValidate("Shape slope of " + s, slopeDef.shape, VlShapeSlope),
 		shapeSlopeAngle: nValidate("Angle of " + s, slopeDef.angle, VlSlopeAngle),
 		cssStyle: sValidate("CSS style of " + s, slopeDef.css, VlCssStyle),
-		menuSlope: sValidate("Menu slope of " + s, slopeDef.menu, VlShapeSlope)
+		menuSlope: sValidate("Menu slope of " + s, slopeDef.menu, VlShapeSlope),
 	};
 }
 
@@ -409,7 +409,7 @@ const DistUnhintedTTF = file.make(
 			const spD = fi.spacingDerive;
 			const [deriveFrom] = await target.need(
 				DistUnhintedTTF(spD.prefix, spD.fileName),
-				de(charMapPath.dir)
+				de(charMapPath.dir),
 			);
 
 			echo.action(echo.hl.command(`Create TTF`), out.full);
@@ -418,7 +418,7 @@ const DistUnhintedTTF = file.make(
 				o: out.full,
 				paramsDir: Path.resolve("params"),
 				oNoGc: noGcTtfPath.full,
-				...fi
+				...fi,
 			});
 		} else {
 			// Ab-initio build
@@ -432,7 +432,7 @@ const DistUnhintedTTF = file.make(
 				CompositesFromBuildPlan,
 				de(charMapPath.dir),
 				de(ttfaControlsPath.dir),
-				de(SHARED_CACHE)
+				de(SHARED_CACHE),
 			);
 
 			echo.action(echo.hl.command(`Create TTF`), out.full);
@@ -445,7 +445,7 @@ const DistUnhintedTTF = file.make(
 				iCache: cachePath,
 				oCache: cacheDiffPath,
 				compositesFromBuildPlan: comps,
-				...fi
+				...fi,
 			});
 
 			if (cacheUpdated) {
@@ -455,37 +455,37 @@ const DistUnhintedTTF = file.make(
 					base: cachePath,
 					diff: cacheDiffPath,
 					version: fi.menu.version,
-					freshAgeKey: ageKey
+					freshAgeKey: ageKey,
 				});
 				lock.release();
 			}
 		}
-	}
+	},
 );
 
 const BuildCM = file.make(
 	(gr, f) => `${BUILD}/TTF/${gr}/${f}.charmap.mpz`,
 	async (target, output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
-	}
+	},
 );
 const BuildTtfaControls = file.make(
 	(gr, f) => `${BUILD}/TTF/${gr}/${f}.ttfa.txt`,
 	async (target, output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
-	}
+	},
 );
 const BuildNoGcUnhintedTtfImpl = file.make(
 	(gr, f) => `${BUILD}/TTF/${gr}/${f}.no-gc.ttf`,
 	async (target, output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
-	}
+	},
 );
 const BuildNoGcTtfImpl = file.make(
 	(gr, f) => `${BUILD}/TTF/${gr}/${f}.no-gc.hinted.ttf`,
 	async (target, output, gr, f) => {
 		await target.need(DistHintedTTF(gr, f));
-	}
+	},
 );
 
 const DistHintedTTF = file.make(
@@ -494,7 +494,7 @@ const DistHintedTTF = file.make(
 		const [fi, hint] = await target.need(
 			FontInfoOf(fn),
 			CheckTtfAutoHintExists,
-			de`${out.dir}`
+			de`${out.dir}`,
 		);
 		if (fi.spacingDerive) {
 			// The font is a spacing variant, and is derivable form an existing
@@ -505,7 +505,7 @@ const DistHintedTTF = file.make(
 
 			const [deriveFrom] = await target.need(
 				DistHintedTTF(spD.prefix, spD.fileName),
-				de(noGcTtfPath.dir)
+				de(noGcTtfPath.dir),
 			);
 
 			echo.action(echo.hl.command(`Hint TTF`), out.full);
@@ -514,17 +514,17 @@ const DistHintedTTF = file.make(
 				oNoGc: noGcTtfPath.full,
 				o: out.full,
 				paramsDir: Path.resolve("params"),
-				...fi
+				...fi,
 			});
 		} else {
 			const [from, ttfaControls] = await target.need(
 				DistUnhintedTTF(gr, fn),
-				BuildTtfaControls(gr, fn)
+				BuildTtfaControls(gr, fn),
 			);
 			echo.action(echo.hl.command(`Hint TTF`), out.full, echo.hl.operator("<-"), from.full);
 			await silently.run(hint, fi.hintParams, "-m", ttfaControls.full, from.full, out.full);
 		}
-	}
+	},
 );
 
 const BuildNoGcTtf = task.make(
@@ -538,7 +538,7 @@ const BuildNoGcTtf = task.make(
 			const [distUnhinted] = await target.need(DistHintedTTF(gr, fn));
 			return distUnhinted;
 		}
-	}
+	},
 );
 
 function formatSuffix(fmt, unhinted) {
@@ -552,7 +552,7 @@ const DistWoff2 = file.make(
 		const [from] = await target.need(Ctor(group, f), de`${out.dir}`);
 		echo.action(echo.hl.command("Create WOFF2"), out.full, echo.hl.operator("<-"), from.full);
 		await silently.node(`tools/misc/src/ttf-to-woff2.mjs`, from.full, out.full);
-	}
+	},
 );
 
 ///////////////////////////////////////////////////////////
@@ -596,7 +596,7 @@ const DistWebFontCSS = file.make(
 		const [plan] = await target.need(BuildPlanOf(gr));
 		await target.need(de(out.dir));
 		await createWebFontCssImpl(target, out.full, gr, plan.webfontFormats, unhinted);
-	}
+	},
 );
 async function createWebFontCssImpl(target, output, gr, formats, unhinted) {
 	const [bp, ts] = await target.need(BuildPlanOf(gr), GroupFontsOf(gr));
@@ -608,7 +608,7 @@ async function createWebFontCssImpl(target, output, gr, formats, unhinted) {
 		bp.family,
 		hs,
 		formats,
-		unhinted
+		unhinted,
 	);
 }
 
@@ -620,7 +620,7 @@ const GroupTtfsImpl = task.make(
 		const [ts] = await target.need(GroupFontsOf(gr));
 		await target.need(ts.map(tn => Ctor(gr, tn)));
 		return gr;
-	}
+	},
 );
 const GroupWoff2Impl = task.make(
 	(gr, unhinted) => `group-${formatSuffix("WOFF2Impl", unhinted)}::${gr}`,
@@ -628,7 +628,7 @@ const GroupWoff2Impl = task.make(
 		const [ts] = await target.need(GroupFontsOf(gr));
 		await target.need(ts.map(tn => DistWoff2(gr, tn, unhinted)));
 		return gr;
-	}
+	},
 );
 const GroupWebFontsImpl = task.make(
 	(gr, unhinted) => `group-${formatSuffix("WebFontImpl", unhinted)}::${gr}`,
@@ -647,7 +647,7 @@ const GroupWebFontsImpl = task.make(
 		}
 		await target.need(groupsNeeded, DistWebFontCSS(gr, unhinted));
 		return gr;
-	}
+	},
 );
 
 ///////////////////////////////////////////////////////////
@@ -708,7 +708,7 @@ async function getCollectPlans(target, rawCollectPlans) {
 			ttcComposition,
 			groupDecomposition: [...collect.from],
 			inRelease: !!collect.release,
-			isAmended: !!collect.isAmended
+			isAmended: !!collect.isAmended,
 		};
 	}
 	return plans;
@@ -736,7 +736,7 @@ function fnStandardTtc(fIsGlyfTtc, prefix, suffixMapping, sfi) {
 		optimalSfi.weight,
 		optimalSfi.width,
 		optimalSfi.slope,
-		DEFAULT_SUBFAMILY
+		DEFAULT_SUBFAMILY,
 	)}`;
 }
 
@@ -760,7 +760,7 @@ const CollectedSuperTtcFile = file.make(
 		const parts = Array.from(Object.keys(cp[cgr].glyfTtcComposition));
 		const [inputs] = await target.need(parts.map(pt => GlyfTtc(cgr, pt)));
 		await buildCompositeTtc(out, inputs);
-	}
+	},
 );
 const CollectedTtcFile = file.make(
 	(cgr, f) => `${DIST_TTC}/${cgr}/${f}.ttc`,
@@ -769,7 +769,7 @@ const CollectedTtcFile = file.make(
 		const parts = Array.from(new Set(cp[cgr].ttcComposition[f]));
 		const [inputs] = await target.need(parts.map(pt => GlyfTtc(cgr, pt)));
 		await buildCompositeTtc(out, inputs);
-	}
+	},
 );
 const GlyfTtc = file.make(
 	(cgr, f) => `${GLYF_TTC}/${cgr}/${f}.ttc`,
@@ -777,7 +777,7 @@ const GlyfTtc = file.make(
 		const [cp] = await target.need(CollectPlans);
 		const parts = cp[cgr].glyfTtcComposition[f];
 		await buildGlyphSharingTtc(target, parts, out);
-	}
+	},
 );
 
 async function buildCompositeTtc(out, inputs) {
@@ -806,14 +806,14 @@ const TtcZip = file.make(
 		const ttcFiles = Array.from(Object.keys(cPlan[cgr].ttcComposition));
 		await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
 		await CreateGroupArchiveFile(`${DIST_TTC}/${cgr}`, out, `*.ttc`);
-	}
+	},
 );
 const SuperTtcZip = file.make(
 	(cgr, version) => `${ARCHIVE_DIR}/SuperTTC-${cgr}-${version}.zip`,
 	async (target, out, cgr) => {
 		await target.need(de`${out.dir}`, CollectedSuperTtcFile(cgr));
 		await CreateGroupArchiveFile(DIST_SUPER_TTC, out, `${cgr}.ttc`);
-	}
+	},
 );
 
 // Single-group Archives
@@ -826,9 +826,9 @@ const GroupTtfZip = file.make(
 		await CreateGroupArchiveFile(
 			`${DIST}/${gr}/${formatSuffix("TTF", unhinted)}`,
 			out,
-			"*.ttf"
+			"*.ttf",
 		);
-	}
+	},
 );
 const GroupWebZip = file.make(
 	(gr, version, unhinted) =>
@@ -841,9 +841,9 @@ const GroupWebZip = file.make(
 			`${DIST}/${gr}`,
 			out,
 			`${formatSuffix(gr, unhinted)}.css`,
-			...plan.webfontFormats.map(format => formatSuffix(format, unhinted))
+			...plan.webfontFormats.map(format => formatSuffix(format, unhinted)),
 		);
-	}
+	},
 );
 
 async function CreateGroupArchiveFile(dir, out, ...files) {
@@ -854,7 +854,7 @@ async function CreateGroupArchiveFile(dir, out, ...files) {
 		[SEVEN_ZIP, "a"],
 		["-tzip", "-r", "-mx=9", "-mmt=off"],
 		relOut,
-		...files
+		...files,
 	);
 }
 
@@ -875,7 +875,7 @@ const Pages = task(`pages`, async t => {
 		PagesFontExport`IosevkaQp`,
 		PagesFontExport`IosevkaQpSlab`,
 		PagesFontExport`IosevkaQpe`,
-		PagesFontExport`IosevkaQpeSlab`
+		PagesFontExport`IosevkaQpeSlab`,
 	);
 });
 
@@ -891,10 +891,10 @@ const PagesDataExport = task(`pages:data-export`, async t => {
 	const [cm, cmi, cmo] = await t.need(
 		BuildCM("Iosevka", "Iosevka-Regular"),
 		BuildCM("Iosevka", "Iosevka-Italic"),
-		BuildCM("Iosevka", "Iosevka-Oblique")
+		BuildCM("Iosevka", "Iosevka-Oblique"),
 	);
 	await node(`tools/generate-samples/src/tokenized-sample-code.mjs`, {
-		output: Path.resolve(pagesDir, "shared/tokenized-sample-code/alphabet.txt.json")
+		output: Path.resolve(pagesDir, "shared/tokenized-sample-code/alphabet.txt.json"),
 	});
 	await node(`tools/data-export/src/index.mjs`, {
 		version,
@@ -903,7 +903,7 @@ const PagesDataExport = task(`pages:data-export`, async t => {
 		charMapItalicPath: cmi.full,
 		charMapObliquePath: cmo.full,
 		exportPathMeta: Path.resolve(pagesDir, "shared/data-import/raw/metadata.json"),
-		exportPathCov: Path.resolve(pagesDir, "shared/data-import/raw/coverage.json")
+		exportPathCov: Path.resolve(pagesDir, "shared/data-import/raw/coverage.json"),
 	});
 });
 
@@ -947,7 +947,7 @@ const AmendReadme = task("amend-readme", async target => {
 		AmendReadmeFor("doc/language-specific-ligation-sets.md"),
 		AmendReadmeFor("doc/cv-influences.md"),
 		AmendReadmeFor("doc/PACKAGE-LIST.md"),
-		AmendLicenseYear
+		AmendLicenseYear,
 	);
 });
 const AmendReadmeFor = task.make(
@@ -958,7 +958,7 @@ const AmendReadmeFor = task.make(
 		const [cm, cmi, cmo] = await target.need(
 			BuildCM("Iosevka", "Iosevka-Regular"),
 			BuildCM("Iosevka", "Iosevka-Italic"),
-			BuildCM("Iosevka", "Iosevka-Oblique")
+			BuildCM("Iosevka", "Iosevka-Oblique"),
 		);
 		return node(`tools/amend-readme/src/index.mjs`, {
 			version,
@@ -968,9 +968,9 @@ const AmendReadmeFor = task.make(
 			releasePackagesJsonPath: rpFiles.full,
 			charMapPath: cm.full,
 			charMapItalicPath: cmi.full,
-			charMapObliquePath: cmo.full
+			charMapObliquePath: cmo.full,
 		});
-	}
+	},
 );
 const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t, out) => {
 	const [cp] = await t.need(CollectPlans);
@@ -985,20 +985,20 @@ const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t,
 			subGroups[gr] = {
 				family: bp.family,
 				desc: bp.desc,
-				spacing: buildPlans[gr].spacing || "type"
+				spacing: buildPlans[gr].spacing || "type",
 			};
 		}
 		releaseNoteGroups[k] = {
 			subGroups,
 			slab: primePlan.serifs === "slab",
-			quasiProportional: primePlan.spacing === "quasi-proportional"
+			quasiProportional: primePlan.spacing === "quasi-proportional",
 		};
 	}
 	await FS.promises.writeFile(out.full, JSON.stringify(releaseNoteGroups, null, "  "));
 });
 const AmendLicenseYear = task("amend-readme:license-year", async target => {
 	return node(`tools/amend-readme/src/license-year.mjs`, {
-		path: "LICENSE.md"
+		path: "LICENSE.md",
 	});
 });
 
@@ -1018,12 +1018,12 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 		GroupTtfsImpl(`Iosevka`, false),
 		GroupTtfsImpl(`IosevkaSlab`, false),
 		GroupTtfsImpl(`IosevkaAile`, false),
-		GroupTtfsImpl(`IosevkaEtoile`, false)
+		GroupTtfsImpl(`IosevkaEtoile`, false),
 	);
 	const [cm, cmi, cmo] = await target.need(
 		BuildCM("Iosevka", "Iosevka-Regular"),
 		BuildCM("Iosevka", "Iosevka-Italic"),
-		BuildCM("Iosevka", "Iosevka-Oblique")
+		BuildCM("Iosevka", "Iosevka-Oblique"),
 	);
 	return await node("tools/generate-samples/src/index.mjs", {
 		version,
@@ -1033,7 +1033,7 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 		fontGroups: fontGroups,
 		charMapPath: cm.full,
 		charMapItalicPath: cmi.full,
-		charMapObliquePath: cmo.full
+		charMapObliquePath: cmo.full,
 	});
 });
 const PackageSnapshotConfig = async target => {
@@ -1045,7 +1045,7 @@ const PackageSnapshotConfig = async target => {
 		cfg.push({
 			name: "package-sample-" + key,
 			fontFamily: p.snapshotFamily,
-			fontFeatures: p.snapshotFeature
+			fontFeatures: p.snapshotFeature,
 		});
 	}
 	return cfg;
@@ -1059,9 +1059,9 @@ const ScreenShotImpl = file.make(
 		await run(rp.buildOptions.snapshotGeneratorApp, [
 			`${IMAGE_TASKS}/${id}.json`,
 			"-o",
-			out.full
+			out.full,
 		]);
-	}
+	},
 );
 
 ///////////////////////////////////////////////////////////
@@ -1079,9 +1079,9 @@ const ReleaseNotesFile = file.make(
 		await t.need(changeFiles.map(fu));
 		await node("tools/amend-readme/src/generate-release-note.mjs", {
 			version,
-			outputPath: out.full
+			outputPath: out.full,
 		});
-	}
+	},
 );
 
 const ChangeLog = task(`release:change-log`, async t => {
@@ -1096,7 +1096,7 @@ const ChangeLogMd = file(`CHANGELOG.md`, async (t, out) => {
 });
 const ChangeFileList = oracle.make(
 	() => `release:change-file-list`,
-	target => FileList({ under: "changes", pattern: "*.md" })(target)
+	target => FileList({ under: "changes", pattern: "*.md" })(target),
 );
 
 ///////////////////////////////////////////////////////////
@@ -1145,11 +1145,11 @@ const ReleaseArchives = task(`release:archives`, async target => {
 
 const MARCOS = [
 	fu`packages/font-glyphs/src/meta/macros.ptl`,
-	fu`packages/font-otl/src/meta/macros.ptl`
+	fu`packages/font-otl/src/meta/macros.ptl`,
 ];
 const ScriptsUnder = oracle.make(
 	(ext, dir) => `${ext}-scripts-under::${dir}`,
-	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target)
+	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target),
 );
 const UtilScriptFiles = computed("util-script-files", async target => {
 	const [mjs, md] = await target.need(ScriptsUnder("mjs", "tools"), ScriptsUnder("md", "tools"));
@@ -1175,7 +1175,7 @@ const CompiledJs = file.make(
 		await target.need(sfu(ptl));
 		echo.action(echo.hl.command("Compile Script"), ptl);
 		await silently.run(PATEL_C, "--strict", "--esm", ptl, "-o", out.full);
-	}
+	},
 );
 const Scripts = task("scripts", async target => {
 	const [jsFromPtlList] = await target.need(JavaScriptFromPtl);
@@ -1201,7 +1201,7 @@ const Parameters = task(`meta:parameters`, async target => {
 		sfu`params/shape-slope.toml`,
 		ofu`params/private-parameters.toml`,
 		sfu`params/variants.toml`,
-		sfu`params/ligation-set.toml`
+		sfu`params/ligation-set.toml`,
 	);
 });
 
@@ -1226,7 +1226,7 @@ function failWithLegacyParamName(prefix, bp, legacy, expected) {
 	if (bp[legacy]) {
 		fail(
 			`Build plan for '${prefix}' contains legacy build parameter '${legacy}'. ` +
-				`Please use '${expected}' instead.`
+				`Please use '${expected}' instead.`,
 		);
 	}
 }
@@ -1238,7 +1238,7 @@ function resolveWws(bpName, buildPlans, defaultConfig) {
 	if (!bp.slopes && bp.slants) {
 		fail(
 			`Build plan for ${bpName} uses legacy "slants" to define slopes. ` +
-				`Use "slopes" instead.`
+				`Use "slopes" instead.`,
 		);
 	}
 
@@ -1265,7 +1265,7 @@ function resolveWwsAspect(aspectName, bpName, buildPlans, defaultConfig, deps) {
 			inheritedPlanName,
 			buildPlans,
 			defaultConfig,
-			updatedDes
+			updatedDes,
 		);
 	} else {
 		return defaultConfig[aspectName];
@@ -1306,12 +1306,12 @@ function validateRecommendedWeight(w, value, label) {
 		semibold: 600,
 		bold: 700,
 		extrabold: 800,
-		heavy: 900
+		heavy: 900,
 	};
 	if (RecommendedMenuWeights[w] && RecommendedMenuWeights[w] !== value) {
 		echo.warn(
 			`${label} weight settings of ${w} ( = ${value}) doesn't match ` +
-				`the recommended value ( = ${RecommendedMenuWeights[w]}).`
+				`the recommended value ( = ${RecommendedMenuWeights[w]}).`,
 		);
 	}
 }
@@ -1345,14 +1345,14 @@ const VlShapeWidth = {
 			const xCorrected = Math.round(500 * Math.pow(Math.sqrt(600 / 500), x - 5));
 			echo.warn(
 				`The build plan is using legacy width grade ${x}. ` +
-					`Converting to unit width ${xCorrected}.`
+					`Converting to unit width ${xCorrected}.`,
 			);
 			g_widthFixupMemory.set(x, xCorrected);
 			return xCorrected;
 		} else {
 			return x;
 		}
-	}
+	},
 };
 const VlMenuWidth = { validate: x => x >= 1 && x <= 9 && x % 1 === 0 };
 const VlSlopeAngle = { validate: x => x >= 0 && x <= 15 };
@@ -1376,7 +1376,7 @@ const VlCssFontStretch = {
 		x == "semi-expanded" ||
 		x == "expanded" ||
 		x == "extra-expanded" ||
-		x == "ultra-expanded"
+		x == "ultra-expanded",
 };
 
 // Utilities

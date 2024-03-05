@@ -21,7 +21,7 @@ export function apply(data, para, argv) {
 	para.variants = {
 		selectorTree: parsed.selectorTree,
 		primes: parsed.primes,
-		composites: parsed.composites
+		composites: parsed.composites,
 	};
 	para.variantSelector = variantSelector;
 }
@@ -167,7 +167,7 @@ class Prime {
 			ligatureSampler: this.ligatureSampler,
 			descSampleText: this.descSampleText,
 			hotChars: this.hotChars,
-			variants: []
+			variants: [],
 		};
 		for (const variant of this.variants.values()) {
 			gr.variants.push({
@@ -175,7 +175,7 @@ class Prime {
 				rank: variant.rank,
 				groupRank: variant.groupRank,
 				description: variant.description,
-				snapshotFeatureApplication: variant.snapshotFeatureApplication
+				snapshotFeatureApplication: variant.snapshotFeatureApplication,
 			});
 		}
 		gr.variants.sort((a, b) => (a.rank || 0x7fffffff) - (b.rank || 0x7fffffff));
@@ -249,7 +249,7 @@ class Composite {
 			design: slabOverrideCfg.design,
 			override: slabOverrideCfg.upright || slabOverrideCfg["upright-oblique"],
 			oblique: slabOverrideCfg.oblique || slabOverrideCfg["upright-oblique"],
-			italic: slabOverrideCfg.italic
+			italic: slabOverrideCfg.italic,
 		};
 	}
 	decompose(para, selTree) {
@@ -259,7 +259,7 @@ class Composite {
 			this.design,
 			this.decomposeSlope(this, para),
 			!para.slab ? {} : this.slabOverride.design,
-			!para.slab ? {} : this.decomposeSlope(this.slabOverride, para)
+			!para.slab ? {} : this.decomposeSlope(this.slabOverride, para),
 		);
 		for (const [k, v] of Object.entries(cfg)) {
 			const pv = selTree.get(k, v);
@@ -308,7 +308,7 @@ class VariantBuilder {
 		globalState.sink.sort(
 			(a, b) =>
 				a.nonBreakingVariantAdditionPriority - b.nonBreakingVariantAdditionPriority ||
-				a.rank - b.rank
+				a.rank - b.rank,
 		);
 
 		let ans = {};
@@ -398,7 +398,7 @@ class VbStageAlternative {
 			ans.addDescription(
 				this.mode,
 				this.evalValue(this.descriptionJoiner, localState),
-				this.evalValue(this.descriptionAffix, localState)
+				this.evalValue(this.descriptionAffix, localState),
 			);
 		}
 		if (this.selectorAffix) {
@@ -563,7 +563,7 @@ class VbLocalState {
 			rank: this.rank,
 			groupRank: this.groupRank,
 			description: this.produceDescription(),
-			selector: Object.fromEntries(this.selector)
+			selector: Object.fromEntries(this.selector),
 		};
 	}
 }

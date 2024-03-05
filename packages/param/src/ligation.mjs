@@ -18,7 +18,7 @@ export function applyLigationData(data, para, argv) {
 	}
 	para.ligation = {
 		defaultBuildup,
-		caltBuildup: []
+		caltBuildup: [],
 	};
 	if (argv.ligations) {
 		if (argv.ligations.inherits)
@@ -27,13 +27,13 @@ export function applyLigationData(data, para, argv) {
 			Parameters.apply(
 				para.ligation,
 				hives,
-				argv.ligations.disables.map(x => `ligset-disable-${x}`)
+				argv.ligations.disables.map(x => `ligset-disable-${x}`),
 			);
 		if (argv.ligations.enables)
 			Parameters.apply(
 				para.ligation,
 				hives,
-				argv.ligations.enables.map(x => `ligset-enable-${x}`)
+				argv.ligations.enables.map(x => `ligset-enable-${x}`),
 			);
 	}
 }
