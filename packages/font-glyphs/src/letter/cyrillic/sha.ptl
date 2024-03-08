@@ -9,15 +9,17 @@ glyph-block Letter-Cyrillic-Sha : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar CyrDescender SerifFrame
 
-	define [CyrShaShape top df fInv] : glyph-proc
+	glyph-block-export CyrShaShape
+	define [CyrShaShape] : with-params [df top bot [fine Stroke] [doSerif false] [fInv false]] : glyph-proc
+		local cofine : fine * df.mvs / Stroke
 		include : union
-			[if fInv HBar.t HBar.b] df.leftSB df.rightSB [if fInv top 0]
-			VBar.l df.leftSB 0 top df.mvs
-			VBar.r df.rightSB 0 top df.mvs
-			VBar.m df.middle 0 top df.mvs
+			[if fInv HBar.t HBar.b] df.leftSB df.rightSB [if fInv top bot] fine
+			VBar.l df.leftSB bot top cofine
+			VBar.r df.rightSB bot top cofine
+			VBar.m df.middle bot top cofine
 
-		if SLAB : begin
-			local sf : SerifFrame.fromDf df top 0 (swSerif -- df.mvs)
+		if doSerif : begin
+			local sf : SerifFrame.fromDf df top bot (swSerif -- cofine)
 
 			if fInv : then : begin
 				include : composite-proc sf.lt.outer sf.rt.outer
@@ -33,31 +35,32 @@ glyph-block Letter-Cyrillic-Sha : begin
 	create-glyph 'cyrl/Sha' 0x428 : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.capital
-		include : CyrShaShape CAP df false
+		include : CyrShaShape df CAP 0 (doSerif -- SLAB)
 
 	create-glyph 'cyrl/sha.upright' : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.e
-		include : CyrShaShape XH df false
+		include : CyrShaShape df XH 0 (doSerif -- SLAB)
 
 	create-glyph 'cyrl/teThreeLeg.upright' : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.e
-		include : CyrShaShape XH df true
+		include : CyrShaShape df XH 0 (doSerif -- SLAB) (fInv -- true)
 
 	alias 'smcpMTurned' 0xA7FA 'cyrl/sha.upright'
 
-	define [CyrShchaShape top df] : glyph-proc
-		include : CyrShaShape top df
+	define [CyrShchaShape] : with-params [df top bot [fine Stroke] [doSerif false]] : glyph-proc
+		local cofine : fine * df.mvs / Stroke
+		include : CyrShaShape df top bot (fine -- fine) (doSerif -- doSerif)
 		#eject-contour 'serifRB'
-		include : CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
+		include : CyrDescender.rSideJut df.rightSB bot (refSw -- cofine)
 
 	create-glyph 'cyrl/Shcha' 0x429 : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.capital
-		include : CyrShchaShape CAP df
+		include : CyrShchaShape df CAP 0 (doSerif -- SLAB)
 
 	create-glyph 'cyrl/shcha.upright' : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.e
-		include : CyrShchaShape XH df
+		include : CyrShchaShape df XH 0 (doSerif -- SLAB)
