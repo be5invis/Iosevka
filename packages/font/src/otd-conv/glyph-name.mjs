@@ -257,7 +257,7 @@ const ApplePostNames = new Map([
 	[0x107, "cacute"],
 	[0x10c, "Ccaron"],
 	[0x10d, "ccaron"],
-	[0x111, "dcroat"]
+	[0x111, "dcroat"],
 	/* spell-checker: enable */
 ]);
 

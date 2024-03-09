@@ -48,7 +48,7 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 					...putFeatSeries(featureSeriesStore, "typographicFeatureSets", typoFs),
 					...putFeatSeries(featureSeriesStore, "cvFeatureSetsUpright", uprightFs),
 					...putFeatSeries(featureSeriesStore, "cvFeatureSetsItalic", italicFs),
-					...putFeatSeries(featureSeriesStore, "cvFeatureSetsOblique", obliqueFs)
+					...putFeatSeries(featureSeriesStore, "cvFeatureSetsOblique", obliqueFs),
 				});
 			} else {
 				blockResults.push({ lch, gc, charName, inFont: false, glyphName: undefined });
@@ -57,7 +57,7 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 		if (blockResults.length) {
 			unicodeCoverage.push({
 				name: block,
-				characters: blockResults.sort((a, b) => a.lch - b.lch)
+				characters: blockResults.sort((a, b) => a.lch - b.lch),
 			});
 		}
 	}

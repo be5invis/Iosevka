@@ -11,7 +11,7 @@ async function main(argv) {
 	const cl = await getCharMapAndSupportedLanguageList(
 		argv.charMapPath,
 		argv.charMapItalicPath,
-		argv.charMapObliquePath
+		argv.charMapObliquePath,
 	);
 	await fs.promises.writeFile(
 		argv.exportPathMeta,
@@ -22,15 +22,15 @@ async function main(argv) {
 				ligationData: {
 					cherry: ligationData.cherry,
 					samplesNarrow: ligationData.samplesNarrow,
-					nonMergeSets: ligationData.nonMergeSets
-				}
+					nonMergeSets: ligationData.nonMergeSets,
+				},
 			},
 			null,
-			2
-		)
+			2,
+		),
 	);
 	await fs.promises.writeFile(
 		argv.exportPathCov,
-		JSON.stringify({ version: argv.version, ...cl }, null, 2)
+		JSON.stringify({ version: argv.version, ...cl }, null, 2),
 	);
 }

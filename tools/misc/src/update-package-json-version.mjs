@@ -1,3 +1,5 @@
+"use strict";
+
 import fs from "fs";
 import path from "path";
 import url from "url";
@@ -17,7 +19,7 @@ setTimeout(
 			console.error(e);
 			process.exit(1);
 		}),
-	0
+	0,
 );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

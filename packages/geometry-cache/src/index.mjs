@@ -4,7 +4,7 @@ import zlib from "zlib";
 import * as CurveUtil from "@iosevka/geometry/curve-util";
 import { encode, decode } from "@msgpack/msgpack";
 
-const Edition = 33;
+const Edition = 36;
 const MAX_AGE = 16;
 class GfEntry {
 	constructor(age, value) {
@@ -42,7 +42,7 @@ class Cache {
 		return {
 			version: version + "@" + Edition,
 			ageKeys: mergedAgeKeys,
-			gf: gfRep
+			gf: gfRep,
 		};
 	}
 	isEmpty() {

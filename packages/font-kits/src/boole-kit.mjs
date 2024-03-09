@@ -22,8 +22,8 @@ class BooleImpl {
 		return glyph.includeGeometry(
 			new TransformedGeometry(
 				new BooleanGeometry(this.operator, operandGeometries),
-				forwardGizmo
-			)
+				forwardGizmo,
+			),
 		);
 	}
 }
@@ -37,6 +37,6 @@ export function SetupBuilders(bindings) {
 	return {
 		union: union,
 		intersection: intersection,
-		difference: difference
+		difference: difference,
 	};
 }

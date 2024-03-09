@@ -21,7 +21,7 @@ async function main(argv) {
 	let readme = await fs.promises.readFile(argv.mdFilePath, "utf-8");
 	const dirs = {
 		images: path.posix.relative(path.dirname(argv.mdFilePath), "images"),
-		fragments: path.resolve(__dirname, "fragments")
+		fragments: path.resolve(__dirname, "fragments"),
 	};
 	readme = (await processSsOt(argv, dirs)).apply(readme);
 	readme = (await processCherryPickingStyles(argv, dirs)).apply(readme);
@@ -30,10 +30,10 @@ async function main(argv) {
 	readme = (await processLigSetCherryPicking(argv, dirs)).apply(readme);
 	readme = (await processLigSetPreDef(argv, dirs)).apply(readme);
 	readme = (await processLigSetOt(argv, dirs, 1, g => !isLanguageSpecificLigTag(g.tag))).apply(
-		readme
+		readme,
 	);
 	readme = (await processLigSetOt(argv, dirs, 2, g => isLanguageSpecificLigTag(g.tag))).apply(
-		readme
+		readme,
 	);
 	readme = (await processLangList(argv)).apply(readme);
 	readme = (await processPrivateBuildPlans(argv, dirs)).apply(readme);

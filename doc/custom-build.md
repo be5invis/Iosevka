@@ -60,8 +60,16 @@ Inside the plan, top-level properties include:
       - As a consequence, the following characters will be **removed**:
         - `U+27F5` LONG LEFTWARDS ARROW
         - `U+27F6` LONG RIGHTWARDS ARROW
+        - `U+27F7` LONG LEFT RIGHT ARROW
+        - `U+27F8` LONG LEFTWARDS DOUBLE ARROW
+        - `U+27F9` LONG RIGHTWARDS DOUBLE ARROW
+        - `U+27FA` LONG LEFT RIGHT DOUBLE ARROW
         - `U+27FB` LONG LEFTWARDS ARROW FROM BAR
         - `U+27FC` LONG RIGHTWARDS ARROW FROM BAR
+        - `U+27FD` LONG LEFTWARDS DOUBLE ARROW FROM BAR
+        - `U+27FE` LONG RIGHTWARDS DOUBLE ARROW FROM BAR
+        - `U+27FF` LONG RIGHTWARDS SQUIGGLE ARROW
+        - `U+2B33` LONG LEFTWARDS SQUIGGLE ARROW
     - Remove `NWID` and `WWID` features typographic features
   - `fixed`: Apply `fontconfig-mono` changes and further remove ligations.
 * `serifs`: Optional, String, configures style of serifs.
@@ -426,10 +434,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `I`
     <details><summary>3 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-i-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-i-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-i = 'serifed'</code>, <code>cv09 = 1</code></td></tr>
-    <tr><td>I with standard (long) serifs (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-i-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-i-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-i = 'serifless'</code>, <code>cv09 = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-i-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-i-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-i = 'serifless'</code>, <code>cv09 = 1</code></td></tr>
     <tr><td>I without serifs, like a straight bar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-i-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-i-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-i = 'serifed'</code>, <code>cv09 = 2</code></td></tr>
+    <tr><td>I with standard (long) serifs (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-i-short-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-i-short-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-i = 'short-serifed'</code>, <code>cv09 = 3</code></td></tr>
     <tr><td>I with short serifs</td></tr>
     </table></details>
@@ -696,10 +704,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-u-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-u-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-u = 'toothed-serifless'</code>, <code>cv20 = 1</code></td></tr>
     <tr><td><code>U</code> with toothed shape; without serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-u-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-u-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-u = 'toothed-motion-serifed'</code>, <code>cv20 = 2</code></td></tr>
-    <tr><td><code>U</code> with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-u-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-u-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-u = 'toothed-bottom-right-serifed'</code>, <code>cv20 = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-u-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-u-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-u = 'toothed-bottom-right-serifed'</code>, <code>cv20 = 2</code></td></tr>
     <tr><td><code>U</code> with toothed shape, and serif at bottom-right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-u-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-u-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-u = 'toothed-motion-serifed'</code>, <code>cv20 = 3</code></td></tr>
+    <tr><td><code>U</code> with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-u-toothed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-u-toothed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-u = 'toothed-serifed'</code>, <code>cv20 = 4</code></td></tr>
     <tr><td><code>U</code> with toothed shape, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-u-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-u-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-u = 'tailed-serifless'</code>, <code>cv20 = 5</code></td></tr>
@@ -826,48 +834,48 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>Z</code> with straight body shape, and a diagonal crossbar; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-serifless-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-serifless-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-serifless-with-horizontal-crossbar'</code>, <code>cv25 = 3</code></td></tr>
     <tr><td><code>Z</code> with straight body shape, and a horizontal crossbar; without serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-serifed'</code>, <code>cv25 = 4</code></td></tr>
-    <tr><td><code>Z</code> with straight body shape, and serifs (default for Slab)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-serifed-with-crossbar'</code>, <code>cv25 = 5</code></td></tr>
-    <tr><td><code>Z</code> with straight body shape, serifs, and a diagonal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 6</code></td></tr>
-    <tr><td><code>Z</code> with straight body shape, serifs, and a horizontal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-top-serifed'</code>, <code>cv25 = 4</code></td></tr>
+    <tr><td><code>Z</code> with straight body shape, and serifs at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-top-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-top-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-top-serifed-with-crossbar'</code>, <code>cv25 = 5</code></td></tr>
+    <tr><td><code>Z</code> with straight body shape, serifs at top, and a diagonal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-top-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-top-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-top-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 6</code></td></tr>
+    <tr><td><code>Z</code> with straight body shape, serifs at top, and a horizontal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-bottom-serifed'</code>, <code>cv25 = 7</code></td></tr>
     <tr><td><code>Z</code> with straight body shape, and serifs at bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-bottom-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-bottom-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-bottom-serifed-with-crossbar'</code>, <code>cv25 = 8</code></td></tr>
     <tr><td><code>Z</code> with straight body shape, serifs at bottom, and a diagonal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-bottom-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-bottom-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-bottom-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 9</code></td></tr>
     <tr><td><code>Z</code> with straight body shape, serifs at bottom, and a horizontal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-top-serifed'</code>, <code>cv25 = 10</code></td></tr>
-    <tr><td><code>Z</code> with straight body shape, and serifs at top</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-top-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-top-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-top-serifed-with-crossbar'</code>, <code>cv25 = 11</code></td></tr>
-    <tr><td><code>Z</code> with straight body shape, serifs at top, and a diagonal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-top-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-top-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-top-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 12</code></td></tr>
-    <tr><td><code>Z</code> with straight body shape, serifs at top, and a horizontal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-serifed'</code>, <code>cv25 = 10</code></td></tr>
+    <tr><td><code>Z</code> with straight body shape, and serifs (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-serifed-with-crossbar'</code>, <code>cv25 = 11</code></td></tr>
+    <tr><td><code>Z</code> with straight body shape, serifs, and a diagonal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-straight-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-straight-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'straight-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 12</code></td></tr>
+    <tr><td><code>Z</code> with straight body shape, serifs, and a horizontal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-serifless'</code>, <code>cv25 = 13</code></td></tr>
     <tr><td><code>Z</code> with curly body shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-serifless-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-serifless-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-serifless-with-crossbar'</code>, <code>cv25 = 14</code></td></tr>
     <tr><td><code>Z</code> with curly body shape, and a diagonal crossbar; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-serifless-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-serifless-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-serifless-with-horizontal-crossbar'</code>, <code>cv25 = 15</code></td></tr>
     <tr><td><code>Z</code> with curly body shape, and a horizontal crossbar; without serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-serifed'</code>, <code>cv25 = 16</code></td></tr>
-    <tr><td><code>Z</code> with curly body shape, and serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-serifed-with-crossbar'</code>, <code>cv25 = 17</code></td></tr>
-    <tr><td><code>Z</code> with curly body shape, serifs, and a diagonal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 18</code></td></tr>
-    <tr><td><code>Z</code> with curly body shape, serifs, and a horizontal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-top-serifed'</code>, <code>cv25 = 16</code></td></tr>
+    <tr><td><code>Z</code> with curly body shape, and serifs at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-top-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-top-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-top-serifed-with-crossbar'</code>, <code>cv25 = 17</code></td></tr>
+    <tr><td><code>Z</code> with curly body shape, serifs at top, and a diagonal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-top-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-top-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-top-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 18</code></td></tr>
+    <tr><td><code>Z</code> with curly body shape, serifs at top, and a horizontal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-bottom-serifed'</code>, <code>cv25 = 19</code></td></tr>
     <tr><td><code>Z</code> with curly body shape, and serifs at bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-bottom-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-bottom-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-bottom-serifed-with-crossbar'</code>, <code>cv25 = 20</code></td></tr>
     <tr><td><code>Z</code> with curly body shape, serifs at bottom, and a diagonal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-bottom-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-bottom-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-bottom-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 21</code></td></tr>
     <tr><td><code>Z</code> with curly body shape, serifs at bottom, and a horizontal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-top-serifed'</code>, <code>cv25 = 22</code></td></tr>
-    <tr><td><code>Z</code> with curly body shape, and serifs at top</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-top-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-top-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-top-serifed-with-crossbar'</code>, <code>cv25 = 23</code></td></tr>
-    <tr><td><code>Z</code> with curly body shape, serifs at top, and a diagonal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-top-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-top-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-top-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 24</code></td></tr>
-    <tr><td><code>Z</code> with curly body shape, serifs at top, and a horizontal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-serifed'</code>, <code>cv25 = 22</code></td></tr>
+    <tr><td><code>Z</code> with curly body shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-serifed-with-crossbar'</code>, <code>cv25 = 23</code></td></tr>
+    <tr><td><code>Z</code> with curly body shape, serifs, and a diagonal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-curly-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-curly-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'curly-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 24</code></td></tr>
+    <tr><td><code>Z</code> with curly body shape, serifs, and a horizontal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'cursive'</code>, <code>cv25 = 25</code></td></tr>
     <tr><td><code>Z</code> with cursive body shape</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-z-cursive-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-z-cursive-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-z = 'cursive-with-crossbar'</code>, <code>cv25 = 26</code></td></tr>
@@ -1074,16 +1082,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `i`
     <details><summary>14 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-i-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'serifed'</code>, <code>cv34 = 1</code></td></tr>
-    <tr><td>Serifed <code>i</code> (default for Upright)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-i-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'serifless'</code>, <code>cv34 = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-i-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'serifless'</code>, <code>cv34 = 1</code></td></tr>
     <tr><td><code>i</code> like a straight line</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-i-hooky.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-hooky.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'hooky'</code>, <code>cv34 = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-i-hooky.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-hooky.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'hooky'</code>, <code>cv34 = 2</code></td></tr>
     <tr><td>Hooky <code>i</code></td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-i-hooky-bottom.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-hooky-bottom.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'hooky-bottom'</code>, <code>cv34 = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-i-hooky-bottom.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-hooky-bottom.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'hooky-bottom'</code>, <code>cv34 = 3</code></td></tr>
     <tr><td><code>i</code> with a sharp-turning horizontal tail</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-i-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-zshaped.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'zshaped'</code>, <code>cv34 = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-i-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-zshaped.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'zshaped'</code>, <code>cv34 = 4</code></td></tr>
     <tr><td>Z-shaped <code>i</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-i-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'serifed'</code>, <code>cv34 = 5</code></td></tr>
+    <tr><td>Serifed <code>i</code> (default for Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-i-serifed-asymmetric.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-serifed-asymmetric.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'serifed-asymmetric'</code>, <code>cv34 = 6</code></td></tr>
     <tr><td><code>i</code> with shorter top serif and full bottom serif</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-i-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-i-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>i = 'tailed'</code>, <code>cv34 = 7</code></td></tr>
@@ -1184,16 +1192,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `l`
     <details><summary>14 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-l-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'serifed'</code>, <code>cv37 = 1</code></td></tr>
-    <tr><td>Serifed <code>l</code> (default for Upright)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-l-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'serifless'</code>, <code>cv37 = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-l-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'serifless'</code>, <code>cv37 = 1</code></td></tr>
     <tr><td><code>l</code> like a straight line</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-l-hooky.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-hooky.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'hooky'</code>, <code>cv37 = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-l-hooky.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-hooky.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'hooky'</code>, <code>cv37 = 2</code></td></tr>
     <tr><td>Hooky <code>l</code></td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-l-hooky-bottom.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-hooky-bottom.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'hooky-bottom'</code>, <code>cv37 = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-l-hooky-bottom.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-hooky-bottom.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'hooky-bottom'</code>, <code>cv37 = 3</code></td></tr>
     <tr><td><code>l</code> with a straight sharp-turning horizontal tail</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-l-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-zshaped.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'zshaped'</code>, <code>cv37 = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-l-zshaped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-zshaped.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'zshaped'</code>, <code>cv37 = 4</code></td></tr>
     <tr><td>Z-shaped <code>l</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-l-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'serifed'</code>, <code>cv37 = 5</code></td></tr>
+    <tr><td>Serifed <code>l</code> (default for Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-l-serifed-asymmetric.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-serifed-asymmetric.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'serifed-asymmetric'</code>, <code>cv37 = 6</code></td></tr>
     <tr><td><code>l</code> with shorter top serif and full bottom serif</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-l-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-l-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>l = 'tailed'</code>, <code>cv37 = 7</code></td></tr>
@@ -1512,10 +1520,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-u-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-u-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>u = 'toothed-serifless'</code>, <code>cv45 = 1</code></td></tr>
     <tr><td><code>u</code> with toothed shape; without serifs (default for Sans Upright)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-u-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-u-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>u = 'toothed-motion-serifed'</code>, <code>cv45 = 2</code></td></tr>
-    <tr><td><code>u</code> with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-u-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-u-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>u = 'toothed-bottom-right-serifed'</code>, <code>cv45 = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-u-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-u-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>u = 'toothed-bottom-right-serifed'</code>, <code>cv45 = 2</code></td></tr>
     <tr><td><code>u</code> with toothed shape, and serif at bottom-right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-u-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-u-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>u = 'toothed-motion-serifed'</code>, <code>cv45 = 3</code></td></tr>
+    <tr><td><code>u</code> with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-u-toothed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-u-toothed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>u = 'toothed-serifed'</code>, <code>cv45 = 4</code></td></tr>
     <tr><td><code>u</code> with toothed shape, and serifs (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-u-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-u-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>u = 'tailed-serifless'</code>, <code>cv45 = 5</code></td></tr>
@@ -1674,48 +1682,48 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>z</code> with straight body shape, and a diagonal crossbar; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-serifless-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-serifless-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-serifless-with-horizontal-crossbar'</code>, <code>cv50 = 3</code></td></tr>
     <tr><td><code>z</code> with straight body shape, and a horizontal crossbar; without serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-serifed'</code>, <code>cv50 = 4</code></td></tr>
-    <tr><td><code>z</code> with straight body shape, and serifs (default for Slab Upright)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-serifed-with-crossbar'</code>, <code>cv50 = 5</code></td></tr>
-    <tr><td><code>z</code> with straight body shape, serifs, and a diagonal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 6</code></td></tr>
-    <tr><td><code>z</code> with straight body shape, serifs, and a horizontal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-top-serifed'</code>, <code>cv50 = 4</code></td></tr>
+    <tr><td><code>z</code> with straight body shape, and serifs at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-top-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-top-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-top-serifed-with-crossbar'</code>, <code>cv50 = 5</code></td></tr>
+    <tr><td><code>z</code> with straight body shape, serifs at top, and a diagonal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-top-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-top-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-top-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 6</code></td></tr>
+    <tr><td><code>z</code> with straight body shape, serifs at top, and a horizontal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-bottom-serifed'</code>, <code>cv50 = 7</code></td></tr>
     <tr><td><code>z</code> with straight body shape, and serifs at bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-bottom-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-bottom-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-bottom-serifed-with-crossbar'</code>, <code>cv50 = 8</code></td></tr>
     <tr><td><code>z</code> with straight body shape, serifs at bottom, and a diagonal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-bottom-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-bottom-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-bottom-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 9</code></td></tr>
     <tr><td><code>z</code> with straight body shape, serifs at bottom, and a horizontal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-top-serifed'</code>, <code>cv50 = 10</code></td></tr>
-    <tr><td><code>z</code> with straight body shape, and serifs at top</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-top-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-top-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-top-serifed-with-crossbar'</code>, <code>cv50 = 11</code></td></tr>
-    <tr><td><code>z</code> with straight body shape, serifs at top, and a diagonal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-top-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-top-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-top-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 12</code></td></tr>
-    <tr><td><code>z</code> with straight body shape, serifs at top, and a horizontal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-serifed'</code>, <code>cv50 = 10</code></td></tr>
+    <tr><td><code>z</code> with straight body shape, and serifs (default for Slab Upright)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-serifed-with-crossbar'</code>, <code>cv50 = 11</code></td></tr>
+    <tr><td><code>z</code> with straight body shape, serifs, and a diagonal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-straight-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-straight-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'straight-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 12</code></td></tr>
+    <tr><td><code>z</code> with straight body shape, serifs, and a horizontal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-serifless'</code>, <code>cv50 = 13</code></td></tr>
     <tr><td><code>z</code> with curly body shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-serifless-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-serifless-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-serifless-with-crossbar'</code>, <code>cv50 = 14</code></td></tr>
     <tr><td><code>z</code> with curly body shape, and a diagonal crossbar; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-serifless-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-serifless-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-serifless-with-horizontal-crossbar'</code>, <code>cv50 = 15</code></td></tr>
     <tr><td><code>z</code> with curly body shape, and a horizontal crossbar; without serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-serifed'</code>, <code>cv50 = 16</code></td></tr>
-    <tr><td><code>z</code> with curly body shape, and serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-serifed-with-crossbar'</code>, <code>cv50 = 17</code></td></tr>
-    <tr><td><code>z</code> with curly body shape, serifs, and a diagonal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 18</code></td></tr>
-    <tr><td><code>z</code> with curly body shape, serifs, and a horizontal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-top-serifed'</code>, <code>cv50 = 16</code></td></tr>
+    <tr><td><code>z</code> with curly body shape, and serifs at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-top-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-top-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-top-serifed-with-crossbar'</code>, <code>cv50 = 17</code></td></tr>
+    <tr><td><code>z</code> with curly body shape, serifs at top, and a diagonal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-top-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-top-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-top-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 18</code></td></tr>
+    <tr><td><code>z</code> with curly body shape, serifs at top, and a horizontal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-bottom-serifed'</code>, <code>cv50 = 19</code></td></tr>
     <tr><td><code>z</code> with curly body shape, and serifs at bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-bottom-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-bottom-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-bottom-serifed-with-crossbar'</code>, <code>cv50 = 20</code></td></tr>
     <tr><td><code>z</code> with curly body shape, serifs at bottom, and a diagonal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-bottom-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-bottom-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-bottom-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 21</code></td></tr>
     <tr><td><code>z</code> with curly body shape, serifs at bottom, and a horizontal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-top-serifed'</code>, <code>cv50 = 22</code></td></tr>
-    <tr><td><code>z</code> with curly body shape, and serifs at top</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-top-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-top-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-top-serifed-with-crossbar'</code>, <code>cv50 = 23</code></td></tr>
-    <tr><td><code>z</code> with curly body shape, serifs at top, and a diagonal crossbar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-top-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-top-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-top-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 24</code></td></tr>
-    <tr><td><code>z</code> with curly body shape, serifs at top, and a horizontal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-serifed'</code>, <code>cv50 = 22</code></td></tr>
+    <tr><td><code>z</code> with curly body shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-serifed-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-serifed-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-serifed-with-crossbar'</code>, <code>cv50 = 23</code></td></tr>
+    <tr><td><code>z</code> with curly body shape, serifs, and a diagonal crossbar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-z-curly-serifed-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-curly-serifed-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'curly-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 24</code></td></tr>
+    <tr><td><code>z</code> with curly body shape, serifs, and a horizontal crossbar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'cursive'</code>, <code>cv50 = 25</code></td></tr>
     <tr><td><code>z</code> with cursive body shape (default for Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-cursive-with-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-cursive-with-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'cursive-with-crossbar'</code>, <code>cv50 = 26</code></td></tr>
@@ -2014,10 +2022,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-serifless'</code>, <code>cv62 = 1</code></td></tr>
     <tr><td>Greek small Mu (<code>μ</code>) with toothed shape; without serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-motion-serifed'</code>, <code>cv62 = 2</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-bottom-right-serifed'</code>, <code>cv62 = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-bottom-right-serifed'</code>, <code>cv62 = 2</code></td></tr>
     <tr><td>Greek small Mu (<code>μ</code>) with toothed shape, and serif at bottom-right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-motion-serifed'</code>, <code>cv62 = 3</code></td></tr>
+    <tr><td>Greek small Mu (<code>μ</code>) with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-serifed'</code>, <code>cv62 = 4</code></td></tr>
     <tr><td>Greek small Mu (<code>μ</code>) with toothed shape, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'tailed-serifless'</code>, <code>cv62 = 5</code></td></tr>
@@ -2696,48 +2704,74 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>1</code> with bottom serif and a diagonal cut at top</td></tr>
     </table></details>
   - Styles for `2`
-    <details><summary>2 variants</summary>
-    <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-two-straight-neck.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-two-straight-neck.dark.svg#gh-dark-mode-only" width=32/></td><td><code>two = 'straight-neck'</code>, <code>cv87 = 1</code></td></tr>
-    <tr><td><code>2</code> with straight neck</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-two-curly-neck.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-two-curly-neck.dark.svg#gh-dark-mode-only" width=32/></td><td><code>two = 'curly-neck'</code>, <code>cv87 = 2</code></td></tr>
-    <tr><td><code>2</code> with curly neck (default)</td></tr>
-    </table></details>
-  - Styles for `3`
-    <details><summary>2 variants</summary>
-    <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-three-flat-top.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-three-flat-top.dark.svg#gh-dark-mode-only" width=32/></td><td><code>three = 'flat-top'</code>, <code>cv88 = 1</code></td></tr>
-    <tr><td>Flat top <code>3</code> (Like Museo Sans / Montserrat)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-three-two-arcs.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-three-two-arcs.dark.svg#gh-dark-mode-only" width=32/></td><td><code>three = 'two-arcs'</code>, <code>cv88 = 2</code></td></tr>
-    <tr><td>Arched top <code>3</code> (default)</td></tr>
-    </table></details>
-  - Styles for `4`
-    <details><summary>6 variants</summary>
-    <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-four-closed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-closed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'closed'</code>, <code>cv89 = 1</code></td></tr>
-    <tr><td><code>4</code> with closed contour</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-four-closed-non-crossing.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-closed-non-crossing.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'closed-non-crossing'</code>, <code>cv89 = 2</code></td></tr>
-    <tr><td><code>4</code> with closed contour but the horizontal bar does not overflow the vertical bar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-four-semi-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-semi-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'semi-open'</code>, <code>cv89 = 3</code></td></tr>
-    <tr><td><code>4</code> with semi-open contour (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-four-semi-open-non-crossing.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-semi-open-non-crossing.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'semi-open-non-crossing'</code>, <code>cv89 = 4</code></td></tr>
-    <tr><td><code>4</code> with semi-open contour but the horizontal bar does not overflow the vertical bar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-four-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'open'</code>, <code>cv89 = 5</code></td></tr>
-    <tr><td><code>4</code> with open contour</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-four-open-non-crossing.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-open-non-crossing.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'open-non-crossing'</code>, <code>cv89 = 6</code></td></tr>
-    <tr><td><code>4</code> with open contour but the horizontal bar does not overflow the vertical bar</td></tr>
-    </table></details>
-  - Styles for `5`
     <details><summary>4 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-five-upright-arched.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-arched.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'upright-arched'</code>, <code>cv90 = 1</code></td></tr>
-    <tr><td><code>5</code> with upright upper-left bar, and arched middle part (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-five-upright-flat.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-flat.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'upright-flat'</code>, <code>cv90 = 2</code></td></tr>
-    <tr><td><code>5</code> with upright upper-left bar, and flat middle part</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-arched.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-arched.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-arched'</code>, <code>cv90 = 3</code></td></tr>
-    <tr><td><code>5</code> with arched middle part</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-flat.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-flat.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-flat'</code>, <code>cv90 = 4</code></td></tr>
-    <tr><td><code>5</code> with flat middle part</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-two-straight-neck-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-two-straight-neck-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>two = 'straight-neck-serifless'</code>, <code>cv87 = 1</code></td></tr>
+    <tr><td><code>2</code> with straight neck; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-two-straight-neck-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-two-straight-neck-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>two = 'straight-neck-serifed'</code>, <code>cv87 = 2</code></td></tr>
+    <tr><td><code>2</code> with straight neck, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-two-curly-neck-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-two-curly-neck-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>two = 'curly-neck-serifless'</code>, <code>cv87 = 3</code></td></tr>
+    <tr><td><code>2</code> with curly neck; without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-two-curly-neck-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-two-curly-neck-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>two = 'curly-neck-serifed'</code>, <code>cv87 = 4</code></td></tr>
+    <tr><td><code>2</code> with curly neck, and serifs (default for Slab)</td></tr>
+    </table></details>
+  - Styles for `3`
+    <details><summary>3 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-three-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-three-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>three = 'flat-top-serifless'</code>, <code>cv88 = 1</code></td></tr>
+    <tr><td><code>3</code> with flat top (Like Museo Sans / Montserrat); without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-three-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-three-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>three = 'flat-top-serifed'</code>, <code>cv88 = 2</code></td></tr>
+    <tr><td><code>3</code> with flat top (Like Museo Sans / Montserrat), and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-three-two-arcs.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-three-two-arcs.dark.svg#gh-dark-mode-only" width=32/></td><td><code>three = 'two-arcs'</code>, <code>cv88 = 3</code></td></tr>
+    <tr><td><code>3</code> with arched top (default)</td></tr>
+    </table></details>
+  - Styles for `4`
+    <details><summary>12 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-closed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-closed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'closed-serifless'</code>, <code>cv89 = 1</code></td></tr>
+    <tr><td><code>4</code> with closed contour; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-closed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-closed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'closed-serifed'</code>, <code>cv89 = 2</code></td></tr>
+    <tr><td><code>4</code> with closed contour, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-closed-non-crossing-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-closed-non-crossing-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'closed-non-crossing-serifless'</code>, <code>cv89 = 3</code></td></tr>
+    <tr><td><code>4</code> with closed contour, and horizontal bar that does not overflow the vertical bar; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-closed-non-crossing-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-closed-non-crossing-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'closed-non-crossing-serifed'</code>, <code>cv89 = 4</code></td></tr>
+    <tr><td><code>4</code> with closed contour, horizontal bar that does not overflow the vertical bar, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-semi-open-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-semi-open-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'semi-open-serifless'</code>, <code>cv89 = 5</code></td></tr>
+    <tr><td><code>4</code> with semi-open contour; without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-semi-open-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-semi-open-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'semi-open-serifed'</code>, <code>cv89 = 6</code></td></tr>
+    <tr><td><code>4</code> with semi-open contour, and serifs (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-semi-open-non-crossing-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-semi-open-non-crossing-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'semi-open-non-crossing-serifless'</code>, <code>cv89 = 7</code></td></tr>
+    <tr><td><code>4</code> with semi-open contour, and horizontal bar that does not overflow the vertical bar; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-semi-open-non-crossing-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-semi-open-non-crossing-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'semi-open-non-crossing-serifed'</code>, <code>cv89 = 8</code></td></tr>
+    <tr><td><code>4</code> with semi-open contour, horizontal bar that does not overflow the vertical bar, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-open-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-open-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'open-serifless'</code>, <code>cv89 = 9</code></td></tr>
+    <tr><td><code>4</code> with open contour; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-open-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-open-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'open-serifed'</code>, <code>cv89 = 10</code></td></tr>
+    <tr><td><code>4</code> with open contour, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-open-non-crossing-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-open-non-crossing-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'open-non-crossing-serifless'</code>, <code>cv89 = 11</code></td></tr>
+    <tr><td><code>4</code> with open contour, and horizontal bar that does not overflow the vertical bar; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-four-open-non-crossing-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-four-open-non-crossing-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>four = 'open-non-crossing-serifed'</code>, <code>cv89 = 12</code></td></tr>
+    <tr><td><code>4</code> with open contour, horizontal bar that does not overflow the vertical bar, and serifs</td></tr>
+    </table></details>
+  - Styles for `5`
+    <details><summary>8 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-five-upright-arched-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-arched-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'upright-arched-serifless'</code>, <code>cv90 = 1</code></td></tr>
+    <tr><td><code>5</code> with upright upper-left bar, and arched middle part; without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-five-upright-arched-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-arched-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'upright-arched-serifed'</code>, <code>cv90 = 2</code></td></tr>
+    <tr><td><code>5</code> with upright upper-left bar, arched middle part, and serifs (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-five-upright-flat-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-flat-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'upright-flat-serifless'</code>, <code>cv90 = 3</code></td></tr>
+    <tr><td><code>5</code> with upright upper-left bar, and flat middle part; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-five-upright-flat-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-flat-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'upright-flat-serifed'</code>, <code>cv90 = 4</code></td></tr>
+    <tr><td><code>5</code> with upright upper-left bar, flat middle part, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-arched-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-arched-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-arched-serifless'</code>, <code>cv90 = 5</code></td></tr>
+    <tr><td><code>5</code> with arched middle part; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-arched-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-arched-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-arched-serifed'</code>, <code>cv90 = 6</code></td></tr>
+    <tr><td><code>5</code> with arched middle part, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-flat-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-flat-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-flat-serifless'</code>, <code>cv90 = 7</code></td></tr>
+    <tr><td><code>5</code> with flat middle part; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-flat-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-flat-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-flat-serifed'</code>, <code>cv90 = 8</code></td></tr>
+    <tr><td><code>5</code> with flat middle part, and serifs</td></tr>
     </table></details>
   - Styles for `6`
     <details><summary>3 variants</summary>
@@ -3060,10 +3094,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-serifless'</code>, <code>VSAQ = 1</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothed shape; without serifs (default for Sans Upright)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-motion-serifed'</code>, <code>VSAQ = 2</code></td></tr>
-    <tr><td>Micro Sign (<code>µ</code>) with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-bottom-right-serifed'</code>, <code>VSAQ = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-bottom-right-serifed'</code>, <code>VSAQ = 2</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothed shape, and serif at bottom-right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-motion-serifed'</code>, <code>VSAQ = 3</code></td></tr>
+    <tr><td>Micro Sign (<code>µ</code>) with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-serifed'</code>, <code>VSAQ = 4</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothed shape, and serifs (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'tailed-serifless'</code>, <code>VSAQ = 5</code></td></tr>
@@ -3128,25 +3162,25 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `++` (Plus ligations)
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-plus-chain-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-plus-chain-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-plus-chain = 'with-notch'</code>, <code>VXAA = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-plus-chain-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-plus-chain-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-plus-chain = 'with-notch'</code>, <code>VLAE = 1</code></td></tr>
     <tr><td>The bars in connected plus (<code>++</code>, etc.) ligation have notches in the middle</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-plus-chain-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-plus-chain-without-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-plus-chain = 'without-notch'</code>, <code>VXAA = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-plus-chain-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-plus-chain-without-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-plus-chain = 'without-notch'</code>, <code>VLAE = 2</code></td></tr>
     <tr><td>The bars in connected plus (<code>++</code>, etc.) ligation do not have notches in the middle (default)</td></tr>
     </table></details>
   - Styles for `=>` (Double arrow ligation)
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-double-arrow-bar-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-double-arrow-bar-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-double-arrow-bar = 'with-notch'</code>, <code>VLAE = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-double-arrow-bar-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-double-arrow-bar-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-double-arrow-bar = 'with-notch'</code>, <code>VLAF = 1</code></td></tr>
     <tr><td>The bars in double arrow (<code>=&gt;</code>, etc.) ligation have notches in the middle</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-double-arrow-bar-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-double-arrow-bar-without-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-double-arrow-bar = 'without-notch'</code>, <code>VLAE = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-double-arrow-bar-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-double-arrow-bar-without-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-double-arrow-bar = 'without-notch'</code>, <code>VLAF = 2</code></td></tr>
     <tr><td>The bars in double arrow (<code>=&gt;</code>, etc.) ligation do not have notches in the middle (default)</td></tr>
     </table></details>
   - Styles for `->` (Single arrow ligation)
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-single-arrow-bar-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-single-arrow-bar-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-single-arrow-bar = 'with-notch'</code>, <code>VLAF = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-single-arrow-bar-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-single-arrow-bar-with-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-single-arrow-bar = 'with-notch'</code>, <code>VLAG = 1</code></td></tr>
     <tr><td>The bars in single arrow (<code>=&gt;</code>, etc.) ligation have notches in the middle</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-single-arrow-bar-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-single-arrow-bar-without-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-single-arrow-bar = 'without-notch'</code>, <code>VLAF = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lig-single-arrow-bar-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-single-arrow-bar-without-notch.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-single-arrow-bar = 'without-notch'</code>, <code>VLAG = 2</code></td></tr>
     <tr><td>The bars in single arrow (<code>=&gt;</code>, etc.) ligation do not have notches in the middle (default)</td></tr>
     </table></details>
 

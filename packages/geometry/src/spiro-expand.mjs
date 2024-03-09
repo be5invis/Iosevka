@@ -2,7 +2,7 @@ import { linreg, mix } from "@iosevka/util";
 import * as SpiroJs from "spiro";
 
 import { Vec2 } from "./point.mjs";
-import { ControlKnot } from "./spiro-control.mjs";
+import { MonoKnot } from "./spiro-control.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -30,26 +30,27 @@ export class SpiroExpander {
 		for (let j = 0; j < this.m_biKnotsT.length; j++) {
 			const lhs = expanded.lhs[j];
 			const rhs = expanded.rhs[j];
-			middles[j] = new ControlKnot(
+			middles[j] = new MonoKnot(
 				this.m_biKnotsT[j].type,
+				this.m_biKnotsT[j].unimportant,
 				mix(lhs.x, rhs.x, 0.5),
-				mix(lhs.y, rhs.y, 0.5)
+				mix(lhs.y, rhs.y, 0.5),
 			);
 		}
 		return middles;
 	}
 	expand() {
-		const lhs = [],
-			rhs = [],
-			lhsUntransformed = [],
-			rhsUntransformed = [];
+		const lhsT = [], // transformed LHS
+			rhsT = [], // transformed RHS
+			lhsU = [], // untransformed LHS
+			rhsU = []; // untransformed RHS
 
 		for (let j = 0; j < this.m_biKnotsT.length; j++) {
-			const knot = this.m_biKnotsT[j];
-			lhs[j] = new ControlKnot(knot.type, 0, 0);
-			rhs[j] = new ControlKnot(reverseKnotType(knot.type), 0, 0);
-			lhsUntransformed[j] = new ControlKnot(knot.type, 0, 0);
-			rhsUntransformed[j] = new ControlKnot(reverseKnotType(knot.type), 0, 0);
+			const bk = this.m_biKnotsT[j];
+			lhsT[j] = new MonoKnot(bk.type, bk.unimportant, 0, 0);
+			rhsT[j] = new MonoKnot(bk.type, bk.unimportant, 0, 0);
+			lhsU[j] = new MonoKnot(bk.type, bk.unimportant, 0, 0);
+			rhsU[j] = new MonoKnot(bk.type, bk.unimportant, 0, 0);
 		}
 
 		for (let j = 0; j < this.m_biKnotsT.length; j++) {
@@ -63,17 +64,17 @@ export class SpiroExpander {
 				dx = normalX(knotT.origTangent, this.m_contrast);
 				dy = normalY(knotT.origTangent, this.m_contrast);
 			}
-			lhs[j].x = knotT.x + knotT.d1 * dx;
-			lhs[j].y = knotT.y + knotT.d1 * dy;
-			rhs[j].x = knotT.x - knotT.d2 * dx;
-			rhs[j].y = knotT.y - knotT.d2 * dy;
+			lhsT[j].x = knotT.x + knotT.d1 * dx;
+			lhsT[j].y = knotT.y + knotT.d1 * dy;
+			rhsT[j].x = knotT.x - knotT.d2 * dx;
+			rhsT[j].y = knotT.y - knotT.d2 * dy;
 
-			this.m_gizmo.unapplyToSink(lhs[j], lhsUntransformed[j]);
-			this.m_gizmo.unapplyToSink(rhs[j], rhsUntransformed[j]);
+			this.m_gizmo.unapplyToSink(lhsT[j], lhsU[j]);
+			this.m_gizmo.unapplyToSink(rhsT[j], rhsU[j]);
 		}
 
-		this.interpolateUnimportantKnots(lhs, rhs, lhsUntransformed, rhsUntransformed);
-		return { lhs, rhs, lhsUntransformed, rhsUntransformed };
+		this.interpolateUnimportantKnots(lhsT, rhsT, lhsU, rhsU);
+		return { lhs: lhsT, rhs: rhsT, lhsUntransformed: lhsU, rhsUntransformed: rhsU };
 	}
 	interpolateUnimportantKnots(lhsT, rhsT, lhsU, rhsU) {
 		for (let j = 0; j < this.m_biKnotsU.length; j++) {
@@ -143,9 +144,6 @@ function normalY(tangent) {
 	return tangent.x / Math.hypot(tangent.x, tangent.y);
 }
 
-function reverseKnotType(ty) {
-	return ty === "left" ? "right" : ty === "right" ? "left" : ty;
-}
 function cyNth(a, j) {
 	return a[j % a.length];
 }

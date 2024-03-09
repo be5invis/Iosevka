@@ -1,8 +1,8 @@
+import { mix } from "@iosevka/util";
 import * as TypoGeom from "typo-geom";
 
 import { Point, Vec2 } from "./point.mjs";
 import { Transform } from "./transform.mjs";
-import { mix } from "@iosevka/util";
 
 function contourToRep(contour) {
 	let c = [];
@@ -30,8 +30,8 @@ function convertContourToArcs(contour) {
 						z0,
 						Point.from(Point.Type.CubicStart, z1),
 						Point.from(Point.Type.CubicEnd, z2),
-						Point.from(Point.Type.Corner, z3)
-					)
+						Point.from(Point.Type.Corner, z3),
+					),
 				);
 				z0 = z3;
 				j += 2;
@@ -47,8 +47,8 @@ function convertContourToArcs(contour) {
 						z0,
 						Point.from(Point.Type.CubicStart, z0).mix(2 / 3, zc),
 						Point.from(Point.Type.CubicEnd, zf).mix(2 / 3, zc),
-						Point.from(Point.Type.Corner, zf)
-					)
+						Point.from(Point.Type.Corner, zf),
+					),
 				);
 				z0 = zf;
 				if (zfIsCorner) j++;
@@ -57,8 +57,8 @@ function convertContourToArcs(contour) {
 			default: {
 				newContour.push(
 					TypoGeom.Arcs.Bez3.fromStraightSegment(
-						new TypoGeom.Arcs.StraightSegment(z0, Point.from(Point.Type.Corner, z))
-					)
+						new TypoGeom.Arcs.StraightSegment(z0, Point.from(Point.Type.Corner, z)),
+					),
 				);
 				z0 = z;
 				break;
@@ -88,7 +88,7 @@ export function derivativeFromFiniteDifference(c, t) {
 			(2 / 3) * backward1.y +
 			(2 / 3) * forward1.y -
 			(1 / 12) * forward2.y) /
-			DELTA
+			DELTA,
 	);
 }
 
@@ -104,7 +104,7 @@ export class OffsetCurve {
 		const absD = Math.hypot(d.x, d.y);
 		return {
 			x: c.x - (d.y / absD) * this.offset * this.contrast,
-			y: c.y + (d.x / absD) * this.offset
+			y: c.y + (d.x / absD) * this.offset,
 		};
 	}
 	derivative(t) {
@@ -189,7 +189,7 @@ export class RoundCapCurve {
 
 		return {
 			x: centerX + r * Math.cos(theta) * this.contrast,
-			y: centerY + r * Math.sin(theta)
+			y: centerY + r * Math.sin(theta),
 		};
 	}
 

@@ -29,7 +29,7 @@ function regulateGlyphStore(cache, skew, glyphStore) {
 function regulateCompositeGlyph(glyphStore, memo, g) {
 	if (memo.has(g)) return memo.get(g);
 
-	let refs = g.geometry.asReferences();
+	let refs = g.geometry.toReferences();
 	if (!refs) return memoSet(memo, g, false);
 
 	for (const sr of refs) {
@@ -65,13 +65,13 @@ function flattenSimpleGlyph(cache, skew, g) {
 				const tfForward = g.gizmo ? g.gizmo : new Transform(1, +skew, 0, 1, 0, 0);
 				gSimplified = new Geom.TransformedGeometry(
 					new Geom.SimplifyGeometry(new Geom.TransformedGeometry(g.geometry, tfBack)),
-					tfForward
+					tfForward,
 				);
 			} else {
 				gSimplified = new Geom.SimplifyGeometry(g.geometry);
 			}
 
-			const cs = gSimplified.asContours();
+			const cs = gSimplified.toContours();
 			g.clearGeometry();
 			g.includeContours(cs);
 			if (ck) cache.saveGF(ck, cs);

@@ -21,7 +21,7 @@ export default async function processCherryPickingStyles(argv, dirs) {
 		const info = {
 			introMD: cv.description || `Styles for ${sampleText + explainText}`,
 			sampleImageCountEm: sampleImageCountEmOfCv(cv),
-			alternatives: []
+			alternatives: [],
 		};
 		const defaults = figureOutDefaults(variantsData, cv);
 		for (const cvv of cv.variants) {
@@ -31,14 +31,14 @@ export default async function processCherryPickingStyles(argv, dirs) {
 					imageId: `${cv.key}-${cvv.key}`,
 					selectors: [`${cv.key} = '${cvv.key}'`, `${cv.tag} = ${cvv.rank}`],
 					description:
-						formatDescription(cvv.description) + formatDefaults(cvv.key, defaults)
+						formatDescription(cvv.description) + formatDefaults(cvv.key, defaults),
 				});
 			} else {
 				info.alternatives.push({
 					imageId: `${cv.key}-${cvv.key}`,
 					selectors: [`${cv.key} = '${cvv.key}'`],
 					description:
-						formatDescription(cvv.description) + formatDefaults(cvv.key, defaults)
+						formatDescription(cvv.description) + formatDefaults(cvv.key, defaults),
 				});
 			}
 		}
@@ -96,26 +96,26 @@ function figureOutDefaults(variantsData, gr) {
 			desc: "Sans Upright",
 			mask: 1,
 			result: null,
-			composition: { ...variantsData.defaults.sans.upright }
+			composition: { ...variantsData.defaults.sans.upright },
 		},
 		{
 			desc: "Sans Italic",
 			mask: 2,
 			result: null,
-			composition: { ...variantsData.defaults.sans.italic }
+			composition: { ...variantsData.defaults.sans.italic },
 		},
 		{
 			desc: "Slab Upright",
 			mask: 4,
 			result: null,
-			composition: { ...variantsData.defaults.slab.upright }
+			composition: { ...variantsData.defaults.slab.upright },
 		},
 		{
 			desc: "Slab Italic",
 			mask: 8,
 			result: null,
-			composition: { ...variantsData.defaults.slab.italic }
-		}
+			composition: { ...variantsData.defaults.slab.italic },
+		},
 	];
 	for (const variant of gr.variants) {
 		for (const dc of defaultConfigs) {

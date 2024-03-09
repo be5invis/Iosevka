@@ -7,8 +7,6 @@ export class Anchor {
 		return Anchor.transform(tfm, this);
 	}
 	static transform(tfm, a) {
-		const x = a.x * tfm.xx + a.y * tfm.yx + tfm.x;
-		const y = a.x * tfm.xy + a.y * tfm.yy + tfm.y;
-		return new Anchor(x, y);
+		return new Anchor(tfm.applyX(a.x, a.y), tfm.applyY(a.x, a.y));
 	}
 }

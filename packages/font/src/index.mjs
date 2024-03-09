@@ -50,7 +50,7 @@ async function getParameters(argv) {
 		await tryParseToml(WEIGHTS_TOML),
 		await tryParseToml(WIDTHS_TOML),
 		await tryParseToml(SLOPES_TOML),
-		fs.existsSync(PRIVATE_TOML) ? await tryParseToml(PRIVATE_TOML) : {}
+		fs.existsSync(PRIVATE_TOML) ? await tryParseToml(PRIVATE_TOML) : {},
 	);
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
@@ -63,7 +63,7 @@ async function getParameters(argv) {
 		if (argv.metricOverride) applyMetricOverride(para, argv.metricOverride, argv);
 		para.naming = {
 			miscNames: para.naming,
-			...createNamingDictFromArgv(argv)
+			...createNamingDictFromArgv(argv),
 		};
 		return para;
 	}
@@ -83,7 +83,7 @@ async function tryParseToml(str) {
 		return Toml.parse(await fs.promises.readFile(str, "utf-8"));
 	} catch (e) {
 		throw new Error(
-			`Failed to parse configuration file ${str}.\nPlease validate whether there's syntax error.\n${e}`
+			`Failed to parse configuration file ${str}.\nPlease validate whether there's syntax error.\n${e}`,
 		);
 	}
 }
@@ -98,7 +98,7 @@ async function saveCharMap(argv, glyphStore) {
 		charMap.push([
 			gn,
 			Array.from(glyphStore.queryUnicodeOfName(gn) || []),
-			...createGrDisplaySheet(glyphStore, gn)
+			...createGrDisplaySheet(glyphStore, gn),
 		]);
 	}
 	await fs.promises.writeFile(argv.oCharMap, zlib.gzipSync(encode(charMap)));

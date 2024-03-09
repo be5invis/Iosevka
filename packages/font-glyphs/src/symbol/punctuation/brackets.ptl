@@ -164,7 +164,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 		create-glyph 'ligExtBracketLeft' : glyph-proc
 			Joining.set currentGlyph Joining.Classes.Right
-			include : Bracket.Shape ParenTop ParenBot (Middle - [HSwToV HalfStroke]) [mix SB RightSB DesignParameters.bracketInside]
+			include : Bracket.Shape ParenTop ParenBot (Middle - [HSwToV HalfStroke]) Width
 
 		create-glyph 'bracketLeftUpper' 0x23A1 : glyph-proc
 			include : ForceUpright
@@ -204,6 +204,8 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				HBar.m hDim.l hDim.r [mix ParenBot ParenTop 0.5]
 				VBar.l hDim.l ParenBot ParenTop
 
+		create-glyph 'smallBracketLeft' null : Bracket.Shape (XH / CAP * ParenTop) (XH / CAP * ParenBot)
+
 		turned 'bracketRight' ']' 'bracketLeft' Middle SymbolMid
 		turned 'bracketRightUHalf' 0x2E23 'bracketLeftLHalf' Middle SymbolMid
 		turned 'bracketRightLHalf' 0x2E25 'bracketLeftUHalf' Middle SymbolMid
@@ -227,12 +229,12 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				(ParenTop - SymbolMid - Stroke * 1.5) / 2
 			return : object parenCenter radius
 
-		export : define [UpperHalfShape top bottom sw pExt] : glyph-proc
+		export : define [UpperHalfShape top bottom sw ext] : glyph-proc
 			define [object parenCenter radius] : Dim
 			define xIns : mix SB RightSB DesignParameters.braceInside
 			define xTip : mix SB RightSB DesignParameters.braceOutside
 			include : dispiro
-				flat ((1 + [fallback pExt 0]) * xIns) top [widths.center.heading sw Leftward]
+				flat (xIns + [fallback ext 0]) top [widths.center.heading sw Leftward]
 				curl (xIns - 0.1) top [heading Leftward]
 				archv
 				flat parenCenter (top - radius) [heading Downward]
@@ -240,12 +242,12 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				arcvh
 				straight.left.end xTip bottom [heading Leftward]
 
-		export : define [LowerHalfShape top bottom sw pExt] : glyph-proc
+		export : define [LowerHalfShape top bottom sw ext] : glyph-proc
 			define [object parenCenter radius] : Dim
 			define xIns : mix SB RightSB DesignParameters.braceInside
 			define xTip : mix SB RightSB DesignParameters.braceOutside
 			include : dispiro
-				flat ((1 + [fallback pExt 0]) * xIns) bottom [widths.center.heading sw Leftward]
+				flat (xIns + [fallback ext 0]) bottom [widths.center.heading sw Leftward]
 				curl (xIns - 0.1) bottom [heading Leftward]
 				archv
 				flat parenCenter (bottom + radius) [heading Upward]
@@ -278,7 +280,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 		######
 
-		export : define [CurlyShape sw pFlatIn pFlatOut pExt] : glyph-proc
+		export : define [CurlyShape sw pFlatIn pFlatOut ext] : glyph-proc
 			local hs : sw / 2
 			local xIns : mix SB RightSB DesignParameters.braceInside
 			local xOus : mix SB RightSB DesignParameters.braceOutside
@@ -296,7 +298,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 			local fine : sw * CThin
 
 			include : dispiro
-				flat (xIns * (1 + pExt)) (top - hs) [widths.center.heading sw Leftward]
+				flat (xIns + [fallback ext 0]) (top - hs) [widths.center.heading sw Leftward]
 				curl (xIns - flatLengthIn) (top - hs) [heading Leftward]
 				archv.superness (2.2 + pFlatIn)
 				g4.down.mid m1 (top - radius1) [heading Downward]
@@ -307,7 +309,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				curl xOus (SymbolMid + (sw - fine) / 2) [heading Leftward]
 
 			include : dispiro
-				flat (xIns * (1 + pExt)) (bot + hs) [widths.center.heading sw Leftward]
+				flat (xIns + [fallback ext 0]) (bot + hs) [widths.center.heading sw Leftward]
 				curl (xIns - flatLengthIn) (bot + hs) [heading Leftward]
 				archv.superness (2.2 + pFlatIn)
 				g4.up.mid m1 (bot + radius1) [heading Upward]
@@ -330,8 +332,8 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 			create-glyph 'ligExtBraceLeft.straight' : glyph-proc
 				Joining.set currentGlyph Joining.Classes.Right
-				include : Brace.UpperHalfShape top SymbolMid Stroke 1
-				include : Brace.LowerHalfShape SymbolMid bot Stroke 1
+				include : Brace.UpperHalfShape top SymbolMid Stroke Width
+				include : Brace.LowerHalfShape SymbolMid bot Stroke Width
 			create-glyph 'ligExtBraceRight.straight' : glyph-proc
 				include [refer-glyph 'ligExtBraceLeft.straight'] AS_BASE ALSO_METRICS
 				include : FlipAround Middle SymbolMid
@@ -380,12 +382,12 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				curlyFlatBoundary { 0.25 0.05 }
 
 			foreach { suffix { pFlatIn pFlatOut } } [Object.entries CurlyBraceConfig] : do
-				create-glyph "braceLeft.\(suffix)" : Brace.CurlyShape Stroke pFlatIn pFlatOut 0
+				create-glyph "braceLeft.\(suffix)" : Brace.CurlyShape Stroke pFlatIn pFlatOut
 				turned "braceRight.\(suffix)" null "braceLeft.\(suffix)" Middle SymbolMid
 
 				create-glyph "ligExtBraceLeft.\(suffix)" : glyph-proc
 					Joining.set currentGlyph Joining.Classes.Right
-					include : Brace.CurlyShape Stroke pFlatIn pFlatOut 1
+					include : Brace.CurlyShape Stroke pFlatIn pFlatOut Width
 				create-glyph "ligExtBraceRight.\(suffix)" : glyph-proc
 					include [refer-glyph "ligExtBraceLeft.\(suffix)"] AS_BASE ALSO_METRICS
 					include : FlipAround Middle SymbolMid
@@ -396,7 +398,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 					local xIns : mix SB RightSB DesignParameters.braceInside
 					local top : mix SymbolMid ParenTop (1 + DesignParameters.braceOvershoot)
 					local bot : mix SymbolMid ParenBot (1 + DesignParameters.braceOvershoot)
-					include : Brace.CurlyShape fine pFlatIn pFlatOut 0
+					include : Brace.CurlyShape fine pFlatIn pFlatOut
 					include : VBar.r xIns (bot + fine / 2) (top - fine / 2) fine
 
 				turned "whiteBraceRight.\(suffix)" null "whiteBraceLeft.\(suffix)" Middle SymbolMid

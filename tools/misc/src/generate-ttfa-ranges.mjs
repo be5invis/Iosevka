@@ -1,3 +1,5 @@
+"use strict";
+
 import fs from "fs";
 import path from "path";
 import url from "url";
@@ -44,7 +46,7 @@ async function main() {
 		out.push({
 			scriptTag: key.split("-")[0],
 			featureTag: key.split("-")[1],
-			ranges: ArrayUtil.toRanges(value)
+			ranges: ArrayUtil.toRanges(value),
 		});
 	}
 
@@ -54,7 +56,7 @@ async function main() {
 			`// Machine generated. Do not modify。\n` +
 			`export default ` +
 			JSON.stringify(out, null, "\t") +
-			";\n"
+			";\n",
 	);
 }
 
@@ -169,74 +171,74 @@ const LatinBase = {
 		All(
 			Script("Latin"),
 			Either(GeneralCategory("Uppercase_Letter"), GeneralCategory("Lowercase_Letter")),
-			Not(Block("Halfwidth_And_Fullwidth_Forms"))
+			Not(Block("Halfwidth_And_Fullwidth_Forms")),
 		),
 		Block("Currency_Symbols"),
-		All(Block("Letterlike_Symbols"), Not(In("℀℁⅍℠℡™℻")))
-	)
+		All(Block("Letterlike_Symbols"), Not(In("℀℁⅍℠℡™℻"))),
+	),
 };
 const CyrillicBase = {
 	scriptTag: "cyrl",
 	featureTag: "dflt",
 	filter: All(
 		Script("Cyrillic"),
-		Either(GeneralCategory("Uppercase_Letter"), GeneralCategory("Lowercase_Letter"))
-	)
+		Either(GeneralCategory("Uppercase_Letter"), GeneralCategory("Lowercase_Letter")),
+	),
 };
 const GreekBase = {
 	scriptTag: "grek",
 	featureTag: "dflt",
 	filter: All(
 		Script("Greek"),
-		Either(GeneralCategory("Uppercase_Letter"), GeneralCategory("Lowercase_Letter"))
-	)
+		Either(GeneralCategory("Uppercase_Letter"), GeneralCategory("Lowercase_Letter")),
+	),
 };
 const DigitBase = {
 	scriptTag: "latn",
 	featureTag: "dflt",
-	filter: Either(In("0123456789"))
+	filter: Either(In("0123456789")),
 };
 
 const LatinSubscript = {
 	scriptTag: "latb",
 	featureTag: "dflt",
-	filter: Either(In("ₐₑₔₕᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ"))
+	filter: Either(In("ₐₑₔₕᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ")),
 };
 const GreekSubscript = {
 	scriptTag: "latb",
 	featureTag: "dflt",
-	filter: Either(In("ᵦᵧᵨᵩᵪ"))
+	filter: Either(In("ᵦᵧᵨᵩᵪ")),
 };
 const CyrillicSubscript = {
 	scriptTag: "latb",
 	featureTag: "dflt",
-	filter: Either(In("𞁑𞁒𞁓𞁔𞁧𞁕𞁖𞁗𞁘𞁩𞁙𞁨𞁚𞁛𞁜𞁝𞁞𞁟𞁠𞁡𞁢𞁣𞁪𞁤𞁥𞁦"))
+	filter: Either(In("𞁑𞁒𞁓𞁔𞁧𞁕𞁖𞁗𞁘𞁩𞁙𞁨𞁚𞁛𞁜𞁝𞁞𞁟𞁠𞁡𞁢𞁣𞁪𞁤𞁥𞁦")),
 };
 const DigitSubscript = {
 	scriptTag: "latb",
 	featureTag: "dflt",
-	filter: Either(In("₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎"))
+	filter: Either(In("₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎")),
 };
 
 const LatinSuperscript = {
 	scriptTag: "latp",
 	featureTag: "dflt",
-	filter: Either(In("ªº"), All(Script("Latin"), Either(GeneralCategory("Modifier_Letter"))))
+	filter: Either(In("ªº"), All(Script("Latin"), Either(GeneralCategory("Modifier_Letter")))),
 };
 const GreekSuperscript = {
 	scriptTag: "latp",
 	featureTag: "dflt",
-	filter: All(Script("Greek"), Either(GeneralCategory("Modifier_Letter")))
+	filter: All(Script("Greek"), Either(GeneralCategory("Modifier_Letter"))),
 };
 const CyrillicSuperscript = {
 	scriptTag: "latp",
 	featureTag: "dflt",
-	filter: All(Script("Cyrillic"), Either(GeneralCategory("Modifier_Letter")))
+	filter: All(Script("Cyrillic"), Either(GeneralCategory("Modifier_Letter"))),
 };
 const DigitSuperscript = {
 	scriptTag: "latp",
 	featureTag: "dflt",
-	filter: Either(In("⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾"))
+	filter: Either(In("⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾")),
 };
 
 const LatinPunctuation = {
@@ -246,8 +248,8 @@ const LatinPunctuation = {
 		Block("Basic_Latin"),
 		Block("Latin_1_Supplement"),
 		Block("General_Punctuation"),
-		Block("Supplemental_Punctuation")
-	)
+		Block("Supplemental_Punctuation"),
+	),
 };
 
 const Targets = [
@@ -263,5 +265,5 @@ const Targets = [
 	DigitBase,
 	DigitSubscript,
 	DigitSuperscript,
-	LatinPunctuation
+	LatinPunctuation,
 ];

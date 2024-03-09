@@ -15,12 +15,12 @@ export default (function (args) {
 						"font-family": "Iosevka",
 						"font-weight": 500,
 						"font-width": 6,
-						"font-size": EM
+						"font-size": EM,
 					},
 					[{ color: theme.body }, args.text],
-					[{ color: theme.stress }, args.stressText || ""]
-				]
-			}
-		]
+					[{ color: theme.stress }, args.stressText || ""],
+				],
+			},
+		],
 	};
 });

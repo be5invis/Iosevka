@@ -1,0 +1,254 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Mosaic-Block : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	for-width-kinds WideWidth4
+
+		define top     fontMetrics.os2.sTypoAscender
+		define bottom  fontMetrics.os2.sTypoDescender
+		define left    0
+		define right   MosaicWidth
+
+		# Corner numbers
+		# 1 2 3
+		# 4 5 6
+		# 7 8 9
+		define [PatternCorner22 bit] : match bit
+			1 : corner [mix left right (0 / 2)] [mix top bottom (0 / 2)]
+			2 : corner [mix left right (1 / 2)] [mix top bottom (0 / 2)]
+			3 : corner [mix left right (2 / 2)] [mix top bottom (0 / 2)]
+			4 : corner [mix left right (0 / 2)] [mix top bottom (1 / 2)]
+			5 : corner [mix left right (1 / 2)] [mix top bottom (1 / 2)]
+			6 : corner [mix left right (2 / 2)] [mix top bottom (1 / 2)]
+			7 : corner [mix left right (0 / 2)] [mix top bottom (2 / 2)]
+			8 : corner [mix left right (1 / 2)] [mix top bottom (2 / 2)]
+			9 : corner [mix left right (2 / 2)] [mix top bottom (2 / 2)]
+
+		define [PatternPolygon22 bits] : spiro-outline : bits.map : x => [PatternCorner22 (x - 0)]
+
+
+		define [FillBlock hStart hEnd vStart vEnd] : spiro-outline
+			corner [mix left right hStart] [mix bottom top vStart]
+			corner [mix left right hStart] [mix bottom top vEnd]
+			corner [mix left right hEnd] [mix bottom top vEnd]
+			corner [mix left right hEnd] [mix bottom top vStart]
+
+		define [BlockElementGlyph unicode hStart hEnd vStart vEnd] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : FillBlock hStart hEnd vStart vEnd
+
+		define [BlockElementGlyph2 unicode hStart1 hEnd1 vStart1 vEnd1 hStart2 hEnd2 vStart2 vEnd2] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : union
+					FillBlock hStart1 hEnd1 vStart1 vEnd1
+					FillBlock hStart2 hEnd2 vStart2 vEnd2
+
+		BlockElementGlyph 0x2588  0 1 0 1
+		BlockElementGlyph 0x1FB86 0 1 (1 / 8) 1
+		BlockElementGlyph 0x1FB85 0 1 (2 / 8) 1
+		BlockElementGlyph 0x1FB84 0 1 (3 / 8) 1
+		BlockElementGlyph 0x2580  0 1 (1 / 2) 1
+		BlockElementGlyph 0x1FB83 0 1 (5 / 8) 1
+		BlockElementGlyph 0x1FB82 0 1 (6 / 8) 1
+		BlockElementGlyph 0x2594  0 1 (7 / 8) 1
+		BlockElementGlyph 0x2595  (7 / 8) 1 0 1
+		BlockElementGlyph 0x1FB87 (6 / 8) 1 0 1
+		BlockElementGlyph 0x1FB88 (5 / 8) 1 0 1
+		BlockElementGlyph 0x2590  (1 / 2) 1 0 1
+		BlockElementGlyph 0x1FB89 (3 / 8) 1 0 1
+		BlockElementGlyph 0x1FB8A (2 / 8) 1 0 1
+		BlockElementGlyph 0x1FB8B (1 / 8) 1 0 1
+
+		foreach [fill : range 1 8] : begin
+			BlockElementGlyph (0x2580 + fill) 0 1 0 (fill / 8)
+			BlockElementGlyph (0x2590 - fill) 0 (fill / 8) 0 1
+			if (fill >= 2 && fill <= 7) : begin
+				BlockElementGlyph (0x1FB70 - 2 + fill) ((fill - 1) / 8) (fill / 8) 0 1
+				BlockElementGlyph (0x1FB76 - 2 + fill) 0 1 (1 - (fill - 1) / 8) (1 - fill / 8)
+
+		foreach [pos : range 0 16] : begin
+			local xCoord : (pos % 4) / 4
+			local yCoord : 1 - [Math.floor (pos / 4)] / 4
+			BlockElementGlyph (0x1CE90 + pos) xCoord (xCoord + 0.25) (yCoord - 0.25) yCoord
+
+		foreach [index : range 0 4] : begin
+			local lower : [Math.max 0 (index - 1)] / 4
+			local upper : [Math.min 4 (index + 2)] / 4
+			BlockElementGlyph (0x1CEA0 + index) (1 - upper) (1 - lower) 0 (1 / 4)
+			BlockElementGlyph (0x1CEA4 + index) 0 (1 / 4) lower upper
+			BlockElementGlyph (0x1CEA8 + index) lower upper (3 / 4) 1
+			BlockElementGlyph (0x1CEAC + index) (3 / 4) 1 (1 - upper) (1 - lower)
+
+		BlockElementGlyph 0x1FBCE 0 (2 / 3) 0 1
+		BlockElementGlyph 0x1FBCF 0 (1 / 3) 0 1
+		BlockElementGlyph 0x1FBE4 (1 / 4) (3 / 4) (1 / 2) 1
+		BlockElementGlyph 0x1FBE5 (1 / 4) (3 / 4) 0 (1 / 2)
+		BlockElementGlyph 0x1FBE6 0 (1 / 2) (1 / 4) (3 / 4)
+		BlockElementGlyph 0x1FBE7 (1 / 2) 1 (1 / 4) (3 / 4)
+
+		BlockElementGlyph2 0x1FB7C     0 (1 / 8) 0 1    0 1 0 (1 / 8)
+		BlockElementGlyph2 0x1FB7D     0 (1 / 8) 0 1    0 1 (7 / 8) 1
+		BlockElementGlyph2 0x1FB7E     (7 / 8) 1 0 1    0 1 (7 / 8) 1
+		BlockElementGlyph2 0x1FB7F     (7 / 8) 1 0 1    0 1 0 (1 / 8)
+		BlockElementGlyph2 0x1FB80     0 1 (7 / 8) 1    0 1 0 (1 / 8)
+		create-glyph [MangleName : NameUni 0x1FB81] [MangleUnicode 0x1FB81] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : union
+				FillBlock 0 1 (7 / 8) 1
+				FillBlock 0 1 (5 / 8) (6 / 8)
+				FillBlock 0 1 (3 / 8) (4 / 8)
+				FillBlock 0 1 0 (1 / 8)
+
+		create-glyph [MangleName : NameUni 0x1FBB5] [MangleUnicode 0x1FBB5] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName "arrowLeft"
+			include : refer-glyph : MangleName : NameUni 0x1FB80
+
+		create-glyph [MangleName : NameUni 0x1FBB6] [MangleUnicode 0x1FBB6] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName "arrowRight"
+			include : refer-glyph : MangleName : NameUni 0x1FB80
+
+		create-glyph [MangleName : NameUni 0x1FBB7] [MangleUnicode 0x1FBB7] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName "arrowDown"
+			include : refer-glyph : MangleName : NameUni 0x2595
+
+		create-glyph [MangleName : NameUni 0x1FBB8] [MangleUnicode 0x1FBB8] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName "arrowUp"
+			include : refer-glyph : MangleName : NameUni 0x2595
+
+		create-glyph [MangleName : NameUni 0x1FBBC] [MangleUnicode 0x1FBBC] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName "blackSmallCircle"
+			include : refer-glyph : MangleName : NameUni 0x2595
+			include : refer-glyph : MangleName : NameUni 0x1FB80
+
+		define [Shade _steps fill box] : glyph-proc
+			local steps : Math.abs _steps
+			local sign : if (_steps >= 0) 1 (-1)
+			local sw : (top - bottom) / steps * fill
+			local skew : [Math.round (MosaicWidth / Width)] * (top - bottom) / 2
+			include : ForceUpright
+			include : intersection
+				glyph-proc
+					foreach j [range (-steps * 4 - 2) (steps * 4 + 2)] : begin
+						local y0 : mix top bottom (j / steps)
+						local y1 : y0 + sign * skew
+						include : spiro-outline
+							corner 0           (y0 - sw / 2)
+							corner MosaicWidth (y1 - sw / 2)
+							corner MosaicWidth (y1 + sw / 2)
+							corner 0           (y0 + sw / 2)
+				fallback box [FillBlock 0 1 0 1]
+
+		define FillLight  (1 / 8)
+		define FillMedium (1 / 4)
+		define FillHeavy  (1 / 2)
+
+		create-glyph [MangleName 'lightShade'] [MangleUnicode 0x2591] : glyph-proc
+			set-width MosaicWidth
+			include : Shade 4 FillLight
+
+		create-glyph [MangleName 'denseShade'] : glyph-proc
+			set-width MosaicWidth
+			include : Shade 16 FillHeavy
+
+		define [MediumShade unicode bits] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : Shade 8 FillMedium : PatternPolygon22 bits
+
+		define [InverseMediumShade unicode bits] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : Shade (-8) (1 - FillMedium) : PatternPolygon22 bits
+				include : difference
+					FillBlock 0 1 0 1
+					PatternPolygon22 bits
+
+		MediumShade 0x2592  {1 3 9 7}
+		MediumShade 0x1FB8C {1 2 8 7}
+		MediumShade 0x1FB8D {2 3 9 8}
+		MediumShade 0x1FB8E {1 3 6 4}
+		MediumShade 0x1FB8F {4 6 9 7}
+		InverseMediumShade 0x1FB90 {1 3 9 7}
+		InverseMediumShade 0x1FB94 {1 2 8 7}
+		# InverseMediumShade 0x1FB93 {2 3 9 8}
+		InverseMediumShade 0x1FB92 {1 3 6 4}
+		InverseMediumShade 0x1FB91 {4 6 9 7}
+		MediumShade 0x1FB9C {1 3 7}
+		MediumShade 0x1FB9D {1 3 9}
+		MediumShade 0x1FB9E {3 7 9}
+		MediumShade 0x1FB9F {1 7 9}
+
+		create-glyph [MangleName 'heavyShade'] [MangleUnicode 0x2593] : glyph-proc
+			set-width MosaicWidth
+			include : Shade 8 FillHeavy
+
+		create-glyph [MangleName 'upperLeftToLowerRightFill'] [MangleUnicode 0x1FB98] : glyph-proc
+			set-width MosaicWidth
+			include : Shade (-4) FillHeavy
+
+		create-glyph [MangleName 'upperRightToLowerLeftFill'] [MangleUnicode 0x1FB99] : glyph-proc
+			set-width MosaicWidth
+			include : Shade 4 FillHeavy
+
+		define filldata : list
+			list 0x2596 0 0 1 0
+			list 0x2597 0 0 0 1
+			list 0x2598 1 0 0 0
+			list 0x2599 1 0 1 1
+			list 0x259A 1 0 0 1
+			list 0x259B 1 1 1 0
+			list 0x259C 1 1 0 1
+			list 0x259D 0 1 0 0
+			list 0x259E 0 1 1 0
+			list 0x259F 0 1 1 1
+		foreach [{unicode lt rt lb rb} : items-of filldata] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				define t top
+				define b bottom
+				define l 0
+				define r MosaicWidth
+				local mx : mix l r 0.5
+				local my : mix b t 0.5
+				if lt : include : spiro-outline
+					corner l  t
+					corner l my
+					corner mx my
+					corner mx t
+				if rt : include : spiro-outline
+					corner mx t
+					corner mx my
+					corner r  my
+					corner r  t
+				if lb : include : spiro-outline
+					corner l  my
+					corner l  b
+					corner mx b
+					corner mx my
+				if rb : include : spiro-outline
+					corner mx my
+					corner mx b
+					corner r  b
+					corner r my

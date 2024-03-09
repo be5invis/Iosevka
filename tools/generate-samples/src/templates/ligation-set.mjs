@@ -47,9 +47,9 @@ export default (function (args) {
 					{ "font-family": args.fontFamily, "font-style": args.fontStyle },
 					{ "font-size": 24, color: theme.body },
 					{ "font-feature-settings": { [args.tag]: args.rank } },
-					trimNewline([...makeSample(theme, args)])
-				]
-			}
-		]
+					trimNewline([...makeSample(theme, args)]),
+				],
+			},
+		],
 	};
 });

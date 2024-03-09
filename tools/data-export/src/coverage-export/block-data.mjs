@@ -5,7 +5,7 @@ export async function collectBlockData() {
 		[[0xe0a0, 0xe0df], "Private Use Area — Powerline"],
 		[[0xee00, 0xee0f], "Private Use Area — Progress Bar"],
 		[[0xef10, 0xef1f], "Private Use Area — Iosevka Private Dingbats"],
-		[[0x1cc00, 0x1ceaf], "Symbols for Legacy Computing Supplement (Purposed)"]
+		[[0x1cc00, 0x1ceaf], "Symbols for Legacy Computing Supplement (Proposed)"],
 	];
 
 	for (const id of UnicodeDataIndex.Block) {

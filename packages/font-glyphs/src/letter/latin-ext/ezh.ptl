@@ -28,10 +28,6 @@ glyph-block Letter-Latin-Ezh : begin
 			g4   (RightSB - OX) [mix yMidBar bot pArc]
 			SerifedArcEnd.RtlRhs SB Middle bot Stroke hookDepth
 
-	define EZH-SLAB-NONE   0
-	define EZH-SLAB-ALWAYS 1
-	define EZH-SLAB-AUTO : if SLAB EZH-SLAB-ALWAYS EZH-SLAB-NONE
-
 	define [ConventionalStart top bot ezhLeft ezhRight yMidBar] : glyph-proc
 		include : HBar.t SB ezhRight top
 		include : dispiro
@@ -54,8 +50,8 @@ glyph-block Letter-Latin-Ezh : begin
 			spiro-outline
 				corner (-Width) bot
 				corner (-Width) (2 * top)
-				corner (ezhRight - xDiagWidth) (2 * top)
-				corner (ezhRight - xDiagWidth) (top - yFootHeight)
+				corner (ezhRight - xDiagWidth + 0.1) (2 * top)
+				corner (ezhRight - xDiagWidth + 0.1) (top - yFootHeight)
 				corner (ezhLeft + xDiagWidth) yMidBar
 				corner (ezhLeft + xDiagWidth) bot
 			dispiro
@@ -65,7 +61,7 @@ glyph-block Letter-Latin-Ezh : begin
 				g2.right.mid (SB + xHookDepth) (top - O) [widths.rhs.heading Stroke Rightward]
 				flat [mix (SB + xMockTailDepth) ezhRight kTop] (top - kTop * yTailDepth)
 				curl [mix (SB + xMockTailDepth) ezhRight 4]    (top - 4    * yTailDepth)
-			
+
 		include : VBar.r ezhRight top (top - yFootHeight) (xDiagWidth / HVContrast)
 		include : dispiro
 			corner ezhRight (top - yFootHeight) [widths.rhs (Stroke / HVContrast)]
@@ -79,7 +75,7 @@ glyph-block Letter-Latin-Ezh : begin
 		local-parameter : pRight        -- 0.925
 		local-parameter : terminalShape -- StdTerminalShape
 		local-parameter : isCursive     -- false
-		local-parameter : serifShape    -- EZH-SLAB-AUTO
+		local-parameter : isSerifed     -- SLAB
 
 		local yMidBar : [mix bot top [if isCursive 0.5 0.55]] + HalfStroke
 		local ezhLeft : mix SB RightSB pLeft
@@ -96,38 +92,34 @@ glyph-block Letter-Latin-Ezh : begin
 				archv
 				terminalShape top bot yMidBar
 
-		if serifShape : include : VSerif.dl SB top VJut
+		if isSerifed : include : VSerif.dl SB top VJut
 
 		return : object yMidBar
 
-	define EzhConfig : SuffixCfg.weave
-		object # body
-			straight { false }
-			cursive  { true  }
-		object # serifs
-			""        { EZH-SLAB-NONE   } # For cursive
-			serifless { EZH-SLAB-NONE   }
-			serifed   { EZH-SLAB-ALWAYS }
+	define EzhConfig : object
+		straightSerifless  { false false }
+		straightTopSerifed { false true  }
+		cursive            { true  false }
 
-	foreach { suffix { {isCursive} {serifShape} } } [pairs-of EzhConfig] : do
+	foreach { suffix { isCursive isSerifed } } [pairs-of EzhConfig] : do
 		create-glyph "Ezh.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : EzhShape CAP 0 (isCursive -- isCursive) (serifShape -- serifShape)
+			include : EzhShape CAP 0 (isCursive -- isCursive) (isSerifed -- isSerifed)
 
 		create-glyph "smcpEzh.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : EzhShape XH 0 (isCursive -- isCursive) (serifShape -- serifShape)
+			include : EzhShape XH 0 (isCursive -- isCursive) (isSerifed -- isSerifed)
 
 		create-glyph "ezh.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			include : EzhShape XH Descender (isCursive -- isCursive) (serifShape -- serifShape)
+			include : EzhShape XH Descender (isCursive -- isCursive) (isSerifed -- isSerifed)
 
 		create-glyph "ezhTail.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			local b : mix Descender XH 0.25
 			local [object yMidBar] : include : EzhShape XH b
 				isCursive -- isCursive
-				serifShape -- serifShape
+				isSerifed -- isSerifed
 				terminalShape -- [HooklessTerminalShape 0.5]
 			local y : mix yMidBar b 0.5
 			include : dispiro
@@ -147,7 +139,7 @@ glyph-block Letter-Latin-Ezh : begin
 			local p : SmallArchDepthB / (SmallArchDepthA + SmallArchDepthB)
 			local [object yMidBar] : include : EzhShape XH Descender
 				isCursive -- isCursive
-				serifShape -- serifShape
+				isSerifed -- isSerifed
 				terminalShape -- [HooklessTerminalShape p]
 			local fine : AdviceStroke2 3 5 (XH - Descender)
 			local rinner : (XH * 0.4 - fine * 1.5) / 2
@@ -163,7 +155,7 @@ glyph-block Letter-Latin-Ezh : begin
 			include : MarkSet.p
 			include : EzhShape XH 0
 				isCursive -- isCursive
-				serifShape -- serifShape
+				isSerifed -- isSerifed
 				terminalShape -- RetroflexConnectionTerminal
 			include : RetroflexHook.l SB 0 (yAttach -- Hook)
 
@@ -226,7 +218,7 @@ glyph-block Letter-Latin-Ezh : begin
 		include : dispiro
 			corner ezhLeft (top - Stroke) [widths.lhs (Stroke / HVContrast)]
 			corner ezhRight yMidBar       [widths.rhs (Stroke / HVContrast)]
-		
+
 		include : dispiro
 			widths.lhs
 			flat ezhRight yMidBar [heading Leftward]

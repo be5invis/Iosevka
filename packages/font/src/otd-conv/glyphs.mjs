@@ -5,14 +5,36 @@ import { Ot } from "ot-builder";
 
 import * as GlyphName from "./glyph-name.mjs";
 
-function byRank([gna, a], [gnb, b]) {
-	return (
-		b.glyphRank - a.glyphRank ||
-		a.grRank - b.grRank ||
-		a.codeRank - b.codeRank ||
-		a.subRank - b.subRank
-	);
+export function convertGlyphs(gsOrig) {
+	const sortedEntries = Array.from(gsOrig.namedEntries(Gr.Nwid, Gr.Wwid)).sort(byRank);
+	const gs = new MappedGlyphStore();
+	const cmap = new Ot.Cmap.Table();
+
+	// initialize
+	for (const [name, gSrc] of sortedEntries) {
+		gs.declare(name, gSrc);
+		const us = gsOrig.queryUnicodeOf(gSrc);
+		if (us) {
+			for (const u of us) {
+				if (!(isFinite(u - 0) && u)) continue;
+				cmap.unicode.set(u, gs.queryBySourceGlyph(gSrc));
+				gs.setPrimaryUnicode(gSrc, u);
+			}
+		}
+	}
+
+	// fill geometry
+	for (const [name, gSrc] of sortedEntries) gs.fill(name, gSrc);
+
+	// fill VS
+	addVsLinks(gsOrig, gs, cmap, Gr.VS01, 0xfe00);
+
+	// fill glyph names
+	gs.fillOtGlyphNames();
+
+	return { glyphs: gs, cmap };
 }
+
 class MappedGlyphStore {
 	constructor() {
 		this.m_nameMapping = new Map();
@@ -48,11 +70,11 @@ class MappedGlyphStore {
 
 		// Fill Geometry
 		if (source.geometry.measureComplexity() & Geom.CPLX_NON_EMPTY) {
-			const rs = source.geometry.asReferences();
+			const rs = source.geometry.toReferences();
 			if (rs) {
 				this.fillReferences(g, rs);
 			} else {
-				this.fillContours(g, source.geometry.asContours());
+				this.fillContours(g, source.geometry.toContours());
 			}
 		}
 	}
@@ -61,7 +83,7 @@ class MappedGlyphStore {
 		let rev = new Map();
 		for (const [u, g] of this.m_primaryUnicodeMapping) rev.set(g, u);
 		const glyphsInBuildOrder = Array.from(this.m_mapping).sort(
-			([a], [b]) => a.subRank - b.subRank
+			([a], [b]) => a.subRank - b.subRank,
 		);
 		for (const [gSrc, gOt] of glyphsInBuildOrder) gOt.name = undefined;
 
@@ -79,7 +101,7 @@ class MappedGlyphStore {
 					gSrcBase,
 					gOtBase,
 					this.m_nameMapping,
-					conflictSet
+					conflictSet,
 				);
 			}
 		} while (nNewNames > 0);
@@ -92,7 +114,7 @@ class MappedGlyphStore {
 					gSrcBase,
 					gOtBase,
 					this.m_nameMapping,
-					conflictSet
+					conflictSet,
 				);
 			}
 		} while (nNewNames > 0);
@@ -140,44 +162,14 @@ class MappedGlyphStore {
 						z.y,
 						z.type === Point.Type.Quadratic
 							? Ot.Glyph.PointType.Quad
-							: Ot.Glyph.PointType.Corner
-					)
+							: Ot.Glyph.PointType.Corner,
+					),
 				);
 			}
 			cs.contours.push(c1);
 		}
 		g.geometry = cs;
 	}
-}
-
-export function convertGlyphs(gsOrig) {
-	const sortedEntries = Array.from(gsOrig.namedEntries(Gr.Nwid, Gr.Wwid)).sort(byRank);
-	const gs = new MappedGlyphStore();
-	const cmap = new Ot.Cmap.Table();
-
-	// initialize
-	for (const [name, gSrc] of sortedEntries) {
-		gs.declare(name, gSrc);
-		const us = gsOrig.queryUnicodeOf(gSrc);
-		if (us) {
-			for (const u of us) {
-				if (!(isFinite(u - 0) && u)) continue;
-				cmap.unicode.set(u, gs.queryBySourceGlyph(gSrc));
-				gs.setPrimaryUnicode(gSrc, u);
-			}
-		}
-	}
-
-	// fill geometry
-	for (const [name, gSrc] of sortedEntries) gs.fill(name, gSrc);
-
-	// fill VS
-	addVsLinks(gsOrig, gs, cmap, Gr.VS01, 0xfe00);
-
-	// fill glyph names
-	gs.fillOtGlyphNames();
-
-	return { glyphs: gs, cmap };
 }
 
 function addVsLinks(gsOrig, gs, cmap, gr, vs) {
@@ -199,4 +191,13 @@ function addVsLinks(gsOrig, gs, cmap, gr, vs) {
 			cmap.vs.set(u, vs, gDstLinked);
 		}
 	}
+}
+
+function byRank([gna, a], [gnb, b]) {
+	return (
+		b.glyphRank - a.glyphRank ||
+		a.grRank - b.grRank ||
+		a.codeRank - b.codeRank ||
+		a.subRank - b.subRank
+	);
 }

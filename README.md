@@ -4,11 +4,28 @@
 
 <p align="center"><a href="https://github.com/be5invis/Iosevka/releases#gh-light-mode-only"><img src="images/button-release.light.svg#gh-light-mode-only" title="Release"></a><a href="https://github.com/be5invis/Iosevka/releases#gh-dark-mode-only"><img src="images/button-release.dark.svg#gh-dark-mode-only" title="Release"></a> <a href="https://be5invis.github.io/Iosevka/customizer#gh-light-mode-only"><img src="images/button-customize.light.svg#gh-light-mode-only" title="Customizer"></a><a href="https://be5invis.github.io/Iosevka/customizer#gh-dark-mode-only"><img src="images/button-customize.dark.svg#gh-dark-mode-only" title="Customizer"></a> <a href="https://be5invis.github.io/Iosevka/specimen#gh-light-mode-only"><img src="images/button-specimen.light.svg#gh-light-mode-only" title="Specimen"></a><a href="https://be5invis.github.io/Iosevka/specimen#gh-dark-mode-only"><img src="images/button-specimen.dark.svg#gh-dark-mode-only" title="Specimen"></a></p>
 
-**Iosevka** is an *open-source*, *sans-serif* + *slab-serif*, *monospace* + *quasi‑proportional* typeface family, designed for *writing code*, using in *terminals*, and preparing *technical documents*.
+**Iosevka** \[ˌjɔˈseβ.kʰa\] is an *open-source*, *sans-serif* + *slab-serif*, *monospace* + *quasi‑proportional* typeface family, designed for *writing code*, using in *terminals*, and preparing *technical documents*.
 
 ## Installation
 
+### Installing from GitHub Releases
+
+1. Download your font package from [releases](https://github.com/be5invis/Iosevka/releases).
+  * For Linux users you could use the following command to download all the packages in the latest release:
+    ```bash
+    curl -s 'https://api.github.com/repos/be5invis/Iosevka/releases/latest' | jq -r ".assets[] | .browser_download_url" | grep ttf-iosevka | xargs -n 1 curl -L -O --fail --silent --show-error
+    ```
+2. Quit all your editors / programs.
+3. Unarchive the font package and you will see the font files.
+4. Take actions depending on your OS:
+    * **Windows**: Select the font files and drag into font [settings](ms-settings:fonts) / font control panel page.  
+      * On Windows 10 1809 or newer, the default font installation is per-user, and it may cause compatibility issues for some applications, mostly written in Java. To cope with this, right click and select “Install for all users” instead. [Ref.](https://youtrack.jetbrains.com/issue/JRE-1166?p=IDEA-200145)
+    * **macOS**: [Follow instructions here](http://support.apple.com/kb/HT2509).
+    * **Linux** : Copy the font files to your fonts directory then run `sudo fc-cache`.
+
 ### Installing via Package Managers
+
+*Disclaimer: This repository does not maintain any package manager distribution. The packages listed below may not always be up-to-date.*
 
   * **macOS**
     * Standard distribution in Homebrew:
@@ -25,21 +42,6 @@
     * Fedora: Install the font(s) from [the COPR here](https://copr.fedorainfracloud.org/coprs/peterwu/iosevka/). Run `dnf search iosevka` to discover available fonts and `dnf install` to install the chosen one(s).
   * **FreeBSD**: The font can be installed with `pkg install iosevka`.
   * **OpenBSD**: Run `pkg_info -Q iosevka` to see which Iosevka packages are available. Use `pkg_add` to install the chosen package(s).
-
-### Manual Installation
-
-1. Download your font package from [releases](https://github.com/be5invis/Iosevka/releases).
-  * For Linux users you could use the following command to download all the packages in the latest release:
-    ```bash
-    curl -s 'https://api.github.com/repos/be5invis/Iosevka/releases/latest' | jq -r ".assets[] | .browser_download_url" | grep ttf-iosevka | xargs -n 1 curl -L -O --fail --silent --show-error
-    ```
-2. Quit all your editors / programs.
-3. Unarchive the font package and you will see the font files.
-4. Take actions depending on your OS:
-    * **Windows**: Select the font files and drag into font [settings](ms-settings:fonts) / font control panel page.  
-      * On Windows 10 1809 or newer, the default font installation is per-user, and it may cause compatibility issues for some applications, mostly written in Java. To cope with this, right click and select “Install for all users” instead. [Ref.](https://youtrack.jetbrains.com/issue/JRE-1166?p=IDEA-200145)
-    * **macOS**: [Follow instructions here](http://support.apple.com/kb/HT2509).
-    * **Linux** : Copy the font files to your fonts directory then run `sudo fc-cache`.
 
 ## Features
 

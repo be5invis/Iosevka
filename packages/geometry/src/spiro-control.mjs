@@ -20,7 +20,7 @@ export class BiKnotCollector {
 			c.call(this);
 		} else if (Array.isArray(c)) {
 			for (const item of c) this.add(item);
-		} else if (c instanceof ControlKnot) {
+		} else if (c instanceof UserControlKnot) {
 			this.afterPreFunction = true;
 			this.pushKnot(c);
 		} else if (c instanceof TerminateInstruction) {
@@ -102,6 +102,33 @@ export class BiKnotCollector {
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+export class MonoKnot {
+	constructor(type, unimportant, x, y) {
+		this.type = type;
+		this.x = x;
+		this.y = y;
+		this.unimportant = unimportant;
+	}
+	clone() {
+		const k1 = new MonoKnot(this.type, this.x, this.y, this.unimportant);
+		return k1;
+	}
+	toShapeString() {
+		return Format.tuple(this.type, this.unimportant, Format.n(this.x), Format.n(this.y));
+	}
+	reverseType() {
+		if (this.type === "left") {
+			this.type = "right";
+		} else if (this.type === "right") {
+			this.type = "left";
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 class BiKnot {
 	constructor(type, x, y, d1, d2) {
 		this.type = type;
@@ -141,8 +168,11 @@ class BiKnot {
 			this.d2 == null ? "" : Format.n(this.d2),
 			this.proposedNormal
 				? Format.tuple(Format.n(this.proposedNormal.x), Format.n(this.proposedNormal.y))
-				: ""
+				: "",
 		);
+	}
+	toMono() {
+		return new MonoKnot(this.type, this.unimportant, this.x, this.y);
 	}
 }
 
@@ -152,7 +182,7 @@ function nCyclic(p, n) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-export class ControlKnot {
+export class UserControlKnot {
 	constructor(type, x, y, af) {
 		this.type = type;
 		this.x = x;
@@ -184,11 +214,4 @@ export function Interpolator(blender, restParameters) {
 	const interpolator = Object.create(base);
 	for (const prop in restParameters) interpolator[prop] = restParameters[prop];
 	return interpolator;
-}
-
-export class ImportanceControlKnot extends ControlKnot {
-	constructor(type, x, y, unimportant) {
-		super(type, x, y, null);
-		this.unimportant = unimportant;
-	}
 }

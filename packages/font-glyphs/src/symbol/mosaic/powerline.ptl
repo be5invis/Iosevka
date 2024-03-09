@@ -1,0 +1,146 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import as Gr from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Symbol-Mosaic-Powerline : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives : refer-glyph
+
+	define MosaicTop    fontMetrics.os2.sTypoAscender
+	define MosaicBottom fontMetrics.os2.sTypoDescender
+
+	for-width-kinds WideWidth4
+		local pwlMidOrig : (MosaicTop + MosaicBottom) / 2
+		local pwlTop : (MosaicTop - pwlMidOrig) * para.powerlineScaleY + para.powerlineShiftY + pwlMidOrig
+		local pwlBot : (MosaicBottom - pwlMidOrig) * para.powerlineScaleY + para.powerlineShiftY + pwlMidOrig
+		local pwlMid : mix pwlBot pwlTop (1 / 2)
+		local pwlNear : 0 * para.powerlineScaleX + para.powerlineShiftX
+		local pwlFar : MosaicWidth * para.powerlineScaleX + para.powerlineShiftX
+
+		define [RotatedPowerline gidNew unicodeNew gidSource] : begin
+			create-glyph [MangleName gidNew] [MangleUnicode unicodeNew] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : refer-glyph [MangleName gidSource]
+				include : FlipAround (MosaicWidth / 2) pwlMid
+
+		create-glyph [MangleName 'powerline/triangleRight'] [MangleUnicode 0xE0B0] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : spiro-outline
+				corner (pwlNear + O) pwlTop
+				corner pwlNear pwlTop
+				corner pwlFar pwlMid
+				corner pwlNear pwlBot
+				corner (pwlNear + O) pwlBot
+
+		create-glyph [MangleName 'powerline/angleRight'] [MangleUnicode 0xE0B1] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			local fine : AdviceStroke 4
+			include : intersection
+				spiro-outline
+					corner (pwlNear - MosaicWidth) pwlTop
+					corner pwlNear pwlTop
+					corner pwlFar pwlMid
+					corner pwlNear pwlBot
+					corner (pwlNear - MosaicWidth) pwlBot
+				union
+					dispiro
+						widths.rhs fine
+						flat pwlNear pwlTop
+						curl pwlFar pwlMid
+					dispiro
+						widths.rhs fine
+						flat pwlFar pwlMid
+						curl pwlNear pwlBot
+
+		RotatedPowerline 'powerline/triangleLeft' 0xE0B2 'powerline/triangleRight'
+		RotatedPowerline 'powerline/angleLeft' 0xE0B3 'powerline/angleRight'
+
+		create-glyph [MangleName 'powerline/hemiCircleRight'] [MangleUnicode 0xE0B4] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : spiro-outline
+				corner (pwlNear + O) pwlTop
+				g4 pwlNear pwlTop
+				g4.down.mid pwlFar pwlMid
+				g4 pwlNear pwlBot
+				corner (pwlNear + O) pwlBot
+
+		create-glyph [MangleName 'powerline/arcRight'] [MangleUnicode 0xE0B5] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			local fine : AdviceStroke 4
+			include : dispiro
+				widths.rhs fine
+				corner (pwlNear + O) pwlTop [heading Rightward]
+				g4 pwlNear pwlTop [heading Rightward]
+				g4.down.mid pwlFar pwlMid [heading Downward]
+				g4 pwlNear pwlBot [heading Leftward]
+				corner (pwlNear + O) pwlBot  [heading Leftward]
+
+		RotatedPowerline 'powerline/hemiCircleLeft' 0xE0B6 'powerline/hemiCircleRight'
+		RotatedPowerline 'powerline/arcLeft' 0xE0B7 'powerline/arcRight'
+
+		create-glyph [MangleName 'powerline/underline'] [MangleUnicode 0xE0AE] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			local fine : AdviceStroke 4
+			include : HBar.b 0 MosaicWidth pwlBot
+
+		create-glyph [MangleName 'powerline/overline'] [MangleUnicode 0xE0AF] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			local fine : AdviceStroke 4
+			include : HBar.t 0 MosaicWidth pwlTop
+
+		create-glyph [MangleName 'powerline/cornerBottomLeft'] [MangleUnicode 0xE0B8] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : spiro-outline
+				corner (pwlNear + O) pwlTop
+				corner pwlNear pwlTop
+				corner pwlFar pwlBot
+				corner (pwlNear + O) pwlBot
+
+		create-glyph [MangleName 'powerline/slashBottomLeft'] [MangleUnicode 0xE0B9] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			local fine : AdviceStroke 4
+			include : dispiro
+				widths.rhs fine
+				flat pwlNear pwlTop
+				curl pwlFar pwlBot
+
+		create-glyph [MangleName 'powerline/cornerTopLeft'] [MangleUnicode 0xE0BC] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : spiro-outline
+				corner (pwlNear + O) pwlTop
+				corner pwlNear pwlTop
+				corner pwlFar pwlTop
+				corner (pwlNear + O) pwlBot
+
+		create-glyph [MangleName 'powerline/slashTopLeft'] [MangleUnicode 0xE0BD] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			local fine : AdviceStroke 4
+			include : dispiro
+				widths.rhs fine
+				flat pwlNear pwlBot
+				curl pwlFar pwlTop
+
+		RotatedPowerline 'powerline/cornerBottomRight' 0xE0BA 'powerline/cornerTopLeft'
+		RotatedPowerline 'powerline/slashBottomRight' 0xE0BB 'powerline/slashTopLeft'
+		RotatedPowerline 'powerline/cornerTopRight' 0xE0BE 'powerline/cornerBottomLeft'
+		RotatedPowerline 'powerline/slashTopRight' 0xE0BF 'powerline/slashBottomLeft'
+
+
+		Gr.linkSingleGlyphPairGr glyphStore [MangleName 'blackTriangleRB'] [MangleName 'powerline/cornerBottomRight'] Gr.MosaicForm
+		Gr.linkSingleGlyphPairGr glyphStore [MangleName 'blackTriangleLB'] [MangleName 'powerline/cornerBottomLeft']  Gr.MosaicForm
+		Gr.linkSingleGlyphPairGr glyphStore [MangleName 'blackTriangleLT'] [MangleName 'powerline/cornerTopLeft']     Gr.MosaicForm
+		Gr.linkSingleGlyphPairGr glyphStore [MangleName 'blackTriangleRT'] [MangleName 'powerline/cornerTopRight']    Gr.MosaicForm

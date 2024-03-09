@@ -35,7 +35,7 @@ export default async function processPackageList(argv, dirs) {
 			ttcCells = [
 				`<td><b><a href="${sTtcLink}">Super\u00A0TTC</b></td>`,
 				`<td><b><a href="${ttcLink}">TTC</b></td>`,
-				`<td colspan="2">&nbsp;</td>`
+				`<td colspan="2">&nbsp;</td>`,
 			];
 		}
 
@@ -43,7 +43,7 @@ export default async function processPackageList(argv, dirs) {
 			`<tr>`,
 			`<td colspan="3"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
 			...ttcCells,
-			`</tr>`
+			`</tr>`,
 		);
 		md.log(
 			`<tr>`,
@@ -51,7 +51,7 @@ export default async function processPackageList(argv, dirs) {
 			`<td><b>Spacing</b></td>`,
 			`<td><b>Ligatures</b></td>`,
 			`<td colspan="4"><b>Downloads</b></td>`,
-			`</tr>`
+			`</tr>`,
 		);
 		let lastSubGroupID = null;
 		for (const [subGroupID, subGr] of Object.entries(gr.subGroups)) {
@@ -78,7 +78,7 @@ export default async function processPackageList(argv, dirs) {
 					`(${createLink("Unhinted", "PkgTTF-Unhinted")})</td>`,
 				`<td>${createLink("WebFont", "PkgWebFont")}&nbsp;` +
 					`(${createLink("Unhinted", "PkgWebFont-Unhinted")})</td>`,
-				`</tr>`
+				`</tr>`,
 			);
 		}
 		md.log(`<tr>`, `<td colspan="8">${img}</td>`, `</tr>`);
@@ -98,7 +98,7 @@ const Spacings = {
 	type: ["Default", true],
 	term: ["Terminal", true],
 	fixed: ["Fixed", false],
-	"quasi-proportional": ["Default", false]
+	"quasi-proportional": ["Default", false],
 };
 function flag(f) {
 	return f ? "<b>Yes</b>" : "No";

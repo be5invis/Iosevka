@@ -14,7 +14,7 @@ export default (function (args) {
 		[-(1 / 4), "Iosevka", "oblique"],
 		[+(1 / 4), "Iosevka Slab", "oblique"],
 		[-(1 / 4), "Iosevka", "italic"],
-		[+(1 / 4), "Iosevka Slab", "italic"]
+		[+(1 / 4), "Iosevka Slab", "italic"],
 	];
 	const weights = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 	let frames = [];
@@ -35,10 +35,10 @@ export default (function (args) {
 						"font-weight": weight,
 						"font-style": slope,
 						"font-size": EM,
-						color: theme.body
+						color: theme.body,
 					},
-					"Mag"
-				]
+					"Mag",
+				],
 			});
 		}
 	}
@@ -57,10 +57,10 @@ export default (function (args) {
 				"font-weight": 100,
 				"font-style": "normal",
 				"font-size": 3 * EM,
-				color: theme.sigil
+				color: theme.sigil,
 			},
-			"\uEF10"
-		]
+			"\uEF10",
+		],
 	});
 
 	return { width: canvasWidth, height: canvasHeight + sigilHeight, frames };

@@ -1,0 +1,538 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Mosaic-Box-Drawing : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	for-width-kinds WideWidth4
+
+		define top     fontMetrics.os2.sTypoAscender
+		define bottom  fontMetrics.os2.sTypoDescender
+		define left    0
+		define right   MosaicWidth
+
+		local light : AdviceStroke 3.5
+		local heavy : Math.max (light * 2) (Width * 0.15)
+		local midx : mix left right 0.5
+		local midy : mix bottom top 0.5
+
+		define [hline unicode pos] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				local posy : mix (bottom + light / 2) (top - light / 2) pos
+				include : HBar.m left right posy light
+
+		define [vline unicode pos] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				local posx : mix (left + light / 2) (right - light / 2) pos
+				include : VBar.m posx bottom top light
+
+		# Scan Lines
+		vline 0x23B8 0
+		vline 0x23B9 1
+		hline 0x23BA 1
+		hline 0x23BB (3 / 4)
+		hline 0x23BC (1 / 4)
+		hline 0x23BD 0
+
+		create-glyph [MangleName : NameUni 0x1CC1B] [MangleUnicode 0x1CC1B] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.m left right midy light
+			include : VBar.r right midy top light
+
+		create-glyph [MangleName : NameUni 0x1CC1C] [MangleUnicode 0x1CC1C] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.m left right midy light
+			include : VBar.r right bottom midy light
+
+		create-glyph [MangleName : NameUni 0x1CC1D] [MangleUnicode 0x1CC1D] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.t left right top light
+			include : VBar.l left (midy - 0.5 * light) top light
+
+		create-glyph [MangleName : NameUni 0x1CC1E] [MangleUnicode 0x1CC1E] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.b left right bottom light
+			include : VBar.l left bottom (midy + 0.5 * light) light
+
+		# Split Dashed Lines
+		create-glyph [MangleName : NameUni 0x1CE0D] [MangleUnicode 0x1CE0D] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.m left [mix left right (1 / 3)] midy light
+			include : HBar.m [mix left right (2 / 3)] right midy light
+
+		create-glyph [MangleName : NameUni 0x1CE0E] [MangleUnicode 0x1CE0E] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.m [mix left right (1 / 3)] [mix left right (2 / 3)] midy light
+
+		define [hlinetick unicode a b c] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : HBar.m left right midy light
+				local tickbot : mix bottom midy 0.5
+				local ticktop midy
+				if a : include : VBar.r [mix left right (1 / 3)] tickbot ticktop light
+				if b : include : VBar.r [mix left right (2 / 3)] tickbot ticktop light
+				if c : include : VBar.r           right          tickbot ticktop light
+
+		define [vlinetick unicode a b c d rev] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : VBar.m midx [if d bottom bottom] [if c top top] light
+				local tickleft : if rev midx left
+				local tickright : if rev right midx
+				if a : include : HBar.t tickleft tickright [mix bottom top (1 / 3)] light
+				if b : include : HBar.t tickleft tickright [mix bottom top (2 / 3)] light
+				if c : include : HBar.t tickleft tickright top light
+				if d : include : HBar.b tickleft tickright bottom light
+
+		# Box Drawing with Ticks
+		hlinetick 0x1CE0F 0 0 1
+		hlinetick 0x1CE10 0 1 0
+		hlinetick 0x1CE11 1 0 1
+		hlinetick 0x1CE12 1 1 1
+		vlinetick 0x1CE13 0 1 0 0 0
+		vlinetick 0x1CE14 1 0 1 0 0
+		vlinetick 0x1CE15 1 1 1 0 0
+		vlinetick 0x1CE16 0 0 1 0 1
+		vlinetick 0x1CE17 0 0 0 1 1
+		vlinetick 0x1CE18 0 0 1 0 0
+		vlinetick 0x1CE19 0 0 0 1 0
+
+		create-glyph [MangleName : NameUni 0x1CC90] [MangleUnicode 0x1CC90] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.m midx bottom top light
+			local tickleft : mix left right (1 / 4)
+			local tickright : mix left right (3 / 4)
+			foreach i [range 0 4] : begin
+				include : HBar.t tickleft tickright [mix bottom top ((i + 1) / 4)] light
+
+		create-glyph [MangleName : NameUni 0x1CC91] [MangleUnicode 0x1CC91] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.m left right midy light
+			local tickbot : mix bottom midy 0.75
+			local ticktop : mix midy top 0.25
+			foreach i [range 0 4] : begin
+				include : VBar.l [mix left right (i / 4)] tickbot ticktop light
+
+		create-glyph [MangleName : NameUni 0x1CC05] [MangleUnicode 0x1CC05] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.m [mix left right (6.5 / 8)] bottom [mix bottom top (3 / 8)] light
+			include : HBar.m left right [mix bottom top (1.5 / 8)] light
+
+		create-glyph [MangleName : NameUni 0x1CC06] [MangleUnicode 0x1CC06] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.m [mix left right (6.5 / 8)] bottom top light
+			include : HBar.m [mix left right (5 / 8)] right [mix bottom top (1.5 / 8)] light
+
+		create-glyph [MangleName : NameUni 0x1CC07] [MangleUnicode 0x1CC07] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.m [mix left right (6.5 / 8)] bottom top light
+			include : HBar.m left right [mix bottom top (1.5 / 8)] light
+
+		define [boxdraw unicode u d l r] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				local stopH : [Math.max u d] / 2
+				local stopV : [Math.max l r] / 2
+				if l : include : HBar.m left (midx + stopH) midy l
+				if r : include : HBar.m (midx - stopH) right midy r
+				if d : include : VBar.m midx bottom (midy + stopV) d
+				if u : include : VBar.m midx (midy - stopV) top u
+
+		define [dlboxdraw unicode u d l r] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				local stopH : [Math.max u d] - light * 1 - [HSwToV : 0.5 * light]
+				local stopV : [Math.max l r] - light * 1.5
+				local capH  : [Math.max u d] - light * 1
+				local capV  : [Math.max l r] - light * 1
+				if l : begin
+					include : HBar.m left (midx - stopH) (midy + (l - light)) light
+					if (l > light) : include : HBar.m left (midx - stopH) (midy - (l - light)) light
+				if r : begin
+					include : HBar.m (midx + stopH) right (midy + (r - light)) light
+					if (r > light) : include : HBar.m (midx + stopH) right (midy - (r - light)) light
+				if d : begin
+					include : VBar.m (midx + (d - light)) bottom (midy - stopV) light
+					if (d > light) : include : VBar.m (midx - (d - light)) bottom (midy - stopV) light
+				if u : begin
+					include : VBar.m (midx + (u - light)) (midy + stopV) top light
+					if (u > light) : include : VBar.m (midx - (u - light)) (midy + stopV) top light
+				if (stopH > 0 && [not u]) : include : HBar.m (midx - stopH - [HSwToV light]) (midx + stopH + [HSwToV light]) (midy + capV) light
+				if (stopH > 0 && [not d]) : include : HBar.m (midx - stopH - [HSwToV light]) (midx + stopH + [HSwToV light]) (midy - capV) light
+				if (stopV > 0 && [not l]) : include : VBar.m (midx - capH) (midy - stopV - light) (midy + stopV + light) light
+				if (stopV > 0 && [not r]) : include : VBar.m (midx + capH) (midy - stopV - light) (midy + stopV + light) light
+
+		define [complexBoxDraw unicodeStart U D L R fn dl] : begin
+			local order {
+				{light light light light}
+				{light light heavy light}
+				{light light light heavy}
+				{light light heavy heavy}
+				{heavy light light light}
+				{light heavy light light}
+				{heavy heavy light light}
+				{heavy light heavy light}
+				{heavy light light heavy}
+				{light heavy heavy light}
+				{light heavy light heavy}
+				{heavy light heavy heavy}
+				{light heavy heavy heavy}
+				{heavy heavy heavy light}
+				{heavy heavy light heavy}
+				{heavy heavy heavy heavy}
+			}
+			local existings {}
+			local n 0
+			foreach {u d l r} [items-of order] : begin
+				local newcome true
+				local masked {(U * u) (D * d) (L * l) (R * r)}
+				foreach existing [items-of existings] : if ('' + existing === '' + masked) : set newcome false
+				if newcome : begin
+					if ([not dl]
+						||  ([not masked.0] || [not masked.1] || (masked.0 === masked.1))
+						&& ([not masked.2] || [not masked.3] || (masked.2 === masked.3))
+						&& (masked.0 > light || masked.1 > light || masked.2 > light || masked.3 > light)
+					) : begin
+						[fallback fn boxdraw].apply null {(unicodeStart + n) :: masked}
+						inc n
+					existings.push masked
+
+		# Straight
+		boxdraw 0x2500 0 0 light light
+		boxdraw 0x2501 0 0 heavy heavy
+		boxdraw 0x2502 light light 0 0
+		boxdraw 0x2503 heavy heavy 0 0
+		boxdraw 0x2574 0 0 light 0
+		boxdraw 0x2575 light 0 0 0
+		boxdraw 0x2576 0 0 0 light
+		boxdraw 0x2577 0 light 0 0
+		boxdraw 0x2578 0 0 heavy 0
+		boxdraw 0x2579 heavy 0 0 0
+		boxdraw 0x257A 0 0 0 heavy
+		boxdraw 0x257B 0 heavy 0 0
+		boxdraw 0x257C 0 0 light heavy
+		boxdraw 0x257D light heavy 0 0
+		boxdraw 0x257E 0 0 heavy light
+		boxdraw 0x257F heavy light 0 0
+		dlboxdraw 0x2550 0 0 heavy heavy
+		dlboxdraw 0x2551 heavy heavy 0 0
+
+		# Complex
+		complexBoxDraw 0x250C 0 1 0 1
+		complexBoxDraw 0x2510 0 1 1 0
+		complexBoxDraw 0x2514 1 0 0 1
+		complexBoxDraw 0x2518 1 0 1 0
+		complexBoxDraw 0x251C 1 1 0 1
+		complexBoxDraw 0x2524 1 1 1 0
+		complexBoxDraw 0x252C 0 1 1 1
+		complexBoxDraw 0x2534 1 0 1 1
+		complexBoxDraw 0x253C 1 1 1 1
+		complexBoxDraw 0x2552 0 1 0 1 dlboxdraw 1
+		complexBoxDraw 0x2555 0 1 1 0 dlboxdraw 1
+		complexBoxDraw 0x2558 1 0 0 1 dlboxdraw 1
+		complexBoxDraw 0x255B 1 0 1 0 dlboxdraw 1
+		complexBoxDraw 0x255E 1 1 0 1 dlboxdraw 1
+		complexBoxDraw 0x2561 1 1 1 0 dlboxdraw 1
+		complexBoxDraw 0x2564 0 1 1 1 dlboxdraw 1
+		complexBoxDraw 0x2567 1 0 1 1 dlboxdraw 1
+		complexBoxDraw 0x256A 1 1 1 1 dlboxdraw 1
+
+		# Dashed
+		define [hDashed unicode segments weight] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				foreach j [range 0 segments] : include : HBar.m [mix (MosaicWidth * j / segments) (MosaicWidth * (j + 1) / segments) 0.2] [mix (MosaicWidth * j / segments) (MosaicWidth * (j + 1) / segments) 0.8] midy weight
+
+		define [vDashed unicode segments weight] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				foreach j [range 0 segments] : include : VBar.m
+					begin midx
+					mix [mix bottom top (j / segments)] [mix bottom top ((j + 1) / segments)] 0.2
+					mix [mix bottom top (j / segments)] [mix bottom top ((j + 1) / segments)] 0.8
+					begin weight
+
+		hDashed 0x2504 3 light
+		hDashed 0x2505 3 heavy
+		hDashed 0x2508 4 light
+		hDashed 0x2509 4 heavy
+		hDashed 0x254C 2 light
+		hDashed 0x254D 2 heavy
+		vDashed 0x2506 3 light
+		vDashed 0x2507 3 heavy
+		vDashed 0x250A 4 light
+		vDashed 0x250B 4 heavy
+		vDashed 0x254E 2 light
+		vDashed 0x254F 2 heavy
+
+		# Arcs
+		local bdArcRadius : Math.min (midx + O * 2) ((midy - bottom) / 2)
+		create-glyph [MangleName : NameUni 0x256D] [MangleUnicode 0x256D] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : dispiro
+				widths.center light
+				flat midx bottom               [heading Upward]
+				curl midx (midy - bdArcRadius) [heading Upward]
+				arcvh
+				flat (midx + bdArcRadius) midy [heading Rightward]
+				curl right midy          [heading Rightward]
+
+		create-glyph [MangleName : NameUni 0x256E] [MangleUnicode 0x256E] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : dispiro
+				widths.center light
+				flat midx bottom               [heading Upward]
+				curl midx (midy - bdArcRadius) [heading Upward]
+				arcvh
+				flat (midx - bdArcRadius) midy [heading Leftward]
+				curl left midy                    [heading Leftward]
+
+		create-glyph [MangleName : NameUni 0x256F] [MangleUnicode 0x256F] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : dispiro
+				widths.center light
+				flat midx top                  [heading Downward]
+				curl midx (midy + bdArcRadius) [heading Downward]
+				arcvh
+				flat (midx - bdArcRadius) midy [heading Leftward]
+				curl left midy                    [heading Leftward]
+
+		create-glyph [MangleName : NameUni 0x2570] [MangleUnicode 0x2570] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : dispiro
+				widths.center light
+				flat midx top                  [heading Downward]
+				curl midx (midy + bdArcRadius) [heading Downward]
+				arcvh
+				flat (midx + bdArcRadius) midy [heading Rightward]
+				curl right midy          [heading Rightward]
+
+		# Corner Diagonals
+		create-glyph [MangleName : NameUni 0x2571] [MangleUnicode 0x2571] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : dispiro
+				widths.center light
+				flat right top
+				curl left bottom
+
+		create-glyph [MangleName : NameUni 0x2572] [MangleUnicode 0x2572] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : dispiro
+				widths.center light
+				flat left top
+				curl right bottom
+
+		create-glyph [MangleName : NameUni 0x2573] [MangleUnicode 0x2573] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName : NameUni 0x2571
+			include : refer-glyph : MangleName : NameUni 0x2572
+
+		create-glyph [MangleName : NameUni 0x1FBD8] [MangleUnicode 0x1FBD8] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : intersection [MaskRight midx] : refer-glyph : MangleName : NameUni 0x2571
+			include : intersection [MaskLeft midx] : refer-glyph : MangleName : NameUni 0x2572
+
+		create-glyph [MangleName : NameUni 0x1FBD9] [MangleUnicode 0x1FBD9] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : intersection [MaskAbove midy] : refer-glyph : MangleName : NameUni 0x2571
+			include : intersection [MaskBelow midy] : refer-glyph : MangleName : NameUni 0x2572
+
+		create-glyph [MangleName : NameUni 0x1FBDA] [MangleUnicode 0x1FBDA] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : intersection [MaskLeft midx] : refer-glyph : MangleName : NameUni 0x2571
+			include : intersection [MaskRight midx] : refer-glyph : MangleName : NameUni 0x2572
+
+		create-glyph [MangleName : NameUni 0x1FBDB] [MangleUnicode 0x1FBDB] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : intersection [MaskBelow midy] : refer-glyph : MangleName : NameUni 0x2571
+			include : intersection [MaskAbove midy] : refer-glyph : MangleName : NameUni 0x2572
+
+		# Diamond
+		define [DiamondBarRaw hStart vStart hEnd vEnd] : begin
+			define zStartX : mix left right hStart
+			define zStartY : mix bottom top vStart
+			define zEndX   : mix left right hEnd
+			define zEndY   : mix bottom top vEnd
+			return : dispiro
+				widths.center light
+				corner [mix zStartX zEndX (-1)] [mix zStartY zEndY (-1)]
+				corner [mix zStartX zEndX (+2)] [mix zStartY zEndY (+2)]
+
+		define [DiamondMask] : spiro-outline
+			corner [mix left right 0] [mix bottom top 0]
+			corner [mix left right 0] [mix bottom top 1]
+			corner [mix left right 1] [mix bottom top 1]
+			corner [mix left right 1] [mix bottom top 0]
+
+		define [DiamondBoxDrawing unicode a b c d] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				local candidates {}
+				if a : candidates.push [DiamondBarRaw 0.5 1  0 0.5]
+				if b : candidates.push [DiamondBarRaw 1 0.5  0.5 1]
+				if c : candidates.push [DiamondBarRaw 0 0.5  0.5 0]
+				if d : candidates.push [DiamondBarRaw 0.5 0  1 0.5]
+
+				set-width MosaicWidth
+				include : ForceUpright
+				include : intersection
+					DiamondMask
+					union.apply null candidates
+
+		DiamondBoxDrawing 0x1FBA0 1 0 0 0
+		DiamondBoxDrawing 0x1FBA1 0 1 0 0
+		DiamondBoxDrawing 0x1FBA2 0 0 1 0
+		DiamondBoxDrawing 0x1FBA3 0 0 0 1
+		DiamondBoxDrawing 0x1FBA4 1 0 1 0
+		DiamondBoxDrawing 0x1FBA5 0 1 0 1
+		DiamondBoxDrawing 0x1FBA6 0 0 1 1
+		DiamondBoxDrawing 0x1FBA7 1 1 0 0
+		DiamondBoxDrawing 0x1FBA8 1 0 0 1
+		DiamondBoxDrawing 0x1FBA9 0 1 1 0
+		DiamondBoxDrawing 0x1FBAA 0 1 1 1
+		DiamondBoxDrawing 0x1FBAB 1 0 1 1
+		DiamondBoxDrawing 0x1FBAC 1 1 0 1
+		DiamondBoxDrawing 0x1FBAD 1 1 1 0
+		DiamondBoxDrawing 0x1FBAE 1 1 1 1
+
+		create-glyph [MangleName : NameUni 0x1CE09] [MangleUnicode 0x1CE09] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName : NameUni 0x1FBA7
+			include : refer-glyph : MangleName : NameUni 0x1FBDA
+
+		create-glyph [MangleName : NameUni 0x1CE0A] [MangleUnicode 0x1CE0A] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName : NameUni 0x1FBA6
+			include : refer-glyph : MangleName : NameUni 0x1FBD8
+
+		# Corner-to-Edge Diagonal
+		define [VDiagonal unicode sx sy] : begin
+			local fUpwards : sy === bottom
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : intersection
+					if fUpwards [MaskBelow top] [MaskAbove bottom]
+					dispiro
+						widths.center light
+						flat sx sy
+						curl [mix sx midx 1.5] [mix sy [if fUpwards top bottom] 1.5]
+
+		define [HDiagonal unicode sx sy] : begin
+			local fRightwards : sx === left
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : intersection
+					if fRightwards [MaskLeft right] [MaskRight left]
+					dispiro
+						widths.center light
+						flat sx sy
+						curl [mix sx [if fRightwards right left] 1.5] [mix sy midy 1.5]
+
+		HDiagonal 0x1FBD0 left bottom
+		HDiagonal 0x1FBD1 right top
+		HDiagonal 0x1FBD2 left top
+		HDiagonal 0x1FBD3 right bottom
+		VDiagonal 0x1FBD4 left top
+		VDiagonal 0x1FBD5 right bottom
+		VDiagonal 0x1FBD6 right top
+		VDiagonal 0x1FBD7 left bottom
+
+		create-glyph [MangleName : NameUni 0x1FBDC] [MangleUnicode 0x1FBDC] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName : NameUni 0x1FBD4
+			include : refer-glyph : MangleName : NameUni 0x1FBD6
+
+		create-glyph [MangleName : NameUni 0x1FBDD] [MangleUnicode 0x1FBDD] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName : NameUni 0x1FBD1
+			include : refer-glyph : MangleName : NameUni 0x1FBD3
+
+		create-glyph [MangleName : NameUni 0x1FBDE] [MangleUnicode 0x1FBDE] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName : NameUni 0x1FBD5
+			include : refer-glyph : MangleName : NameUni 0x1FBD7
+
+		create-glyph [MangleName : NameUni 0x1FBDF] [MangleUnicode 0x1FBDF] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName : NameUni 0x1FBD0
+			include : refer-glyph : MangleName : NameUni 0x1FBD2
+
+		# Double Diagonals
+		create-glyph [MangleName : NameUni 0x1CC1F] [MangleUnicode 0x1CC1F] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			define offset : (top - bottom) / 4
+			include : intersection [DiamondMask] : union
+				dispiro
+					widths.center light
+					flat right (top + offset)
+					curl [mix right left 1.5] ([mix top bottom 1.5] + offset)
+				dispiro
+					widths.center light
+					flat [mix left right 1.5] ([mix bottom top 1.5] - offset)
+					curl left (bottom - offset)
+
+		create-glyph [MangleName : NameUni 0x1CC20] [MangleUnicode 0x1CC20] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			define offset : (top - bottom) / 4
+			include : intersection [DiamondMask] : union
+				dispiro
+					widths.center light
+					flat left (top + offset)
+					curl [mix left right 1.5] ([mix top bottom 1.5] + offset)
+				dispiro
+					widths.center light
+					flat [mix right left 1.5] ([mix bottom top 1.5] - offset)
+					curl right (bottom - offset)
+
+		create-glyph [MangleName : NameUni 0x1FBAF] [MangleUnicode 0x1FBAF] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : intersection
+				glyph-proc : include : refer-glyph : MangleName : NameUni 0x253C
+				Rect [mix bottom top 0.35] [mix bottom top 0.65] 0 MosaicWidth

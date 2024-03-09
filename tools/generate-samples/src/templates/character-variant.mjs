@@ -20,14 +20,14 @@ export default (function (args) {
 					{ "font-style": slope },
 					{ "font-feature-settings": { ...args.fontFeatures, dlig: 1 } },
 					{ color: theme.body },
-					ch
-				]
+					ch,
+				],
 			});
 		}
 	}
 	return {
 		width: unitWidth * frames.length,
 		height: 160,
-		frames
+		frames,
 	};
 });

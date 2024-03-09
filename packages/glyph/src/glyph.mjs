@@ -118,7 +118,7 @@ export class Glyph {
 			this.includeGeometry(new Geom.ReferenceGeometry(g, shiftX, shiftY));
 		} else {
 			this.includeGeometry(
-				new Geom.TransformedGeometry(g.geometry, Transform.Translate(shiftX, shiftY))
+				new Geom.TransformedGeometry(g.geometry, Transform.Translate(shiftX, shiftY)),
 			);
 		}
 	}
@@ -172,7 +172,7 @@ export class Glyph {
 					const baseDerived = g.baseAnchors[m2];
 					this.baseAnchors[m2] = new Anchor(
 						shift.x + baseDerived.x,
-						shift.y + baseDerived.y
+						shift.y + baseDerived.y,
 					);
 				}
 			}

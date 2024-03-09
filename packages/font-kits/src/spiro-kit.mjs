@@ -1,9 +1,9 @@
 import { DiSpiroGeometry, SpiroGeometry } from "@iosevka/geometry";
 import {
 	BiKnotCollector,
-	ControlKnot,
+	UserControlKnot,
 	Interpolator,
-	TerminateInstruction
+	TerminateInstruction,
 } from "@iosevka/geometry/spiro-control";
 import { bez3, fallback, mix } from "@iosevka/util";
 
@@ -44,7 +44,11 @@ class SpiroOutlineImpl extends SpiroImplBase {
 	applyToGlyph(glyph) {
 		const { gizmo, collector } = this.createCollector(glyph);
 		return glyph.includeGeometry(
-			new SpiroGeometry(gizmo, collector.closed, collector.controls)
+			new SpiroGeometry(
+				gizmo,
+				collector.closed,
+				collector.controls.map(k => k.toMono()),
+			),
 		);
 	}
 }
@@ -54,7 +58,7 @@ class DiSpiroProxy {
 			gizmo,
 			collector.contrast,
 			collector.closed,
-			collector.controls
+			collector.controls,
 		);
 		this.m_origKnots = collector.controls;
 	}
@@ -75,7 +79,7 @@ export function SetupBuilders(bindings) {
 		return (x, y, f) => {
 			if (!isFinite(x)) throw new TypeError("NaN detected for X");
 			if (!isFinite(y)) throw new TypeError("NaN detected for Y");
-			return new ControlKnot(type, x, y, f);
+			return new UserControlKnot(type, x, y, f);
 		};
 	}
 	const g4 = KnotType("g4");
@@ -91,18 +95,18 @@ export function SetupBuilders(bindings) {
 			{ name: "up", x: 0, y: 1 },
 			{ name: "down", x: 0, y: -1 },
 			{ name: "left", x: -1, y: 0 },
-			{ name: "right", x: 1, y: 0 }
+			{ name: "right", x: 1, y: 0 },
 		];
 		let adhesions = [
 			{ name: "start", l: 0, r: 0.01 },
 			{ name: "mid", l: -0.005, r: 0.005 },
-			{ name: "end", l: -0.01, r: 0 }
+			{ name: "end", l: -0.01, r: 0 },
 		];
 		let knotTypes = [
 			[g4, g4, g4],
 			[g2, g2, g2],
 			[corner, corner, corner],
-			[straight, flat, curl]
+			[straight, flat, curl],
 		];
 		for (const [sink, kl, kr] of knotTypes) {
 			for (const d of directions) {
@@ -110,7 +114,7 @@ export function SetupBuilders(bindings) {
 				for (const a of adhesions) {
 					sink[d.name][a.name] = (x, y, af) => [
 						kl(x + d.x * a.l, y + d.y * a.l, af),
-						kr(x + d.x * a.r, y + d.y * a.r, af)
+						kr(x + d.x * a.r, y + d.y * a.r, af),
 					];
 					sink[d.name][a.name].l = (x, y, af) => kl(x + d.x * a.l, y + d.y * a.l, af);
 					sink[d.name][a.name].r = (x, y, af) => kr(x + d.x * a.r, y + d.y * a.r, af);
@@ -206,21 +210,21 @@ export function SetupBuilders(bindings) {
 		return g4(
 			mix(before.x, after.x, args.rx),
 			mix(before.y, after.y, args.ry),
-			fallback(args.raf, unimportant)
+			fallback(args.raf, unimportant),
 		);
 	}
 	function afInterpolateDelta(before, after, args) {
 		return g4(
 			mix(before.x, after.x, args.rx) + args.deltaX,
 			mix(before.y, after.y, args.ry) + args.deltaY,
-			fallback(args.raf, unimportant)
+			fallback(args.raf, unimportant),
 		);
 	}
 	function afInterpolateG2(before, after, args) {
 		return g2(
 			mix(before.x, after.x, args.rx),
 			mix(before.y, after.y, args.ry),
-			fallback(args.raf, unimportant)
+			fallback(args.raf, unimportant),
 		);
 	}
 	function afInterpolateThem(before, after, args) {
@@ -233,9 +237,9 @@ export function SetupBuilders(bindings) {
 					args.raf && args.raf.blend && rt !== void 0
 						? args.raf.blend(rt)
 						: args.raf
-						  ? args.raf
-						  : unimportant
-				)
+							? args.raf
+							: unimportant,
+				),
 			);
 		}
 		return innerKnots;
@@ -250,9 +254,9 @@ export function SetupBuilders(bindings) {
 					args.raf && args.raf.blend && rt !== void 0
 						? args.raf.blend(rt)
 						: args.raf
-						  ? args.raf
-						  : unimportant
-				)
+							? args.raf
+							: unimportant,
+				),
 			);
 		}
 		return innerKnots;
@@ -264,8 +268,8 @@ export function SetupBuilders(bindings) {
 				fallback(args.ty, g2)(
 					mix(before.x, after.x, args.raf.rx(rt)) + args.raf.deltaX(rt),
 					mix(before.y, after.y, args.raf.ry(rt)) + args.raf.deltaY(rt),
-					args.raf.modifier(rt)
-				)
+					args.raf.modifier(rt),
+				),
 			);
 		}
 		return innerKnots;
@@ -296,7 +300,7 @@ export function SetupBuilders(bindings) {
 			rs.push([
 				bez3(0, x1, x2, 1, j / samples),
 				bez3(0, y1, y2, 1, j / samples),
-				j / samples
+				j / samples,
 			]);
 		return alsoThruThem(rs, raf);
 	}
@@ -310,7 +314,7 @@ export function SetupBuilders(bindings) {
 			mix(1, x1, 2 / 3),
 			mix(1, y1, 2 / 3),
 			fallback(_samples, 3),
-			raf
+			raf,
 		);
 	}
 
@@ -428,6 +432,6 @@ export function SetupBuilders(bindings) {
 		arcvh,
 		dispiro,
 		"spiro-outline": spiroOutline,
-		CursiveBuilder
+		CursiveBuilder,
 	};
 }
