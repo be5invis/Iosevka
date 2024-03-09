@@ -257,13 +257,6 @@ glyph-block AutoBuild-Enclosure : begin
 				set a.shape.slopeAngle : mix (para.slopeAngle || 0) 15 (95 / 150)
 			return : StandardSpacing.getPara pp1 digits rows width
 
-	define SansSerifSpacing : object
-		gniPrefix 'ss'
-		getPara : function [pp digits rows width] : begin
-			define pp1 : pp.createFork : function [a] : begin
-				set a.shape.serifs 'sans'
-			return : StandardSpacing.getPara pp1 digits rows width
-
 	define [EnclosureT prefix builder spacing digits rows demands fnEnclosure] : begin
 		foreach {suffix ww gap} [items-of circleWidthClasses] : do
 			define allowProportional : if (digits > 1) MONOSPACE-ONLY ALLOW-PROPORTIONAL
@@ -331,8 +324,6 @@ glyph-block AutoBuild-Enclosure : begin
 		EnclosureT "circle-slashed" CircledBuilder StandardSpacing digits 1 demands BackslashCircleEnclosureShape
 	define [createItalicCircledGlyphs digits demands]
 		EnclosureT "circle-italic" CircledBuilder ItalicSpacing digits 1 demands CircleEnclosureShape
-	define [createSansSerifCircledGlyphs digits demands]
-		EnclosureT "circle-ss" CircledBuilder SansSerifSpacing digits 1 demands CircleEnclosureShape
 	define [CircleEnclosureShape digits ww gap] : glyph-proc
 		define [object width sw top bot left right archDepthA archDepthB] : circleDimens digits ww
 		set-width width
@@ -393,8 +384,6 @@ glyph-block AutoBuild-Enclosure : begin
 
 	define [createInsetCircledGlyphs digits demands]
 		EnclosureT 'inset-circle' InsetBuilder StandardSpacing digits 1 demands InsetCircleEnclosureShape
-	define [createInsetSansSerifCircledGlyphs digits demands]
-		EnclosureT 'inset-circle-ss' InsetBuilder SansSerifSpacing digits 1 demands InsetCircleEnclosureShape
 	define [InsetCircleEnclosureShape digits ww gap] : glyph-proc
 		define [object width sw top bot left right archDepthA archDepthB] : circleDimens digits ww
 		set-width width
@@ -629,8 +618,7 @@ glyph-block AutoBuild-Enclosure : begin
 		return names
 
 	define [digitNoSuffix d] : return ''
-	define [digitSansSerifSuffix d] : if (d == 1 || d == 7) '/sansSerif' ''
-	define [digitHasSerif d] : SLAB && (d == 2 || d == 3 || d == 4 || d == 5)
+	define [digitSansSerifSuffix d] : if ((d >= 1 && d <= 5) || d == 7) '/sansSerif' ''
 
 	do "Single-digit circled"
 		local compositions : list
@@ -644,7 +632,7 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x1F10B {'zero.lnum'}               WideWidth1 # We don't have serifs for digit 0, so make an alias here
 			list 0x1F10D {'zero.lnum/forceSlashed'}  WideWidth2
 		foreach [j : range 1 till 9] : compositions.push : list (0x2460 + j - 1) [digitGlyphNames j] WideWidth1
-		foreach [j : range 1 till 9] : if [not : digitHasSerif j] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j digitSansSerifSuffix] WideWidth1
+		foreach [j : range 1 till 9] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j digitSansSerifSuffix] WideWidth1
 		foreach [j : range 0 26] : compositions.push {(0x24B6 + j) {[glyphStore.queryNameByUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		foreach [j : range 0 26] : compositions.push {(0x24D0 + j) {[glyphStore.queryNameByUnicode (['a'.charCodeAt 0] + j)]} WideWidth1 0.5 (XH/2)}
 		createCircledGlyphs 1 compositions
@@ -658,11 +646,6 @@ glyph-block AutoBuild-Enclosure : begin
 		createItalicCircledGlyphs 1 : list
 			list 0x1F12B {'C'} WideWidth1
 			list 0x1F12C {'R'} WideWidth1
-
-	do "Single-digit sans-serif circled"
-		local compositions : list
-		foreach [j : range 1 till 9] : if [digitHasSerif j] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j] WideWidth1
-		createSansSerifCircledGlyphs 1 compositions
 
 	do "Double-digit circled"
 		local compositions : list
@@ -681,14 +664,9 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x24FF  {'zero.lnum'} WideWidth1
 			list 0x1F10C {'zero.lnum'} WideWidth1 # We don't have serifs for digit 0, so make an alias here
 		foreach [j : range 1 till 9] : compositions.push : list (0x2776 + j - 1) [digitGlyphNames j] WideWidth1
-		foreach [j : range 1 till 9] : if [not : digitHasSerif j] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j digitSansSerifSuffix] WideWidth1
+		foreach [j : range 1 till 9] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j digitSansSerifSuffix] WideWidth1
 		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {[glyphStore.queryNameByUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createInsetCircledGlyphs 1 compositions
-
-	do "Single-digit inset sans-serif circled"
-		local compositions : list
-		foreach [j : range 1 till 9] : if [digitHasSerif j] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j] WideWidth1
-		createInsetSansSerifCircledGlyphs 1 compositions
 
 	do "Double-digit inset circled"
 		local compositions : list
