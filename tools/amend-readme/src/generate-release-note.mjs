@@ -46,7 +46,7 @@ export default async function main(argv) {
 			`<tr><td align="center">` +
 			`<a href="${baseUrl}/packages-sha.txt">Package hashes (SHA-256)</a>` +
 			`</td></tr>` +
-			`</table>`
+			`</table>`,
 	);
 	await fs.promises.writeFile(argv.outputPath, out.data);
 }

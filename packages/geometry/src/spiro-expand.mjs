@@ -34,7 +34,7 @@ export class SpiroExpander {
 				this.m_biKnotsT[j].type,
 				this.m_biKnotsT[j].unimportant,
 				mix(lhs.x, rhs.x, 0.5),
-				mix(lhs.y, rhs.y, 0.5)
+				mix(lhs.y, rhs.y, 0.5),
 			);
 		}
 		return middles;

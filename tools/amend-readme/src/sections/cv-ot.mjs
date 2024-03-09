@@ -19,7 +19,7 @@ export default async function processCvOt(argv, dirs) {
 		for (let rid = 0; rid < rowsNeeded; rid++) {
 			const entriesInThisRow = Math.min(
 				entriesPerRow,
-				effVariants.length - rid * entriesPerRow
+				effVariants.length - rid * entriesPerRow,
 			);
 			const tailBlankColumnsCount = TableColumns - entryWidth * entriesInThisRow;
 			// Image row

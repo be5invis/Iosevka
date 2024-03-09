@@ -20,13 +20,13 @@ export default (function (args) {
 					"font-family": "Iosevka",
 					"font-weight": weight,
 					"font-size": EM,
-					color: theme.body
+					color: theme.body,
 				},
 				[{ color: theme.title }, "float"],
 				" Fox.quick(h){ is_brown ",
 				[{ color: theme.stress }, "&&"],
-				" it_jumps_over(dogs.lazy); }"
-			]
+				" it_jumps_over(dogs.lazy); }",
+			],
 		});
 	}
 	return { width: canvasWidth, height: canvasHeight, frames };

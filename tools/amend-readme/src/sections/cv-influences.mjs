@@ -6,12 +6,12 @@ export default async function processCvInfluences(argv) {
 	const cl = await getCharMapAndSupportedLanguageList(
 		argv.charMapPath,
 		argv.charMapItalicPath,
-		argv.charMapObliquePath
+		argv.charMapObliquePath,
 	);
 
 	let m = {
 		upright: new Map(),
-		italic: new Map()
+		italic: new Map(),
 	};
 
 	for (const block of cl.unicodeCoverage) {

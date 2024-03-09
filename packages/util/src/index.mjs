@@ -69,7 +69,7 @@ export const SuffixCfg = {
 			if (pair) ans[pair.left] = pair.right;
 		}
 		return ans;
-	}
+	},
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ export const MatchUtil = {
 	},
 	either(a, b) {
 		return x => a(x) || b(x);
-	}
+	},
 };
 export function constant(x) {
 	return () => x;
@@ -136,5 +136,5 @@ export const ArrayUtil = {
 		}
 
 		return ranges;
-	}
+	},
 };

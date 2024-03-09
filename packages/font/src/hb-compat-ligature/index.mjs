@@ -46,8 +46,8 @@ export async function buildCompatLigatures(para, font) {
 			ligature.geometry.items.push(
 				new Ot.Glyph.TtReference(
 					glyphList.at(component.g),
-					Ot.Glyph.Transform2X3.Translate(x, y)
-				)
+					Ot.Glyph.Transform2X3.Translate(x, y),
+				),
 			);
 
 			xCursor += component.ax;

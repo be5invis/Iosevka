@@ -13,7 +13,7 @@ export const Dotless = {
 	},
 	amendName(name) {
 		return name + ".dotless";
-	}
+	},
 };
 
 export const LowerYDotAtBelow = LinkedGlyphProp("LowerYDotAtBelow");
@@ -27,9 +27,9 @@ export const LeaningMarkSpacer = LinkedGlyphProp("LeaningMarkSpacer");
 export const LocalizedForm = {
 	SRB: {
 		Upright: LinkedGlyphProp("SerbianLocUpright"),
-		Italic: LinkedGlyphProp("SerbianLocItalic")
+		Italic: LinkedGlyphProp("SerbianLocItalic"),
 	},
-	BGR: LinkedGlyphProp("BulgarianLoc")
+	BGR: LinkedGlyphProp("BulgarianLoc"),
 };
 
 export const Texture = {
@@ -38,7 +38,7 @@ export const Texture = {
 	ExtLR: LinkedGlyphProp("TextureExtLR"),
 	ShrL: LinkedGlyphProp("TextureShrL"),
 	ShrR: LinkedGlyphProp("TextureShrR"),
-	ShrLR: LinkedGlyphProp("TextureShrLR")
+	ShrLR: LinkedGlyphProp("TextureShrLR"),
 };
 
 function LinkedGlyphProp(key) {
@@ -58,7 +58,7 @@ function LinkedGlyphProp(key) {
 		},
 		amendOtName(name) {
 			return `${name}.${key}`;
-		}
+		},
 	};
 }
 
@@ -90,7 +90,7 @@ function DecompositionProp(key) {
 		},
 		amendOtName(baseName, index) {
 			return `${baseName}.d${index}`;
-		}
+		},
 	};
 }
 
@@ -103,7 +103,7 @@ export const TieGlyph = {
 		if (!glyph.related) glyph.related = {};
 		glyph.related.TieGlyph = true;
 		Joining.or(glyph, Joining.Classes.Mid);
-	}
+	},
 };
 
 function BoolProp(id) {
@@ -115,7 +115,7 @@ function BoolProp(id) {
 		set(glyph) {
 			if (!glyph.related) glyph.related = {};
 			glyph.related[id] = true;
-		}
+		},
 	};
 }
 export const Radical = BoolProp("Radical");
@@ -152,8 +152,8 @@ export const Joining = {
 	Classes: {
 		Left: 1,
 		Right: 2,
-		Mid: 3
-	}
+		Mid: 3,
+	},
 };
 
 export const HintClass = {
@@ -164,7 +164,7 @@ export const HintClass = {
 	set(glyph, script, style) {
 		if (!glyph.related) glyph.related = {};
 		glyph.related.hintClass = [script, style];
-	}
+	},
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ export const DotlessOrNot = {
 	query(glyph) {
 		if (Dotless.get(glyph)) return [Dotless];
 		return null;
-	}
+	},
 };
 
 export const AnyLocalizedForm = {
@@ -184,7 +184,7 @@ export const AnyLocalizedForm = {
 		if (LocalizedForm.BGR.get(glyph)) grs.push(LocalizedForm.BGR);
 		if (grs.length) return grs;
 		return null;
-	}
+	},
 };
 
 export const AnyCv = {
@@ -203,7 +203,7 @@ export const AnyCv = {
 		if (ua < ub) return -1;
 		if (ua > ub) return 1;
 		return a.rank - b.rank;
-	}
+	},
 };
 
 export const AnyDerivingCv = {
@@ -223,7 +223,7 @@ export const AnyDerivingCv = {
 			return glyph.related.preventCvDeriving.size > 0;
 		}
 		return false;
-	}
+	},
 };
 
 export const AnyCvOrCherryPicking = {
@@ -231,7 +231,7 @@ export const AnyCvOrCherryPicking = {
 		let ret = AnyCv.query(glyph);
 		if (Zero.get(glyph)) ret.push(Zero);
 		return ret;
-	}
+	},
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -370,9 +370,9 @@ function displayQueryPairFeatures(g, name, grCis, grTrans, sink) {
 			FeatureSeries(name, [
 				[
 					{ css: `'${grCis.otlTag}' 1`, description: grCis.description },
-					{ css: `'${grTrans.otlTag}' 1`, description: grTrans.description }
-				]
-			])
+					{ css: `'${grTrans.otlTag}' 1`, description: grTrans.description },
+				],
+			]),
 		);
 	}
 }
@@ -382,9 +382,9 @@ function displayQuerySingleFeature(g, grCis, sink) {
 			FeatureSeries(grCis.description, [
 				[
 					{ css: `'${grCis.otlTag}' 0`, description: grCis.description + " disabled" },
-					{ css: `'${grCis.otlTag}' 1`, description: grCis.description + " enabled" }
-				]
-			])
+					{ css: `'${grCis.otlTag}' 1`, description: grCis.description + " enabled" },
+				],
+			]),
 		);
 	}
 }
@@ -414,7 +414,7 @@ function queryCvFeatureTagsOf(sink, gid, glyph, tagSet) {
 
 		const featureApp = {
 			css: `'${gr.tag}' ${String(gr.rank).padStart(2)}`,
-			description: gr.description
+			description: gr.description,
 		};
 		if (!series.groups[gr.groupRank]) series.groups[gr.groupRank] = [];
 		series.groups[gr.groupRank].push(featureApp);
@@ -474,7 +474,7 @@ export const SvInheritableRelations = [
 	Joining,
 	NeqLigationSlashDotted,
 	OgonekTrY,
-	ScheduleLeaningMark
+	ScheduleLeaningMark,
 ];
 
 export const CvCherryPickingGrs = [Zero];

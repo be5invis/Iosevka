@@ -72,7 +72,7 @@ function sweepFeatures(table, accessibleLookupsIds) {
 		const featureFiltered = {
 			name: feature.name,
 			tag: feature.tag,
-			lookups: []
+			lookups: [],
 		};
 		for (const l of feature.lookups) {
 			if (accessibleLookupsIds.has(l)) featureFiltered.lookups.push(l);
@@ -242,7 +242,7 @@ function analyzeReferenceGraph(glyphStore, markedGlyphs) {
 function traverseReferenceTree(depthMap, aliasMap, g, d) {
 	depthMapSet(depthMap, g, d);
 
-	let refs = g.geometry.asReferences();
+	let refs = g.geometry.toReferences();
 	if (!refs) return;
 
 	for (const sr of refs) {
@@ -282,7 +282,7 @@ function collectAliasMap(aliasMap) {
 		if (!m) {
 			m = {
 				representative: null,
-				aliases: new Map()
+				aliases: new Map(),
 			};
 			aliasResolution.set(terminal.glyph, m);
 		}
@@ -319,7 +319,7 @@ function alterGeometryAndOptimize(collection) {
 
 		cluster.representative.glyph.geometry = new Geometry.TransformedGeometry(
 			gT.geometry,
-			Transform.Translate(cluster.representative.x, cluster.representative.y)
+			Transform.Translate(cluster.representative.x, cluster.representative.y),
 		);
 
 		for (const [g, tf] of cluster.aliases) {
@@ -327,12 +327,12 @@ function alterGeometryAndOptimize(collection) {
 				g.geometry = new Geometry.ReferenceGeometry(
 					cluster.representative.glyph,
 					tf.x - cluster.representative.x,
-					tf.y - cluster.representative.y
+					tf.y - cluster.representative.y,
 				);
 				optimized.set(g, {
 					glyph: cluster.representative.glyph,
 					x: tf.x - cluster.representative.x,
-					y: tf.y - cluster.representative.y
+					y: tf.y - cluster.representative.y,
 				});
 			}
 		}
@@ -359,7 +359,7 @@ function rectifyGlyphAndMarkComponents(glyphStore, aliasMap, markedGlyphs, memo,
 	if (memo.has(g)) return;
 	memo.add(g);
 
-	let refs = g.geometry.asReferences();
+	let refs = g.geometry.toReferences();
 	if (refs) {
 		let parts = [];
 		for (let sr of refs) {
@@ -385,7 +385,7 @@ function rectifyGlyphAndMarkComponents(glyphStore, aliasMap, markedGlyphs, memo,
 					markedGlyphs,
 					memo,
 					sr.glyph,
-					d + 0x10000
+					d + 0x10000,
 				);
 				parts.push(new Geometry.ReferenceGeometry(sr.glyph, sr.x, sr.y));
 			}

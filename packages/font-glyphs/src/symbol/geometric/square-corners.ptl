@@ -1,0 +1,104 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Symbol-Geometric-Square-Corners : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+	define lineWidth : Math.min GeometryStroke ((Geom.Size * 2 - GeometryStroke * 2) * 1 / 11)
+	define aperature : Geom.Size / 3
+
+	do "squared form"
+		create-glyph [MangleName 'squareCorners'] [MangleUnicode 0x26F6] : glyph-proc
+			set-width Geom.Width
+			include : difference
+				refer-glyph : MangleName 'whiteSquare'
+				union
+					intersection [MaskBelow (Geom.MidY + Geom.Size / 3)] [MaskAbove (Geom.MidY - Geom.Size / 3)]
+					intersection [MaskLeft (Geom.MidX + Geom.Size / 3)] [MaskRight (Geom.MidX - Geom.Size / 3)]
+
+		create-glyph [MangleName 'squareCornersSaltires'] [MangleUnicode 0x1CC89] : glyph-proc
+			set-width Geom.Width
+			include : intersection
+				difference
+					refer-glyph : MangleName 'blackSquare'
+					union
+						intersection [MaskBelow (Geom.MidY + Geom.Size / 3)] [MaskAbove (Geom.MidY - Geom.Size / 3)]
+						intersection [MaskLeft (Geom.MidX + Geom.Size / 3)] [MaskRight (Geom.MidX - Geom.Size / 3)]			
+				union
+					dispiro [widths.center lineWidth] [flat Geom.MidX (Geom.MidY + Geom.Size * (4 / 3))] [curl (Geom.MidX + Geom.Size * (4 / 3)) Geom.MidY]
+					dispiro [widths.center lineWidth] [flat (Geom.MidX + Geom.Size * (4 / 3)) Geom.MidY] [curl Geom.MidX (Geom.MidY - Geom.Size * (4 / 3))]
+					dispiro [widths.center lineWidth] [flat Geom.MidX (Geom.MidY - Geom.Size * (4 / 3))] [curl (Geom.MidX - Geom.Size * (4 / 3)) Geom.MidY]
+					dispiro [widths.center lineWidth] [flat (Geom.MidX - Geom.Size * (4 / 3)) Geom.MidY] [curl Geom.MidX (Geom.MidY + Geom.Size * (4 / 3))] 
+					dispiro [widths.center lineWidth] [flat (Geom.MidX - Geom.Size) (Geom.MidY + Geom.Size)] [curl (Geom.MidX + Geom.Size) (Geom.MidY - Geom.Size)] 
+					dispiro [widths.center lineWidth] [flat (Geom.MidX - Geom.Size) (Geom.MidY - Geom.Size)] [curl (Geom.MidX + Geom.Size) (Geom.MidY + Geom.Size)] 
+
+		create-glyph [MangleName 'squareCornersDiagonals'] [MangleUnicode 0x1CC8A] : glyph-proc
+			set-width Geom.Width
+			include : intersection
+				refer-glyph : MangleName 'blackSquare'
+				union
+					dispiro [widths.lhs lineWidth] [flat Geom.MidX (Geom.MidY + Geom.Size * (4 / 3))] [curl (Geom.MidX + Geom.Size * (4 / 3)) Geom.MidY]
+					dispiro [widths.lhs lineWidth] [flat (Geom.MidX + Geom.Size * (4 / 3)) Geom.MidY] [curl Geom.MidX (Geom.MidY - Geom.Size * (4 / 3))]
+					dispiro [widths.lhs lineWidth] [flat Geom.MidX (Geom.MidY - Geom.Size * (4 / 3))] [curl (Geom.MidX - Geom.Size * (4 / 3)) Geom.MidY]
+					dispiro [widths.lhs lineWidth] [flat (Geom.MidX - Geom.Size * (4 / 3)) Geom.MidY] [curl Geom.MidX (Geom.MidY + Geom.Size * (4 / 3))] 
+
+		create-glyph [MangleName 'squareCornersTriangles'] [MangleUnicode 0x1CC8B] : glyph-proc
+			set-width Geom.Width
+			include : difference
+				refer-glyph : MangleName 'blackSquare'
+				spiro-outline
+					corner Geom.MidX (Geom.MidY + Geom.Size * (4 / 3))
+					corner (Geom.MidX + Geom.Size * (4 / 3)) Geom.MidY
+					corner Geom.MidX (Geom.MidY - Geom.Size * (4 / 3))
+					corner (Geom.MidX - Geom.Size * (4 / 3)) Geom.MidY
+
+		create-glyph [MangleName 'squareAperature'] [MangleUnicode 0x1CC8C] : glyph-proc
+			set-width Geom.Width
+			include : refer-glyph : MangleName 'whiteSquare'
+			include : intersection
+				refer-glyph : MangleName 'blackSquare'
+				union
+					intersection
+						spiro-outline
+							corner (Geom.MidX - Geom.Size - aperature) (Geom.MidY + Geom.Size)
+							corner (Geom.MidX + Geom.Size) (Geom.MidY + Geom.Size)
+							corner (Geom.MidX + Geom.Size) (Geom.MidY - Geom.Size - aperature)
+						dispiro
+							widths.center lineWidth
+							flat (Geom.MidX - Geom.Size) (Geom.MidY - Geom.Size + aperature)
+							curl (Geom.MidX + Geom.Size) (Geom.MidY + Geom.Size + aperature)
+					intersection
+						spiro-outline
+							corner (Geom.MidX + Geom.Size) (Geom.MidY + Geom.Size + aperature)
+							corner (Geom.MidX + Geom.Size) (Geom.MidY - Geom.Size)
+							corner (Geom.MidX - Geom.Size - aperature) (Geom.MidY - Geom.Size)
+						dispiro
+							widths.center lineWidth
+							flat (Geom.MidX - Geom.Size + aperature) (Geom.MidY + Geom.Size)
+							curl (Geom.MidX + Geom.Size + aperature) (Geom.MidY - Geom.Size)
+					intersection
+						spiro-outline
+							corner (Geom.MidX + Geom.Size + aperature) (Geom.MidY - Geom.Size)
+							corner (Geom.MidX - Geom.Size) (Geom.MidY - Geom.Size)
+							corner (Geom.MidX - Geom.Size) (Geom.MidY + Geom.Size + aperature)
+						dispiro
+							widths.center lineWidth
+							flat (Geom.MidX - Geom.Size) (Geom.MidY - Geom.Size - aperature)
+							curl (Geom.MidX + Geom.Size) (Geom.MidY + Geom.Size - aperature)
+					intersection
+						spiro-outline
+							corner (Geom.MidX - Geom.Size) (Geom.MidY - Geom.Size - aperature)
+							corner (Geom.MidX - Geom.Size) (Geom.MidY + Geom.Size)
+							corner (Geom.MidX + Geom.Size + aperature) (Geom.MidY + Geom.Size)
+						dispiro
+							widths.center lineWidth
+							flat (Geom.MidX - Geom.Size - aperature) (Geom.MidY + Geom.Size)
+							curl (Geom.MidX + Geom.Size - aperature) (Geom.MidY - Geom.Size)

@@ -4,6 +4,17 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 
+export default async function (out, archiveFiles) {
+	const filesToAnalyze = Array.from(new Set(archiveFiles.map(f => f.full))).sort();
+
+	let s = "";
+	for (const filePath of filesToAnalyze) {
+		s += `${await hashFile(filePath)}\t${path.basename(filePath)}\n`;
+	}
+
+	await fs.promises.writeFile(out, s);
+}
+
 function hashFile(filePath) {
 	return new Promise((resolve, reject) => {
 		let sum = crypto.createHash("sha256");
@@ -23,13 +34,3 @@ function hashFile(filePath) {
 		});
 	});
 }
-export default (async function (out, archiveFiles) {
-	const filesToAnalyze = Array.from(new Set(archiveFiles.map(f => f.full))).sort();
-
-	let s = "";
-	for (const filePath of filesToAnalyze) {
-		s += `${await hashFile(filePath)}\t${path.basename(filePath)}\n`;
-	}
-
-	await fs.promises.writeFile(out, s);
-});

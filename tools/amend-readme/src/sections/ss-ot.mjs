@@ -18,7 +18,7 @@ export default async function processSsOt(argv, dirs) {
 				`<tr>`,
 				`<td>${ImgX(`${dirs.images}/ss-u-${ss.tag}-${ss.rank}`)}</td>`,
 				`<td>${ImgX(`${dirs.images}/ss-i-${ss.tag}-${ss.rank}`)}</td>`,
-				`</tr>`
+				`</tr>`,
 			);
 		}
 	}

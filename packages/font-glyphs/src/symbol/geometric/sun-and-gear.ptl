@@ -13,7 +13,8 @@ glyph-block Symbol-Geometric-Sun-And-Gear : for-width-kinds WideWidth1
 	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
 	define Size : GeometricSizes Geom
 
-	define [EightPointingRaysShape r] : glyph-proc
+	define [EightPointingRaysShape r _r2] : glyph-proc
+		local r2 : fallback _r2 Geom.Size
 		foreach [n : range 0 8] : begin
 			local theta : n / 8 * Math.PI * 2
 			local c : Math.cos theta
@@ -21,11 +22,15 @@ glyph-block Symbol-Geometric-Sun-And-Gear : for-width-kinds WideWidth1
 			include : dispiro
 				widths.center rayWidth
 				corner (Geom.MidX + c * r) (Geom.MidY + s * r)
-				corner (Geom.MidX + c * Geom.Size) (Geom.MidY + s * Geom.Size)
+				corner (Geom.MidX + c * r2) (Geom.MidY + s * r2)
 
 	define rayWidth : AdviceStroke 8 [Math.sqrt Geom.Scalar]
 	define rayInnerRadius : Geom.Size * 0.56
 	define dotRadius : Geom.Size * 0.44
+
+	define gearRingRad : mix rayInnerRadius Geom.Size 0.3
+	define handleLength : Geom.Size * 0.5
+	define rayInwardShrink : Geom.Size * 0.25
 
 	create-glyph [MangleName 'blackSunWithRays'] [MangleUnicode 0x2600] : glyph-proc
 		set-width Geom.Width
@@ -35,15 +40,31 @@ glyph-block Symbol-Geometric-Sun-And-Gear : for-width-kinds WideWidth1
 		set-width Geom.Width
 		include : EightPointingRaysShape rayInnerRadius
 		include : RingStrokeAt Geom.MidX Geom.MidY dotRadius rayWidth
-	create-glyph [MangleName 'gear'] [MangleUnicode 0x2699] : glyph-proc
+	create-glyph [MangleName 'gearWithoutHub'] [MangleUnicode 0x26ED] : glyph-proc
 		set-width Geom.Width
-		local gearRingRad : mix rayInnerRadius Geom.Size 0.4
 		include : EightPointingRaysShape (gearRingRad - rayWidth / 2)
 		include : RingStrokeAt Geom.MidX Geom.MidY gearRingRad rayWidth
+	create-glyph [MangleName 'gearWithHandle'] [MangleUnicode 0x26EE] : glyph-proc
+		set-width Geom.Width
+		include : refer-glyph : MangleName 'gearWithoutHub'
+		include : VBar.r (Geom.MidX + Geom.Size) (Geom.MidY - rayWidth / 2) (Geom.MidY + handleLength) rayWidth
+		include : VBar.l (Geom.MidX - Geom.Size) (Geom.MidY - handleLength) (Geom.MidY + rayWidth / 2) rayWidth
+	create-glyph [MangleName 'gear'] [MangleUnicode 0x2699] : glyph-proc
+		set-width Geom.Width
+		include : refer-glyph : MangleName 'gearWithoutHub'
 		include : RingAt Geom.MidX Geom.MidY (0.4 * (gearRingRad - rayWidth))
+	alias [MangleName 'lighthouseSymbol'] [MangleUnicode 0x26EF] [MangleName 'gear']
+
 	create-glyph [MangleName 'helm'] [MangleUnicode 0x2388] : glyph-proc
 		set-width Geom.Width
 		local gearRingRad : mix rayInnerRadius Geom.Size 0.4
 		include : EightPointingRaysShape 0
 		include : RingStrokeAt Geom.MidX Geom.MidY gearRingRad rayWidth
 		include : RingAt Geom.MidX Geom.MidY (1.1 * rayWidth)
+
+	create-glyph [MangleName 'raysInward'] [MangleUnicode 0x1CC69] : glyph-proc
+		set-width Geom.Width
+		include : EightPointingRaysShape (rayInnerRadius - rayInwardShrink) (Geom.Size - rayInwardShrink)
+	create-glyph [MangleName 'raysOutward'] [MangleUnicode 0x1CC6A] : glyph-proc
+		set-width Geom.Width
+		include : EightPointingRaysShape rayInnerRadius Geom.Size

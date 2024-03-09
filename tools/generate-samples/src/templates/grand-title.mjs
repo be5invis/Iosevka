@@ -15,11 +15,11 @@ export default (function (args) {
 						"font-family": "Iosevka",
 						"font-weight": 100,
 						"font-size": EM,
-						color: theme.body
+						color: theme.body,
 					},
-					"Iosevka"
-				]
-			}
-		]
+					"Iosevka",
+				],
+			},
+		],
 	};
 });

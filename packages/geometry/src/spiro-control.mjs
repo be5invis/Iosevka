@@ -168,7 +168,7 @@ class BiKnot {
 			this.d2 == null ? "" : Format.n(this.d2),
 			this.proposedNormal
 				? Format.tuple(Format.n(this.proposedNormal.x), Format.n(this.proposedNormal.y))
-				: ""
+				: "",
 		);
 	}
 	toMono() {
