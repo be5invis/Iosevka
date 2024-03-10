@@ -1,7 +1,8 @@
 $$include '../meta/macros.ptl'
 
 import [mix clamp fallback] from "@iosevka/util"
-import [Dotless CvDecompose RightDependentTrigger RightDependentLink DependentSelector] from "@iosevka/glyph/relation"
+import [Dotless CvDecompose] from "@iosevka/glyph/relation"
+import [RightDependentTrigger RightDependentLink DependentSelector] from "@iosevka/glyph/relation"
 import [DesignParameters] from "../meta/aesthetics.mjs"
 
 glyph-module
@@ -9,14 +10,17 @@ glyph-module
 glyph-block Letter-Shared : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Adjustment : TurnMarks
+	glyph-block-import Mark-Adjustment : TurnMarks LeaningAnchorMap
 
 	glyph-block-export CreateAccentedComposition
 	define [CreateAccentedComposition dst u srcGid accentGid]
 		derive-multi-part-glyphs dst u { srcGid accentGid } : function [gns gr] : glyph-proc
 			local { base mark } gns
+			local gMark : query-glyph mark
+
 			include [refer-glyph base] AS_BASE ALSO_METRICS
-			include [refer-glyph mark]
+			currentGlyph.includeMarkWithLeaningSupport gMark LeaningAnchorMap
+
 			if (!gr && accentGid === 'dotAbove') : Dotless.set currentGlyph base
 
 	glyph-block-export CreateOgonekComposition
