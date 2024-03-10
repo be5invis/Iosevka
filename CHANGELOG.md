@@ -1,5 +1,13 @@
 ## Modifications since last major version
 
+### 29.0.1
+
+* Fix broken `s`/`t` variants for `U+01BE`. (#2223).
+* Fix precomposed iota with double marks (#2229).
+* Fix leaning mark placement on letters around i/l.
+* Fix sans-serif linking for `U+2781`..`U+2784` and `U+278B`..`U+278E`.
+
+
 ### 29.0.0
 
 * \[**BREAKING**\] Add separate serifed variants for digits `2` through `5`. As a result, current variants are partially renamed and reordered (#1965). Change of variant names:
