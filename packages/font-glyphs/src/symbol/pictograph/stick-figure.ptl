@@ -12,6 +12,19 @@ glyph-block Symbol-Pictograph-Stick-Figure : begin
 
 	define PictographSw : AdviceStroke 4
 
+	glyph-block-export D4Transform WithD4Transform
+	define [D4Transform midx rot refl] : Transform.Combine
+		Translate (-midx) (-SymbolMid)
+		if refl [Scale (-1) 1] [Transform.Id]
+		Rotate ((rot / 2) * Math.PI)
+		Translate (+midx) (+SymbolMid)
+	define [WithD4Transform midx rot refl shapeFunc] : new-glyph : glyph-proc
+		local giz this.gizmo
+		set this.gizmo : Transform.Id
+		include : shapeFunc
+		include : D4Transform midx rot refl
+		include   giz
+
 	glyph-block-export StickFigureKit
 	define [StickFigureKit box tfm sw] : namespace
 		export : define [RoundSeg h1 v1 h2 v2 cl cr] : glyph-proc
@@ -76,6 +89,7 @@ glyph-block Symbol-Pictograph-Stick-Figure : begin
 			local z1 : tfm.applyXY [mix box.left box.right h1] [mix box.bottom box.top v1]
 			include : DotAt z1.x z1.y (pr * (box.top - box.bottom))
 
+	# Pointing Hand
 	glyph-block-export PointingHandShape
 	define [PointingHandShape box tfm sw] : begin
 		local Kit : StickFigureKit box tfm sw
@@ -123,32 +137,20 @@ glyph-block Symbol-Pictograph-Stick-Figure : begin
 
 		create-glyph [MangleName "whiteRightPointingIndex"] [MangleUnicode 0x261E] : glyph-proc
 			set-width MosaicWidth
-			include : PointingHandShape hBox [Translate 0 0] sw
+			include : PointingHandShape hBox [Transform.Id] sw
 
 		create-glyph [MangleName "whiteLeftPointingIndex"] [MangleUnicode 0x261C] : glyph-proc
 			set-width MosaicWidth
-			local tfm : Transform.Combine
-				Translate (-0.5 * MosaicWidth) (-SymbolMid)
-				Scale (-1) 1
-				Translate (+0.5 * MosaicWidth) (+SymbolMid)
-			include : PointingHandShape hBox tfm sw
+			include : PointingHandShape hBox [D4Transform (MosaicWidth / 2) 0 1] sw
 
 		create-glyph [MangleName "whiteDownPointingIndex"] [MangleUnicode 0x261F] : glyph-proc
 			set-width MosaicWidth
-			local tfm : Transform.Combine
-				Translate (-0.5 * MosaicWidth) (-SymbolMid)
-				Rotate (-0.5 * Math.PI)
-				Translate (+0.5 * MosaicWidth) (+SymbolMid)
-			include : PointingHandShape vBox tfm sw
+			include : PointingHandShape vBox [D4Transform (MosaicWidth / 2) 3 0] sw
 
 		create-glyph [MangleName "whiteUpPointingIndex"] [MangleUnicode 0x261D] : glyph-proc
 			set-width MosaicWidth
 			local tfm : Transform.Combine
-				Translate (-0.5 * MosaicWidth) (-SymbolMid)
-				Scale (-1) 1
-				Rotate (-0.5 * Math.PI)
-				Translate (+0.5 * MosaicWidth) (+SymbolMid)
-			include : PointingHandShape vBox tfm sw
+			include : PointingHandShape vBox [D4Transform (MosaicWidth / 2) 3 1] sw
 
 	create-glyph 'ccHumanFigure' : glyph-proc
 		define yTop : mix ParenBot ParenTop 0.95
