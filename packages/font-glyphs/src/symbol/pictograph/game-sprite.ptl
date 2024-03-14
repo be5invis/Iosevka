@@ -1,0 +1,235 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [Box] from "@iosevka/geometry/box"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Pictograph-Stick-Figure : StickFigureKit WithD4Transform D4Transform
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim
+	glyph-block-import Symbol-Mosaic-Block : HShade VShade
+
+	define top     fontMetrics.os2.sTypoAscender
+	define bottom  fontMetrics.os2.sTypoDescender
+	define left    0
+	define right   MosaicWidth
+
+	define midX : mix left right 0.5
+	define midY : mix top bottom 0.5
+
+	define uiTop : mix ParenBot ParenTop 0.95
+	define uiBot : mix ParenBot ParenTop 0.05
+	define uiLeft  : left + SB
+	define uiRight : right - SB
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+	define [SidewaysBox top bottom left right _left2 _right2] : begin
+		local left2  : fallback _left2  left
+		local right2 : fallback _right2 right
+		local newHeight : (right - left) * (right2 - left2) / (top - bottom)
+		local midX : mix left2 right2 0.5
+		local midY : mix top bottom 0.5
+
+		return : new Box
+			midY + (right2 - midX)
+			midY + (left2  - midX)
+			midX - newHeight / 2
+			midX + newHeight / 2
+
+	do "Stick Man"
+		define [StickManScaffold top bottom left right _sw] : begin
+			local baseHeight : uiTop - uiBot
+			local height : top - bottom
+			local scale : height / baseHeight
+
+			local scaffold : object
+				top top
+				bot bottom
+				left left
+				right right
+				stroke : fallback _sw : AdviceStroke 3.5
+				xMiddle : mix left right 0.5
+				yMiddle : mix top bottom 0.5
+				armRaiseK 0.4
+				headSize : height / 2.5
+				legSize  : (Width - SB * 2) * scale
+				armSize  : (Width - SB) * scale
+
+			set scaffold.yPelvis    : scaffold.bot + scaffold.legSize / 2
+			set scaffold.xLeftFoot  : scaffold.xMiddle - scaffold.legSize / 2
+			set scaffold.xRightFoot : scaffold.xMiddle + scaffold.legSize / 2
+			set scaffold.yNeck      : scaffold.top - scaffold.headSize
+			set scaffold.xLeftHead  : scaffold.xMiddle - scaffold.headSize / 2
+			set scaffold.xRightHead : scaffold.xMiddle + scaffold.headSize / 2
+			set scaffold.xLeftArm   : scaffold.xMiddle - scaffold.armSize / 2
+			set scaffold.xRightArm  : scaffold.xMiddle + scaffold.armSize / 2
+			set scaffold.yShoulder : lambda [p] : mix scaffold.yPelvis scaffold.yNeck p
+
+			return scaffold
+
+		define [StickManHead scaffold] : OShape (scaffold.top - O) (scaffold.yNeck + O) (scaffold.xLeftHead + O) (scaffold.xRightHead - O) scaffold.stroke
+		define [StickManArms scaffold p kl kr] : union
+			dispiro
+				widths.center scaffold.stroke
+				corner scaffold.xMiddle [scaffold.yShoulder p]
+				corner scaffold.xLeftArm ([scaffold.yShoulder p] + scaffold.armSize / 2 * kl)
+			dispiro
+				widths.center scaffold.stroke
+				corner scaffold.xMiddle [scaffold.yShoulder p]
+				corner scaffold.xRightArm ([scaffold.yShoulder p] + scaffold.armSize / 2 * kr)
+		define [StickManBody scaffold kl kr] : glyph-proc
+			include : StickManHead scaffold
+			include : VBar.m scaffold.xMiddle scaffold.yPelvis scaffold.yNeck scaffold.stroke
+			include : dispiro
+				widths.center scaffold.stroke
+				corner scaffold.xMiddle scaffold.yPelvis
+				corner scaffold.xLeftFoot scaffold.bot
+			include : dispiro
+				widths.center scaffold.stroke
+				corner scaffold.xMiddle scaffold.yPelvis
+				corner scaffold.xRightFoot scaffold.bot
+			include : StickManArms scaffold 0.6 kl kr
+		define [StickManDressBody scaffold kl kr] : glyph-proc
+			include : StickManHead scaffold
+			define p 0.7
+			define dressBottom : [mix scaffold.bot scaffold.yNeck 0.25] - scaffold.stroke / 2
+			define dressLeft : scaffold.xLeftFoot - scaffold.stroke / 2
+			define dressRight : scaffold.xRightFoot + scaffold.stroke / 2
+			include : StickManArms scaffold p kl kr
+			include : VBar.m scaffold.xMiddle [scaffold.yShoulder p] scaffold.yNeck
+			include : intersection
+				spiro-outline
+					corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
+					corner dressRight dressBottom
+					corner dressLeft dressBottom
+				union
+					dispiro
+						widths.rhs scaffold.stroke
+						corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
+						corner dressRight dressBottom
+					dispiro
+						widths.rhs scaffold.stroke
+						corner dressRight dressBottom
+						corner dressLeft dressBottom
+					dispiro
+						widths.rhs scaffold.stroke
+						corner dressLeft dressBottom
+						corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
+			include : VBar.m [mix dressLeft dressRight 0.3] scaffold.bot (dressBottom - O) scaffold.stroke
+			include : VBar.m [mix dressLeft dressRight 0.7] scaffold.bot (dressBottom - O) scaffold.stroke
+
+
+		define scaffold : StickManScaffold uiTop uiBot uiLeft uiRight
+		define hBox : SidewaysBox uiTop uiBot uiLeft uiRight
+		define hScaffold : StickManScaffold hBox.top hBox.bottom hBox.left hBox.right [AdviceStroke 3.5 : Math.sqrt (MosaicWidthScalar / 2)]
+
+		create-glyph [MangleName 'stickMan'] [MangleUnicode 0x1FBC5] : glyph-proc
+			set-width MosaicWidth
+			include : StickManBody scaffold 0 0
+		create-glyph [MangleName 'stickManLeft'] [MangleUnicode 0x1CC02] : glyph-proc
+			set-width MosaicWidth
+			include : WithD4Transform midX 1 0 : lambda [] : StickManBody hScaffold 0 0
+		create-glyph [MangleName 'stickManRight'] [MangleUnicode 0x1CC03] : glyph-proc
+			set-width MosaicWidth
+			include : WithD4Transform midX 3 0 : lambda [] : StickManBody hScaffold 0 0
+		create-glyph [MangleName 'stickManDown'] [MangleUnicode 0x1CC04] : glyph-proc
+			set-width MosaicWidth
+			include : WithD4Transform midX 2 0 : lambda [] : StickManBody scaffold 0 0
+		create-glyph [MangleName 'stickManArmsRaised'] [MangleUnicode 0x1FBC6] : glyph-proc
+			set-width MosaicWidth
+			include : StickManBody scaffold scaffold.armRaiseK scaffold.armRaiseK
+		create-glyph [MangleName 'stickManLeaningLeft'] [MangleUnicode 0x1FBC7] : glyph-proc
+			set-width MosaicWidth
+			include : StickManBody scaffold (-scaffold.armRaiseK) scaffold.armRaiseK
+		create-glyph [MangleName 'stickManLeaningRight'] [MangleUnicode 0x1FBC8] : glyph-proc
+			set-width MosaicWidth
+			include : StickManBody scaffold scaffold.armRaiseK (-scaffold.armRaiseK)
+		create-glyph [MangleName 'stickManWithDress'] [MangleUnicode 0x1FBC9] : glyph-proc
+			set-width MosaicWidth
+			include : StickManDressBody scaffold 0 0
+
+	do "Square Spiral"
+		define directions : list
+			* {.dx   1  .dy   0  .heading Rightward}
+			* {.dx   0  .dy   1  .heading Upward}
+			* {.dx (-1) .dy   0  .heading Leftward}
+			* {.dx   0  .dy (-1) .heading Downward}
+
+		define spiralSw : AdviceStroke 4 : Math.sqrt (MosaicWidthScalar / 2)
+		define oneStep : Geom.Size / 4.5
+		define stepsPerTurn { 9 9 9 7 7 5 5 3 3 }
+		define [SquareSpiral startx starty startidx] : glyph-proc
+			local x1 startx
+			local y1 starty
+			foreach [idx : range 0 stepsPerTurn.length] : begin
+				local {.dx dx .dy dy .heading dir} directions.((startidx + idx) % 4)
+				local x2 : x1 + dx * oneStep * stepsPerTurn.(idx)
+				local y2 : y1 + dy * oneStep * stepsPerTurn.(idx)
+				include : dispiro
+					widths.lhs spiralSw
+					disable-contrast
+					flat x1 y1 [heading dir]
+					curl x2 y2 [heading dir]
+				set x1 x2
+				set y1 y2
+
+		create-glyph [MangleName "squareSpiralFromTopLeft"] [MangleUnicode 0x1CC7C] : glyph-proc
+			set-width MosaicWidth
+			include : SquareSpiral Geom.Left Geom.Top 3
+		create-glyph [MangleName "squareSpiralFromTopRight"] [MangleUnicode 0x1CC7D] : glyph-proc
+			set-width MosaicWidth
+			include : SquareSpiral Geom.Right Geom.Top 2
+		create-glyph [MangleName "squareSpiralFromBottomRight"] [MangleUnicode 0x1CC7E] : glyph-proc
+			set-width MosaicWidth
+			include : SquareSpiral Geom.Right Geom.Bot 1
+		create-glyph [MangleName "squareSpiralFromBottomLeft"] [MangleUnicode 0x1CC7F] : glyph-proc
+			set-width MosaicWidth
+			include : SquareSpiral Geom.Left Geom.Bot 0
+
+	do "Ladder"
+		create-glyph [MangleName "vertLadder"] [MangleUnicode 0x1CC84] : glyph-proc
+			set-width MosaicWidth
+			include : HShade 8 top bottom Geom.Left Geom.Right
+			include : VBar.l Geom.Left bottom top GeometryStroke
+			include : VBar.r Geom.Right bottom top GeometryStroke
+
+		create-glyph [MangleName "horiLadder"] [MangleUnicode 0x1CC85] : glyph-proc
+			set-width MosaicWidth
+			include : VShade (4 * MosaicWidthScalar) Geom.Top Geom.Bot left right
+			include : HBar.b left right Geom.Bot GeometryStroke
+			include : HBar.t left right Geom.Top GeometryStroke
+
+	do "Striped Triangles"
+		define stripes : 2 + 2 * MosaicWidthScalar
+		define coTop : mix Geom.Top Geom.Bot (0 - 1 / (2 * stripes))
+		define coBot : mix Geom.Top Geom.Bot (1 + 1 / (2 * stripes))
+		define coLeft : mix Geom.Left Geom.Right (0 - 1 / (2 * stripes))
+		define coRight : mix Geom.Left Geom.Right (1 + 1 / (2 * stripes))
+
+		create-glyph [MangleName "stripedTriangleLeft"] [MangleUnicode 0x1CC80] : glyph-proc
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName "blackTriangleLeft"
+				VShade stripes top bottom coLeft coRight
+
+		create-glyph [MangleName "stripedTriangleUp"] [MangleUnicode 0x1CC81] : glyph-proc
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName "blackTriangleUp"
+				HShade stripes coTop coBot left right
+
+		create-glyph [MangleName "stripedTriangleRight"] [MangleUnicode 0x1CC82] : glyph-proc
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName "blackTriangleRight"
+				VShade stripes top bottom coLeft coRight
+
+		create-glyph [MangleName "stripedTriangleDown"] [MangleUnicode 0x1CC83] : glyph-proc
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName "blackTriangleDown"
+				HShade stripes coTop coBot left right
