@@ -6,5 +6,4 @@ module.exports = {
     output: "export",
     optimizeFonts: false,
     pageExtensions: ["tsx"],
-    ...(!debug ? { assetPrefix: "https://typeof.net/Iosevka/" } : {}),
 };
