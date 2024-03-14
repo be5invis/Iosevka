@@ -1119,6 +1119,18 @@ const Release = task(`release`, async target => {
 	await target.need(ReleaseArchives, SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
 });
 
+const ReleaseArchives = task(`release:archives`, async target => {
+	const [collectPlans] = await target.need(Version, CollectPlans, UtilScriptFiles);
+
+	let goals = [];
+	for (const [cgr, plan] of Object.entries(collectPlans)) {
+		if (!plan.inRelease) continue;
+		goals.push(ReleaseArchivesFor(cgr));
+	}
+
+	await target.need(goals);
+});
+
 const ReleaseArchivesFor = task.group(`release:archives-for`, async (target, cgr) => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans, UtilScriptFiles);
 	const plan = collectPlans[cgr];
@@ -1137,18 +1149,6 @@ const ReleaseArchivesFor = task.group(`release:archives-for`, async (target, cgr
 
 	const [archiveFiles] = await target.need(goals);
 	return archiveFiles;
-});
-
-const ReleaseArchives = task(`release:archives`, async target => {
-	const [collectPlans] = await target.need(Version, CollectPlans, UtilScriptFiles);
-
-	let goals = [];
-	for (const [cgr, plan] of Object.entries(collectPlans)) {
-		if (!plan.inRelease) continue;
-		goals.push(ReleaseArchivesFor(cgr));
-	}
-
-	await target.need(goals);
 });
 
 ///////////////////////////////////////////////////////////
