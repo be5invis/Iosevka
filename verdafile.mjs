@@ -1119,24 +1119,36 @@ const Release = task(`release`, async target => {
 	await target.need(ReleaseArchives, SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
 });
 
-const ReleaseArchives = task(`release:archives`, async target => {
+const ReleaseArchivesFor = task.group(`release:archives-for`, async (target, cgr) => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans, UtilScriptFiles);
+	const plan = collectPlans[cgr];
+	if (!plan || !plan.inRelease) throw new Error(`CollectGroup ${cgr} is not in release.`);
+
+	let goals = [];
+	goals.push(TtcZip(cgr, version));
+	goals.push(SuperTtcZip(cgr, version));
+	const subGroups = collectPlans[cgr].groupDecomposition;
+	for (const gr of subGroups) {
+		goals.push(GroupTtfZip(gr, version, false));
+		goals.push(GroupTtfZip(gr, version, true));
+		goals.push(GroupWebZip(gr, version, false));
+		goals.push(GroupWebZip(gr, version, true));
+	}
+
+	const [archiveFiles] = await target.need(goals);
+	return archiveFiles;
+});
+
+const ReleaseArchives = task(`release:archives`, async target => {
+	const [collectPlans] = await target.need(Version, CollectPlans, UtilScriptFiles);
+
 	let goals = [];
 	for (const [cgr, plan] of Object.entries(collectPlans)) {
 		if (!plan.inRelease) continue;
-		const subGroups = collectPlans[cgr].groupDecomposition;
-		goals.push(TtcZip(cgr, version));
-		goals.push(SuperTtcZip(cgr, version));
-		for (const gr of subGroups) {
-			goals.push(GroupTtfZip(gr, version, false));
-			goals.push(GroupTtfZip(gr, version, true));
-			goals.push(GroupWebZip(gr, version, false));
-			goals.push(GroupWebZip(gr, version, true));
-		}
+		goals.push(ReleaseArchivesFor(cgr));
 	}
-	const [archiveFiles] = await target.need(goals);
-	// Create hash of packages
-	await node("tools/misc/src/create-sha-file.mjs", "doc/packages-sha.txt", archiveFiles);
+
+	await target.need(goals);
 });
 
 ///////////////////////////////////////////////////////////
