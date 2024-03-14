@@ -21,7 +21,7 @@ export default function (output, family, hs, formats, unhinted) {
 		const src = formats
 			.map(
 				ext =>
-					`url('${ext}${dirSuffix}/${term.name}.${ext}') ` +
+					`url('${ext}${dirSuffix}/${term.name}.${ext.toLowerCase()}') ` +
 					`format('${WebfontFormatMap.get(ext)}')`,
 			)
 			.join(", ");
