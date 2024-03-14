@@ -43,9 +43,6 @@ export default async function main(argv) {
 			`<tr><td align="center"><h1>` +
 			`<a href="${baseUrl}/PACKAGE-LIST.md">View package list</a>` +
 			`</h1></td></tr>` +
-			`<tr><td align="center">` +
-			`<a href="${baseUrl}/packages-sha.txt">Package hashes (SHA-256)</a>` +
-			`</td></tr>` +
 			`</table>`,
 	);
 	await fs.promises.writeFile(argv.outputPath, out.data);

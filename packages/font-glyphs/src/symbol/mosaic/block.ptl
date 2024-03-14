@@ -8,6 +8,20 @@ glyph-block Symbol-Mosaic-Block : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
+	glyph-block-export HShade VShade
+	define [HShade steps t b l r] : glyph-proc
+		foreach [j : range 0 steps] : include : dispiro
+			widths.center GeometryStroke
+			disable-contrast
+			flat l [mix t b ((j + 0.5) / steps)] [heading Rightward]
+			curl r [mix t b ((j + 0.5) / steps)] [heading Rightward]
+	define [VShade steps t b l r] : glyph-proc
+		foreach [j : range 0 steps] : include : dispiro
+			widths.center GeometryStroke
+			disable-contrast
+			flat [mix l r ((j + 0.5) / steps)] t [heading Downward]
+			curl [mix l r ((j + 0.5) / steps)] b [heading Downward]
+
 	for-width-kinds WideWidth4
 
 		define top     fontMetrics.os2.sTypoAscender
@@ -211,44 +225,34 @@ glyph-block Symbol-Mosaic-Block : begin
 			set-width MosaicWidth
 			include : Shade 4 FillHeavy
 
-		define filldata : list
-			list 0x2596 0 0 1 0
-			list 0x2597 0 0 0 1
-			list 0x2598 1 0 0 0
-			list 0x2599 1 0 1 1
-			list 0x259A 1 0 0 1
-			list 0x259B 1 1 1 0
-			list 0x259C 1 1 0 1
-			list 0x259D 0 1 0 0
-			list 0x259E 0 1 1 0
-			list 0x259F 0 1 1 1
-		foreach [{unicode lt rt lb rb} : items-of filldata] : begin
-			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
-				set-width MosaicWidth
-				include : ForceUpright
-				define t top
-				define b bottom
-				define l 0
-				define r MosaicWidth
-				local mx : mix l r 0.5
-				local my : mix b t 0.5
-				if lt : include : spiro-outline
-					corner l  t
-					corner l my
-					corner mx my
-					corner mx t
-				if rt : include : spiro-outline
-					corner mx t
-					corner mx my
-					corner r  my
-					corner r  t
-				if lb : include : spiro-outline
-					corner l  my
-					corner l  b
-					corner mx b
-					corner mx my
-				if rb : include : spiro-outline
-					corner mx my
-					corner mx b
-					corner r  b
-					corner r my
+		define [DiagShade _steps] : begin
+			local steps : Math.abs _steps
+			local skew : [Math.round (MosaicWidth / Width)] * (top - bottom) / 2
+			local coSw : GeometryStroke * [Math.hypot 1 (skew / MosaicWidth)]
+			local fill : coSw * steps / (top - bottom)
+			return : Shade _steps fill
+
+		create-glyph [MangleName 'sparseHoriShade'] [MangleUnicode 0x1CC40] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HShade 4 top bottom left right
+		create-glyph [MangleName 'sparseVertShade'] [MangleUnicode 0x1CC41] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VShade (2 * MosaicWidthScalar) top bottom left right
+		create-glyph [MangleName 'orthoCrosshatchShade'] [MangleUnicode 0x1CC42] : glyph-proc
+			set-width MosaicWidth
+			include : refer-glyph : MangleName 'sparseHoriShade'
+			include : refer-glyph : MangleName 'sparseVertShade'
+		create-glyph [MangleName 'diagCrosshatchShade'] [MangleUnicode 0x1CC43] : glyph-proc
+			set-width MosaicWidth
+			include : DiagShade 4
+			include : DiagShade (-4)
+		create-glyph [MangleName 'denseHoriShade'] [MangleUnicode 0x1CC44] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HShade 8 top bottom left right
+		create-glyph [MangleName 'denseVertShade'] [MangleUnicode 0x1CC45] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VShade (4 * MosaicWidthScalar) top bottom left right
