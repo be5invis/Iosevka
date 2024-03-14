@@ -905,6 +905,16 @@ const PagesDataExport = task(`pages:data-export`, async t => {
 		exportPathMeta: Path.resolve(pagesDir, "shared/data-import/raw/metadata.json"),
 		exportPathCov: Path.resolve(pagesDir, "shared/data-import/raw/coverage.json"),
 	});
+
+	// Update packages.json version
+	const packageJson = JSON.parse(
+		await FS.promises.readFile(Path.resolve(pagesDir, "package.json"), "utf-8"),
+	);
+	packageJson.version = version;
+	await FS.promises.writeFile(
+		Path.resolve(pagesDir, "package.json"),
+		JSON.stringify(packageJson, null, "  "),
+	);
 });
 
 const PagesFontExport = task.group(`pages:font-export`, async (target, gr) => {
