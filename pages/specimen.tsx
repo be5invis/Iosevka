@@ -559,7 +559,11 @@ function SpecimenCharacterImpl(props: SpecimenCharacterImplProps) {
 
     const isMark = props.char.inFont && props.char.gc === "Nonspacing_Mark";
     const isSpace =
-        props.char.inFont && (props.char.gc === "Space_Separator" || props.char.gc === "Format");
+        props.char.inFont &&
+        (props.char.gc === "Space_Separator" ||
+            props.char.gc === "Format" ||
+            props.char.gc === "Line_Separator" ||
+            props.char.gc === "Paragraph_Separator");
     const isMosaic =
         props.char.inFont &&
         (props.blockName === "Private Use Area" ||
