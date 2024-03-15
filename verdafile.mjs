@@ -424,7 +424,7 @@ const DistUnhintedTTF = file.make(
 			// Ab-initio build
 			const cacheFileName =
 				`${Math.round(1000 * fi.shape.weight)}-${Math.round(1000 * fi.shape.width)}-` +
-				`${Math.round(3600 * fi.shape.slopeAngle)}-${fi.shape.slope}`;
+				`${Math.round(3600 * fi.shape.slopeAngle)}`;
 			const cachePath = `${SHARED_CACHE}/${cacheFileName}.mpz`;
 			const cacheDiffPath = `${charMapPath.dir}/${fn}.cache.mpz`;
 
