@@ -1130,7 +1130,7 @@ const Release = task(`release`, async target => {
 });
 
 const ReleaseArchives = task(`release:archives`, async target => {
-	const [collectPlans] = await target.need(Version, CollectPlans, UtilScriptFiles);
+	const [collectPlans] = await target.need(CollectPlans, UtilScriptFiles);
 
 	let goals = [];
 	for (const [cgr, plan] of Object.entries(collectPlans)) {
