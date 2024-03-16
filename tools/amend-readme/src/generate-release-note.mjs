@@ -39,11 +39,14 @@ export default async function main(argv) {
 	let baseUrl = `https://github.com/be5invis/Iosevka/blob/v${argv.version}/doc`;
 	await GenerateChangeList(argv, out);
 	out.log(
-		`<table>` +
+		`<table>\n` +
 			`<tr><td align="center"><h1>` +
 			`<a href="${baseUrl}/PACKAGE-LIST.md">View package list</a>` +
-			`</h1></td></tr>` +
-			`</table>`,
+			`</h1></td></tr>\n` +
+			`<tr><td align="center">` +
+			`<a href="${baseUrl}/SHA-256.txt">SHA-256 hashes</a>` +
+			`</td></tr>\n` +
+			`</table>\n`,
 	);
 	await fs.promises.writeFile(argv.outputPath, out.data);
 }

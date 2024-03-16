@@ -424,7 +424,7 @@ const DistUnhintedTTF = file.make(
 			// Ab-initio build
 			const cacheFileName =
 				`${Math.round(1000 * fi.shape.weight)}-${Math.round(1000 * fi.shape.width)}-` +
-				`${Math.round(3600 * fi.shape.slopeAngle)}-${fi.shape.slope}`;
+				`${Math.round(3600 * fi.shape.slopeAngle)}`;
 			const cachePath = `${SHARED_CACHE}/${cacheFileName}.mpz`;
 			const cacheDiffPath = `${charMapPath.dir}/${fn}.cache.mpz`;
 
@@ -905,6 +905,16 @@ const PagesDataExport = task(`pages:data-export`, async t => {
 		exportPathMeta: Path.resolve(pagesDir, "shared/data-import/raw/metadata.json"),
 		exportPathCov: Path.resolve(pagesDir, "shared/data-import/raw/coverage.json"),
 	});
+
+	// Update packages.json version
+	const packageJson = JSON.parse(
+		await FS.promises.readFile(Path.resolve(pagesDir, "package.json"), "utf-8"),
+	);
+	packageJson.version = version;
+	await FS.promises.writeFile(
+		Path.resolve(pagesDir, "package.json"),
+		JSON.stringify(packageJson, null, "  "),
+	);
 });
 
 const PagesFontExport = task.group(`pages:font-export`, async (target, gr) => {
@@ -1120,7 +1130,7 @@ const Release = task(`release`, async target => {
 });
 
 const ReleaseArchives = task(`release:archives`, async target => {
-	const [collectPlans] = await target.need(Version, CollectPlans, UtilScriptFiles);
+	const [collectPlans] = await target.need(CollectPlans, UtilScriptFiles);
 
 	let goals = [];
 	for (const [cgr, plan] of Object.entries(collectPlans)) {
