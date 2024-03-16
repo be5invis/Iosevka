@@ -18,19 +18,16 @@ setTimeout(
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 async function main() {
-	const outMd = await glob("release-archives/*.md");
-	if (outMd.length != 1) throw new Error("Expected exactly one .md file in release-archives");
+	const sourcesPattern = process.argv[2];
+	const outPath = process.argv[3];
 
-	const o = fs.createWriteStream(outMd[0], { flags: "a" });
+	const o = fs.createWriteStream(outPath);
 
-	o.write("\n\n## SHA256 checksums\n\n");
-	o.write("<details>\n\n");
-	const zipFilesToArchive = (await glob("release-archives/*.zip")).sort();
+	const zipFilesToArchive = (await glob(sourcesPattern)).sort();
 	for (const filePath of zipFilesToArchive) {
 		console.log(`Checking ${filePath}...`);
-		o.write(`* \`${await hashFile(filePath)}\` ${path.basename(filePath)}\n`);
+		o.write(`${await hashFile(filePath)}\t${path.basename(filePath)}\n`);
 	}
-	o.write("</details>\n\n");
 
 	o.end();
 }
