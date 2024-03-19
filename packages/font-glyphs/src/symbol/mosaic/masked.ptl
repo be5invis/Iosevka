@@ -1,0 +1,53 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import as Gr from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Symbol-Mosaic-Masked : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define MosaicTop    fontMetrics.os2.sTypoAscender
+	define MosaicBottom fontMetrics.os2.sTypoDescender
+
+	define [CellMask] : spiro-outline
+		corner 0 MosaicTop
+		corner MosaicWidth MosaicTop
+		corner MosaicWidth MosaicBottom
+		corner 0 MosaicBottom
+
+	define halfHeight : 0.5 * (MosaicTop - MosaicBottom)
+	define halfWidth : 0.5 * MosaicWidth
+
+	define [SplitShape dstName dstUnicode srcName dx dy] : begin
+		create-glyph [MangleName dstName] [MangleUnicode dstUnicode] : glyph-proc
+			set-width MosaicWidth
+			include : intersection
+				CellMask
+				with-transform [ApparentTranslate dx dy] : refer-glyph : MangleName srcName
+
+	SplitShape 'whiteCircleLowerHalfJustified' 0x1FBE0 'whiteCircle' 0 halfHeight
+	SplitShape 'whiteCircleLeftHalfJustified'  0x1FBE1 'whiteCircle' halfWidth 0
+	SplitShape 'whiteCircleUpperHalfJustified' 0x1FBE2 'whiteCircle' 0 (-halfHeight)
+	SplitShape 'whiteCircleRightHalfJustified' 0x1FBE3 'whiteCircle' (-halfWidth) 0
+	SplitShape 'blackCircleLowerHalfJustified' 0x1FBE8 'blackCircle' 0 halfHeight
+	SplitShape 'blackCircleLeftHalfJustified'  0x1FBE9 'blackCircle' halfWidth 0
+	SplitShape 'blackCircleUpperHalfJustified' 0x1FBEA 'blackCircle' 0 (-halfHeight)
+	SplitShape 'blackCircleRightHalfJustified' 0x1FBEB 'blackCircle' (-halfWidth) 0
+	SplitShape 'blackCircleLBQuarterJustified' 0x1FBEC 'blackCircle' halfWidth halfHeight
+	SplitShape 'blackCircleRTQuarterJustified' 0x1FBED 'blackCircle' (-halfWidth) (-halfHeight)
+	SplitShape 'blackCircleLTQuarterJustified' 0x1FBEE 'blackCircle' halfWidth (-halfHeight)
+	SplitShape 'blackCircleRBQuarterJustified' 0x1FBEF 'blackCircle' (-halfWidth) halfHeight
+	SplitShape 'whiteEllipseLeftHalfJustified'  0x1CE0B 'whiteEllipse' halfWidth 0
+	SplitShape 'whiteEllipseRightHalfJustified' 0x1CE0C 'whiteEllipse' (-halfWidth) 0
+
+	create-glyph [MangleName 'whiteCircleLeftRightHalf'] [MangleUnicode 0x1CE01] : glyph-proc
+		set-width MosaicWidth
+		include : refer-glyph : MangleName 'whiteCircleLowerHalfJustified'
+		include : refer-glyph : MangleName 'whiteCircleUpperHalfJustified'
+	create-glyph [MangleName 'whiteCircleUpperLowerHalf'] [MangleUnicode 0x1CE00] : glyph-proc
+		set-width MosaicWidth
+		include : refer-glyph : MangleName 'whiteCircleLeftHalfJustified'
+		include : refer-glyph : MangleName 'whiteCircleRightHalfJustified'
