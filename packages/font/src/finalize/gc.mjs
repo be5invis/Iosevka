@@ -318,8 +318,8 @@ function alterGeometryAndOptimize(collection) {
 		}
 
 		cluster.representative.glyph.geometry = new Geometry.TransformedGeometry(
-			gT.geometry,
 			Transform.Translate(cluster.representative.x, cluster.representative.y),
+			gT.geometry,
 		);
 
 		for (const [g, tf] of cluster.aliases) {

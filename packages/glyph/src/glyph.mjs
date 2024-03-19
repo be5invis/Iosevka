@@ -4,6 +4,7 @@ import * as Geom from "@iosevka/geometry";
 import { Anchor } from "@iosevka/geometry/anchor";
 import { Vec2 } from "@iosevka/geometry/point";
 import { Transform } from "@iosevka/geometry/transform";
+
 import { ScheduleLeaningMark } from "./relation.mjs";
 
 export class Glyph {
@@ -124,7 +125,7 @@ export class Glyph {
 			this.includeGeometry(new Geom.ReferenceGeometry(g, shiftX, shiftY));
 		} else {
 			this.includeGeometry(
-				new Geom.TransformedGeometry(g.geometry, Transform.Translate(shiftX, shiftY)),
+				new Geom.TransformedGeometry(Transform.Translate(shiftX, shiftY), g.geometry),
 			);
 		}
 	}
@@ -138,7 +139,7 @@ export class Glyph {
 		this.includeGeometry(new Geom.ContourSetGeometry(cs));
 	}
 	applyTransform(tfm, alsoAnchors) {
-		this.geometry = new Geom.TransformedGeometry(this.geometry, tfm);
+		this.geometry = new Geom.TransformedGeometry(tfm, this.geometry);
 		if (alsoAnchors) {
 			for (const k in this.baseAnchors)
 				this.baseAnchors[k] = Anchor.transform(tfm, this.baseAnchors[k]);
