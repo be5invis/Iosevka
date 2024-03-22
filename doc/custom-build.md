@@ -3203,9 +3203,9 @@ In addition to list all the weights/widths/slopes directly, the user could also 
 [buildPlans.IosevkaCustom2]
 family = "Iosevka Custom 2"
 
-weights.inherits = "IosevkaCustom1" # Inherit weights list from "IosevkaCustom1"
-widths.inherits = "IosevkaCustom1"  # Inherit widths list from "IosevkaCustom1"
-slopes.inherits = "IosevkaCustom1"  # Inherit slopes list from "IosevkaCustom1"
+weights.inherits = "buildPlans.IosevkaCustom1" # Inherit weights list from "IosevkaCustom1"
+widths.inherits = "buildPlans.IosevkaCustom1"  # Inherit widths list from "IosevkaCustom1"
+slopes.inherits = "default"  # Inherit slopes list from default
 ```
 
 #### Compatibility Ligatures
