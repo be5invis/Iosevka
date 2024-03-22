@@ -100,22 +100,6 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
 
 * `inherits`: Optional, String, defines the inherited ligation set. When absent, the ligation set will not inherit any other sets. Valid values are:
 
-  - `--default-center-ops--`: Default ligation set would be assigned to undefined.
-  - `--c-center-ops--`: Default ligation set would be assigned to undefined.
-  - `--default-equality-inequality--`: Default ligation set would be assigned to undefined.
-  - `--c-equality-inequality--`: Default ligation set would be assigned to undefined.
-  - `--raku-equality-inequality--`: Default ligation set would be assigned to undefined.
-  - `--ml-equality-inequality--`: Default ligation set would be assigned to undefined.
-  - `--fstar-equality-inequality--`: Default ligation set would be assigned to undefined.
-  - `--haskell-equality-inequality--`: Default ligation set would be assigned to undefined.
-  - `--matlab-equality-inequality--`: Default ligation set would be assigned to undefined.
-  - `--verilog-equality-inequality--`: Default ligation set would be assigned to undefined.
-  - `--wolfram-equality-inequality--`: Default ligation set would be assigned to undefined.
-  - `--erlang-equality-inequality--`: Default ligation set would be assigned to undefined.
-  - `--default-kern--`: Default ligation set would be assigned to undefined.
-  - `--default-chaining--`: Default ligation set would be assigned to undefined.
-  - `--fast-chaining--`: Default ligation set would be assigned to undefined.
-  - `--c-like-chaining--`: Default ligation set would be assigned to undefined.
   - `default-calt`: Inherit default ligation set.
   - `dlig`: Default ligation set would be assigned to Discretionary ligatures.
   - `clike`: Default ligation set would be assigned to C-Like.
@@ -3212,6 +3196,17 @@ Subsection `slopes` is used to change the slope angles and grades that the custo
    * `shape`: String from `upright`, `italic` or `oblique`. Configures the slope used for variant selection. 
    * `menu`: String from `upright`, `italic` or `oblique`. Configures the slope grade used when naming fonts.
    * `css`: String from `normal`, `italic` or `oblique`. Configures the [CSS font-style](https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-style) value.
+
+In addition to list all the weights/widths/slopes directly, the user could also configure the weights/widths/slopes list using “inherits” to inherit the list from another build plan:
+
+```toml
+[buildPlans.IosevkaCustom2]
+family = "Iosevka Custom 2"
+
+weights.inherits = "buildPlans.IosevkaCustom1" # Inherit weights list from "IosevkaCustom1"
+widths.inherits = "buildPlans.IosevkaCustom1"  # Inherit widths list from "IosevkaCustom1"
+slopes.inherits = "default"  # Inherit slopes list from default
+```
 
 #### Compatibility Ligatures
 

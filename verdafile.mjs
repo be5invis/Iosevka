@@ -1272,22 +1272,48 @@ function resolveWws(bpName, buildPlans, defaultConfig) {
 function resolveWwsAspect(aspectName, bpName, buildPlans, defaultConfig, deps) {
 	const bp = buildPlans[bpName];
 	if (!bp) fail(`Build plan ${bpName} not found.`);
+	if (deps.includes(bp)) {
+		fail(`Circular dependency detected when resolving ${aspectName} of ${bp.family}.`);
+	}
+	const updatedDeps = [...deps, bpName];
 
 	if (bp[aspectName]) {
-		return shimBpAspect(aspectName, bp[aspectName], defaultConfig[aspectName]);
+		const aspect = bp[aspectName];
+		if (typeof aspect.inherits == "string") {
+			if (aspect.inherits === "default") {
+				return defaultConfig[aspectName];
+			} else {
+				// Make sure it start with `buildPlans.`
+				if (!aspect.inherits.startsWith("buildPlans.")) {
+					fail(
+						`Invalid \`inherits\`2 value for ${aspectName} in ${bpName}. ` +
+							`It must be \`default\` or start with \`buildPlans.\`.`,
+					);
+				}
+				const inheritedPlanName = aspect.inherits.slice("buildPlans.".length);
+				return resolveWwsAspect(
+					aspectName,
+					inheritedPlanName,
+					buildPlans,
+					defaultConfig,
+					updatedDeps,
+				);
+			}
+		} else {
+			return shimBpAspect(aspectName, bp[aspectName], defaultConfig[aspectName]);
+		}
 	} else if (bp[`${aspectName}-inherits`]) {
+		echo.warn(
+			`The ${aspectName}-inherits syntax is deprecated. ` +
+				`Use the new syntax \`${aspectName}.inherits = "buildPlans.<plan name>\` instead.`,
+		);
 		const inheritedPlanName = bp[`${aspectName}-inherits`];
-		const inheritedPlan = buildPlans[inheritedPlanName];
-		if (deps.includes(inheritedPlan))
-			fail(`Circular dependency detected when resolving ${aspectName} of ${bp.family}.`);
-
-		const updatedDes = [...deps, bpName];
 		return resolveWwsAspect(
 			aspectName,
 			inheritedPlanName,
 			buildPlans,
 			defaultConfig,
-			updatedDes,
+			updatedDeps,
 		);
 	} else {
 		return defaultConfig[aspectName];
@@ -1304,11 +1330,18 @@ function shimBpAspect(aspectName, aspect, defaultAspect) {
 }
 function shimBpAspectKey(aspectName, sink, k, v, defaultAspect) {
 	if (typeof v === "string") {
-		if (!/^default\./.test(v))
-			throw new Error(`Invalid configuration '${v}' for ${aspectName}.${k}'`);
+		if (!v.startsWith("default."))
+			throw new Error(
+				`Invalid configuration '${v}' for ${aspectName}.${k}'. ` +
+					`It must start with 'default.'`,
+			);
 		const remappingKey = v.slice("default.".length);
 		if (!defaultAspect[remappingKey])
-			throw new Error(`Invalid configuration '${v}' for ${aspectName}.${k}'`);
+			throw new Error(
+				`Invalid configuration '${v}' for ${aspectName}.${k}'. ` +
+					`The default aspect doesn't have a key '${remappingKey}'.`,
+			);
+
 		sink[k] = defaultAspect[remappingKey];
 	} else {
 		sink[k] = v;
