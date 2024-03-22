@@ -145,7 +145,7 @@ class MappedGlyphStore {
 		const gl = new Ot.Glyph.GeometryList();
 		for (const ref of rs) {
 			const target = this.queryBySourceGlyph(ref.glyph);
-			if (!target) throw new Error("Unreachable");
+			if (!target) throw new Error("Unreachable: glyph not found");
 			const tfm = Ot.Glyph.Transform2X3.Translate(ref.x, ref.y);
 			gl.items.push(new Ot.Glyph.TtReference(target, tfm));
 		}

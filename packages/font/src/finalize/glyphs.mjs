@@ -12,43 +12,11 @@ export function finalizeGlyphs(cache, para, glyphStore) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 function regulateGlyphStore(cache, skew, glyphStore) {
-	const compositeMemo = new Map();
 	for (const g of glyphStore.glyphs()) {
 		if (!(g.geometry.measureComplexity() & Geom.CPLX_NON_EMPTY)) continue;
-		if (!regulateCompositeGlyph(glyphStore, compositeMemo, g)) {
-			g.geometry = g.geometry.unlinkReferences();
-		}
-	}
-	for (const g of glyphStore.glyphs()) {
-		if (!compositeMemo.get(g)) flattenSimpleGlyph(cache, skew, g);
+		if (!g.geometry.toReferences()) flattenSimpleGlyph(cache, skew, g);
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-function regulateCompositeGlyph(glyphStore, memo, g) {
-	if (memo.has(g)) return memo.get(g);
-
-	let refs = g.geometry.toReferences();
-	if (!refs) return memoSet(memo, g, false);
-
-	for (const sr of refs) {
-		const gn = glyphStore.queryNameOf(sr.glyph);
-		if (!gn) return memoSet(memo, g, false);
-	}
-
-	let refGeometries = [];
-	for (const sr of refs) refGeometries.push(new Geom.ReferenceGeometry(sr.glyph, sr.x, sr.y));
-	g.geometry = new Geom.CombineGeometry(refGeometries);
-	return memoSet(memo, g, true);
-}
-
-function memoSet(memo, g, v) {
-	memo.set(g, v);
-	return v;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
 
 function flattenSimpleGlyph(cache, skew, g) {
 	const ck = Geom.hashGeometry(g.geometry);
