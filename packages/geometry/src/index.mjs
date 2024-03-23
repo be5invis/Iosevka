@@ -202,8 +202,8 @@ export class ReferenceGeometry extends GeometryBase {
 	}
 	unwrap() {
 		return new TransformedGeometry(
-			this.m_glyph.geometry,
 			Transform.Translate(this.m_x, this.m_y),
+			this.m_glyph.geometry,
 		);
 	}
 	toContours() {
@@ -267,11 +267,16 @@ export class TaggedGeometry extends GeometryBase {
 }
 
 export class TransformedGeometry extends GeometryBase {
-	constructor(g, tfm) {
+	constructor(tfm, g) {
 		super();
-		this.m_geom = g;
 		this.m_transform = tfm;
+		this.m_geom = g;
 	}
+
+	withTransform(tfm) {
+		return new TransformedGeometry(Transform.Combine(this.m_transform, tfm), this.m_geom);
+	}
+
 	toContours() {
 		let result = [];
 		for (const c of this.m_geom.toContours()) {
@@ -296,7 +301,7 @@ export class TransformedGeometry extends GeometryBase {
 	filterTag(fn) {
 		const e = this.m_geom.filterTag(fn);
 		if (!e) return null;
-		return new TransformedGeometry(e, this.m_transform);
+		return new TransformedGeometry(this.m_transform, e);
 	}
 	measureComplexity() {
 		return (
@@ -308,26 +313,16 @@ export class TransformedGeometry extends GeometryBase {
 		const unwrapped = this.m_geom.unlinkReferences();
 		if (Transform.isIdentity(this.m_transform)) {
 			return unwrapped;
-		} else if (
-			unwrapped instanceof TransformedGeometry &&
-			Transform.isTranslate(this.m_transform) &&
-			Transform.isTranslate(unwrapped.m_transform)
-		) {
-			return new TransformedGeometry(
-				unwrapped.m_geom,
-				Transform.Translate(
-					this.m_transform.tx + unwrapped.m_transform.tx,
-					this.m_transform.ty + unwrapped.m_transform.ty,
-				),
-			);
+		} else if (unwrapped instanceof TransformedGeometry) {
+			return unwrapped.withTransform(this.m_transform);
 		} else {
-			return new TransformedGeometry(unwrapped, this.m_transform);
+			return new TransformedGeometry(this.m_transform, unwrapped);
 		}
 	}
 	toShapeStringOrNull() {
 		const sTarget = this.m_geom.toShapeStringOrNull();
 		if (!sTarget) return null;
-		return Format.struct("TransformedGeometry", sTarget, Format.gizmo(this.m_transform));
+		return Format.struct("TransformedGeometry", Format.gizmo(this.m_transform), sTarget);
 	}
 }
 
@@ -544,7 +539,7 @@ export class StrokeGeometry extends GeometryBase {
 
 	toContours() {
 		// Produce simplified arcs
-		const nonTransformedGeometry = new TransformedGeometry(this.m_geom, this.m_gizmo.inverse());
+		const nonTransformedGeometry = new TransformedGeometry(this.m_gizmo.inverse(), this.m_geom);
 		let arcs = TypoGeom.Boolean.removeOverlap(
 			CurveUtil.convertShapeToArcs(nonTransformedGeometry.toContours()),
 			TypoGeom.Boolean.PolyFillType.pftNonZero,

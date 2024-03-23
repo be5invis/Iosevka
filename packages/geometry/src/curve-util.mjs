@@ -23,8 +23,8 @@ function convertContourToArcs(contour) {
 		switch (z.type) {
 			case Point.Type.CubicStart: {
 				const z1 = z;
-				const z2 = contour[j + 1];
-				const z3 = contour[j + 2];
+				const z2 = contour[(j + 1) % contour.length];
+				const z3 = contour[(j + 2) % contour.length];
 				newContour.push(
 					new TypoGeom.Arcs.Bez3(
 						z0,
@@ -39,7 +39,7 @@ function convertContourToArcs(contour) {
 			}
 			case Point.Type.Quadratic: {
 				const zc = z;
-				let zf = contour[j + 1] || contour[0];
+				let zf = contour[(j + 1) % contour.length];
 				const zfIsCorner = zf.type === Point.Type.contour;
 				if (!zfIsCorner) zf = Point.from(Point.Type.Corner, zc).mix(0.5, zf);
 				newContour.push(

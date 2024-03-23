@@ -12,16 +12,24 @@ glyph-block Letter-Shared : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : TurnMarks LeaningAnchorMap
 
+	glyph-block-export CreateMultiAccentedComposition
+	define [CreateMultiAccentedComposition dst u gnSrc gnAccents]
+		derive-multi-part-glyphs dst u { gnSrc :: gnAccents } : function [gns gr] : glyph-proc
+			local { gnBase :: gnAccents } gns
+
+			include [refer-glyph gnBase] AS_BASE ALSO_METRICS
+			foreach gnAccent [items-of gnAccents] : begin
+				local gAccent : query-glyph gnAccent
+				currentGlyph.includeMarkWithLeaningSupport gAccent LeaningAnchorMap
+
+			if (!gr) : begin
+				if (gnAccents.length === 1 && gnAccents.0 === 'dotAbove')
+				: then : Dotless.set currentGlyph gnBase
+				: else : CvDecompose.set currentGlyph { gnSrc :: gnAccents }
+
 	glyph-block-export CreateAccentedComposition
 	define [CreateAccentedComposition dst u srcGid accentGid]
-		derive-multi-part-glyphs dst u { srcGid accentGid } : function [gns gr] : glyph-proc
-			local { base mark } gns
-			local gMark : query-glyph mark
-
-			include [refer-glyph base] AS_BASE ALSO_METRICS
-			currentGlyph.includeMarkWithLeaningSupport gMark LeaningAnchorMap
-
-			if (!gr && accentGid === 'dotAbove') : Dotless.set currentGlyph base
+		CreateMultiAccentedComposition dst u srcGid { accentGid }
 
 	glyph-block-export CreateOgonekComposition
 	define [CreateOgonekComposition dst u srcGid]
@@ -43,13 +51,6 @@ glyph-block Letter-Shared : begin
 			include : refer-glyph comma
 			include : ApparentTranslate commaOffset 0
 			include [refer-glyph base] AS_BASE ALSO_METRICS
-
-	glyph-block-export CreateMultiAccentedComposition
-	define [CreateMultiAccentedComposition dstGid unicode srcGid accentGids fDontDecompose]
-		derive-glyphs dstGid unicode srcGid : lambda [src gr] : glyph-proc
-			include [refer-glyph src] AS_BASE ALSO_METRICS
-			foreach accentGid [items-of accentGids] : include [refer-glyph accentGid]
-			if (!fDontDecompose && !gr) : CvDecompose.set currentGlyph { src :: accentGids }
 
 	glyph-block-export CreateDependentComposite
 	define [CreateDependentComposite gidDst unicode gidPart1 gidPart2Map] : begin

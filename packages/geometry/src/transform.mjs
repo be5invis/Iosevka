@@ -83,6 +83,11 @@ export class Transform {
 	static isPositive(tfm) {
 		return tfm.xx * tfm.yy - tfm.xy * tfm.yx > 0;
 	}
+	static Scale(sx, sy) {
+		return new Transform(sx, 0, 0, sy, 0, 0);
+	}
+
+	/** Combine the transfoems, in application order */
 	static Combine(...tfms) {
 		let z00 = new Vec2(0, 0);
 		let z10 = new Vec2(1, 0);
