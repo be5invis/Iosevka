@@ -12,8 +12,7 @@ glyph-block Mark-Tie : begin
 	glyph-block-import Mark-Shared-Metrics : markExtend markHalfStroke markStress markFine
 	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
 	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
-	glyph-block-import Mark-Above : TildeShape CaretShape CaretCaronWidth
-	glyph-block-import Mark-Above : CaretCaronMidSw CaretCaronTerminalSw
+	glyph-block-import Mark-Above : TildeShape CaretCaronMidSw CaretCaronTerminalSw
 	glyph-block-import Mark-Below : belowMarkBot belowMarkTop belowMarkMid
 
 	define aboveTieBase   : aboveMarkStack - AccentClearance
@@ -130,15 +129,23 @@ glyph-block Mark-Tie : begin
 
 	create-glyph 'circumflexTieAbove' 0x1DCD : glyph-proc
 		set-width 0
-		set-mark-anchor 'tieAbove' 0 aboveTieBase 0 aboveTieTop
-		set-base-anchor 'aboveBraceL' (0 - 0.5 * markExtend) aboveTieMid
-		set-base-anchor 'aboveBraceR' (0 + 0.5 * markExtend) aboveTieMid
+		include : TieAboveAnchors
 
 		TieGlyph.set currentGlyph
-		include : CaretShape
-			xMiddle -- 0
-			width   -- CaretCaronWidth
-			top     -- aboveTieTop + markFine * 0.7
-			bottom  -- aboveTieBottom + markStress - markFine
-			swEnd   -- CaretCaronTerminalSw
-			swMid   -- CaretCaronMidSw
+		local leftHalf : include : dispiro
+			flat tieLeft aboveTieBottom [widths.center CaretCaronTerminalSw]
+			curl 0 aboveTieTop [widths.center CaretCaronMidSw]
+		local rightHalf : include : dispiro
+			flat tieRight aboveTieBottom [widths.center CaretCaronTerminalSw]
+			curl 0 aboveTieTop [widths.center CaretCaronMidSw]
+
+		local a leftHalf.lhsKnots.1
+		local b rightHalf.rhsKnots.1
+		local c leftHalf.rhsKnots.1
+		local d rightHalf.lhsKnots.1
+
+		include : spiro-outline
+			corner a.x a.y
+			corner b.x b.y
+			corner [Math.max c.x d.x] d.y
+			corner [Math.min c.x d.x] c.y

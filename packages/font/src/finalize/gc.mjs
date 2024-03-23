@@ -318,8 +318,8 @@ function alterGeometryAndOptimize(collection) {
 		}
 
 		cluster.representative.glyph.geometry = new Geometry.TransformedGeometry(
-			gT.geometry,
 			Transform.Translate(cluster.representative.x, cluster.representative.y),
+			gT.geometry,
 		);
 
 		for (const [g, tf] of cluster.aliases) {
@@ -359,9 +359,14 @@ function rectifyGlyphAndMarkComponents(glyphStore, aliasMap, markedGlyphs, memo,
 	if (memo.has(g)) return;
 	memo.add(g);
 
-	let refs = g.geometry.toReferences();
-	if (refs) {
-		let parts = [];
+	analyzeRefs: {
+		let refs = g.geometry.toReferences();
+		if (!refs) break analyzeRefs;
+
+		let partGns = []; // The names of the referenced glyphs
+		let parts = []; // The parts of the new geometry
+		let hasMarked = false; // Whether any of the referenced glyphs is marked
+
 		for (let sr of refs) {
 			// Resolve alias
 			const alias = aliasMap.get(sr.glyph);
@@ -371,14 +376,14 @@ function rectifyGlyphAndMarkComponents(glyphStore, aliasMap, markedGlyphs, memo,
 				sr.y += alias.y;
 			}
 
+			// Resolve reference
 			const gn = glyphStore.queryNameOf(sr.glyph);
 			if (!gn) {
 				// Reference is invalid. The root glyph will be radicalized.
-				g.geometry = new Geometry.RadicalGeometry(g.geometry.unlinkReferences());
-				return;
+				break analyzeRefs;
 			} else {
 				// Reference is valid. Process the referenced glyph.
-				if (!markedGlyphs.has(gn)) markedGlyphs.set(gn, d + 0x10000);
+				if (markedGlyphs.has(gn)) hasMarked = true;
 				rectifyGlyphAndMarkComponents(
 					glyphStore,
 					aliasMap,
@@ -388,10 +393,18 @@ function rectifyGlyphAndMarkComponents(glyphStore, aliasMap, markedGlyphs, memo,
 					d + 0x10000,
 				);
 				parts.push(new Geometry.ReferenceGeometry(sr.glyph, sr.x, sr.y));
+				partGns.push(gn);
 			}
 		}
-		g.geometry = new Geometry.CombineGeometry(parts);
-	} else {
-		g.geometry = new Geometry.RadicalGeometry(g.geometry.unlinkReferences());
+
+		// If any of the referenced glyphs is marked, mark all the remaining references.
+		if (hasMarked) {
+			for (const gn of partGns) if (!markedGlyphs.has(gn)) markedGlyphs.set(gn, d + 0x10000);
+			g.geometry = new Geometry.CombineGeometry(parts);
+			return;
+		}
 	}
+
+	// Make the glyph radical if it has no marked references.
+	g.geometry = g.geometry.unlinkReferences();
 }

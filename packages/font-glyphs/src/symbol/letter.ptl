@@ -2,7 +2,10 @@
 
 $$include '../meta/macros.ptl'
 
+import [TransformedGeometry ContourSetGeometry] from "@iosevka/geometry"
+import [Point] from "@iosevka/geometry/point"
 import [Box] from "@iosevka/geometry/box"
+import [Transform] from "@iosevka/geometry/transform"
 import [mix linreg clamp fallback] from "@iosevka/util"
 import [DesignParameters] from "../meta/aesthetics.mjs"
 
@@ -158,29 +161,66 @@ glyph-block Symbol-Letter : begin
 
 	alias 'Ohm' 0x2126 'grek/Omega'
 	turned 'Mho' 0x2127 'Ohm' Middle (CAP / 2)
-	turned 'turniota' 0x2129 'grek/iota' HalfAdvance (XH / 2)
+
 	alias 'letterLike/kelvinSign' 0x212A 'K'
 
-	create-glyph 'estimated' 0x212E : glyph-proc
-		include : MarkSet.capital
-		local fineArc : CAP * 0.0300
-		local fineBar : CAP * 0.0278
-		local thickBarWidth : (0.183 / [Math.sqrt 0.9]) * [Math.sqrt (CAP * (RightSB - SB))]
-		define smA : ArchDepthAOf (ArchDepth * (CAP / XH)) Width
-		define smB : ArchDepthBOf (ArchDepth * (CAP / XH)) Width
-		include : union
-			HBar.b SB RightSB (CAP * 0.5) fineBar
-			difference
-				union
-					difference
-						OShapeOutline CAP 0 SB RightSB fineArc smA smB
-						OShapeOutline (CAP - fineArc) (0 + fineArc) [mix SB RightSB 0.077] [mix RightSB SB 0.077] fineArc (smA - fineArc) (smB - fineArc)
-					intersection
-						OShapeOutline.NoOvershoot CAP 0 SB RightSB fineArc smA smB
-						union
-							Rect CAP 0 SB (SB + thickBarWidth)
-							Rect CAP (CAP * 0.5) (RightSB - thickBarWidth) RightSB
-				Rect (CAP * 0.5) (CAP * 0.208) Middle Width
+	for-width-kinds WideWidth1 : begin
+		create-glyph [MangleName 'estimated'] [MangleUnicode 0x212E] : glyph-proc
+			set-width MosaicWidth
+
+			local cx 500
+			local cy 450
+			local r1 (846 / 2)
+			local yGapSize 263
+			local sw 183
+			local r2 85
+			local r3 13
+			local swCenter 25
+
+			# Scale and transform
+			local desiredHeight : if FMosaicWide CAP XH
+			local s : Math.min (desiredHeight / (2 * cy)) ((MosaicWidth - SB) / (2 * cx))
+			local glyphCenter : currentGlyph.gizmo.applyXY (MosaicWidth / 2) (desiredHeight / 2)
+			local tfm : Transform.Combine
+				Transform.Translate (-cx) (-cy)
+				Transform.Scale s s
+				Transform.Translate glyphCenter.x glyphCenter.y
+
+			# Center of inner round corner, as well as the limit X for the inner circle edge
+			local xLargeRc : sw + r2
+			local yLargeRc : cy - [Math.sqrt ((r1 - r2) * (r1 - r2) - (cx - sw - r2) * (cx - sw - r2))]
+			local xInnerCircleLimit : cx - (cx - xLargeRc) * (r1 / (r1 - r2))
+
+			include : ForceUpright
+			include : difference [Ellipse.Outline.At cx cy cx cy]
+				# Inner arcs
+				intersection [Circle.Outline.At cx cy r1] : union
+					Rect (2 * cy) (2 * cy - yLargeRc) xInnerCircleLimit (2 * cx - xInnerCircleLimit)
+					Rect yLargeRc (-1) xInnerCircleLimit cx
+					Rect (cy - yGapSize) (-1) (cx - 1) (2 * cx)
+
+				# Large round corners
+				Circle.Outline.At xLargeRc yLargeRc r2
+				Circle.Outline.At xLargeRc (2 * cy - yLargeRc) r2
+				Circle.Outline.At (2 * cx - xLargeRc) (2 * cy - yLargeRc) r2
+
+				# Small round corners
+				Circle.Outline.At (sw + r3) (cy + swCenter + r3) r3
+				Circle.Outline.At (2 * cx - sw - r3) (cy + swCenter + r3) r3
+				Circle.Outline.At (sw + r3) (cy - r3) r3
+
+				# Top inner opening
+				Rect (2 * cy - yLargeRc) (cy + swCenter + r3) sw (2 * cx - sw)
+				Rect (cy + swCenter + r3 + 1) (cy + swCenter) (sw + r3) (2 * cx - sw - r3)
+
+				# Bottom-left opening
+				Rect (cy - r3) yLargeRc sw cx
+				Rect cy (cy - r3 - 1) (sw + r3) cx
+
+				# Bottom-right opening
+				Rect               cy (cy - yGapSize) (cx - 1) (2 * cx)
+
+			include tfm
 
 	create-glyph 'mathAleph' 0x2135 : glyph-proc
 		include : MarkSet.capital

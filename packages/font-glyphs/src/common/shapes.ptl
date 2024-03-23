@@ -160,33 +160,38 @@ glyph-block CommonShapes : begin
 	glyph-block-export DotStrokeAt
 	define [DotStrokeAt x y r s] : RingStroke (y + r) (y - r) (x - r) (x + r) s true
 
-	glyph-block-export CircleRing
-	define [CircleRing u d l r transformShiftOnly] : glyph-proc
-		local giz currentGlyph.gizmo
-		include : new-glyph : glyph-proc
-			local my ((u + d) / 2)
-			local mx ((l + r) / 2)
-			currentGlyph.gizmo = [if transformShiftOnly [Transform.Id] giz]
-			include : spiro-outline
-				begin [lambda : set this.gizmo currentGlyph.gizmo]
-				g4 mx d
-				archv 32 2.0
-				g4 l my
-				arcvh 32 2.0
-				g4 mx u
-				archv 32 2.0
-				g4 r my
-				arcvh 32 2.0
-				close
-			if transformShiftOnly : begin
-				local {.x mx1 .y my1} : giz.apply {.x mx .y my}
-				include : Translate (mx1 - mx) (my1 - my)
-	glyph-block-export CircleRingAt
-	define [CircleRingAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r)
-	glyph-block-export CircleDotAt
-	define [CircleDotAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r) true
-	glyph-block-export RoundStrokeTerminalAt
-	define [RoundStrokeTerminalAt x y r] : CircleRing (y + r) (y - r) (x - [HSwToV r]) (x + [HSwToV r]) true
+	glyph-block-export Circle
+	define Circle : namespace
+		export : define Outline : namespace
+			export : define [At x y r] : Ellipse.Outline.AtDimens (y + r) (y - r) (x - r) (x + r)
+			export : define [DotAt x y r] : Ellipse.Outline.AtDimens (y + r) (y - r) (x - r) (x + r) true
+
+	glyph-block-export Ellipse
+	define Ellipse : namespace
+		export : define Outline : namespace
+			export : define [AtDimens u d l r transformShiftOnly] : glyph-proc
+				local giz currentGlyph.gizmo
+				include : new-glyph : glyph-proc
+					local my ((u + d) / 2)
+					local mx ((l + r) / 2)
+					currentGlyph.gizmo = [if transformShiftOnly [Transform.Id] giz]
+					include : spiro-outline
+						begin [lambda : set this.gizmo currentGlyph.gizmo]
+						g4 mx d
+						archv 32 2.0
+						g4 l my
+						arcvh 32 2.0
+						g4 mx u
+						archv 32 2.0
+						g4 r my
+						arcvh 32 2.0
+						close
+					if transformShiftOnly : begin
+						local {.x mx1 .y my1} : giz.apply {.x mx .y my}
+						include : Translate (mx1 - mx) (my1 - my)
+			export : define [At x y rx ry] : AtDimens (y + ry) (y - ry) (x - rx) (x + rx)
+			export : define [DotAt x y rx ry] : AtDimens (y + ry) (y - ry) (x - rx) (x + rx) true
+			export : define [RoundStrokeTerminalAt x y r] : AtDimens (y + r) (y - r) (x - [HSwToV r]) (x + [HSwToV r]) true
 
 	glyph-block-export OShapeT
 	define [OShapeT sink u d l r _width _ada _adb] : begin

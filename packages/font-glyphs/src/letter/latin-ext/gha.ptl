@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 
 
 glyph-module
@@ -8,14 +8,23 @@ glyph-module
 glyph-block Letter-Latin-Gha : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
+	glyph-block-import Letter-Latin-Lower-Q : RDiagTailedBar
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 
-	define [GhaShape df top] : glyph-proc
+	define TERMINAL-NORMAL  0
+	define TERMINAL-TAILED  1
+	define TERMINAL-DIAG    2
+
+	define [GhaShape df terminal top bot slab] : glyph-proc
 		local abarRight : df.middle + [HSwToV : 0.5 * df.mvs]
 		local ada : ArchDepthAOf [Math.max (df.mvs * 1.125) (SmallArchDepth * 0.6 * df.div)] (Width * df.div)
 		local adb : ArchDepthBOf [Math.max (df.mvs * 1.125) (SmallArchDepth * 0.6 * df.div)] (Width * df.div)
 		include : OShape top 0 df.leftSB abarRight df.mvs ada adb
-		include : VBar.r (df.rightSB - O) Descender top df.mvs
+		include : match terminal
+			[Just TERMINAL-NORMAL] : VBar.r             (df.rightSB - O) bot top df.mvs
+			[Just TERMINAL-TAILED] : RightwardTailedBar (df.rightSB - O) bot top df.mvs
+			[Just TERMINAL-DIAG]   : RDiagTailedBar     (df.rightSB - O) bot top df.mvs
 		include : dispiro
 			widths.lhs df.mvs
 			flat df.middle (top - adb) [heading Rightward]
@@ -23,16 +32,28 @@ glyph-block Letter-Latin-Gha : begin
 			alsoThru 0.5 0.15
 			g4   (df.rightSB - O - [HSwToV df.mvs]) top [widths 0 df.mvs]
 
-		if SLAB : begin
-			local sf : SerifFrame.fromDf df top Descender
+		if slab : begin
+			local sf : SerifFrame.fromDf df top bot
 			include sf.rb.full
 
-	create-glyph 'Gha' 0x1A2 : glyph-proc
-		local df : include : DivFrame para.diversityM 3
-		include : df.markSet.capDesc
-		include : GhaShape df CAP
+	define GhaConfig : object
+		straightSerifless       { TERMINAL-NORMAL false }
+		straightBottomSerifed   { TERMINAL-NORMAL true  }
+		tailedSerifless         { TERMINAL-TAILED false }
+		diagonalTailedSerifless { TERMINAL-DIAG   false }
 
-	create-glyph 'gha' 0x1A3 : glyph-proc
-		local df : include : DivFrame para.diversityM 3
-		include : df.markSet.p
-		include : GhaShape df XH
+	foreach { suffix { terminal doSerif } } [Object.entries GhaConfig] : do
+		create-glyph "Gha.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capDesc
+			include : GhaShape df terminal CAP Descender doSerif
+			include : LeaningAnchor.Below.VBar.r (df.rightSB - O)
+
+		create-glyph "gha.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.p
+			include : GhaShape df terminal XH Descender doSerif
+			include : LeaningAnchor.Below.VBar.r (df.rightSB - O)
+
+	select-variant 'Gha' 0x1A2 (follow -- 'gha')
+	select-variant 'gha' 0x1A3
