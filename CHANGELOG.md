@@ -1,5 +1,11 @@
 ## Modifications since last major version
 
+### 29.0.4
+
+* Make `U+2980` respond to `VSAM`.
+  - `U+2AFC` will no longer respond to `VSAM`.
+
+
 ### 29.0.3
 
 * Fix height of block quadrants (`U+2596`..`U+259F`) (#2240).
