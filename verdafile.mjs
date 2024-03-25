@@ -535,8 +535,8 @@ const BuildNoGcTtf = task.make(
 			const [noGc] = await target.need(BuildNoGcTtfImpl(gr, fn));
 			return noGc;
 		} else {
-			const [distUnhinted] = await target.need(DistHintedTTF(gr, fn));
-			return distUnhinted;
+			const [distHinted] = await target.need(DistHintedTTF(gr, fn));
+			return distHinted;
 		}
 	},
 );
@@ -659,29 +659,33 @@ const CollectPlans = computed(`metadata:collect-plans`, async target => {
 	return await getCollectPlans(target, rawPlans.collectPlans);
 });
 
+const SGR_PREFIX_PREFIX = "SGr-";
+
 // eslint-disable-next-line complexity
 async function getCollectPlans(target, rawCollectPlans) {
 	const plans = {};
 
 	let allCollectableGroups = new Set();
+
 	for (const collectPrefix in rawCollectPlans) {
 		const collect = rawCollectPlans[collectPrefix];
-		if (!collect.release) continue;
-		for (const gr of collect.from) allCollectableGroups.add(gr);
-	}
 
-	const amendedRawCollectPlans = { ...rawCollectPlans };
-	out: for (const gr of allCollectableGroups) {
-		for (const [k, cp] of Object.entries(rawCollectPlans)) {
-			if (cp.from.length === 1 && cp.from[0] === gr) continue out;
+		const glyfTtcComposition = {}; // Collect plan for glyf-sharing TTCs
+		const ttcComposition = {}; // Collect plan for master TTCs
+		const singleGroupTtcInfos = {}; // single-group TTCs
+
+		const shouldProduceSgr = collect.release && collect.from.length > 1;
+
+		if (shouldProduceSgr) {
+			for (const prefix of collect.from) {
+				const sgrPrefix = SGR_PREFIX_PREFIX + prefix;
+				if (allCollectableGroups.has(sgrPrefix))
+					throw new Error(`Group ${sgrPrefix} is already in another release plan.`);
+				allCollectableGroups.add(sgrPrefix);
+				singleGroupTtcInfos[sgrPrefix] = { from: prefix, comp: {} };
+			}
 		}
-		amendedRawCollectPlans[`SGr-` + gr] = { release: true, isAmended: true, from: [gr] };
-	}
 
-	for (const collectPrefix in amendedRawCollectPlans) {
-		const glyfTtcComposition = {};
-		const ttcComposition = {};
-		const collect = amendedRawCollectPlans[collectPrefix];
 		if (!collect || !collect.from || !collect.from.length) continue;
 
 		for (const prefix of collect.from) {
@@ -701,12 +705,21 @@ async function getCollectPlans(target, rawCollectPlans) {
 				const ttcFileName = fnStandardTtc(false, collectPrefix, suffixMap, sfi);
 				if (!ttcComposition[ttcFileName]) ttcComposition[ttcFileName] = [];
 				ttcComposition[ttcFileName].push(glyfTtcFileName);
+
+				if (shouldProduceSgr) {
+					const sgrPrefix = SGR_PREFIX_PREFIX + prefix;
+					const sgrTtcFileName = fnStandardTtc(false, sgrPrefix, suffixMap, sfi);
+					const sgrInfo = singleGroupTtcInfos[sgrPrefix];
+					if (!sgrInfo.comp[sgrTtcFileName]) sgrInfo.comp[sgrTtcFileName] = [];
+					sgrInfo.comp[sgrTtcFileName].push(ttfTargetName);
+				}
 			}
 		}
 		plans[collectPrefix] = {
 			glyfTtcComposition,
 			ttcComposition,
 			groupDecomposition: [...collect.from],
+			singleGroupTtcInfos,
 			inRelease: !!collect.release,
 			isAmended: !!collect.isAmended,
 		};
@@ -771,6 +784,34 @@ const CollectedTtcFile = file.make(
 		await buildCompositeTtc(out, inputs);
 	},
 );
+
+const SGrTtcFile = file.make(
+	(cgr, sgr, f) => `${DIST_TTC}/${sgr}/${f}.ttc`,
+	async (target, out, cgr, sgr, f) => {
+		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
+		const sgrInfo = cp[cgr].singleGroupTtcInfos[sgr];
+		const parts = Array.from(new Set(sgrInfo.comp[f] || []));
+		const [inputs] = await target.need(parts.map(pt => DistHintedTTF(sgrInfo.from, pt)));
+		await buildCompositeTtc(out, inputs);
+	},
+);
+const SGrSuperTtcFile = file.make(
+	(cgr, sgr) => `${DIST_SUPER_TTC}/${sgr}.ttc`,
+	async (target, out, cgr, sgr) => {
+		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
+		const sgrInfo = cp[cgr].singleGroupTtcInfos[sgr];
+		const parts = Array.from(Object.keys(sgrInfo.comp));
+		const [inputs] = await target.need(parts.map(pt => SGrTtcFile(cgr, sgr, pt)));
+		await buildCompositeTtc(out, inputs);
+	},
+);
+async function buildCompositeTtc(out, inputs) {
+	const inputPaths = inputs.map(f => f.full);
+	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), inputPaths);
+	await absolutelySilently.run(MAKE_TTC, ["-o", out.full], inputPaths);
+}
+
+// TTC for glyph sharing
 const GlyfTtc = file.make(
 	(cgr, f) => `${GLYF_TTC}/${cgr}/${f}.ttc`,
 	async (target, out, cgr, f) => {
@@ -779,13 +820,6 @@ const GlyfTtc = file.make(
 		await buildGlyphSharingTtc(target, parts, out);
 	},
 );
-
-async function buildCompositeTtc(out, inputs) {
-	const inputPaths = inputs.map(f => f.full);
-	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), inputPaths);
-	await absolutelySilently.run(MAKE_TTC, ["-o", out.full], inputPaths);
-}
-
 async function buildGlyphSharingTtc(target, parts, out) {
 	await target.need(de`${out.dir}`);
 	const [ttfInputs] = await target.need(parts.map(part => BuildNoGcTtf(part.dir, part.file)));
@@ -813,6 +847,22 @@ const SuperTtcZip = file.make(
 	async (target, out, cgr) => {
 		await target.need(de`${out.dir}`, CollectedSuperTtcFile(cgr));
 		await CreateGroupArchiveFile(DIST_SUPER_TTC, out, `${cgr}.ttc`);
+	},
+);
+const SgrTtcZip = file.make(
+	(cgr, sgr, version) => `${ARCHIVE_DIR}/PkgTTC-${sgr}-${version}.zip`,
+	async (target, out, cgr, sgr) => {
+		const [cPlan] = await target.need(CollectPlans, de`${out.dir}`);
+		const ttcFiles = Array.from(Object.keys(cPlan[cgr].singleGroupTtcInfos[sgr].comp));
+		await target.need(ttcFiles.map(pt => SGrTtcFile(cgr, sgr, pt)));
+		await CreateGroupArchiveFile(`${DIST_TTC}/${sgr}`, out, `*.ttc`);
+	},
+);
+const SgrSuperTtcZip = file.make(
+	(cgr, sgr, version) => `${ARCHIVE_DIR}/SuperTTC-${sgr}-${version}.zip`,
+	async (target, out, cgr, sgr) => {
+		await target.need(de`${out.dir}`, SGrSuperTtcFile(cgr, sgr));
+		await CreateGroupArchiveFile(DIST_SUPER_TTC, out, `${sgr}.ttc`);
 	},
 );
 
@@ -1147,8 +1197,14 @@ const ReleaseArchivesFor = task.group(`release:archives-for`, async (target, cgr
 	if (!plan || !plan.inRelease) throw new Error(`CollectGroup ${cgr} is not in release.`);
 
 	let goals = [];
+
 	goals.push(TtcZip(cgr, version));
 	goals.push(SuperTtcZip(cgr, version));
+	for (const sgr in plan.singleGroupTtcInfos) {
+		goals.push(SgrTtcZip(cgr, sgr, version));
+		goals.push(SgrSuperTtcZip(cgr, sgr, version));
+	}
+
 	const subGroups = collectPlans[cgr].groupDecomposition;
 	for (const gr of subGroups) {
 		goals.push(GroupTtfZip(gr, version, false));
