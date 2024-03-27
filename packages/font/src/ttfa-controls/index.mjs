@@ -30,7 +30,7 @@ export async function generateTtfaControls(gsOrig, gsTtf) {
 		alignment.write(ttfaControls, gsTtf);
 	}
 
-	return ttfaControls;
+	return ttfaControls.join("\n") + "\n";
 }
 
 class Alignment {

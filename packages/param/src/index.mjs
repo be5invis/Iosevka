@@ -12,6 +12,7 @@ export function init(data, argv) {
 	if (argv.featureControl.noCvSs) para.enableCvSs = false;
 	if (argv.featureControl.noLigation) para.enableLigation = false;
 	if (argv.featureControl.buildTextureFeature) para.buildTextureFeature = true;
+	if (argv.featureControl.exportGlyphNames) para.exportGlyphNames = true;
 	return para;
 }
 function applyBlendingParam(argv, para, data, key, keyArgv) {

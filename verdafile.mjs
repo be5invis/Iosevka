@@ -254,6 +254,8 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		};
 	}
 
+	const [compositesFromBuildPlan] = await target.need(CompositesFromBuildPlan);
+
 	return {
 		name: fileName,
 		variants: bp.variants || null,
@@ -304,6 +306,9 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 
 		// Spacing derivation -- creating faster build for spacing variants
 		spacingDerive,
+
+		// Composite variants from build plan -- used for variant resolution when building fonts
+		compositesFromBuildPlan,
 	};
 });
 
@@ -428,24 +433,27 @@ const DistUnhintedTTF = file.make(
 			const cachePath = `${SHARED_CACHE}/${cacheFileName}.mpz`;
 			const cacheDiffPath = `${charMapPath.dir}/${fn}.cache.mpz`;
 
-			const [comps] = await target.need(
-				CompositesFromBuildPlan,
-				de(charMapPath.dir),
-				de(ttfaControlsPath.dir),
-				de(SHARED_CACHE),
-			);
+			await target.need(de(charMapPath.dir), de(ttfaControlsPath.dir), de(SHARED_CACHE));
 
 			echo.action(echo.hl.command(`Create TTF`), out.full);
 			const { cacheUpdated } = await silently.node("packages/font/src/index.mjs", {
-				o: out.full,
-				...(fi.buildCharMap ? { oCharMap: charMapPath.full } : {}),
-				paramsDir: Path.resolve("params"),
-				oTtfaControls: ttfaControlsPath.full,
-				cacheFreshAgeKey: ageKey,
-				iCache: cachePath,
-				oCache: cacheDiffPath,
-				compositesFromBuildPlan: comps,
+				// INPUT: font info
 				...fi,
+				// INPUT: path to parameters
+				paramsDir: Path.resolve("params"),
+				// TTF output. Optional.
+				o: out.full,
+				// Charmap output. Optional.
+				...(fi.buildCharMap ? { oCharMap: charMapPath.full } : {}),
+				// TTFAutohint controls output. Optional.
+				oTtfaControls: ttfaControlsPath.full,
+
+				// Geometry cache parameters. Optional.
+				cache: {
+					input: cachePath,
+					output: cacheDiffPath,
+					freshAgeKey: ageKey,
+				},
 			});
 
 			if (cacheUpdated) {

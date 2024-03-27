@@ -3,6 +3,7 @@ import path from "path";
 import zlib from "zlib";
 
 import * as Toml from "@iarna/toml";
+import * as Caching from "@iosevka/geometry-cache";
 import { createGrDisplaySheet } from "@iosevka/glyph/relation";
 import * as Parameters from "@iosevka/param";
 import { applyLigationData } from "@iosevka/param/ligation";
@@ -10,33 +11,41 @@ import { applyMetricOverride } from "@iosevka/param/metric-override";
 import * as VariantData from "@iosevka/param/variant";
 import { encode } from "@msgpack/msgpack";
 
+import { buildFont } from "./build-font/index.mjs";
 import { saveTTF } from "./font-io/index.mjs";
-import { buildFont } from "./font.mjs";
-import { buildCompatLigatures } from "./hb-compat-ligature/index.mjs";
 import { createNamingDictFromArgv } from "./naming/index.mjs";
 
 export default main;
 async function main(argv) {
-	const paraT = await getParameters(argv);
+	// Set up parameters
+	const paraT = await getParametersT(argv);
 	const para = paraT(argv);
-	const { font, glyphStore, cacheUpdated, ttfaControls } = await buildFont(argv, para);
-	if (argv.oCharMap) {
-		await saveCharMap(argv, glyphStore);
+
+	// Set up cache
+	const cache = argv.cache
+		? await Caching.load(argv.cache.input, argv.menu.version, argv.cache.freshAgeKey)
+		: null;
+	// Build font
+	const { font, glyphStore, cacheUpdated, ttfaControls } = await buildFont(para, cache);
+
+	// Save charmap
+	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
+	// Save ttfaControls
+	if (argv.oTtfaControls) await fs.promises.writeFile(argv.oTtfaControls, ttfaControls);
+	// Save TTF
+	if (argv.o) await saveTTF(argv.o, font);
+	// Save cache
+	if (argv.cache && cache && cache.isUpdated()) {
+		await Caching.save(argv.cache.output, argv.menu.version, cache, true);
 	}
-	if (argv.oTtfaControls) {
-		await fs.promises.writeFile(argv.oTtfaControls, ttfaControls.join("\n") + "\n");
-	}
-	if (argv.o) {
-		if (para.compatibilityLigatures) await buildCompatLigatures(para, font);
-		await saveTTF(argv.o, font);
-	}
+
 	return { cacheUpdated };
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Parameter preparation
-async function getParameters(argv) {
+async function getParametersT(argv) {
 	const PARAMETERS_TOML = path.resolve(argv.paramsDir, "./parameters.toml");
 	const WEIGHTS_TOML = path.resolve(argv.paramsDir, "./shape-weight.toml");
 	const WIDTHS_TOML = path.resolve(argv.paramsDir, "./shape-width.toml");
