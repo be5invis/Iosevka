@@ -221,8 +221,25 @@ export : define [UkMapToLookup m] : begin
 		r.push v
 	return { .left l .right r }
 
-export : define [UkMap2ToLookup mm] : begin
-	local res {}
-	foreach { g1 second } [Object.entries mm] : foreach { g2 gTo } [Object.entries second] : begin
-		res.push {.from {g1 g2} .to gTo}
-	return res
+export : define [UkLigatureToLookup data mapper] : begin
+	local substitutions {}
+	foreach { from to } [items-of data] : begin
+		local allFound true
+		local fromGlyphNames {}
+		local toGlyph null
+
+		foreach u [items-of from] : begin
+			local gn : mapper u
+			if gn
+			: then : fromGlyphNames.push gn
+			: else : set allFound false
+
+		begin
+			local gn : mapper to
+			if gn
+			: then : set toGlyph gn
+			: else : set allFound false
+
+		if allFound : substitutions.push {.from fromGlyphNames .to toGlyph}
+
+	return substitutions
