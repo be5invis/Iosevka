@@ -2,12 +2,14 @@ $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
 import [Box] from "@iosevka/geometry/box"
+import [Transform] from "@iosevka/geometry/transform"
 
 glyph-module
 
 glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Shared-Symbol-Shapes : TriangleShape
 	glyph-block-import Symbol-Pictograph-Stick-Figure : StickFigureKit WithD4Transform D4Transform
 	glyph-block-import Symbol-Geometric-Shared : GeometricDim
 	glyph-block-import Symbol-Mosaic-Block : HShade VShade
@@ -26,6 +28,8 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 	define uiRight : right - SB
 
 	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+	define graphicSw : AdviceStroke 3.5
+	define smallGraphicSw : AdviceStroke 3.5 : Math.sqrt (MosaicWidthScalar / 2)
 
 	define [SidewaysBox top bottom left right _left2 _right2] : begin
 		local left2  : fallback _left2  left
@@ -51,7 +55,7 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 				bot bottom
 				left left
 				right right
-				stroke : fallback _sw : AdviceStroke 3.5
+				stroke : fallback _sw graphicSw
 				xMiddle : mix left right 0.5
 				yMiddle : mix top bottom 0.5
 				armRaiseK 0.4
@@ -101,31 +105,14 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 			define dressRight : scaffold.xRightFoot + scaffold.stroke / 2
 			include : StickManArms scaffold p kl kr
 			include : VBar.m scaffold.xMiddle [scaffold.yShoulder p] scaffold.yNeck
-			include : intersection
-				spiro-outline
-					corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
-					corner dressRight dressBottom
-					corner dressLeft dressBottom
-				union
-					dispiro
-						widths.rhs scaffold.stroke
-						corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
-						corner dressRight dressBottom
-					dispiro
-						widths.rhs scaffold.stroke
-						corner dressRight dressBottom
-						corner dressLeft dressBottom
-					dispiro
-						widths.rhs scaffold.stroke
-						corner dressLeft dressBottom
-						corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
+			include : TriangleShape scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke) dressRight dressBottom dressLeft dressBottom scaffold.stroke
 			include : VBar.m [mix dressLeft dressRight 0.3] scaffold.bot (dressBottom - O) scaffold.stroke
 			include : VBar.m [mix dressLeft dressRight 0.7] scaffold.bot (dressBottom - O) scaffold.stroke
 
 
 		define scaffold : StickManScaffold uiTop uiBot uiLeft uiRight
 		define hBox : SidewaysBox uiTop uiBot uiLeft uiRight
-		define hScaffold : StickManScaffold hBox.top hBox.bottom hBox.left hBox.right [AdviceStroke 3.5 : Math.sqrt (MosaicWidthScalar / 2)]
+		define hScaffold : StickManScaffold hBox.top hBox.bottom hBox.left hBox.right smallGraphicSw
 
 		create-glyph [MangleName 'stickMan'] [MangleUnicode 0x1FBC5] : glyph-proc
 			set-width MosaicWidth
