@@ -89,6 +89,59 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 						corner [mix midx rodRight 2] [mix midy rodTop 2]
 						corner midx midy
 
+	do "Resistor"
+		define amplitude Geom.Size
+		define vWaves 2
+		define hWaves MosaicWidthScalar
+
+		define [HoriWaveSegment left right lefty righty sw] : intersection
+			MaskRight left
+			MaskLeft right
+			dispiro
+				widths.center sw
+				corner [mix left right (-1)] [mix lefty righty (-1)]
+				corner [mix left right   2 ] [mix lefty righty   2 ]
+		define [VertWaveSegment bot top botx topx sw] : intersection
+			MaskAbove bot
+			MaskBelow top
+			dispiro
+				widths.center sw
+				corner [mix botx topx (-1)] [mix bot top (-1)]
+				corner [mix botx topx   2 ] [mix bot top   2 ]
+
+		create-glyph [MangleName 'resistorHori'] [MangleUnicode 0x1CC09] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			local segs : 2 * hWaves - 1
+			local halfPeriod : MosaicWidth / (2 * hWaves)
+			local up : midy + amplitude
+			local down : midy - amplitude
+			include : HoriWaveSegment left (left + 0.5 * halfPeriod) midy up boxDrawingStroke
+			foreach [j : range 0 segs] : begin
+				include : HoriWaveSegment
+					left + (j + 0.5) * halfPeriod
+					left + (j + 1.5) * halfPeriod
+					if (j % 2) down up
+					if (j % 2) up down
+					* boxDrawingStroke
+			include : HoriWaveSegment (right - halfPeriod * 0.5) right down midy boxDrawingStroke
+
+		create-glyph [MangleName 'resistorVert'] [MangleUnicode 0x1CC0A] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			local segs : 2 * vWaves - 1
+			local halfPeriod : MosaicHeight / (2 * vWaves)
+			local up : midx + amplitude
+			local down : midx - amplitude
+			include : VertWaveSegment bottom (bottom + halfPeriod * 0.5) midx up boxDrawingStroke
+			foreach [j : range 0 segs] : begin
+				include : VertWaveSegment
+					bottom + (j + 0.5) * halfPeriod
+					bottom + (j + 1.5) * halfPeriod
+					if (j % 2) down up
+					if (j % 2) up down
+					* boxDrawingStroke
+			include : VertWaveSegment (top - halfPeriod * 0.5) top down midx boxDrawingStroke
 
 	do "Diode"
 		define diodeGap : MosaicWidth / 9
