@@ -2,12 +2,14 @@ $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
 import [Box] from "@iosevka/geometry/box"
+import [Transform] from "@iosevka/geometry/transform"
 
 glyph-module
 
 glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Shared-Symbol-Shapes : TriangleShape
 	glyph-block-import Symbol-Pictograph-Stick-Figure : StickFigureKit WithD4Transform D4Transform
 	glyph-block-import Symbol-Geometric-Shared : GeometricDim
 	glyph-block-import Symbol-Mosaic-Block : HShade VShade
@@ -26,7 +28,10 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 	define uiRight : right - SB
 
 	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+	define graphicSw : AdviceStroke 3.5
+	define smallGraphicSw : AdviceStroke 3.5 : Math.sqrt (MosaicWidthScalar / 2)
 
+	define squareBox : new Box Geom.Top Geom.Bot Geom.Left Geom.Right
 	define [SidewaysBox top bottom left right _left2 _right2] : begin
 		local left2  : fallback _left2  left
 		local right2 : fallback _right2 right
@@ -40,6 +45,69 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 			midX - newHeight / 2
 			midX + newHeight / 2
 
+	do "Top-down Vehicles"
+		define scaffold : object
+		set scaffold.xWheelFront : 1.5 / 9
+		set scaffold.xWheel      : 1 / 9
+		set scaffold.xWheelRear  : 0.5 / 9
+		set scaffold.wheelDiam   : 3 / 9
+		set scaffold.yAxle  : scaffold.wheelDiam / 2
+
+		define [Car box fJut fWindow fSymmetric rot bodyWidth _sw] : glyph-proc
+			local yBody : if fJut 0 scaffold.yAxle
+			local xFront : if fSymmetric scaffold.xWheel scaffold.xWheelFront
+			local xRear  : if fSymmetric scaffold.xWheel scaffold.xWheelRear
+
+			local sw : fallback _sw smallGraphicSw
+			local tfm : D4Transform midX rot 0
+			local Kit : StickFigureKit box tfm sw
+			local Kit2 : if [not fSymmetric] Kit : StickFigureKit box tfm (sw * 2)
+
+			local shape : union
+				Kit2.RoundSeg xFront 1 xFront (1 - scaffold.wheelDiam)
+				Kit.RoundSeg xFront (1 - scaffold.yAxle) (1 - xFront) (1 - scaffold.yAxle)
+				Kit2.RoundSeg (1 - xFront) 1 (1 - xFront) (1 - scaffold.wheelDiam)
+				Kit2.RoundSeg xRear scaffold.wheelDiam xRear 0
+				Kit.RoundSeg xRear (scaffold.yAxle) (1 - xRear) (scaffold.yAxle)
+				Kit2.RoundSeg (1 - xRear) scaffold.wheelDiam (1 - xRear) 0
+				if (bodyWidth <= 0)
+					Kit.RoundSeg (1 / 2) (1 - yBody) (1 / 2) (yBody)
+					Kit.Box (1 / 2 - bodyWidth / 2) (1 - yBody) (1 / 2 + bodyWidth / 2) (yBody)
+
+			if fWindow
+				include : difference shape
+					Kit.Box (1 / 2 - bodyWidth / 6) (1 - yBody - 1 / 9) (1 / 2 + bodyWidth / 6) (1 - yBody - 3 / 9)
+				include shape
+
+		create-glyph [MangleName 'goKartUp']     [MangleUnicode 0x1CC00] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 0 0 0 0 0
+		create-glyph [MangleName 'goKartRight']  [MangleUnicode 0x1CC01] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 0 0 0 3 0
+		create-glyph [MangleName 'raceCarLeft']  [MangleUnicode 0x1CC97] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 1 1 1 (3 / 9)
+		create-glyph [MangleName 'raceCarUp']    [MangleUnicode 0x1CC98] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 1 1 0 (3 / 9)
+		create-glyph [MangleName 'raceCarRight'] [MangleUnicode 0x1CC99] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 1 1 3 (3 / 9)
+		create-glyph [MangleName 'raceCarDown']  [MangleUnicode 0x1CC9A] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 1 1 2 (3 / 9)
+		create-glyph [MangleName 'raceCarHori']  [MangleUnicode 0x1CC9B] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 0 1 1 (3 / 9)
+		create-glyph [MangleName 'raceCarVert']  [MangleUnicode 0x1CC9C] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 0 1 0 (3 / 9)
+		create-glyph [MangleName 'goKartVert']   [MangleUnicode 0x1CC9D] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 0 0 1 0 (3 / 9)
+
+
 	do "Stick Man"
 		define [StickManScaffold top bottom left right _sw] : begin
 			local baseHeight : uiTop - uiBot
@@ -51,7 +119,7 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 				bot bottom
 				left left
 				right right
-				stroke : fallback _sw : AdviceStroke 3.5
+				stroke : fallback _sw graphicSw
 				xMiddle : mix left right 0.5
 				yMiddle : mix top bottom 0.5
 				armRaiseK 0.4
@@ -101,31 +169,14 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 			define dressRight : scaffold.xRightFoot + scaffold.stroke / 2
 			include : StickManArms scaffold p kl kr
 			include : VBar.m scaffold.xMiddle [scaffold.yShoulder p] scaffold.yNeck
-			include : intersection
-				spiro-outline
-					corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
-					corner dressRight dressBottom
-					corner dressLeft dressBottom
-				union
-					dispiro
-						widths.rhs scaffold.stroke
-						corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
-						corner dressRight dressBottom
-					dispiro
-						widths.rhs scaffold.stroke
-						corner dressRight dressBottom
-						corner dressLeft dressBottom
-					dispiro
-						widths.rhs scaffold.stroke
-						corner dressLeft dressBottom
-						corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
+			include : TriangleShape scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke) dressRight dressBottom dressLeft dressBottom scaffold.stroke
 			include : VBar.m [mix dressLeft dressRight 0.3] scaffold.bot (dressBottom - O) scaffold.stroke
 			include : VBar.m [mix dressLeft dressRight 0.7] scaffold.bot (dressBottom - O) scaffold.stroke
 
 
 		define scaffold : StickManScaffold uiTop uiBot uiLeft uiRight
 		define hBox : SidewaysBox uiTop uiBot uiLeft uiRight
-		define hScaffold : StickManScaffold hBox.top hBox.bottom hBox.left hBox.right [AdviceStroke 3.5 : Math.sqrt (MosaicWidthScalar / 2)]
+		define hScaffold : StickManScaffold hBox.top hBox.bottom hBox.left hBox.right smallGraphicSw
 
 		create-glyph [MangleName 'stickMan'] [MangleUnicode 0x1FBC5] : glyph-proc
 			set-width MosaicWidth
@@ -151,6 +202,44 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 		create-glyph [MangleName 'stickManWithDress'] [MangleUnicode 0x1FBC9] : glyph-proc
 			set-width MosaicWidth
 			include : StickManDressBody scaffold 0 0
+
+	do "Energy Waves"
+		define [LeftEnergyWave top bottom left right] : glyph-proc
+			local midX : mix left right 0.5
+			local midY : mix top bottom 0.5
+
+			include : difference
+				spiro-outline
+					corner right top
+					corner (midX + 0.01) top
+					flat midX top
+					archv.superness 2
+					g4 left midY
+					arcvh.superness 2
+					curl midX bottom
+					corner (midX + 0.01) bottom
+					corner right bottom
+				spiro-outline
+					corner right [mix top bottom 0.1]
+					flat [mix left right 0.9] [mix top bottom 0.1]
+					archv.superness 2
+					g4 midX midY
+					arcvh.superness 2
+					curl [mix left right 0.9] [mix top bottom 0.9]
+					corner right [mix top bottom 0.9]
+
+		create-glyph [MangleName "energyWaveLeft"] [MangleUnicode 0x1CC78] : glyph-proc
+			set-width MosaicWidth
+			include : LeftEnergyWave Geom.Top Geom.Bot Geom.Left Geom.Right
+		create-glyph [MangleName "energyWaveUp"] [MangleUnicode 0x1CC79] : glyph-proc
+			set-width MosaicWidth
+			include : WithD4Transform midX 3 0 : lambda [] : LeftEnergyWave Geom.Top Geom.Bot Geom.Left Geom.Right
+		create-glyph [MangleName "energyWaveRight"] [MangleUnicode 0x1CC7A] : glyph-proc
+			set-width MosaicWidth
+			include : WithD4Transform midX 2 0 : lambda [] : LeftEnergyWave Geom.Top Geom.Bot Geom.Left Geom.Right
+		create-glyph [MangleName "energyWaveDown"] [MangleUnicode 0x1CC7B] : glyph-proc
+			set-width MosaicWidth
+			include : WithD4Transform midX 1 0 : lambda [] : LeftEnergyWave Geom.Top Geom.Bot Geom.Left Geom.Right
 
 	do "Square Spiral"
 		define directions : list
