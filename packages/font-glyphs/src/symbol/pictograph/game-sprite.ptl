@@ -31,6 +31,7 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 	define graphicSw : AdviceStroke 3.5
 	define smallGraphicSw : AdviceStroke 3.5 : Math.sqrt (MosaicWidthScalar / 2)
 
+	define squareBox : new Box Geom.Top Geom.Bot Geom.Left Geom.Right
 	define [SidewaysBox top bottom left right _left2 _right2] : begin
 		local left2  : fallback _left2  left
 		local right2 : fallback _right2 right
@@ -43,6 +44,69 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 			midY + (left2  - midX)
 			midX - newHeight / 2
 			midX + newHeight / 2
+
+	do "Top-down Vehicles"
+		define scaffold : object
+		set scaffold.xWheelFront : 1.5 / 9
+		set scaffold.xWheel      : 1 / 9
+		set scaffold.xWheelRear  : 0.5 / 9
+		set scaffold.wheelDiam   : 3 / 9
+		set scaffold.yAxle  : scaffold.wheelDiam / 2
+
+		define [Car box fJut fWindow fSymmetric rot bodyWidth _sw] : glyph-proc
+			local yBody : if fJut 0 scaffold.yAxle
+			local xFront : if fSymmetric scaffold.xWheel scaffold.xWheelFront
+			local xRear  : if fSymmetric scaffold.xWheel scaffold.xWheelRear
+
+			local sw : fallback _sw smallGraphicSw
+			local tfm : D4Transform midX rot 0
+			local Kit : StickFigureKit box tfm sw
+			local Kit2 : if [not fSymmetric] Kit : StickFigureKit box tfm (sw * 2)
+
+			local shape : union
+				Kit2.RoundSeg xFront 1 xFront (1 - scaffold.wheelDiam)
+				Kit.RoundSeg xFront (1 - scaffold.yAxle) (1 - xFront) (1 - scaffold.yAxle)
+				Kit2.RoundSeg (1 - xFront) 1 (1 - xFront) (1 - scaffold.wheelDiam)
+				Kit2.RoundSeg xRear scaffold.wheelDiam xRear 0
+				Kit.RoundSeg xRear (scaffold.yAxle) (1 - xRear) (scaffold.yAxle)
+				Kit2.RoundSeg (1 - xRear) scaffold.wheelDiam (1 - xRear) 0
+				if (bodyWidth <= 0)
+					Kit.RoundSeg (1 / 2) (1 - yBody) (1 / 2) (yBody)
+					Kit.Box (1 / 2 - bodyWidth / 2) (1 - yBody) (1 / 2 + bodyWidth / 2) (yBody)
+
+			if fWindow
+				include : difference shape
+					Kit.Box (1 / 2 - bodyWidth / 6) (1 - yBody - 1 / 9) (1 / 2 + bodyWidth / 6) (1 - yBody - 3 / 9)
+				include shape
+
+		create-glyph [MangleName 'goKartUp']     [MangleUnicode 0x1CC00] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 0 0 0 0 0
+		create-glyph [MangleName 'goKartRight']  [MangleUnicode 0x1CC01] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 0 0 0 3 0
+		create-glyph [MangleName 'raceCarLeft']  [MangleUnicode 0x1CC97] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 1 1 1 (3 / 9)
+		create-glyph [MangleName 'raceCarUp']    [MangleUnicode 0x1CC98] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 1 1 0 (3 / 9)
+		create-glyph [MangleName 'raceCarRight'] [MangleUnicode 0x1CC99] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 1 1 3 (3 / 9)
+		create-glyph [MangleName 'raceCarDown']  [MangleUnicode 0x1CC9A] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 1 1 2 (3 / 9)
+		create-glyph [MangleName 'raceCarHori']  [MangleUnicode 0x1CC9B] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 0 1 1 (3 / 9)
+		create-glyph [MangleName 'raceCarVert']  [MangleUnicode 0x1CC9C] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 1 0 1 0 (3 / 9)
+		create-glyph [MangleName 'goKartVert']   [MangleUnicode 0x1CC9D] : glyph-proc
+			set-width MosaicWidth
+			include : Car squareBox 0 0 1 0 (3 / 9)
+
 
 	do "Stick Man"
 		define [StickManScaffold top bottom left right _sw] : begin
