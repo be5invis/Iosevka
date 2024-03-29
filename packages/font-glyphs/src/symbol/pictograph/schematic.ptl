@@ -1,0 +1,91 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Shared-Symbol-Shapes : TriangleShape
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim
+
+	define top     fontMetrics.os2.sTypoAscender
+	define bottom  fontMetrics.os2.sTypoDescender
+	define left    0
+	define right   MosaicWidth
+
+	define midx : mix left right 0.5
+	define midy : mix bottom top 0.5
+	define MosaicHeight : top - bottom
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+	define boxDrawingStroke : AdviceStroke 3.5
+	define fineStroke : AdviceStroke 3.5 : Math.sqrt (MosaicWidthScalar / 2)
+	define gateSize : MosaicHeight / 2
+	define gateBot : midy - gateSize
+	define gateTop : midy + gateSize
+	define ringSize : Math.min (Geom.Size * 0.5) (MosaicWidth / 6)
+	define [InvertRingAt x y fMask] : [if fMask spiro-outline dispiro]
+		if fMask {} : list
+			widths.rhs fineStroke
+		g4 x (y - ringSize)
+		archv 32 2.0
+		g4 (x - ringSize) y
+		arcvh 32 2.0
+		g4 x (y + ringSize)
+		archv 32 2.0
+		g4 (x + ringSize) y
+		arcvh 32 2.0
+		close
+
+	do "Explosion at Horizon"
+		define horizon : Geom.MidY - Geom.Size * 0.8
+		create-glyph [MangleName 'explosionHorizon'] [MangleUnicode 0x1CE02] : glyph-proc
+			set-width MosaicWidth
+			include : HBar.m Geom.Left Geom.Right horizon boxDrawingStroke
+			include : dispiro
+				widths.center fineStroke
+				corner (Geom.MidX - Geom.Size * 0.8) (horizon + Geom.Size * 0.7)
+				corner (Geom.MidX - Geom.Size * 0.4) (horizon + Geom.Size * 0.3)
+			include : dispiro
+				widths.center fineStroke
+				corner (Geom.MidX + Geom.Size * 0.8) (horizon + Geom.Size * 0.7)
+				corner (Geom.MidX + Geom.Size * 0.4) (horizon + Geom.Size * 0.3)
+			include : dispiro
+				widths.center fineStroke
+				corner (Geom.MidX - Geom.Size * 0.4) (horizon + Geom.Size * 1.4)
+				corner (Geom.MidX - Geom.Size * 0.2) (horizon + Geom.Size * 0.4)
+			include : dispiro
+				widths.center fineStroke
+				corner (Geom.MidX + Geom.Size * 0.4) (horizon + Geom.Size * 1.4)
+				corner (Geom.MidX + Geom.Size * 0.2) (horizon + Geom.Size * 0.4)
+
+	do "Funnel"
+		create-glyph [MangleName 'funnel'] [MangleUnicode 0x1CE08] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : TriangleShape Geom.Left Geom.Top Geom.Right Geom.Top Geom.MidX Geom.Bot boxDrawingStroke
+			include : VBar.m midx bottom (Geom.Bot + boxDrawingStroke * 2) boxDrawingStroke
+
+	do "Antenna"
+		define rodLeft  : Geom.Left  + [HSwToV : boxDrawingStroke / 2]
+		define rodRight : Geom.Right - [HSwToV : boxDrawingStroke / 2]
+		define rodTop Geom.Top
+		create-glyph [MangleName 'antenna'] [MangleUnicode 0x1CC08] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.m midx bottom rodTop boxDrawingStroke
+			include : intersection
+				MaskBelow rodTop
+				union
+					dispiro
+						widths.center boxDrawingStroke
+						corner [mix midx rodLeft 2] [mix midy rodTop 2]
+						corner midx midy
+					dispiro
+						widths.center boxDrawingStroke
+						corner [mix midx rodRight 2] [mix midy rodTop 2]
+						corner midx midy
+
