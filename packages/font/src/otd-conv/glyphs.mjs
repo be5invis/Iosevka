@@ -1,5 +1,6 @@
 import * as Geom from "@iosevka/geometry";
 import { Point } from "@iosevka/geometry/point";
+import { Glyph } from "@iosevka/glyph";
 import * as Gr from "@iosevka/glyph/relation";
 import { Ot } from "ot-builder";
 
@@ -57,6 +58,13 @@ class MappedGlyphStore {
 		if (!name) return undefined;
 		return this.m_nameMapping.get(name);
 	}
+
+	// Add directly from Ot.Glyphs
+	addOtGlyph(name, g) {
+		this.m_nameMapping.set(name, g);
+		this.m_mapping.set(new Glyph(name), g);
+	}
+
 	decideOrder() {
 		const gs = Ot.ListGlyphStoreFactory.createStoreFromList([...this.m_mapping.values()]);
 		return gs.decideOrder();

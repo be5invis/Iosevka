@@ -37,7 +37,7 @@
     * Customizable install using Homebrew: see [robertgzr/homebrew-tap](https://github.com/robertgzr/homebrew-tap).
   * **Linux**
     * Arch Linux: Install one of the [ttc-iosevka packages](https://archlinux.org/packages/?q=ttc-iosevka).
-    * Ubuntu Linux: Install one of the [fonts-iosevka packages](http://phd-sid.ethz.ch/debian/fonts-iosevka/).
+    * Ubuntu Linux: Install one of the [fonts-iosevka packages](http://sid.ethz.ch/debian/fonts-iosevka/).
     * Void Linux: Install the font with `xbps-install font-iosevka`.
     * Fedora: Install the font(s) from [the COPR here](https://copr.fedorainfracloud.org/coprs/peterwu/iosevka/). Run `dnf search iosevka` to discover available fonts and `dnf install` to install the chosen one(s).
   * **FreeBSD**: The font can be installed with `pkg install iosevka`.
