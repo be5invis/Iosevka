@@ -1,0 +1,265 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Shared-Symbol-Shapes : TriangleShape
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim
+
+	define top     fontMetrics.os2.sTypoAscender
+	define bottom  fontMetrics.os2.sTypoDescender
+	define left    0
+	define right   MosaicWidth
+
+	define midx : mix left right 0.5
+	define midy : mix bottom top 0.5
+	define MosaicHeight : top - bottom
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+	define boxDrawingStroke : AdviceStroke 3.5
+	define fineStroke : AdviceStroke 3.5 : Math.sqrt (MosaicWidthScalar / 2)
+	define gateSize : MosaicHeight / 2
+	define gateBot : midy - gateSize
+	define gateTop : midy + gateSize
+	define ringSize : Math.min (Geom.Size * 0.5) (MosaicWidth / 6)
+	define [InvertRingAt x y fMask] : [if fMask spiro-outline dispiro]
+		if fMask {} : list
+			widths.rhs fineStroke
+		g4 x (y - ringSize)
+		archv 32 2.0
+		g4 (x - ringSize) y
+		arcvh 32 2.0
+		g4 x (y + ringSize)
+		archv 32 2.0
+		g4 (x + ringSize) y
+		arcvh 32 2.0
+		close
+
+	do "Explosion at Horizon"
+		define horizon : Geom.MidY - Geom.Size * 0.8
+		create-glyph [MangleName 'explosionHorizon'] [MangleUnicode 0x1CE02] : glyph-proc
+			set-width MosaicWidth
+			include : HBar.m Geom.Left Geom.Right horizon boxDrawingStroke
+			include : dispiro
+				widths.center fineStroke
+				corner (Geom.MidX - Geom.Size * 0.8) (horizon + Geom.Size * 0.7)
+				corner (Geom.MidX - Geom.Size * 0.4) (horizon + Geom.Size * 0.3)
+			include : dispiro
+				widths.center fineStroke
+				corner (Geom.MidX + Geom.Size * 0.8) (horizon + Geom.Size * 0.7)
+				corner (Geom.MidX + Geom.Size * 0.4) (horizon + Geom.Size * 0.3)
+			include : dispiro
+				widths.center fineStroke
+				corner (Geom.MidX - Geom.Size * 0.4) (horizon + Geom.Size * 1.4)
+				corner (Geom.MidX - Geom.Size * 0.2) (horizon + Geom.Size * 0.4)
+			include : dispiro
+				widths.center fineStroke
+				corner (Geom.MidX + Geom.Size * 0.4) (horizon + Geom.Size * 1.4)
+				corner (Geom.MidX + Geom.Size * 0.2) (horizon + Geom.Size * 0.4)
+
+	do "Funnel"
+		create-glyph [MangleName 'funnel'] [MangleUnicode 0x1CE08] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : TriangleShape Geom.Left Geom.Top Geom.Right Geom.Top Geom.MidX Geom.Bot boxDrawingStroke
+			include : VBar.m midx bottom (Geom.Bot + boxDrawingStroke * 2) boxDrawingStroke
+
+	do "Antenna"
+		define rodLeft  : Geom.Left  + [HSwToV : boxDrawingStroke / 2]
+		define rodRight : Geom.Right - [HSwToV : boxDrawingStroke / 2]
+		define rodTop Geom.Top
+		create-glyph [MangleName 'antenna'] [MangleUnicode 0x1CC08] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.m midx bottom rodTop boxDrawingStroke
+			include : intersection
+				MaskBelow rodTop
+				union
+					dispiro
+						widths.center boxDrawingStroke
+						corner [mix midx rodLeft 2] [mix midy rodTop 2]
+						corner midx midy
+					dispiro
+						widths.center boxDrawingStroke
+						corner [mix midx rodRight 2] [mix midy rodTop 2]
+						corner midx midy
+
+	do "Resistor"
+		define amplitude Geom.Size
+		define vWaves 2
+		define hWaves MosaicWidthScalar
+
+		define [HoriWaveSegment left right lefty righty sw] : intersection
+			MaskRight left
+			MaskLeft right
+			dispiro
+				widths.center sw
+				corner [mix left right (-1)] [mix lefty righty (-1)]
+				corner [mix left right   2 ] [mix lefty righty   2 ]
+		define [VertWaveSegment bot top botx topx sw] : intersection
+			MaskAbove bot
+			MaskBelow top
+			dispiro
+				widths.center sw
+				corner [mix botx topx (-1)] [mix bot top (-1)]
+				corner [mix botx topx   2 ] [mix bot top   2 ]
+
+		create-glyph [MangleName 'resistorHori'] [MangleUnicode 0x1CC09] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			local segs : 2 * hWaves - 1
+			local halfPeriod : MosaicWidth / (2 * hWaves)
+			local up : midy + amplitude
+			local down : midy - amplitude
+			include : HoriWaveSegment left (left + 0.5 * halfPeriod) midy up boxDrawingStroke
+			foreach [j : range 0 segs] : begin
+				include : HoriWaveSegment
+					left + (j + 0.5) * halfPeriod
+					left + (j + 1.5) * halfPeriod
+					if (j % 2) down up
+					if (j % 2) up down
+					* boxDrawingStroke
+			include : HoriWaveSegment (right - halfPeriod * 0.5) right down midy boxDrawingStroke
+
+		create-glyph [MangleName 'resistorVert'] [MangleUnicode 0x1CC0A] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			local segs : 2 * vWaves - 1
+			local halfPeriod : MosaicHeight / (2 * vWaves)
+			local up : midx + amplitude
+			local down : midx - amplitude
+			include : VertWaveSegment bottom (bottom + halfPeriod * 0.5) midx up boxDrawingStroke
+			foreach [j : range 0 segs] : begin
+				include : VertWaveSegment
+					bottom + (j + 0.5) * halfPeriod
+					bottom + (j + 1.5) * halfPeriod
+					if (j % 2) down up
+					if (j % 2) up down
+					* boxDrawingStroke
+			include : VertWaveSegment (top - halfPeriod * 0.5) top down midx boxDrawingStroke
+
+	do "Diode"
+		define diodeGap : MosaicWidth / 9
+		define diodeLeft : left + diodeGap
+		define diodeRight : right - diodeGap
+
+		create-glyph [MangleName 'diodeLeft'] [MangleUnicode 0x1CC0E] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.m left diodeLeft midy boxDrawingStroke
+			include : HBar.m diodeRight right midy boxDrawingStroke
+			include : VBar.l diodeLeft gateBot gateTop boxDrawingStroke
+			include : TriangleShape diodeLeft midy diodeRight gateTop diodeRight gateBot boxDrawingStroke
+
+		create-glyph [MangleName 'diodeRight'] [MangleUnicode 0x1CC0F] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.m left diodeLeft midy boxDrawingStroke
+			include : HBar.m diodeRight right midy boxDrawingStroke
+			include : VBar.r diodeRight gateBot gateTop boxDrawingStroke
+			include : TriangleShape diodeLeft gateBot diodeLeft gateTop diodeRight midy boxDrawingStroke
+
+	do "Transistor"
+		local slope : MosaicHeight / MosaicWidth
+		local tipDx : Math.max (Geom.Size / 5) (boxDrawingStroke / slope)
+		local tipDy : tipDx * (-slope)
+		local baseDx : -tipDy / [Math.sqrt 3] * 2
+		local baseDy : baseDx / (-slope)
+		define arrowPos : (1 - [HSwToV boxDrawingStroke] / (MosaicWidth / 2)) * 0.4
+
+		create-glyph [MangleName 'transistorPNP'] [MangleUnicode 0x1CC10] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.l left gateBot gateTop boxDrawingStroke
+			include : refer-glyph : MangleName : NameUni 0x1FBA4
+
+			local arrowCx : mix midx left arrowPos
+			local arrowCy : mix bottom midy arrowPos
+			include : spiro-outline
+				corner (arrowCx + tipDx) (arrowCy + tipDy)
+				corner (arrowCx - tipDx - baseDx) (arrowCy - tipDy + baseDy)
+				corner (arrowCx - tipDx + baseDx) (arrowCy - tipDy - baseDy)
+
+		create-glyph [MangleName 'transistorNPN'] [MangleUnicode 0x1CC11] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.l left gateBot gateTop boxDrawingStroke
+			include : refer-glyph : MangleName : NameUni 0x1FBA4
+
+			local arrowCx : mix midx left arrowPos
+			local arrowCy : mix top midy arrowPos
+			include : spiro-outline
+				corner (arrowCx - tipDx) (arrowCy + tipDy)
+				corner (arrowCx + tipDx - baseDx) (arrowCy - tipDy - baseDy)
+				corner (arrowCx + tipDx + baseDx) (arrowCy - tipDy + baseDy)
+
+	do "Receptacle"
+		create-glyph [MangleName 'receptacle'] [MangleUnicode 0x1CC12] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : refer-glyph : MangleName : NameUni 0x1FBDB
+			include : refer-glyph : MangleName : NameUni 0x2576
+
+	do "Capacitor"
+		define capacitorSize Geom.Size
+		define capacitorGap : Geom.Size / 4
+
+		create-glyph [MangleName 'capacitorHori'] [MangleUnicode 0x1CC13] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.m left (midx - capacitorGap) midy boxDrawingStroke
+			include : VBar.r (midx - capacitorGap) (midy - capacitorSize) (midy + capacitorSize) boxDrawingStroke
+			include : VBar.l (midx + capacitorGap) (midy - capacitorSize) (midy + capacitorSize) boxDrawingStroke
+			include : HBar.m (midx + capacitorGap) right midy boxDrawingStroke
+
+		create-glyph [MangleName 'capacitorVert'] [MangleUnicode 0x1CC14] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.m midx bottom (midy - capacitorGap) boxDrawingStroke
+			include : HBar.t (midx - capacitorSize) (midx + capacitorSize) (midy - capacitorGap) boxDrawingStroke
+			include : HBar.b (midx - capacitorSize) (midx + capacitorSize) (midy + capacitorGap) boxDrawingStroke
+			include : VBar.m midx (midy + capacitorGap) top boxDrawingStroke
+
+	do "Rings"
+		create-glyph [MangleName 'twoRings'] [MangleUnicode 0x1CC88] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : InvertRingAt (left + ringSize) midy
+			include : InvertRingAt (right - ringSize) midy
+
+		create-glyph [MangleName 'invertedInputs'] [MangleUnicode 0x1CC17] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : InvertRingAt (right - ringSize) (top - ringSize)
+			include : InvertRingAt (right - ringSize) (bottom + ringSize)
+			include : difference
+				HBar.t left (right - ringSize) top boxDrawingStroke
+				InvertRingAt (right - ringSize) (top - ringSize) 1
+			include : difference
+				HBar.b left (right - ringSize) bottom boxDrawingStroke
+				InvertRingAt (right - ringSize) (bottom + ringSize) 1
+
+		create-glyph [MangleName 'invertedOutput'] [MangleUnicode 0x1CC18] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : InvertRingAt (left + ringSize) midy
+			include : HBar.m (left + ringSize * 2 - fineStroke / 2) right midy boxDrawingStroke
+
+	do "Buffer"
+		create-glyph [MangleName 'bufferGate'] [MangleUnicode 0x1CC19] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.m left midx midy boxDrawingStroke
+			include : TriangleShape midx bottom midx top right midy boxDrawingStroke
+
+		create-glyph [MangleName 'invertedBufferGate'] [MangleUnicode 0x1CC1A] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : HBar.m left (midx - ringSize * 2 + fineStroke / 2) midy boxDrawingStroke
+			include : InvertRingAt (midx - ringSize) midy
+			include : TriangleShape midx bottom midx top right midy boxDrawingStroke

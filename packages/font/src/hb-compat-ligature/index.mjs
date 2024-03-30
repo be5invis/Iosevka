@@ -3,12 +3,11 @@ import { Ot } from "ot-builder";
 import { buildTTF } from "../font-io/index.mjs";
 
 export async function buildCompatLigatures(para, font) {
-	// We need to fix the glyph order before building the TTF
+	// MappedGlyphStore is append-only, so we do not need to worry about the order of glyphs
 	const glyphList = font.glyphs.decideOrder();
-	const gsFixed = Ot.ListGlyphStoreFactory.createStoreFromList(Array.from(glyphList));
-	font.glyphs = gsFixed;
 
 	const completedCodePoints = new Set();
+	const jobs = [];
 
 	// Build a provisional in-memory TTF for shaping
 	const provisionalTtf = buildTTF(font);
@@ -55,10 +54,15 @@ export async function buildCompatLigatures(para, font) {
 		}
 
 		// Save the ligature glyph
-		font.glyphs.items.push(ligature);
-		font.cmap.unicode.set(entry.unicode, ligature);
-		if (font.gdef) font.gdef.glyphClassDef.set(ligature, Ot.Gdef.GlyphClass.Ligature);
+		jobs.push({ name: ligature.name, unicode: entry.unicode, glyph: ligature });
 		completedCodePoints.add(entry.unicode);
+	}
+
+	// Commit jobs
+	for (const job of jobs) {
+		font.glyphs.addOtGlyph(job.name, job.glyph);
+		font.cmap.unicode.set(job.unicode, job.glyph);
+		if (font.gdef) font.gdef.glyphClassDef.set(job.glyph, Ot.Gdef.GlyphClass.Ligature);
 	}
 
 	hbFont.destroy();
