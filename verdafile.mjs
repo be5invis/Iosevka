@@ -1184,9 +1184,13 @@ const CleanDist = task(`clean-dist`, async () => {
 });
 
 const Release = task(`release`, async target => {
-	await target.need(ReleaseArchives, SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
+	await target.need(ReleaseAncillary);
+	await target.need(ReleaseArchives);
 });
 
+const ReleaseAncillary = task(`release:ancillary`, async target => {
+	await target.need(SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
+});
 const ReleaseArchives = task(`release:archives`, async target => {
 	const [collectPlans] = await target.need(CollectPlans, UtilScriptFiles);
 
