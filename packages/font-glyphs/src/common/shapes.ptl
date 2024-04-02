@@ -430,12 +430,12 @@ glyph-block CommonShapes : begin
 
 	define nHookSegments 12
 	define [HookShape toStraight toFinish isStart args] : begin
-		local [object y tight sw swItalicAdj noAdjTerminalY turnSlope] args
+		local [object y tight sw swItalicAdj noAdjTerminalY turnSlope isTail] args
 
 		local atBottom : toStraight.y > y
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 		local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
-		local doSwash : !tight && !isStart && atBottom && para.isItalic && [if (para.slopeAngle >= 0) ltr [not ltr]]
+		local doSwash : !tight && !isStart && atBottom && (para.isItalic || isTail) && [if (para.slopeAngle >= 0) ltr [not ltr]]
 		local superness : if tight DesignParameters.tightHookSuperness DesignParameters.superness
 
 		# Adjust terminal's position if necessary
@@ -527,7 +527,9 @@ glyph-block CommonShapes : begin
 		local-parameter : swItalicAdj    -- sw
 		local-parameter : noAdjTerminalY -- false
 		local-parameter : turnSlope      -- nothing
-		return : Interpolator hookStartBlender : object y tight sw swItalicAdj noAdjTerminalY turnSlope
+		local-parameter : isTail         -- false
+		return : Interpolator hookStartBlender
+			object y tight sw swItalicAdj noAdjTerminalY turnSlope isTail
 
 	glyph-block-export hookend
 	define flex-params [hookend] : begin
@@ -537,7 +539,9 @@ glyph-block CommonShapes : begin
 		local-parameter : swItalicAdj    -- sw
 		local-parameter : noAdjTerminalY -- false
 		local-parameter : turnSlope      -- nothing
-		return : Interpolator hookEndBlender : object y tight sw swItalicAdj noAdjTerminalY turnSlope
+		local-parameter : isTail         -- false
+		return : Interpolator hookEndBlender
+			object y tight sw swItalicAdj noAdjTerminalY turnSlope isTail
 
 	glyph-block-export Ungizmo
 	define [Ungizmo] : glyph-proc
