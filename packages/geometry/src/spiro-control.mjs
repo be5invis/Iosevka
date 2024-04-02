@@ -115,9 +115,15 @@ export class MonoKnot {
 		const k1 = new MonoKnot(this.type, this.x, this.y, this.unimportant);
 		return k1;
 	}
-	toShapeString() {
-		return Format.tuple(this.type, this.unimportant, Format.n(this.x), Format.n(this.y));
+	hash(h) {
+		h.beginStruct("MonoKnot");
+		h.str(this.type);
+		h.bool(this.unimportant);
+		h.f64(this.x);
+		h.f64(this.y);
+		h.endStruct();
 	}
+
 	reverseType() {
 		if (this.type === "left") {
 			this.type = "right";
@@ -158,19 +164,26 @@ class BiKnot {
 		k1.unimportant = this.unimportant;
 		return k1;
 	}
-	toShapeString() {
-		return Format.tuple(
-			this.type,
-			this.unimportant,
-			Format.n(this.x),
-			Format.n(this.y),
-			this.d1 == null ? "" : Format.n(this.d1),
-			this.d2 == null ? "" : Format.n(this.d2),
-			this.proposedNormal
-				? Format.tuple(Format.n(this.proposedNormal.x), Format.n(this.proposedNormal.y))
-				: "",
-		);
+	hash(h) {
+		h.beginStruct("BiKnot");
+		h.str(this.type);
+		h.bool(this.unimportant);
+		h.f64(this.x);
+		h.f64(this.y);
+
+		h.bool(this.d1 != null);
+		if (this.d1 != null) h.f64(this.d1);
+		h.bool(this.d2 != null);
+		if (this.d2 != null) h.f64(this.d2);
+
+		h.bool(this.proposedNormal != null);
+		if (this.proposedNormal) {
+			h.f64(this.proposedNormal.x);
+			h.f64(this.proposedNormal.y);
+		}
+		h.endStruct();
 	}
+
 	toMono() {
 		return new MonoKnot(this.type, this.unimportant, this.x, this.y);
 	}

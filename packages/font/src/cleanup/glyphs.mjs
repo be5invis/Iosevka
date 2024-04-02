@@ -19,19 +19,6 @@ function regulateGlyphStore(cache, skew, glyphStore) {
 }
 
 function flattenSimpleGlyph(cache, skew, g) {
-	// Check if the geometry is already in the cache. If so, use the cached geometry.
-	const ck = Geom.hashGeometry(g.geometry);
-	if (ck && cache) {
-		const cachedGeometry = cache && cache.getGF(ck);
-		if (cachedGeometry) {
-			g.clearGeometry();
-			g.includeContours(cachedGeometry);
-			cache.refreshGF(ck);
-			return;
-		}
-	}
-
-	// Perform the actual simplification
 	try {
 		let gSimplified;
 		if (skew) {
@@ -45,10 +32,9 @@ function flattenSimpleGlyph(cache, skew, g) {
 			gSimplified = new Geom.SimplifyGeometry(g.geometry);
 		}
 
-		const cs = gSimplified.toContours();
+		const cs = gSimplified.toContours({ cache });
 		g.clearGeometry();
 		g.includeContours(cs);
-		if (ck && cache) cache.saveGF(ck, cs);
 	} catch (e) {
 		console.error("Detected broken geometry when processing", g._m_identifier);
 		throw e;
