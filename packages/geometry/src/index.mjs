@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 import * as Format from "@iosevka/util/formatter";
 import * as TypoGeom from "typo-geom";
 
@@ -7,7 +5,7 @@ import * as CurveUtil from "./curve-util.mjs";
 import { Point } from "./point.mjs";
 import { QuadifySink } from "./quadify.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
-import { spiroToOutline } from "./spiro-to-outline.mjs";
+import { spiroToOutlineWithSimplification } from "./spiro-to-outline.mjs";
 import { strokeArcs } from "./stroke.mjs";
 import { Transform } from "./transform.mjs";
 
@@ -114,7 +112,7 @@ export class SpiroGeometry extends CachedGeometry {
 		this.m_gizmo = gizmo;
 	}
 	toContoursImpl() {
-		return spiroToOutline(this.m_knots, this.m_closed, this.m_gizmo);
+		return spiroToOutlineWithSimplification(this.m_knots, this.m_closed, this.m_gizmo);
 	}
 	toReferences() {
 		return null;
@@ -182,10 +180,10 @@ export class DiSpiroGeometry extends CachedGeometry {
 			this.m_biKnots,
 		);
 		expander.initializeNormals();
-		expander.iterateNormals();
-		expander.iterateNormals();
-		expander.iterateNormals();
-		expander.iterateNormals();
+		for (let r = 0; r < 8; r++) {
+			let d = expander.iterateNormals();
+			if (d < 1e-8) break;
+		}
 		return expander.expand();
 	}
 	toReferences() {

@@ -9,6 +9,10 @@ export class Vec2 {
 	static from(z) {
 		return new Vec2(z.x, z.y);
 	}
+
+	static scaleFrom(s, z) {
+		return new Vec2(s * z.x, s * z.y);
+	}
 }
 
 export class Point {

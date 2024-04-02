@@ -21,7 +21,8 @@ function regulateGlyphStore(cache, skew, glyphStore) {
 function flattenSimpleGlyph(cache, skew, g) {
 	try {
 		let gSimplified;
-		if (skew) {
+		const needsTransform = g.gizmo ? !Transform.isTranslate(g.gizmo) : skew != 0;
+		if (needsTransform) {
 			const tfBack = g.gizmo ? g.gizmo.inverse() : new Transform(1, -skew, 0, 1, 0, 0);
 			const tfForward = g.gizmo ? g.gizmo : new Transform(1, +skew, 0, 1, 0, 0);
 			gSimplified = new Geom.TransformedGeometry(

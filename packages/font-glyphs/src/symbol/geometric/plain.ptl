@@ -1,5 +1,6 @@
 $$include '../../meta/macros.ptl'
 
+import [OCCURRENT_PRECISION] from "@iosevka/geometry/curve-util"
 import [mix linreg clamp fallback] from "@iosevka/util"
 import [DesignParameters] from "../../meta/aesthetics.mjs"
 
@@ -38,6 +39,8 @@ glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 				s * Geom.Size * [fallback pp.size 1] - in * sw
 				in * sw
 
+	define [pointsAreNotClose a b] : begin
+		return : [Math.abs (a.x - b.x)] > OCCURRENT_PRECISION || [Math.abs (a.y - b.y)] > OCCURRENT_PRECISION
 	define [ConvexWhitePolygonImpl fn props] : begin
 		local pp : fallback props {.}
 		local sh : new-glyph : fn
@@ -50,7 +53,7 @@ glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 			foreach c [items-of : sh.geometry.toContours] : foreach j [range 0 c.length] : begin
 				local a c.[if j (j - 1) (c.length - 1)]
 				local b c.(j)
-				include : dispiro
+				if [pointsAreNotClose a b] : include : dispiro
 					disable-contrast
 					widths.center ([fallback pp.sw GeometryStroke] * 2)
 					corner [mix a.x b.x (-2)] [mix a.y b.y (-2)]
