@@ -50,9 +50,11 @@ class SpiroSimplifier {
 	flushArcs() {
 		if (!this.m_ongoingArcs.length) return;
 		if (this.m_ongoingArcs.length === 1) {
-			this.combinedArcs.push(this.m_ongoingArcs[0]);
+			const arc = this.m_ongoingArcs[0];
+			if (arc.arcLength > 1e-6) this.combinedArcs.push(arc);
 		} else {
-			this.combinedArcs.push(new SpiroSequenceArc(this.m_ongoingArcs));
+			const combined = new SpiroSequenceArc(this.m_ongoingArcs);
+			if (combined.totalLength > 1e-6) this.combinedArcs.push(combined);
 		}
 		this.m_ongoingArcs = [];
 	}
@@ -60,6 +62,16 @@ class SpiroSimplifier {
 
 class SpiroSequenceArc {
 	constructor(segments) {
+		// Filter out zero-length segments
+		let rear = 0;
+		for (let j = 0; j < segments.length; j++) {
+			if (segments[j].arcLength > 1e-6) {
+				segments[rear++] = segments[j];
+			}
+		}
+		segments.length = rear;
+
+		// Compute total length and stops
 		let totalLength = 0;
 		let stops = [];
 		for (let j = 0; j < segments.length; j++) {
@@ -69,6 +81,7 @@ class SpiroSequenceArc {
 		for (let j = 0; j < segments.length; j++) {
 			stops[j] = stops[j] / totalLength;
 		}
+		this.totalLength = totalLength;
 		this.m_segments = segments;
 		this.m_stops = stops;
 	}

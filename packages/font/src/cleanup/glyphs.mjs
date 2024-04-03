@@ -38,6 +38,6 @@ function flattenSimpleGlyph(cache, skew, g) {
 		g.includeContours(cs);
 	} catch (e) {
 		console.error("Detected broken geometry when processing", g._m_identifier);
-		throw e;
+		g.clearGeometry();
 	}
 }

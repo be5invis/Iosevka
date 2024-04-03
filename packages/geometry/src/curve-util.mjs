@@ -136,17 +136,28 @@ export class BezToContoursSink {
 		this.lastContour = [];
 	}
 	moveTo(x, y) {
+		if (!isFinite(x) || !isFinite(y)) throw new Error("Invalid coordinates detected in moveTo");
 		this.endShape();
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
 	}
 	lineTo(x, y) {
+		if (!isFinite(x) || !isFinite(y)) throw new Error("Invalid coordinates detected in lineTo");
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
 	}
 	curveTo(xc, yc, x, y) {
+		if (!isFinite(xc) || !isFinite(yc) || !isFinite(x) || !isFinite(y))
+			throw new Error("Invalid coordinates detected in curveTo");
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Quadratic, xc, yc));
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
 	}
 	cubicTo(x1, y1, x2, y2, x, y) {
+		if (!isFinite(x1) || !isFinite(y1))
+			throw new Error("Invalid coordinates detected in cubicTo");
+		if (!isFinite(x2) || !isFinite(y2))
+			throw new Error("Invalid coordinates detected in cubicTo");
+		if (!isFinite(x) || !isFinite(y))
+			throw new Error("Invalid coordinates detected in cubicTo");
+
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.CubicStart, x1, y1));
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.CubicEnd, x2, y2));
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
