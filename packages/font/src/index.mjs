@@ -70,10 +70,7 @@ async function getParametersT(argv) {
 		if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
 		if (argv.compatibilityLigatures) para.compatibilityLigatures = argv.compatibilityLigatures;
 		if (argv.metricOverride) applyMetricOverride(para, argv.metricOverride, argv);
-		para.naming = {
-			miscNames: para.naming,
-			...createNamingDictFromArgv(argv),
-		};
+		para.naming = { ...para.naming, ...createNamingDictFromArgv(argv) };
 		return para;
 	}
 	function paraT(argv) {

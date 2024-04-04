@@ -302,6 +302,8 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			slope: sfi.shapeSlope,
 			slopeAngle: sfi.shapeSlopeAngle,
 		},
+		// Naming
+		namingOverride: bp.namingOverride || null,
 		// Menu
 		menu: {
 			family: bp.family,
