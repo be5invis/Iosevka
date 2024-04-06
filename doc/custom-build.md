@@ -81,7 +81,7 @@ Inside the plan, top-level properties include:
 * `webfontFormats`: Optional, Array of String. Controls the formats needed to be exported into the webfont CSS. Valid options are `'ttf'` and `'woff2'`, or including both.
 * `buildTextureFeature`: Optional, Boolean, whether to build the `TXTR` feature for cross-letter texture adjustments. Defaults to false.
 
-Build plan could have 8 optional subsections:
+Build plan could have 9 optional subsections:
 * `ligations`
 * `variants`
 * `weights`
@@ -90,6 +90,7 @@ Build plan could have 8 optional subsections:
 * `compatibilityLigatures`
 * `excludeChars`
 * `metricOverride`
+* `namingOverride`
 
 #### Configuring Ligations
 
@@ -2243,17 +2244,17 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-hanging-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-hanging-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'hanging-serifless'</code>, <code>cv74 = 1</code></td></tr>
-    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline; without serifs (default for Sans)</td></tr>
+    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-hanging-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-hanging-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'hanging-motion-serifed'</code>, <code>cv74 = 2</code></td></tr>
     <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-hanging-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-hanging-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'hanging-serifed'</code>, <code>cv74 = 3</code></td></tr>
-    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline, and serifs (default for Slab)</td></tr>
+    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-flat-bottom-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-flat-bottom-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'flat-bottom-serifless'</code>, <code>cv74 = 4</code></td></tr>
-    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle aligned to baseline; without serifs</td></tr>
+    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle aligned to baseline; without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-flat-bottom-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-flat-bottom-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'flat-bottom-motion-serifed'</code>, <code>cv74 = 5</code></td></tr>
     <tr><td>Cyrillic Lower Em (<code>м</code>) with middle aligned to baseline, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-flat-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-flat-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'flat-bottom-serifed'</code>, <code>cv74 = 6</code></td></tr>
-    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle aligned to baseline, and serifs</td></tr>
+    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle aligned to baseline, and serifs (default for Slab)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-slanted-sides-hanging-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-slanted-sides-hanging-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'slanted-sides-hanging-serifless'</code>, <code>cv74 = 7</code></td></tr>
     <tr><td>Cyrillic Lower Em (<code>м</code>) with slanted sides, and middle being hanging off baseline; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-slanted-sides-hanging-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-slanted-sides-hanging-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'slanted-sides-hanging-motion-serifed'</code>, <code>cv74 = 8</code></td></tr>
@@ -3306,6 +3307,21 @@ will:
  * Override line height to `1500` em-unit;
  * Override the sidebearing value by its value multiplied by `1.0625` then added with `15`.
  * Override the dot size by a interpolation against weight: at thin (`100`) being `50`, at regular (`400`) being `125`, and at heavy (`900`) being `180`.
+
+#### Naming Override
+
+The properties in the `namingOverride` section could be uase to override menu names of the produced font. The following properties will be applied to the font directly:
+
+ - `copyright`: Name ID 0, copyright notice.
+ - `manufacturer`: Name ID 8, manufacturer name.
+ - `designer`: Name ID 9, designer name.
+ - `description`: Name ID 10, description of the typeface.
+ - `urlVendor`: Name ID 11, URL of font vendor.
+ - `urlDesigner`: Name ID 12, URL of typeface designer.
+ - `licence`: Name ID 13, license description.
+ - `licenceURL`: Name ID 14, license Info URL.
+
+In addition, you can also use the `version` property to override font version. The version number should follow [SemVer](https://semver.org/), like being `1.0.0`.
 
 #### Sample Configuration
 

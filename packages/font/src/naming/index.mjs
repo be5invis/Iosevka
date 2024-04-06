@@ -3,8 +3,12 @@ import semver from "semver";
 
 export function createNamingDictFromArgv(argv) {
 	return {
+		// Strings
 		family: argv.menu.family,
 		version: argv.menu.version,
+		...argv.namingOverride,
+
+		// Generated from argv property
 		weight: argv.menu.weight - 0,
 		width: argv.menu.width - 0,
 		slope: argv.menu.slope,
@@ -12,6 +16,14 @@ export function createNamingDictFromArgv(argv) {
 }
 
 export function assignFontNames(font, naming, isQuasiProportional) {
+	setMainNames(font, naming);
+	setMiscStyleProps(font, isQuasiProportional);
+	setInformaticNames(font, naming);
+	setVersion(font, naming);
+	applyMiscProps(font);
+}
+
+function setMainNames(font, naming) {
 	// Preferred names
 	const family = naming.family.trim();
 	const style = getStyle(naming.weight, naming.width, naming.slope);
@@ -21,7 +33,7 @@ export function assignFontNames(font, naming, isQuasiProportional) {
 	nameFont(font, Ot.Name.NameID.WwsFamily, family);
 	nameFont(font, Ot.Name.NameID.WwsSubfamily, style);
 
-	// Compat banes
+	// Compat names
 	const compat = getStyleLinkedStyles(naming.weight, naming.width, naming.slope);
 	let compatFamily = family;
 	if (compat.familySuffix !== "Regular") compatFamily = family + " " + compat.familySuffix;
@@ -65,7 +77,9 @@ export function assignFontNames(font, naming, isQuasiProportional) {
 		[Ot.Head.MacStyle.Condensed,          naming.width < 5],
 		[Ot.Head.MacStyle.Extended,           naming.width > 5]
 	);
+}
 
+function setMiscStyleProps(font, isQuasiProportional) {
 	// Panose
 	font.os2.panose.bFamilyType = 2;
 	font.os2.panose.bContrast = 3;
@@ -79,25 +93,57 @@ export function assignFontNames(font, naming, isQuasiProportional) {
 		font.os2.panose.bProportion = 0;
 		font.post.isFixedPitch = false;
 	}
+}
 
-	// Licensing
-	if (naming.miscNames) {
-		nameFont(font, Ot.Name.NameID.Copyright, ancNameEntry(naming.miscNames.copyright));
-		nameFont(font, Ot.Name.NameID.Manufacturer, ancNameEntry(naming.miscNames.manufacturer));
-		nameFont(font, Ot.Name.NameID.Designer, ancNameEntry(naming.miscNames.designer));
-		nameFont(font, Ot.Name.NameID.Description, ancNameEntry(naming.miscNames.description));
-		nameFont(font, Ot.Name.NameID.LicenseDescription, ancNameEntry(naming.miscNames.licence));
+function setInformaticNames(font, naming) {
+	if (naming.copyright) {
+		nameFont(font, Ot.Name.NameID.Copyright, ancNameEntry(naming.copyright));
 	}
+	if (naming.manufacturer) {
+		nameFont(font, Ot.Name.NameID.Manufacturer, ancNameEntry(naming.manufacturer));
+	}
+	if (naming.designer) {
+		nameFont(font, Ot.Name.NameID.Designer, ancNameEntry(naming.designer));
+	}
+	if (naming.description) {
+		nameFont(font, Ot.Name.NameID.Description, ancNameEntry(naming.description));
+	}
+	if (naming.urlVendor) {
+		nameFont(font, Ot.Name.NameID.UrlVendor, ancNameEntry(naming.urlVendor));
+	}
+	if (naming.urlDesigner) {
+		nameFont(font, Ot.Name.NameID.UrlDesigner, ancNameEntry(naming.urlDesigner));
+	}
+	if (naming.licence) {
+		nameFont(font, Ot.Name.NameID.LicenseDescription, ancNameEntry(naming.licence));
+	}
+	if (naming.license) {
+		nameFont(font, Ot.Name.NameID.LicenseDescription, ancNameEntry(naming.license));
+	}
+	if (naming.licenceURL) {
+		nameFont(font, Ot.Name.NameID.LicenseInfoUrl, ancNameEntry(naming.licenceURL));
+	}
+	if (naming.licenseURL) {
+		nameFont(font, Ot.Name.NameID.LicenseInfoUrl, ancNameEntry(naming.licenseURL));
+	}
+}
 
-	// Version
-	nameFont(font, Ot.Name.NameID.VersionString, `Version ${naming.version}`);
-	const majorVersion = semver.major(naming.version);
-	const minorVersion = semver.minor(naming.version);
-	const patchVersion = semver.patch(naming.version);
-	if (minorVersion > 99 || patchVersion > 99) throw new RangeError("Version number overflow");
-	font.head.fontRevision = majorVersion + (minorVersion * 10 + patchVersion) / 1000;
+function setVersion(font, naming) {
+	if (naming.version) {
+		// Trim the "Version " prefix if it exists
+		const versionString = naming.version.trim().replace(/^Version\s+/i, "");
+		const ver = semver.parse(versionString);
+		if (!ver) throw new Error(`Version string ${naming.version} does not follow semver format`);
+		if (ver.minor > 99 || ver.patch > 99) throw new RangeError("Version number overflow");
 
-	// Misc
+		// Set Name entry
+		nameFont(font, Ot.Name.NameID.VersionString, `Version ${versionString}`);
+		// Set Font Revision
+		font.head.fontRevision = ver.major + (ver.minor * 100 + ver.patch) / 10000;
+	}
+}
+
+function applyMiscProps(font) {
 	font.os2.ulCodePageRange1 = 0x2000011f;
 	font.os2.ulCodePageRange2 = 0xc4000000;
 	font.head.flags = accumulateFlags(

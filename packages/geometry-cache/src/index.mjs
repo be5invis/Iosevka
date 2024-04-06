@@ -1,10 +1,11 @@
 import fs from "fs";
+import { setTimeout } from "node:timers/promises";
 import zlib from "zlib";
 
 import * as CurveUtil from "@iosevka/geometry/curve-util";
 import { encode, decode } from "@msgpack/msgpack";
 
-const Edition = 37;
+const Edition = 41;
 const MAX_AGE = 16;
 class GfEntry {
 	constructor(age, value) {
@@ -78,12 +79,22 @@ class Cache {
 export async function load(path, version, freshAgeKey) {
 	let cache = new Cache(freshAgeKey);
 	if (path && fs.existsSync(path)) {
-		try {
-			const buf = zlib.gunzipSync(await fs.promises.readFile(path));
-			cache.loadRep(version, decode(buf));
-		} catch (e) {
-			console.error("Error loading cache. Treat as empty.");
-			console.error(e);
+		let loadAttempt = 0;
+		while (loadAttempt < 3) {
+			try {
+				const buf = zlib.gunzipSync(await fs.promises.readFile(path));
+				cache.loadRep(version, decode(buf));
+				loadAttempt += 1;
+				break;
+			} catch (e) {
+				if (loadAttempt < 2) {
+					await setTimeout(500);
+				} else {
+					console.error("Error loading cache. Treat as empty.");
+					console.error(e);
+				}
+				loadAttempt += 1;
+			}
 		}
 	}
 	return cache;

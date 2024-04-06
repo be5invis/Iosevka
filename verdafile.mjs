@@ -53,7 +53,7 @@ build.setJournal(`${BUILD}/.verda-build-journal`);
 build.setSelfTracking();
 
 ///////////////////////////////////////////////////////////
-//////                   Oracles                     //////
+//////                 Environment                   //////
 ///////////////////////////////////////////////////////////
 
 const Version = computed(`env::version`, async target => {
@@ -71,15 +71,39 @@ const CheckTtfAutoHintExists = oracle(`oracle:check-ttfautohint-exists`, async t
 });
 
 const Dependencies = computed("env::dependencies", async target => {
-	const [pjf] = await target.need(sfu`package.json`);
-	const pj = JSON.parse(await FS.promises.readFile(pjf.full, "utf-8"));
-	let subGoals = [];
-	for (const pkgName in pj.dependencies) {
-		subGoals.push(InstalledVersion(pkgName, pj.dependencies[pkgName]));
+	const [packageJsons] = await target.need(AllPackageJsons);
+	const subGoals = [];
+	for (const pjf of packageJsons) {
+		subGoals.push(DependenciesFor(pjf));
 	}
-	const [actual] = await target.need(subGoals);
-	return actual;
+	return await target.need(subGoals);
 });
+
+const AllPackageJsons = computed("env::all-package-jsons", async target => {
+	const [ppj, tpj] = await target.need(PackagesPackagesJsons, ToolPackagesJsons);
+	return [`package.json`, ...ppj, ...tpj];
+});
+const PackagesPackagesJsons = computed("env::packages-packages-jsons", target =>
+	FileList({ under: "packages", pattern: "*/package.json" })(target),
+);
+const ToolPackagesJsons = computed("env::tool-packages-jsons", target =>
+	FileList({ under: "tools", pattern: "*/package.json" })(target),
+);
+
+const DependenciesFor = computed.make(
+	pakcageJsonPath => `env::dependencies-for::${pakcageJsonPath}`,
+	async (target, pakcageJsonPath) => {
+		const [pjf] = await target.need(sfu(pakcageJsonPath));
+		const pj = JSON.parse(await FS.promises.readFile(pjf.full, "utf-8"));
+		let subGoals = [];
+		for (const pkgName in pj.dependencies) {
+			if (/^@iosevka/.test(pkgName)) continue;
+			subGoals.push(InstalledVersion(pkgName, pj.dependencies[pkgName]));
+		}
+		const [actual] = await target.need(subGoals);
+		return actual;
+	},
+);
 
 const InstalledVersion = computed.make(
 	(pkg, required) => `env::installed-version::${pkg}::${required}`,
@@ -278,6 +302,8 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			slope: sfi.shapeSlope,
 			slopeAngle: sfi.shapeSlopeAngle,
 		},
+		// Naming
+		namingOverride: bp.namingOverride || null,
 		// Menu
 		menu: {
 			family: bp.family,
@@ -1184,9 +1210,13 @@ const CleanDist = task(`clean-dist`, async () => {
 });
 
 const Release = task(`release`, async target => {
-	await target.need(ReleaseArchives, SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
+	await target.need(ReleaseAncillary);
+	await target.need(ReleaseArchives);
 });
 
+const ReleaseAncillary = task(`release:ancillary`, async target => {
+	await target.need(SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
+});
 const ReleaseArchives = task(`release:archives`, async target => {
 	const [collectPlans] = await target.need(CollectPlans, UtilScriptFiles);
 
