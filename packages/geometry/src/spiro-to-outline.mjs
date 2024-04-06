@@ -17,7 +17,7 @@ export function spiroToOutlineWithSimplification(knots, fClosed, gizmo) {
 	TypoGeom.ShapeConv.transferGenericShapeAsBezier(
 		[simplifier.combinedArcs],
 		sink,
-		CurveUtil.GEOMETRY_PRECISION,
+		CurveUtil.OCCURRENT_PRECISION,
 	);
 	return sink.contours;
 }

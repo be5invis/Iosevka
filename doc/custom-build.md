@@ -2244,17 +2244,17 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-hanging-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-hanging-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'hanging-serifless'</code>, <code>cv74 = 1</code></td></tr>
-    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline; without serifs (default for Sans)</td></tr>
+    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-hanging-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-hanging-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'hanging-motion-serifed'</code>, <code>cv74 = 2</code></td></tr>
     <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-hanging-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-hanging-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'hanging-serifed'</code>, <code>cv74 = 3</code></td></tr>
-    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline, and serifs (default for Slab)</td></tr>
+    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle being hanging off baseline, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-flat-bottom-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-flat-bottom-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'flat-bottom-serifless'</code>, <code>cv74 = 4</code></td></tr>
-    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle aligned to baseline; without serifs</td></tr>
+    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle aligned to baseline; without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-flat-bottom-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-flat-bottom-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'flat-bottom-motion-serifed'</code>, <code>cv74 = 5</code></td></tr>
     <tr><td>Cyrillic Lower Em (<code>м</code>) with middle aligned to baseline, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-flat-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-flat-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'flat-bottom-serifed'</code>, <code>cv74 = 6</code></td></tr>
-    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle aligned to baseline, and serifs</td></tr>
+    <tr><td>Cyrillic Lower Em (<code>м</code>) with middle aligned to baseline, and serifs (default for Slab)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-slanted-sides-hanging-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-slanted-sides-hanging-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'slanted-sides-hanging-serifless'</code>, <code>cv74 = 7</code></td></tr>
     <tr><td>Cyrillic Lower Em (<code>м</code>) with slanted sides, and middle being hanging off baseline; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-slanted-sides-hanging-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-slanted-sides-hanging-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'slanted-sides-hanging-motion-serifed'</code>, <code>cv74 = 8</code></td></tr>
