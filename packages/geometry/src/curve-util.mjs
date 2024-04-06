@@ -136,17 +136,28 @@ export class BezToContoursSink {
 		this.lastContour = [];
 	}
 	moveTo(x, y) {
+		if (!isFinite(x) || !isFinite(y)) throw new Error("Invalid coordinates detected in moveTo");
 		this.endShape();
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
 	}
 	lineTo(x, y) {
+		if (!isFinite(x) || !isFinite(y)) throw new Error("Invalid coordinates detected in lineTo");
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
 	}
 	curveTo(xc, yc, x, y) {
+		if (!isFinite(xc) || !isFinite(yc) || !isFinite(x) || !isFinite(y))
+			throw new Error("Invalid coordinates detected in curveTo");
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Quadratic, xc, yc));
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
 	}
 	cubicTo(x1, y1, x2, y2, x, y) {
+		if (!isFinite(x1) || !isFinite(y1))
+			throw new Error("Invalid coordinates detected in cubicTo");
+		if (!isFinite(x2) || !isFinite(y2))
+			throw new Error("Invalid coordinates detected in cubicTo");
+		if (!isFinite(x) || !isFinite(y))
+			throw new Error("Invalid coordinates detected in cubicTo");
+
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.CubicStart, x1, y1));
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.CubicEnd, x2, y2));
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
@@ -187,14 +198,27 @@ export class RoundCapCurve {
 		const r = mix(this.r0, this.r1, t);
 		const theta = mix(this.theta0, this.theta1, t);
 
-		return {
-			x: centerX + r * Math.cos(theta) * this.contrast,
-			y: centerY + r * Math.sin(theta),
-		};
+		return new Vec2(
+			centerX + r * Math.cos(theta) * this.contrast,
+			centerY + r * Math.sin(theta),
+		);
 	}
 
 	derivative(t) {
-		// TODO: calculate an exact form instead of using finite difference
-		return derivativeFromFiniteDifference(this, t);
+		const theta = mix(this.theta0, this.theta1, t);
+		const r = mix(this.r0, this.r1, t);
+		const dx =
+			this.center1.x -
+			this.center0.x +
+			this.contrast *
+				((this.r1 - this.r0) * Math.cos(theta) -
+					(this.theta1 - this.theta0) * r * Math.sin(theta));
+		const dy =
+			this.center1.y -
+			this.center0.y +
+			((this.r1 - this.r0) * Math.sin(theta) +
+				(this.theta1 - this.theta0) * r * Math.cos(theta));
+
+		return new Vec2(dx, dy);
 	}
 }

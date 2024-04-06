@@ -23,6 +23,7 @@ export class SpiroExpander {
 		const centerBone = this.getPass2Knots();
 		const normalRectifier = new NormalRectifier(this.m_biKnotsT, this.m_gizmo);
 		SpiroJs.spiroToArcsOnContext(centerBone, this.m_closed, normalRectifier);
+		return normalRectifier.totalDelta / normalRectifier.nKnotsProcessed;
 	}
 	getPass2Knots() {
 		const expanded = this.expand(this.m_contrast);
@@ -105,36 +106,49 @@ class NormalRectifier {
 	constructor(stage1ControlKnots, gizmo) {
 		this.m_gizmo = gizmo;
 		this.m_biKnots = stage1ControlKnots;
-		this.m_nKnotsProcessed = 0;
+
+		this.nKnotsProcessed = 0;
+		this.totalDelta = 0;
 	}
 	beginShape() {}
 	endShape() {}
 	moveTo(x, y) {
-		this.m_nKnotsProcessed += 1;
+		this.nKnotsProcessed += 1;
 	}
 	arcTo(arc, x, y) {
-		if (this.m_nKnotsProcessed === 1) {
+		if (this.nKnotsProcessed === 1) {
 			const d = new Vec2(arc.deriveX0, arc.deriveY0);
 			if (isTangentValid(d)) {
-				this.m_biKnots[0].origTangent = d;
+				this.updateKnotTangent(this.m_biKnots[0], d);
 			} else {
 				throw new Error("NaN angle detected.");
 			}
 		}
-		if (this.m_biKnots[this.m_nKnotsProcessed]) {
+		if (this.m_biKnots[this.nKnotsProcessed]) {
 			const d = new Vec2(arc.deriveX1, arc.deriveY1);
 			if (isTangentValid(d)) {
-				this.m_biKnots[this.m_nKnotsProcessed].origTangent = d;
+				this.updateKnotTangent(this.m_biKnots[this.nKnotsProcessed], d);
 			} else {
 				throw new Error("NaN angle detected.");
 			}
 		}
-		this.m_nKnotsProcessed += 1;
+		this.nKnotsProcessed += 1;
+	}
+
+	updateKnotTangent(knot, d) {
+		if (isTangentValid(knot.origTangent)) {
+			this.totalDelta +=
+				(d.x - knot.origTangent.x) * (d.x - knot.origTangent.x) +
+				(d.y - knot.origTangent.y) * (d.y - knot.origTangent.y);
+		} else {
+			this.totalDelta += 4;
+		}
+		knot.origTangent = d;
 	}
 }
 
 function isTangentValid(d) {
-	return isFinite(d.x) && isFinite(d.y);
+	return d && isFinite(d.x) && isFinite(d.y);
 }
 
 function normalX(tangent, contrast) {
