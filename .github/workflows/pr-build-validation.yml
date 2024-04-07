@@ -3,10 +3,61 @@ name: PR Font Build Validation
 on: [pull_request]
 
 jobs:
+  bump_version_check:
+    name: Bump version check
+    if: github.repository == 'be5invis/Iosevka' && github.base_ref == 'dev'
+    runs-on: ubuntu-latest
+
+    outputs:
+      changed: ${{ steps.check_changes.outputs.changed }}
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Bump version
+        run: |
+          npm install
+          npm run bump-ver
+
+      - id: check_changes
+        name: Check changes
+        run: |
+          git config core.autocrlf false
+          if git diff --quiet; then
+            echo "changed=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit to PR
+        if: steps.check_changes.outputs.changed == '1'
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add --all
+          git commit -m "Bump version"
+          git push
+
+      - name: Add PR comment
+        uses: mshick/add-pr-comment@v2
+        if : steps.check_changes.outputs.changed == '1'
+        with:
+          message: |
+            Your pull request changes the version number.
+            A commit has been made to bump the version number.
+
   build:
     name: Build ${{ matrix.fontName }} font
+    needs: bump_version_check
     if: github.repository == 'be5invis/Iosevka'
-
     runs-on: ubuntu-latest
 
     strategy:
