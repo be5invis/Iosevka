@@ -12,13 +12,10 @@ jobs:
       changed: ${{ steps.check_changes.outputs.changed }}
 
     steps:
-      - uses: actions/checkout@v4
       - name: Checkout PR
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git fetch --depth=1 origin +refs/pull/${{ github.event.pull_request.number }}/head
-          git checkout FETCH_HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -32,8 +29,6 @@ jobs:
 
       - id: check_changes
         name: Check changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if git diff --quiet; then
             echo "changed=0" >> "$GITHUB_OUTPUT"
@@ -43,8 +38,6 @@ jobs:
 
       - name: Commit to PR
         if: steps.check_changes.outputs.changed == '1'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
