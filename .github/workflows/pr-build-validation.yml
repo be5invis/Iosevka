@@ -3,10 +3,47 @@ name: PR Font Build Validation
 on: [pull_request]
 
 jobs:
+  bump_version_check:
+    name: Bump version check
+    if: github.repository == 'be5invis/Iosevka'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch origin +refs/pull/${{ github.event.pull_request.number }}/head
+          git checkout FETCH_HEAD
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Bump version
+        run: |
+          npm install
+          npm run bump-ver
+
+      - name: Commit to PR if anything changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Actions"
+          git add --all
+          git commit -m "Bump version" || exit 0
+          # We have to push to the PR now
+          git push
+          # Trigger a failure so the next stage won't run
+          exit 1
+
   build:
     name: Build ${{ matrix.fontName }} font
     if: github.repository == 'be5invis/Iosevka'
-
+    needs: bump_version_check
     runs-on: ubuntu-latest
 
     strategy:
