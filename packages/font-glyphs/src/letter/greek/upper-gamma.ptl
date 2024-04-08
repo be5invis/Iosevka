@@ -38,10 +38,10 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 				include : tagged 'serifRT' : VSerif.dr (RightSB - OX) top VJut
 
 	define GammaConfig : object
-		serifless       { SLAB-NONE   SLAB }
-		topRightSerifed { SLAB-TR     true }
-		bottomSerifed   { SLAB-BOTTOM SLAB }
-		serifed         { SLAB-ALL    true }
+		serifless       { SLAB-NONE   false }
+		topRightSerifed { SLAB-TR     true  }
+		bottomSerifed   { SLAB-BOTTOM false }
+		serifed         { SLAB-ALL    true  }
 
 	foreach { suffix { slabType doSM } } [Object.entries GammaConfig] : do
 		create-glyph "grek/Gamma.\(suffix)" : glyph-proc
@@ -139,16 +139,19 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	select-variant 'grek/smcpGamma' 0x1D26 (shapeFrom -- 'cyrl/ghe.upright') (follow -- 'grek/Gamma')
 	select-variant 'cyrl/ge' 0x491
 	select-variant 'cyrl/gheMidHook' 0x495 (follow -- 'cyrl/ghe.upright')
-
-	select-variant 'grek/Digamma' 0x3DC (follow -- 'grek/Gamma')
-
-	create-glyph 'grek/digamma' 0x3DD : glyph-proc
+	
+	create-glyph "grek/digamma.serifless" : glyph-proc
 		include : MarkSet.p
 		include : GammaShape XH Descender SLAB-NONE
-		local yBar : mix 0 XH DesignParameters.upperEBarPos
-		include : HBar.m GammaBarLeft (RightSB - [xMidBarShrink SLAB]) yBar
-		if SLAB : include : tagged 'serifRM'
-			VSerif.dr (RightSB - [xMidBarShrink SLAB]) (yBar + HalfStroke) [mix Stroke VJut 0.5]
+		include : HBar.m GammaBarLeft (RightSB - [xMidBarShrink SLAB]) [mix 0 XH DesignParameters.upperEBarPos]
+
+	create-glyph "grek/digamma.topRightSerifed" : glyph-proc
+		include [refer-glyph "grek/digamma.serifless"] AS_BASE ALSO_METRICS
+		include : tagged 'serifRM'
+			VSerif.dr (RightSB - [xMidBarShrink SLAB]) ([mix 0 XH DesignParameters.upperEBarPos] + HalfStroke) [mix Stroke VJut 0.5]
+
+	select-variant 'grek/Digamma' 0x3DC
+	select-variant 'grek/digamma' 0x3DD
 
 	define [GhaynOverlayBar top] : LetterBarOverlay.l GammaBarLeft (top * (1 - OverlayPos))
 
