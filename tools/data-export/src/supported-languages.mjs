@@ -81,8 +81,8 @@ function getSupportedLangs(supportLocaleSet) {
 
 function getRawCoverage(charMap) {
 	const rawCoverage = new Map();
-	for (const [gn, codes, tv, cv] of charMap)
-		for (const u of codes) rawCoverage.set(u, [gn, tv, cv]);
+	for (const [gn, codes, tv, cv, cp] of charMap)
+		for (const u of codes) rawCoverage.set(u, [gn, tv, cv, cp]);
 	return rawCoverage;
 }
 
