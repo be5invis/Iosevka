@@ -25,7 +25,7 @@ glyph-block Letter-Latin-Lower-E : begin
 	define SLAB-CLASSICAL  1
 	define SLAB-INWARD     2
 
-	define [SmallESerifedTerminalShape df top stroke tailSlab] : match tailSlab
+	define [SmallESerifedTerminalShape df top stroke tailSlab schwaTail] : match tailSlab
 		[Just SLAB-CLASSICAL] : begin
 			SerifedArcEnd.LtrLhs df.rightSB df.middle 0 stroke [HookHeight top stroke]
 		[Just SLAB-INWARD] : list
@@ -33,16 +33,16 @@ glyph-block Letter-Latin-Lower-E : begin
 			g4 (df.middle + CorrectionOMidX * stroke) O
 			g4 df.rightSB (DToothlessRise)
 		__ : list
-			hookend O (sw -- stroke)
+			hookend O (sw -- stroke) (suppressSwash -- schwaTail)
 			g4 [xTerminalR df] [HookHeight top stroke]
 
-	define [SmallETerminalSerif df top stroke tailSlab] : match tailSlab
+	define [SmallETerminalSerif df top stroke tailSlab schwaTail] : match tailSlab
 		[Just SLAB-CLASSICAL] : ArcEndSerif.R df.rightSB 0 stroke [HookHeight top stroke]
 		[Just SLAB-INWARD] : ArcEndSerif.InwardR df.rightSB 0 stroke [HookHeight top stroke]
 		__ : no-shape
 
 	glyph-block-export SmallEShape
-	define [SmallEShape] : with-params [df top stroke barpos [bbd 0] tailSlab] : glyph-proc
+	define [SmallEShape] : with-params [df top stroke barpos [bbd 0] tailSlab schwaTail] : glyph-proc
 		local barbottom : top * [fallback barpos DesignParameters.eBarPos] - (stroke / 2)
 
 		include : HBar.b (df.leftSB + (stroke / 2) + OX + bbd) (df.rightSB - (stroke / 2) - OX) barbottom stroke
@@ -55,9 +55,9 @@ glyph-block Letter-Latin-Lower-E : begin
 			archv
 			flat (df.leftSB + OX) (top - [df.archDepthA SmallArchDepth])
 			curl (df.leftSB + OX) (0 + [df.archDepthB SmallArchDepth])
-			SmallESerifedTerminalShape df top stroke tailSlab
+			SmallESerifedTerminalShape df top stroke tailSlab schwaTail
 
-		include : SmallETerminalSerif df top stroke tailSlab
+		include : SmallETerminalSerif df top stroke tailSlab schwaTail
 
 		return path.rhsKnots.[path.rhsKnots.length - 1]
 
@@ -81,7 +81,7 @@ glyph-block Letter-Latin-Lower-E : begin
 			g4 (df.width - [xTerminalR df]) [HookHeight top stroke]
 
 	glyph-block-export SmallERoundedShape
-	define [SmallERoundedShape] : with-params [df top stroke barpos tailSlab] : glyph-proc
+	define [SmallERoundedShape] : with-params [df top stroke barpos tailSlab schwaTail] : glyph-proc
 		local barbottom : top * [fallback barpos : if para.isItalic 0.500 0.475] - (stroke / 2)
 
 		local pBarRight : 0.475 - TanSlope * 0.5
@@ -93,7 +93,7 @@ glyph-block Letter-Latin-Lower-E : begin
 			widths.lhs stroke
 			[if para.isItalic g2 flat] xStart (barbottom - pfIt * [StrokeWidthBlend 2 3] * O)
 			if para.isItalic [alsoThru.g2 0.5 0.8] [list]
-			[if para.isItalic g2 curl] [mix (xStart + [if para.isItalic 0.25 0.0] * [HSwToV stroke]) df.rightSB pBarRight] (barbottom + pfIt * [StrokeWidthBlend 0.25 1] * O)
+			[if para.isItalic g2 curl] [mix (xStart + pfIt * 0.25 * [HSwToV stroke]) df.rightSB pBarRight] (barbottom + pfIt * [StrokeWidthBlend 0.25 1] * O)
 			if para.isItalic {} [archv]
 			g4 (df.rightSB - OX) [mix barbottom top pArcRight]
 			arcvh
@@ -101,9 +101,9 @@ glyph-block Letter-Latin-Lower-E : begin
 			archv
 			flat (df.leftSB + OX) (top - [df.archDepthA SmallArchDepth])
 			curl (df.leftSB + OX) (0 + [df.archDepthB SmallArchDepth])
-			SmallESerifedTerminalShape df top stroke tailSlab
+			SmallESerifedTerminalShape df top stroke tailSlab schwaTail
 
-		include : SmallETerminalSerif df top stroke tailSlab
+		include : SmallETerminalSerif df top stroke tailSlab schwaTail
 
 		return path.rhsKnots.[path.rhsKnots.length - 1]
 
@@ -136,21 +136,22 @@ glyph-block Letter-Latin-Lower-E : begin
 		define divSub : (df.width - gap - df.mvs) / Width
 		define dfSub : DivFrame divSub 2
 		include : Body dfSub top df.mvs (tailSlab -- tailSlab)
+		define offset : Width * (df.div - divSub)
 		if fDesc : begin
 			include : ExtendBelowBaseAnchors (-LongJut + 0.5 * Stroke)
 			include : difference
 				VBar.m dfSub.middle (-LongJut + 0.5 * Stroke) (df.mvs + O) [AdviceStroke 3.5 df.div]
 				OShapeOutline.NoOvershoot top 0 dfSub.leftSB dfSub.rightSB df.mvs
-		include : Translate (Width * (df.div - divSub)) 0
+		include : Translate offset 0
 
 		local hd : FlatHookDepth df
 		local yBar : top * DesignParameters.eBarPos - 0.5 * df.mvs
-		include : intersection [MaskLeft (dfSub.leftSB + Width * (df.div - divSub))] : dispiro
+		include : intersection [MaskLeft : dfSub.leftSB + offset] : dispiro
 			flat (df.leftSB - [HSwToV : 0.25 * df.mvs]) (yBar + Hook) [widths.lhs.heading df.mvs Downward]
 			curl (df.leftSB - [HSwToV : 0.25 * df.mvs]) (yBar + [Math.min Hook hd.y] - df.mvs * 0.25) [heading Downward]
 			arcvh
-			flat [Math.min (df.leftSB + hd.x - [HSwToV : 0.5 * df.mvs]) (dfSub.leftSB + Width * (df.div - divSub))] yBar
-			curl (dfSub.middle + Width * (df.div - divSub)) yBar
+			flat [Math.min (df.leftSB + hd.x - [HSwToV : 0.5 * df.mvs]) (dfSub.leftSB + offset)] yBar
+			curl (dfSub.middle + offset) yBar
 
 	define SmallEConfig : object
 		flatCrossbar { SmallEShape        RevSmallEShape        }
@@ -239,12 +240,12 @@ glyph-block Letter-Latin-Lower-E : begin
 			create-glyph "Schwa.\(suffix).\(suffixSerif)" : glyph-proc
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
-				include : Body [DivFrame 1] CAP [AdviceStroke2 2 3 CAP] (tailSlab -- styTop)
+				include : Body [DivFrame 1] CAP [AdviceStroke2 2 3 CAP] (tailSlab -- styTop) (schwaTail -- true)
 				include : FlipAround Middle (CAP / 2)
 			create-glyph "schwa.\(suffix).\(suffixSerif)" : glyph-proc
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
-				include : Body [DivFrame 1] XH [AdviceStroke2 2 3 XH] (tailSlab -- styTop)
+				include : Body [DivFrame 1] XH [AdviceStroke2 2 3 XH] (tailSlab -- styTop) (schwaTail -- true)
 				include : FlipAround Middle (XH / 2)
 
 			create-glyph "cyrl/abk/Che.\(suffix).\(suffixSerif)" : glyph-proc

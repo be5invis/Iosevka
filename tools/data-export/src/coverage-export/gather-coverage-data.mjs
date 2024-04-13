@@ -35,7 +35,7 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 			const cdItalic = covItalic.get(lch);
 			const cdOblique = covOblique.get(lch);
 			if (cdUpright && cdItalic && cdOblique) {
-				const [glyphName, typoFs, uprightFs] = cdUpright;
+				const [glyphName, typoFs, uprightFs, charProps] = cdUpright;
 				const [, , italicFs] = cdItalic;
 				const [, , obliqueFs] = cdOblique;
 
@@ -45,6 +45,7 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 					charName,
 					inFont: true,
 					glyphName: glyphName,
+					...charProps,
 					...putFeatSeries(featureSeriesStore, "typographicFeatureSets", typoFs),
 					...putFeatSeries(featureSeriesStore, "cvFeatureSetsUpright", uprightFs),
 					...putFeatSeries(featureSeriesStore, "cvFeatureSetsItalic", italicFs),

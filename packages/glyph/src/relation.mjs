@@ -124,6 +124,7 @@ export const OgonekTrY = BoolProp("OgonekTrY");
 export const IsSuperscript = BoolProp("IsSuperscript");
 export const IsSubscript = BoolProp("IsSubscript");
 export const ScheduleLeaningMark = BoolProp("ScheduleLeaningMark");
+export const IsCompositeOrLigature = BoolProp("IsCompositeOrLigature");
 
 export const Joining = {
 	get(glyph) {
@@ -353,7 +354,10 @@ export function createGrDisplaySheet(glyphStore, gn) {
 
 	sortFeatureDisplaySheet(typographicFeatures);
 	sortFeatureDisplaySheet(charVariantFeatures);
-	return [typographicFeatures, charVariantFeatures];
+
+	let charProps = {};
+	if (IsCompositeOrLigature.get(glyph)) charProps.isCompositeOrLigature = true;
+	return [typographicFeatures, charVariantFeatures, charProps];
 }
 
 function sortFeatureDisplaySheet(sheet) {
