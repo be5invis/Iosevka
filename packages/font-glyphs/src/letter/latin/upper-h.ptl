@@ -1,7 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
-import [MathSansSerif] from "@iosevka/glyph/relation"
+import [MathSansSerif DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -13,6 +13,7 @@ glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import Mark-Below : belowMarkMid
 	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-import Letter-Shared : SetGrekUpperTonos
+	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
 	glyph-block-import Letter-Shared-Shapes : LeftHook MidHook EngHook UpwardHookShape
 	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender PalatalHook
@@ -65,7 +66,9 @@ glyph-block Letter-Latin-Upper-H : begin
 		include : HBar.t (xRightBar + O) xTopRight top
 
 		include : HSerifs slabType top 0 df.leftSB xRightBar sw
-		if vSlab : include : VSerif.dr xTopRight top VJut (df.mvs / HVContrast)
+		if vSlab
+			then : include : VSerif.dr xTopRight top VJut (df.mvs / HVContrast)
+			else : eject-contour 'serifRT'
 
 	define [HwairShape df top yend slabType] : glyph-proc
 		include : VBar.l df.leftSB 0 top df.mvs
@@ -91,19 +94,22 @@ glyph-block Letter-Latin-Upper-H : begin
 			Math.min OverlayStroke (0.625 * (yt - yb))
 
 	define HConfig : object
-		serifless                        { HShape       HTurned SLAB-NONE                  false }
-		tailedSerifless                  { TailedHShape HTurned SLAB-NONE                  false }
-		topLeftSerifed                   { HShape       HTurned SLAB-TOP-LEFT              false }
-		tailedTopLeftSerifed             { TailedHShape HTurned SLAB-TOP-LEFT              SLAB  }
-		topLeftBottomRightSerifed        { HShape       HTurned SLAB-TOP-LEFT-BOTTOM-RIGHT true  }
-		serifed                          { HShape       HTurned SLAB-ALL                   true  }
-		tailedSerifed                    { TailedHShape HTurned SLAB-TAILED-CYRILLIC       true  }
-		serifedExceptBottomRight         { HShape       HTurned SLAB-TAILED-CYRILLIC       true  }
-		serifedBGR                       { HShape       HTurned SLAB-ALL-BGR               true  }
-		tailedSerifedBGR                 { TailedHShape HTurned SLAB-TAILED-CYRILLIC-BGR   true  }
-		serifedSmallHeta                 { HShape       HTurned [if SLAB SLAB-TOP-LEFT SLAB-NONE] false }
+		serifless                        { HShape       HTurned SLAB-NONE                  }
+		tailedSerifless                  { TailedHShape HTurned SLAB-NONE                  }
+		topLeftSerifed                   { HShape       HTurned SLAB-TOP-LEFT              }
+		tailedTopLeftSerifed             { TailedHShape HTurned SLAB-TOP-LEFT              }
+		topLeftBottomRightSerifed        { HShape       HTurned SLAB-TOP-LEFT-BOTTOM-RIGHT }
+		serifed                          { HShape       HTurned SLAB-ALL                   }
+		tailedSerifed                    { TailedHShape HTurned SLAB-TAILED-CYRILLIC       }
+		serifedExceptBottomRight         { HShape       HTurned SLAB-TAILED-CYRILLIC       }
+		serifedBGR                       { HShape       HTurned SLAB-ALL-BGR               }
+		tailedSerifedBGR                 { TailedHShape HTurned SLAB-TAILED-CYRILLIC-BGR   }
 
-	foreach { suffix { Body TurnedBody slabType enGheVSlab } } [Object.entries HConfig] : do
+	define EnGheGheConfig : object
+		serifless       false
+		topRightSerifed true
+
+	foreach { suffix { Body TurnedBody slabType } } [Object.entries HConfig] : do
 		create-glyph "H.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : Body SB RightSB CAP
@@ -165,15 +171,24 @@ glyph-block Letter-Latin-Upper-H : begin
 			eject-contour 'serifLT'
 			eject-contour 'serifLB'
 
-		create-glyph "cyrl/EnGhe.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.diversityM 3
-			include : df.markSet.capital
-			include : EnGheShape Body df CAP slabType enGheVSlab
+		define enGheDf : DivFrame para.diversityM 3
 
-		create-glyph "cyrl/enghe.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.diversityM 3
-			include : df.markSet.e
-			include : EnGheShape Body df XH slabType enGheVSlab
+		DefineSelectorGlyph "cyrl/EnGhe" suffix [enGheDf.markSet.capital]
+		DefineSelectorGlyph "cyrl/enghe" suffix [enGheDf.markSet.e]
+
+		foreach { suffixGhe enGheVSlab } [Object.entries EnGheGheConfig] : do
+			create-glyph "cyrl/EnGhe.\(suffix).\(suffixGhe)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : EnGheShape Body enGheDf CAP slabType enGheVSlab
+
+			create-glyph "cyrl/enghe.\(suffix).\(suffixGhe)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : EnGheShape Body enGheDf XH slabType enGheVSlab
+
+		select-variant "cyrl/EnGhe.\(suffix)" (follow -- 'cyrl/EnGhe/GhePart')
+		select-variant "cyrl/enghe.\(suffix)" (follow -- 'cyrl/enghe/ghePart')
 
 		create-glyph "Hwair.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 3
@@ -232,7 +247,7 @@ glyph-block Letter-Latin-Upper-H : begin
 	alias 'cyrl/En/descenderBase' null 'H/descenderBase'
 	select-variant 'leftHalfH' 0x2C75
 	select-variant 'rightHalfH' 0xA7F5
-	alias 'grek/Heta' 0x370 'leftHalfH'
+	select-variant 'grek/Heta' 0x370 (shapeFrom -- 'leftHalfH')
 
 	select-variant 'smcpH' 0x29C (follow -- 'H')
 	select-variant 'leftHalfSmcpH' 0x2C76 (follow -- 'leftHalfH')
@@ -240,7 +255,7 @@ glyph-block Letter-Latin-Upper-H : begin
 	select-variant 'cyrl/en' 0x43D (shapeFrom -- 'smcpH')
 	select-variant 'cyrl/en/descenderBase' (shapeFrom -- 'smcpH')
 	select-variant 'cyrl/en.BGR' (shapeFrom -- 'smcpH')
-	alias 'grek/heta' 0x371 'leftHalfSmcpH.serifedSmallHeta'
+	select-variant 'grek/heta' 0x371 (shapeFrom -- 'leftHalfSmcpH')
 
 	derive-composites 'HDescender' 0x2C67 'H/descenderBase' [CyrDescender.rSideJut RightSB 0]
 
@@ -250,8 +265,8 @@ glyph-block Letter-Latin-Upper-H : begin
 	derive-composites 'cyrl/EnTail' 0x4C9 'cyrl/En/descenderBase' [CyrTailDescender.rSideJut RightSB 0]
 	derive-composites 'cyrl/enTail' 0x4CA 'cyrl/en/descenderBase' [CyrTailDescender.rSideJut RightSB 0]
 
-	select-variant 'cyrl/EnGhe' 0x4A4 (follow -- 'H')
-	select-variant 'cyrl/enghe' 0x4A5 (follow -- 'cyrl/en')
+	CreateSelectorVariants 'cyrl/EnGhe' 0x4A4 [Object.keys HConfig] (follow -- 'H')
+	CreateSelectorVariants 'cyrl/enghe' 0x4A5 [Object.keys HConfig] (follow -- 'cyrl/en')
 
 	select-variant 'Hwair' 0x1F6
 	select-variant 'HHookLeft' 0xA7AA
