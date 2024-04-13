@@ -19,6 +19,7 @@ export type CoverageCharacter = {
     glyphName?: string;
     gc: string;
     inFont: boolean;
+    isCompositeOrLigature?: boolean;
 
     typographicFeatureSets?: number[];
     cvFeatureSetsUpright?: number[];

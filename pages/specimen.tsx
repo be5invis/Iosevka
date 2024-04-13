@@ -422,8 +422,8 @@ function SpecimenCharacter(props: SpecimenCharacterProps) {
                 props.char.inFont
                     ? "in-font"
                     : props.char.gc === "Unassigned"
-                    ? "unassigned"
-                    : "not-in-font",
+                      ? "unassigned"
+                      : "not-in-font",
                 `column-${props.char.lch % 16}`,
                 dropdownVisible ? "variant-menu-visible" : null,
             )}
@@ -461,7 +461,10 @@ function charHasVariants(props: SpecimenCharacterProps) {
     );
     for (const id of charFeatures) if (queryCvList(id).size > 1) return true;
 
-    if (props.char.typographicFeatureSets) {
+    if (
+        !(Gr.styleIsQp(props.fontStyle.style) && props.char.isCompositeOrLigature) &&
+        props.char.typographicFeatureSets
+    ) {
         for (const id of props.char.typographicFeatureSets)
             if (queryCvList(id).size > 1) return true;
     }
@@ -495,7 +498,10 @@ function CharVariantsImpl(props: SpecimenCharacterProps) {
     const hasCvSs = Gr.styleHasCvSs(props.fontStyle.style || Gr.Style.Sans);
     const fontSlope = props.fontStyle.slope || Gr.Slope.Upright;
     const charFeatures = gatherCharFeatures(hasCvSs, props.char, fontSlope);
-    const typographicFeatures = props.char.typographicFeatureSets || [];
+    const typographicFeatures =
+        Gr.styleIsQp(props.fontStyle.style) && props.char.isCompositeOrLigature
+            ? []
+            : props.char.typographicFeatureSets || [];
 
     const rows = [...typographicFeatures, ...charFeatures];
     for (let iGroup = 0; iGroup < rows.length; iGroup++) {
@@ -598,8 +604,8 @@ function SpecimenCharacterImpl(props: SpecimenCharacterImplProps) {
                               props.variantOverride + (isMark ? ', "NWID" on' : ""),
                       }
                     : isMark
-                    ? { fontFeatureSettings: "'NWID' on" }
-                    : Gr.fontStyleToOtStyle(props.fontStyle)
+                      ? { fontFeatureSettings: "'NWID' on" }
+                      : Gr.fontStyleToOtStyle(props.fontStyle)
             }
             title={formatCharInfo(props.char, props.titleOverride, props.variantOverride)}
             onClick={() => {

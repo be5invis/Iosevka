@@ -135,6 +135,17 @@ export function styleReduceWidth(sg: Style, wg: null | undefined | Width) {
     if (sg === Style.Etoile || sg === Style.Aile) return Width.Expanded;
     else return Width.Normal;
 }
+export function styleIsQp(sg: null | undefined | Style) {
+    return (
+        sg &&
+        (sg === Style.Aile ||
+            sg === Style.Etoile ||
+            sg === Style.QP ||
+            sg === Style.QPE ||
+            sg === Style.QPSlab ||
+            sg === Style.QPESlab)
+    );
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
