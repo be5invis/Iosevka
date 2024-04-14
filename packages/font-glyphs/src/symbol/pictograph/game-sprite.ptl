@@ -30,6 +30,7 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
 	define graphicSw : AdviceStroke 3.5
 	define smallGraphicSw : AdviceStroke 3.5 : Math.sqrt (MosaicWidthScalar / 2)
+	define heavyGraphicSw : Math.max (graphicSw * 2) (Width * 0.15)
 
 	define squareBox : new Box Geom.Top Geom.Bot Geom.Left Geom.Right
 	define [SidewaysBox top bottom left right _left2 _right2] : begin
@@ -202,6 +203,67 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 		create-glyph [MangleName 'stickManWithDress'] [MangleUnicode 0x1FBC9] : glyph-proc
 			set-width MosaicWidth
 			include : StickManDressBody scaffold 0 0
+
+	do "Snake Head"
+		define eyeSize : Geom.Size / 8
+		define mouthWidth : Geom.Size / 3
+		define eyeOffset mouthWidth
+
+		define [SnakeHead facing fMouth] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+
+			local eyeX : match facing
+				0 : midX + eyeSize
+				1 : midX - eyeSize - eyeOffset
+				2 : midX - eyeSize
+				3 : midX + eyeSize + eyeOffset
+			local eyeY : match facing
+				0 : midY + eyeSize + eyeOffset
+				1 : midY + eyeSize
+				2 : midY + eyeSize + eyeOffset
+				3 : midY - eyeSize
+
+			include : difference
+				union
+					refer-glyph : MangleName : match facing
+						0 'uni2578'
+						1 'uni257B'
+						2 'uni257A'
+						3 'uni2579'
+					refer-glyph : MangleName 'blackCircle'
+				DotAt eyeX eyeY eyeSize
+				if fMouth
+					spiro-outline
+						corner midX midY
+						match facing
+							0 : corner Geom.Right (midY - mouthWidth)
+							1 : corner (midX + mouthWidth) Geom.Top
+							2 : corner Geom.Left (midY + mouthWidth)
+							3 : corner (midX - mouthWidth) Geom.Bot
+						match facing
+							0 : corner Geom.Right (midY + mouthWidth)
+							1 : corner (midX - mouthWidth) Geom.Top
+							2 : corner Geom.Left (midY - mouthWidth)
+							3 : corner (midX + mouthWidth) Geom.Bot
+					glyph-proc
+
+		create-glyph [MangleName "snakeHeadLeftOpen"] [MangleUnicode 0x1CC70] : glyph-proc
+			include : SnakeHead 2 0
+		create-glyph [MangleName "snakeHeadUpOpen"] [MangleUnicode 0x1CC71] : glyph-proc
+			include : SnakeHead 1 0
+		create-glyph [MangleName "snakeHeadRightOpen"] [MangleUnicode 0x1CC72] : glyph-proc
+			include : SnakeHead 0 0
+		create-glyph [MangleName "snakeHeadDownOpen"] [MangleUnicode 0x1CC73] : glyph-proc
+			include : SnakeHead 3 0
+		create-glyph [MangleName "snakeHeadLeftClosed"] [MangleUnicode 0x1CC74] : glyph-proc
+			include : SnakeHead 2 1
+		create-glyph [MangleName "snakeHeadUpClosed"] [MangleUnicode 0x1CC75] : glyph-proc
+			include : SnakeHead 1 1
+		create-glyph [MangleName "snakeHeadRightClosed"] [MangleUnicode 0x1CC76] : glyph-proc
+			include : SnakeHead 0 1
+		create-glyph [MangleName "snakeHeadDownClosed"] [MangleUnicode 0x1CC77] : glyph-proc
+			include : SnakeHead 3 1
 
 	do "Energy Waves"
 		define [LeftEnergyWave top bottom left right] : glyph-proc
