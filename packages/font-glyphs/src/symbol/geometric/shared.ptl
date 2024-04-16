@@ -1,5 +1,6 @@
 $$include '../../meta/macros.ptl'
 
+import [OCCURRENT_PRECISION] from "@iosevka/geometry/curve-util"
 import [mix linreg clamp fallback] from "@iosevka/util"
 import [DesignParameters] from "../../meta/aesthetics.mjs"
 
@@ -57,3 +58,20 @@ glyph-block Symbol-Geometric-Shared : begin
 		TinyInner   { .innerSize (1 / 4) }
 		SmallInner  { .innerSize (1 / 3) }
 		MediumInner { .innerSize (2 / 3) }
+
+	glyph-block-export ConvexPolygonOutline
+	define [pointsAreNotClose a b] : begin
+		return : [Math.abs (a.x - b.x)] > OCCURRENT_PRECISION || [Math.abs (a.y - b.y)] > OCCURRENT_PRECISION
+	define [ConvexPolygonOutline shape sw] : begin
+		local outlines : glyph-proc : begin
+			set this.gizmo : Translate 0 0
+			foreach c [items-of : shape.geometry.toContours] : foreach j [range 0 c.length] : begin
+				local a c.[if j (j - 1) (c.length - 1)]
+				local b c.(j)
+				if [pointsAreNotClose a b] : include : dispiro
+					disable-contrast
+					widths.center (sw * 2)
+					corner [mix a.x b.x (-2)] [mix a.y b.y (-2)]
+					corner [mix a.x b.x (+3)] [mix a.y b.y (+3)]
+
+		return : intersection shape outlines
