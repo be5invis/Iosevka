@@ -14,9 +14,33 @@ glyph-block Symbol-Geometric-Ballot-Box : for-width-kinds WideWidth1
 
 	alias [MangleName 'ballotBox'] [MangleUnicode 0x2610] [MangleName 'whiteSquare']
 
+	define [CrossMark cx cy size sw] : glyph-proc
+		include : dispiro
+			widths.center sw
+			corner (cx - size) (cy - size)
+			corner (cx + size) (cy + size)
+		include : dispiro
+			widths.center sw
+			corner (cx + size) (cy - size)
+			corner (cx - size) (cy + size)
+
+	define [UpArrowMark cx cy size sw] : glyph-proc
+		local size2 : size / 1.5
+		include : intersection [MaskLeft cx] : dispiro
+			widths.center sw
+			corner (cx - size2 * 2) (cy - size2)
+			corner (cx + size2) (cy + size2 * 2)
+		include : intersection [MaskRight cx] : dispiro
+			widths.center sw
+			corner (cx - size2) (cy + size2 * 2)
+			corner (cx + size2 * 2) (cy - size2)
+
 	define bbGap : Math.max (Geom.Size / 6) [AdviceStroke 5 Geom.Scalar]
 	define swMark : Math.min GeometryStroke : AdviceStroke 5 Geom.Scalar
+	define lightSwMark : UnicodeWeightGrade 3 Geom.Scalar
+	define boldSwMark  : UnicodeWeightGrade 7 Geom.Scalar
 	define bbSize : Geom.Size - bbGap - swMark * 0.75
+	define circXSize : (Geom.Size - bbGap) * [Math.sqrt 0.5] - swMark * 0.75
 
 	create-glyph [MangleName 'checkedBallotBox'] [MangleUnicode 0x2611] : glyph-proc
 		local k1 0.4
@@ -36,11 +60,58 @@ glyph-block Symbol-Geometric-Ballot-Box : for-width-kinds WideWidth1
 
 	create-glyph [MangleName 'crossBallotBox'] [MangleUnicode 0x2612] : glyph-proc
 		include [refer-glyph : MangleName 'whiteSquare'] AS_BASE ALSO_METRICS
-		include : dispiro
-			widths.center swMark
-			corner (Geom.MidX - bbSize) (Geom.MidY - bbSize)
-			corner (Geom.MidX + bbSize) (Geom.MidY + bbSize)
-		include : dispiro
-			widths.center swMark
-			corner (Geom.MidX + bbSize) (Geom.MidY - bbSize)
-			corner (Geom.MidX - bbSize) (Geom.MidY + bbSize)
+		include : CrossMark Geom.MidX Geom.MidY bbSize swMark
+
+	create-glyph [MangleName 'lightCrossBallotBox'] [MangleUnicode 0x2BBD] : glyph-proc
+		include [refer-glyph : MangleName 'whiteSquare'] AS_BASE ALSO_METRICS
+		include : CrossMark Geom.MidX Geom.MidY bbSize lightSwMark
+
+	create-glyph [MangleName 'crossCircle'] [MangleUnicode 0x2BBE] : glyph-proc
+		include [refer-glyph : MangleName 'whiteCircle'] AS_BASE ALSO_METRICS
+		include : CrossMark Geom.MidX Geom.MidY circXSize swMark
+
+	create-glyph [MangleName 'boldCrossCircle'] [MangleUnicode 0x2BBF] : glyph-proc
+		include [refer-glyph : MangleName 'whiteCircle'] AS_BASE ALSO_METRICS
+		include : CrossMark Geom.MidX Geom.MidY circXSize boldSwMark
+
+	do "Delete Symbols"
+		glyph-block-import Symbol-Geometric-Shared : ConvexPolygonOutline
+
+		define delGap : Math.max (Geom.Size / 6) [AdviceStroke 5 Geom.Scalar]
+		define delSize : (Geom.Size - delGap) / 1.5 - swMark * 0.75
+
+		define [RightFingerpostFill cx cy r] : begin
+			define skew : r * 1 / 4
+			return : spiro-outline
+				corner (cx - r)        (cy + r / 1.5)
+				corner (cx + r - skew) (cy + r / 1.5)
+				corner (cx + r + skew)  cy
+				corner (cx + r - skew) (cy - r / 1.5)
+				corner (cx - r)        (cy - r / 1.5)
+
+		define [LeftFingerpostFill cx cy r] : begin
+			define skew : r * 1 / 4
+			return : spiro-outline
+				corner (cx + r)        (cy - r / 1.5)
+				corner (cx + r)        (cy + r / 1.5)
+				corner (cx - r + skew) (cy + r / 1.5)
+				corner (cx - r - skew)  cy
+				corner (cx - r + skew) (cy - r / 1.5)
+
+		create-glyph [MangleName 'UpArrowInRectangle'] [MangleUnicode 0x2BB9] : glyph-proc
+			include [refer-glyph : MangleName 'whiteHoriRectangle'] AS_BASE ALSO_METRICS
+			include : UpArrowMark Geom.MidX Geom.MidY delSize swMark
+
+		create-glyph [MangleName 'xInRectangle'] [MangleUnicode 0x2327] : glyph-proc
+			include [refer-glyph : MangleName 'whiteHoriRectangle'] AS_BASE ALSO_METRICS
+			include : CrossMark Geom.MidX Geom.MidY delSize swMark
+
+		create-glyph [MangleName 'deleteRight'] [MangleUnicode 0x2326] : glyph-proc
+			set-width Geom.Width
+			include : ConvexPolygonOutline [new-glyph : RightFingerpostFill Geom.MidX Geom.MidY Geom.Size] GeometryStroke
+			include : CrossMark Geom.MidX Geom.MidY delSize swMark
+
+		create-glyph [MangleName 'deleteLeft'] [MangleUnicode 0x232B] : glyph-proc
+			set-width Geom.Width
+			include : ConvexPolygonOutline [new-glyph : LeftFingerpostFill Geom.MidX Geom.MidY Geom.Size] GeometryStroke
+			include : CrossMark Geom.MidX Geom.MidY delSize swMark

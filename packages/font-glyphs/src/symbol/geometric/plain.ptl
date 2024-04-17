@@ -1,6 +1,5 @@
 $$include '../../meta/macros.ptl'
 
-import [OCCURRENT_PRECISION] from "@iosevka/geometry/curve-util"
 import [mix linreg clamp fallback] from "@iosevka/util"
 import [DesignParameters] from "../../meta/aesthetics.mjs"
 
@@ -9,7 +8,7 @@ glyph-module
 glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes ConvexPolygonOutline
 
 	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
 	define Size : GeometricSizes Geom
@@ -39,8 +38,6 @@ glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 				s * Geom.Size * [fallback pp.size 1] - in * sw
 				in * sw
 
-	define [pointsAreNotClose a b] : begin
-		return : [Math.abs (a.x - b.x)] > OCCURRENT_PRECISION || [Math.abs (a.y - b.y)] > OCCURRENT_PRECISION
 	define [ConvexWhitePolygonImpl fn props] : begin
 		local pp : fallback props {.}
 		local sh : new-glyph : fn
@@ -48,33 +45,25 @@ glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 			fallback pp.cy Geom.MidY
 			Geom.Size * [fallback pp.size 1]
 			begin 0
-		local outlines : glyph-proc : begin
-			set this.gizmo : Translate 0 0
-			foreach c [items-of : sh.geometry.toContours] : foreach j [range 0 c.length] : begin
-				local a c.[if j (j - 1) (c.length - 1)]
-				local b c.(j)
-				if [pointsAreNotClose a b] : include : dispiro
-					disable-contrast
-					widths.center ([fallback pp.sw GeometryStroke] * 2)
-					corner [mix a.x b.x (-2)] [mix a.y b.y (-2)]
-					corner [mix a.x b.x (+3)] [mix a.y b.y (+3)]
-
-		return : intersection sh outlines
+		return : ConvexPolygonOutline sh [fallback pp.sw GeometryStroke]
 
 	define [StdWhiteShape fn name unicode props] : begin
 		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
 			set-width Geom.Width
 			include : StdWhiteShapeImpl fn 1 0 1 props
 
+	define [InnerShapeSize props] : begin
+		local pp : fallback props {.}
+		return : [fallback pp.innerSize 0.5] * (Geom.Size * [fallback pp.size 1] - [fallback pp.sw GeometryStroke])
+
 	define [StdWhiteContainingBlackShape fn name unicode props] : begin
 		local pp : fallback props {.}
 		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
 			set-width Geom.Width
-			local sw : fallback pp.sw GeometryStroke
 			include : fn
 				fallback pp.cx Geom.MidX
 				fallback pp.cy Geom.MidY
-				[fallback pp.innerSize 0.5] * (Geom.Size * [fallback pp.size 1] - sw)
+				InnerShapeSize pp
 				begin 0
 			include : StdWhiteShapeImpl fn 1 0 1 props
 
@@ -86,7 +75,7 @@ glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 			include : fn
 				fallback pp.cx Geom.MidX
 				fallback pp.cy Geom.MidY
-				[fallback pp.innerSize 0.5] * (Geom.Size * [fallback pp.size 1] - sw)
+				InnerShapeSize pp
 				begin 0
 			include : ConvexWhitePolygonImpl fn props
 
@@ -254,6 +243,18 @@ glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 
 		StdBlackShape ParallelogramFill 'blackParallelogram' 0x25B0
 		ConvexWhitePolygon ParallelogramFill 'whiteParallelogram' 0x25B1
+
+		alias [MangleName 'flatness'] [MangleUnicode 0x23E5] [MangleName 'whiteParallelogram']
+
+		define [TrapeziumFill cx cy r] : begin
+			define skew : r * 1 / 4
+			return : spiro-outline
+				corner (cx - r) (cy + r / 1.5)
+				corner (cx + r - skew) (cy + r / 1.5)
+				corner (cx + r) (cy - r / 1.5)
+				corner (cx - r) (cy - r / 1.5)
+
+		ConvexWhitePolygon TrapeziumFill 'whiteTrapezium' 0x23E2
 
 	do "Triangles"
 		define triangleOvershoot : 2.1 / [Math.sqrt 3]
@@ -601,3 +602,8 @@ glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 
 		StdBlackShape RightArrowHeadShape 'blackArrowHeadRight' 0x27A4 Size.Oblique
 		StdWhiteShape RightArrowHeadShape 'whiteArrowHeadRight' null   Size.Oblique
+
+	do "Other Polygon"
+		create-glyph [MangleName 'straightness'] [MangleUnicode 0x23E4] : glyph-proc
+			set-width Geom.Width
+			include : HBar.m Geom.Left Geom.Right Geom.MidY GeometryStroke
