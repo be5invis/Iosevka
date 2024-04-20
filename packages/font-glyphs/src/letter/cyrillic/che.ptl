@@ -20,47 +20,47 @@ glyph-block Letter-Cyrillic-Che : begin
 	glyph-block-export SERIFS
 	define SERIFS : object
 		NONE        0
-		ALL         1
-		LOWER       2
-		TOP         3
-		BOT         4
-		TAILED-I    5
+		TL          1
+		BR          2
+		TL-BR       3
+		ALL         4
+		TOP         5
 		ALL-BGR     6
-		TAILED-BGR  7
+		TOP-BGR     7
 
 	glyph-block-export CyrCheShape
-	define [CyrCheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs]] : glyph-proc
-		local bar : top * [fallback pyBar 0.5]
+	define [CyrCheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs] [yBarOffset DToothlessRise]] : glyph-proc
+		local bar : top * [fallback pyBar 0.5] + yBarOffset
 		include : match bodyType
 			[Just BODY.TAILED] : RightwardTailedBar df.rightSB 0 top (sw -- sw)
 			__                 : VBar.r df.rightSB 0 top sw
 		include : dispiro
 			widths.lhs sw
 			flat df.leftSB top [heading Downward]
-			curl df.leftSB (bar + ArchDepthB - HalfStroke)
-			g4 (df.middle + CorrectionOMidS) (bar - HalfStroke)
-			g4 (df.rightSB - 1 / 16) (bar - HalfStroke + DToothlessRise) [heading Rightward]
+			curl df.leftSB (bar - DToothlessRise + ArchDepthB - HalfStroke)
+			g4 (df.middle + CorrectionOMidS) (bar - DToothlessRise - HalfStroke)
+			g4 (df.rightSB - 1 / 16) (bar - HalfStroke) [heading Rightward]
 
 		local sf : SerifFrame.fromDf df top 0
 		include : tagged 'serifLT' : match slabType
 			[Just SERIFS.ALL]        sf.lt.full
 			[Just SERIFS.TOP]        sf.lt.full
 			[Just SERIFS.ALL-BGR]    sf.lt.outer
-			[Just SERIFS.TAILED-BGR] sf.lt.outer
-			[Just SERIFS.LOWER]      sf.lt.outer
-			[Just SERIFS.TAILED-I]   sf.lt.outer
+			[Just SERIFS.TOP-BGR]    sf.lt.outer
+			[Just SERIFS.TL-BR]      sf.lt.outer
+			[Just SERIFS.TL]         sf.lt.outer
 			__                   : glyph-proc
 		include : tagged 'SerifRT' : match slabType
 			[Just SERIFS.ALL]        sf.rt.full
 			[Just SERIFS.TOP]        sf.rt.full
 			[Just SERIFS.ALL-BGR]    sf.rt.inner
-			[Just SERIFS.TAILED-BGR] sf.rt.inner
+			[Just SERIFS.TOP-BGR]    sf.rt.inner
 			__                   : glyph-proc
 		include : tagged 'SerifRB' : match slabType
 			[Just SERIFS.ALL]        sf.rb.fullSide
 			[Just SERIFS.ALL-BGR]    sf.rb.fullSide
-			[Just SERIFS.LOWER]      sf.rb.outer
-			[Just SERIFS.BOT]        sf.rb.outer
+			[Just SERIFS.TL-BR]      sf.rb.outer
+			[Just SERIFS.BR]         sf.rb.outer
 			__                   : glyph-proc
 
 	create-glyph 'cyrl/Che' 0x427 : glyph-proc
@@ -78,8 +78,8 @@ glyph-block Letter-Cyrillic-Che : begin
 
 	glyph-block-export ItalicConfig
 	define ItalicConfig : object
-		standard { BODY.STRAIGHT SERIFS.ALL SERIFS.ALL-BGR    SERIFS.LOWER    }
-		tailed   { BODY.TAILED   SERIFS.TOP SERIFS.TAILED-BGR SERIFS.TAILED-I }
+		standard { BODY.STRAIGHT SERIFS.ALL SERIFS.ALL-BGR SERIFS.TL-BR }
+		tailed   { BODY.TAILED   SERIFS.TOP SERIFS.TOP-BGR SERIFS.TL    }
 
 	foreach { suffix { body slabUpright slabUprightBGR slabItalic } } [pairs-of ItalicConfig] : do
 		create-glyph "cyrl/che.\(suffix)" : glyph-proc
@@ -114,18 +114,19 @@ glyph-block Letter-Cyrillic-Che : begin
 
 	define ShhaConfig : object
 		serifless                 SERIFS.NONE
-		topLeftSerifed            SERIFS.BOT
-		topLeftBottomRightSerifed SERIFS.LOWER
+		topLeftSerifed            SERIFS.BR
+		topLeftBottomRightSerifed SERIFS.TL-BR
 		serifed                   SERIFS.ALL
 
 	foreach { suffix serifs } [pairs-of ShhaConfig] : do
 		create-glyph "cyrl/Shha.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : LeaningAnchor.Above.VBar.l SB
-			include : CyrCheShape [DivFrame 1] CAP 0.4 BODY.STRAIGHT serifs
+			include : CyrCheShape [DivFrame 1] CAP (1 - HBarPos) BODY.STRAIGHT serifs
+				yBarOffset -- [HSwToV : Math.pow Stroke 2] / (RightSB - SB)
 			include : FlipAround Middle (CAP / 2)
 
 	select-variant 'cyrl/Shha' 0x4BA (follow -- 'H')
-	select-variant 'cyrl/Shha/descBase' (shapeFrom -- 'cyrl/Shha') (follow -- 'H/descenderBase')
+	select-variant 'cyrl/Shha/descBase' (shapeFrom -- 'cyrl/Shha') (follow -- 'H/descBase')
 
 	derive-composites 'cyrl/ShhaDescender' 0x526 'cyrl/Shha/descBase' [CyrDescender.rSideJut RightSB 0]
