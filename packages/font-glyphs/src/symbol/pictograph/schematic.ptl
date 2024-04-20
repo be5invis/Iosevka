@@ -23,6 +23,11 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 
 	define boxDrawingStroke : AdviceStroke 3.5
 	define fineStroke : AdviceStroke 3.5 : Math.sqrt (MosaicWidthScalar / 2)
+	define [LineExt x1 y1 x2 y2 sw] : dispiro
+		widths.center sw
+		corner [mix x1 x2 (-1)] [mix y1 y2 (-1)]
+		corner [mix x1 x2   2 ] [mix y1 y2   2 ]
+
 	define gateSize : MosaicHeight / 2
 	define gateBot : midy - gateSize
 	define gateTop : midy + gateSize
@@ -39,6 +44,38 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 		g4 (x + ringSize) y
 		arcvh 32 2.0
 		close
+
+	do "Monostable and Bell"
+		create-glyph [MangleName 'monostable'] [MangleUnicode 0x238D] : glyph-proc
+			set-width MosaicWidth
+			include : HBar.b Geom.Left (Geom.MidX - Geom.Size * 0.5) Geom.Bot boxDrawingStroke
+			include : VBar.m (Geom.MidX - Geom.Size * 0.5) Geom.Bot Geom.Top boxDrawingStroke
+			include : HBar.t (Geom.MidX - Geom.Size * 0.5) (Geom.MidX + Geom.Size * 0.5) Geom.Top boxDrawingStroke
+			include : VBar.m (Geom.MidX + Geom.Size * 0.5) Geom.Bot Geom.Top boxDrawingStroke
+			include : HBar.b (Geom.MidX + Geom.Size * 0.5) Geom.Right Geom.Bot boxDrawingStroke
+
+		create-glyph [MangleName 'bellSymbol'] [MangleUnicode 0x237E] : glyph-proc
+			set-width MosaicWidth
+			include : intersection
+				MaskBelow Geom.MidY
+				refer-glyph : MangleName 'monostable'
+			include : with-transform
+				ApparentTranslate 0 (Geom.Size / 2)
+				refer-glyph : MangleName 'segment'
+
+	do "Fuse"
+		create-glyph [MangleName 'fuse'] [MangleUnicode 0x23DB] : glyph-proc
+			include [refer-glyph : MangleName : NameUni 0x2500] AS_BASE ALSO_METRICS
+			include : refer-glyph : MangleName 'whiteHoriRectangle'
+
+	do "Earth Ground"
+		create-glyph [MangleName 'earthGround'] [MangleUnicode 0x23DA] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.m midx midy top boxDrawingStroke
+			include : HBar.m Geom.Left Geom.Right midy boxDrawingStroke
+			include : HBar.m (Geom.MidX - Geom.Size * 0.6) (Geom.MidX + Geom.Size * 0.6) [mix bottom top 0.4] boxDrawingStroke
+			include : HBar.m (Geom.MidX - Geom.Size * 0.3) (Geom.MidX + Geom.Size * 0.3) [mix bottom top 0.3] boxDrawingStroke
 
 	do "Explosion at Horizon"
 		define horizon : Geom.MidY - Geom.Size * 0.8
@@ -90,24 +127,18 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 						corner midx midy
 
 	do "Resistor"
-		define amplitude Geom.Size
+		define amplitude : Geom.Size * 0.8
 		define vWaves 2
 		define hWaves MosaicWidthScalar
 
 		define [HoriWaveSegment left right lefty righty sw] : intersection
 			MaskRight left
 			MaskLeft right
-			dispiro
-				widths.center sw
-				corner [mix left right (-1)] [mix lefty righty (-1)]
-				corner [mix left right   2 ] [mix lefty righty   2 ]
+			LineExt left lefty right righty sw
 		define [VertWaveSegment bot top botx topx sw] : intersection
 			MaskAbove bot
 			MaskBelow top
-			dispiro
-				widths.center sw
-				corner [mix botx topx (-1)] [mix bot top (-1)]
-				corner [mix botx topx   2 ] [mix bot top   2 ]
+			LineExt botx bot topx top sw
 
 		create-glyph [MangleName 'resistorHori'] [MangleUnicode 0x1CC09] : glyph-proc
 			set-width MosaicWidth
@@ -116,7 +147,10 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 			local halfPeriod : MosaicWidth / (2 * hWaves)
 			local up : midy + amplitude
 			local down : midy - amplitude
-			include : HoriWaveSegment left (left + 0.5 * halfPeriod) midy up boxDrawingStroke
+			include : intersection
+				MaskLeft : left + 0.5 * halfPeriod
+				MaskAbove : midy - 0.5 * boxDrawingStroke
+				LineExt left midy (left + 0.5 * halfPeriod) up boxDrawingStroke
 			foreach [j : range 0 segs] : begin
 				include : HoriWaveSegment
 					left + (j + 0.5) * halfPeriod
@@ -124,7 +158,10 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 					if (j % 2) down up
 					if (j % 2) up down
 					* boxDrawingStroke
-			include : HoriWaveSegment (right - halfPeriod * 0.5) right down midy boxDrawingStroke
+			include : intersection
+				MaskRight : right - 0.5 * halfPeriod
+				MaskBelow : midy + 0.5 * boxDrawingStroke
+				LineExt (right - 0.5 * halfPeriod) down right midy boxDrawingStroke
 
 		create-glyph [MangleName 'resistorVert'] [MangleUnicode 0x1CC0A] : glyph-proc
 			set-width MosaicWidth
@@ -133,7 +170,10 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 			local halfPeriod : MosaicHeight / (2 * vWaves)
 			local up : midx + amplitude
 			local down : midx - amplitude
-			include : VertWaveSegment bottom (bottom + halfPeriod * 0.5) midx up boxDrawingStroke
+			include : intersection
+				MaskBelow : bottom + 0.5 * halfPeriod
+				MaskRight : midx - [HSwToV : 0.5 * boxDrawingStroke]
+				LineExt midx bottom up (bottom + 0.5 * halfPeriod) boxDrawingStroke
 			foreach [j : range 0 segs] : begin
 				include : VertWaveSegment
 					bottom + (j + 0.5) * halfPeriod
@@ -141,7 +181,10 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 					if (j % 2) down up
 					if (j % 2) up down
 					* boxDrawingStroke
-			include : VertWaveSegment (top - halfPeriod * 0.5) top down midx boxDrawingStroke
+			include : intersection
+				MaskAbove : top - 0.5 * halfPeriod
+				MaskLeft : midx + [HSwToV : 0.5 * boxDrawingStroke]
+				LineExt down (top - 0.5 * halfPeriod) midx top boxDrawingStroke
 
 	do "Diode"
 		define diodeGap : MosaicWidth / 9
@@ -172,11 +215,17 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 		local baseDy : baseDx / (-slope)
 		define arrowPos : (1 - [HSwToV boxDrawingStroke] / (MosaicWidth / 2)) * 0.4
 
+		define [VerticalPart] : intersection
+			Rect top bottom left (midx + [HSwToV : 0.5 * boxDrawingStroke])
+			union
+				LineExt midx bottom left midy boxDrawingStroke
+				LineExt left midy midx top boxDrawingStroke
+
 		create-glyph [MangleName 'transistorPNP'] [MangleUnicode 0x1CC10] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
 			include : VBar.l left gateBot gateTop boxDrawingStroke
-			include : refer-glyph : MangleName : NameUni 0x1FBA4
+			include : VerticalPart
 
 			local arrowCx : mix midx left arrowPos
 			local arrowCy : mix bottom midy arrowPos
@@ -189,7 +238,7 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 			set-width MosaicWidth
 			include : ForceUpright
 			include : VBar.l left gateBot gateTop boxDrawingStroke
-			include : refer-glyph : MangleName : NameUni 0x1FBA4
+			include : VerticalPart
 
 			local arrowCx : mix midx left arrowPos
 			local arrowCy : mix top midy arrowPos

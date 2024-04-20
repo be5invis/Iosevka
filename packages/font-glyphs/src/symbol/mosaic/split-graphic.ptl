@@ -5,40 +5,53 @@ import [Box] from "@iosevka/geometry/box"
 
 glyph-module
 
-glyph-block Symbol-Mosaic-Split-Graphic : for-width-kinds WideWidth4
+glyph-block Symbol-Mosaic-Split-Graphic : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Symbol-Pictograph-Stick-Figure : StickFigureKit PointingHandShape
 
-	define uiFigTop : mix ParenBot ParenTop 0.95
-	define uiFigBot : mix ParenBot ParenTop 0.05
+	define boxDrawingStroke : AdviceStroke 3.5
+	define graphicSw : AdviceStroke 3.5
 
 	define top    fontMetrics.os2.sTypoAscender
 	define bottom fontMetrics.os2.sTypoDescender
 	define left   0
-	define right  MosaicWidth
 	define MosaicHeight : top - bottom
 
-	define [CellMask] : spiro-outline
-		corner left top
-		corner right top
-		corner right bottom
-		corner left bottom
+	glyph-block-export Multicell
+	define [Multicell MosaicWidth] : namespace
+		define [Mask] : spiro-outline
+			corner left top
+			corner (left + MosaicWidth) top
+			corner (left + MosaicWidth) bottom
+			corner left bottom
 
-	define [SplitGraphic t b l r vspan hspan vidx hidx shapeFunc] : begin
-		local r2 : r + MosaicWidth * (hspan - 1)
-		local t2 : t + MosaicHeight * (vspan - 1)
+		export : define [NBox t b l r vspan hspan] : begin
+			local r2 : r + MosaicWidth * (hspan - 1)
+			local t2 : t + MosaicHeight * (vspan - 1)
 
-		return : intersection
-			CellMask
-			with-transform [Translate (-hidx * MosaicWidth) (-vidx * MosaicHeight)] : shapeFunc t2 b l r2
+			return : new Box t2 b l r2
 
-	define boxDrawingStroke : AdviceStroke 3.5
+		export : define [Split t b l r vspan hspan vidx hidx fUpright shapeFunc] : begin
+			local box : NBox t b l r vspan hspan
 
-	do "Split Circles"
-		define [CircleTouchingBox top bot left right] : glyph-proc
-			include : ForceUpright
-			include : dispiro
+			return : intersection
+				Mask
+				with-transform
+					Translate (-hidx * MosaicWidth) (-vidx * MosaicHeight)
+					if fUpright
+						composite-proc
+							ForceUpright
+							shapeFunc box.top box.bottom box.left box.right
+						shapeFunc box.top box.bottom box.left box.right
+
+	for-width-kinds WideWidth4
+		define right MosaicWidth
+
+		local multicell : Multicell MosaicWidth
+
+		do "Split Circles"
+			define [CircleTouchingBox top bot left right] : dispiro
 				widths.lhs boxDrawingStroke
 				g4 left [mix top bot 0.5]
 				arcvh.superness 2
@@ -50,25 +63,176 @@ glyph-block Symbol-Mosaic-Split-Graphic : for-width-kinds WideWidth4
 				archv.superness 2
 				close
 
-		define [BuildSplitCircle name unicode vspan hspan vidx hidx] : begin
-			create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
+			define [BuildSplitCircle name unicode vspan hspan vidx hidx] : begin
+				create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					include : multicell.Split top bottom left right vspan hspan vidx hidx 1 CircleTouchingBox
+
+			BuildSplitCircle "twelfthCircleLT"  0x1CC30 4 4 3 0
+			BuildSplitCircle "twelfthCircleCLT" 0x1CC31 4 4 3 1
+			BuildSplitCircle "twelfthCircleCRT" 0x1CC32 4 4 3 2
+			BuildSplitCircle "twelfthCircleRT"  0x1CC33 4 4 3 3
+			BuildSplitCircle "twelfthCircleLMT" 0x1CC34 4 4 2 0
+			BuildSplitCircle "quarterCircleLT"  0x1CC35 2 2 1 0
+			BuildSplitCircle "quarterCircleRT"  0x1CC36 2 2 1 1
+			BuildSplitCircle "twelfthCircleRMT" 0x1CC37 4 4 2 3
+			BuildSplitCircle "twelfthCircleLMB" 0x1CC38 4 4 1 0
+			BuildSplitCircle "quarterCircleLB"  0x1CC39 2 2 0 0
+			BuildSplitCircle "quarterCircleRB"  0x1CC3A 2 2 0 1
+			BuildSplitCircle "twelfthCircleRMB" 0x1CC3B 4 4 1 3
+			BuildSplitCircle "twelfthCircleLB"  0x1CC3C 4 4 0 0
+			BuildSplitCircle "twelfthCircleCLB" 0x1CC3D 4 4 0 1
+			BuildSplitCircle "twelfthCircleCRB" 0x1CC3E 4 4 0 2
+			BuildSplitCircle "twelfthCircleRB"  0x1CC3F 4 4 0 3
+
+		do "Television"
+			define scaffold : object
+			set scaffold.legSize (1 / 6)
+			set scaffold.dotSize DotRadius
+			set scaffold.dotXOffset : (top - bottom) / 9
+			set scaffold.dotYOffset : (top - bottom) / 6
+			set scaffold.screenInset : (top - bottom) / 8
+			set scaffold.cornerRad : (top - bottom) / 8
+
+			define [Screen top bot left right] : glyph-proc
+				include : dispiro
+					widths.lhs graphicSw
+					flat left ([mix top bot 0.5] + 1)
+					curl left (bot + scaffold.cornerRad)
+					arcvh 2
+					flat (left + scaffold.cornerRad) bot
+					curl (right - scaffold.cornerRad) bot
+					archv 2
+					flat right (bot + scaffold.cornerRad)
+					curl right (top - scaffold.cornerRad)
+					arcvh 2
+					flat (right - scaffold.cornerRad) top
+					curl (left + scaffold.cornerRad) top
+					archv 2
+					flat left (top - scaffold.cornerRad)
+					flat left ([mix top bot 0.5] - 1)
+
+			define [Television top bot left right] : glyph-proc
+				local tvBot : mix bot top scaffold.legSize
+				local legWidth : (right - left) * scaffold.legSize * (2 / MosaicWidthScalar)
+				local legLeft  : left  + [HSwToV graphicSw]
+				local legRight : right - [HSwToV graphicSw]
+				local dotX : right - [HSwToV graphicSw] - scaffold.dotXOffset
+
+				include : HBar.t left right top graphicSw
+				include : HBar.b left right tvBot graphicSw
+				include : VBar.l left tvBot top graphicSw
+				include : VBar.r right tvBot top graphicSw
+				include : spiro-outline
+					corner legLeft tvBot
+					corner (legLeft + legWidth / 3) bot
+					corner (legLeft + legWidth * 2 / 3) bot
+					corner (legLeft + legWidth) tvBot
+				include : spiro-outline
+					corner legRight tvBot
+					corner (legRight - legWidth / 3) bot
+					corner (legRight - legWidth * 2 / 3) bot
+					corner (legRight - legWidth) tvBot
+
+				include : DotAt dotX (top - graphicSw - scaffold.dotYOffset * 1) scaffold.dotSize
+				include : DotAt dotX (top - graphicSw - scaffold.dotYOffset * 2) scaffold.dotSize
+				include : DotAt dotX (top - graphicSw - scaffold.dotYOffset * 3) scaffold.dotSize
+				include : Screen (top - scaffold.screenInset) (tvBot + scaffold.screenInset) (left + scaffold.screenInset) (dotX - scaffold.dotXOffset)
+
+			create-glyph [MangleName 'televisionLT'] [MangleUnicode 0x1CCB2] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
-				include : SplitGraphic top bottom left right vspan hspan vidx hidx CircleTouchingBox
+				include : multicell.Split top bottom left right 2 2 1 0 1 Television
+			create-glyph [MangleName 'televisionRT'] [MangleUnicode 0x1CCB3] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : multicell.Split top bottom left right 2 2 1 1 1 Television
+			create-glyph [MangleName 'televisionLB'] [MangleUnicode 0x1CCB4] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : multicell.Split top bottom left right 2 2 0 0 1 Television
+			create-glyph [MangleName 'televisionRB'] [MangleUnicode 0x1CCB5] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : multicell.Split top bottom left right 2 2 0 1 1 Television
 
-		BuildSplitCircle "twelfthCircleLT"  0x1CC30 4 4 3 0
-		BuildSplitCircle "twelfthCircleCLT" 0x1CC31 4 4 3 1
-		BuildSplitCircle "twelfthCircleCRT" 0x1CC32 4 4 3 2
-		BuildSplitCircle "twelfthCircleRT"  0x1CC33 4 4 3 3
-		BuildSplitCircle "twelfthCircleLMT" 0x1CC34 4 4 2 0
-		BuildSplitCircle "quarterCircleLT"  0x1CC35 2 2 1 0
-		BuildSplitCircle "quarterCircleRT"  0x1CC36 2 2 1 1
-		BuildSplitCircle "twelfthCircleRMT" 0x1CC37 4 4 2 3
-		BuildSplitCircle "twelfthCircleLMB" 0x1CC38 4 4 1 0
-		BuildSplitCircle "quarterCircleLB"  0x1CC39 2 2 0 0
-		BuildSplitCircle "quarterCircleRB"  0x1CC3A 2 2 0 1
-		BuildSplitCircle "twelfthCircleRMB" 0x1CC3B 4 4 1 3
-		BuildSplitCircle "twelfthCircleLB"  0x1CC3C 4 4 0 0
-		BuildSplitCircle "twelfthCircleCLB" 0x1CC3D 4 4 0 1
-		BuildSplitCircle "twelfthCircleCRB" 0x1CC3E 4 4 0 2
-		BuildSplitCircle "twelfthCircleRB"  0x1CC3F 4 4 0 3
+		do "Microcomputer"
+			define scaffold : object
+			set scaffold.blank (1 / 6)
+			set scaffold.dotSize DotRadius
+			set scaffold.dotXOffset : (top - bottom) / 9
+			set scaffold.dotYOffset : (top - bottom) / 6
+			set scaffold.keyInset : (top - bottom) / 8 * (MosaicWidthScalar / 2)
+
+			define [KeyGen top bot left right keys] : glyph-proc
+				foreach {yp xp1 xp2} [items-of keys] : begin
+					include : HBar.m
+						mix left right (xp1 / 28)
+						mix left right (xp2 / 28)
+						mix (bot + graphicSw) (top - graphicSw) ((yp + 0.5) / 4)
+						* graphicSw
+
+			define [Microcomputer top bot left right] : glyph-proc
+				local cpuTop : mix top bot scaffold.blank
+				local dotX : right - [HSwToV graphicSw] - scaffold.dotXOffset
+				local dotY : cpuTop - graphicSw - scaffold.dotYOffset
+				local kbdTop : dotY - scaffold.dotYOffset
+				local keyLeft : left + [HSwToV graphicSw] + scaffold.keyInset
+				local keyRight : right - [HSwToV graphicSw] - scaffold.keyInset
+
+				include : HBar.t left right cpuTop graphicSw
+				include : HBar.t left right kbdTop graphicSw
+				include : HBar.b left right bot graphicSw
+				include : VBar.l left bot cpuTop graphicSw
+				include : VBar.r right bot cpuTop graphicSw
+
+				include : HBar.m keyLeft (dotX - scaffold.dotSize / 2 - scaffold.keyInset) dotY graphicSw
+				include : DotAt dotX dotY scaffold.dotSize
+
+				# Key configuration
+				# **  **  **  **  **  **  ****
+				# ***  **  **  **  **  **  ***
+				# ****  **  **  **  **  ******
+				#       ****************      
+				include : KeyGen (kbdTop - graphicSw - scaffold.keyInset) (bot + graphicSw + scaffold.keyInset) keyLeft keyRight : list
+					list 3  0  2
+					list 3  4  6
+					list 3  8 10
+					list 3 12 14
+					list 3 16 18
+					list 3 20 22
+					list 3 24 28
+					list 2  0  3
+					list 2  5  7
+					list 2  9 11
+					list 2 13 15
+					list 2 17 19
+					list 2 21 23
+					list 2 25 28
+					list 1  0  4
+					list 1  6  8
+					list 1 10 12
+					list 1 14 16
+					list 1 18 20
+					list 1 22 28
+					list 0  6 22
+
+			create-glyph [MangleName 'microcomputerLT'] [MangleUnicode 0x1CCB6] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : multicell.Split top bottom left right 2 2 1 0 1 Microcomputer
+			create-glyph [MangleName 'microcomputerRT'] [MangleUnicode 0x1CCB7] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : multicell.Split top bottom left right 2 2 1 1 1 Microcomputer
+			create-glyph [MangleName 'microcomputerLB'] [MangleUnicode 0x1CCB8] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : multicell.Split top bottom left right 2 2 0 0 1 Microcomputer
+			create-glyph [MangleName 'microcomputerRB'] [MangleUnicode 0x1CCB9] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : multicell.Split top bottom left right 2 2 0 1 1 Microcomputer
+
+

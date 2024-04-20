@@ -1,0 +1,308 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Robot-And-Human : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Mosaic-Split-Graphic : Multicell
+
+	define top    fontMetrics.os2.sTypoAscender
+	define bottom fontMetrics.os2.sTypoDescender
+	define left   0
+	define right  Width
+
+	define graphicSw : AdviceStroke 3.5
+	define PictographSw : AdviceStroke 4
+
+	define SIDE : object
+		LEFT  0
+		FRONT 1
+		RIGHT 2
+
+	define rbtScaffold : object
+	set rbtScaffold.headWidth  (1 / 2)
+	set rbtScaffold.headWidth2 (3 / 4)
+	set rbtScaffold.headHeight (1 / 3)
+	set rbtScaffold.eyeSpan    (1 / 2)
+
+	set rbtScaffold.bodyTop       (2 / 3)
+	set rbtScaffold.bodyOvershoot (13 / 12)
+	set rbtScaffold.shoulder      (1 / 2)
+	set rbtScaffold.bodyWidth     (3 / 4)
+	set rbtScaffold.markSpan      (2 / 3)
+	set rbtScaffold.markTop       (2 / 3)
+
+	set rbtScaffold.pelvis  (1 / 4)
+	set rbtScaffold.legGap  (1 / 3)
+	set rbtScaffold.footLen (1 / 4)
+
+	define hmnScaffold : object
+	set hmnScaffold.headSizeX    0.8
+	set hmnScaffold.headSizeY   (1 / 4)
+
+	set hmnScaffold.neckGap      0.05
+	set hmnScaffold.bodyWidth    1
+	set hmnScaffold.shoulderRad (1 / 16)
+
+	set hmnScaffold.armBot       0.5
+	set hmnScaffold.armBotHigh   0.6
+	set hmnScaffold.armBotHigher 0.75
+
+	set hmnScaffold.legWidth    (1 / 2)
+	set hmnScaffold.legBot       0
+	set hmnScaffold.legBotHigh   0.2
+	set hmnScaffold.legBotHigher 0.3
+
+	# Components
+	define [FlailRobotHead rev top bot left right] : glyph-proc
+		local midX   : mix left right 0.5
+		local midY   : mix top bot 0.5
+		local archDepth : Math.min
+			(right - left) / 2.25
+			(top - bot) / 2
+
+		local eyeHeight : (top - bot) * (1 / 4) + PictographSw
+		local eyeOffset : Math.min
+			(right - left) / 12
+			(right - left - 2 * [HSwToV graphicSw] - eyeHeight) / 2
+
+		include : dispiro
+			widths.lhs graphicSw
+			g4 left midY
+			arcvh
+			flat (left + archDepth) bot
+			curl (right - archDepth) bot
+			archv
+			g4 right midY
+			arcvh
+			flat (right - archDepth) top
+			curl (left + archDepth) top
+			archv
+			close
+		include : DotAt (midX + [if rev 1 (-1)] * eyeOffset) midY (eyeHeight / 2)
+
+	define [RobotHead side top bot left right] : glyph-proc
+		local midX   : mix left right 0.5
+		local midY   : mix top bot 0.5
+
+		local eyeHeight : (top - bot) * (1 / 4) + PictographSw
+		local eyeTop : midY + (0.5 * eyeHeight)
+		local eyeBot : midY - (0.5 * eyeHeight)
+		local eyeWidth : (right - left) * rbtScaffold.eyeSpan
+		include : difference
+			Rect top bot left right
+			match side
+				[Just SIDE.LEFT ] : Rect eyeTop eyeBot left (left + eyeWidth)
+				[Just SIDE.FRONT] : Rect eyeTop eyeBot (midX - 0.5 * eyeWidth) (midX + 0.5 * eyeWidth)
+				[Just SIDE.RIGHT] : Rect eyeTop eyeBot (right - eyeWidth) right
+
+	define [FlailRobotBody rev top bot left right] : glyph-proc
+		local midX : mix left right 0.5
+
+		local legWidth : (right - left) * hmnScaffold.legWidth / 2
+		local legLeft  : midX - legWidth
+		local legRight : midX + legWidth
+
+		local armY : mix bot top (5 / 8)
+		local forearmLength : (top - bot) * (5 / 8)
+
+		include : Rect top bot legLeft legRight
+		include : HBar.m left right armY PictographSw
+		include : VBar.l left  armY (armY + [if rev (-1) 1] * forearmLength) PictographSw
+		include : VBar.r right armY (armY + [if rev 1 (-1)] * forearmLength) PictographSw
+
+	define [RobotBody side top bot left right] : glyph-proc
+		local midX  : mix left right 0.5
+
+		local shoulderY : mix bot top rbtScaffold.shoulder
+		local bodyTop : mix bot top rbtScaffold.bodyOvershoot
+
+		local markLeft  : mix left right (0.5 - rbtScaffold.markSpan / 2)
+		local markRight : mix left right (0.5 + rbtScaffold.markSpan / 2)
+		local markTop   : mix bot top rbtScaffold.markTop
+		local markSw    : (markRight - markLeft) * (2 / 5) - PictographSw / 2
+
+		include : difference
+			spiro-outline
+				corner left shoulderY
+				corner left bot
+				corner right bot
+				corner right shoulderY
+				corner midX bodyTop
+			match side
+				[Just SIDE.LEFT ] : union
+					Rect (bot + markSw) bot markLeft (markRight - markSw)
+					Rect markTop (bot + markSw) (markRight - markSw * 2) (markRight - markSw)
+				[Just SIDE.FRONT] : union
+					Rect markTop (bot + markSw) markLeft (markLeft + markSw)
+					Rect markTop (bot + markSw) (markRight - markSw) markRight
+				[Just SIDE.RIGHT] : union
+					Rect (bot + markSw) bot (markLeft + markSw) markRight
+					Rect markTop (bot + markSw) (markLeft + markSw) (markLeft + markSw * 2)
+
+	# Full Glyph
+	define [HumanFront step] : lambda [top bot left right] : glyph-proc
+		local midX   : mix left right 0.5
+
+		local headSize : Math.min
+			(right - left) * hmnScaffold.headSizeX
+			(top - bot) * hmnScaffold.headSizeY
+		include : DotAt midX (top - headSize / 2) (headSize / 2)
+
+		local bodyTop : top - headSize - (top - bot) * hmnScaffold.neckGap
+		local cr : (top - bot) * hmnScaffold.shoulderRad
+		local legWidth : (right - left) * hmnScaffold.legWidth / 2
+		local legLeft  : midX - legWidth
+		local legRight : midX + legWidth
+		local bodyWidth : (right - left) * hmnScaffold.bodyWidth / 2
+		local bodyLeft  : midX - bodyWidth
+		local bodyRight : midX + bodyWidth
+
+		local armLeftBot  : mix bot bodyTop : match step
+			2   hmnScaffold.armBotHigh
+			3   hmnScaffold.armBotHigher
+			4   hmnScaffold.armBotHigher
+			__  hmnScaffold.armBot
+		local armRightBot : mix bot bodyTop : match step
+			1   hmnScaffold.armBotHigher
+			2   hmnScaffold.armBotHigh
+			4   hmnScaffold.armBotHigher
+			__  hmnScaffold.armBot
+		local legLeftBot  : mix bot bodyTop : match step
+			2   hmnScaffold.legBotHigh
+			3   hmnScaffold.legBotHigher
+			__  hmnScaffold.legBot
+		local legRightBot : mix bot bodyTop : match step
+			1   hmnScaffold.legBotHigher
+			2   hmnScaffold.legBotHigh
+			__  hmnScaffold.legBot
+
+		include : spiro-outline
+			widths.center PictographSw
+			corner legLeft legLeftBot
+			corner legLeft armLeftBot
+			corner bodyLeft armLeftBot
+			curl bodyLeft (bodyTop - cr)
+			arcvh
+			flat (bodyLeft + cr) bodyTop
+			curl (bodyRight - cr) bodyTop
+			archv
+			flat bodyRight (bodyTop - cr)
+			corner bodyRight armRightBot
+			corner legRight armRightBot
+			corner legRight legRightBot
+			if (legRightBot === legLeftBot) [list] : list
+				corner midX legRightBot
+				corner midX legLeftBot
+			close
+
+	define [FlailRobotUpper rev top bot left right] : glyph-proc
+		include : FlailRobotHead rev
+			* top
+			mix top bot rbtScaffold.headHeight
+			mix left right (0.5 - rbtScaffold.headWidth2 / 2)
+			mix left right (0.5 + rbtScaffold.headWidth2 / 2)
+
+		local bodyTop : top - (top - bot) * (rbtScaffold.headHeight + hmnScaffold.neckGap * 2)
+
+		include : FlailRobotBody rev bodyTop bot left right
+
+	define [RobotUpper side top bot left right] : glyph-proc
+		include : RobotHead side
+			* top
+			mix top bot rbtScaffold.headHeight
+			mix left right (0.5 - rbtScaffold.headWidth / 2)
+			mix left right (0.5 + rbtScaffold.headWidth / 2)
+
+		include : RobotBody side
+			mix bot top rbtScaffold.bodyTop
+			* bot
+			mix left right (0.5 - rbtScaffold.bodyWidth / 2)
+			mix left right (0.5 + rbtScaffold.bodyWidth / 2)
+
+	define [RobotLegs side top bot left right] : glyph-proc
+		local bodyLeft  : mix left right (0.5 - rbtScaffold.bodyWidth / 2)
+		local bodyRight : mix left right (0.5 + rbtScaffold.bodyWidth / 2)
+		local pelvis    : mix top bot rbtScaffold.pelvis
+
+		include : Rect top pelvis bodyLeft bodyRight
+
+		local legLeft  : mix left right (0.5 - rbtScaffold.legGap / 2)
+		local legRight : mix left right (0.5 + rbtScaffold.legGap / 2)
+		local footLen : (right - left) * rbtScaffold.footLen
+
+		include : VBar.r legLeft bot pelvis PictographSw
+		include : if (side === SIDE.RIGHT)
+			HBar.b legLeft (legLeft + footLen - [HSwToV PictographSw]) bot PictographSw
+			HBar.b (legLeft - footLen) legLeft bot PictographSw
+		include : VBar.l legRight bot pelvis PictographSw
+		include : if (side === SIDE.LEFT)
+			HBar.b (legRight - footLen + [HSwToV PictographSw]) legRight bot PictographSw
+			HBar.b legRight (legRight + footLen) bot PictographSw
+
+	for-width-kinds WideWidth4
+		local multicell : Multicell MosaicWidth
+		define right MosaicWidth
+
+		create-glyph [MangleName 'robotBodyLeft']  [MangleUnicode 0x1CC5A] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : RobotUpper SIDE.LEFT top bottom left right
+		create-glyph [MangleName 'robotBodyFront'] [MangleUnicode 0x1CC5B] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : RobotUpper SIDE.FRONT top bottom left right
+		create-glyph [MangleName 'robotBodyRight'] [MangleUnicode 0x1CC5C] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : RobotUpper SIDE.RIGHT top bottom left right
+		create-glyph [MangleName 'robotLegsLeft']  [MangleUnicode 0x1CC5D] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : RobotLegs SIDE.LEFT top bottom left right
+		create-glyph [MangleName 'robotLegsFront'] [MangleUnicode 0x1CC5E] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : RobotLegs SIDE.FRONT top bottom left right
+		create-glyph [MangleName 'robotLegsRight'] [MangleUnicode 0x1CC5F] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : RobotLegs SIDE.RIGHT top bottom left right
+		create-glyph [MangleName 'humanFrontTop'] [MangleUnicode 0x1CDF0] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 2 1 1 0 1 : HumanFront 0
+		create-glyph [MangleName 'humanFrontBottom1'] [MangleUnicode 0x1CDF1] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 2 1 0 0 1 : HumanFront 1
+		create-glyph [MangleName 'humanFrontBottom2'] [MangleUnicode 0x1CDF2] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 2 1 0 0 1 : HumanFront 2
+		create-glyph [MangleName 'humanFrontBottom3'] [MangleUnicode 0x1CDF3] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 2 1 0 0 1 : HumanFront 3
+		create-glyph [MangleName 'humanFrontBottom4'] [MangleUnicode 0x1CDF4] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 2 1 0 0 1 : HumanFront 4
+		create-glyph [MangleName 'flailRobotBody1'] [MangleUnicode 0x1CDF6] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : FlailRobotUpper 0 top bottom left right
+		create-glyph [MangleName 'flailRobotBody2'] [MangleUnicode 0x1CDF7] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : FlailRobotUpper 1 top bottom left right
+
+	create-glyph 'ccHumanFigure' : glyph-proc
+		include : [HumanFront 0]
+			mix ParenBot ParenTop 0.95
+			mix ParenBot ParenTop 0.05
+			mix SB RightSB 0.1
+			mix SB RightSB 0.9
