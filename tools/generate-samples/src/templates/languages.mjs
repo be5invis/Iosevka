@@ -4,7 +4,7 @@ import * as themes from "../themes/index.mjs";
 const languages = [
     { lang: 'English', sample: 'Shaw, those twelve beige hooks are joined if I patch a young, gooey mouth.' },
     { lang: 'IPA', sample: '[ɢʷɯʔ.nas.doːŋ.kʰlja] [ŋan.ȵʑi̯wo.ɕi̯uĕn.ɣwa]', localeId :'en-fonipa' },
-    { lang: 'Azerbaijani', sample: 'Zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq.' },
+    { lang: 'Azerbaijani', sample: 'Zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq.', localeId :'az' },
     { lang: 'Belarusian', sample: 'У Іўі худы жвавы чорт у зялёнай камізэльцы пабег пад’есці фаршу з юшкай.' },
     { lang: 'Bulgarian', sample: 'Я, пазачът Вальо уж бди, а скришом хапва кюфтенца зад щайгите.', localeId :'bg' },
     { lang: 'Catalan', sample: '«Dóna amor que seràs feliç!». Això, iŀlús company geniüt, ja és un lluït rètol blavís d’onze kWh.' },
@@ -35,7 +35,7 @@ const languages = [
     { lang: 'Slovak', sample: 'Kŕdeľ šťastných ďatľov učí pri ústí Váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso.' },
     { lang: 'Spanish', sample: 'Benjamín pidió una bebida de kiwi y fresa; Noé, sin vergüenza, la más exquisita champaña del menú.' },
     { lang: 'Swedish', sample: 'Yxmördaren Julia Blomqvist på fäktning i Schweiz.' },
-    { lang: 'Turkish', sample: 'Pijamalı hasta yağız şoföre çabucak güvendi.' },
+    { lang: 'Turkish', sample: 'Pijamalı hasta yağız şoföre çabucak güvendi.', localeId :'tr' },
     { lang: 'Ukrainian', sample: 'Чуєш їх, доцю, га? Кумедна ж ти, прощайся без ґольфів!' },
     { lang: 'Vietnamese', sample: 'Do bạch kim rất quý nên sẽ dùng để lắp vô xương.', localeId :'vi' },
     { lang: 'Volapük', sample: 'Ꞝrꞛtom jofazaris hodagudik ꞟf binoy ve cꞛl ad xilapel.' },
