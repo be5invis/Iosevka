@@ -1595,7 +1595,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>w</code> with cursive shape, and serifs</td></tr>
     </table></details>
   - Styles for `x`
-    <details><summary>10 variants</summary>
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-x-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'straight-serifless'</code>, <code>cv48 = 1</code></td></tr>
     <tr><td><code>x</code> with straight shape; without serifs (default for Sans)</td></tr>
@@ -1609,14 +1609,18 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>x</code> with curly shape, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-x-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'curly-serifed'</code>, <code>cv48 = 6</code></td></tr>
     <tr><td><code>x</code> with curly shape, and serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-x-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'cursive'</code>, <code>cv48 = 7</code></td></tr>
-    <tr><td><code>x</code> with cursive shape (default for Slab Italic)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-x-semi-chancery-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-semi-chancery-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'semi-chancery-straight'</code>, <code>cv48 = 8</code></td></tr>
-    <tr><td><code>x</code> with Semi-chancery shape with straight counter-leg</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-x-semi-chancery-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-semi-chancery-curly.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'semi-chancery-curly'</code>, <code>cv48 = 9</code></td></tr>
-    <tr><td><code>x</code> with Semi-chancery shape with curly counter-leg</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-x-chancery.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-chancery.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'chancery'</code>, <code>cv48 = 10</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-x-semi-chancery-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-semi-chancery-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'semi-chancery-straight-serifless'</code>, <code>cv48 = 7</code></td></tr>
+    <tr><td><code>x</code> with Semi-chancery shape with straight counter-leg; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-x-semi-chancery-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-semi-chancery-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'semi-chancery-straight-serifed'</code>, <code>cv48 = 8</code></td></tr>
+    <tr><td><code>x</code> with Semi-chancery shape with straight counter-leg, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-x-semi-chancery-curly-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-semi-chancery-curly-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'semi-chancery-curly-serifless'</code>, <code>cv48 = 9</code></td></tr>
+    <tr><td><code>x</code> with Semi-chancery shape with curly counter-leg; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-x-semi-chancery-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-semi-chancery-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'semi-chancery-curly-serifed'</code>, <code>cv48 = 10</code></td></tr>
+    <tr><td><code>x</code> with Semi-chancery shape with curly counter-leg, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-x-chancery.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-chancery.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'chancery'</code>, <code>cv48 = 11</code></td></tr>
     <tr><td><code>x</code> with Chancery shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-x-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-x-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>x = 'cursive'</code>, <code>cv48 = 12</code></td></tr>
+    <tr><td><code>x</code> with cursive shape (default for Slab Italic)</td></tr>
     </table></details>
   - Styles for `y`
     <details><summary>18 variants</summary>
@@ -2816,292 +2820,300 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-nine-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-nine-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>nine = 'straight-bar'</code>, <code>cv94 = 3</code></td></tr>
     <tr><td><code>9</code> with a straight bar (default)</td></tr>
     </table></details>
-  - Styles for `öẋ`, `ij` (Dot and Comma shape in diacritics)
+  - Styles for `ij` (Dots in letters “i” and “j” in particular (not including dots in other letters, even if they are similar))
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="188"><img src="../images/cv-diacritic-dot-round.light.svg#gh-light-mode-only" width=160/><img src="../images/cv-diacritic-dot-round.dark.svg#gh-dark-mode-only" width=160/></td><td><code>diacritic-dot = 'round'</code>, <code>cv95 = 1</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-tittle-round.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-tittle-round.dark.svg#gh-dark-mode-only" width=64/></td><td><code>tittle = 'round'</code>, <code>cv95 = 1</code></td></tr>
+    <tr><td>Dots in i/j are round (default)</td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-tittle-square.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-tittle-square.dark.svg#gh-dark-mode-only" width=64/></td><td><code>tittle = 'square'</code>, <code>cv95 = 2</code></td></tr>
+    <tr><td>Dots in i/j are square</td></tr>
+    </table></details>
+  - Styles for `öẋ` (Dot and Comma shape in diacritics)
+    <details><summary>2 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="124"><img src="../images/cv-diacritic-dot-round.light.svg#gh-light-mode-only" width=96/><img src="../images/cv-diacritic-dot-round.dark.svg#gh-dark-mode-only" width=96/></td><td><code>diacritic-dot = 'round'</code>, <code>cv96 = 1</code></td></tr>
     <tr><td>Dots and Commas in diacritics are round (default)</td></tr>
-    <tr><td rowspan="2" width="188"><img src="../images/cv-diacritic-dot-square.light.svg#gh-light-mode-only" width=160/><img src="../images/cv-diacritic-dot-square.dark.svg#gh-dark-mode-only" width=160/></td><td><code>diacritic-dot = 'square'</code>, <code>cv95 = 2</code></td></tr>
+    <tr><td rowspan="2" width="124"><img src="../images/cv-diacritic-dot-square.light.svg#gh-light-mode-only" width=96/><img src="../images/cv-diacritic-dot-square.dark.svg#gh-dark-mode-only" width=96/></td><td><code>diacritic-dot = 'square'</code>, <code>cv96 = 2</code></td></tr>
     <tr><td>Dots and Commas in diacritics are square</td></tr>
     </table></details>
   - Styles for `.,`, `:;` (Dot and Comma shape in punctuations and symbols)
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="220"><img src="../images/cv-punctuation-dot-round.light.svg#gh-light-mode-only" width=192/><img src="../images/cv-punctuation-dot-round.dark.svg#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'round'</code>, <code>cv96 = 1</code></td></tr>
+    <tr><td rowspan="2" width="220"><img src="../images/cv-punctuation-dot-round.light.svg#gh-light-mode-only" width=192/><img src="../images/cv-punctuation-dot-round.dark.svg#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'round'</code>, <code>cv97 = 1</code></td></tr>
     <tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use round dots (default)</td></tr>
-    <tr><td rowspan="2" width="220"><img src="../images/cv-punctuation-dot-square.light.svg#gh-light-mode-only" width=192/><img src="../images/cv-punctuation-dot-square.dark.svg#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'square'</code>, <code>cv96 = 2</code></td></tr>
+    <tr><td rowspan="2" width="220"><img src="../images/cv-punctuation-dot-square.light.svg#gh-light-mode-only" width=192/><img src="../images/cv-punctuation-dot-square.dark.svg#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'square'</code>, <code>cv97 = 2</code></td></tr>
     <tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use square dots</td></tr>
     </table></details>
   - Styles for `~`
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-tilde-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-tilde-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>tilde = 'high'</code>, <code>cv97 = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-tilde-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-tilde-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>tilde = 'high'</code>, <code>cv98 = 1</code></td></tr>
     <tr><td>Higher tilde <code>~</code></td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-tilde-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-tilde-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>tilde = 'low'</code>, <code>cv97 = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-tilde-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-tilde-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>tilde = 'low'</code>, <code>cv98 = 2</code></td></tr>
     <tr><td>Lower tilde <code>~</code> (default)</td></tr>
     </table></details>
   - Styles for `*`
     <details><summary>12 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-penta-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-penta-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'penta-high'</code>, <code>cv98 = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-penta-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-penta-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'penta-high'</code>, <code>cv99 = 1</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with five-pointed shape, and high position (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-penta-mid.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-penta-mid.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'penta-mid'</code>, <code>cv98 = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-penta-mid.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-penta-mid.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'penta-mid'</code>, <code>cv99 = 2</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with five-pointed shape, and medium position</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-penta-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-penta-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'penta-low'</code>, <code>cv98 = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-penta-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-penta-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'penta-low'</code>, <code>cv99 = 3</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with five-pointed shape, and low position</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-penta-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-penta-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-penta-high'</code>, <code>cv98 = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-penta-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-penta-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-penta-high'</code>, <code>cv99 = 4</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with turned five-pointed shape, and high position</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-penta-mid.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-penta-mid.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-penta-mid'</code>, <code>cv98 = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-penta-mid.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-penta-mid.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-penta-mid'</code>, <code>cv99 = 5</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with turned five-pointed shape, and medium position</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-penta-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-penta-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-penta-low'</code>, <code>cv98 = 6</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-penta-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-penta-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-penta-low'</code>, <code>cv99 = 6</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with turned five-pointed shape, and low position</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-hex-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-hex-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'hex-high'</code>, <code>cv98 = 7</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-hex-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-hex-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'hex-high'</code>, <code>cv99 = 7</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with six-pointed shape, and high position</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-hex-mid.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-hex-mid.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'hex-mid'</code>, <code>cv98 = 8</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-hex-mid.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-hex-mid.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'hex-mid'</code>, <code>cv99 = 8</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with six-pointed shape, and medium position</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-hex-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-hex-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'hex-low'</code>, <code>cv98 = 9</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-hex-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-hex-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'hex-low'</code>, <code>cv99 = 9</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with six-pointed shape, and low position</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-hex-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-hex-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-hex-high'</code>, <code>cv98 = 10</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-hex-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-hex-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-hex-high'</code>, <code>cv99 = 10</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with turned six-pointed shape, and high position</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-hex-mid.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-hex-mid.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-hex-mid'</code>, <code>cv98 = 11</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-hex-mid.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-hex-mid.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-hex-mid'</code>, <code>cv99 = 11</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with turned six-pointed shape, and medium position</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-hex-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-hex-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-hex-low'</code>, <code>cv98 = 12</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-asterisk-turn-hex-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-asterisk-turn-hex-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>asterisk = 'turn-hex-low'</code>, <code>cv99 = 12</code></td></tr>
     <tr><td>Asterisk (<code>*</code>) with turned six-pointed shape, and low position</td></tr>
     </table></details>
   - Styles for `_`
     <details><summary>3 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-underscore-above-baseline.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-underscore-above-baseline.dark.svg#gh-dark-mode-only" width=32/></td><td><code>underscore = 'above-baseline'</code>, <code>cv99 = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-underscore-above-baseline.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-underscore-above-baseline.dark.svg#gh-dark-mode-only" width=32/></td><td><code>underscore = 'above-baseline'</code>, <code>VSAA = 1</code></td></tr>
     <tr><td>Extra-high <code>_</code>, placed right above baseline</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-underscore-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-underscore-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>underscore = 'high'</code>, <code>cv99 = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-underscore-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-underscore-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>underscore = 'high'</code>, <code>VSAA = 2</code></td></tr>
     <tr><td>Higher underscore <code>_</code>, placed right below baseline (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-underscore-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-underscore-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>underscore = 'low'</code>, <code>cv99 = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-underscore-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-underscore-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>underscore = 'low'</code>, <code>VSAA = 3</code></td></tr>
     <tr><td>Lower underscore <code>_</code>, placed right above descender line</td></tr>
     </table></details>
   - Styles for `^`
     <details><summary>3 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-caret-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'high'</code>, <code>VSAA = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-caret-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'high'</code>, <code>VSAB = 1</code></td></tr>
     <tr><td>Higher circumflex <code>^</code></td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-caret-medium.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-medium.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'medium'</code>, <code>VSAA = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-caret-medium.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-medium.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'medium'</code>, <code>VSAB = 2</code></td></tr>
     <tr><td>Lower circumflex <code>^</code> (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-caret-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'low'</code>, <code>VSAA = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-caret-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'low'</code>, <code>VSAB = 3</code></td></tr>
     <tr><td>Lower circumflex <code>^</code></td></tr>
     </table></details>
   - Styles for `` ` ``
     <details><summary>3 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-grave-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-grave-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-grave = 'straight'</code>, <code>VSAB = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-grave-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-grave-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-grave = 'straight'</code>, <code>VSAC = 1</code></td></tr>
     <tr><td>Show ASCII grave (<code>`</code>) as short diagonal straight bar. (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-grave-raised-inverse-comma.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-grave-raised-inverse-comma.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-grave = 'raised-inverse-comma'</code>, <code>VSAB = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-grave-raised-inverse-comma.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-grave-raised-inverse-comma.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-grave = 'raised-inverse-comma'</code>, <code>VSAC = 2</code></td></tr>
     <tr><td>Show ASCII grave (<code>`</code>) as raised comma.</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-grave-raised-turn-comma.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-grave-raised-turn-comma.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-grave = 'raised-turn-comma'</code>, <code>VSAB = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-grave-raised-turn-comma.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-grave-raised-turn-comma.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-grave = 'raised-turn-comma'</code>, <code>VSAC = 3</code></td></tr>
     <tr><td>Show ASCII grave (<code>`</code>) as raised turned comma, identical to curly open single quote symbols (U+2018).</td></tr>
     </table></details>
   - Styles for `'`
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-single-quote-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-single-quote-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-single-quote = 'straight'</code>, <code>VSAC = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-single-quote-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-single-quote-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-single-quote = 'straight'</code>, <code>VSAD = 1</code></td></tr>
     <tr><td>Show ASCII quote (<code>"</code>) as short vertical straight bar. (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-single-quote-raised-comma.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-single-quote-raised-comma.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-single-quote = 'raised-comma'</code>, <code>VSAC = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ascii-single-quote-raised-comma.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ascii-single-quote-raised-comma.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ascii-single-quote = 'raised-comma'</code>, <code>VSAD = 2</code></td></tr>
     <tr><td>Show ASCII quote (<code>"</code>) as raised comma.</td></tr>
     </table></details>
   - Styles for `(`, `)`
     <details><summary>3 variants</summary>
     <table>
-    <tr><td rowspan="2" width="92"><img src="../images/cv-paren-normal.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-paren-normal.dark.svg#gh-dark-mode-only" width=64/></td><td><code>paren = 'normal'</code>, <code>VSAD = 1</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-paren-normal.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-paren-normal.dark.svg#gh-dark-mode-only" width=64/></td><td><code>paren = 'normal'</code>, <code>VSAE = 1</code></td></tr>
     <tr><td>Parenthesis with normal contour (default)</td></tr>
-    <tr><td rowspan="2" width="92"><img src="../images/cv-paren-large-contour.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-paren-large-contour.dark.svg#gh-dark-mode-only" width=64/></td><td><code>paren = 'large-contour'</code>, <code>VSAD = 2</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-paren-large-contour.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-paren-large-contour.dark.svg#gh-dark-mode-only" width=64/></td><td><code>paren = 'large-contour'</code>, <code>VSAE = 2</code></td></tr>
     <tr><td>Parenthesis with larger contour, like that in Monaco</td></tr>
-    <tr><td rowspan="2" width="92"><img src="../images/cv-paren-flat-arc.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-paren-flat-arc.dark.svg#gh-dark-mode-only" width=64/></td><td><code>paren = 'flat-arc'</code>, <code>VSAD = 3</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-paren-flat-arc.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-paren-flat-arc.dark.svg#gh-dark-mode-only" width=64/></td><td><code>paren = 'flat-arc'</code>, <code>VSAE = 3</code></td></tr>
     <tr><td>Parenthesis with flat arc, like that in JetBrains Mono</td></tr>
     </table></details>
   - Styles for `{`, `}`
     <details><summary>3 variants</summary>
     <table>
-    <tr><td rowspan="2" width="92"><img src="../images/cv-brace-straight.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-brace-straight.dark.svg#gh-dark-mode-only" width=64/></td><td><code>brace = 'straight'</code>, <code>VSAE = 1</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-brace-straight.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-brace-straight.dark.svg#gh-dark-mode-only" width=64/></td><td><code>brace = 'straight'</code>, <code>VSAF = 1</code></td></tr>
     <tr><td>More straight braces</td></tr>
-    <tr><td rowspan="2" width="92"><img src="../images/cv-brace-curly.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-brace-curly.dark.svg#gh-dark-mode-only" width=64/></td><td><code>brace = 'curly'</code>, <code>VSAE = 2</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-brace-curly.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-brace-curly.dark.svg#gh-dark-mode-only" width=64/></td><td><code>brace = 'curly'</code>, <code>VSAF = 2</code></td></tr>
     <tr><td>More curly braces (default)</td></tr>
-    <tr><td rowspan="2" width="92"><img src="../images/cv-brace-curly-flat-boundary.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-brace-curly-flat-boundary.dark.svg#gh-dark-mode-only" width=64/></td><td><code>brace = 'curly-flat-boundary'</code>, <code>VSAE = 3</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-brace-curly-flat-boundary.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-brace-curly-flat-boundary.dark.svg#gh-dark-mode-only" width=64/></td><td><code>brace = 'curly-flat-boundary'</code>, <code>VSAF = 3</code></td></tr>
     <tr><td>Curly braces with flat boundary shape</td></tr>
     </table></details>
   - Styles for `«`, `»` (Guillemets)
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="92"><img src="../images/cv-guillemet-straight.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-guillemet-straight.dark.svg#gh-dark-mode-only" width=64/></td><td><code>guillemet = 'straight'</code>, <code>VSAF = 1</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-guillemet-straight.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-guillemet-straight.dark.svg#gh-dark-mode-only" width=64/></td><td><code>guillemet = 'straight'</code>, <code>VSAG = 1</code></td></tr>
     <tr><td>Straight Guillemets (<code>« »</code>)</td></tr>
-    <tr><td rowspan="2" width="92"><img src="../images/cv-guillemet-curly.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-guillemet-curly.dark.svg#gh-dark-mode-only" width=64/></td><td><code>guillemet = 'curly'</code>, <code>VSAF = 2</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-guillemet-curly.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-guillemet-curly.dark.svg#gh-dark-mode-only" width=64/></td><td><code>guillemet = 'curly'</code>, <code>VSAG = 2</code></td></tr>
     <tr><td>Curly Guillemets (<code>« »</code>) (default)</td></tr>
     </table></details>
   - Styles for `#`
     <details><summary>8 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-upright.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-upright.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'upright'</code>, <code>VSAG = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-upright.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-upright.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'upright'</code>, <code>VSAH = 1</code></td></tr>
     <tr><td>Number sign with vertical bars (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-slanted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-slanted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'slanted'</code>, <code>VSAG = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-slanted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-slanted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'slanted'</code>, <code>VSAH = 2</code></td></tr>
     <tr><td>Number sign with slanted bars</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-upright-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-upright-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'upright-open'</code>, <code>VSAG = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-upright-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-upright-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'upright-open'</code>, <code>VSAH = 3</code></td></tr>
     <tr><td>Number sign with vertical bars and open inner</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-slanted-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-slanted-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'slanted-open'</code>, <code>VSAG = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-slanted-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-slanted-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'slanted-open'</code>, <code>VSAH = 4</code></td></tr>
     <tr><td>Number sign with slanted bars and open inner</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-upright-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-upright-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'upright-tall'</code>, <code>VSAG = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-upright-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-upright-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'upright-tall'</code>, <code>VSAH = 5</code></td></tr>
     <tr><td>Number sign with vertical bars and taller than digits</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-slanted-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-slanted-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'slanted-tall'</code>, <code>VSAG = 6</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-slanted-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-slanted-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'slanted-tall'</code>, <code>VSAH = 6</code></td></tr>
     <tr><td>Number sign with slanted bars and taller than digits</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-upright-open-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-upright-open-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'upright-open-tall'</code>, <code>VSAG = 7</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-upright-open-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-upright-open-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'upright-open-tall'</code>, <code>VSAH = 7</code></td></tr>
     <tr><td>Number sign with vertical bars, open inner, and taller than digits</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-slanted-open-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-slanted-open-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'slanted-open-tall'</code>, <code>VSAG = 8</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-number-sign-slanted-open-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-number-sign-slanted-open-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>number-sign = 'slanted-open-tall'</code>, <code>VSAH = 8</code></td></tr>
     <tr><td>Number sign with slanted bars, open inner, and taller than digits</td></tr>
     </table></details>
   - Styles for `&`
     <details><summary>8 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-closed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-closed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'closed'</code>, <code>VSAH = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-closed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-closed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'closed'</code>, <code>VSAI = 1</code></td></tr>
     <tr><td>Ampersand (<code>&amp;</code>) with a closed contour (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-upper-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-upper-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'upper-open'</code>, <code>VSAH = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-upper-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-upper-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'upper-open'</code>, <code>VSAI = 2</code></td></tr>
     <tr><td>Ampersand (<code>&amp;</code>) with an open contour at upper half</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-lower-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-lower-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'lower-open'</code>, <code>VSAH = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-lower-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-lower-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'lower-open'</code>, <code>VSAI = 3</code></td></tr>
     <tr><td>Ampersand (<code>&amp;</code>) with an open contour at lower half</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-flat-top.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-flat-top.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'flat-top'</code>, <code>VSAH = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-flat-top.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-flat-top.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'flat-top'</code>, <code>VSAI = 4</code></td></tr>
     <tr><td>Ampersand (<code>&amp;</code>) drawn with a flat top</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-et-toothed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-et-toothed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'et-toothed'</code>, <code>VSAH = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-et-toothed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-et-toothed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'et-toothed'</code>, <code>VSAI = 5</code></td></tr>
     <tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t with tooth</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-et-toothless-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-et-toothless-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'et-toothless-corner'</code>, <code>VSAH = 6</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-et-toothless-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-et-toothless-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'et-toothless-corner'</code>, <code>VSAI = 6</code></td></tr>
     <tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t without tooth (corner)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-et-toothless-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-et-toothless-rounded.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'et-toothless-rounded'</code>, <code>VSAH = 7</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-et-toothless-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-et-toothless-rounded.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'et-toothless-rounded'</code>, <code>VSAI = 7</code></td></tr>
     <tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t without tooth (rounded)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-et-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-et-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'et-tailed'</code>, <code>VSAH = 8</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ampersand-et-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ampersand-et-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ampersand = 'et-tailed'</code>, <code>VSAI = 8</code></td></tr>
     <tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t with tail</td></tr>
     </table></details>
   - Styles for `@`
     <details><summary>9 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-at-threefold.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-threefold.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'threefold'</code>, <code>VSAI = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-at-threefold.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-threefold.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'threefold'</code>, <code>VSAJ = 1</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with three-fold body (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-at-threefold-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-threefold-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'threefold-tall'</code>, <code>VSAI = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-at-threefold-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-threefold-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'threefold-tall'</code>, <code>VSAJ = 2</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with three-fold body, and tall height</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-at-threefold-solid-inner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-threefold-solid-inner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'threefold-solid-inner'</code>, <code>VSAI = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-at-threefold-solid-inner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-threefold-solid-inner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'threefold-solid-inner'</code>, <code>VSAJ = 3</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with three-fold body, and solid inner</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-at-threefold-solid-inner-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-threefold-solid-inner-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'threefold-solid-inner-tall'</code>, <code>VSAI = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-at-threefold-solid-inner-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-threefold-solid-inner-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'threefold-solid-inner-tall'</code>, <code>VSAJ = 4</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with three-fold body, solid inner, and tall height</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-at-fourfold.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-fourfold.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'fourfold'</code>, <code>VSAI = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-at-fourfold.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-fourfold.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'fourfold'</code>, <code>VSAJ = 5</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with four-fold body</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-at-fourfold-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-fourfold-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'fourfold-tall'</code>, <code>VSAI = 6</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-at-fourfold-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-fourfold-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'fourfold-tall'</code>, <code>VSAJ = 6</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with four-fold body, and tall height</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-at-fourfold-solid-inner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-fourfold-solid-inner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'fourfold-solid-inner'</code>, <code>VSAI = 7</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-at-fourfold-solid-inner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-fourfold-solid-inner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'fourfold-solid-inner'</code>, <code>VSAJ = 7</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with four-fold body, and solid inner</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-at-fourfold-solid-inner-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-fourfold-solid-inner-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'fourfold-solid-inner-tall'</code>, <code>VSAI = 8</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-at-fourfold-solid-inner-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-fourfold-solid-inner-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'fourfold-solid-inner-tall'</code>, <code>VSAJ = 8</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with four-fold body, solid inner, and tall height</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-at-compact.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-compact.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'compact'</code>, <code>VSAI = 9</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-at-compact.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-at-compact.dark.svg#gh-dark-mode-only" width=32/></td><td><code>at = 'compact'</code>, <code>VSAJ = 9</code></td></tr>
     <tr><td>At symbol (<code>@</code>) with compact body</td></tr>
     </table></details>
   - Styles for `$`
     <details><summary>6 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'open'</code>, <code>VSAJ = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'open'</code>, <code>VSAK = 1</code></td></tr>
     <tr><td>Dollar symbol with open contour</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-through.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'through'</code>, <code>VSAJ = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-through.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'through'</code>, <code>VSAK = 2</code></td></tr>
     <tr><td>Dollar symbol with strike-through vertical bar (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-interrupted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'interrupted'</code>, <code>VSAJ = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-interrupted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'interrupted'</code>, <code>VSAK = 3</code></td></tr>
     <tr><td>Dollar symbol with interrupted strike-through vertical bar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-open-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'open-cap'</code>, <code>VSAJ = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-open-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'open-cap'</code>, <code>VSAK = 4</code></td></tr>
     <tr><td>Dollar symbol with open contour, sized not exceeding baseline and ascender</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-through-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'through-cap'</code>, <code>VSAJ = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-through-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'through-cap'</code>, <code>VSAK = 5</code></td></tr>
     <tr><td>Dollar symbol with strike-through vertical bar, sized not exceeding baseline and ascender</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'interrupted-cap'</code>, <code>VSAJ = 6</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'interrupted-cap'</code>, <code>VSAK = 6</code></td></tr>
     <tr><td>Dollar symbol with interrupted strike-through vertical bar, sized not exceeding baseline and ascender</td></tr>
     </table></details>
   - Styles for `¢`
     <details><summary>6 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'open'</code>, <code>VSAK = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'open'</code>, <code>VSAL = 1</code></td></tr>
     <tr><td>Cent sign (<code>¢</code>) with open contour</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-through.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'through'</code>, <code>VSAK = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-through.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'through'</code>, <code>VSAL = 2</code></td></tr>
     <tr><td>Cent sign (<code>¢</code>) with vertical bar all through the <code>c</code> part (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-bar-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-bar-interrupted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'bar-interrupted'</code>, <code>VSAK = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-bar-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-bar-interrupted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'bar-interrupted'</code>, <code>VSAL = 3</code></td></tr>
     <tr><td>Cent sign (<code>¢</code>) with vertical bar breaks at center</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-open-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'open-cap'</code>, <code>VSAK = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-open-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'open-cap'</code>, <code>VSAL = 4</code></td></tr>
     <tr><td>Cent sign (<code>¢</code>) with open contour, sized not exceeding baseline and ascender</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-through-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'through-cap'</code>, <code>VSAK = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-through-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'through-cap'</code>, <code>VSAL = 5</code></td></tr>
     <tr><td>Cent sign (<code>¢</code>) with vertical bar all through the <code>c</code> part, sized not exceeding baseline and ascender</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-bar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-bar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'bar-interrupted-cap'</code>, <code>VSAK = 6</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-bar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-bar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'bar-interrupted-cap'</code>, <code>VSAL = 6</code></td></tr>
     <tr><td>Cent sign (<code>¢</code>) with vertical bar breaks at center, sized not exceeding baseline and ascender</td></tr>
     </table></details>
   - Styles for `%`
     <details><summary>4 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-percent-dots.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-percent-dots.dark.svg#gh-dark-mode-only" width=32/></td><td><code>percent = 'dots'</code>, <code>VSAL = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-percent-dots.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-percent-dots.dark.svg#gh-dark-mode-only" width=32/></td><td><code>percent = 'dots'</code>, <code>VSAM = 1</code></td></tr>
     <tr><td>Percent <code>%</code> with rectangular dots</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-percent-rings-segmented-slash.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-percent-rings-segmented-slash.dark.svg#gh-dark-mode-only" width=32/></td><td><code>percent = 'rings-segmented-slash'</code>, <code>VSAL = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-percent-rings-segmented-slash.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-percent-rings-segmented-slash.dark.svg#gh-dark-mode-only" width=32/></td><td><code>percent = 'rings-segmented-slash'</code>, <code>VSAM = 2</code></td></tr>
     <tr><td>Percent <code>%</code> with rings and segmented slash (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-percent-rings-continuous-slash.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-percent-rings-continuous-slash.dark.svg#gh-dark-mode-only" width=32/></td><td><code>percent = 'rings-continuous-slash'</code>, <code>VSAL = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-percent-rings-continuous-slash.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-percent-rings-continuous-slash.dark.svg#gh-dark-mode-only" width=32/></td><td><code>percent = 'rings-continuous-slash'</code>, <code>VSAM = 3</code></td></tr>
     <tr><td>Percent <code>%</code> with rings and continuous bar</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-percent-rings-continuous-slash-also-connected.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-percent-rings-continuous-slash-also-connected.dark.svg#gh-dark-mode-only" width=32/></td><td><code>percent = 'rings-continuous-slash-also-connected'</code>, <code>VSAL = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-percent-rings-continuous-slash-also-connected.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-percent-rings-continuous-slash-also-connected.dark.svg#gh-dark-mode-only" width=32/></td><td><code>percent = 'rings-continuous-slash-also-connected'</code>, <code>VSAM = 4</code></td></tr>
     <tr><td>Percent <code>%</code> with rings and continuous bar and the slash in <code>%</code> is also connected to the top-left ring</td></tr>
     </table></details>
   - Styles for `|`, `¦`
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="156"><img src="../images/cv-bar-natural-slope.light.svg#gh-light-mode-only" width=128/><img src="../images/cv-bar-natural-slope.dark.svg#gh-dark-mode-only" width=128/></td><td><code>bar = 'natural-slope'</code>, <code>VSAM = 1</code></td></tr>
+    <tr><td rowspan="2" width="156"><img src="../images/cv-bar-natural-slope.light.svg#gh-light-mode-only" width=128/><img src="../images/cv-bar-natural-slope.dark.svg#gh-dark-mode-only" width=128/></td><td><code>bar = 'natural-slope'</code>, <code>VSAN = 1</code></td></tr>
     <tr><td>Bar punctuations (<code>|</code>) has a natural slope under italics and oblique (default)</td></tr>
-    <tr><td rowspan="2" width="156"><img src="../images/cv-bar-force-upright.light.svg#gh-light-mode-only" width=128/><img src="../images/cv-bar-force-upright.dark.svg#gh-dark-mode-only" width=128/></td><td><code>bar = 'force-upright'</code>, <code>VSAM = 2</code></td></tr>
+    <tr><td rowspan="2" width="156"><img src="../images/cv-bar-force-upright.light.svg#gh-light-mode-only" width=128/><img src="../images/cv-bar-force-upright.dark.svg#gh-dark-mode-only" width=128/></td><td><code>bar = 'force-upright'</code>, <code>VSAN = 2</code></td></tr>
     <tr><td>Bar punctuations (<code>|</code>) is forced upright under italics and oblique</td></tr>
     </table></details>
   - Styles for `?`
     <details><summary>3 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-question-smooth.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-question-smooth.dark.svg#gh-dark-mode-only" width=32/></td><td><code>question = 'smooth'</code>, <code>VSAN = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-question-smooth.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-question-smooth.dark.svg#gh-dark-mode-only" width=32/></td><td><code>question = 'smooth'</code>, <code>VSAO = 1</code></td></tr>
     <tr><td>Smooth question mark (<code>?</code>) (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-question-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-question-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>question = 'corner'</code>, <code>VSAN = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-question-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-question-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>question = 'corner'</code>, <code>VSAO = 2</code></td></tr>
     <tr><td>Question mark (<code>?</code>) with a corner at middle</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-question-corner-flat-hooked.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-question-corner-flat-hooked.dark.svg#gh-dark-mode-only" width=32/></td><td><code>question = 'corner-flat-hooked'</code>, <code>VSAN = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-question-corner-flat-hooked.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-question-corner-flat-hooked.dark.svg#gh-dark-mode-only" width=32/></td><td><code>question = 'corner-flat-hooked'</code>, <code>VSAO = 3</code></td></tr>
     <tr><td>Question mark (<code>?</code>) with a corner at middle and flat hook</td></tr>
     </table></details>
   - Styles for `¶`
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-pilcrow-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>pilcrow = 'high'</code>, <code>VSAO = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-pilcrow-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>pilcrow = 'high'</code>, <code>VSAP = 1</code></td></tr>
     <tr><td>Higher pilcrow sign <code>¶</code> (default)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-pilcrow-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>pilcrow = 'low'</code>, <code>VSAO = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-pilcrow-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>pilcrow = 'low'</code>, <code>VSAP = 2</code></td></tr>
     <tr><td>Lower pilcrow sign <code>¶</code></td></tr>
     </table></details>
   - Styles for `∂` (Partial derivative symbol)
     <details><summary>2 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'straight-bar'</code>, <code>VSAP = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'straight-bar'</code>, <code>VSAQ = 1</code></td></tr>
     <tr><td>The upper bar of the partial derivative symbol is straight</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-curly-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-curly-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'curly-bar'</code>, <code>VSAP = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-curly-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-curly-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'curly-bar'</code>, <code>VSAQ = 2</code></td></tr>
     <tr><td>The upper bar of the partial derivative symbol is curly (default)</td></tr>
     </table></details>
   - Styles for `µ` (Micro sign)
     <details><summary>13 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-serifless'</code>, <code>VSAQ = 1</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-serifless'</code>, <code>VSAR = 1</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothed shape; without serifs (default for Sans Upright)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-bottom-right-serifed'</code>, <code>VSAQ = 2</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-bottom-right-serifed'</code>, <code>VSAR = 2</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothed shape, and serif at bottom-right</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-motion-serifed'</code>, <code>VSAQ = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-motion-serifed'</code>, <code>VSAR = 3</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-serifed'</code>, <code>VSAQ = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothed-serifed'</code>, <code>VSAR = 4</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothed shape, and serifs (default for Slab Upright)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'tailed-serifless'</code>, <code>VSAQ = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'tailed-serifless'</code>, <code>VSAR = 5</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with tailed shape; without serifs (default for Sans Italic)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-tailed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-tailed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'tailed-motion-serifed'</code>, <code>VSAQ = 6</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-tailed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-tailed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'tailed-motion-serifed'</code>, <code>VSAR = 6</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with tailed shape, and motion serifs at top-left and bottom-right (default for Slab Italic)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'tailed-serifed'</code>, <code>VSAQ = 7</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'tailed-serifed'</code>, <code>VSAR = 7</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with tailed shape, and serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-corner-serifless'</code>, <code>VSAQ = 8</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-corner-serifless'</code>, <code>VSAR = 8</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothless (corner bottom-right) shape; without serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-corner-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-corner-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-corner-motion-serifed'</code>, <code>VSAQ = 9</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-corner-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-corner-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-corner-motion-serifed'</code>, <code>VSAR = 9</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothless (corner bottom-right) shape, and motion serifs at top-left and bottom-right</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-corner-serifed'</code>, <code>VSAQ = 10</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-corner-serifed'</code>, <code>VSAR = 10</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothless (corner bottom-right) shape, and serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-rounded-serifless'</code>, <code>VSAQ = 11</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-rounded-serifless'</code>, <code>VSAR = 11</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothless (rounded) shape; without serifs</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-rounded-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-rounded-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-rounded-motion-serifed'</code>, <code>VSAQ = 12</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-rounded-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-rounded-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-rounded-motion-serifed'</code>, <code>VSAR = 12</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothless (rounded) shape, and motion serifs at top-left and bottom-right</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-rounded-serifed'</code>, <code>VSAQ = 13</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-rounded-serifed'</code>, <code>VSAR = 13</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothless (rounded) shape, and serifs</td></tr>
     </table></details>
   - Styles for `<=`, `>=` (Less-equal and Greater-equal ligations)

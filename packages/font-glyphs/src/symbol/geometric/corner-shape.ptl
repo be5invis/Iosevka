@@ -1,5 +1,7 @@
 $$include '../../meta/macros.ptl'
 
+import [mix] from "@iosevka/util"
+
 glyph-module
 
 glyph-block Symbol-Geometric-Corner-Shape: begin
@@ -35,3 +37,37 @@ glyph-block Symbol-Geometric-Corner-Shape: begin
 						VBar.r ptRSB ptBot ptTop GeometryStroke
 						HBar.t ptSB ptRSB ptTop GeometryStroke
 						HBar.b ptSB ptRSB ptBot GeometryStroke
+
+	for-width-kinds WideWidth1 : do "Crop Shapes"
+		define vBot ParenBot
+		define vTop ParenTop
+		define hLeft 0
+		define hRight MosaicWidth
+
+		define cropKH : 0.3 * [Math.sqrt (1 / MosaicWidthScalar)]
+		define H_LEFT  { (0 - cropKH) 0 }
+		define H_RIGHT { 1 (1 + cropKH) }
+		define cropKV : cropKH * MosaicWidth / (vTop - vBot)
+		define V_BOTTOM { (0 - cropKV) 0 }
+		define V_TOP    { 1 (1 + cropKV) }
+
+		define CropConfig : list
+			#   Unicode hPos/Rg   vPos/Rg
+			list 0x230C 0 H_RIGHT 1 V_BOTTOM
+			list 0x230D 0 H_LEFT  0 V_BOTTOM
+			list 0x230E 1 H_RIGHT 1 V_TOP
+			list 0x230F 1 H_LEFT  0 V_TOP
+
+		foreach { unicode hPos hRg vPos vRg } [items-of CropConfig] : begin
+			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				include : HBar.m
+					mix hLeft hRight hRg.0
+					mix hLeft hRight hRg.1
+					mix (vBot + 0.5 * GeometryStroke) (vTop - 0.5 * GeometryStroke) hPos
+					begin GeometryStroke
+				include : VBar.m
+					mix (hLeft + [HSwToV : 0.5 * GeometryStroke]) (hRight - [HSwToV : 0.5 * GeometryStroke]) vPos
+					mix vBot vTop vRg.0
+					mix vBot vTop vRg.1
+					begin GeometryStroke

@@ -1,0 +1,110 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Keyboard : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim
+
+	glyph-block-export KeyGen
+	define [KeyGen top bot left right nCols nRows sw keys] : glyph-proc
+		foreach {yp xp1 xp2} [items-of keys] : begin
+			include : HBar.m
+				mix left right (xp1 / nCols)
+				mix left right (xp2 / nCols)
+				mix (bot + sw) (top - sw) ((yp + 0.5) / nRows)
+				* sw
+
+	for-width-kinds WideWidth1
+		define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+		do "Keyboard"
+			define [KeyboardShape top bot left right sw] : glyph-proc
+				local scaffold : object
+				set scaffold.keyInset : (top - bot) / 16 * (MosaicWidthScalar / 2)
+
+				local keyTop : top - sw - scaffold.keyInset
+				local keyBot : bot + sw + scaffold.keyInset
+				local keyLeft : left + [HSwToV sw] + scaffold.keyInset
+				local keyRight : right - [HSwToV sw] - scaffold.keyInset
+
+				include : HBar.t left right top sw
+				include : HBar.b left right bot sw
+				include : VBar.l left bot top sw
+				include : VBar.r right bot top sw
+
+				# Key configuration
+				# *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+				# ***** *** *** *** *** *** *** *** *** *** *** *** *** *****
+				# ****** *** *** *** *** *** *** *** *** *** *** *** ********
+				# ******** *** *** *** *** *** *** *** *** *** *** ****** ***
+				#       *** ***** *********************** ***** ***
+				include : KeyGen keyTop keyBot keyLeft keyRight 59 5 [Math.min sw ((keyTop - keyBot) / 9)] : list
+					list 4  0  3
+					list 4  4  7
+					list 4  8 11
+					list 4 12 15
+					list 4 16 19
+					list 4 20 23
+					list 4 24 27
+					list 4 28 31
+					list 4 32 35
+					list 4 36 39
+					list 4 40 43
+					list 4 44 47
+					list 4 48 51
+					list 4 52 55
+					list 4 56 59
+					list 3  0  5
+					list 3  6  9
+					list 3 10 13
+					list 3 14 17
+					list 3 18 21
+					list 3 22 25
+					list 3 26 29
+					list 3 30 33
+					list 3 34 37
+					list 3 38 41
+					list 3 42 45
+					list 3 46 49
+					list 3 50 53
+					list 3 54 59
+					list 2  0  6
+					list 2  7 10
+					list 2 11 14
+					list 2 15 18
+					list 2 19 22
+					list 2 23 26
+					list 2 27 30
+					list 2 31 34
+					list 2 35 38
+					list 2 39 42
+					list 2 43 46
+					list 2 47 50
+					list 2 51 59
+					list 1  0  8
+					list 1  9 12
+					list 1 13 16
+					list 1 17 20
+					list 1 21 24
+					list 1 25 28
+					list 1 29 32
+					list 1 33 36
+					list 1 37 40
+					list 1 41 44
+					list 1 45 48
+					list 1 49 55
+					list 1 56 59
+					list 0  6  9
+					list 0 10 15
+					list 0 16 39
+					list 0 40 45
+					list 0 46 49
+
+			create-glyph [MangleName "keyboard"] [MangleUnicode 0x2328] : glyph-proc
+				set-width Geom.Width
+				local sw : AdviceStroke 8 : Math.sqrt MosaicWidthScalar
+				include : KeyboardShape (Geom.MidY + Geom.Size / 1.5) (Geom.MidY - Geom.Size / 1.5) Geom.Left Geom.Right sw
