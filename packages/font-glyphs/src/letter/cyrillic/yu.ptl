@@ -25,7 +25,7 @@ glyph-block Letter-Cyrillic-Yu : begin
 			Iotified.ascender df xtop xm (top / 2)
 			Iotified.full df xtop xm (top / 2) (fCapital -- (slabType === SLAB-ALL))
 
-	define [CyrRevYuShape df slabType top xtop ada adb] : glyph-proc
+	define [CyrRevYuShape df slabType top xtop ada adb fTail] : glyph-proc
 		local xm : barMixL df.leftSB df.rightSB [HSwToV df.mvs] [StrokeWidthBlend 0.4 0.45]
 		local revXm : df.leftSB + df.rightSB - xm
 		include : OShape top 0 df.leftSB revXm df.mvs (ada * 0.7 * df.div) (adb * 0.7 * df.div)
@@ -39,6 +39,7 @@ glyph-block Letter-Cyrillic-Yu : begin
 			hBarY      -- (top / 2)
 			slabTop    -- slabTop
 			slabBottom -- slabBottom
+			fTail      -- fTail
 
 	create-glyph 'cyrl/Yu' 0x42E : glyph-proc
 		local df : include : DivFrame para.diversityM 3
@@ -55,12 +56,19 @@ glyph-block Letter-Cyrillic-Yu : begin
 		include : df.markSet.b
 		include : CyrYuShape df SLAB-BULGARIAN XH Ascender SmallArchDepthA SmallArchDepthB
 
-	create-glyph 'cyrl/YuRev' 0xA654 : glyph-proc
-		local df : include : DivFrame para.diversityM 3
-		include : df.markSet.capital
-		include : CyrRevYuShape df SLAB-ALL CAP CAP ArchDepthA ArchDepthB
+	define YuRevConfig : object
+		straight  false
+		tailed    true
 
-	create-glyph 'cyrl/yuRev' 0xA655 : glyph-proc
-		local df : include : DivFrame para.diversityM 3
-		include : df.markSet.e
-		include : CyrRevYuShape df SLAB-LOWER XH XH SmallArchDepthA SmallArchDepthB
+	foreach { suffix fTail } [Object.entries YuRevConfig] : do
+		if [not fTail] : create-glyph "cyrl/YuRev.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : CyrRevYuShape df SLAB-ALL CAP CAP ArchDepthA ArchDepthB fTail
+		create-glyph "cyrl/yuRev.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+			include : CyrRevYuShape df SLAB-LOWER XH XH SmallArchDepthA SmallArchDepthB fTail
+
+	select-variant 'cyrl/YuRev' 0xA654
+	select-variant 'cyrl/yuRev' 0xA655

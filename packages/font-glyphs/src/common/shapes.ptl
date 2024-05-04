@@ -430,38 +430,35 @@ glyph-block CommonShapes : begin
 
 	define nHookSegments 12
 	define [HookShape toStraight toFinish isStart args] : begin
-		local [object y tight sw swItalicAdj noAdjTerminalY turnSlope isTail noSwash] args
+		local [object y sw swTerminal isTail noSwash] args
 
 		local atBottom : toStraight.y > y
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 		local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
-		local doSwash : !noSwash && !tight && !isStart && atBottom && (para.isItalic || isTail) && [if (para.slopeAngle >= 0) ltr [not ltr]]
-		local superness : if tight DesignParameters.tightHookSuperness DesignParameters.superness
+		local doSwash : !noSwash && !isStart && atBottom && (para.isItalic || isTail) && [if (para.slopeAngle >= 0) ltr [not ltr]]
+		local superness DesignParameters.superness
 
 		# Adjust terminal's position if necessary
 		toFinish.x = toFinish.x + OXHook * [if ltr (-1) 1] * [if isStart (-1) 1]
 		if (doSwash) : begin
-			toFinish.x = toFinish.x + [Math.min TailAdjX (0.25 * (toFinish.x - toStraight.x))] * TanSlope
-			toFinish.y = toFinish.y - TailAdjY * [Math.abs TanSlope]
+			local tailAdjX : Math.max (Hook * 0.5) (1.00 * sw)
+			local tailAdjY : Math.max (Hook * 0.5) (1.25 * sw)
+			toFinish.x = toFinish.x + tailAdjX * TanSlope
+			toFinish.y = toFinish.y - tailAdjY * [Math.abs TanSlope]
 
 		# Compute key middle knot
 		local w : Math.abs (toStraight.y - y)
 		local v : Math.abs (toFinish.y - y)
 		local u : Math.abs (toFinish.x - toStraight.x)
 		local mixRatio : determineMixR w v u sw doSwash
-		local mxSwMultiplier : [if (tight && tight.shift) tight.shift (1 - (tight || 0))] * [if atBottom 1 (-1)]
-		local mx : [mix toStraight.x toFinish.x mixRatio] + mxSwMultiplier * CorrectionOMidX * swItalicAdj
+		local mx : [mix toStraight.x toFinish.x mixRatio] + [if atBottom 1 (-1)] * 0.75 * CorrectionOMidX * sw
+		local keyKnotDirection : if ltr Rightward Leftward
+		local extraSlope : [if ltr 1 (-1)] * 0.25 * (sw - swTerminal) / sw
+		local finalTurnSlope : keyKnotDirection.x + extraSlope - [if ltr 1 (-1)] * 0.5 * TanSlope
 		local keyKnot : g4.[if ltr "right" "left"].mid
 			begin mx
 			begin y
-			piecewise
-				tight : begin
-					local s : if ltr Rightward Leftward
-					heading {.x (s.x * [fallback tight.skew 1]) .y s.y}
-				turnSlope : begin
-					local s : if ltr Rightward Leftward
-					heading {.x turnSlope .y s.y}
-				true : begin nothing
+			heading {.x finalTurnSlope .y keyKnotDirection.y}
 
 		# Adjust terminal's direction
 		do "Adjust terminal's direction"
@@ -471,26 +468,28 @@ glyph-block CommonShapes : begin
 			local shallowLimit : sw / 2
 			local skew : clamp 0 (1 / 2) : skew0 + [clamp 0 shallowLimit (shallowLimit - depth)] / rad
 			local faf toFinish.af
-			set toFinish.af : lambda [] : begin
-				if faf : faf.apply this arguments
-				if this.headsTo : this.headsTo : if doSwash
-					then : begin {
-						.x (Contrast / [Math.sqrt : 1 + skew * skew] * [if dtu (-1) 1])
-						.y (skew / [Math.sqrt : 1 + skew * skew] * [if ltr 1 (-1)])
+			if doSwash
+			: then : begin
+				set toFinish.af : lambda [] : begin
+					if faf : faf.apply this arguments
+					if this.headsTo : this.headsTo {
+						.x (Contrast / [Math.hypot 1 skew] * [if dtu (-1) 1])
+						.y (skew / [Math.hypot 1 skew] * [if ltr 1 (-1)])
 					}
-					else : begin {
+			: else : begin
+				set toFinish.af : lambda [] : begin
+					if faf : faf.apply this arguments
+					if this.headsTo : this.headsTo{
 						.x (Contrast * [if dtu (-1) 1])
 						.y 0
 					}
-			if ([not noAdjTerminalY] && [not doSwash]) : begin
-				set toFinish.y : toFinish.y + skew * sw * [if (y > toFinish.y) (-1) (+1)]
 
 		# Create the arc knots
 		local segBefore {}
 		local segAfter {}
 		foreach [j : range 1 nHookSegments] : begin
 			local fraction : j / nHookSegments
-			local mixRatioAdjust : Math.max (1 / 2) : (1 / 2) + [if doSwash 1 : if tight 0 (1 / 8)] * (mixRatio - (1 / 2))
+			local mixRatioAdjust : Math.max (1 / 2) : (1 / 2) + [if doSwash 1 (1 / 8)] * (mixRatio - (1 / 2))
 			local fractionAfter : fraction * (1 - mixRatioAdjust) / mixRatioAdjust
 			local myfinal : _SuperXY ((1 - mixRatioAdjust) / mixRatioAdjust) superness
 			segBefore.push : g4
@@ -501,7 +500,6 @@ glyph-block CommonShapes : begin
 				mix mx toFinish.x fraction
 				mix y toFinish.y ((1 - [_SuperXY fractionAfter superness]) / (1 - myfinal))
 				begin unimportant
-			# if (!tight && w < u * mixRatio) : set segAfter {}
 
 		if isStart
 		: then : return : list
@@ -522,28 +520,22 @@ glyph-block CommonShapes : begin
 	glyph-block-export hookstart
 	define flex-params [hookstart] : begin
 		local-parameter : y
-		local-parameter : tight
 		local-parameter : sw             -- Stroke
-		local-parameter : swItalicAdj    -- sw
-		local-parameter : noAdjTerminalY -- false
-		local-parameter : turnSlope      -- nothing
+		local-parameter : swTerminal     -- sw
 		local-parameter : isTail         -- false
 		local-parameter : noSwash        -- false
 		return : Interpolator hookStartBlender
-			object y tight sw swItalicAdj noAdjTerminalY turnSlope isTail noSwash
+			object y sw swTerminal isTail noSwash
 
 	glyph-block-export hookend
 	define flex-params [hookend] : begin
 		local-parameter : y
-		local-parameter : tight
 		local-parameter : sw             -- Stroke
-		local-parameter : swItalicAdj    -- sw
-		local-parameter : noAdjTerminalY -- false
-		local-parameter : turnSlope      -- nothing
+		local-parameter : swTerminal     -- sw
 		local-parameter : isTail         -- false
 		local-parameter : noSwash        -- false
 		return : Interpolator hookEndBlender
-			object y tight sw swItalicAdj noAdjTerminalY turnSlope isTail noSwash
+			object y sw swTerminal isTail noSwash
 
 	glyph-block-export Ungizmo
 	define [Ungizmo] : glyph-proc

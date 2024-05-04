@@ -8,7 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Lower-G : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors
+	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors LeaningAnchor
 	glyph-block-import Letter-Shared : CreateTurnedLetter
 	glyph-block-import Letter-Shared-Shapes : OBarLeft OBarRight DToothlessRise DMBlend
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth CurlyTail PalatalHook TopHook
@@ -90,7 +90,7 @@ glyph-block Letter-Latin-Lower-G : begin
 			widths.rhs sw
 			[if (sink == spiro-outline) corner flat] (df.rightSB - offset) yTop [heading Downward]
 			curl (df.rightSB - offset) (Descender + SmallArchDepthA)
-			hookend (Descender + O + offset)
+			hookend (Descender + O + offset) (sw -- sw)
 			g4 (df.leftSB + offset) (Descender + SHook)
 			if (sink == spiro-outline) {[corner df.leftSB XH]} {}
 
@@ -183,7 +183,7 @@ glyph-block Letter-Latin-Lower-G : begin
 			include : bodyShape df CAP
 			include : hookShape df (CAP - hookStart)
 
-		create-glyph "gPalatalHook.\(suffix)" : glyph-proc
+		create-glyph "gScriptPalatalHook.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 1
 			include : df.markSet.p
 			set-base-anchor 'overlay' Middle (XH / 2)
@@ -214,17 +214,20 @@ glyph-block Letter-Latin-Lower-G : begin
 	select-variant "gBar" 0x1E5 (follow -- 'g')
 	select-variant 'g/single' null (shapeFrom -- 'g')
 
-	select-variant 'gScript/hookTopBase' null (shapeFrom -- 'g')
+	select-variant 'g/hookTopBase' null (shapeFrom -- 'g')
+
 	select-variant 'gScript' 0x261 (shapeFrom -- 'g') (follow -- 'gScript')
 	select-variant 'GScript' 0xA7AC (follow -- 'gScript')
-	select-variant 'gPalatalHook' 0x1D83 (follow -- 'gScript')
+	select-variant 'gScriptPalatalHook' 0x1D83 (follow -- 'gScript')
 	select-variant 'gScriptCrossedTail' 0xAB36
 
 	alias 'cyrl/de.BGR' null 'g/single'
 	alias 'cyrl/de.SRB' null 'g/single'
 
-	derive-composites 'gScriptHookTop' 0x260 'gScript/hookTopBase'
-		TopHook.rBarOuter RightSB 0 XH
+	derive-glyphs 'gHookTop' 0x260 "g/hookTopBase" : function [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : TopHook.rBarOuter RightSB 0 XH
+		include : LeaningAnchor.Above.VBar.r RightSB
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	create-glyph 'mathbb/g' 0x1D558 : glyph-proc
