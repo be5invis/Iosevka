@@ -9,9 +9,10 @@ glyph-block Letter-Latin-Lower-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
-	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar DToothlessRise DMBlend
-	glyph-block-import Letter-Shared-Shapes : nShoulder nShoulderMask
-	glyph-block-import Letter-Shared-Shapes : CyrDescender PalatalHook MidHook CurlyTail UpwardHookShape
+	glyph-block-import Letter-Shared-Shapes : CurlyTail nShoulder nShoulderMask
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend MidHook
+	glyph-block-import Letter-Shared-Shapes : CyrDescender PalatalHook EngHook UpwardHookShape
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
 
 	define [SmallMSmooth df] : df.div * (0.5 * SmallArchDepth + 0.375 * Stroke)
 	define [SmallMShoulderSpiro] : with-params [left right top bottom width fine df coBottom] : glyph-proc
@@ -255,10 +256,10 @@ glyph-block Letter-Latin-Lower-M : begin
 
 		create-glyph "meng.\(suffix)" : glyph-proc
 			local df : include : dfM
-			include : df.markSet.e
-			include [refer-glyph "m.\(suffix)"]
+			include : df.markSet.p
+			include : mShapeBody df XH
 			eject-contour 'serifRB'
-			include : PalatalHook.rExt df.rightSB 0 (sw -- df.mvs)
+			include : EngHook df.rightSB 0 Descender (sw -- df.mvs)
 
 		create-glyph "mCrossedTail.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 4
@@ -334,6 +335,15 @@ glyph-block Letter-Latin-Lower-M : begin
 	select-variant 'meng' 0x271
 	select-variant 'mCrossedTail' 0xAB3A (follow -- 'meng')
 
+	define [turnMShapeBodyImpl df height body toothless tailed serifs] : glyph-proc
+		include : body df height 0 0 0
+		include : serifs df height 0 0 0 0 toothless
+		include : FlipAround df.middle (height / 2)
+		if tailed : begin
+			eject-contour 'barL'
+			eject-contour 'serifLT'
+			include : RightwardTailedBar df.rightSB 0 height (sw -- df.mvs)
+
 	define TurnMConfig : SuffixCfg.weave
 		object # body
 			toothed            { SmallMArches                        0 0 }
@@ -350,13 +360,7 @@ glyph-block Letter-Latin-Lower-M : begin
 
 	foreach { suffix { {Body toothless tailed} {Serifs} } } [pairs-of TurnMConfig] : do
 		define [turnMShapeBody df top] : glyph-proc
-			include : Body df top 0 0 0
-			include : Serifs df top 0 0 0 0 toothless
-			include : FlipAround df.middle (top / 2)
-			if tailed : begin
-				eject-contour 'barL'
-				eject-contour 'serifLT'
-				include : RightwardTailedBar df.rightSB 0 top (sw -- df.mvs)
+			include : turnMShapeBodyImpl df top Body toothless tailed Serifs
 
 		create-glyph "turnm.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 3
