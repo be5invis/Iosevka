@@ -61,7 +61,6 @@ glyph-block Letter-Latin-Lower-M : begin
 			corner left [Math.min (top - sm - 0.1) bottom]
 			close
 
-
 	define [SmallMTopLeftSerif df top lbot fFull] : begin
 		local sf : SerifFrame.fromDf df top 0
 		return sf.lt.outer
@@ -90,8 +89,9 @@ glyph-block Letter-Latin-Lower-M : begin
 		local sf : SerifFrame.fromDf df top rbot
 		return sf.rb.outer
 
-
-	define [MEnoughSpaceForFullSerifs df mid] : begin
+	glyph-block-export MEnoughSpaceForFullSerifs
+	define [MEnoughSpaceForFullSerifs df _mid] : begin
+		local mid : fallback _mid df.middle
 		local ink : HSwToV df.mvs
 		local gap : [Math.min (mid - df.leftSB) (df.rightSB - mid)] - 1.5 * ink
 		return : 0.5 * ink + 0.375 * gap > para.refJut
@@ -127,7 +127,7 @@ glyph-block Letter-Latin-Lower-M : begin
 		local fFull : MEnoughSpaceForFullSerifs df : fallback _mid df.middle
 		include : SmallMBottomMotionRightSerif df top rbot fFull
 
-
+	glyph-block-export dfM
 	define [dfM] : DivFrame para.diversityM 3
 	define [SmallMArches df top lbot mbot rbot _mid] : glyph-proc
 		local mid : fallback _mid df.middle
@@ -402,15 +402,15 @@ glyph-block Letter-Latin-Lower-M : begin
 				eject-contour 'serifLT'
 				include : CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
 
-	select-variant 'turnm' 0x26F
-	select-variant 'capitalTurnm' 0x19C (follow -- 'turnm')
-	select-variant 'turnmLeg' 0x270
-	select-variant 'turnmSideways' 0x1D1F (follow -- 'turnm')
+	select-variant 'turnm' 0x26F          (follow -- [if [MEnoughSpaceForFullSerifs : dfM] 'turnm' 'turnm/reduced'])
+	select-variant 'capitalTurnm' 0x19C   (follow -- [if [MEnoughSpaceForFullSerifs : dfM] 'turnm' 'turnm/reduced'])
+	select-variant 'turnmLeg' 0x270       (follow -- [if [MEnoughSpaceForFullSerifs : dfM] 'turnmLeg' 'turnmLeg/reduced'])
+	select-variant 'turnmSideways' 0x1D1F (follow -- [if [MEnoughSpaceForFullSerifs : dfM] 'turnm' 'turnm/reduced'])
 
-	select-variant 'cyrl/sha.italic' (shapeFrom -- 'turnm')
+	select-variant 'cyrl/sha.italic' (shapeFrom -- 'turnm') (follow -- [if [MEnoughSpaceForFullSerifs : dfM] 'cyrl/sha.italic' 'cyrl/sha.italic/reduced'])
 	alias 'cyrl/sha.BGR' null 'cyrl/sha.italic'
 
-	select-variant 'cyrl/shcha.italic'
+	select-variant 'cyrl/shcha.italic' (follow -- [if [MEnoughSpaceForFullSerifs : dfM] 'cyrl/shcha.italic' 'cyrl/shcha.italic/reduced'])
 	alias 'cyrl/shcha.BGR' null 'cyrl/shcha.italic'
 
 	derive-composites 'cyrl/te.SRB' null 'cyrl/sha.italic' 'macronAbove'
