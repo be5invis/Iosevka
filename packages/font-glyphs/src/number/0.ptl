@@ -16,13 +16,13 @@ glyph-block Digits-Zero : begin
 	define [CutoutStrokeWidth top] : Math.max (0.1 * top) : Math.min (0.125 * top) (0.5 * CircleInnerWidth) [AdviceStroke 3]
 
 	glyph-block-export OvalShapeT
-	define [OvalShapeT sink t b l r pHAdj sw] : let [m : mix l r 0.5] : sink
+	define [OvalShapeT sink t b l r sw] : let [m : mix l r 0.5] : sink
 		widths.rhs [fallback sw Stroke]
-		g4 (m - [fallback pHAdj 1] * CorrectionOMidS) (t - O)
+		arch.rhs.centerAt.ltr.t m t
 		archv
 		g4 (r - OX) [YSmoothMidR t b SmallArchDepthA SmallArchDepthB]
 		arcvh
-		g4 (m + [fallback pHAdj 1] * CorrectionOMidS) (b + O)
+		arch.rhs.centerAt.rtl.b m b
 		archv
 		g4 (l + OX) [YSmoothMidL t b SmallArchDepthA SmallArchDepthB]
 		arcvh
@@ -35,8 +35,8 @@ glyph-block Digits-Zero : begin
 		local sw1    fine
 		local sw2  : mix body fine 0.375
 
-		local mxb : [mix (l - OX) (r + OX) 0.5] + CorrectionOMidX * fine
-		local mxt : [mix (l - OX) (r + OX) 0.5] - CorrectionOMidX * fine
+		local mxb : arch.adjust-x.bot [mix (l - OX) (r + OX) 0.5] (sw -- fine)
+		local mxt : arch.adjust-x.top [mix (l - OX) (r + OX) 0.5] (sw -- fine)
 		local myl : YSmoothMidL t b
 		local myr : YSmoothMidR t b
 
@@ -155,8 +155,8 @@ glyph-block Digits-Zero : begin
 		return : OShapeOutline.NoOvershoot
 			top / 2 + DotRadius
 			top / 2 - DotRadius
-			Middle + halfDotWidth
 			Middle - halfDotWidth
+			Middle + halfDotWidth
 			Stroke * halfDotWidth * 2 / Width
 			ArchDepthAOf halfDotWidth (halfDotWidth * 2)
 			ArchDepthBOf halfDotWidth (halfDotWidth * 2)
@@ -167,30 +167,11 @@ glyph-block Digits-Zero : begin
 		return : OShapeOutline.NoOvershoot
 			top / 2 + halfDotHeight
 			top / 2 - halfDotHeight
-			Middle + halfDotWidth
 			Middle - halfDotWidth
+			Middle + halfDotWidth
 			Stroke * halfDotWidth * 2 / Width
 			ArchDepthAOf halfDotWidth (halfDotWidth * 2)
 			ArchDepthBOf halfDotWidth (halfDotWidth * 2)
-
-	define [ZeroOvalDotShape top] : begin
-		local halfDotWidth : Math.min DotRadius (CircleInnerWidth / 4)
-		return : OvalShapeT spiro-outline
-			top / 2 + DotRadius - O
-			top / 2 - DotRadius + O
-			Middle - halfDotWidth + OX
-			Middle + halfDotWidth - OX
-			begin 0
-
-	define [ZeroOvalLongDotShape top] : begin
-		local halfDotWidth : Math.min HalfStroke (CircleInnerWidth / 4)
-		local halfDotHeight : Math.max DotRadius : Math.min ((top - Stroke * 2) / 4) ((top - Stroke * 2 - (CircleInnerWidth - halfDotWidth * 2)) / 2)
-		return : OvalShapeT spiro-outline
-			top / 2 + halfDotHeight - O
-			top / 2 - halfDotHeight + O
-			Middle - halfDotWidth + OX
-			Middle + halfDotWidth - OX
-			begin 0
 
 	define ZeroConfig : SuffixCfg.weave
 		object # outline shape

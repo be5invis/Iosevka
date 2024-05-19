@@ -242,7 +242,7 @@ glyph-block Letter-Latin-K : begin
 			define kshRight : right + [KBalanceRight slabLegs true]
 			define Ok       : KO slabLegs true top stroke
 
-			define arcFine : stroke * CThin
+			define arcFine ShoulderFine
 			define arcStroke : AdviceStroke2 2 3 top
 			define arcTerminalFine : AdviceStroke2 3 4 top
 			define expansion : Width / (UPM / 2) - 1
@@ -251,14 +251,13 @@ glyph-block Letter-Latin-K : begin
 			define pArcTopX      : 0.625 - 0.05 * (arcStroke / Width) - 0 * expansion * (arcStroke / UPM)
 			define pArcRightX    : 0.925 - TanSlope * 0.25 + ([if SLAB 0 0.05] + 0.75 * TanSlope) * (arcStroke / Width)
 			define pArcRightY    : 0.575 - 0.625 * (arcStroke / Width) - 0.5 * expansion * (arcStroke / UPM)
-			define pArcTerminalX : 0.15 - 0.5 * (arcStroke / Width)
-			define pArcBottomX   : 0.15 + 0.5 * (arcStroke / Width)
+			define pArcTerminalX : 0.2 - 2.25 * (arcStroke / Width)
+			define pArcBottomX   : 0.15 + 0.0 * (arcStroke / Width)
 			define pArcBottomY   : 0.45 + 0.5 * (arcStroke / Width)
 
 			define arcRightSlope : 0.05 + 0.2 * (arcStroke / Width) + 1 * expansion * (arcStroke / UPM)
-			define arcTopSkew   : shoulderMidSkew arcFine arcStroke
 
-			define arcStartX    : kshLeft + HVContrast * (stroke - arcFine)
+			define arcStartX    : kshLeft + [HSwToV (stroke - arcFine)]
 			define arcStartY    : top * pArcStartY
 			define arcTerminalX : mix arcStartX kshRight pArcTerminalX
 			define arcBottomX   : mix arcStartX kshRight pArcBottomX
@@ -266,19 +265,19 @@ glyph-block Letter-Latin-K : begin
 			define arcTerminalY : arcBottomY + arcStroke * 0.125 - O
 			define arcRightX    : kshRight * pArcRightX + [HSwToV : 0.2 * stroke]
 			define arcRightY    : mix arcBottomY top pArcRightY
-			define arcTopX      : mix arcStartX arcRightX pArcTopX
-			define arcTopY      : top - O
 
-			return : object Ok arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSkew arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshLeft kshRight
+			return : object Ok arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcStroke arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshLeft kshRight pArcTopX
 
 		define [CursiveLoopT sink offset left right stroke top slabLT slabLegs] : begin
 			define dim : CursiveDimen left right top stroke slabLT slabLegs
 			return : sink
 				g4.up.start (dim.arcStartX + offset) dim.arcStartY [widths.rhs.heading dim.arcFine Upward]
-				arcvh 8
-				g4 dim.arcTopX (dim.arcTopY - offset)
-					widths.rhs.heading dim.arcStroke {.y (+1) .x dim.arcTopSkew}
-				archv 8 2.0
+				arch.rhs (top - offset)
+					sw -- dim.arcStroke
+					swBefore -- dim.arcFine
+					swAfter -- dim.arcStroke
+					p -- dim.pArcTopX
+
 				g4.down.mid (dim.arcRightX - offset) (dim.arcRightY - 0.5 * dim.arcRightSlope * [HSwToV dim.arcStroke])
 					heading {.y dim.arcRightSlope .x HVContrast}
 				arcvh
