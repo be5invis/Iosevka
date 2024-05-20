@@ -1,0 +1,44 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [Box] from "@iosevka/geometry/box"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Bell : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim
+
+	for-width-kinds WideWidth1 : begin
+		define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+		define clapperRad : Geom.Size * 0.2
+
+		define top : mix PictBot PictTop (0.7 + 0.1 * MosaicWidthScalar)
+		define bot : mix PictBot PictTop (0.3 - 0.1 * MosaicWidthScalar)
+		define bellTop : mix bot top 0.9
+		define bellBot : mix bot top 0.2
+		define px1 0.2
+		define py1 : 1 / 3
+		define py2 : 2 / 3
+
+		create-glyph [MangleName 'bell'] [MangleUnicode 0x1F514] : glyph-proc
+			set-width Geom.Width
+
+			include : spiro-outline
+				straight.right.start Geom.Left bellBot
+				archv
+				flat [mix Geom.Left Geom.Right px1] [mix bellBot bellTop py1]
+				curl [mix Geom.Left Geom.Right px1] [mix bellBot bellTop py2]
+				arcvh
+				g4 Geom.MidX bellTop
+				archv
+				flat [mix Geom.Right Geom.Left px1] [mix bellBot bellTop py2]
+				curl [mix Geom.Right Geom.Left px1] [mix bellBot bellTop py1]
+				arcvh
+				straight.right.end Geom.Right bellBot
+			
+			include : HBar.t Geom.Left Geom.Right bellBot GeometryStroke
+			include : DotAt Geom.MidX (bot + clapperRad) clapperRad
+			include : VBar.m Geom.MidX bellBot top GeometryStroke
