@@ -1,0 +1,104 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [Box] from "@iosevka/geometry/box"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Hourglass : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim
+
+	define [HourglassShape bound sw _swRef] : begin
+		local swRef : fallback _swRef sw
+		local left : bound.left + [HSwToV : 0.5 * swRef]
+		local right : bound.right - [HSwToV : 0.5 * swRef]
+
+		local curveL : list
+			straight.down.start left bound.top [heading Downward]
+			alsoThru 0 0.45
+			flat [bound.mixX 0.3] [bound.mixY 0.6]
+			curl [bound.mixX 0.7] [bound.mixY 0.4]
+			alsoThru 1 0.55
+			straight.down.end right bound.bottom [heading Downward]
+
+		local curveR : list
+			straight.up.start left bound.bottom [heading Upward]
+			alsoThru 0 0.45
+			flat [bound.mixX 0.3] [bound.mixY 0.4]
+			curl [bound.mixX 0.7] [bound.mixY 0.6]
+			alsoThru 1 0.55
+			straight.up.end right bound.top [heading Upward]
+
+		return : if sw
+			union
+				HBar.t bound.left bound.right bound.top [mix sw swRef 0.5]
+				HBar.b bound.left bound.right bound.bottom [mix sw swRef 0.5]
+				dispiro [widths.center sw] curveL
+				dispiro [widths.center sw] curveR
+			spiro-outline curveL curveR
+
+	for-width-kinds WideWidth1 : begin
+		define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+		define Bound : new Box PictTop PictBot Geom.Left Geom.Right
+		define sandSlope 0.3
+		define sandFill1 0.33
+		define sandFill2 0.15
+		define sandFill3 0.8
+
+		create-glyph [MangleName 'hourglass'] [MangleUnicode 0x231B] : glyph-proc
+			set-width Geom.Width
+
+			include : HourglassShape Bound GeometryStroke
+
+			local mask : HourglassShape Bound (GeometryStroke * 2) GeometryStroke
+			local mask2 : HourglassShape Bound 0 GeometryStroke
+			local sandBot : Bound.bottom + GeometryStroke
+			local sandTop : mix sandBot (Bound.top - GeometryStroke) sandFill1
+			local sandRad : (Bound.top - Bound.bottom - GeometryStroke) * sandFill1 / sandSlope 
+			local sand : spiro-outline
+				corner (Bound.xMid - sandRad) sandBot
+				corner (Bound.xMid + sandRad) sandBot
+				corner Bound.xMid sandTop
+			
+			include : difference [intersection sand mask2] mask 
+
+		create-glyph [MangleName 'hourglassFlowing'] [MangleUnicode 0x23F3] : glyph-proc
+			set-width Geom.Width
+
+			include : HourglassShape Bound GeometryStroke
+
+			local mask : HourglassShape Bound (GeometryStroke * 2) GeometryStroke
+			local mask2 : HourglassShape Bound 0 GeometryStroke
+			local sandBot : Bound.bottom + GeometryStroke
+			local sandTop : mix sandBot (Bound.top - GeometryStroke) sandFill2
+			local sandRad : (Bound.top - Bound.bottom - GeometryStroke) * sandFill2 / sandSlope 
+			local sand : union
+				spiro-outline
+					corner (Bound.xMid - sandRad) sandBot
+					corner (Bound.xMid + sandRad) sandBot
+					corner Bound.xMid sandTop
+				Rect [Bound.mixY sandFill3] Bound.yMid Bound.left Bound.right
+				VBar.m Bound.xMid Bound.bottom Bound.yMid [AdviceStroke 10]
+
+			include : difference [intersection sand mask2] mask 
+
+		create-glyph [MangleName 'wineglass'] [MangleUnicode 0x1F377] : glyph-proc
+			set-width Geom.Width
+
+			include : HBar.b Geom.Left Geom.Right PictBot GeometryStroke
+			include : HBar.t Geom.Left Geom.Right PictTop GeometryStroke
+			include : VBar.m Geom.MidX PictBot SymbolMid GeometryStroke
+
+			include : dispiro
+				widths.lhs GeometryStroke
+				straight.down.start Geom.Left PictTop [heading Downward]
+				curl Geom.Left (SymbolMid - GeometryStroke / 2 + ArchDepthB)
+				arcvh
+				g4   Geom.MidX (SymbolMid - GeometryStroke / 2)
+				archv
+				flat Geom.Right (SymbolMid - GeometryStroke / 2 + ArchDepthA)
+				straight.up.end Geom.Right PictTop [heading Upward]
+			
