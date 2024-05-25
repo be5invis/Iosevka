@@ -525,7 +525,6 @@ glyph-block CommonShapes : begin
 				local-parameter : sw -- Stroke
 				return : x + CorrectionOMidX * sw
 
-
 		define [impl args] : begin
 			local doAdj : not args.compact
 
@@ -546,8 +545,21 @@ glyph-block CommonShapes : begin
 				if args.rtl g2.left.mid g2.right.mid
 			return : knotType (args.x + italicAdj) (args.y + overshoot) af
 
+		define [mixR w v u sw] : begin
+			if (w < v) : return : 1 - [mixR v w u sw]
+			local superness DesignParameters.superness
+			local r : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) superness]) (1 / superness)] + 1)
+			set r : 0.5 + (r - 0.5) * (v + w) / (u * 2)
+			return r
+
 		define [archBlender before after args] : begin
-			set args.x : mix before.x after.x args.p
+			local u : Math.abs (after.x - before.x)
+			local v : Math.abs (after.y - args.y)
+			local w : Math.abs (before.y - args.y)
+
+			local mixRatio : mixR w v u args.sw
+
+			set args.x : mix before.x after.x [fallback args.p mixRatio]
 			set args.rtl : before.x > after.x
 			set args.atBot : args.y < before.y && args.y < after.y
 
@@ -558,7 +570,7 @@ glyph-block CommonShapes : begin
 
 		export : define flex-params [lhs] : begin
 			local-parameter : y
-			local-parameter : p            -- 0.5
+			local-parameter : p
 			local-parameter : sw 		   -- Stroke
 			local-parameter : compact      -- false
 			local-parameter : o 		   -- O
@@ -571,7 +583,7 @@ glyph-block CommonShapes : begin
 
 		export : define flex-params [rhs] : begin
 			local-parameter : y
-			local-parameter : p            -- 0.5
+			local-parameter : p
 			local-parameter : sw 		   -- Stroke
 			local-parameter : compact      -- false
 			local-parameter : o 		   -- O
