@@ -7,7 +7,7 @@ glyph-module
 glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Symbol-Geometric-Shared : UnicodeWeightGrade
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
 
 	define arrowHeight : para.arrowHeight * (Width - SB / 2) * [Math.pow (MosaicWidth / MosaicUnitWidth) (1 / 3)]
 	define arrowWidth  : Math.min (MosaicWidth - SB / 2) arrowHeight
@@ -202,6 +202,10 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 	define [TrigArrowShape x1 y1 x2 y2 size] : glyph-proc
 		include : TriangleArrowHead x1 y1 x2 y2 (0.75 * size)
 		include : ArrowBar x1 y1 x2 y2 halfArrowSw
+
+	define [WeightedTrigArrowShape sw w h] : lambda [x1 y1 x2 y2 size] : glyph-proc
+		include : TriangleArrowHead x1 y1 x2 y2 (0.75 * w * size) (0.75 * [fallback h w] * size)
+		include : ArrowBar x1 y1 x2 y2 (sw / 2) 0 (0.75 * [fallback h w] * size)
 
 	define [OpenArrowShape x1 y1 x2 y2 size] : glyph-proc
 		local fine : Math.min [AdviceStroke 5] (size * 0.75 / 3)
@@ -638,7 +642,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			include : TriangleArrowHead arrowX gapTop arrowX (gapTop - headLength) headSize
 
 		define [OpenCircleArrow headFunc fCcw fClosed] : glyph-proc
-			local arrowX : arrowMidX - CorrectionOMidX * arcSW
+			local arrowX : arch.adjust-x.top arrowMidX arcSW
 			local arrowXS : arrowX + [if fCcw 0.5 (-0.5)] * headLength
 			local arrowXE : arrowX + [if fCcw (-0.5) 0.5] * headLength
 			local arrowY : t - (0.5 * arcSW)
@@ -896,6 +900,49 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		BarbGroup 'barbArrowMedium'    0x1F870 0.375 7
 		BarbGroup 'barbArrowHeavy'     0x1F878 0.375 9
 		BarbGroup 'barbArrowVeryHeavy' 0x1F880 0.375 10
+
+	do "Weighted Trig Arrows"
+		define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+		define Size : GeometricSizes Geom
+
+		define eqHeight : Math.sqrt 3
+
+		define trigArrowSize : 0.75 * arrowHeadSize
+		define squatRange : 1.5 * Geom.Size * Size.VerySmall.size
+		define kSmall   : 2 * Geom.Size * Size.VerySmall.size / trigArrowSize
+		define kMedium  : 2 * Geom.Size * Size.Small.size / trigArrowSize
+
+		define [TrigGroupSquat prefix b sw w h] : begin
+			MkArrow [WeightedTrigArrowShape sw w h] [MangleName "\(prefix)Left"]  [MangleUnicode : b + 0] (arrowMidX + squatRange) (SymbolMid) (arrowMidX - squatRange) (SymbolMid)
+			MkArrow [WeightedTrigArrowShape sw w h] [MangleName "\(prefix)Up"]    [MangleUnicode : b + 1] (arrowMidX) (SymbolMid - squatRange) (arrowMidX) (SymbolMid + squatRange)
+			MkArrow [WeightedTrigArrowShape sw w h] [MangleName "\(prefix)Right"] [MangleUnicode : b + 2] (arrowMidX - squatRange) (SymbolMid) (arrowMidX + squatRange) (SymbolMid)
+			MkArrow [WeightedTrigArrowShape sw w h] [MangleName "\(prefix)Down"]  [MangleUnicode : b + 3] (arrowMidX) (SymbolMid + squatRange) (arrowMidX) (SymbolMid - squatRange)
+
+		define [TrigGroup prefix b sw w h] : begin
+			MkArrow [WeightedTrigArrowShape sw w h] [MangleName "\(prefix)Left"]  [MangleUnicode : b + 0] arrowRSB SymbolMid arrowSB SymbolMid
+			MkArrow [WeightedTrigArrowShape sw w h] [MangleName "\(prefix)Up"]    [MangleUnicode : b + 1] arrowMidX arrowBot arrowMidX arrowTop
+			MkArrow [WeightedTrigArrowShape sw w h] [MangleName "\(prefix)Right"] [MangleUnicode : b + 2] arrowSB SymbolMid arrowRSB SymbolMid
+			MkArrow [WeightedTrigArrowShape sw w h] [MangleName "\(prefix)Down"]  [MangleUnicode : b + 3] arrowMidX arrowTop arrowMidX arrowBot
+
+		TrigGroup 'trigArrowSmallHead'         0x1F800 [UnicodeWeightGrade 3 MosaicWidthScalar] Size.Small.size
+		TrigGroup 'trigArrowMediumHead'        0x1F804 [UnicodeWeightGrade 5 MosaicWidthScalar] Size.Medium.size
+		TrigGroup 'trigArrowLargeHead'         0x1F808 [UnicodeWeightGrade 7 MosaicWidthScalar] Size.Large.size
+		TrigGroup 'trigArrowSmallEqHead'       0x1F810 [UnicodeWeightGrade 3 MosaicWidthScalar] Size.Small.size (Size.Small.size * eqHeight)
+		TrigGroup 'trigArrowEqHead'            0x1F814 [UnicodeWeightGrade 4 MosaicWidthScalar] 1 eqHeight
+		TrigGroup 'trigArrowEqHeadHeavy'       0x1F818 [UnicodeWeightGrade 5 MosaicWidthScalar] 1 eqHeight
+		TrigGroup 'trigArrowLargeEqHeadHeavy'  0x1F81C [UnicodeWeightGrade 7 MosaicWidthScalar] Size.Large.size (Size.Large.size * eqHeight)
+		TrigGroup 'trigArrowNarrowShaft'       0x1F820 [UnicodeWeightGrade 3 MosaicWidthScalar] 1
+		TrigGroup 'trigArrowMediumShaft'       0x1F824 [UnicodeWeightGrade 5 MosaicWidthScalar] 1
+		TrigGroup 'trigArrowBoldShaft'         0x1F828 [UnicodeWeightGrade 7 MosaicWidthScalar] 1
+		TrigGroup 'trigArrowHeavyShaft'        0x1F82C [UnicodeWeightGrade 9 MosaicWidthScalar] 1
+		TrigGroup 'trigArrowVeryHeavyShaft'    0x1F830 [UnicodeWeightGrade 10 MosaicWidthScalar] 1
+		TrigGroup 'fingerPost'                 0x1F834 (2 * (trigArrowSize - o)) 1
+		TrigGroup 'trigArrowHeavy'             0x1F844 (2 * (trigArrowSize - o)) kMedium
+
+		TrigGroupSquat 'trigArrowSquared'         0x1F838 (2 * Geom.Size * Size.VerySmall.size) kSmall
+		TrigGroupSquat 'trigArrowCompressed'      0x1F83C (2 * Geom.Size * Size.Small.size) kMedium kSmall
+		TrigGroupSquat 'trigArrowCompressedHeavy' 0x1F840 (2 * Geom.Size * Size.MediumSmall.size) kMedium kSmall
+		MkArrow [WeightedTrigArrowShape (2 * Geom.Size * Size.Medium.size) kMedium kSmall] [MangleName "trigArrowSquatBlackRight"] [MangleUnicode 0x27A7] (arrowMidX - squatRange) SymbolMid (arrowMidX + squatRange) SymbolMid
 
 	do "Round-stroke arrows"
 		define sw : UnicodeWeightGrade 9 MosaicWidthScalar

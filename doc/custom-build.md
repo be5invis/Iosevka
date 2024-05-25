@@ -3330,8 +3330,8 @@ The properties in the `namingOverride` section could be uase to override menu na
  - `description`: Name ID 10, description of the typeface.
  - `urlVendor`: Name ID 11, URL of font vendor.
  - `urlDesigner`: Name ID 12, URL of typeface designer.
- - `licence`: Name ID 13, license description.
- - `licenceURL`: Name ID 14, license Info URL.
+ - `license` (or alternatively `licence`): Name ID 13, license description.
+ - `licenseURL` (or alternatively `licenceURL`): Name ID 14, license Info URL.
 
 In addition, you can also use the `version` property to override font version. The version number should follow [SemVer](https://semver.org/), like being `1.0.0`.
 

@@ -936,7 +936,7 @@ async function CreateGroupArchiveFile(dir, out, ...files) {
 	echo.action(echo.hl.command("Create Archive"), out.full);
 	await cd(dir).silently.run(
 		[SEVEN_ZIP, "a"],
-		["-tzip", "-r", "-mx=9", "-mmt=off"],
+		["-tzip", "-r", "-mx=9", "-mmt1"],
 		relOut,
 		...files,
 	);

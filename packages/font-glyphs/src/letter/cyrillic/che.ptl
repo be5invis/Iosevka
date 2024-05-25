@@ -1,6 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -8,9 +9,10 @@ glyph-block Letter-Cyrillic-Che : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
-	glyph-block-import Letter-Shared : CreateTurnedLetter
+	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph CreateTurnedLetter
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar DToothlessRise
-	glyph-block-import Letter-Shared-Shapes : CyrDescender BottomExtension
+	glyph-block-import Letter-Shared-Shapes : TopHook CyrDescender BottomExtension
+	glyph-block-import Letter-Latin-Lower-M : EarlessCornerDoubleArchSmallMShape
 
 	glyph-block-export BODY
 	define BODY : object
@@ -31,14 +33,16 @@ glyph-block Letter-Cyrillic-Che : begin
 	glyph-block-export CyrCheShape
 	define [CyrCheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs] [yBarOffset DToothlessRise]] : glyph-proc
 		local bar : top * [fallback pyBar 0.5] + yBarOffset
-		include : match bodyType
+
+		include : tagged 'strokeR' : match bodyType
 			[Just BODY.TAILED] : RightwardTailedBar df.rightSB 0 top (sw -- sw)
 			__                 : VBar.r df.rightSB 0 top sw
+
 		include : dispiro
 			widths.lhs sw
 			flat df.leftSB top [heading Downward]
 			curl df.leftSB (bar - DToothlessRise + ArchDepthB - HalfStroke)
-			g4 (df.middle + CorrectionOMidS) (bar - DToothlessRise - HalfStroke)
+			arch.lhs.centerAt.ltr.b df.middle (bar - DToothlessRise - HalfStroke)
 			g4 (df.rightSB - 1 / 16) (bar - HalfStroke) [heading Rightward]
 
 		local sf : SerifFrame.fromDf df top 0
@@ -63,18 +67,112 @@ glyph-block Letter-Cyrillic-Che : begin
 			[Just SERIFS.BR]         sf.rb.outer
 			__                   : glyph-proc
 
+	define [CyrCcheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs] [yBarOffset DToothlessRise]] : glyph-proc
+		local bar : top * [fallback pyBar 0.5] + yBarOffset
+
+		include : EarlessCornerDoubleArchSmallMShape df (top - bar + DToothlessRise + HalfStroke) 0 0 0
+		eject-contour 'barL'
+		include : FlipAround df.middle (top / 2)
+
+		include : tagged 'strokeR' : match bodyType
+			[Just BODY.TAILED] : RightwardTailedBar df.rightSB 0 top (sw -- sw)
+			__                 : VBar.r df.rightSB 0 top sw
+
+		local sf : SerifFrame.fromDf df top 0
+		include : tagged 'serifLT' : match slabType
+			[Just SERIFS.ALL]        [if sf.enoughSpaceForFullSerifs sf.lt.full sf.lt.outer]
+			[Just SERIFS.TOP]        [if sf.enoughSpaceForFullSerifs sf.lt.full sf.lt.outer]
+			[Just SERIFS.TL-BR]      sf.lt.outer
+			[Just SERIFS.TL]         sf.lt.outer
+			__                   : glyph-proc
+		include : tagged 'serifMT' : match slabType
+			[Just SERIFS.ALL]        [if sf.enoughSpaceForFullSerifs sf.mt.full [glyph-proc]]
+			[Just SERIFS.TOP]        [if sf.enoughSpaceForFullSerifs sf.mt.full [glyph-proc]]
+			__                   : glyph-proc
+		include : tagged 'SerifRT' : match slabType
+			[Just SERIFS.ALL]        [if sf.enoughSpaceForFullSerifs sf.rt.full sf.rt.outer]
+			[Just SERIFS.TOP]        [if sf.enoughSpaceForFullSerifs sf.rt.full sf.rt.outer]
+			__                   : glyph-proc
+		include : tagged 'SerifRB' : match slabType
+			[Just SERIFS.ALL]        sf.rb.fullSide
+			[Just SERIFS.TL-BR]      sf.rb.outer
+			[Just SERIFS.BR]         sf.rb.outer
+			__                   : glyph-proc
+
+	define [CyrTcheShape] : with-params [df top pyBar bodyType slabType [teSerifs SLAB] [sw : AdviceStroke 2.75] [yBarOffset DToothlessRise]] : glyph-proc
+		local bar : top * [fallback pyBar 0.5] + yBarOffset
+
+		local left : [mix df.leftSB df.rightSB 0.2] - [HSwToV : 0.25 * sw] + OX
+		local right : df.rightSB - OX
+
+		include : tagged 'strokeR' : match bodyType
+			[Just BODY.TAILED] : RightwardTailedBar right 0 top (sw -- sw)
+			__                 : VBar.r right 0 top sw
+
+		include : dispiro
+			widths.lhs sw
+			flat left top [heading Downward]
+			curl left (bar - DToothlessRise + ArchDepthB - HalfStroke)
+			arch.lhs.centerAt.ltr.b [mix left right 0.5] (bar - DToothlessRise - HalfStroke)
+			g4 (right - 1 / 16) (bar - HalfStroke) [heading Rightward]
+
+		local xTopBarLeft : df.leftSB - SideJut
+		local xTopBarRight : mix xTopBarLeft (left + [HSwToV : 0.5 * sw]) 2
+
+		include : dispiro
+			widths.rhs sw
+			flat xTopBarLeft  top [if SLAB [heading Rightward] null]
+			curl xTopBarRight top [if SLAB [heading Rightward] null]
+
+		local sf : SerifFrame top 0 left right (swRef -- sw)
+		include : tagged 'SerifRT' : match slabType
+			[Just SERIFS.ALL]        sf.rt.outer
+			[Just SERIFS.TOP]        sf.rt.outer
+			__                   : glyph-proc
+		include : tagged 'SerifRB' : match slabType
+			[Just SERIFS.ALL]        sf.rb.fullSide
+			[Just SERIFS.TL-BR]      sf.rb.outer
+			[Just SERIFS.BR]         sf.rb.outer
+			__                   : glyph-proc
+
+		if teSerifs : begin
+			local swVJut : Math.min [AdviceStroke 4.5] (0.625 * (left - xTopBarLeft))
+			include : VSerif.dl  xTopBarLeft  top VJut swVJut
+			include : VSerif.dr  xTopBarRight top VJut swVJut
+
 	create-glyph 'cyrl/Che' 0x427 : glyph-proc
 		include : MarkSet.capital
 		include : LeaningAnchor.Below.VBar.r RightSB
 		include : CyrCheShape [DivFrame 1] CAP [if SLAB 0.45 0.35] BODY.STRAIGHT
 			if SLAB SERIFS.ALL SERIFS.NONE
 
-	create-glyph 0x4B6 : composite-proc
+	create-glyph 'cyrl/CheDescender' 0x4B6 : composite-proc
 		refer-glyph 'cyrl/Che'
 		CyrDescender.rSideJut RightSB 0
-	create-glyph 0x4CB : composite-proc
+	create-glyph 'cyrl/kjh/Che' 0x4CB : composite-proc
 		refer-glyph 'cyrl/Che'
 		CyrDescender.lSideJut (RightSB - [HSwToV Stroke]) 0 (jut -- MidJutSide)
+
+	create-glyph 'cyrl/Cche' 0xA686 : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.capital
+		include : LeaningAnchor.Below.VBar.r df.rightSB
+		include : CyrCcheShape df CAP [if SLAB 0.45 0.35] BODY.STRAIGHT
+			if SLAB SERIFS.ALL SERIFS.NONE
+
+	define TcheConfig : object
+		serifless     { false false }
+		motionSerifed { true  false }
+
+	foreach { suffix { doST doSB } } [Object.entries TcheConfig] : do
+		create-glyph "cyrl/Tche.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : LeaningAnchor.Below.VBar.r RightSB
+			include : CyrTcheShape [DivFrame 1] CAP [if SLAB 0.45 0.35] BODY.STRAIGHT
+				if SLAB SERIFS.ALL SERIFS.NONE
+				teSerifs -- doST
+
+	select-variant 'cyrl/Tche' 0xA692 (follow -- 'T/rtailBase')
 
 	glyph-block-export ItalicConfig
 	define ItalicConfig : object
@@ -94,23 +192,47 @@ glyph-block Letter-Cyrillic-Che : begin
 			include : CyrCheShape [DivFrame 1] XH [if SLAB 0.45 0.4] body
 				if SLAB [if para.isItalic slabItalic slabUprightBGR] SERIFS.NONE
 
+		create-glyph "cyrl/cche.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+			include : LeaningAnchor.Below.VBar.r df.rightSB
+			include : CyrCcheShape df XH [if SLAB 0.45 0.4] body
+				if SLAB [if para.isItalic slabItalic slabUpright] SERIFS.NONE
+
+		DefineSelectorGlyph "cyrl/tche" suffix [MarkSet.e]
+
+		foreach { suffixTe { doST doSB } } [Object.entries TcheConfig] : do
+			create-glyph "cyrl/tche.\(suffix).\(suffixTe)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : LeaningAnchor.Below.VBar.r RightSB
+				include : CyrTcheShape [DivFrame 1] XH [if SLAB 0.45 0.4] body
+					if SLAB [if para.isItalic slabItalic slabUpright] SERIFS.NONE
+					teSerifs -- doST
+
+		select-variant "cyrl/tche.\(suffix)" (follow -- 'T/rtailBase')
+
 	select-variant 'cyrl/che' 0x447
 	select-variant 'cyrl/che.BGR' (follow -- 'cyrl/che')
 
-	create-glyph 0x4B7 : composite-proc
+	create-glyph 'cyrl/cheDescender' 0x4B7 : composite-proc
 		refer-glyph 'cyrl/che.standard'
 		CyrDescender.rSideJut RightSB 0
-	create-glyph 0x4CC : composite-proc
+	create-glyph 'cyrl/kjh/che' 0x4CC : composite-proc
 		refer-glyph 'cyrl/che.standard'
 		CyrDescender.lSideJut (RightSB - [HSwToV Stroke]) 0 (jut -- MidJutSide)
 
-	define [ChrVBar top pyBar] : begin
+	select-variant 'cyrl/cche' 0xA687 (follow -- 'cyrl/che')
+
+	CreateSelectorVariants 'cyrl/tche' 0xA693 [Object.keys ItalicConfig] (follow -- 'cyrl/che')
+
+	define [CheVBarBarShape top pyBar] : begin
 		local SwCheVBar : Math.min OverlayStroke (0.625 * (RightSB - SB - [HSwToV : 2 * Stroke]) / HVContrast)
 		local yc : top * [fallback pyBar 0.5] + Stroke * 0.1
 		return : VBar.m Middle (yc + LongJut * 0.8) (yc - LongJut * 0.8) SwCheVBar
 
-	derive-composites 'cyrl/CheVBar' 0x4B8 'cyrl/Che' [ChrVBar CAP [if SLAB 0.45 0.35]]
-	derive-composites 'cyrl/cheVBar' 0x4B9 'cyrl/che' [ChrVBar XH  [if SLAB 0.45 0.4 ]]
+	derive-composites 'cyrl/CheVBar' 0x4B8 'cyrl/Che' [CheVBarBarShape CAP [if SLAB 0.45 0.35]]
+	derive-composites 'cyrl/cheVBar' 0x4B9 'cyrl/che' [CheVBarBarShape XH  [if SLAB 0.45 0.4 ]]
 
 	define ShhaConfig : object
 		serifless                 SERIFS.NONE
@@ -126,7 +248,15 @@ glyph-block Letter-Cyrillic-Che : begin
 				yBarOffset -- [HSwToV : Math.pow Stroke 2] / (RightSB - SB)
 			include : FlipAround Middle (CAP / 2)
 
+		create-glyph "cyrl/Hwe.\(suffix)" : glyph-proc
+			include [refer-glyph "cyrl/Shha.\(suffix)"] AS_BASE ALSO_METRICS
+			eject-contour 'strokeR'
+			eject-contour 'serifRB'
+			include : TopHook.lBarInner SB 0 CAP
+			include : LeaningAnchor.Above.VBar.l SB
+
 	select-variant 'cyrl/Shha' 0x4BA (follow -- 'H')
 	select-variant 'cyrl/Shha/descBase' (shapeFrom -- 'cyrl/Shha') (follow -- 'H/descBase')
+	select-variant 'cyrl/Hwe' 0xA694 (follow -- 'HHookTop')
 
 	derive-composites 'cyrl/ShhaDescender' 0x526 'cyrl/Shha/descBase' [CyrDescender.rSideJut RightSB 0]

@@ -14,29 +14,99 @@ glyph-block Symbol-Geometric-Clock : for-width-kinds WideWidth1
 
 	define pHour 0.6
 	define pMin 0.8
+	define pSec 0.9
 
+	define extLightSw   : UnicodeWeightGrade 2    Geom.Scalar
 	define lightSw      : UnicodeWeightGrade 3    Geom.Scalar
 	define mediumSw     : UnicodeWeightGrade 5    Geom.Scalar
+	
+	define dotSize : Math.max (0.6 * mediumSw) (0.1 * Geom.Size)
 
-	define [patterns min su] : foreach [hr: range 0 12] : begin
-			local name : 'clock' + [(hr + 1).toString 10 :.padStart 2 '0'] + [min.toString 10 :.padStart 2 '0']
-			create-glyph [MangleName name] [MangleUnicode (su + hr)] : glyph-proc
+	define [ClockRing] : glyph-proc
+		include : RingStrokeAt Geom.MidX Geom.MidY Geom.Size mediumSw
+		include : Circle.Outline.At Geom.MidX Geom.MidY dotSize
+
+	define [ClockHand angle pLen sw _swTip] : glyph-proc
+		local swTip : fallback _swTip sw
+
+		include : dispiro
+			corner Geom.MidX Geom.MidY [widths.center sw]
+			corner
+				Geom.MidX + (Geom.Size - mediumSw) * pLen * [Math.sin angle]
+				Geom.MidY + (Geom.Size - mediumSw) * pLen * [Math.cos angle]
+				widths.center swTip
+
+	define [ClockShape hr min] : glyph-proc
+		local minAngle : 2 * Math.PI * (min / 60)
+		local hrAngle : 2 * Math.PI * ((min / 60 + hr) / 12)
+
+		include : ClockRing
+
+		include : ClockHand hrAngle pHour mediumSw
+		include : ClockHand minAngle pMin lightSw
+
+	define [patterns min su] : foreach [hr : range 1 till 12] : begin
+			local name : 'clock' + [hr.toString 10 :.padStart 2 '0'] + [min.toString 10 :.padStart 2 '0']
+			create-glyph [MangleName name] [MangleUnicode (su + hr - 1)] : glyph-proc
 				set-width MosaicWidth
 
-				include : RingStrokeAt Geom.MidX Geom.MidY Geom.Size mediumSw
-				include : Circle.Outline.At Geom.MidX Geom.MidY [Math.max (0.6 * mediumSw) (0.1 * Geom.Size)]
-				local minAngle : 2 * Math.PI * (min / 60)
-				include : dispiro
-					corner Geom.MidX Geom.MidY [widths.center lightSw]
-					corner
-						Geom.MidX + (Geom.Size - mediumSw) * pMin * [Math.sin minAngle]
-						Geom.MidY + (Geom.Size - mediumSw) * pMin * [Math.cos minAngle]
-				local hrAngle : 2 * Math.PI * ((min / 60 + hr + 1) / 12)
-				include : dispiro
-					corner Geom.MidX Geom.MidY [widths.center mediumSw]
-					corner
-						Geom.MidX + (Geom.Size - mediumSw) * pHour * [Math.sin hrAngle]
-						Geom.MidY + (Geom.Size - mediumSw) * pHour * [Math.cos hrAngle]
+				include : ClockShape hr min
 
 	patterns 0 0x1F550
 	patterns 30 0x1F55C
+
+	create-glyph [MangleName 'watch'] [MangleUnicode 0x231A] : glyph-proc
+		set-width MosaicWidth
+
+		include : ClockShape 10 10
+		include : difference
+			Rect PictTop PictBot (Geom.MidX - Geom.Size / 2) (Geom.MidX + Geom.Size / 2)
+			RingAt Geom.MidX Geom.MidY (Geom.Size - 1)
+
+	create-glyph [MangleName 'alarm'] [MangleUnicode 0x23F0] : glyph-proc
+		set-width MosaicWidth
+
+		include : ClockShape 7 0
+		include : difference
+			union
+				dispiro
+					corner (Geom.MidX - Geom.Size * 0.6) Geom.Bot [widths.center.heading lightSw Upward]
+					corner (Geom.MidX - Geom.Size * 0.3) Geom.MidY
+				dispiro
+					corner (Geom.MidX + Geom.Size * 0.6) Geom.Bot [widths.center.heading lightSw Upward]
+					corner (Geom.MidX + Geom.Size * 0.3) Geom.MidY
+				dispiro
+					corner Geom.MidX Geom.MidY [widths.center lightSw]
+					corner Geom.MidX (Geom.MidY + Geom.Size * 1.15)
+			RingAt Geom.MidX Geom.MidY (Geom.Size - 1)
+		include : difference
+			union
+				dispiro
+					corner (Geom.MidX - Geom.Size * 0.6) (Geom.MidY + Geom.Size * 1.1) [widths.center (Geom.Size / 3)]
+					corner (Geom.MidX - Geom.Size * 0.3) Geom.MidY
+				dispiro
+					corner (Geom.MidX + Geom.Size * 0.6) (Geom.MidY + Geom.Size * 1.1) [widths.center (Geom.Size / 3)]
+					corner (Geom.MidX + Geom.Size * 0.3) Geom.MidY
+			RingAt Geom.MidX Geom.MidY (Geom.Size + extLightSw)
+
+	create-glyph [MangleName 'stopwatch'] [MangleUnicode 0x23F1] : glyph-proc
+		set-width MosaicWidth
+
+		include : ClockRing
+		include : ClockHand 0 pSec extLightSw
+
+		include : difference
+			union
+				dispiro
+					corner Geom.MidX Geom.MidY [widths.center (Geom.Size / 3)]
+					corner Geom.MidX (Geom.MidY + Geom.Size * 1.25 + extLightSw * 0.5)
+				dispiro
+					corner Geom.MidX Geom.MidY [widths.center mediumSw]
+					corner (Geom.MidX + Geom.Size * 0.95) (Geom.MidY + Geom.Size * 0.95)
+			RingAt Geom.MidX Geom.MidY (Geom.Size + extLightSw)
+
+	create-glyph [MangleName 'timer'] [MangleUnicode 0x23F2] : glyph-proc
+		set-width MosaicWidth
+
+		include : ClockRing
+		include : ClockHand (Math.PI * 5 / 3) pMin (2 * dotSize) lightSw

@@ -25,6 +25,14 @@ export function bez3(a, b, c, d, t) {
 		t * t * t * d
 	);
 }
+export function boole(b) {
+	if (b) return 1;
+	else return 0;
+}
+export function boolePn(b) {
+	if (b) return 1;
+	else return -1;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
