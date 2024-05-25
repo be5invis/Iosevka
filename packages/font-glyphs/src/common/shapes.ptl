@@ -552,7 +552,10 @@ glyph-block CommonShapes : begin
 			set r : 0.5 + (r - 0.5) * (v + w) / (u * 2)
 			return r
 
-		define [archBlender before after args] : begin
+		define [archBlender _before _after args] : begin
+			local before : fallback args.mockPre _before
+			local after : fallback args.mockPost _after
+
 			local u : Math.abs (after.x - before.x)
 			local v : Math.abs (after.y - args.y)
 			local w : Math.abs (before.y - args.y)
@@ -564,9 +567,9 @@ glyph-block CommonShapes : begin
 			set args.atBot : args.y < before.y && args.y < after.y
 
 			return : list
-				if args.noBlendPre [list] [arcvh]
+				begin (args.blendPre || {})
 				impl args
-				if args.noBlendPost [list] [archv]
+				begin (args.blendPost || {})
 
 		export : define flex-params [lhs] : begin
 			local-parameter : y
@@ -576,10 +579,12 @@ glyph-block CommonShapes : begin
 			local-parameter : o 		   -- O
 			local-parameter : swBefore	   -- sw
 			local-parameter : swAfter	   -- sw
-			local-parameter : noBlendPre   -- false
-			local-parameter : noBlendPost  -- false
+			local-parameter : mockPre      -- nothing
+			local-parameter : mockPost     -- nothing
+			local-parameter : blendPre     -- [arcvh]
+			local-parameter : blendPost    -- [archv]
 			return : Interpolator archBlender
-				object [lhs true] y p sw compact o swBefore swAfter noBlendPre noBlendPost
+				object [lhs true] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost
 
 		export : define flex-params [rhs] : begin
 			local-parameter : y
@@ -589,10 +594,12 @@ glyph-block CommonShapes : begin
 			local-parameter : o 		   -- O
 			local-parameter : swBefore	   -- sw
 			local-parameter : swAfter	   -- sw
-			local-parameter : noBlendPre   -- false
-			local-parameter : noBlendPost  -- false
+			local-parameter : mockPre      -- nothing
+			local-parameter : mockPost     -- nothing
+			local-parameter : blendPre     -- [arcvh]
+			local-parameter : blendPost    -- [archv]
 			return : Interpolator archBlender
-				object [lhs false] y p sw compact o swBefore swAfter noBlendPre noBlendPost
+				object [lhs false] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost
 
 		foreach side {lhs rhs} : begin
 			set side.centerAt : object
