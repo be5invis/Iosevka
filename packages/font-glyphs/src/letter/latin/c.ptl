@@ -27,11 +27,11 @@ glyph-block Letter-Latin-C : begin
 	define [CShapeT sink offset df st sb top bot ada adb hook sw origBar] : sink
 		widths.lhs sw
 		match st
-			[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs (df.rightSB - offset) df.middle top sw [fallback hook Hook] origBar
-			[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs (df.rightSB - offset) df.middle top sw
+			[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs (df.rightSB - offset) top sw [fallback hook Hook] origBar
+			[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs (df.rightSB - offset) top sw
 			[Just FLAT-CONNECTION] : list
 				flat (df.width - offset) (top - offset)
-				curl (df.middle - CorrectionOMidX * sw) (top - offset)
+				curl [arch.adjust-x.top df.middle (sw -- sw)] (top - offset)
 				archv
 			_ : list
 				g4 (df.rightSB - offset) (top - [fallback hook Hook])
@@ -41,11 +41,11 @@ glyph-block Letter-Latin-C : begin
 		curl (df.leftSB + OX + offset) (bot + adb)
 
 		match sb
-			[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs (df.rightSB - offset) df.middle bot sw [fallback hook Hook] origBar
-			[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs (df.rightSB - offset) df.middle bot sw
+			[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs (df.rightSB - offset) bot sw [fallback hook Hook] origBar
+			[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs (df.rightSB - offset) bot sw
 			[Just FLAT-CONNECTION] : list
 				arcvh
-				flat (df.middle + CorrectionOMidX * sw) (bot + O + offset)
+				flat [arch.adjust-x.bot df.middle (sw -- sw)] (bot + O + offset)
 				curl (df.width - offset) (bot + O + offset)
 			_ : list
 				hookend (bot + O + offset) (sw -- sw)
@@ -54,11 +54,11 @@ glyph-block Letter-Latin-C : begin
 	define [RevCShapeT sink offset df st sb top bot ada adb hook sw origBar] : sink
 		widths.rhs sw
 		match st
-			[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs (df.leftSB + offset) df.middle top sw [fallback hook Hook] origBar
-			[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs (df.leftSB + offset) df.middle top sw
+			[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs (df.leftSB + offset) top sw [fallback hook Hook] origBar
+			[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs (df.leftSB + offset) top sw
 			[Just FLAT-CONNECTION] : list
 				flat (0 + offset) (top - offset)
-				curl (df.middle - CorrectionOMidX * sw) (top - offset)
+				curl [arch.adjust-x.top df.middle (sw -- sw)] (top - offset)
 				archv
 			_ : list
 				g4 (df.leftSB + offset) (top - [fallback hook Hook])
@@ -68,11 +68,11 @@ glyph-block Letter-Latin-C : begin
 		curl (df.rightSB - OX + offset) (bot + adb)
 
 		match sb
-			[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs (df.leftSB + offset) df.middle bot sw [fallback hook Hook]
-			[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs (df.leftSB + offset) df.middle bot sw
+			[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs (df.leftSB + offset) bot sw [fallback hook Hook]
+			[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs (df.leftSB + offset) bot sw
 			[Just FLAT-CONNECTION] : list
 				arcvh
-				flat (df.middle + CorrectionOMidX * sw) (bot + O + offset)
+				flat [arch.adjust-x.bot df.middle (sw -- sw)] (bot + O + offset)
 				curl (0 + offset) (bot + O + offset)
 			_ : list
 				hookend (bot + O + offset) (sw -- sw)
@@ -101,20 +101,15 @@ glyph-block Letter-Latin-C : begin
 	define [CCurlyTailShape slabType] : glyph-proc
 		local sw : AdviceStroke2 2 3 XH
 		local fine : AdviceStroke2 3 3 XH
-		local rinner : ((XH * 0.45) - fine * 1.5) / 2
-		local m1 : SB + O + [HSwToV sw]
-		local x2 : SB + sw * 0.3
-		local y2 : -XH * 0.05
 
 		include : dispiro
 			match slabType
-				[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs RightSB Middle XH sw Hook
-				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs RightSB Middle XH sw Hook
+				[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs RightSB XH sw Hook
+				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs RightSB XH sw Hook
 				__ : list [g4 RightSB (XH - Hook) [widths.lhs sw]] [hookstart XH (sw -- sw)]
 			flat (SB + OX) (XH - SmallArchDepthA)
 			curl (SB + OX) SmallArchDepthB
-			arcvh
-			CurlyTail fine rinner m1 0 RightSB x2 y2
+			CurlyTail.n fine 0 RightSB 0 0 (yLoopTop -- XH * 0.45)
 
 	glyph-block-export CLetterForm
 	define [CLetterForm] : with-params [df sty styBot top bot [ada ArchDepthA] [adb ArchDepthB] [hook Hook] [sw Stroke] [ob nothing]] : namespace
