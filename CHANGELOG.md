@@ -1,5 +1,10 @@
 ## Modifications since last major version
 
+### 30.1.1
+
+* Fix broken Cyrillic Ef (#2343).
+
+
 ### 30.1.0
 
 * Reduce fully-serifed variants of turned m (`U+019C`, `U+026F`, `U+0270`) and Cyrillic Italic Lower {Sha|Scha} (`U+0448`, `U+0449`) under monospace.
