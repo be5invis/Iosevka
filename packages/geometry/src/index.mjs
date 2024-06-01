@@ -625,6 +625,72 @@ export class StrokeGeometry extends CachedGeometry {
 	}
 }
 
+export class RemoveHolesGeometry extends CachedGeometry {
+	constructor(geom, gizmo) {
+		super();
+		this.m_geom = geom;
+		this.m_gizmo = gizmo;
+	}
+
+	toContoursImpl(ctx) {
+		// Produce simplified arcs
+		const nonTransformedGeometry = new TransformedGeometry(this.m_gizmo.inverse(), this.m_geom);
+		let arcs = TypoGeom.Boolean.removeOverlap(
+			CurveUtil.convertShapeToArcs(nonTransformedGeometry.toContours(ctx)),
+			TypoGeom.Boolean.PolyFillType.pftNonZero,
+			CurveUtil.BOOLE_RESOLUTION,
+		);
+
+		if (arcs.length > 1) {
+			let stack = [];
+			stack.push({
+				type: "operand",
+				fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+				shape: [arcs[0]],
+			});
+
+			for (let i = 1; i < arcs.length; i++) {
+				stack.push({
+					type: "operand",
+					fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+					shape: [arcs[i]],
+				});
+				stack.push({ type: "operator", operator: TypoGeom.Boolean.ClipType.ctUnion });
+			}
+
+			arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
+		}
+
+		// Convert to Iosevka format
+		let sink = new CurveUtil.BezToContoursSink(this.m_gizmo);
+		TypoGeom.ShapeConv.transferBezArcShape(arcs, sink, CurveUtil.GEOMETRY_PRECISION);
+
+		return sink.contours;
+	}
+	toReferences() {
+		return null;
+	}
+	getDependencies() {
+		return this.m_geom.getDependencies();
+	}
+	unlinkReferences() {
+		return new RemoveHolesGeometry(this.m_geom.unlinkReferences(), this.m_gizmo);
+	}
+	filterTag(fn) {
+		return new RemoveHolesGeometry(this.m_geom.filterTag(fn), this.m_gizmo);
+	}
+	measureComplexity() {
+		return this.m_geom.measureComplexity() | CPLX_NON_SIMPLE;
+	}
+
+	hash(h) {
+		h.beginStruct("RemoveHolesGeometry");
+		h.embed(this.m_geom);
+		h.gizmo(this.m_gizmo);
+		h.endStruct();
+	}
+}
+
 // This special geometry type is used in the finalization phase to create TTF contours.
 export class SimplifyGeometry extends CachedGeometry {
 	constructor(g) {
