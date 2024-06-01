@@ -328,6 +328,25 @@ glyph-block AutoBuild-Enclosure : begin
 					refer-glyph gnEnclosure
 					EnclosureInner inners [if decomposable gnEnclosure null] miniatureFont job dimens
 
+	define InsetWithGapBuilder : object
+		decomposable false
+		build : lambda [prefix inners digits ww gap job miniatureFont gnEnclosure decomposable] : begin
+			define { gn unicode parts w bal baly } job
+			define dimens : CircleDimens digits ww
+			define [object width top bot left right] dimens
+			if [not : query-glyph gn] : create-glyph gn [if (w == ww) unicode null] : glyph-proc
+				set-width width
+				local gap : Math.max [AdviceStroke 6] (Width * 0.08)
+				local [inner] : EnclosureInner inners null miniatureFont job dimens
+				include : difference
+					intersection
+						Rect top bot left right
+						union
+							refer-glyph gnEnclosure
+							remove-holes [inner]
+							with-outlined gap [inner]
+					inner
+
 	define [AddEnclosureMark digits dimens] : glyph-proc
 		define [object width dscale mockInnerWidth] dimens
 		if (digits > 1)
@@ -440,19 +459,6 @@ glyph-block AutoBuild-Enclosure : begin
 			DecomposableInsetKnockout digits ww
 		include : AddEnclosureMark digits : CircleDimens digits ww
 
-	define [createCrossInsetBoxedGlyphs digits demands]
-		EnclosureT 'cross-inset-boxed' CircledBuilder DecomposableInsetInners digits 1 demands CrossInsetSquareShape
-	define [CrossInsetSquareShape digits ww gap] : glyph-proc
-		define [object width sw top bot left right] : CircleDimens digits ww
-		set-width width
-		include : difference
-			Rect top bot left right
-			DecomposableInsetKnockout digits ww
-			# cross strokes
-			ExtLineCenter (-0.1) sw left bot right top
-			ExtLineCenter (-0.1) sw right bot left top
-		include : AddEnclosureMark digits : CircleDimens digits ww
-
 	define [DecomposableInsetKnockout digits ww] : begin
 		define [object top bot left right dscale mockInnerWidth] : CircleDimens digits ww
 		local xMid : mix left right 0.5
@@ -460,6 +466,17 @@ glyph-block AutoBuild-Enclosure : begin
 		local halfHeight : CAP * 0.55 * dscale
 		local halfWidth : [Math.min (digits * Width) mockInnerWidth] * 0.5 * dscale
 		return : Rect (yMid + halfHeight) (yMid - halfHeight) (xMid - halfWidth) (xMid + halfWidth)
+
+	define [createCrossInsetBoxedGlyphs digits demands]
+		EnclosureT 'cross-inset-boxed' InsetWithGapBuilder StandardInners digits 1 demands CrossInsetSquareShape
+	define [CrossInsetSquareShape digits ww gap] : glyph-proc
+		define [object width sw top bot left right] : CircleDimens digits ww
+		set-width width
+		include : difference
+			Rect top bot left right
+			ExtLineCenter (-0.1) sw left bot right top
+			ExtLineCenter (-0.1) sw right bot left top
+		include : AddEnclosureMark digits : CircleDimens digits ww
 
 	define [createInsetDiamondGlyphs digits demands]
 		EnclosureT 'inset-diamond' InsetBuilder StandardInners digits 1 demands InsetDiamondEnclosureShape
