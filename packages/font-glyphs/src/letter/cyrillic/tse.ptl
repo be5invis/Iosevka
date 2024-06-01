@@ -41,9 +41,8 @@ glyph-block Letter-Cyrillic-Tse : begin
 	define TeTseConfig : object
 		serifless     { false false }
 		motionSerifed { true  false }
-		serifed       { true  true  }
 
-	define [CyrTeTseShape top slabTop slabBot] : glyph-proc
+	define [CyrTeTseShape top teSerifs] : glyph-proc
 		local sw : AdviceStroke 2.75
 		local left : [mix SB RightSB 0.2] - [HSwToV : 0.25 * sw] + OX
 		local right : RightSB - OX
@@ -56,31 +55,30 @@ glyph-block Letter-Cyrillic-Tse : begin
 		include : VBar.r right 0 top sw
 		include : dispiro
 			widths.rhs sw
-			flat xTopBarLeft  top [if SLAB [heading Rightward] null]
-			curl xTopBarRight top [if SLAB [heading Rightward] null]
+			flat xTopBarLeft  top [if teSerifs [heading Rightward] null]
+			curl xTopBarRight top [if teSerifs [heading Rightward] null]
 
 		local sf : SerifFrame top 0 left right (swRef -- sw)
 		include : CyrDescender.rSideJut right 0 (sideJut -- sf.sideJut)
 
-		if slabTop : begin
+		if SLAB : begin
 			include sf.rt.outer
+			include sf.lb.outer
+			include sf.rb.outer
 
+		if teSerifs : begin
 			local swVJut : Math.min [AdviceStroke 4.5] (0.625 * (left - xTopBarLeft))
 			include : VSerif.dl  xTopBarLeft  top VJut swVJut
 			include : VSerif.dr  xTopBarRight top VJut swVJut
 
-		if slabBot : begin
-			include sf.lb.outer
-			include sf.rb.outer
-
 	foreach { suffix { doST doSB } } [Object.entries TeTseConfig] : do
 		create-glyph "cyrl/TeTse.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : CyrTeTseShape CAP doST doSB
+			include : CyrTeTseShape CAP doST
 
 		create-glyph "cyrl/tetse.upright.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : CyrTeTseShape XH doST doSB
+			include : CyrTeTseShape XH doST
 
-	select-variant 'cyrl/TeTse' 0x4B4 (follow -- 'T')
-	select-variant 'cyrl/tetse.upright' (follow -- 'T')
+	select-variant 'cyrl/TeTse' 0x4B4 (follow -- 'T/rtailBase')
+	select-variant 'cyrl/tetse.upright' (follow -- 'T/rtailBase')

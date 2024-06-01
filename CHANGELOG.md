@@ -1,5 +1,21 @@
 ## Modifications since last major version
 
+### 30.1.2
+
+* Fix Te bar terminal for Cyrillic TeTse (`U+04B4`..`U+04B5`) and Tche (`U+A693`..`U+A694`) under sans italic/oblique when `T` (`cv19`) is serifed.
+* Make presence of non-Te serifs of Cyrillic TeTse automatic.
+* Add characters:
+  - COMBINING KAVYKA ABOVE RIGHT (`U+1DF6`).
+  - COMBINING KAVYKA ABOVE LEFT (`U+1DF7`).
+  - DOTTED OBELOS (`U+2E13`).
+  - DASH WITH LEFT UPTURN (`U+2E43`) ... DOTTED SOLIDUS (`U+2E4A`).
+  - COMBINING CYRILLIC VZMET (`U+A66F`).
+  - COMBINING CYRILLIC KAVYKA (`U+A67C`) ... CYRILLIC PAYEROK (`U+A67F`).
+  - MODIFIER LETTER DOT VERTICAL BAR (`U+A717`) ... MODIFIER LETTER DOT HORIZONTAL BAR (`U+A719`).
+  - CROSSED NEGATIVE SQUARED LATIN CAPITAL LETTER P (`U+1F18A`).
+* Fix mark placement of Sideways U with Diaeresis (`U+1D1E`) when a CV/SS is applied to it (#2353).
+
+
 ### 30.1.1
 
 * Fix broken Cyrillic Ef (#2343).
