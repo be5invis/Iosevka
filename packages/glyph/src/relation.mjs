@@ -118,7 +118,7 @@ function BoolProp(id) {
 		},
 	};
 }
-export const Radical = BoolProp("Radical");
+
 export const NeqLigationSlashDotted = BoolProp("NeqLigationSlashDotted");
 export const OgonekTrY = BoolProp("OgonekTrY");
 export const IsSuperscript = BoolProp("IsSuperscript");

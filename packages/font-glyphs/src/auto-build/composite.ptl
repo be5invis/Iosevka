@@ -187,21 +187,16 @@ glyph-block AutoBuild-Enclosure : begin
 			include : with-transform [Translate x 0] : refer-glyph gniPart
 			set x : x + ([enclosureInnerPartActualWidth.get gniPart] || 0)
 
-	define [EnclosureInner inners gnEnclosure miniatureFont job dimens] : begin
+	define [EnclosureInner dimens inners miniatureFont job] : glyph-proc
 		define { gn unicode parts w bal baly }      job
 		define [object width] dimens
 
 		local finalParts : EnsureInnerSubGlyphSeq inners 'enclosureInner' miniatureFont job dimens 1 0
 
-		if gnEnclosure
-		: then : begin
-			return : glyph-proc
-				include : EnclosureInnerImpl dimens finalParts
-				CvDecompose.set currentGlyph [{gnEnclosure}.concat finalParts]
-		: else : begin
-			return : new-glyph : EnclosureInnerImpl dimens finalParts
+		include : new-glyph : EnclosureInnerImpl dimens finalParts
+		return finalParts
 
-	define [TwoRowEnclosureInner inners gnEnclosure miniatureFont job dimens] : begin
+	define [TwoRowEnclosureInner dimens inners miniatureFont job] : glyph-proc
 		define { gn unicode parts w bal baly }      job
 		define [object width] dimens
 		local jobFirstHalf  { gn unicode [parts.slice 0 (parts.length / 2)] w bal baly }
@@ -209,14 +204,10 @@ glyph-block AutoBuild-Enclosure : begin
 		local finalPartsFirstHalf  : EnsureInnerSubGlyphSeq inners "enclosureInnerFirstHalf" miniatureFont jobFirstHalf  dimens 0.45 (+0.55)
 		local finalPartsSecondHalf : EnsureInnerSubGlyphSeq inners "enclosureInnerSecondHalf" miniatureFont jobSecondHalf dimens 0.45 (+0.00)
 
-		if gnEnclosure
-		: then : return : glyph-proc
+		include : new-glyph : glyph-proc
 			include : EnclosureInnerImpl dimens finalPartsFirstHalf
 			include : EnclosureInnerImpl dimens finalPartsSecondHalf
-			CvDecompose.set currentGlyph [{gnEnclosure}.concat finalPartsFirstHalf finalPartsSecondHalf]
-		: else : return : new-glyph : glyph-proc
-			include : EnclosureInnerImpl dimens finalPartsFirstHalf
-			include : EnclosureInnerImpl dimens finalPartsSecondHalf
+		return : {}.concat finalPartsFirstHalf finalPartsSecondHalf
 
 	define [CircCrowd digits width] : 2 + 2 * [Math.pow [AdjustDigitCount digits width] (2 / 3)] * [Math.max 1 (HalfUPM / Width)]
 	define [CircScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
@@ -286,66 +277,62 @@ glyph-block AutoBuild-Enclosure : begin
 			define forkedPara : inners.getPara para digits rows ww
 			define miniatureFont : CreateDerivedFontFromJobs jobs {} : function [gs] : Fork gs forkedPara
 			define gnEnclosure : CircName null (prefix + digits + '.enclosure') {} suffix
+
+			define [buildImpl job decomposable] : begin
+				define { gn unicode parts w bal baly } job
+				if [query-glyph gn] : return nothing
+				create-glyph gn [if (w == ww) unicode null] : glyph-proc
+					define dimens : CircleDimens digits ww
+					set-width dimens.width
+					include : builder.buildGlyph dimens inners miniatureFont decomposable job gnEnclosure
+						# if decomposable gnEnclosure null
+
 			if [not : query-glyph gnEnclosure] : create-glyph gnEnclosure : fnEnclosure digits ww gap
-			foreach job [items-of jobs.decomposableJobs] : begin
-				builder.build (prefix + digits) inners digits ww gap job miniatureFont gnEnclosure true
-			foreach job [items-of jobs.nonDecomposable] : begin
-				builder.build (prefix + digits) inners digits ww gap job miniatureFont gnEnclosure false
+			foreach job [items-of jobs.decomposableJobs] : buildImpl job true
+			foreach job [items-of jobs.nonDecomposable] : buildImpl job false
 			applyRelations jobs.relApplications
 
 	# Builders and Enclosure Shapes
 	define CircledBuilder : object
 		decomposable true
-		build : lambda [prefix inners digits ww gap job miniatureFont gnEnclosure decomposable] : begin
-			define { gn unicode parts w bal baly } job
-			define dimens : CircleDimens digits ww
-			define [object width] dimens
-			if [not : query-glyph gn] : create-glyph gn [if (w == ww) unicode null] : glyph-proc
-				set-width width
-				include : EnclosureInner inners [if decomposable gnEnclosure null] miniatureFont job dimens
-				include : refer-glyph gnEnclosure
+		buildGlyph : function [dimens inners miniatureFont decomp job gnEnclosure] : glyph-proc
+			include : refer-glyph gnEnclosure
+			local parts : include : EnclosureInner dimens inners miniatureFont job
+			if decomp : CvDecompose.set currentGlyph [{gnEnclosure}.concat parts]
+
+	define DecomposableInsetBuilder : object
+		decomposable true
+		buildGlyph : function [dimens inners miniatureFont decomp job gnEnclosure] : glyph-proc
+			include : CircledBuilder.buildGlyph dimens inners miniatureFont decomp job gnEnclosure
+			include : radicalize
 
 	define TwoRowBoxedBuilder : object
 		decomposable true
-		build : lambda [prefix inners digits ww gap job miniatureFont gnEnclosure decomposable] : begin
-			define { gn unicode parts w bal baly } job
-			define dimens : CircleDimens digits ww
-			define [object width] dimens
-			if [not : query-glyph gn] : create-glyph gn [if (w == ww) unicode null] : glyph-proc
-				set-width width
-				include : TwoRowEnclosureInner inners [if decomposable gnEnclosure null] miniatureFont job dimens
-				include : refer-glyph gnEnclosure
+		buildGlyph : function [dimens inners miniatureFont decomp job gnEnclosure] : glyph-proc
+			include : refer-glyph gnEnclosure
+			local parts : include : TwoRowEnclosureInner dimens inners miniatureFont job
+			if decomp : CvDecompose.set currentGlyph [{gnEnclosure}.concat parts]
 
 	define InsetBuilder : object
 		decomposable false
-		build : lambda [prefix inners digits ww gap job miniatureFont gnEnclosure decomposable] : begin
-			define { gn unicode parts w bal baly } job
-			define dimens : CircleDimens digits ww
-			define [object width] dimens
-			if [not : query-glyph gn] : create-glyph gn [if (w == ww) unicode null] : glyph-proc
-				set-width width
-				include : difference
-					refer-glyph gnEnclosure
-					EnclosureInner inners [if decomposable gnEnclosure null] miniatureFont job dimens
+		buildGlyph : function [dimens inners miniatureFont decomp job gnEnclosure] : difference
+			refer-glyph gnEnclosure
+			EnclosureInner dimens inners miniatureFont job
 
 	define InsetWithGapBuilder : object
 		decomposable false
-		build : lambda [prefix inners digits ww gap job miniatureFont gnEnclosure decomposable] : begin
-			define { gn unicode parts w bal baly } job
-			define dimens : CircleDimens digits ww
-			define [object width top bot left right] dimens
-			if [not : query-glyph gn] : create-glyph gn [if (w == ww) unicode null] : glyph-proc
-				set-width width
-				local gap : Math.max [AdviceStroke 6] (Width * 0.08)
-				local [inner] : EnclosureInner inners null miniatureFont job dimens
-				include : difference
-					intersection
-						Rect top bot left right
-						union
-							refer-glyph gnEnclosure
-							remove-holes [inner]
-							with-outlined gap [inner]
-					inner
+		buildGlyph : function [dimens inners miniatureFont decomp job gnEnclosure] : begin
+			define [object top bot left right] dimens
+			local gap : Math.max [AdviceStroke 6] (Width * 0.08)
+			local [inner] : EnclosureInner dimens inners miniatureFont job
+			return : difference
+				intersection
+					Rect top bot left right
+					union
+						refer-glyph gnEnclosure
+						remove-holes [inner]
+						with-outlined gap [inner]
+				inner
 
 	define [AddEnclosureMark digits dimens] : glyph-proc
 		define [object width dscale mockInnerWidth] dimens
@@ -440,7 +427,7 @@ glyph-block AutoBuild-Enclosure : begin
 		include : AddEnclosureMark digits : CircleDimens digits ww
 
 	define [createDecomposableInsetCircledGlyphs digits demands]
-		EnclosureT 'inset-circle-decomp' CircledBuilder DecomposableInsetInners digits 1 demands DecomposableInsetCircleEnclosureShape
+		EnclosureT 'inset-circle-decomp' DecomposableInsetBuilder DecomposableInsetInners digits 1 demands DecomposableInsetCircleEnclosureShape
 	define [DecomposableInsetCircleEnclosureShape digits ww gap] : glyph-proc
 		define [object width sw top bot left right archDepthA archDepthB] : CircleDimens digits ww
 		set-width width
@@ -450,7 +437,7 @@ glyph-block AutoBuild-Enclosure : begin
 		include : AddEnclosureMark digits : CircleDimens digits ww
 
 	define [createDecomposableInsetBoxedGlyphs digits demands]
-		EnclosureT 'inset-boxed-decomp' CircledBuilder DecomposableInsetInners digits 1 demands DecomposableInsetBoxEnclosureShape
+		EnclosureT 'inset-boxed-decomp' DecomposableInsetBuilder DecomposableInsetInners digits 1 demands DecomposableInsetBoxEnclosureShape
 	define [DecomposableInsetBoxEnclosureShape digits ww gap] : glyph-proc
 		define [object width top bot left right] : CircleDimens digits ww
 		set-width width
@@ -546,8 +533,10 @@ glyph-block AutoBuild-Enclosure : begin
 				define dimens : bracedDottdeDimens digits ww
 				define [object width] dimens
 				set-width width
-				include : EnclosureInner StandardInners [if jobDecomposable gnb null] miniatureFont job dimens
+
 				include : refer-glyph gnb
+				local parts : include : EnclosureInner dimens StandardInners miniatureFont job
+				if jobDecomposable : CvDecompose.set currentGlyph [{gnb}.concat parts]
 
 		foreach job [items-of jobs.decomposableJobs] : CreateGlyphImpl true job
 		foreach job [items-of jobs.nonDecomposable]  : CreateGlyphImpl false job
