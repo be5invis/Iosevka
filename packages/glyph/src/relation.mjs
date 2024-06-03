@@ -30,6 +30,7 @@ export const LocalizedForm = {
 		Italic: LinkedGlyphProp("SerbianLocItalic"),
 	},
 	BGR: LinkedGlyphProp("BulgarianLoc"),
+	IPPH: LinkedGlyphProp("IPALoc"),
 };
 
 export const Texture = {
@@ -183,6 +184,7 @@ export const AnyLocalizedForm = {
 		if (LocalizedForm.SRB.Upright.get(glyph)) grs.push(LocalizedForm.SRB.Upright);
 		if (LocalizedForm.SRB.Italic.get(glyph)) grs.push(LocalizedForm.SRB.Italic);
 		if (LocalizedForm.BGR.get(glyph)) grs.push(LocalizedForm.BGR);
+		if (LocalizedForm.IPPH.get(glyph)) grs.push(LocalizedForm.IPPH);
 		if (grs.length) return grs;
 		return null;
 	},
