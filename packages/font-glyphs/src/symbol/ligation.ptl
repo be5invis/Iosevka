@@ -12,7 +12,7 @@ glyph-block Symbol-Ligation : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Symbol-Math-Relation-Common : LessSlope EqualHalfSpace EqualHoleWidth
 	glyph-block-import Symbol-Math-Relation-Equal : EqualShape EqualHole IdentShape IdentHole
-	glyph-block-import Symbol-Math-Arith : PlusShape
+	glyph-block-import Symbol-Math-Arith : PlusShape JunctDiamond
 
 	local arrowheadsKern : (2 / 3) * [clamp 0 (Width * 0.4) (Width - OperatorStroke * 3)]
 
@@ -41,8 +41,8 @@ glyph-block Symbol-Ligation : begin
 
 	do "Arrow Bar"
 		define [ArrowBarConfig extend kern join doubleBar] : begin
-			define cleft O
-			define cright (Width - O)
+			define cleft   0
+			define cright  Width
 			define arrowr : if doubleBar
 				Width + SB + [HSwToV OperatorStroke]
 				Width + extend
@@ -51,32 +51,30 @@ glyph-block Symbol-Ligation : begin
 				0 - extend
 			define zleft : cleft - Width + RightSB
 			define zright : cright + SB
+
 			define lk : object
-				x    (SB - Width)
-				y    (-join - Width)
-				f    SB
-				p    (arrowl + Width)
-				l    arrowl
-				l1 : arrowl - kern
-				c    cleft
-				m    (0 - RodBarHOffset)
-				j    (-join)
-				j1   (-join - kern)
-				z    zleft
-				lx : mix arrowl 0 0.5
+				f   { SB                      false } # Free end
+				x   { (SB - Width)            false } # !='s bar shape, extension to left
+				y   { (-join - Width)         false } # -!-'s second bar, more to left
+				l   { arrowl                  false } # <-
+				l1  { (arrowl - kern)         false } # <<-
+				lx  { [mix arrowl 0 0.5]      false } # Bar right after <!--'s exclam
+				m   { (0 - RodBarHOffset)     false } # |-
+				j   { (-join)                 false } # >-
+				j1  { (-join - kern)          false } # >>-
+				c   { cleft                   true  } # Connected rod
+				z   { zleft                   true  } # Connected rod
 
 			define rk : object
-				x    (RightSB + Width)
-				y    (2 * Width + join)
-				f    RightSB
-				p    (arrowr - Width)
-				r    arrowr
-				r1 : arrowr + kern
-				c    cright
-				m    (Width + RodBarHOffset)
-				j    (Width + join)
-				j1   (Width + join + kern)
-				z    zright
+				f   { RightSB                 false } # Free end
+				p   { (arrowr - Width)        false } # bar in :> when ">" is turned into an arrow
+				r   { arrowr                  false } # ->
+				r1  { (arrowr + kern)         false } # ->>
+				m   { (Width + RodBarHOffset) false } # -|
+				j   { (Width + join)          false } # -<
+				j1  { (Width + join + kern)   false } # -<<
+				c   { cright                  true  } # Connected rods
+				z   { zright                  true  } # Connected rods
 
 			define result {}
 			foreach [l : items-of : Object.keys lk] : foreach [r : items-of : Object.keys rk]
@@ -84,6 +82,7 @@ glyph-block Symbol-Ligation : begin
 			return result
 
 		define [HyphenShape l r] : HBar.m l r SymbolMid OperatorStroke
+		define [HyphenShape.joinCap x] : JunctDiamond x SymbolMid OperatorStroke
 
 		define Shapes : object
 			'plus'   { PlusShape   HyphenNotch { arrowExtend arrowheadsKern arrowJ    0 } }
@@ -96,12 +95,15 @@ glyph-block Symbol-Ligation : begin
 			'withNotch'    { true  }
 
 		foreach { prefix { Shape Notch { extend kern join fDB } } } [Object.entries Shapes] : do
-			foreach { lS rS left right } [items-of : ArrowBarConfig extend kern join fDB] : do
+			foreach { lS rS { left capLeft } { right capRight } } [items-of : ArrowBarConfig extend kern join fDB] : do
 				foreach { suffix { fNotch } } [Object.entries NotchConfig] : do
 					create-glyph "\(prefix).lig.\(lS)\(rS).\(suffix)" : glyph-proc
 						include : SetJoiningKind lS rS
 						include : difference
-							Shape left right
+							union
+								Shape left right
+								if capLeft  [Shape.joinCap left]  [no-shape]
+								if capRight [Shape.joinCap right] [no-shape]
 							if (fNotch && left < (SB - Width))       [Notch (-Width)]    [no-shape]
 							if (fNotch && left < SB)                 [Notch 0]           [no-shape]
 							if (fNotch && right > RightSB)           [Notch Width]       [no-shape]
@@ -255,9 +257,22 @@ glyph-block Symbol-Ligation : begin
 		glyph-block-import Symbol-Punctuation-Dashes : UnderScoreConfig
 
 		foreach { suffix { yBar } } [Object.entries UnderScoreConfig] : do
-			create-glyph "underscore.lig.zf.\(suffix)" : glyph-proc
+			# ___ shapes
+			create-glyph "underscore.lig.fc.\(suffix)" : glyph-proc
 				Joining.set currentGlyph Joining.Classes.Left
-				include : HBar.b (O - SB) RightSB yBar
+				include : HBar.b SB Width yBar
+				include : JunctDiamond Width (yBar + HalfStroke) Stroke
+			create-glyph "underscore.lig.cf.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Left
+				include : HBar.b 0 RightSB yBar
+				include : JunctDiamond 0 (yBar + HalfStroke) Stroke
+			create-glyph "underscore.lig.cc.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Left
+				include : HBar.b 0 Width yBar
+				include : JunctDiamond 0     (yBar + HalfStroke) Stroke
+				include : JunctDiamond Width (yBar + HalfStroke) Stroke
+
+			# _|_ shapes
 			create-glyph "underscore.lig.fm.\(suffix)" : glyph-proc
 				Joining.set currentGlyph Joining.Classes.Right
 				include : HBar.b SB (Width + RodBarHOffset) yBar
@@ -267,7 +282,9 @@ glyph-block Symbol-Ligation : begin
 			create-glyph "bar.lig.bottomMid.\(suffix)"
 				VBar.m Middle yBar ParenTop
 
-		select-variant "underscore.lig.zf" (follow -- 'underscore')
+		select-variant "underscore.lig.fc" (follow -- 'underscore')
+		select-variant "underscore.lig.cc" (follow -- 'underscore')
+		select-variant "underscore.lig.cf" (follow -- 'underscore')
 		select-variant "underscore.lig.fm" (follow -- 'underscore')
 		select-variant "underscore.lig.mf" (follow -- 'underscore')
 		select-variant "bar.lig.bottomMid" (follow -- 'underscore')
@@ -431,12 +448,16 @@ glyph-block Symbol-Ligation : begin
 			create-glyph "plus.lig.fc.s.\(suffix)" : glyph-proc
 				Joining.set currentGlyph Joining.Classes.Right
 				include : difference
-					PlusShape SB (Width - O) SB
+					union
+						PlusShape SB Width SB
+						PlusShape.joinCap Width
 					if fNotch [HyphenNotch Width] [no-shape]
 			create-glyph "plus.lig.cf.s.\(suffix)" : glyph-proc
 				Joining.set currentGlyph Joining.Classes.Left
 				include : difference
-					PlusShape O RightSB (-SB)
+					union
+						PlusShape 0 RightSB (-SB)
+						PlusShape.joinCap 0
 					if fNotch [HyphenNotch 0] [no-shape]
 
 		select-variant 'plus.lig.fc.s' (follow -- 'lig-plus')
