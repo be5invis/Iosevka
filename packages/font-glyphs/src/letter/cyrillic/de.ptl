@@ -56,7 +56,7 @@ glyph-block Letter-Cyrillic-De : begin
 
 		return : object desc xTopLeft xTopRight
 
-	define [CyrSoftDeShape top left right _sw] : glyph-proc
+	define [CyrSoftDeShape top left right _sw vSlab] : glyph-proc
 		local descenderOverflow : if SLAB SideJut ((right - left) * 0.075)
 		local sw : fallback _sw Stroke
 		local xm : if SLAB
@@ -65,11 +65,12 @@ glyph-block Letter-Cyrillic-De : begin
 		local xTopRight : mix left xm : StrokeWidthBlend 0.95 0.96
 
 		include : CyrDeShape top left xm _sw
-		if SLAB
-		: then : begin
-				include : HBar.t (xTopRight + descenderOverflow) right top sw
-				include : VSerif.dr right top VJut (sw * VJutStroke / Stroke)
-		: else : include : HBar.t xTopRight right top sw
+
+		include : if SLAB
+			then : HBar.t (xTopRight + descenderOverflow) right top sw
+			else : HBar.t xTopRight right top sw
+
+		if vSlab : include : VSerif.dr right top VJut (sw * VJutStroke / Stroke)
 
 	create-glyph 'cyrl/De' 0x414 : glyph-proc
 		include : MarkSet.capital
@@ -85,18 +86,33 @@ glyph-block Letter-Cyrillic-De : begin
 		include : MarkSet.p
 		include : CyrDeShape XH SB RightSB Stroke Descender
 
-	create-glyph 'cyrl/DeSoft' 0xA662 : glyph-proc
+	create-glyph 'cyrl/DeSoft.serifless' : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.capital
 		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrSoftDeShape CAP df.leftSB df.rightSB df.mvs
+		include : CyrSoftDeShape CAP df.leftSB df.rightSB df.mvs false
 
-	create-glyph 'cyrl/deSoft' 0xA663 : glyph-proc
+	create-glyph 'cyrl/DeSoft.topRightSerifed' : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.capital
+		include : ExtendBelowBaseAnchors BottomExtension
+		include : CyrSoftDeShape CAP df.leftSB df.rightSB df.mvs true
+
+	select-variant 'cyrl/DeSoft' 0xA662 (follow -- 'cyrl/EnGhe/GhePart')
+
+	create-glyph 'cyrl/deSoft.serifless' : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.e
 		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrSoftDeShape XH df.leftSB df.rightSB df.mvs
+		include : CyrSoftDeShape XH df.leftSB df.rightSB df.mvs false
 
+	create-glyph 'cyrl/deSoft.topRightSerifed' : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		include : df.markSet.e
+		include : ExtendBelowBaseAnchors BottomExtension
+		include : CyrSoftDeShape XH df.leftSB df.rightSB df.mvs true
+
+	select-variant 'cyrl/deSoft' 0xA663 (follow -- 'cyrl/enghe/ghePart')
 
 	foreach { suffix { st sb }} [Object.entries EpsilonConfig] : do
 		define [DzzeDescendershape de] : begin
