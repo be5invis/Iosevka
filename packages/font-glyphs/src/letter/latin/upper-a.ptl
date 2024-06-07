@@ -15,10 +15,11 @@ glyph-block Letter-Latin-Upper-A : begin
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
 	glyph-block-import Letter-Latin-V : VShapeOutline VShape VCornerHalfWidth
 
-	define SLAB-NONE    0
-	define SLAB-TOP     1
-	define SLAB-LEFT    2
-	define SLAB-RIGHT   4
+	define SLAB-NONE     0
+	define SLAB-TOP      1
+	define SLAB-LEFT     2
+	define SLAB-RIGHT    4
+	define SLAB-CYRL-BGR 8
 
 	glyph-block-export AMaskShape
 	define [AMaskShape] : with-params [df fBarStraight top sw] : new-glyph : glyph-proc
@@ -44,8 +45,10 @@ glyph-block Letter-Latin-Upper-A : begin
 
 	define [ASerifs df top sw slabKind] : glyph-proc : begin
 		local sf : SerifFrame.fromDf df top 0
-		if [maskBits slabKind SLAB-LEFT] : include sf.lb.full
-		if [maskBits slabKind SLAB-RIGHT] : include sf.rb.full
+		if [maskBits slabKind SLAB-LEFT] : include
+			if ([maskBits slabKind SLAB-CYRL-BGR] && para.isItalic) sf.lb.outer sf.lb.full
+		if [maskBits slabKind SLAB-RIGHT] : include
+			if ([maskBits slabKind SLAB-CYRL-BGR] && para.isItalic) sf.rb.outer sf.rb.full
 		if [maskBits slabKind SLAB-TOP] : include : intersection [MaskLeft df.middle]
 			if [maskBits slabKind : bitOr SLAB-LEFT SLAB-RIGHT]
 			: then : HSerif.lt df.middle top (MidJutSide + [HSwToV : 0.25 * sw]) sf.swSerif
@@ -149,6 +152,15 @@ glyph-block Letter-Latin-Upper-A : begin
 				sw           -- Stroke
 				slabKind     -- slabKind
 
+		create-glyph "cyrl/el.BGR.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : LambdaShape
+				df           -- [DivFrame 1]
+				fBarStraight -- fStraightBar
+				top          -- XH
+				sw           -- Stroke
+				slabKind     -- [bitOr slabKind SLAB-CYRL-BGR]
+
 	select-variant 'A' 'A'
 	link-reduced-variant 'A/sansSerif' 'A' MathSansSerif
 	select-variant 'smcpA' 0x1D00 (follow -- 'A')
@@ -161,6 +173,9 @@ glyph-block Letter-Latin-Upper-A : begin
 	select-variant 'grek/Lambda' 0x39B
 	link-reduced-variant 'grek/Lambda/sansSerif' 'grek/Lambda' MathSansSerif
 	select-variant 'grek/smcpLambda' 0x1D27 (follow -- 'grek/Lambda')
+
+	alias 'cyrl/El.BGR' null 'grek/Lambda'
+	select-variant 'cyrl/el.BGR' (follow -- 'grek/Lambda')
 
 	# Delta
 	glyph-block-export DeltaShape
