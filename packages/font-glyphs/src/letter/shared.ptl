@@ -77,9 +77,10 @@ glyph-block Letter-Shared : begin
 		CreateDependentComposite name code "\(name)/selector" obj
 
 	glyph-block-export DefineSelectorGlyph
-	define [DefineSelectorGlyph name selector marks] : begin
+	define [DefineSelectorGlyph name selector df mk] : begin
 		create-glyph "\(name)/selector.\(selector)" : glyph-proc
-			include marks
+			include df
+			include : df.markSet.(mk)
 			set-base-anchor 'cvDecompose' 0 0
 			DependentSelector.set currentGlyph selector
 
@@ -278,7 +279,7 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [arcStart] : with-params [
 				[top XH] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[ystart (top - ada - 0.01)]
+				[ystart (top - ada - TINY)]
 			] : begin
 			local xstart : left + (sw - fine) * HVContrast
 			return : list
@@ -289,7 +290,7 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [arcEnd] : with-params [
 				[bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[yend (bot + ada + 0.01)]
+				[yend (bot + ada + TINY)]
 			] : begin
 			local xend : left + (sw - fine) * HVContrast
 			return : list
@@ -303,18 +304,18 @@ glyph-block Letter-Shared-Shapes : begin
 			] : begin
 			return : dispiro
 				widths.lhs fine
-				flat (left + (sw - fine) * HVContrast) (top - ada - 0.01)
+				flat (left + (sw - fine) * HVContrast) (top - ada - TINY)
 				curl (left + (sw - fine) * HVContrast) (0 + adb)
 				arch.lhs 0 (sw -- sw) (swBefore -- fine)
 				flat (right - OX) (0 + ada)
 				curl (right - OX) (top - adb)
 				arch.lhs top (sw -- sw) (swAfter -- fine)
 				flat (left + (sw - fine) * HVContrast) (top - ada) [widths.lhs fine]
-				curl (left + (sw - fine) * HVContrast) (top - ada - 0.01)
+				curl (left + (sw - fine) * HVContrast) (top - ada - TINY)
 
 		export : define [toothless] : with-params [
 				[top XH] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
-				[mBlend : Math.sqrt (1 / 2)] [ada SmallArchDepthA] [adb SmallArchDepthB]
+				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : begin
 			return : dispiro
 				g4 left rise [widths.lhs sw]
@@ -325,7 +326,7 @@ glyph-block Letter-Shared-Shapes : begin
 				curl (right - OX) (top - adb)
 				arch.lhs top (sw -- sw) (swAfter -- fine)
 				flat (left + (sw - fine) * HVContrast) (top - ada) [widths.lhs fine]
-				curl (left + (sw - fine) * HVContrast) (top - ada - 0.01) [widths.lhs fine]
+				curl (left + (sw - fine) * HVContrast) (top - ada - TINY) [widths.lhs fine]
 
 		export : define [rounded] : with-params [
 				[top XH] [left SB] [right RightSB] [yTerminal CAP] [sw Stroke] [fine ShoulderFine]
@@ -333,20 +334,20 @@ glyph-block Letter-Shared-Shapes : begin
 			] : begin
 			return : dispiro
 				flat left yTerminal [widths.lhs.heading sw Downward]
-				curl left [Math.min adb (yTerminal - 0.01)]
+				curl left [Math.min adb (yTerminal - TINY)]
 				arch.lhs 0 (sw -- sw)
 				flat (right - OX) (0 + ada)
 				curl (right - OX) (top - adb)
 				arch.lhs top (sw -- sw) (swAfter -- fine)
-				flat (left + (sw - fine) * HVContrast) (top - ada + 0.01) [widths.lhs fine]
+				flat (left + (sw - fine) * HVContrast) (top - ada + TINY) [widths.lhs fine]
 				curl (left + (sw - fine) * HVContrast) (top - ada) [widths.lhs fine]
 
 		export : define [toothlessTop] : with-params [
 				[top XH] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
-				[mBlend : Math.sqrt (1 / 2)] [ada SmallArchDepthA] [adb SmallArchDepthB]
+				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : begin
 			return : dispiro
-				flat (left + (sw - fine) * HVContrast) (top - ada - 0.01) [widths.lhs fine]
+				flat (left + (sw - fine) * HVContrast) (top - ada - TINY) [widths.lhs fine]
 				curl (left + (sw - fine) * HVContrast) (0 + adb) [widths.lhs fine]
 				arch.lhs 0 (sw -- sw) (swBefore -- fine)
 				flat (right - OX) (0 + ada)
@@ -361,13 +362,13 @@ glyph-block Letter-Shared-Shapes : begin
 				[fine ShoulderFine] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : begin
 			return : dispiro
-				flat (left + (sw - fine) * HVContrast) (top - ada - 0.01) [widths.lhs fine]
+				flat (left + (sw - fine) * HVContrast) (top - ada - TINY) [widths.lhs fine]
 				curl (left + (sw - fine) * HVContrast) (0 + adb) [widths.lhs fine]
 				arch.lhs 0 (sw -- sw) (swBefore -- fine)
 				flat (right - OX) (0 + ada)
 				curl (right - OX) (top - adb)
 				arch.lhs top (sw -- sw)
-				flat left [Math.max (yTerminal + 0.01 - TanSlope * Stroke) (top - ada)]
+				flat left [Math.max (yTerminal + TINY - TanSlope * Stroke) (top - ada)]
 				curl left yTerminal [widths.lhs.heading sw Downward]
 
 	glyph-block-export : OBarRight
@@ -376,7 +377,7 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [arcStart] : with-params [
 				[top XH] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[ystart (top - ada - 0.01)]
+				[ystart (top - ada - TINY)]
 			] : begin
 			local xstart : right - (sw - fine) * HVContrast
 			return : list
@@ -387,7 +388,7 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [arcEnd] : with-params [
 				[bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[yend (bot + ada + 0.01)]
+				[yend (bot + ada + TINY)]
 			] : begin
 			local xend : right - (sw - fine) * HVContrast
 			return : list
@@ -411,7 +412,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 		export : define [toothless] : with-params [
 				[top XH] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
-				[mBlend : Math.sqrt (1 / 2)] [ada SmallArchDepthA] [adb SmallArchDepthB]
+				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : new-glyph : glyph-proc
 			include : OBarLeft.toothlessTop
 				top -- top
@@ -775,7 +776,7 @@ glyph-block Letter-Shared-Shapes : begin
 		include : dispiro
 			widths.lhs sw
 			flat left ybegin [heading Downward]
-			curl left [Math.min (ybegin - 0.01) adb]
+			curl left [Math.min (ybegin - TINY) adb]
 			arcvh
 			g4 [mix left right 0.5] bottom [heading Rightward]
 			archv
@@ -791,12 +792,12 @@ glyph-block Letter-Shared-Shapes : begin
 			local hdY : if (yDepth < 0) (-hd.y) hd.y
 
 			local y2 : if (yDepth > 0)
-				Math.min (y - yDepth + hd.y - 0.25 * sw) (y - 0.01)
-				Math.max (y - yDepth - hd.y + 0.25 * sw) (y + 0.01)
+				Math.min (y - yDepth + hd.y - 0.25 * sw) (y - TINY)
+				Math.max (y - yDepth - hd.y + 0.25 * sw) (y + TINY)
 
 			local x3 : if (xDepth > 0)
-				Math.min (x + xDepth - 0.01) (x + hd.x - [HSwToV : 0.25 * sw])
-				Math.max (x + xDepth + 0.01) (x - hd.x + [HSwToV : 0.25 * sw])
+				Math.min (x + xDepth - TINY) (x + hd.x - [HSwToV : 0.25 * sw])
+				Math.max (x + xDepth + TINY) (x - hd.x + [HSwToV : 0.25 * sw])
 
 			dispiro [widths.center sw]
 				flat x (y + yExtension) [heading : if (yDepth > 0) Downward Upward]

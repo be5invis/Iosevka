@@ -1,6 +1,6 @@
 import * as Geometry from "@iosevka/geometry";
 import { Transform } from "@iosevka/geometry/transform";
-import { Radical, VS01 } from "@iosevka/glyph/relation";
+import { VS01 } from "@iosevka/glyph/relation";
 
 export function gcFont(glyphStore, excludedChars, otl) {
 	const daGsub = markSweepOtlLookups(otl.GSUB);
@@ -104,7 +104,7 @@ function markGlyphsInitial(glyphStore, excludedChars) {
 	for (const [gName, g] of glyphStore.namedEntries()) {
 		if (!g) continue;
 		if (g.glyphRank > 0) markSingleGlyph(markedGlyphs, gName, 1);
-		if (Radical.get(g)) markSingleGlyph(markedGlyphs, gName, 1);
+
 		const unicodeSet = glyphStore.queryUnicodeOf(g);
 		if (unicodeSet) {
 			for (const u of unicodeSet) {
@@ -317,7 +317,7 @@ function alterGeometryAndOptimize(collection) {
 			throw new Error("Unreachable: each cluster should have at least one representative");
 		}
 
-		cluster.representative.glyph.geometry = new Geometry.TransformedGeometry(
+		cluster.representative.glyph.geometry = Geometry.TransformedGeometry.create(
 			Transform.Translate(cluster.representative.x, cluster.representative.y),
 			gT.geometry,
 		);
@@ -406,5 +406,5 @@ function rectifyGlyphAndMarkComponents(glyphStore, aliasMap, markedGlyphs, memo,
 	}
 
 	// Make the glyph radical if it has no marked references.
-	g.geometry = g.geometry.unlinkReferences();
+	g.geometry = new Geometry.RadicalGeometry(g.geometry);
 }

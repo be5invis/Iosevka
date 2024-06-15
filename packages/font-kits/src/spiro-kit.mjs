@@ -74,7 +74,7 @@ class DiSpiroProxy {
 }
 
 export function SetupBuilders(bindings) {
-	const { Stroke, Superness, Contrast, CorrectionOMidX } = bindings;
+	const { Stroke, Superness, Contrast, CorrectionOMidX, TINY } = bindings;
 	function KnotType(type) {
 		return (x, y, f) => {
 			if (!isFinite(x)) throw new TypeError("NaN detected for X");
@@ -98,9 +98,9 @@ export function SetupBuilders(bindings) {
 			{ name: "right", x: 1, y: 0 },
 		];
 		let adhesions = [
-			{ name: "start", l: 0, r: 0.01 },
-			{ name: "mid", l: -0.005, r: 0.005 },
-			{ name: "end", l: -0.01, r: 0 },
+			{ name: "start", l: 0, r: TINY },
+			{ name: "mid", l: -0.5 * TINY, r: 0.5 * TINY },
+			{ name: "end", l: -TINY, r: 0 },
 		];
 		let knotTypes = [
 			[g4, g4, g4],

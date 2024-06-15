@@ -1,7 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix fallback SuffixCfg] from "@iosevka/util"
-import [MathSansSerif] from "@iosevka/glyph/relation"
+import [MathSansSerif DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -10,6 +10,7 @@ glyph-block Letter-Latin-Upper-M : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared : CreateTurnedLetter
+	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
 	glyph-block-import Letter-Shared-Shapes : SerifFrame EngHook CyrTailDescender
 
 	define FORM-FLAT      0
@@ -91,7 +92,7 @@ glyph-block Letter-Latin-Upper-M : begin
 
 		return : object [swSideBot]
 
-	define [CyrSoftEmShape] : with-params [top df form slabType slanted] : glyph-proc
+	define [CyrSoftEmShape] : with-params [top df form slabType slanted vSlab] : glyph-proc
 		local subDf : df.slice 4 3
 		local sidesSlope : if slanted 0.04 0
 		local xRightTop : subDf.rightSB - top * sidesSlope
@@ -106,9 +107,7 @@ glyph-block Letter-Latin-Upper-M : begin
 		include : MShape top subDf form slabType slanted (kMidHang -- df.div)
 
 		include : HBar.t xRightTop df.rightSB top swSideBot
-		if SLAB : include : VSerif.dr df.rightSB top VJut (swSideBot * VJutStroke / Stroke)
-
-
+		if vSlab : include : VSerif.dr df.rightSB top VJut (swSideBot * VJutStroke / Stroke)
 
 	define MConfig : SuffixCfg.combine
 		SuffixCfg.weave
@@ -126,6 +125,10 @@ glyph-block Letter-Latin-Upper-M : begin
 		object # Greek San variants
 			grekCapitalSan { false FORM-SAN       SLAB-AUTO }
 			grekSmallSan   { false FORM-SAN-SMALL SLAB-NONE }
+
+	define CyrSoftEmGheConfig : object
+		serifless       false
+		topRightSerifed true
 
 	foreach { suffix { slanted form slab } } [Object.entries MConfig] : do
 		create-glyph "M.\(suffix)" : glyph-proc
@@ -151,15 +154,24 @@ glyph-block Letter-Latin-Upper-M : begin
 			include : LeaningAnchor.Below.VBar.l df.leftSB
 			include : MShape XH df form slab slanted
 
-		create-glyph "cyrl/EmSoft.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.diversityM 3
-			include : df.markSet.capital
-			include : CyrSoftEmShape CAP df form slab slanted
+		define cyrSoftEmDf : DivFrame [mix 1 para.diversityM 2] 4
 
-		create-glyph "cyrl/emSoft.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.diversityM 3
-			include : df.markSet.e
-			include : CyrSoftEmShape XH df form slab slanted
+		DefineSelectorGlyph "cyrl/EmSoft" suffix cyrSoftEmDf 'capital'
+		DefineSelectorGlyph "cyrl/emSoft" suffix cyrSoftEmDf 'e'
+
+		foreach { suffixGhe cyrSoftEmVSlab } [Object.entries CyrSoftEmGheConfig] : do
+			create-glyph "cyrl/EmSoft.\(suffix).\(suffixGhe)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : CyrSoftEmShape CAP cyrSoftEmDf form slab slanted cyrSoftEmVSlab
+
+			create-glyph "cyrl/emSoft.\(suffix).\(suffixGhe)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : CyrSoftEmShape XH cyrSoftEmDf form slab slanted cyrSoftEmVSlab
+
+		select-variant "cyrl/EmSoft.\(suffix)" (follow -- 'cyrl/EnGhe/GhePart')
+		select-variant "cyrl/emSoft.\(suffix)" (follow -- 'cyrl/enghe/ghePart')
 
 	select-variant 'M' 'M'
 	link-reduced-variant 'M/sansSerif' 'M' MathSansSerif
@@ -169,8 +181,9 @@ glyph-block Letter-Latin-Upper-M : begin
 	alias 'grek/Mu' 0x39C 'M'
 	alias-reduced-variant 'grek/Mu/sansSerif' 'grek/Mu' 'M/sansSerif' MathSansSerif
 	alias 'cyrl/Em' 0x41C 'M'
-	select-variant 'cyrl/EmSoft' 0xA666 (follow -- 'M')
-	select-variant 'cyrl/emSoft' 0xA667 (follow -- 'cyrl/em')
+
+	CreateSelectorVariants 'cyrl/EmSoft' 0xA666 [Object.keys MConfig] (follow -- 'M')
+	CreateSelectorVariants 'cyrl/emSoft' 0xA667 [Object.keys MConfig] (follow -- 'cyrl/em')
 
 	derive-composites 'cyrl/EmTail' 0x4CD 'cyrl/Em' : do
 		local df : DivFrame para.diversityM 3

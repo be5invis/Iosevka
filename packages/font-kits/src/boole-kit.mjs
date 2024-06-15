@@ -17,10 +17,10 @@ class BooleImpl {
 			const g1 = new Glyph();
 			g1.gizmo = forwardGizmo;
 			g1.include(operand);
-			operandGeometries.push(new TransformedGeometry(backwardGizmo, g1.geometry));
+			operandGeometries.push(TransformedGeometry.create(backwardGizmo, g1.geometry));
 		}
 		return glyph.includeGeometry(
-			new TransformedGeometry(
+			TransformedGeometry.create(
 				forwardGizmo,
 				new BooleanGeometry(this.operator, operandGeometries),
 			),
