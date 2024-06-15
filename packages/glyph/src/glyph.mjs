@@ -125,7 +125,7 @@ export class Glyph {
 			this.includeGeometry(new Geom.ReferenceGeometry(g, shiftX, shiftY));
 		} else {
 			this.includeGeometry(
-				new Geom.TransformedGeometry(Transform.Translate(shiftX, shiftY), g.geometry),
+				Geom.TransformedGeometry.create(Transform.Translate(shiftX, shiftY), g.geometry),
 			);
 		}
 	}
@@ -139,7 +139,7 @@ export class Glyph {
 		this.includeGeometry(new Geom.ContourSetGeometry(cs));
 	}
 	applyTransform(tfm, alsoAnchors) {
-		this.geometry = new Geom.TransformedGeometry(tfm, this.geometry);
+		this.geometry = Geom.TransformedGeometry.create(tfm, this.geometry);
 		if (alsoAnchors) {
 			for (const k in this.baseAnchors)
 				this.baseAnchors[k] = Anchor.transform(tfm, this.baseAnchors[k]);
@@ -150,8 +150,8 @@ export class Glyph {
 	tryBecomeMirrorOf(dst, rankSet) {
 		if (rankSet.has(this) || rankSet.has(dst)) return;
 		if (dst.hasDependency(this)) return;
-		const csThis = Geom.hashGeometry(this.geometry.unlinkReferences());
-		const csDst = Geom.hashGeometry(dst.geometry.unlinkReferences());
+		const csThis = Geom.hashGeometry(this.geometry);
+		const csDst = Geom.hashGeometry(dst.geometry);
 		if (csThis && csDst && csThis === csDst) {
 			this.geometry = new Geom.CombineGeometry([new Geom.ReferenceGeometry(dst, 0, 0)]);
 			rankSet.add(this);

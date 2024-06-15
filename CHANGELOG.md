@@ -1,5 +1,26 @@
 ## Modifications since last major version
 
+### 30.2.0
+
+* Improve glyph shape of INVERTED LOW KAVYKA WITH KAVYKA ABOVE (`U+2E46`).
+* Fix `cv96` application to LOW KAVYKA WITH DOT (`U+2E48`).
+* Make MODIFIER LETTER DOT VERTICAL BAR (`U+A717`) ... MODIFIER LETTER DOT HORIZONTAL BAR (`U+A719`) follow variants of Diacritical Dot (`cv96`).
+* Fix metrics of Cyrillie EnGhe and Abkhasian Che under Aile/Etoile (#2366).
+* Make CYRILLIC CAPITAL LETTER SOFT DE (`U+A662`) ... CYRILLIC SMALL LETTER SOFT EM (`A667`) follow variants of Greek Capital Gamma (`cv56`).
+* Make Bulgarian Cyrillic Lower El follow variants of Greek Capital Lambda (`cv60`).
+* Allow Italic Serbian Cyrillic Lower Ghe to use Hooky Bottom and Z-Shaped variants of `i` (`cv34`).
+* Fix CV/SS application of localized form of superscript/subscript letters (#2368).
+* Fix IPPH/APPH localization for superscript/subscript Greek Lower Beta and Chi (`U+1D5D`, `U+1D61`, `U+1D66`, `U+1D6A`).
+* Improve glyph visual for `U+279D`, `U+27A2`, `U+27A3`, and `U+2B4D`.
+* Add characters:
+  - STAR OF DAVID (`U+2720`).
+  - HEAVY TRIANGLE-HEADED RIGHTWARDS ARROW (`U+279E`).
+  - LEFTWARDS HARPOON WITH BARB UP ABOVE LEFTWARDS HARPOON WITH BARB DOWN (`U+2962`) ... DOWNWARDS HARPOON WITH BARB LEFT BESIDE DOWNWARDS HARPOON WITH BARB RIGHT (`U+2965`).
+  - UPWARDS HARPOON WITH BARB LEFT BESIDE DOWNWARDS HARPOON WITH BARB RIGHT (`U+296E`).
+  - DOWNWARDS HARPOON WITH BARB LEFT BESIDE UPWARDS HARPOON WITH BARB RIGHT (`U+296F`).
+  - HELLSCHREIBER PAUSE SYMBOL (`U+2BFF`).
+
+
 ### 30.1.2
 
 * Fix Te bar terminal for Cyrillic TeTse (`U+04B4`..`U+04B5`) and Tche (`U+A693`..`U+A694`) under sans italic/oblique when `T` (`cv19`) is serifed.
