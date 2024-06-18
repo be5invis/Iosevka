@@ -330,4 +330,58 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 			include : ForceUpright
 			include : HBar.m left (midx - ringSize * 2 + fineStroke / 2) midy boxDrawingStroke
 			include : InvertRingAt (midx - ringSize) midy
-			include : TriangleShape midx bottom midx top right midy boxDrawingStroke
+			include : TriangleShape midx gateBot midx gateTop right midy boxDrawingStroke
+
+	do "Logic Gates"
+		define andCurlX : Math.max midx (right - gateSize)
+		define leftOX : left - OX
+		define orCurlX1 : mix leftOX right 0.15
+		define orCurlX2 : mix leftOX right 0.4
+
+		create-glyph [MangleName 'andGate'] [MangleUnicode 0x1CC16] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.l left gateBot gateTop boxDrawingStroke
+
+			include : dispiro
+				widths.lhs boxDrawingStroke
+				flat left gateBot
+				curl (right - andCurlX) gateBot
+				archv
+				g4 right midy
+				arcvh
+				flat (right - andCurlX) gateTop
+				corner left gateTop
+
+		create-glyph [MangleName 'orGate'] [MangleUnicode 0x1CC15] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : intersection [Rect gateTop gateBot leftOX right]
+				dispiro
+					widths.lhs boxDrawingStroke
+					g4 leftOX gateTop
+					quadControls 1 0.3
+					g4 orCurlX1 midy
+					quadControls 0 0.7
+					g4 leftOX gateBot
+			include : difference
+				union
+					intersection [MaskBelow midy] : dispiro
+						widths.lhs boxDrawingStroke
+						flat leftOX gateBot
+						curl orCurlX2 gateBot
+						quadControls 0.7 0
+						g4 right midy
+					intersection [MaskAbove midy] : dispiro
+						widths.rhs boxDrawingStroke
+						flat leftOX gateTop
+						curl orCurlX2 gateTop
+						quadControls 0.7 0
+						g4 right midy
+				spiro-outline
+					g4 leftOX gateTop
+					quadControls 1 0.3
+					g4 orCurlX1 midy
+					quadControls 0 0.7
+					g4 leftOX gateBot
+					close
