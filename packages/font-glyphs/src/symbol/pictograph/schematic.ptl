@@ -28,7 +28,7 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 		corner [mix x1 x2 (-1)] [mix y1 y2 (-1)]
 		corner [mix x1 x2   2 ] [mix y1 y2   2 ]
 
-	define gateSize : MosaicHeight / 2
+	define gateSize : MosaicHeight / 4 * MosaicWidthScalar
 	define gateBot : midy - gateSize
 	define gateTop : midy + gateSize
 	define ringSize : Math.min (Geom.Size * 0.5) (MosaicWidth / 6)
@@ -281,17 +281,36 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 			include : InvertRingAt (left + ringSize) midy
 			include : InvertRingAt (right - ringSize) midy
 
+		define [InvertedInputImpl spread] : glyph-proc
+			local limit : MosaicHeight / 2 - ringSize
+			local spread2 : Math.min (spread - boxDrawingStroke / 2) limit
+
+			include : InvertRingAt (right - ringSize) (midy + spread2)
+			include : InvertRingAt (right - ringSize) (midy - spread2)
+
+			if (spread >= MosaicHeight / 2) : begin
+				include : difference
+					HBar.t left (right - ringSize) top boxDrawingStroke
+					InvertRingAt (right - ringSize) (midy + spread2) 1
+				include : difference
+					HBar.b left (right - ringSize) bottom boxDrawingStroke
+					InvertRingAt (right - ringSize) (midy - spread2) 1
+			: else : begin
+				include : HBar.t left midx top boxDrawingStroke
+				include : HBar.b left midx bottom boxDrawingStroke
+				include : VBar.m midx (midy + spread - boxDrawingStroke) top    boxDrawingStroke
+				include : VBar.m midx bottom (midy - spread + boxDrawingStroke) boxDrawingStroke
+				include : difference
+					HBar.t midx (right - ringSize) (midy + spread) boxDrawingStroke
+					InvertRingAt (right - ringSize) (midy + spread2) 1
+				include : difference
+					HBar.b midx (right - ringSize) (midy - spread) boxDrawingStroke
+					InvertRingAt (right - ringSize) (midy - spread2) 1
+
 		create-glyph [MangleName 'invertedInputs'] [MangleUnicode 0x1CC17] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
-			include : InvertRingAt (right - ringSize) (top - ringSize)
-			include : InvertRingAt (right - ringSize) (bottom + ringSize)
-			include : difference
-				HBar.t left (right - ringSize) top boxDrawingStroke
-				InvertRingAt (right - ringSize) (top - ringSize) 1
-			include : difference
-				HBar.b left (right - ringSize) bottom boxDrawingStroke
-				InvertRingAt (right - ringSize) (bottom + ringSize) 1
+			include : InvertedInputImpl (gateSize - [if (MosaicWidthScalar < 2) (ringSize - boxDrawingStroke / 2) 0])
 
 		create-glyph [MangleName 'invertedOutput'] [MangleUnicode 0x1CC18] : glyph-proc
 			set-width MosaicWidth
@@ -304,7 +323,7 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 			set-width MosaicWidth
 			include : ForceUpright
 			include : HBar.m left midx midy boxDrawingStroke
-			include : TriangleShape midx bottom midx top right midy boxDrawingStroke
+			include : TriangleShape midx gateBot midx gateTop right midy boxDrawingStroke
 
 		create-glyph [MangleName 'invertedBufferGate'] [MangleUnicode 0x1CC1A] : glyph-proc
 			set-width MosaicWidth
