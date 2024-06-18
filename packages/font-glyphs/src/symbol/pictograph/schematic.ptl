@@ -186,6 +186,60 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 				MaskLeft : midx + [HSwToV : 0.5 * boxDrawingStroke]
 				LineExt down (top - 0.5 * halfPeriod) midx top boxDrawingStroke
 
+	do "Coil"
+		glyph-block-import Symbol-Mosaic-Split-Graphic : Multicell
+		local multicell : Multicell MosaicWidth
+
+		define amplitude : Geom.Size * 0.8
+
+		define [CoilImpl top bot left right] : begin
+			local mid1 : mix left right (1 / 3)
+			local mid2 : mix left right (2 / 3)
+			local midy : mix bot top 0.5
+
+			local yTerm : midy + boxDrawingStroke / 2
+			local yTop : midy + amplitude
+			local yBot : midy - amplitude
+			local yInter : mix yBot yTop 0.95
+			local ySide : mix yBot yTop 0.45
+			local kX 0.1
+			local kX2 0.15
+			local kX3 : StrokeWidthBlend 0.24 0.21
+
+			return : dispiro
+				widths.rhs boxDrawingStroke
+				straight.right.start left yTerm
+				g4 [mix left mid1 kX3] [mix yTerm yTop 0.4]
+				g4.right.mid [mix left mid1 (0.5 + kX2)] yTop
+				g4 mid1 yInter
+				g4.down.mid [mix mid1 mid2 (0.5 - kX)] ySide
+				arch.rhs yBot (sw -- boxDrawingStroke)
+				g4.up.mid [mix left mid1 (0.5 + kX)] ySide
+				g4 mid1 yInter
+				flat [mix mid1 mid2 (0.5 - kX2)] yTop
+				curl [mix mid1 mid2 (0.5 + kX2)] yTop
+				g4 mid2 yInter
+				g4.down.mid [mix mid2 right (0.5 - kX)] ySide
+				arch.rhs yBot (sw -- boxDrawingStroke)
+				g4.up.mid [mix mid1 mid2 (0.5 + kX)] ySide
+				g4 mid2 yInter
+				g4.right.mid [mix mid2 right (0.5 - kX2)] yTop
+				g4 [mix right mid2 kX3] [mix yTerm yTop 0.4]
+				straight.right.end right yTerm
+
+		create-glyph [MangleName 'inductorLeftThird'] [MangleUnicode 0x1CC0B] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 1 3 0 0 1 CoilImpl
+		create-glyph [MangleName 'inductorMiddleThird'] [MangleUnicode 0x1CC0C] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 1 3 0 1 1 CoilImpl
+		create-glyph [MangleName 'inductorRightThird'] [MangleUnicode 0x1CC0D] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 1 3 0 2 1 CoilImpl
+
 	do "Diode"
 		define diodeGap : MosaicWidth / 9
 		define diodeLeft : left + diodeGap
