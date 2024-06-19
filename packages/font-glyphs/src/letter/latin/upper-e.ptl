@@ -15,40 +15,56 @@ glyph-block Letter-Latin-Upper-E : begin
 	define kSB 1
 	define xEBarLeft     : SB * kSB - O
 	define xRevEBarRight : Width - SB * kSB + O
-	define [EShape] : with-params [top pyBar serifLT serifLB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+
+	define [EShape] : with-params [top pyBar serifLT serifLB serifV serifM [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+		local xMidRight : RightSB - [xMidBarShrink serifV]
+		local yBar : yMidBar top pyBar
+		local { jutTop jutBot } : EFVJutLength top pyBar stroke
+
 		include : VBar.l (xEBarLeft) 0 top stroke
 		include : HBar.t (xEBarLeft - O) RightSB top stroke
-		include : HBar.m (xEBarLeft - O) (RightSB - [xMidBarShrink serifV]) [yMidBar top pyBar] stroke
+		include : HBar.m (xEBarLeft - O) xMidRight yBar stroke
 		include : HBar.b (xEBarLeft - O) RightSB 0 stroke
+
 		if serifLT : include : HSerif.lt xEBarLeft top SideJut
 		if serifLB : include : HSerif.lb xEBarLeft 0 SideJut
 		if serifV : begin
-			local { jutTop jutBot } : EFVJutLength top pyBar stroke
 			include : VSerif.dr RightSB top jutTop
 			include : VSerif.ur RightSB 0 jutBot
+		if serifM : begin
+			local fine : stroke * [AdviceStroke 3.5] / Stroke
+			include : VBar.r xMidRight (yBar - 0.5 * jutBot) (yBar + 0.5 * jutBot) fine
 
 	glyph-block-export RevEShape
-	define [RevEShape] : with-params [top pyBar serifRT serifRB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+	define [RevEShape] : with-params [top pyBar serifRT serifRB serifV serifM [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+		local xMidLeft : SB + [xMidBarShrink serifV]
+		local yBar : yMidBar top pyBar
+		local { jutTop jutBot } : EFVJutLength top pyBar stroke
+
 		include : VBar.r (xRevEBarRight) 0 top stroke
 		include : HBar.t SB (xRevEBarRight + O) top stroke
-		include : HBar.m (SB + [xMidBarShrink serifV]) (xRevEBarRight + O) [yMidBar top pyBar] stroke
+		include : HBar.m xMidLeft (xRevEBarRight + O) yBar stroke
 		include : HBar.b SB (xRevEBarRight + O) 0 stroke
+
 		if serifRT : include : HSerif.rt xRevEBarRight top SideJut
 		if serifRB : include : HSerif.rb xRevEBarRight 0 SideJut
 		if serifV : begin
-			local { jutTop jutBot } : EFVJutLength top pyBar stroke
 			include : VSerif.dl SB top jutTop
 			include : VSerif.ul SB 0 jutBot
+		if serifM : begin
+			local fine : stroke * [AdviceStroke 3.5] / Stroke
+			include : VBar.l xMidLeft (yBar - 0.5 * jutBot) (yBar + 0.5 * jutBot) fine
 
 	define EConfig : object
-		serifless      { false false false }
-		topLeftSerifed { true false false  }
-		serifed        { true true true    }
+		serifless      { false false false false }
+		topLeftSerifed { true  false false false }
+		serifed        { true  true  true  false }
+		serifedCapped  { true  true  true  true  }
 
-	foreach { suffix { lt lb v } } [Object.entries EConfig] : do
+	foreach { suffix { lt lb v m } } [Object.entries EConfig] : do
 		create-glyph "E.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : EShape CAP (serifLT -- lt) (serifLB -- lb) (serifV -- v)
+			include : EShape CAP (serifLT -- lt) (serifLB -- lb) (serifV -- v) (serifM -- m)
 			set-base-anchor 'trailing' RightSB 0
 
 		create-glyph "grek/Epsilon.\(suffix)" : glyph-proc
@@ -57,13 +73,12 @@ glyph-block Letter-Latin-Upper-E : begin
 
 		create-glyph "smcpE.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : EShape XH (serifLT -- lt) (serifLB -- lb) (serifV -- v)
+			include : EShape XH (serifLT -- lt) (serifLB -- lb) (serifV -- v) (serifM -- m)
 			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
 		create-glyph "revE.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : RevEShape CAP (serifRT -- lt) (serifRB -- lb) (serifV -- v)
-
+			include : RevEShape CAP (serifRT -- lt) (serifRB -- lb) (serifV -- v) (serifM -- m)
 
 	select-variant 'E' 'E'
 	link-reduced-variant 'E/sansSerif' 'E' MathSansSerif

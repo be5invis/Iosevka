@@ -17,6 +17,7 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 
 	define SLAB-E-NONE    0
 	define SLAB-E-ALL     2
+	define SLAB-E-CAPPED  3
 
 	define [AESW df top] : Math.min df.mvs : AdviceStroke2 3 3 top df.div
 
@@ -97,16 +98,24 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 		define eleft : df.middle - [HSwToV : 0.25 * sw]
 		define swVJut : Math.min sw ((df.rightSB - eleft - [HSwToV sw]) * (4 / 5))
 
+		local xMidRight : df.rightSB - sw / 4
+		local yBar : top * eBarPos
+		local { jutTop jutBot } : EFVJutLength top eBarPos sw
+
 		# E half
 		include : VBar.l eleft 0 top sw
 		include : HBar.t (eleft - O) df.rightSB top
-		include : HBar.m (eleft - O) (df.rightSB - sw / 4) (top * eBarPos)
+		include : HBar.m (eleft - O) xMidRight yBar
 		include : HBar.b (eleft - O) df.rightSB 0
+
 		match slabKind
-			[Just SLAB-E-ALL] : begin
-				local { jutTop jutBot } : EFVJutLength top eBarPos sw
+			([Just SLAB-E-ALL] || [Just SLAB-E-CAPPED]) : begin
 				include : VSerif.dr df.rightSB top jutTop swVJut
 				include : VSerif.ur df.rightSB 0 jutBot swVJut
+		match slabKind
+			[Just SLAB-E-CAPPED] : begin
+				local fine : swVJut * [AdviceStroke 3.5] / Stroke
+				include : VBar.r xMidRight (yBar - 0.5 * jutBot) (yBar + 0.5 * jutBot) fine
 
 	do "P/Ya Half"
 		glyph-block-import Letter-Latin-Upper-P : PShape PBarPosY
@@ -140,8 +149,9 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 		curlyTriSerifed       { false  SLAB-A-TRI  }
 
 	define EConfig : object
-		serifless     { SLAB-E-NONE }
-		serifed       { SLAB-E-ALL  }
+		serifless     { SLAB-E-NONE   }
+		serifed       { SLAB-E-ALL    }
+		serifedCapped { SLAB-E-CAPPED }
 
 	foreach { suffix { fStraightBar slabKind } } [Object.entries AConfig] : do
 		create-glyph "AE/AHalf.\(suffix)" : glyph-proc
@@ -184,6 +194,10 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 		define eleft : df.middle - sw * [if SLAB (1 / 3) (1 / 4)] * HVContrast
 		define swVJut : Math.min sw ((df.rightSB - eleft - [HSwToV sw]) * (4 / 5))
 
+		local xMidRight : df.rightSB - sw / 4
+		local yBar : top * eBarPos
+		local { jutTop jutBot } : EFVJutLength top eBarPos sw
+
 		# O half
 		include : dispiro
 			widths.lhs sw 0
@@ -197,15 +211,17 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 		# E half
 		include : VBar.l eleft 0 top sw
 		include : HBar.t (eleft - O) df.rightSB top sw
-		include : HBar.m (eleft - O) (df.rightSB - sw / 4) (top * 0.54) sw
+		include : HBar.m (eleft - O) xMidRight yBar sw
 		include : HBar.b (eleft - O) df.rightSB 0 sw
 
 		match slabKind
-			[Just SLAB-E-ALL] : begin
-				local { jutTop jutBot } : EFVJutLength top eBarPos sw
+			([Just SLAB-E-ALL] || [Just SLAB-E-CAPPED]) : begin
 				include : VSerif.dr df.rightSB top jutTop swVJut
 				include : VSerif.ur df.rightSB 0 jutBot swVJut
-
+		match slabKind
+			[Just SLAB-E-CAPPED] : begin
+				local fine : swVJut * [AdviceStroke 3.5] / Stroke
+				include : VBar.r xMidRight (yBar - 0.5 * jutBot) (yBar + 0.5 * jutBot) fine
 
 	foreach { suffix { slabKind } } [Object.entries EConfig] : do
 		create-glyph "OE.\(suffix)" : glyph-proc
