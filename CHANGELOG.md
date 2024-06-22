@@ -1,5 +1,23 @@
 ## Modifications since last major version
 
+### 30.3.0
+
+* Add separate variant selectors For Cyrillic Capital/Lower E (`VXAA`, `VXAB`).
+* Add variant selector for Capital Eszet (`ẞ`) (`VXAC`) (#1552).
+* Add variant selector for Capital Thorn (`Þ`) (`VXAD`).
+* Add `serifed-capped` variants for `capital-e` and `capital-f` (`cv05`, `cv06`) (#2026).
+* Add `unilateral-bottom-serifed` and `unilateral-bottom-inward-serifed` variants for Cyrillic Capital/Lower Ze (`cv69`, `cv70`).
+* Add characters:
+  - SYMBOL FOR SAMARITAN SOURCE (`U+214F`).
+  - CURLY LOOP (`U+27B0`).
+  - DOUBLE CURLY LOOP (`U+27BF`).
+  - LEFT THIRD INDUCTOR (`U+1CC0B`)  (Proposed for Unicode 16; L2/21-235).
+  - MIDDLE THIRD INDUCTOR (`U+1CC0C`)  (Proposed for Unicode 16; L2/21-235).
+  - RIGHT THIRD INDUCTOR (`U+1CC0D`)  (Proposed for Unicode 16; L2/21-235).
+  - LOGIC GATE OR (`U+1CC15`)  (Proposed for Unicode 16; L2/21-235).
+  - LOGIC GATE AND (`U+1CC16`)  (Proposed for Unicode 16; L2/21-235).
+
+
 ### 30.2.0
 
 * Improve glyph shape of INVERTED LOW KAVYKA WITH KAVYKA ABOVE (`U+2E46`).
@@ -13,7 +31,7 @@
 * Fix IPPH/APPH localization for superscript/subscript Greek Lower Beta and Chi (`U+1D5D`, `U+1D61`, `U+1D66`, `U+1D6A`).
 * Improve glyph visual for `U+279D`, `U+27A2`, `U+27A3`, and `U+2B4D`.
 * Add characters:
-  - STAR OF DAVID (`U+2720`).
+  - STAR OF DAVID (`U+2721`).
   - HEAVY TRIANGLE-HEADED RIGHTWARDS ARROW (`U+279E`).
   - LEFTWARDS HARPOON WITH BARB UP ABOVE LEFTWARDS HARPOON WITH BARB DOWN (`U+2962`) ... DOWNWARDS HARPOON WITH BARB LEFT BESIDE DOWNWARDS HARPOON WITH BARB RIGHT (`U+2965`).
   - UPWARDS HARPOON WITH BARB LEFT BESIDE DOWNWARDS HARPOON WITH BARB RIGHT (`U+296E`).

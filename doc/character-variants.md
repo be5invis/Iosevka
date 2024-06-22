@@ -97,26 +97,30 @@
 <td><img src="../images/cv-capital-e-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-e-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-e-top-left-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-e-top-left-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-e-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-e-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="9"> </td>
+<td><img src="../images/cv-capital-e-serifed-capped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-e-serifed-capped.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="8"> </td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
 <td>3</td>
-<td colspan="9"> </td>
+<td>4</td>
+<td colspan="8"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv06</code></td>
 <td><img src="../images/cv-capital-f-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-f-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-f-top-left-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-f-top-left-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-f-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-f-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="9"> </td>
+<td><img src="../images/cv-capital-f-serifed-capped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-f-serifed-capped.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="8"> </td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
 <td>3</td>
-<td colspan="9"> </td>
+<td>4</td>
+<td colspan="8"> </td>
 </tr>
 <tr>
 <td rowspan="6"><code>cv07</code></td>
@@ -1731,6 +1735,21 @@
 <td colspan="9"> </td>
 </tr>
 <tr>
+<td rowspan="2"><code>VXAC</code></td>
+<td><img src="../images/cv-capital-eszet-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-eszet-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-eszet-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-eszet-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
 <td rowspan="6"><code>cv51</code></td>
 <td><img src="../images/cv-long-s-bent-hook-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-bent-hook-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-long-s-bent-hook-middle-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-bent-hook-middle-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -1914,6 +1933,19 @@
 <td>1</td>
 <td>2</td>
 <td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>VXAD</code></td>
+<td><img src="../images/cv-capital-thorn-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-thorn-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-thorn-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-thorn-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-thorn-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-thorn-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv54</code></td>
@@ -2208,10 +2240,12 @@
 <td rowspan="2"><code>cv69</code></td>
 <td><img src="../images/cv-cyrl-capital-ze-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-capital-ze-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-ze-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-capital-ze-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-capital-ze-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-ze-unilateral-bottom-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-bottom-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-capital-ze-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="7"> </td>
+<td colspan="5"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -2219,16 +2253,20 @@
 <td>3</td>
 <td>4</td>
 <td>5</td>
-<td colspan="7"> </td>
+<td>6</td>
+<td>7</td>
+<td colspan="5"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv70</code></td>
 <td><img src="../images/cv-cyrl-ze-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-ze-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-ze-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-ze-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-ze-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-ze-unilateral-bottom-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-bottom-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-ze-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="7"> </td>
+<td colspan="5"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -2236,7 +2274,9 @@
 <td>3</td>
 <td>4</td>
 <td>5</td>
-<td colspan="7"> </td>
+<td>6</td>
+<td>7</td>
+<td colspan="5"> </td>
 </tr>
 <tr>
 <td rowspan="4"><code>cv71</code></td>
@@ -2552,16 +2592,16 @@
 </tr>
 <tr>
 <td rowspan="2"><code>cv81</code></td>
-<td><img src="../images/cv-cyrl-yeri-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yeri-corner.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-cyrl-yeri-round.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yeri-round.dark.svg#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/cv-cyrl-yeri-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yeri-cursive.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="9"> </td>
+<td colspan="2"><img src="../images/cv-cyrl-yeri-corner.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-cyrl-yeri-corner.dark.svg#gh-dark-mode-only" width=64/></td>
+<td colspan="2"><img src="../images/cv-cyrl-yeri-round.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-cyrl-yeri-round.dark.svg#gh-dark-mode-only" width=64/></td>
+<td colspan="2"><img src="../images/cv-cyrl-yeri-cursive.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-cyrl-yeri-cursive.dark.svg#gh-dark-mode-only" width=64/></td>
+<td colspan="6"> </td>
 </tr>
 <tr>
-<td>1</td>
-<td>2</td>
-<td>3</td>
-<td colspan="9"> </td>
+<td colspan="2">1</td>
+<td colspan="2">2</td>
+<td colspan="2">3</td>
+<td colspan="6"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv82</code></td>
@@ -2581,6 +2621,48 @@
 <td>5</td>
 <td>6</td>
 <td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>VXAA</code></td>
+<td><img src="../images/cv-cyrl-capital-e-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-e-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-e-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-e-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-e-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-e-unilateral-bottom-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-bottom-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-e-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>VXAB</code></td>
+<td><img src="../images/cv-cyrl-e-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-e-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-e-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-e-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-e-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-e-unilateral-bottom-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-bottom-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-e-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td colspan="5"> </td>
 </tr>
 <tr>
 <td rowspan="4"><code>cv83</code></td>

@@ -28,31 +28,37 @@ glyph-block Letter-Latin-Upper-F : begin
 	define xFBarLeft : SB * 1.5
 	define xFBarRight : Width - SB * 1.5
 
-	define [FShape] : with-params [top pyBar serifLT serifLB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+	define [FShape] : with-params [top pyBar serifLT serifLB serifV serifM [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+		local xMidRight : RightSB - [xMidBarShrink serifV]
+		local yBar : yMidBar top pyBar
+		local { jutTop jutBot } : EFVJutLength top pyBar stroke
+
 		include : VBar.l (xFBarLeft) 0 top stroke
 		include : HBar.t (xFBarLeft - O) RightSB top stroke
-		include : tagged 'crossBar'
-			HBar.m (xFBarLeft - O) (RightSB - [xMidBarShrink serifV]) [yMidBar top pyBar] stroke
+		include : tagged 'crossBar' : HBar.m (xFBarLeft - O) xMidRight yBar stroke
+
 		if serifLT : include : HSerif.lt xFBarLeft top SideJut
 		if serifLB : begin
 			include : tagged 'serifBottom' : HSerif.lb xFBarLeft 0 SideJut
 			include : tagged 'serifBottom' : HSerif.rb (xFBarLeft + [HSwToV HalfStroke]) 0 MidJutSide
-		if serifV : begin
-			local { jutTop jutBot } : EFVJutLength top pyBar stroke
-			include : VSerif.dr RightSB top jutTop
+		if serifV : include : VSerif.dr RightSB top jutTop
+		if serifM : begin
+			local fine : stroke * [AdviceStroke 3.5] / Stroke
+			include : VBar.r xMidRight (yBar - 0.5 * jutBot) (yBar + 0.5 * jutBot) fine
 
 	define FConfig : object
-		serifless      { false false false }
-		topLeftSerifed { true false false  }
-		serifed        { true true true    }
+		serifless      { false false false false }
+		topLeftSerifed { true  false false false }
+		serifed        { true  true  true  false }
+		serifedCapped  { true  true  true  true  }
 
-	foreach { suffix { lt lb v } } [Object.entries FConfig] : do
+	foreach { suffix { lt lb v m } } [Object.entries FConfig] : do
 		create-glyph "F.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : LeaningAnchor.Below.VBar.l xFBarLeft [AdviceStroke2 2 3 CAP]
-			include : FShape CAP (serifLT -- lt) (serifLB -- lb) (serifV -- v)
+			include : FShape CAP (serifLT -- lt) (serifLB -- lb) (serifV -- v) (serifM -- m)
 
-		create-glyph "currency/frenchFrancSign.\(suffix)" : glyph-proc
+		if [not m] : create-glyph "currency/frenchFrancSign.\(suffix)" : glyph-proc
 			include [refer-glyph "F.\(suffix)"] AS_BASE ALSO_METRICS
 
 			eject-contour 'crossBar'
@@ -78,13 +84,13 @@ glyph-block Letter-Latin-Upper-F : begin
 		create-glyph "smcpF.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : LeaningAnchor.Below.VBar.l xFBarLeft [AdviceStroke2 2 3 XH]
-			include : FShape XH (serifLT -- lt) (serifLB -- lb) (serifV -- v)
+			include : FShape XH (serifLT -- lt) (serifLB -- lb) (serifV -- v) (serifM -- m)
 
 	select-variant 'F' 'F'
 	link-reduced-variant 'F/sansSerif' 'F' MathSansSerif
 	select-variant 'smcpF' 0xA730 (follow -- 'F')
 	select-variant 'FBar' 0xA798 (follow -- 'F')
-	select-variant 'currency/frenchFrancSign' 0x20A3 (follow -- 'F')
+	select-variant 'currency/frenchFrancSign' 0x20A3
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/F' 0x1D53D : glyph-proc

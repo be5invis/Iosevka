@@ -134,6 +134,7 @@ glyph-block Letter-Latin-C : begin
 	define CConfig : object
 		serifless               { SLAB-NONE      SLAB-NONE      }
 		bottomSerifed           { SLAB-NONE      SLAB-CLASSICAL }
+		bottomInwardSerifed     { SLAB-NONE      SLAB-INWARD    }
 		unilateralSerifed       { SLAB-CLASSICAL SLAB-NONE      }
 		bilateralSerifed        { SLAB-CLASSICAL SLAB-CLASSICAL }
 		unilateralInwardSerifed { SLAB-INWARD    SLAB-NONE      }
@@ -163,6 +164,12 @@ glyph-block Letter-Latin-C : begin
 			include : ExtendAboveBaseAnchors (CAP + Ascender - XH)
 			include : LeaningAnchor.Above.VBar.r RightSB
 
+		create-glyph "currency/euroSign.\(suffix)" : glyph-proc
+			include [refer-glyph "C.\(suffix)"] AS_BASE ALSO_METRICS
+			include : union
+				LetterBarOverlay.l SB (CAP * 0.4)
+				LetterBarOverlay.l SB (CAP * 0.6)
+
 		create-glyph "c.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
@@ -188,7 +195,7 @@ glyph-block Letter-Latin-C : begin
 				adb -- SmallArchDepthB
 			include : lf.full
 
-		create-glyph "revSmallC.\(suffix)" : glyph-proc
+		create-glyph "revc.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
 				ada -- SmallArchDepthA
@@ -240,7 +247,9 @@ glyph-block Letter-Latin-C : begin
 			difference base
 				Rect (top / 2) Descender (Middle + [HSwToV Stroke]) (Width * 4)
 				Rect (XH / 2) [mix Stroke Hook 0.5] Middle (Width * 4)
-			if styTop [HSerif.mb (Middle + [HSwToV HalfStroke]) Descender MidJutSide] [no-shape]
+			if (styTop && [not para.isItalic])
+				HSerif.mb (Middle + [HSwToV HalfStroke]) Descender MidJutSide
+				no-shape
 
 		if [not styBot] : create-glyph "cyrl/Koppa.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
@@ -286,10 +295,12 @@ glyph-block Letter-Latin-C : begin
 	select-variant 'CHookTop' 0x187
 	select-variant 'smcpC' 0x1D04 (follow -- 'C')
 
+	select-variant 'currency/euroSign' 0x20AC
+
 	select-variant 'c' 'c'
 	link-reduced-variant 'c/sansSerif' 'c' MathSansSerif
-	link-reduced-variant 'c/turnDescBase' 'c'
-	select-variant 'revSmallC' 0x2184 (follow -- 'c')
+	link-reduced-variant 'c/turnDescBase' 'c' (follow -- 'cHookTop')
+	select-variant 'revc' 0x2184 (follow -- 'c')
 	select-variant 'c/centKernelStd' (follow -- 'c')
 	select-variant 'c/centKernelCap' (follow -- 'c')
 	alias 'cyrl/es' 0x441 'c'
@@ -310,6 +321,42 @@ glyph-block Letter-Latin-C : begin
 	select-variant 'c/descBase'
 	select-variant 'romanSixLateForm' 0x2185 (follow -- 'C/descBase')
 
+	CreateTurnedLetter 'turnC' 0x186 'C' HalfAdvance (CAP / 2)
+	CreateTurnedLetter 'turnc' 0x254 'c' HalfAdvance (XH / 2)
+	CreateTurnedLetter 'turnSmcpC' 0x1D10 'smcpC' HalfAdvance (XH / 2)
+	alias 'grek/revLunateSigma' 0x3FD 'revC'
+	alias 'grek/revLunateSmallSigma' 0x37B 'revc.serifless'
+
+	CreateTurnedLetter 'turnc/descBase' null 'c/turnDescBase' HalfAdvance (XH / 2)
+	derive-composites 'turncRetroflexHook' 0x1D97 'turnc/descBase'
+		RetroflexHook.l SB 0 (yAttach -- DToothlessRise)
+
+	derive-composites 'CPalatalHook' 0xA7C4 'C/descBase'
+		PalatalHook.r RightSB 0 (yAttach -- DToothlessRise)
+
+	derive-composites 'cPalatalHook' 0xA794 'c/descBase'
+		PalatalHook.r RightSB 0 (yAttach -- DToothlessRise)
+
+	derive-composites 'cRetroflexHook' 0x1DF1D 'c/descBase'
+		RetroflexHook.r RightSB 0 (yAttach -- DToothlessRise)
+
+	derive-composites 'grek/dotLunateSigma' 0x3FE 'grek/lunateSigma' 'innerDot'
+	derive-composites 'grek/dotRevLunateSigma' 0x3FF 'grek/revLunateSigma' 'innerDot'
+	derive-composites 'grek/dotLunateSmallSigma' 0x37C 'grek/lunateSmallSigma' 'innerDotSmall'
+	derive-composites 'grek/dotRevLunateSmallSigma' 0x37D 'grek/revLunateSmallSigma' 'innerDotSmall'
+	derive-composites 'CRevDot' 0xA73E 'revC' 'innerDotSmall'
+	derive-composites 'cRevDot' 0xA73F 'revc' 'innerDotSmall'
+
+	create-glyph 'CBarOverlay' : LetterBarOverlay.l.in SB 0 CAP
+	create-glyph 'cBarOverlay' : LetterBarOverlay.l.in SB 0 XH
+	derive-composites 'CBar' 0xA792 'C' 'CBarOverlay'
+	derive-composites 'cBar' 0xA793 'c' 'cBarOverlay'
+
+	derive-composites 'CCedilla' 0xC7 'C' 'cedillaExtShapeBelowOArc'
+	derive-composites 'cCedilla' 0xE7 'c' 'cedillaExtShapeBelowOArc'
+	derive-composites 'cyrl/The' 0x4AA 'cyrl/Es' 'cedillaExtShapeBelowOArc'
+	derive-composites 'cyrl/the' 0x4AB 'cyrl/es' 'cedillaExtShapeBelowOArc'
+
 	create-glyph 'mathbb/C' 0x2102 : glyph-proc
 		include : MarkSet.capital
 		include : CShapeT dispiro 0 [DivFrame 1] SLAB-NONE SLAB-NONE CAP 0 ArchDepthA ArchDepthB Hook BBS
@@ -323,11 +370,6 @@ glyph-block Letter-Latin-C : begin
 		include : intersection
 			CShapeT spiro-outline 0.1 [DivFrame 1] SLAB-NONE SLAB-NONE XH 0 SmallArchDepthA SmallArchDepthB Hook BBS
 			VBar.l (SB + BBD + OX) 0 CAP BBS
-
-	create-glyph 'currency/euroSign/overlay' : union
-		LetterBarOverlay.l SB (CAP * 0.4)
-		LetterBarOverlay.l SB (CAP * 0.6)
-	derive-composites 'currency/euroSign' 0x20AC 'C' 'currency/euroSign/overlay'
 
 	define CentBarConfig : object
 		open           { (Descender / 2) (XH - Descender / 2) 0 "std" }
@@ -379,39 +421,3 @@ glyph-block Letter-Latin-C : begin
 	CreateDependentComposite 'cent/centSign' 0xA2 "cent/bar" : object
 		'std' 'c/centKernelStd'
 		'cap' 'c/centKernelCap'
-
-	CreateTurnedLetter 'turnC' 0x186 'C' HalfAdvance (CAP / 2)
-	CreateTurnedLetter 'turnc' 0x254 'c' HalfAdvance (XH / 2)
-	CreateTurnedLetter 'turnSmcpC' 0x1D10 'smcpC' HalfAdvance (XH / 2)
-	alias 'grek/revLunateSigma' 0x3FD 'revC'
-	alias 'grek/revLunateSmallSigma' 0x37B 'revSmallC.serifless'
-
-	CreateTurnedLetter 'turnc/turnDescBase' null 'c/turnDescBase' HalfAdvance (XH / 2)
-	derive-composites 'turncRetroflexHook' 0x1D97 'turnc/turnDescBase'
-		RetroflexHook.l SB 0 (yAttach -- DToothlessRise)
-
-	derive-composites 'CPalatalHook' 0xA7C4 'C/descBase'
-		PalatalHook.r RightSB 0 (yAttach -- DToothlessRise)
-
-	derive-composites 'cPalatalHook' 0xA794 'c/descBase'
-		PalatalHook.r RightSB 0 (yAttach -- DToothlessRise)
-
-	derive-composites 'cRetroflexHook' 0x1DF1D 'c/descBase'
-		RetroflexHook.r RightSB 0 (yAttach -- DToothlessRise)
-
-	derive-composites 'grek/dotLunateSigma' 0x3FE 'grek/lunateSigma' 'innerDot'
-	derive-composites 'grek/dotRevLunateSigma' 0x3FF 'grek/revLunateSigma' 'innerDot'
-	derive-composites 'grek/dotLunateSmallSigma' 0x37C 'grek/lunateSmallSigma' 'innerDotSmall'
-	derive-composites 'grek/dotRevLunateSmallSigma' 0x37D 'grek/revLunateSmallSigma' 'innerDotSmall'
-	derive-composites 'CRevDot' 0xA73E 'revC'      'innerDotSmall'
-	derive-composites 'cRevDot' 0xA73F 'revSmallC' 'innerDotSmall'
-
-	create-glyph 'CBarOverlay' : LetterBarOverlay.l.in SB 0 CAP
-	create-glyph 'cBarOverlay' : LetterBarOverlay.l.in SB 0 XH
-	derive-composites 'CBar' 0xA792 'C' 'CBarOverlay'
-	derive-composites 'cBar' 0xA793 'c' 'cBarOverlay'
-
-	derive-composites 'CCedilla' 0xC7 'C' 'cedillaExtShapeBelowOArc'
-	derive-composites 'cCedilla' 0xE7 'c' 'cedillaExtShapeBelowOArc'
-	derive-composites 'cyrl/The' 0x4AA 'cyrl/Es' 'cedillaExtShapeBelowOArc'
-	derive-composites 'cyrl/the' 0x4AB 'cyrl/es' 'cedillaExtShapeBelowOArc'
