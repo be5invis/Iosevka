@@ -1,0 +1,54 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [Box] from "@iosevka/geometry/box"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Loops : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+	define box : new Box Geom.Top Geom.Bot Geom.Left Geom.Right
+
+	define [LoopImpl bound nLoops sw _kX] : glyph-proc
+		local xDroop : (bound.right - bound.left) * (0.2 / nLoops)
+		local left  : bound.left  + xDroop
+		local right : bound.right - xDroop
+		local yTerm : bound.mixY (1 - 0.05 / nLoops)
+		local yInter : bound.mixY 0.9
+		local ySide : bound.mixY 0.4
+		local kX : fallback _kX 0.1
+
+		local loopPart {}
+		foreach [i : range 0 nLoops] : loopPart.push : list
+			g4.right.mid [mix left right (i / nLoops)] bound.top
+			g4 [mix left right ((i + 0.5) / nLoops)] yInter
+			g4.down.mid [mix left right ((i + 1 - kX) / nLoops)] ySide
+			arch.rhs bound.bot (sw -- sw)
+			g4.up.mid [mix left right ((i + kX) / nLoops)] ySide
+			g4 [mix left right ((i + 0.5) / nLoops)] yInter
+
+		include : dispiro
+			widths.rhs sw
+			g4 bound.left yTerm
+			* loopPart
+			g4.right.mid right bound.top
+			g4 bound.right yTerm
+
+	create-glyph [MangleName 'curlyLoop'] [MangleUnicode 0x27B0] : glyph-proc
+		set-width Geom.Width
+		include : LoopImpl box 1 GeometryStroke
+
+	create-glyph [MangleName 'doubleCurlyLoop'] [MangleUnicode 0x27BF] : glyph-proc
+		set-width Geom.Width
+		include : LoopImpl box 2 [AdviceStroke : 8 / MosaicWidthScalar] 0.05
+
+	create-glyph [MangleName 'samaritanSource'] [MangleUnicode 0x214F] : glyph-proc
+		set-width Geom.Width
+		local lowBox : new Box (XH / 2) 0 SB (MosaicWidth - SB)
+		include : LoopImpl lowBox 3 [AdviceStroke : 10 / MosaicWidthScalar]
+
+		include : FlipAround lowBox.xMid lowBox.yMid

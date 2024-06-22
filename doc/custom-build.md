@@ -327,7 +327,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>D</code> with more rounded shape, and serifs at both top and bottom</td></tr>
     </table></details>
   - Styles for `E`
-    <details><summary>3 variants</summary>
+    <details><summary>4 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-e-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-e-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-e = 'serifless'</code>, <code>cv05 = 1</code></td></tr>
     <tr><td>E without serifs (default for Sans)</td></tr>
@@ -335,9 +335,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>E with serif only at top left</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-e-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-e-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-e = 'serifed'</code>, <code>cv05 = 3</code></td></tr>
     <tr><td>E with serifs (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-e-serifed-capped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-e-serifed-capped.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-e = 'serifed-capped'</code>, <code>cv05 = 4</code></td></tr>
+    <tr><td>E with serifs and capped middle bar</td></tr>
     </table></details>
   - Styles for `F`
-    <details><summary>3 variants</summary>
+    <details><summary>4 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-f-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-f-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-f = 'serifless'</code>, <code>cv06 = 1</code></td></tr>
     <tr><td>F without serifs (default for Sans)</td></tr>
@@ -345,6 +347,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>F with serif only at top left</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-f-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-f-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-f = 'serifed'</code>, <code>cv06 = 3</code></td></tr>
     <tr><td>F with serifs (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-f-serifed-capped.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-f-serifed-capped.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-f = 'serifed-capped'</code>, <code>cv06 = 4</code></td></tr>
+    <tr><td>F with serifs and capped middle bar</td></tr>
     </table></details>
   - Styles for `G`
     <details><summary>27 variants</summary>
@@ -1720,6 +1724,18 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-z-cursive-with-horizontal-crossbar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-z-cursive-with-horizontal-crossbar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>z = 'cursive-with-horizontal-crossbar'</code>, <code>cv50 = 27</code></td></tr>
     <tr><td><code>z</code> with cursive body shape, and a horizontal crossbar</td></tr>
     </table></details>
+  - Styles for `ẞ` (Capital Eszet)
+    <details><summary>4 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-eszet-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-eszet = 'rounded-serifless'</code>, <code>VXAC = 1</code></td></tr>
+    <tr><td>Capital Eszet (<code>ẞ</code>) with rounded top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-eszet-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-eszet = 'rounded-serifed'</code>, <code>VXAC = 2</code></td></tr>
+    <tr><td>Capital Eszet (<code>ẞ</code>) with rounded top, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-eszet-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-eszet = 'flat-top-serifless'</code>, <code>VXAC = 3</code></td></tr>
+    <tr><td>Capital Eszet (<code>ẞ</code>) with flat top; without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-eszet-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-eszet = 'flat-top-serifed'</code>, <code>VXAC = 4</code></td></tr>
+    <tr><td>Capital Eszet (<code>ẞ</code>) with flat top, and serifs (default for Slab)</td></tr>
+    </table></details>
   - Styles for `ſ` (Long-S)
     <details><summary>30 variants</summary>
     <table>
@@ -1875,6 +1891,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Lowercase Eth (<code>ð</code>) with a straight bar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-eth-curly-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eth-curly-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-eth = 'curly-bar'</code>, <code>cv53 = 2</code></td></tr>
     <tr><td>Lowercase Eth (<code>ð</code>) with a curly bar (default)</td></tr>
+    </table></details>
+  - Styles for `Þ` (Capital Thorn (`Þ`))
+    <details><summary>3 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-thorn-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-thorn-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-thorn = 'serifless'</code>, <code>VXAD = 1</code></td></tr>
+    <tr><td>Capital Thorn (<code>Þ</code>) without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-thorn-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-thorn-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-thorn = 'motion-serifed'</code>, <code>VXAD = 2</code></td></tr>
+    <tr><td>Capital Thorn (<code>Þ</code>) with motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-thorn-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-thorn-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-thorn = 'serifed'</code>, <code>VXAD = 3</code></td></tr>
+    <tr><td>Capital Thorn (<code>Þ</code>) with serifs (default for Slab)</td></tr>
     </table></details>
   - Styles for `þ` (Lowercase Thorn (`þ`))
     <details><summary>3 variants</summary>
@@ -2121,31 +2147,39 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower Zhe (<code>ж</code>) with cursive legs</td></tr>
     </table></details>
   - Styles for `З` (Cyrillic Capital Ze)
-    <details><summary>5 variants</summary>
+    <details><summary>7 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'serifless'</code>, <code>cv69 = 1</code></td></tr>
     <tr><td>Serifless Cyrillic Capital Ze (<code>З</code>) (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'unilateral-serifed'</code>, <code>cv69 = 2</code></td></tr>
     <tr><td>Cyrillic Capital Ze (<code>З</code>) with serif at top (default for Slab)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'bilateral-serifed'</code>, <code>cv69 = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'unilateral-bottom-serifed'</code>, <code>cv69 = 3</code></td></tr>
+    <tr><td>Cyrillic Capital Ze (<code>З</code>) with serif at bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'bilateral-serifed'</code>, <code>cv69 = 4</code></td></tr>
     <tr><td>Cyrillic Capital Ze (<code>З</code>) with serif at both top and bottom</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'unilateral-inward-serifed'</code>, <code>cv69 = 4</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'unilateral-inward-serifed'</code>, <code>cv69 = 5</code></td></tr>
     <tr><td>Cyrillic Capital Ze (<code>З</code>) with inward serif at top</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'bilateral-inward-serifed'</code>, <code>cv69 = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-unilateral-bottom-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-bottom-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'unilateral-bottom-inward-serifed'</code>, <code>cv69 = 6</code></td></tr>
+    <tr><td>Cyrillic Capital Ze (<code>З</code>) with inward serif at bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'bilateral-inward-serifed'</code>, <code>cv69 = 7</code></td></tr>
     <tr><td>Cyrillic Capital Ze (<code>З</code>) with inward serif at both top and bottom</td></tr>
     </table></details>
   - Styles for `з` (Cyrillic Lower Ze)
-    <details><summary>5 variants</summary>
+    <details><summary>7 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'serifless'</code>, <code>cv70 = 1</code></td></tr>
     <tr><td>Serifless Cyrillic Lower Ze (<code>з</code>) (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'unilateral-serifed'</code>, <code>cv70 = 2</code></td></tr>
     <tr><td>Cyrillic Lower Ze (<code>з</code>) with serif at top (default for Slab Upright)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'bilateral-serifed'</code>, <code>cv70 = 3</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'unilateral-bottom-serifed'</code>, <code>cv70 = 3</code></td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) with serif at bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'bilateral-serifed'</code>, <code>cv70 = 4</code></td></tr>
     <tr><td>Cyrillic Lower Ze (<code>з</code>) with serif at both top and bottom</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'unilateral-inward-serifed'</code>, <code>cv70 = 4</code></td></tr>
-    <tr><td>Cyrillic Lower Ze (<code>з</code>) with inward serif at top (default for Slab Italic)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'bilateral-inward-serifed'</code>, <code>cv70 = 5</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'unilateral-inward-serifed'</code>, <code>cv70 = 5</code></td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) with inward serif at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-unilateral-bottom-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-bottom-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'unilateral-bottom-inward-serifed'</code>, <code>cv70 = 6</code></td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) with inward serif at bottom (default for Slab Italic)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'bilateral-inward-serifed'</code>, <code>cv70 = 7</code></td></tr>
     <tr><td>Cyrillic Lower Ze (<code>з</code>) with inward serif at both top and bottom</td></tr>
     </table></details>
   - Styles for `К` (Cyrillic Capital Ka)
@@ -2416,14 +2450,14 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-che-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-che-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-che = 'tailed'</code>, <code>cv80 = 2</code></td></tr>
     <tr><td>Cyrillic Lower Che (<code>ч</code>) with tail</td></tr>
     </table></details>
-  - Styles for `ь` (Cyrillic Lower Yeri and related letters)
+  - Styles for `ь`, `ъ` (Cyrillic Lower Yeri and related letters)
     <details><summary>3 variants</summary>
     <table>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-yeri-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yeri-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-yeri = 'corner'</code>, <code>cv81 = 1</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-cyrl-yeri-corner.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-cyrl-yeri-corner.dark.svg#gh-dark-mode-only" width=64/></td><td><code>cyrl-yeri = 'corner'</code>, <code>cv81 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Yeri (<code>ь</code>) with corner at bottom left (default for Upright)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-yeri-round.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yeri-round.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-yeri = 'round'</code>, <code>cv81 = 2</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-cyrl-yeri-round.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-cyrl-yeri-round.dark.svg#gh-dark-mode-only" width=64/></td><td><code>cyrl-yeri = 'round'</code>, <code>cv81 = 2</code></td></tr>
     <tr><td>Cyrillic Lower Yeri (<code>ь</code>) with rounded shape (default for Sans Italic)</td></tr>
-    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-yeri-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yeri-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-yeri = 'cursive'</code>, <code>cv81 = 3</code></td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-cyrl-yeri-cursive.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-cyrl-yeri-cursive.dark.svg#gh-dark-mode-only" width=64/></td><td><code>cyrl-yeri = 'cursive'</code>, <code>cv81 = 3</code></td></tr>
     <tr><td>Cyrillic Lower Yeri (<code>ь</code>) with cursive shape (default for Slab Italic)</td></tr>
     </table></details>
   - Styles for `ы` (Cyrillic Lower Yery)
@@ -2441,6 +2475,42 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower Yery (<code>ы</code>) with cursive shape (default for Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-yery-cursive-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-yery-cursive-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-yery = 'cursive-tailed'</code>, <code>cv82 = 6</code></td></tr>
     <tr><td>Cyrillic Lower Yery (<code>ы</code>) with cursive shape and tail</td></tr>
+    </table></details>
+  - Styles for `Э` (Cyrillic Capital E (`Э`))
+    <details><summary>7 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'serifless'</code>, <code>VXAA = 1</code></td></tr>
+    <tr><td>Serifless Cyrillic Capital E (<code>Э</code>) (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'unilateral-serifed'</code>, <code>VXAA = 2</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with serif at top (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'unilateral-bottom-serifed'</code>, <code>VXAA = 3</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with serif at bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'bilateral-serifed'</code>, <code>VXAA = 4</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with serifs at both top and bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'unilateral-inward-serifed'</code>, <code>VXAA = 5</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with inward serif at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-unilateral-bottom-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-bottom-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'unilateral-bottom-inward-serifed'</code>, <code>VXAA = 6</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with inward serif at bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'bilateral-inward-serifed'</code>, <code>VXAA = 7</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with inward serif at both top and bottom</td></tr>
+    </table></details>
+  - Styles for `э` (Cyrillic Lower E (`э`))
+    <details><summary>7 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'serifless'</code>, <code>VXAB = 1</code></td></tr>
+    <tr><td>Serifless Cyrillic Lower E (<code>э</code>) (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'unilateral-serifed'</code>, <code>VXAB = 2</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with serif at top (default for Slab Upright)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'unilateral-bottom-serifed'</code>, <code>VXAB = 3</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with serif at bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'bilateral-serifed'</code>, <code>VXAB = 4</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with serifs at both top and bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'unilateral-inward-serifed'</code>, <code>VXAB = 5</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with inward serif at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-unilateral-bottom-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-bottom-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'unilateral-bottom-inward-serifed'</code>, <code>VXAB = 6</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with inward serif at bottom (default for Slab Italic)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'bilateral-inward-serifed'</code>, <code>VXAB = 7</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with inward serif at both top and bottom</td></tr>
     </table></details>
   - Styles for `Я` (Cyrillic Capital Ya)
     <details><summary>18 variants</summary>

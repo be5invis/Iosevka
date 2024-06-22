@@ -181,12 +181,44 @@ glyph-block Letter-Latin-Upper-Eszet : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-
-	create-glyph 'Eszet' 0x1E9E : glyph-proc
+	define [EszetRoundedShape slab] : glyph-proc
 		include : MarkSet.capital
 
 		define ymiddle : [mix 0 CAP 0.5] - HalfStroke
-		define ymiddleCap : [mix 0 CAP 0.54] - HalfStroke
+		define ymiddleCap : [mix 0 CAP 0.5] + HalfStroke
+		define xFinal : Math.max
+			mix (SB + [HSwToV Stroke]) RightSB 0.1
+			mix SB RightSB 0.3
+		define xMiddle : RightSB - ymiddle / 2 - Stroke * 0.75
+		define xMiddleBot : RightSB - ymiddle / 2 - HalfStroke
+		define rightTopX : RightSB + O * 2
+
+		include : dispiro
+			widths.lhs
+			g4 rightTopX (CAP - ArchDepthB)
+			hookstart (CAP - O)
+			flat SB XH
+			curl SB 0 [heading Downward]
+		include : dispiro
+			widths.rhs
+			g4   xMiddle ymiddleCap
+			archv
+			g4   (RightSB - O) [mix 0 ymiddleCap 0.5]
+			arcvh
+			flat xMiddleBot 0
+			curl xFinal 0 [heading Leftward]
+		include : dispiro
+			widths.rhs
+			g4 rightTopX (CAP - ArchDepthB)
+			g4 xMiddle ymiddleCap [widths Stroke 0]
+
+		if slab : include : HSerif.lb SB 0 SideJut
+
+	define [EszetFlatTopShape slab] : glyph-proc
+		include : MarkSet.capital
+
+		define ymiddle : [mix 0 CAP 0.5] - HalfStroke
+		define ymiddleCap : [mix 0 CAP 0.54] + HalfStroke
 		define xFinal : Math.max
 			mix (SB + [HSwToV Stroke]) RightSB 0.1
 			mix SB RightSB 0.3
@@ -203,15 +235,28 @@ glyph-block Letter-Latin-Upper-Eszet : begin
 			curl SB 0 [heading Downward]
 		include : dispiro
 			widths.rhs
-			g4   xMiddle (ymiddleCap + Stroke) [heading Rightward]
+			g4   xMiddle ymiddleCap [heading Rightward]
 			archv
-			g4   (RightSB - O * 2) [YSmoothMidR (ymiddleCap + Stroke) 0]
+			g4   (RightSB - O * 2) [YSmoothMidR ymiddleCap 0]
 			arcvh
 			flat xMiddleBot 0
 			curl xFinal 0 [heading Leftward]
 		include : dispiro
 			widths.rhs
 			g4 rightTopX (CAP - Stroke)
-			g4 xMiddle (ymiddleCap + Stroke) [widths.lhs Stroke]
+			g4 xMiddle ymiddleCap [widths.lhs Stroke]
 
-		if SLAB : include : HSerif.lb SB 0 SideJut
+		if slab : include : HSerif.lb SB 0 SideJut
+
+	define CapitalEszetConfig : SuffixCfg.weave
+		object # body
+			rounded    EszetRoundedShape
+			flatTop    EszetFlatTopShape
+		object # serifs
+			serifless  false
+			serifed    true
+
+	foreach { suffix { Base serif } } [pairs-of CapitalEszetConfig] : do
+		create-glyph "Eszet.\(suffix)" : Base serif
+
+	select-variant 'Eszet' 0x1E9E

@@ -28,7 +28,7 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 		corner [mix x1 x2 (-1)] [mix y1 y2 (-1)]
 		corner [mix x1 x2   2 ] [mix y1 y2   2 ]
 
-	define gateSize : MosaicHeight / 2
+	define gateSize : MosaicHeight / 4 * MosaicWidthScalar
 	define gateBot : midy - gateSize
 	define gateTop : midy + gateSize
 	define ringSize : Math.min (Geom.Size * 0.5) (MosaicWidth / 6)
@@ -186,6 +186,60 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 				MaskLeft : midx + [HSwToV : 0.5 * boxDrawingStroke]
 				LineExt down (top - 0.5 * halfPeriod) midx top boxDrawingStroke
 
+	do "Coil"
+		glyph-block-import Symbol-Mosaic-Split-Graphic : Multicell
+		local multicell : Multicell MosaicWidth
+
+		define amplitude : Geom.Size * 0.8
+
+		define [CoilImpl top bot left right] : begin
+			local mid1 : mix left right (1 / 3)
+			local mid2 : mix left right (2 / 3)
+			local midy : mix bot top 0.5
+
+			local yTerm : midy + boxDrawingStroke / 2
+			local yTop : midy + amplitude
+			local yBot : midy - amplitude
+			local yInter : mix yBot yTop 0.95
+			local ySide : mix yBot yTop 0.45
+			local kX 0.1
+			local kX2 0.15
+			local kX3 : StrokeWidthBlend 0.24 0.21
+
+			return : dispiro
+				widths.rhs boxDrawingStroke
+				straight.right.start left yTerm
+				g4 [mix left mid1 kX3] [mix yTerm yTop 0.4]
+				g4.right.mid [mix left mid1 (0.5 + kX2)] yTop
+				g4 mid1 yInter
+				g4.down.mid [mix mid1 mid2 (0.5 - kX)] ySide
+				arch.rhs yBot (sw -- boxDrawingStroke)
+				g4.up.mid [mix left mid1 (0.5 + kX)] ySide
+				g4 mid1 yInter
+				flat [mix mid1 mid2 (0.5 - kX2)] yTop
+				curl [mix mid1 mid2 (0.5 + kX2)] yTop
+				g4 mid2 yInter
+				g4.down.mid [mix mid2 right (0.5 - kX)] ySide
+				arch.rhs yBot (sw -- boxDrawingStroke)
+				g4.up.mid [mix mid1 mid2 (0.5 + kX)] ySide
+				g4 mid2 yInter
+				g4.right.mid [mix mid2 right (0.5 - kX2)] yTop
+				g4 [mix right mid2 kX3] [mix yTerm yTop 0.4]
+				straight.right.end right yTerm
+
+		create-glyph [MangleName 'inductorLeftThird'] [MangleUnicode 0x1CC0B] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 1 3 0 0 1 CoilImpl
+		create-glyph [MangleName 'inductorMiddleThird'] [MangleUnicode 0x1CC0C] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 1 3 0 1 1 CoilImpl
+		create-glyph [MangleName 'inductorRightThird'] [MangleUnicode 0x1CC0D] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : multicell.Split top bottom left right 1 3 0 2 1 CoilImpl
+
 	do "Diode"
 		define diodeGap : MosaicWidth / 9
 		define diodeLeft : left + diodeGap
@@ -281,17 +335,36 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 			include : InvertRingAt (left + ringSize) midy
 			include : InvertRingAt (right - ringSize) midy
 
+		define [InvertedInputImpl spread] : glyph-proc
+			local limit : MosaicHeight / 2 - ringSize
+			local spread2 : Math.min (spread - boxDrawingStroke / 2) limit
+
+			include : InvertRingAt (right - ringSize) (midy + spread2)
+			include : InvertRingAt (right - ringSize) (midy - spread2)
+
+			if (spread >= MosaicHeight / 2) : begin
+				include : difference
+					HBar.t left (right - ringSize) top boxDrawingStroke
+					InvertRingAt (right - ringSize) (midy + spread2) 1
+				include : difference
+					HBar.b left (right - ringSize) bottom boxDrawingStroke
+					InvertRingAt (right - ringSize) (midy - spread2) 1
+			: else : begin
+				include : HBar.t left midx top boxDrawingStroke
+				include : HBar.b left midx bottom boxDrawingStroke
+				include : VBar.m midx (midy + spread - boxDrawingStroke) top    boxDrawingStroke
+				include : VBar.m midx bottom (midy - spread + boxDrawingStroke) boxDrawingStroke
+				include : difference
+					HBar.t midx (right - ringSize) (midy + spread) boxDrawingStroke
+					InvertRingAt (right - ringSize) (midy + spread2) 1
+				include : difference
+					HBar.b midx (right - ringSize) (midy - spread) boxDrawingStroke
+					InvertRingAt (right - ringSize) (midy - spread2) 1
+
 		create-glyph [MangleName 'invertedInputs'] [MangleUnicode 0x1CC17] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
-			include : InvertRingAt (right - ringSize) (top - ringSize)
-			include : InvertRingAt (right - ringSize) (bottom + ringSize)
-			include : difference
-				HBar.t left (right - ringSize) top boxDrawingStroke
-				InvertRingAt (right - ringSize) (top - ringSize) 1
-			include : difference
-				HBar.b left (right - ringSize) bottom boxDrawingStroke
-				InvertRingAt (right - ringSize) (bottom + ringSize) 1
+			include : InvertedInputImpl (gateSize - [if (MosaicWidthScalar < 2) (ringSize - boxDrawingStroke / 2) 0])
 
 		create-glyph [MangleName 'invertedOutput'] [MangleUnicode 0x1CC18] : glyph-proc
 			set-width MosaicWidth
@@ -304,11 +377,65 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 			set-width MosaicWidth
 			include : ForceUpright
 			include : HBar.m left midx midy boxDrawingStroke
-			include : TriangleShape midx bottom midx top right midy boxDrawingStroke
+			include : TriangleShape midx gateBot midx gateTop right midy boxDrawingStroke
 
 		create-glyph [MangleName 'invertedBufferGate'] [MangleUnicode 0x1CC1A] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
 			include : HBar.m left (midx - ringSize * 2 + fineStroke / 2) midy boxDrawingStroke
 			include : InvertRingAt (midx - ringSize) midy
-			include : TriangleShape midx bottom midx top right midy boxDrawingStroke
+			include : TriangleShape midx gateBot midx gateTop right midy boxDrawingStroke
+
+	do "Logic Gates"
+		define andCurlX : Math.max midx (right - gateSize)
+		define leftOX : left - OX
+		define orCurlX1 : mix leftOX right 0.15
+		define orCurlX2 : mix leftOX right 0.4
+
+		create-glyph [MangleName 'andGate'] [MangleUnicode 0x1CC16] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : VBar.l left gateBot gateTop boxDrawingStroke
+
+			include : dispiro
+				widths.lhs boxDrawingStroke
+				flat left gateBot
+				curl (right - andCurlX) gateBot
+				archv
+				g4 right midy
+				arcvh
+				flat (right - andCurlX) gateTop
+				corner left gateTop
+
+		create-glyph [MangleName 'orGate'] [MangleUnicode 0x1CC15] : glyph-proc
+			set-width MosaicWidth
+			include : ForceUpright
+			include : intersection [Rect gateTop gateBot leftOX right]
+				dispiro
+					widths.lhs boxDrawingStroke
+					g4 leftOX gateTop
+					quadControls 1 0.3
+					g4 orCurlX1 midy
+					quadControls 0 0.7
+					g4 leftOX gateBot
+			include : difference
+				union
+					intersection [MaskBelow midy] : dispiro
+						widths.lhs boxDrawingStroke
+						flat leftOX gateBot
+						curl orCurlX2 gateBot
+						quadControls 0.7 0
+						g4 right midy
+					intersection [MaskAbove midy] : dispiro
+						widths.rhs boxDrawingStroke
+						flat leftOX gateTop
+						curl orCurlX2 gateTop
+						quadControls 0.7 0
+						g4 right midy
+				spiro-outline
+					g4 leftOX gateTop
+					quadControls 1 0.3
+					g4 orCurlX1 midy
+					quadControls 0 0.7
+					g4 leftOX gateBot
+					close

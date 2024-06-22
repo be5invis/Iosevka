@@ -26,7 +26,11 @@ glyph-block Symbol-Currency : begin
 				flat (Middle + radius * 0.87 * [Math.cos angle]) (SymbolMid + radius * 0.87 * [Math.sin angle])
 				curl (Middle + radius * Math.SQRT2 * [Math.cos angle]) (SymbolMid + radius * Math.SQRT2 * [Math.sin angle])
 
-	do "Sterling"
+	define SterlingConfig : object
+		serifless     { 0 }
+		motionSerifed { 1 }
+
+	foreach { suffix { serifGrade } } [Object.entries SterlingConfig] : do
 		define xBarLeft : [mix SB RightSB 0.2] - Stroke * 0.1
 		define [BaseShape] : glyph-proc
 			local xBarLeft : [mix SB RightSB 0.2] - Stroke * 0.1
@@ -39,17 +43,21 @@ glyph-block Symbol-Currency : begin
 					curl xBarLeft [mix Stroke CAP 0.3]
 					g4   SB Stroke
 				HBar.b SB RightSB 0
+			if serifGrade : include : VSerif.ur RightSB 0 VJut
 
-		create-glyph 'currency/sterlingSign' 0xA3 : glyph-proc
+		create-glyph "currency/sterlingSign.\(suffix)" : glyph-proc
 			set-width Width
 			include : BaseShape
 			include : LetterBarOverlay.l xBarLeft (CAP * 0.5)
 
-		create-glyph 'currency/liraSymbolSign' 0x20A4 : glyph-proc
+		create-glyph "currency/liraSymbolSign.\(suffix)" : glyph-proc
 			set-width Width
 			include : BaseShape
 			include : LetterBarOverlay.l xBarLeft (CAP * 0.37)
 			include : LetterBarOverlay.l xBarLeft (CAP * 0.60 - OverlayStroke * 0.25)
+
+	select-variant 'currency/sterlingSign'   0xA3
+	select-variant 'currency/liraSymbolSign' 0x20A4 (follow -- 'currency/sterlingSign')
 
 glyph-block Symbol-Currency-Letter-Derived : begin
 	glyph-block-import CommonShapes
