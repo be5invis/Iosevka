@@ -16,54 +16,57 @@ glyph-block Symbol-Braille : begin
 	local stress : 0.5 * [AdviceStroke 3.375]
 	local dotRadius : PeriodRadius * [Math.min 1 (stress / HalfStroke)]
 
-	define [BrailleYCoord y] (SymbolMid + y * offsetY)
-	define [BrailleOutlineShape byte] : glyph-proc
-		foreach [bit : range 0 8] : if [maskBit byte bit] : begin
-			include : match bit
-				0 : DotAt left  [BrailleYCoord (-3)] dotRadius
-				1 : DotAt left  [BrailleYCoord (-1)] dotRadius
-				2 : DotAt left  [BrailleYCoord   1 ] dotRadius
-				3 : DotAt right [BrailleYCoord (-3)] dotRadius
-				4 : DotAt right [BrailleYCoord (-1)] dotRadius
-				5 : DotAt right [BrailleYCoord   1 ] dotRadius
-				6 : DotAt left  [BrailleYCoord   3 ] dotRadius
-				7 : DotAt right [BrailleYCoord   3 ] dotRadius
+	define MASK-LEFT-HALF  0x47
+	define MASK-RIGHT-HALF 0xB8
 
-	define [BrailleReferenceShape byte] : glyph-proc
-		foreach [bit : range 0 8] : if [maskBit byte bit]
-			include : refer-glyph ['braille' + (bit + 1)]
 
-	define [BrailleHalvesShape byte] : glyph-proc
-		local leftHalf  : maskBits byte 0x47
-		local rightHalf : maskBits byte 0xB8
-		include : refer-glyph : brailleGlyphName leftHalf
-		include : refer-glyph : brailleGlyphName rightHalf
-
-	define [brailleBuildStage byte] : begin
-		if (1 == [popCountByte byte]) : return 1
-		if (![maskBits byte 0x47] || ![maskBits byte 0xB8]) : return 2
-		return 3
-
-	define [brailleGlyphName byte] : begin
+	define [brailleGlyphName byte suffix] : begin
 		local dots {}
 		foreach [bit : range 0 8] : if [maskBit byte bit] : dots.push (bit + 1)
-		return ("braille" + [dots.join ''])
+		return : if suffix "braille\[dots.join ''].\(suffix)" "braille\[dots.join '']"
 
-	### Computed Braille Patterns
-	###
-	### Bit to Dot mapping:
-	###   0  3
-	###   1  4
-	###   2  5
-	###   6  7
+	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+		define [BrailleYCoord y] (SymbolMid + y * offsetY)
 
-	define stageConfig : list
-		list 1 BrailleOutlineShape
-		list 2 BrailleReferenceShape
-		list 3 BrailleHalvesShape
+		### Computed Braille Patterns
+		###
+		### Bit to Dot mapping:
+		###   0  3
+		###   1  4
+		###   2  5
+		###   6  7
+		define [OneHalf byte] : glyph-proc
+			local r : kDotRadius * dotRadius - overshoot
+			foreach [bit : range 0 8] : if [maskBit byte bit] : begin
+				include : match bit
+					0 : DrawAt left  [BrailleYCoord (-3)] r
+					1 : DrawAt left  [BrailleYCoord (-1)] r
+					2 : DrawAt left  [BrailleYCoord   1 ] r
+					3 : DrawAt right [BrailleYCoord (-3)] r
+					4 : DrawAt right [BrailleYCoord (-1)] r
+					5 : DrawAt right [BrailleYCoord   1 ] r
+					6 : DrawAt left  [BrailleYCoord   3 ] r
+					7 : DrawAt right [BrailleYCoord   3 ] r
 
-	foreach { stage F } [items-of stageConfig] : begin
-		foreach [byte : range 1 256] : if (stage == [brailleBuildStage byte])
-			create-glyph [brailleGlyphName byte] (0x2800 + byte) : glyph-proc
-				include : ForceUpright
-				include : F byte
+		define [TwoHalves byte] : glyph-proc
+			local leftHalf  : maskBits byte MASK-LEFT-HALF
+			local rightHalf : maskBits byte MASK-RIGHT-HALF
+			include : refer-glyph : brailleGlyphName leftHalf  suffix
+			include : refer-glyph : brailleGlyphName rightHalf suffix
+
+		define [brailleBuildStage byte] : begin
+			if (![maskBits byte MASK-LEFT-HALF] || ![maskBits byte MASK-RIGHT-HALF]) : return 1
+			return 2
+
+		define stageConfig : list
+			list 1 OneHalf
+			list 2 TwoHalves
+
+		foreach { stage F } [items-of stageConfig] : begin
+			foreach [byte : range 1 256] : if (stage == [brailleBuildStage byte]) : begin
+				create-glyph [brailleGlyphName byte suffix] : glyph-proc
+					include : ForceUpright
+					include : F byte
+
+	foreach [byte : range 1 256] : begin
+		select-variant [brailleGlyphName byte] (0x2800 + byte) (follow -- 'brailleDot')
