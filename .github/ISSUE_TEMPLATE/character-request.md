@@ -21,7 +21,7 @@ assignees: ''
   - [ ] Mathematical or other professional use in documents.
   - [ ] The symbol set of a programming language. For the languages that support using arbitrary symbols, please provide usages in well-known components or libraries.
   - [ ] The symbol set of a command-line program.
-- [ ] For each character you requested, there are another monospace/programming font supports this character. Provide images below.
+- [ ] For each character you requested, there is at least a monospace/programming font supports this character. Provide images below.
 
 ------
 
