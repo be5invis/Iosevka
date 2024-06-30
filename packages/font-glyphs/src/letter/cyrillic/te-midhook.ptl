@@ -9,47 +9,47 @@ glyph-block Letter-Cyrillic-Te-MidHook : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : MidHook
 
-	define [Shape top pArc slabTop slabBot] : glyph-proc
-		local sw : AdviceStroke 2.75
-		local left : [mix SB RightSB 0.20] + OX
-		local right : RightSB - OX
+	define [Shape df top pArc slabTop slabBot] : glyph-proc
+		local left : [mix df.leftSB df.rightSB 0.3] + OX
 
-		local xTopBarLeft : SB - SideJut
-		local xTopBarRightSym : 2 * left + [HSwToV sw] - xTopBarLeft
-		local xTopBarRight : Math.max xTopBarRightSym : mix left RightSB 0.475
+		local xTopBarLeft : df.leftSB - SideJut
+		local xTopBarRightSym : 2 * left + [HSwToV df.mvs] - xTopBarLeft
+		local xTopBarRight : Math.max xTopBarRightSym : mix left df.rightSB 0.475
 
-		include : VBar.l left 0 top sw
-		include : HBar.t xTopBarLeft xTopBarRight top sw
+		include : VBar.l left 0 top df.mvs
+		include : HBar.t xTopBarLeft xTopBarRight top df.mvs
 		include : MidHook.general
-			left   -- (left + [HSwToV sw])
-			right  -- RightSB
-			top    -- top * HBarPos + sw / 4
+			left   -- (left + [HSwToV df.mvs])
+			right  -- df.rightSB
+			top    -- top * HBarPos + df.mvs / 4
 			ada    -- ArchDepthA * pArc
 			adb    -- ArchDepthB * pArc
-			sw     -- sw
+			sw     -- df.mvs
 
 		if slabTop : begin
-			local swVJut : Math.min [AdviceStroke 4.5] (0.625 * (left - xTopBarLeft))
-			include : VSerif.dl  xTopBarLeft top VJut swVJut
-			include : VSerif.dr xTopBarRight top VJut swVJut
+			include : VSerif.dl  xTopBarLeft top VJut
+			include : VSerif.dr xTopBarRight top VJut
 
 		if slabBot : begin
-			include : HSerif.mb (left + [HSwToV : 0.5 * sw]) 0 Jut
+			include : HSerif.mb (left + [HSwToV : 0.5 * df.mvs]) 0 Jut
 
 	define Config : object
-		serifless     { false false }
-		motionSerifed { true  false }
-		serifed       { true  true  }
+		serifless     { 1                           false false }
+		motionSerifed { [mix 1 para.diversityM 0.5] true  false }
+		serifed       { [mix 1 para.diversityM 0.5] true  true  }
 
-	foreach { suffix { doST doSB } } [Object.entries Config] : do
+	foreach { suffix { div doST doSB } } [Object.entries Config] : do
+		local df : DivFrame div 3
 
 		create-glyph "cyrl/TeMidHook.\(suffix)" : glyph-proc
-			include : MarkSet.capDesc
-			include : Shape CAP 1 doST doSB
+			set-width df.width
+			include : df.markSet.capDesc
+			include : Shape df CAP 1 doST doSB
 
 		create-glyph "cyrl/teMidHook.upright.\(suffix)" : glyph-proc
-			include : MarkSet.p
-			include : Shape XH [Math.pow HBarPos 0.3] doST doSB
+			set-width df.width
+			include : df.markSet.p
+			include : Shape df XH [Math.pow HBarPos 0.3] doST doSB
 
 	select-variant 'cyrl/TeMidHook' 0xA68A (follow -- 'T')
 	select-variant 'cyrl/teMidHook.upright' (follow -- 'T')
