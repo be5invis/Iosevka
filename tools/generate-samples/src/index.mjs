@@ -60,7 +60,7 @@ async function main(argv) {
 		argv.charMapItalicPath,
 		argv.charMapObliquePath,
 	);
-	for (const block of cl.unicodeCoverage) {
+	for (const block of cl.unique.unicodeCoverage) {
 		const blockID = block.name
 			.toLowerCase()
 			.replaceAll(/[^\w ]/g, "")
@@ -68,6 +68,7 @@ async function main(argv) {
 		if (blockID === "specials") continue;
 		await tasks.add(`cs-block-${blockID}`, CharGrid, {
 			characters: block.characters,
+			udatMap: cl.shared.udatMap,
 		});
 	}
 

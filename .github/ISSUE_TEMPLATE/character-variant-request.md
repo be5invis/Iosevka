@@ -7,9 +7,9 @@ assignees: ''
 
 ---
 
-- [ ] The requested variant shape does not go too far away from Iosevka's design.
-- [ ] The requested variant does not conflict with any characters in Unicode that Iosevka currently supports.
-- [ ] At least two monospace/programming fonts, created by different designers, supported the requested variant. Provide images below.
+- [ ] The requested variant shape **does not go too far away from Iosevka's design**.
+- [ ] The requested variant **does not conflict with any characters in Unicode that Iosevka currently supports**.
+- [ ] For each variant you requested, there are at least **two monospace/programming fonts created by different designers supported the requested variant**. Provide images below.
 
 ------
 

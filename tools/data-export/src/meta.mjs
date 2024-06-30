@@ -1,18 +1,12 @@
 import fs from "fs";
 
 import { parseLigationData } from "./ligation-data.mjs";
-import { getCharMapAndSupportedLanguageList } from "./supported-languages.mjs";
 import { parseVariantsData } from "./variants-data.mjs";
 
 export default main;
 async function main(argv) {
 	const variantsData = await parseVariantsData(argv);
 	const ligationData = await parseLigationData(argv);
-	const cl = await getCharMapAndSupportedLanguageList(
-		argv.charMapPath,
-		argv.charMapItalicPath,
-		argv.charMapObliquePath,
-	);
 	await fs.promises.writeFile(
 		argv.exportPathMeta,
 		JSON.stringify(
@@ -28,9 +22,5 @@ async function main(argv) {
 			null,
 			2,
 		),
-	);
-	await fs.promises.writeFile(
-		argv.exportPathCov,
-		JSON.stringify({ version: argv.version, ...cl }, null, 2),
 	);
 }
