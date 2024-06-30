@@ -1740,14 +1740,22 @@
 <td><img src="../images/cv-capital-eszet-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-eszet-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-eszet-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="8"> </td>
+<td><img src="../images/cv-capital-eszet-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-eszet-corner-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-corner-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-eszet-corner-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-corner-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-eszet-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="4"> </td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
 <td>3</td>
 <td>4</td>
-<td colspan="8"> </td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td colspan="4"> </td>
 </tr>
 <tr>
 <td rowspan="6"><code>cv51</code></td>
@@ -3130,6 +3138,17 @@
 <tr>
 <td colspan="6">1</td>
 <td colspan="6">2</td>
+</tr>
+<tr>
+<td rowspan="2"><code>VXAE</code></td>
+<td colspan="2"><img src="../images/cv-braille-dot-round.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-braille-dot-round.dark.svg#gh-dark-mode-only" width=64/></td>
+<td colspan="2"><img src="../images/cv-braille-dot-square.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-braille-dot-square.dark.svg#gh-dark-mode-only" width=64/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td colspan="2">1</td>
+<td colspan="2">2</td>
+<td colspan="8"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv98</code></td>
