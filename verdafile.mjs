@@ -952,6 +952,11 @@ async function CreateGroupArchiveFile(dir, out, ...files) {
 const Pages = task(`pages`, async t => {
 	await t.need(
 		PagesDataExport,
+		PagesFontVersionSync,
+		PagesAtlasExport(`Iosevka`),
+		PagesAtlasExport(`IosevkaSlab`),
+		PagesAtlasExport(`IosevkaAile`),
+		PagesAtlasExport(`IosevkaEtoile`),
 		PagesFontExport`Iosevka`,
 		PagesFontExport`IosevkaSlab`,
 		PagesFontExport`IosevkaAile`,
@@ -969,28 +974,9 @@ const PagesDir = oracle(`pages-dir-path`, async t => {
 	return rp.buildOptions.__pagesDir;
 });
 
-const PagesDataExport = task(`pages:data-export`, async t => {
+const PagesFontVersionSync = task(`pages:font-version-sync`, async t => {
 	const [version] = await t.need(Version);
-	const [pagesDir] = await t.need(PagesDir, Version, Parameters, UtilScripts);
-	const [cm, cmi, cmo] = await t.need(
-		BuildCM("Iosevka", "Iosevka-Regular"),
-		BuildCM("Iosevka", "Iosevka-Italic"),
-		BuildCM("Iosevka", "Iosevka-Oblique"),
-	);
-	await node(`tools/generate-samples/src/tokenized-sample-code.mjs`, {
-		output: Path.resolve(pagesDir, "shared/tokenized-sample-code/alphabet.txt.json"),
-	});
-	await node(`tools/data-export/src/index.mjs`, {
-		version,
-		paramsDir: Path.resolve("params"),
-		charMapPath: cm.full,
-		charMapItalicPath: cmi.full,
-		charMapObliquePath: cmo.full,
-		exportPathMeta: Path.resolve(pagesDir, "shared/data-import/raw/metadata.json"),
-		exportPathCov: Path.resolve(pagesDir, "shared/data-import/raw/coverage.json"),
-	});
-
-	// Update packages.json version
+	const [pagesDir] = await t.need(PagesDir);
 	const packageJson = JSON.parse(
 		await FS.promises.readFile(Path.resolve(pagesDir, "package.json"), "utf-8"),
 	);
@@ -999,6 +985,40 @@ const PagesDataExport = task(`pages:data-export`, async t => {
 		Path.resolve(pagesDir, "package.json"),
 		JSON.stringify(packageJson, null, "  "),
 	);
+});
+
+const PagesDataExport = task(`pages:data-export`, async t => {
+	const [version] = await t.need(Version);
+	const [pagesDir] = await t.need(PagesDir, Parameters, UtilScripts);
+	await node(`tools/generate-samples/src/tokenized-sample-code.mjs`, {
+		output: Path.resolve(pagesDir, "shared/tokenized-sample-code/alphabet.txt.json"),
+	});
+	await node(`tools/data-export/src/meta.mjs`, {
+		version,
+		paramsDir: Path.resolve("params"),
+		exportPathMeta: Path.resolve(pagesDir, "shared/data-import/raw/metadata.json"),
+	});
+});
+
+const PagesAtlasExport = task.group(`pages:atlas-export`, async (t, gr) => {
+	const [version] = await t.need(Version);
+	const [pagesDir] = await t.need(PagesDir, Parameters, UtilScripts);
+	const [cm, cmi, cmo] = await t.need(
+		BuildCM(gr, `${gr}-Regular`),
+		BuildCM(gr, `${gr}-Italic`),
+		BuildCM(gr, `${gr}-Oblique`),
+	);
+	await node(`tools/data-export/src/atlas.mjs`, {
+		version,
+		charMapPath: cm.full,
+		charMapItalicPath: cmi.full,
+		charMapObliquePath: cmo.full,
+		outputShared:
+			gr === "Iosevka"
+				? Path.resolve(pagesDir, "shared/data-import/raw/atlas-shared.json")
+				: null,
+		output: Path.resolve(pagesDir, `shared/data-import/raw/atlas-${gr}.json`),
+	});
 });
 
 const PagesFontExport = task.group(`pages:font-export`, async (target, gr) => {
@@ -1012,8 +1032,12 @@ const PagesFontExport = task.group(`pages:font-export`, async (target, gr) => {
 	await rm(Path.resolve(outDir, "TTF"));
 });
 
-const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, gr) => {
+const PagesFastFont = task.group(`pages:ff`, async (t, gr) => {
+	await t.need(PagesDataExport, PagesAtlasExport(gr), PagesFastFontExportImpl(gr));
+});
+const PagesFastFontExportImpl = task.group(`pages:fast-font-export-impl`, async (target, gr) => {
 	target.is.volatile();
+
 	const [pagesDir] = await target.need(PagesDir);
 	if (!pagesDir) return;
 	const outDir = Path.resolve(pagesDir, "shared/fonts/imports", gr);
