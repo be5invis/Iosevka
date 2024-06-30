@@ -4,6 +4,11 @@ export default CharGrid;
 
 function CharGrid(args) {
 	const theme = themes[args.theme];
+	const udatMap = args.udatMap;
+	const gcMap = new Map();
+	for (const [ch, gc, _name] of udatMap) {
+		gcMap.set(ch, gc);
+	}
 
 	const EM = 48;
 	const ITEMS_PER_ROW = 16;
@@ -50,7 +55,7 @@ function CharGrid(args) {
 			});
 		}
 
-		const isMark = char.inFont && char.gc === "Nonspacing_Mark";
+		const isMark = char.inFont && gcMap.get(char.lch) === "Nonspacing_Mark";
 		const dimensions = {
 			"horizontal-align": "center",
 			"vertical-align": "center",

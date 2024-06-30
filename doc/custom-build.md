@@ -1725,7 +1725,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>z</code> with cursive body shape, and a horizontal crossbar</td></tr>
     </table></details>
   - Styles for `ẞ` (Capital Eszet)
-    <details><summary>4 variants</summary>
+    <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-eszet-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-eszet = 'rounded-serifless'</code>, <code>VXAC = 1</code></td></tr>
     <tr><td>Capital Eszet (<code>ẞ</code>) with rounded top; without serifs</td></tr>
@@ -1735,6 +1735,14 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Capital Eszet (<code>ẞ</code>) with flat top; without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-eszet-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-eszet = 'flat-top-serifed'</code>, <code>VXAC = 4</code></td></tr>
     <tr><td>Capital Eszet (<code>ẞ</code>) with flat top, and serifs (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-eszet-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-eszet = 'corner-serifless'</code>, <code>VXAC = 5</code></td></tr>
+    <tr><td>Capital Eszet (<code>ẞ</code>) with top-left corner; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-eszet-corner-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-corner-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-eszet = 'corner-bottom-serifed'</code>, <code>VXAC = 6</code></td></tr>
+    <tr><td>Capital Eszet (<code>ẞ</code>) with top-left corner, and bottom serif</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-eszet-corner-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-corner-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-eszet = 'corner-motion-serifed'</code>, <code>VXAC = 7</code></td></tr>
+    <tr><td>Capital Eszet (<code>ẞ</code>) with top-left corner, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-eszet-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-eszet-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-eszet = 'corner-serifed'</code>, <code>VXAC = 8</code></td></tr>
+    <tr><td>Capital Eszet (<code>ẞ</code>) with top-left corner, and serifs</td></tr>
     </table></details>
   - Styles for `ſ` (Long-S)
     <details><summary>30 variants</summary>
@@ -2913,6 +2921,14 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use round dots (default)</td></tr>
     <tr><td rowspan="2" width="220"><img src="../images/cv-punctuation-dot-square.light.svg#gh-light-mode-only" width=192/><img src="../images/cv-punctuation-dot-square.dark.svg#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'square'</code>, <code>cv97 = 2</code></td></tr>
     <tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use square dots</td></tr>
+    </table></details>
+  - Styles for `⠭⠽` (Dot shape in braille)
+    <details><summary>2 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-braille-dot-round.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-braille-dot-round.dark.svg#gh-dark-mode-only" width=64/></td><td><code>braille-dot = 'round'</code>, <code>VXAE = 1</code></td></tr>
+    <tr><td>Braille uses round dots (default)</td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-braille-dot-square.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-braille-dot-square.dark.svg#gh-dark-mode-only" width=64/></td><td><code>braille-dot = 'square'</code>, <code>VXAE = 2</code></td></tr>
+    <tr><td>Braille uses square dots</td></tr>
     </table></details>
   - Styles for `~`
     <details><summary>2 variants</summary>
