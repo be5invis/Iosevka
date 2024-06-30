@@ -1,10 +1,10 @@
 import { CharacterVariants, StylisticSets } from "./cv";
 import SupportedLanguages from "./languages";
 import { AvailableLigationSets } from "./ligation";
-import rawCoverage from "./raw/coverage.json";
+import rawAtlasShared from "./raw/atlas-shared.json";
 
 const Stats = {
-    ...rawCoverage.stats,
+    ...rawAtlasShared.stats,
     supportedLanguages: SupportedLanguages.length,
     characterVariants: Array.from(CharacterVariants).length,
     stylisticSets: Array.from(StylisticSets).filter(([k, ss]) => ss.rank && ss.tag).length,

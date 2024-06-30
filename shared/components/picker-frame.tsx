@@ -27,6 +27,7 @@ export type PickerFrameProps = {
     enableMarkings?: boolean;
     styleGrades?: Gr.Style[];
     onFontSet?: (fontStyle: Gr.FontStyle) => void;
+    onFontStyleChange?: (current: Gr.Style, previous: Gr.Style) => void;
     content: (props: { fontStyle: Gr.FontStyle }) => JSX.Element;
 };
 function rectifyPickedFs(fs: Gr.FontStyle) {
@@ -39,7 +40,18 @@ export function PickerFrame(props: PickerFrameProps) {
     const [fontStyle, setFontStyle] = useState<Gr.FontStyle>({ ...props.defaultFontStyle });
     const receiver = (fs: Gr.FontStyle) => {
         const rectifiedFs = rectifyPickedFs({ ...fontStyle, ...fs });
-        if (props.onFontSet) props.onFontSet(rectifiedFs);
+
+        if (props.onFontStyleChange) {
+            const currentStyle = rectifiedFs.style || Gr.Style.Sans;
+            const previousStyle = fontStyle.style || Gr.Style.Sans;
+            if (currentStyle != previousStyle)
+                props.onFontStyleChange(currentStyle, previousStyle);
+        }
+
+        if (props.onFontSet) {
+            props.onFontSet(rectifiedFs);
+        }
+
         setFontStyle(rectifiedFs);
     };
 
@@ -174,7 +186,7 @@ function Button(props: PickerButtonProps) {
                 "picker-button",
                 fActive ? "active" : null,
                 Gr.fontStyleToCls({ ...Gr.DefaultFontStyle, ...props.apply }),
-                props.className
+                props.className,
             )}
             title={props.title}
         >

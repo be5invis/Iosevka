@@ -5,8 +5,9 @@ import useOnClickOutside from "use-onclickoutside";
 
 import { PickerFrame } from "../shared/components/picker-frame";
 import { Section } from "../shared/components/section";
-import * as Coverage from "../shared/data-import/coverage";
+import * as Coverage from "../shared/data-import/atlas";
 import * as Gr from "../shared/data-import/grades";
+import { unicodeGcMap, unicodeNameMap } from "../shared/data-import/unicode-data-map";
 import { joinCls } from "../shared/utils/join-classes";
 import { Ptr } from "../shared/utils/ptr";
 
@@ -26,18 +27,43 @@ export default function Specimen() {
 type SimpFeaturePair = string;
 type Standout = {
     blockName: string;
-    char: Coverage.CoverageCharacter;
+    char: Coverage.Character;
     variantOverride?: string;
     specificSlopeOnly?: Gr.Slope;
 };
-type SpecimenContextProps = { standouts: Standout[] };
+
+type SpecimenContextProps = {
+    atlas: Coverage.Atlas;
+    standouts: Standout[];
+};
 const SpecimenContext = createContext<Ptr<SpecimenContextProps>>({
-    val: { standouts: [] },
+    val: {
+        atlas: Coverage.Atlas_Sans,
+        standouts: [],
+    },
     set: () => {},
 });
 
 function CharacterSpecimen() {
-    const [scp, setScp] = useState<SpecimenContextProps>({ standouts: [] });
+    const [scp, setScp] = useState<SpecimenContextProps>({
+        atlas: Coverage.Atlas_Sans,
+        standouts: [],
+    });
+    function setStyle(newFs: Gr.Style) {
+        let atlas = Coverage.Atlas_Sans;
+        switch (newFs) {
+            case Gr.Style.Slab:
+                atlas = Coverage.Atlas_Slab;
+                break;
+            case Gr.Style.Aile:
+                atlas = Coverage.Atlas_Aile;
+                break;
+            case Gr.Style.Etoile:
+                atlas = Coverage.Atlas_Etoile;
+                break;
+        }
+        setScp({ atlas, standouts: [] });
+    }
     return (
         <SpecimenContext.Provider value={{ val: scp, set: setScp }}>
             <Section withToolbar id="character-specimen">
@@ -49,6 +75,7 @@ function CharacterSpecimen() {
                     enableMarkings
                     content={CharacterSpecimenInner}
                     styleGrades={[Gr.Style.Sans, Gr.Style.Slab, Gr.Style.Aile, Gr.Style.Etoile]}
+                    onFontStyleChange={setStyle}
                     defaultFontStyle={{ style: Gr.Style.Sans }}
                 />
             </Section>
@@ -91,7 +118,8 @@ function NavigationDropdown() {
 
     let curStrip = 0;
 
-    for (const block of Coverage.CharacterCoverage) {
+    const ctx = useContext(SpecimenContext);
+    for (const block of ctx.val.atlas.unicodeCoverage) {
         const lchMin = block.characters[0].lch;
         const lchMax = block.characters[block.characters.length - 1].lch;
 
@@ -114,10 +142,11 @@ function NavigationDropdown() {
     );
 }
 function NavBlocksPanel() {
+    const ctx = useContext(SpecimenContext);
     return (
         <div className="navigation-panel blocks-panel">
             <ol>
-                {Coverage.CharacterCoverage.map((block) => (
+                {ctx.val.atlas.unicodeCoverage.map((block) => (
                     <NavBlocksPanelItem
                         name={block.name}
                         key={block.name}
@@ -151,10 +180,10 @@ function NavBlocksPanelItem(props: { name: string; code: number }) {
 
 function NavStripsPanel() {
     let rows: StripRow[] = [];
-
     let curStrip = 0;
 
-    for (const block of Coverage.CharacterCoverage) {
+    const ctx = useContext(SpecimenContext);
+    for (const block of ctx.val.atlas.unicodeCoverage) {
         const lchMin = block.characters[0].lch;
         const lchMax = block.characters[block.characters.length - 1].lch;
 
@@ -342,7 +371,7 @@ function CharacterSpecimenInner(props: { fontStyle: Gr.FontStyle }) {
     return (
         <>
             <>
-                {Coverage.CharacterCoverage.map((block) => (
+                {ctx.val.atlas.unicodeCoverage.map((block) => (
                     <SpecimenBlock
                         key={`block-` + block.name}
                         block={block}
@@ -367,7 +396,7 @@ function CharacterSpecimenInner(props: { fontStyle: Gr.FontStyle }) {
 }
 
 type SpecimenBlockProps = {
-    block: Coverage.CoverageBlock;
+    block: Coverage.Block;
     fontStyle: Gr.FontStyle;
 };
 function SpecimenBlock(props: SpecimenBlockProps) {
@@ -413,17 +442,13 @@ function SpecimenCharacter(props: SpecimenCharacterProps) {
     const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
     const ref = useRef<HTMLDivElement>(null);
     useOnClickOutside(ref, () => setDropdownVisible(false));
-
+    const gc = unicodeGcMap.get(props.char.lch) || "?";
     return (
         <div
             ref={ref}
             className={joinCls(
                 "specimen-character",
-                props.char.inFont
-                    ? "in-font"
-                    : props.char.gc === "Unassigned"
-                      ? "unassigned"
-                      : "not-in-font",
+                props.char.inFont ? "in-font" : gc === "Unassigned" ? "unassigned" : "not-in-font",
                 `column-${props.char.lch % 16}`,
                 dropdownVisible ? "variant-menu-visible" : null,
             )}
@@ -437,7 +462,7 @@ function SpecimenCharacter(props: SpecimenCharacterProps) {
     );
 }
 
-function gatherCharFeatures(hasCvSs: boolean, ch: Coverage.CoverageCharacter, slope: Gr.Slope) {
+function gatherCharFeatures(hasCvSs: boolean, ch: Coverage.Character, slope: Gr.Slope) {
     if (!hasCvSs) return [];
     switch (slope) {
         case Gr.Slope.Upright:
@@ -448,25 +473,25 @@ function gatherCharFeatures(hasCvSs: boolean, ch: Coverage.CoverageCharacter, sl
             return ch.cvFeatureSetsOblique || [];
     }
 }
-function queryCvList(n: number) {
-    return Coverage.CovFeatureSeries[n];
+function queryCvList(atlas: Coverage.Atlas, n: number) {
+    return atlas.featureSeries[n];
 }
 
-function charHasVariants(props: SpecimenCharacterProps) {
+function charHasVariants(atlas: Coverage.Atlas, props: SpecimenCharacterProps) {
     const hasCvSs = Gr.styleHasCvSs(props.fontStyle.style || Gr.Style.Sans);
     const charFeatures = gatherCharFeatures(
         hasCvSs,
         props.char,
         props.fontStyle.slope || Gr.Slope.Upright,
     );
-    for (const id of charFeatures) if (queryCvList(id).size > 1) return true;
+    for (const id of charFeatures) if (queryCvList(atlas, id).size > 1) return true;
 
     if (
         !(Gr.styleIsQp(props.fontStyle.style) && props.char.isCompositeOrLigature) &&
         props.char.typographicFeatureSets
     ) {
         for (const id of props.char.typographicFeatureSets)
-            if (queryCvList(id).size > 1) return true;
+            if (queryCvList(atlas, id).size > 1) return true;
     }
 
     return false;
@@ -477,21 +502,24 @@ function charIsSpecial(lch: number) {
 }
 
 function SpecimenCharacterVariantsMarker(props: SpecimenCharacterProps) {
+    const ctx = useContext(SpecimenContext);
     if (!props.char.inFont) return null;
     if (charIsSpecial(props.char.lch)) return null;
-    if (!charHasVariants(props)) return null;
+    if (!charHasVariants(ctx.val.atlas, props)) return null;
     return <div className="has-variant-marker" />;
 }
 
 function SpecimenCharacterVariants(props: SpecimenCharacterProps) {
+    const ctx = useContext(SpecimenContext);
     if (!props.char.inFont) return null;
     if (charIsSpecial(props.char.lch)) return null;
-    if (!charHasVariants(props)) return null;
+    if (!charHasVariants(ctx.val.atlas, props)) return null;
 
     return <CharVariantsImpl {...props} />;
 }
 
 function CharVariantsImpl(props: SpecimenCharacterProps) {
+    const ctx = useContext(SpecimenContext);
     const [currentSelection, setCurrentSelection] = useState<SimpFeaturePair[]>([]);
     const variantRows: JSX.Element[] = [];
 
@@ -505,7 +533,7 @@ function CharVariantsImpl(props: SpecimenCharacterProps) {
 
     const rows = [...typographicFeatures, ...charFeatures];
     for (let iGroup = 0; iGroup < rows.length; iGroup++) {
-        const fs = queryCvList(rows[iGroup]);
+        const fs = queryCvList(ctx.val.atlas, rows[iGroup]);
         const subgroups: JSX.Element[] = [];
 
         for (let iSubgroup = 0; iSubgroup < fs.groups.length; iSubgroup++) {
@@ -562,14 +590,14 @@ type SpecimenCharacterImplProps = SpecimenCharacterProps & {
 };
 function SpecimenCharacterImpl(props: SpecimenCharacterImplProps) {
     const pCtx = useContext(SpecimenContext);
-
-    const isMark = props.char.inFont && props.char.gc === "Nonspacing_Mark";
+    const gc = unicodeGcMap.get(props.char.lch) || "?";
+    const isMark = props.char.inFont && gc === "Nonspacing_Mark";
     const isSpace =
         props.char.inFont &&
-        (props.char.gc === "Space_Separator" ||
-            props.char.gc === "Format" ||
-            props.char.gc === "Line_Separator" ||
-            props.char.gc === "Paragraph_Separator");
+        (gc === "Space_Separator" ||
+            gc === "Format" ||
+            gc === "Line_Separator" ||
+            gc === "Paragraph_Separator");
     const isMosaic =
         props.char.inFont &&
         (props.blockName === "Private Use Area" ||
@@ -581,11 +609,11 @@ function SpecimenCharacterImpl(props: SpecimenCharacterImplProps) {
     const isLetter =
         props.char.inFont &&
         !isMosaic &&
-        (props.char.gc === "Decimal_Number" ||
-            props.char.gc === "Uppercase_Letter" ||
-            props.char.gc === "Lowercase_Letter" ||
-            props.char.gc === "Titlecase_Letter" ||
-            props.char.gc === "Other_Letter" ||
+        (gc === "Decimal_Number" ||
+            gc === "Uppercase_Letter" ||
+            gc === "Lowercase_Letter" ||
+            gc === "Titlecase_Letter" ||
+            gc === "Other_Letter" ||
             props.blockName === "Currency Symbols");
     return (
         <div
@@ -647,25 +675,20 @@ function formatUnicode(lch: number) {
     return lch.toString(16).toUpperCase().padStart(4, "0");
 }
 
-function formatCharInfo(
-    ch: Coverage.CoverageCharacter,
-    titleOverride?: string,
-    variantOverride?: string,
-) {
+function formatCharInfo(ch: Coverage.Character, titleOverride?: string, variantOverride?: string) {
+    const charName = unicodeNameMap.get(ch.lch) || "?";
+    const gc = unicodeGcMap.get(ch.lch) || "?";
     const charSamp =
-        "\u200b" +
-        (ch.gc === "Nonspacing_Mark" ? "◌" : "") +
-        String.fromCodePoint(ch.lch) +
-        "\u200b";
+        "\u200b" + (gc === "Nonspacing_Mark" ? "◌" : "") + String.fromCodePoint(ch.lch) + "\u200b";
     return (
-        `U+${formatUnicode(ch.lch)} ⟦${charSamp}⟧\n${ch.charName || ""}\n(${ch.gc})` +
+        `U+${formatUnicode(ch.lch)} ⟦${charSamp}⟧\n${charName || ""}\n(${gc})` +
         (titleOverride ? "\n" + titleOverride : "") +
         (variantOverride ? "\n" + variantOverride : "")
     );
 }
 
 type SpecimenCharacterBgProps = {
-    char: Coverage.CoverageCharacter;
+    char: Coverage.Character;
     isMark: boolean;
     isLetter: boolean;
     isMosaic: boolean;

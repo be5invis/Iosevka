@@ -1,4 +1,4 @@
-import rawCoverage from "./raw/coverage.json";
+import rawAtlasShared from "./raw/atlas-shared.json";
 
-const SupportedLanguages: string[] = rawCoverage.languages;
+const SupportedLanguages: string[] = rawAtlasShared.languages;
 export default SupportedLanguages;
