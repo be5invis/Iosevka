@@ -54,63 +54,21 @@ class SpiroSimplifier {
 			if (arc.arcLength > 1e-6) this.combinedArcs.push(arc);
 		} else {
 			const combined = new SpiroSequenceArc(this.m_ongoingArcs);
-			if (combined.totalLength > 1e-6) this.combinedArcs.push(combined);
+			if (!combined.isEmpty() && combined.totalLength > 1e-6) {
+				this.combinedArcs.push(combined);
+			}
 		}
 		this.m_ongoingArcs = [];
 	}
 }
 
-class SpiroSequenceArc {
+const SpiroMeasurer = {
+	measureLength(a) {
+		return a.arcLength;
+	},
+};
+class SpiroSequenceArc extends TypoGeom.Arcs.CombinedArc {
 	constructor(segments) {
-		// Filter out zero-length segments
-		let rear = 0;
-		for (let j = 0; j < segments.length; j++) {
-			if (segments[j].arcLength > 1e-6) {
-				segments[rear++] = segments[j];
-			}
-		}
-		segments.length = rear;
-
-		// Compute total length and stops
-		let totalLength = 0;
-		let stops = [];
-		for (let j = 0; j < segments.length; j++) {
-			stops[j] = totalLength;
-			totalLength += segments[j].arcLength;
-		}
-		for (let j = 0; j < segments.length; j++) {
-			stops[j] = stops[j] / totalLength;
-		}
-		this.totalLength = totalLength;
-		this.m_segments = segments;
-		this.m_stops = stops;
+		super(SpiroMeasurer, segments);
 	}
-
-	eval(t) {
-		const j = segTSearch(this.m_stops, t);
-		const tBefore = this.m_stops[j];
-		const tNext = j < this.m_stops.length - 1 ? this.m_stops[j + 1] : 1;
-		const tRelative = (t - tBefore) / (tNext - tBefore);
-		return this.m_segments[j].eval(tRelative);
-	}
-
-	derivative(t) {
-		const j = segTSearch(this.m_stops, t);
-		const tBefore = this.m_stops[j];
-		const tNext = j < this.m_stops.length - 1 ? this.m_stops[j + 1] : 1;
-		const tRelative = (t - tBefore) / (tNext - tBefore);
-		return Vec2.scaleFrom(1 / (tNext - tBefore), this.m_segments[j].derivative(tRelative));
-	}
-}
-
-function segTSearch(stops, t) {
-	if (t < 0) return 0;
-	let l = 0,
-		r = stops.length;
-	while (l < r) {
-		let m = (l + r) >>> 1;
-		if (stops[m] > t) r = m;
-		else l = m + 1;
-	}
-	return r - 1;
 }

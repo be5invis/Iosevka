@@ -41,12 +41,12 @@ function convertContourToArcs(contour) {
 				const zc = z;
 				let zf = contour[(j + 1) % contour.length];
 				const zfIsCorner = zf.type === Point.Type.contour;
-				if (!zfIsCorner) zf = Point.from(Point.Type.Corner, zc).mix(0.5, zf);
+				if (!zfIsCorner) zf = Point.from(Point.Type.Corner, zc).mix(zf, 0.5);
 				newContour.push(
 					new TypoGeom.Arcs.Bez3(
 						z0,
-						Point.from(Point.Type.CubicStart, z0).mix(2 / 3, zc),
-						Point.from(Point.Type.CubicEnd, zf).mix(2 / 3, zc),
+						Point.from(Point.Type.CubicStart, z0).mix(zc, 2 / 3),
+						Point.from(Point.Type.CubicEnd, zf).mix(zc, 2 / 3),
 						Point.from(Point.Type.Corner, zf),
 					),
 				);
