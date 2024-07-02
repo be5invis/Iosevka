@@ -14,6 +14,10 @@ glyph-block Symbol-Other-Phonetic : begin
 	local toneMarkLeft : mix SB RightSB 0.1
 	local toneMarkRight : Width - toneMarkLeft
 
+	define [dblToneMarkLeft df] : mix df.leftSB df.rightSB 0.1
+	define [dblToneMarkRight df] : mix df.leftSB df.rightSB 0.9
+	define [dblToneMarkMiddle df] : mix [dblToneMarkLeft df] [dblToneMarkRight df] 0.5
+
 	create-glyph 'triangleColon' 0x2D0 : glyph-proc
 		include : MarkSet.e
 		include : union
@@ -35,7 +39,7 @@ glyph-block Symbol-Other-Phonetic : begin
 
 	define [yOfTone tone]        : mix (OperatorStroke / 2) (CAP - OperatorStroke / 2) (tone / 4)
 	define [yOfToneNeutral tone] : mix DotRadius (CAP - DotRadius) (tone / 4)
-	define [yOfToneDepart a b p]     : mix (CAP * a + OperatorStroke / 2) (CAP * b - OperatorStroke / 2) p
+	define [yOfToneDepart a b p] : mix (CAP * a + OperatorStroke / 2) (CAP * b - OperatorStroke / 2) p
 
 	foreach tone [range 4 downtill 0] : begin
 		create-glyph ('tone' + tone) (0x2E5 + 4 - tone) : glyph-proc
@@ -122,7 +126,7 @@ glyph-block Symbol-Other-Phonetic : begin
 		list 'departingToneYin'  0x2EA  0    0.5  0
 		list 'departingToneYang' 0x2EB  0    0.5  0.5
 		list 'beginHighTone'     0x2F9  0.6  1    1.0
-		list 'beginLowTone'      0x2FB  0    0.4   0
+		list 'beginLowTone'      0x2FB  0    0.4  0
 	foreach { name code a b pos } [items-of DepartingToneConfig] : begin
 		create-glyph name code : glyph-proc
 			include : VBar.l toneMarkLeft (CAP * a) (CAP * b) OperatorStroke
@@ -135,3 +139,14 @@ glyph-block Symbol-Other-Phonetic : begin
 		create-glyph name code : glyph-proc
 			include : VBar.r toneMarkRight (CAP * a) (CAP * b) OperatorStroke
 			include : HBar.m toneMarkLeft (toneMarkRight - TINY) [yOfToneDepart a b pos] OperatorStroke
+
+	local DblToneConfig : list
+		list 'stressAndHighTone'     0xA720  0.6  1    1.0
+		list 'stressAndLowTone'      0xA721  0    0.4  0
+	foreach { name code a b pos } [items-of DblToneConfig] : begin
+		create-glyph name code : glyph-proc
+			local df : include : DivFrame 1 3.75
+			local fine : OperatorStroke * df.mvs / Stroke
+			include : VBar.l [dblToneMarkLeft df] (CAP * a) (CAP * b) fine
+			include : VBar.m [dblToneMarkMiddle df] (CAP * a) (CAP * b) fine
+			include : HBar.m ([dblToneMarkLeft df] + TINY) [dblToneMarkRight df] [yOfToneDepart a b pos] OperatorStroke
