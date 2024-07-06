@@ -38,7 +38,7 @@ export default async function main(argv) {
 	const out = new MdCol("Release-Note");
 	const baseUrl = `https://github.com/be5invis/Iosevka/blob/v${argv.version}/doc`;
 	const releaseUrl = `https://github.com/be5invis/Iosevka/releases/download/v${argv.version}`;
-	await GenerateChangeList(argv, out);
+
 	out.log(
 		`<table>\n` +
 			`<tr><td align="center"><h1>` +
@@ -49,5 +49,8 @@ export default async function main(argv) {
 			`</td></tr>\n` +
 			`</table>\n`,
 	);
+
+	await GenerateChangeList(argv, out);
+
 	await fs.promises.writeFile(argv.outputPath, out.data);
 }
