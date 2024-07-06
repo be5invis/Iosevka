@@ -695,7 +695,6 @@ const CollectPlans = computed(`metadata:collect-plans`, async target => {
 
 const SGR_PREFIX_PREFIX = "SGr-";
 
-// eslint-disable-next-line complexity
 async function getCollectPlans(target, rawCollectPlans) {
 	const plans = {};
 
