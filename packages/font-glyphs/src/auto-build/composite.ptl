@@ -372,10 +372,10 @@ glyph-block AutoBuild-Enclosure : begin
 		define [object width sw top bot left right] : CircleDimens digits ww
 		set-width width
 		include : union
-			HBar.t    left right top sw
-			HBar.b left right bot sw
-			VBar.l   left bot top   sw
-			VBar.r  right bot top  sw
+			HBar.t left  right top sw
+			HBar.b left  right bot sw
+			VBar.l left  bot   top sw
+			VBar.r right bot   top sw
 		include : AddEnclosureMark digits : CircleDimens digits ww
 
 	define [createTwoRowBoxedGlyphs digits demands]
@@ -384,10 +384,10 @@ glyph-block AutoBuild-Enclosure : begin
 		define [object width sw top bot left right] : CircleDimens digits ww
 		set-width width
 		include : union
-			HBar.t    left right top sw
-			HBar.b left right bot sw
-			VBar.l   left bot top   sw
-			VBar.r  right bot top  sw
+			HBar.t left  right top sw
+			HBar.b left  right bot sw
+			VBar.l left  bot   top sw
+			VBar.r right bot   top sw
 		include : AddEnclosureMarkTwoLine digits : CircleDimens digits ww
 
 	define [createDashedBoxedGlyphs digits demands]
@@ -397,13 +397,13 @@ glyph-block AutoBuild-Enclosure : begin
 		set-width width
 		include : difference
 			union
-				HBar.t    left right top sw
-				HBar.b left right bot sw
-				VBar.l   left bot top   sw
-				VBar.r  right bot top  sw
+				HBar.t left  right top sw
+				HBar.b left  right bot sw
+				VBar.l left  bot   top sw
+				VBar.r right bot   top sw
 			union
 				VBar.m [mix left right 0.25] bot top sw
-				VBar.m [mix left right 0.5] bot top sw
+				VBar.m [mix left right 0.50] bot top sw
 				VBar.m [mix left right 0.75] bot top sw
 				HBar.m left right [mix bot top 0.25] sw
 				HBar.m left right [mix bot top 0.50] sw
@@ -506,7 +506,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	define [BraceCrowd digits width] : 2.75 + [AdjustDigitCount digits width]
 	define [BraceScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
-	define [bracedDottdeDimens digits width] : begin
+	define [bracedDottedDimens digits width] : begin
 		define dscale : linreg Width 0.55 UPM 0.65 width
 		define pscale : linreg Width 0.6 UPM 0.75 width
 		define sw0 : [EnclosureStrokeScale dscale digits width] * [AdviceStroke [BraceCrowd digits width]] / [BraceScale digits width]
@@ -530,7 +530,7 @@ glyph-block AutoBuild-Enclosure : begin
 		define [CreateGlyphImpl jobDecomposable job] : begin
 			local {gn unicode parts w bal baly} job
 			if [not : query-glyph gn] : create-glyph gn [if (w == ww) unicode null] : glyph-proc
-				define dimens : bracedDottdeDimens digits ww
+				define dimens : bracedDottedDimens digits ww
 				define [object width] dimens
 				set-width width
 
@@ -544,7 +544,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	define [createBracedGlyphs digits demands] : BracedT 'braced' digits demands BraceShape
 	define [BraceShape digits ww] : glyph-proc
-		define [object width pscale sw l r] : bracedDottdeDimens digits ww
+		define [object width pscale sw l r] : bracedDottedDimens digits ww
 		local s : TanSlope * SymbolMid / 2
 		local p : 0.1 * [Math.sqrt : Math.min 1 (width / (digits * Width))]
 		set-width width
@@ -563,11 +563,11 @@ glyph-block AutoBuild-Enclosure : begin
 		include : Ungizmo
 		include : Translate 0 (SymbolMid - SymbolMid * pscale)
 		include : Regizmo
-		include : AddEnclosureMark digits : bracedDottdeDimens digits ww
+		include : AddEnclosureMark digits : bracedDottedDimens digits ww
 
 	define [createHexBracedGlyphs digits demands] : BracedT 'hex-braced' digits demands HexBracedShape
 	define [HexBracedShape digits ww] : glyph-proc
-		define [object width pscale sw l r] : bracedDottdeDimens digits ww
+		define [object width pscale sw l r] : bracedDottedDimens digits ww
 		local s : TanSlope * SymbolMid / 2
 		local p : (1 / 6) * [Math.sqrt : Math.min 1 (width / (digits * Width))]
 		set-width width
@@ -605,7 +605,7 @@ glyph-block AutoBuild-Enclosure : begin
 		include : Ungizmo
 		include : Translate 0 (SymbolMid - SymbolMid * pscale)
 		include : Regizmo
-		include : AddEnclosureMark digits : bracedDottdeDimens digits ww
+		include : AddEnclosureMark digits : bracedDottedDimens digits ww
 
 	define [DottedCrowd digits width] : 2 + [AdjustDigitCount digits width]
 	define [DottedScale digits width] : 1 / [Math.pow [AdjustDigitCount digits width] 0.5]
@@ -634,7 +634,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 			define [createDottedGlyphImpl job jobDecomposable] : begin
 				local {gn unicode partsWithDot w} job
-				define [object width dscale pscale sw l r] : bracedDottdeDimens 1 ww
+				define [object width dscale pscale sw l r] : bracedDottedDimens 1 ww
 
 				local totalWidth 0
 				local offsets    { }
@@ -739,14 +739,14 @@ glyph-block AutoBuild-Enclosure : begin
 		foreach [j : range 11 till 20] : compositions.push : list (0x24EB + j - 11) [digitGlyphNames j] WideWidth1
 		createDecomposableInsetCircledGlyphs 2 compositions
 
-	do "boxed"
+	do "Single-digit boxed"
 		local compositions {}
 		compositions.push { null {'markBaseSpace'} WideWidth1 }
 		foreach [j : range 0 26] : compositions.push {(0x1F130 + j) {[glyphStore.queryNameByUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		compositions.push : list 0x1F1A5 {'d'} WideWidth1
 		createBoxedGlyphs 1 compositions
 
-	do "double-digit boxed"
+	do "Double-digit boxed"
 		createBoxedGlyphs 2 : list
 			list null    {'markBaseSpace'} WideWidth1
 			list 0x1F14A {'H' 'V'} WideWidth1
@@ -763,9 +763,9 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x1F19D {'two.lnum' 'K'} WideWidth1
 			list 0x1F19E {'four.lnum' 'K'} WideWidth1
 			list 0x1F19F {'eight.lnum' 'K'} WideWidth1
-			list 0x1F1A6 {'H' 'C' } WideWidth1
+			list 0x1F1A6 {'H' 'C'} WideWidth1
 
-	do "triple-digit boxed"
+	do "Triple-digit boxed"
 		createBoxedGlyphs 3 : list
 			list null    {'markBaseSpace'} WideWidth1
 			list 0x1F14E {'P' 'P' 'V'} WideWidth1
@@ -780,7 +780,7 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x1F1AB {'U' 'H' 'D'} WideWidth1
 			list 0x1F1AC {'V' 'O' 'D'} WideWidth1
 
-	do "quad-digit boxed"
+	do "Quadruple-digit boxed"
 		createBoxedGlyphs 4 : list
 			list null    {'markBaseSpace'} WideWidth1
 			list 0x1F192 {'C' 'O' 'O' 'L'} WideWidth1
@@ -788,31 +788,36 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x1F1A2 {'two.lnum' 'two.lnum' 'period' 'two.lnum'} WideWidth1
 			list 0x1F1A4 {'one.lnum' 'two.lnum' 'zero.lnum' 'P'} WideWidth1
 
-	do "triple-digit two-row boxed"
+	do "Triple-digit two-row boxed"
 		createTwoRowBoxedGlyphs 3 : list
 			list null    { 'markBaseSpace' 'markBaseSpace' } WideWidth1
-			list 0x1F19C { 'two.lnum' 'N' 'D' 'S' 'C' 'R' }  WideWidth1
-			list 0x1F1A8 { 'H' 'I' 'hyphen' 'R' 'E' 'S' }  WideWidth1
+			list 0x1F19C { 'two.lnum' 'N' 'D' 'S' 'C' 'R' } WideWidth1
+			list 0x1F1A8 { 'H' 'I' 'hyphen' 'R' 'E' 'S' } WideWidth1
 
-	do "quad-digit two-row boxed"
+	do "Quadruple-digit two-row boxed"
 		createTwoRowBoxedGlyphs 4 : list
 			list null    { 'markBaseSpace' 'markBaseSpace' } WideWidth1
-			list 0x1F1A9 { 'L' 'O' 'S' 'S' 'L' 'E' 'S' 'S' }  WideWidth1
+			list 0x1F1A9 { 'L' 'O' 'S' 'S' 'L' 'E' 'S' 'S' } WideWidth1
 
-	do "triple-digit dashed-boxed"
+	do "Single-digit dashed-boxed"
+		local compositions {}
+		foreach [j : range 0 26] : compositions.push {(0x1F1E6 + j) {[glyphStore.queryNameByUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
+		createDashedBoxedGlyphs 1 compositions
+
+	do "Triple-digit dashed-boxed"
 		createDashedBoxedGlyphs 3 : list
 			list 0xFFFC {'O' 'B' 'J/noDescend'} WideWidth1
 
-	do "inset boxed"
+	do "Single-digit inset boxed"
 		local compositions {}
 		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {[glyphStore.queryNameByUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createInsetBoxedGlyphs 1 compositions
 
-	do "inset diamond"
+	do "Single-digit inset diamond"
 		createInsetDiamondGlyphs 1 : list
 			list 0xFFFD { "question" } WideWidth2
 
-	do "double-digit inset boxed"
+	do "Double-digit inset boxed"
 		createDecomposableInsetBoxedGlyphs 2 : list
 			list 0x1F18B {'I' 'C'} WideWidth1
 			list 0x1F18C {'P' 'A'} WideWidth1
@@ -820,11 +825,11 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x1F18E {'A' 'B'} WideWidth1
 			list 0x1F18F {'W' 'C'} WideWidth1
 
-	do "negative square"
+	do "Single-digit negative square"
 		createCrossInsetBoxedGlyphs 1 : list
 			list 0x1F18A { "P" } WideWidth1
 
-	do "inset mosaic"
+	do "Single-digit inset mosaic"
 		local compositions {}
 		compositions.push { 0x1FBB1 { [[glyphStore.queryNameByUnicode (0x2714)].replace [regex '.WWID$'] ".NWID"] } WideWidth4 }
 		compositions.push { 0x1FBB4 { [[glyphStore.queryNameByUnicode (0x21B2)].replace [regex '.WWID$'] ".NWID"] } WideWidth4 }
@@ -1009,6 +1014,7 @@ glyph-block Autobuild-Fractions : begin
 		list 0x215C { 'three.lnum' 'eight.lnum' }
 		list 0x215D { 'five.lnum' 'eight.lnum' }
 		list 0x215E { 'seven.lnum' 'eight.lnum' }
+		list 0x215F { 'one.lnum' 'markBaseSpace' }
 		list 0x2189 { 'zero.lnum' 'three.lnum' }
 		list 0x214D { 'A' 'S' }
 
@@ -1139,9 +1145,6 @@ glyph-block AutoBuild-Accented-Equal : begin
 		list 0x1F16A {"M" "C"}
 		list 0x1F16B {"M" "D"}
 		list 0x1F16C {"M" "R"}
-	createAccentedOp 'markDemoBaseSpace' 6.5 0.35 0 (aboveMarkBot - (CAP * 0.35 - XH * 0.35)) : list
-		list 0x2121  {"T" "E" "L"}
-		list 0x213B  {"F" "A" "X"}
 
 glyph-block Autobuild-Ligatures : begin
 	glyph-block-import CommonShapes
@@ -1432,6 +1435,10 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 	createPhoneticLigatures ToLetter 'phonetic2' [mix 1 para.diversityM 1.5] 3 stdShrink 1 : list
 		list 0xFB03  { 'f/compLigLeft1' 'f/compLigLeft1' 'dotlessi/compLigRight' } null
 		list 0xFB04  { 'f/compLigLeft3' 'f/compLigLeft2' 'l/compLigRight'        } null
+
+	createPhoneticLigatures ToLetter 'phonetic3' [mix 1 para.diversityM (2 * XH / CAP)] 3 1 0.5 : list
+		list 0x2121  { 'smcpT' 'smcpE' 'smcpL' } 'e'
+		list 0x213B  { 'smcpF' 'smcpA' 'smcpX' } 'e'
 
 	createPhoneticLigatures ToSuperscript 'phoneticSuperscript' 1 2 stdShrink 1 : list
 		list 0x10787 { 'd/phoneticLeft'  'z/phoneticRight'          } 'b'
