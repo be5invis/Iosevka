@@ -209,6 +209,19 @@ glyph-block AutoBuild-Enclosure : begin
 			include : EnclosureInnerImpl dimens finalPartsSecondHalf
 		return : {}.concat finalPartsFirstHalf finalPartsSecondHalf
 
+	define [PlayingCardInner dimens inners miniatureFont job] : glyph-proc
+		define { gn unicode parts w bal baly }      job
+		define [object width] dimens
+		local jobFirstHalf  { gn unicode [parts.slice 0 (parts.length / 2)] w bal baly }
+		local jobSecondHalf { gn unicode [parts.slice (parts.length / 2)  ] w bal baly }
+		local finalPartsFirstHalf  : EnsureInnerSubGlyphSeq inners "playingCardRank" miniatureFont jobFirstHalf  dimens 0.6 (+0.55)
+		local finalPartsSecondHalf : EnsureInnerSubGlyphSeq inners "playingCardSuit" miniatureFont jobSecondHalf dimens 0.6 (-0.15)
+
+		include : new-glyph : glyph-proc
+			include : EnclosureInnerImpl dimens finalPartsFirstHalf
+			include : EnclosureInnerImpl dimens finalPartsSecondHalf
+		return : {}.concat finalPartsFirstHalf finalPartsSecondHalf
+
 	define [CircCrowd digits width] : 2 + 2 * [Math.pow [AdjustDigitCount digits width] (2 / 3)] * [Math.max 1 (HalfUPM / Width)]
 	define [CircScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
 
@@ -313,6 +326,13 @@ glyph-block AutoBuild-Enclosure : begin
 			local parts : include : TwoRowEnclosureInner dimens inners miniatureFont job
 			if decomp : CvDecompose.set currentGlyph [{gnEnclosure}.concat parts]
 
+	define PlayingCardBuilder : object
+		decomposable true
+		buildGlyph : function [dimens inners miniatureFont decomp job gnEnclosure] : glyph-proc
+			include : refer-glyph gnEnclosure
+			local parts : include : PlayingCardInner dimens inners miniatureFont job
+			if decomp : CvDecompose.set currentGlyph [{gnEnclosure}.concat parts]
+
 	define InsetBuilder : object
 		decomposable false
 		buildGlyph : function [dimens inners miniatureFont decomp job gnEnclosure] : difference
@@ -391,7 +411,7 @@ glyph-block AutoBuild-Enclosure : begin
 		include : AddEnclosureMarkTwoLine digits : CircleDimens digits ww
 
 	define [createPlayingCardGlyphs digits demands]
-		EnclosureT 'playingCard' TwoRowBoxedBuilder StandardInners digits 2 demands PlayingCardEnclosureShape
+		EnclosureT 'playingCard' PlayingCardBuilder StandardInners digits 2 demands PlayingCardEnclosureShape
 	define [PlayingCardEnclosureShape digits ww gap] : glyph-proc
 		define [object width sw top bot left right] : CircleDimens [Math.max digits 2] ww
 		set-width width
