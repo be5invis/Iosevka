@@ -414,6 +414,24 @@ glyph-block AutoBuild-Enclosure : begin
 			VBar.r right bot   top sw
 		include : AddEnclosureMark digits : CircleDimens digits ww
 
+	define [createPlayingCardBackGlyphs digits demands]
+		EnclosureT 'playingCardBack' InsetBuilder StandardInners digits 1 demands PlayingCardBackShape
+	define [PlayingCardBackShape digits ww gap] : glyph-proc
+		define [object width sw0 sw top bot left right] : CircleDimens digits ww (ww * gap)
+		set-width width
+		define sw1 : Math.min sw0 (sw / 2)
+		include : union
+			HBar.t left  right top sw1
+			HBar.b left  right bot sw1
+			VBar.l left  bot   top sw1
+			VBar.r right bot   top sw1
+		include : Rect
+			top - sw
+			bot + sw
+			left + [HSwToV sw]
+			right - [HSwToV sw]
+		include : AddEnclosureMark digits : CircleDimens digits ww
+
 	define [createDashedBoxedGlyphs digits demands]
 		EnclosureT 'dashed-boxed' CircledBuilder StandardInners digits 1 demands DashedBoxEnclosureShape
 	define [DashedBoxEnclosureShape digits ww cap] : glyph-proc
@@ -905,6 +923,10 @@ glyph-block AutoBuild-Enclosure : begin
 			list null    {'markBaseSpace'} WideWidth1
 			list 0x1F0F2 {'X' 'V' 'I' 'I' 'I'} WideWidth4
 
+	do "Playing card back"
+		createPlayingCardBackGlyphs 1 : list
+			list 0x1F0A0 {'markBaseSpace'} WideWidth4
+
 	do "Single-digit dashed-boxed"
 		local compositions {}
 		foreach [j : range 0 26] : compositions.push {(0x1F1E6 + j) {[glyphStore.queryNameByUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
@@ -917,7 +939,6 @@ glyph-block AutoBuild-Enclosure : begin
 	do "Single-digit inset boxed"
 		local compositions {}
 		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {[glyphStore.queryNameByUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
-		compositions.push : list 0x1F0A0 {'markBaseSpace'} WideWidth4
 		createInsetBoxedGlyphs 1 compositions
 
 	do "Single-digit inset diamond"
