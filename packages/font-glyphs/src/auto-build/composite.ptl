@@ -147,7 +147,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 		return gniPart
 
-	define [EnsureInnerSubGlyphSeq inners markClass miniatureFont job dimens yCompress kExtraYShift] : begin
+	define [EnsureInnerSubGlyphSeq inners markClass miniatureFont job dimens _xCompress yCompress kExtraYShift] : begin
 		define { gn unicode parts w bal baly }      job
 		define [object width mockInnerWidth dscale] dimens
 
@@ -157,7 +157,7 @@ glyph-block AutoBuild-Enclosure : begin
 			local derivedGlyph : miniatureFont.queryByNameEnsured gidPart
 			if [not firstDerivedGyph] : set firstDerivedGyph derivedGlyph
 			set totalWidth : totalWidth + derivedGlyph.advanceWidth
-		local xCompress [Math.min 1 (mockInnerWidth / totalWidth)]
+		local xCompress : _xCompress * [Math.min 1 (mockInnerWidth / totalWidth)]
 		set totalWidth : Math.min mockInnerWidth totalWidth
 
 		local shift : getGlyphDefaultShift bal baly firstDerivedGyph
@@ -191,7 +191,7 @@ glyph-block AutoBuild-Enclosure : begin
 		define { gn unicode parts w bal baly }      job
 		define [object width] dimens
 
-		local finalParts : EnsureInnerSubGlyphSeq inners 'enclosureInner' miniatureFont job dimens 1 0
+		local finalParts : EnsureInnerSubGlyphSeq inners 'enclosureInner' miniatureFont job dimens 1 1 0
 
 		include : new-glyph : EnclosureInnerImpl dimens finalParts
 		return finalParts
@@ -201,8 +201,21 @@ glyph-block AutoBuild-Enclosure : begin
 		define [object width] dimens
 		local jobFirstHalf  { gn unicode [parts.slice 0 (parts.length / 2)] w bal baly }
 		local jobSecondHalf { gn unicode [parts.slice (parts.length / 2)  ] w bal baly }
-		local finalPartsFirstHalf  : EnsureInnerSubGlyphSeq inners "enclosureInnerFirstHalf" miniatureFont jobFirstHalf  dimens 0.45 (+0.55)
-		local finalPartsSecondHalf : EnsureInnerSubGlyphSeq inners "enclosureInnerSecondHalf" miniatureFont jobSecondHalf dimens 0.45 (+0.00)
+		local finalPartsFirstHalf  : EnsureInnerSubGlyphSeq inners "enclosureInnerFirstHalf"  miniatureFont jobFirstHalf  dimens 1 0.45 (+0.55)
+		local finalPartsSecondHalf : EnsureInnerSubGlyphSeq inners "enclosureInnerSecondHalf" miniatureFont jobSecondHalf dimens 1 0.45 (+0.00)
+
+		include : new-glyph : glyph-proc
+			include : EnclosureInnerImpl dimens finalPartsFirstHalf
+			include : EnclosureInnerImpl dimens finalPartsSecondHalf
+		return : {}.concat finalPartsFirstHalf finalPartsSecondHalf
+
+	define [PlayingCardInner dimens inners miniatureFont job] : glyph-proc
+		define { gn unicode parts w bal baly }      job
+		define [object width] dimens
+		local jobFirstHalf  { gn unicode [parts.slice 0 (parts.length / 2)] w bal baly }
+		local jobSecondHalf { gn unicode [parts.slice (parts.length / 2)  ] w bal baly }
+		local finalPartsFirstHalf  : EnsureInnerSubGlyphSeq inners "playingCardRank" miniatureFont jobFirstHalf  dimens 0.6 0.6 (+0.55)
+		local finalPartsSecondHalf : EnsureInnerSubGlyphSeq inners "playingCardSuit" miniatureFont jobSecondHalf dimens 0.6 0.6 (-0.15)
 
 		include : new-glyph : glyph-proc
 			include : EnclosureInnerImpl dimens finalPartsFirstHalf
@@ -313,6 +326,13 @@ glyph-block AutoBuild-Enclosure : begin
 			local parts : include : TwoRowEnclosureInner dimens inners miniatureFont job
 			if decomp : CvDecompose.set currentGlyph [{gnEnclosure}.concat parts]
 
+	define PlayingCardBuilder : object
+		decomposable true
+		buildGlyph : function [dimens inners miniatureFont decomp job gnEnclosure] : glyph-proc
+			include : refer-glyph gnEnclosure
+			local parts : include : PlayingCardInner dimens inners miniatureFont job
+			if decomp : CvDecompose.set currentGlyph [{gnEnclosure}.concat parts]
+
 	define InsetBuilder : object
 		decomposable false
 		buildGlyph : function [dimens inners miniatureFont decomp job gnEnclosure] : difference
@@ -389,6 +409,48 @@ glyph-block AutoBuild-Enclosure : begin
 			VBar.l left  bot   top sw
 			VBar.r right bot   top sw
 		include : AddEnclosureMarkTwoLine digits : CircleDimens digits ww
+
+	define [createPlayingCardGlyphs digits demands]
+		EnclosureT 'playingCard' PlayingCardBuilder StandardInners digits 2 demands PlayingCardEnclosureShape
+	define [PlayingCardEnclosureShape digits ww gap] : glyph-proc
+		define [object width sw top bot left right] : CircleDimens [Math.max digits 2] ww
+		set-width width
+		include : union
+			HBar.t left  right top sw
+			HBar.b left  right bot sw
+			VBar.l left  bot   top sw
+			VBar.r right bot   top sw
+		include : AddEnclosureMarkTwoLine digits : CircleDimens digits ww
+
+	define [createTrumpCardGlyphs digits demands]
+		EnclosureT 'trumpCard' CircledBuilder StandardInners digits 1 demands TrumpCardEnclosureShape
+	define [TrumpCardEnclosureShape digits ww gap] : glyph-proc
+		define [object width sw top bot left right] : CircleDimens [Math.max digits 5] ww
+		set-width width
+		include : union
+			HBar.t left  right top sw
+			HBar.b left  right bot sw
+			VBar.l left  bot   top sw
+			VBar.r right bot   top sw
+		include : AddEnclosureMark digits : CircleDimens digits ww
+
+	define [createPlayingCardBackGlyphs digits demands]
+		EnclosureT 'playingCardBack' InsetBuilder StandardInners digits 1 demands PlayingCardBackShape
+	define [PlayingCardBackShape digits ww gap] : glyph-proc
+		define [object width sw0 sw top bot left right] : CircleDimens digits ww (ww * gap)
+		set-width width
+		define sw1 : Math.min sw0 (sw / 2)
+		include : union
+			HBar.t left  right top sw1
+			HBar.b left  right bot sw1
+			VBar.l left  bot   top sw1
+			VBar.r right bot   top sw1
+		include : Rect
+			top - sw
+			bot + sw
+			left + [HSwToV sw]
+			right - [HSwToV sw]
+		include : AddEnclosureMark digits : CircleDimens digits ww
 
 	define [createDashedBoxedGlyphs digits demands]
 		EnclosureT 'dashed-boxed' CircledBuilder StandardInners digits 1 demands DashedBoxEnclosureShape
@@ -798,6 +860,92 @@ glyph-block AutoBuild-Enclosure : begin
 		createTwoRowBoxedGlyphs 4 : list
 			list null    { 'markBaseSpace' 'markBaseSpace' } WideWidth1
 			list 0x1F1A9 { 'L' 'O' 'S' 'S' 'L' 'E' 'S' 'S' } WideWidth1
+
+	do "Single-digit playing cards"
+		local compositions : list
+			list null    {'markBaseSpace' 'markBaseSpace'} WideWidth1
+			list 0x1F0A1 {'A' 'spadeSuit'} WideWidth4
+			list 0x1F0AB {'J/noDescend' 'spadeSuit'} WideWidth4
+			list 0x1F0AC {'C' 'spadeSuit'} WideWidth4
+			list 0x1F0AD {'Q/noDescend' 'spadeSuit'} WideWidth4
+			list 0x1F0AE {'K' 'spadeSuit'} WideWidth4
+			list 0x1F0B1 {'A' 'whiteHeartSuit'} WideWidth4
+			list 0x1F0BB {'J/noDescend' 'whiteHeartSuit'} WideWidth4
+			list 0x1F0BC {'C' 'whiteHeartSuit'} WideWidth4
+			list 0x1F0BD {'Q/noDescend' 'whiteHeartSuit'} WideWidth4
+			list 0x1F0BE {'K' 'whiteHeartSuit'} WideWidth4
+			list 0x1F0BF {'J/noDescend' 'vShadeStar.NWID'} WideWidth4
+			list 0x1F0C1 {'A' 'whiteDiamondSuit'} WideWidth4
+			list 0x1F0CB {'J/noDescend' 'whiteDiamondSuit'} WideWidth4
+			list 0x1F0CC {'C' 'whiteDiamondSuit'} WideWidth4
+			list 0x1F0CD {'Q/noDescend' 'whiteDiamondSuit'} WideWidth4
+			list 0x1F0CE {'K' 'whiteDiamondSuit'} WideWidth4
+			list 0x1F0CF {'J/noDescend' 'blackStar.NWID'} WideWidth4
+			list 0x1F0D1 {'A' 'clubSuit'} WideWidth4
+			list 0x1F0DB {'J/noDescend' 'clubSuit'} WideWidth4
+			list 0x1F0DC {'C' 'clubSuit'} WideWidth4
+			list 0x1F0DD {'Q/noDescend' 'clubSuit'} WideWidth4
+			list 0x1F0DE {'K' 'clubSuit'} WideWidth4
+			list 0x1F0DF {'J/noDescend' 'whiteStar.NWID'} WideWidth4
+		foreach [j : range 2 till 9] : compositions.push : list (0x1F0A0 + j) [[digitGlyphNames j].concat {'spadeSuit'}] WideWidth4
+		foreach [j : range 2 till 9] : compositions.push : list (0x1F0B0 + j) [[digitGlyphNames j].concat {'whiteHeartSuit'}] WideWidth4
+		foreach [j : range 2 till 9] : compositions.push : list (0x1F0C0 + j) [[digitGlyphNames j].concat {'whiteDiamondSuit'}] WideWidth4
+		foreach [j : range 2 till 9] : compositions.push : list (0x1F0D0 + j) [[digitGlyphNames j].concat {'clubSuit'}] WideWidth4
+		createPlayingCardGlyphs 1 compositions
+
+	do "Double-digit playing cards"
+		createPlayingCardGlyphs 2 : list
+			list null    { 'markBaseSpace' 'markBaseSpace' } WideWidth1
+			list 0x1F0AA { 'one.lnum' 'zero.lnum' 'spadeSuit' 'zwsp' } WideWidth4
+			list 0x1F0BA { 'one.lnum' 'zero.lnum' 'whiteHeartSuit' 'zwsp' } WideWidth4
+			list 0x1F0CA { 'one.lnum' 'zero.lnum' 'whiteDiamondSuit' 'zwsp' } WideWidth4
+			list 0x1F0DA { 'one.lnum' 'zero.lnum' 'clubSuit' 'zwsp' } WideWidth4
+
+	do "Single-digit trump cards"
+		createTrumpCardGlyphs 1 : list
+			list null    {'markBaseSpace'} WideWidth1
+			list 0x1F0E0 {'zero.lnum/forceUnslashed'} WideWidth4
+			list 0x1F0E1 {'I'} WideWidth4
+			list 0x1F0E5 {'V'} WideWidth4
+			list 0x1F0EA {'X'} WideWidth4
+
+	do "Double-digit trump cards"
+		createTrumpCardGlyphs 2 : list
+			list null    {'markBaseSpace'} WideWidth1
+			list 0x1F0E2 {'I' 'I'} WideWidth4
+			list 0x1F0E4 {'I' 'V'} WideWidth4
+			list 0x1F0E6 {'V' 'I'} WideWidth4
+			list 0x1F0E9 {'I' 'X'} WideWidth4
+			list 0x1F0EB {'X' 'I'} WideWidth4
+			list 0x1F0EF {'X' 'V'} WideWidth4
+			list 0x1F0F4 {'X' 'X'} WideWidth4
+
+	do "Triple-digit trump cards"
+		createTrumpCardGlyphs 3 : list
+			list null    {'markBaseSpace'} WideWidth1
+			list 0x1F0E3 {'I' 'I' 'I'} WideWidth4
+			list 0x1F0E7 {'V' 'I' 'I'} WideWidth4
+			list 0x1F0EC {'X' 'I' 'I'} WideWidth4
+			list 0x1F0EE {'X' 'I' 'V'} WideWidth4
+			list 0x1F0F0 {'X' 'V' 'I'} WideWidth4
+			list 0x1F0F3 {'X' 'I' 'X'} WideWidth4
+			list 0x1F0F5 {'X' 'X' 'I'} WideWidth4
+
+	do "Quadruple-digit trump cards"
+		createTrumpCardGlyphs 4 : list
+			list null    {'markBaseSpace'} WideWidth1
+			list 0x1F0E8 {'V' 'I' 'I' 'I'} WideWidth4
+			list 0x1F0ED {'X' 'I' 'I' 'I'} WideWidth4
+			list 0x1F0F1 {'X' 'V' 'I' 'I'} WideWidth4
+
+	do "Quintuple-digit trump cards"
+		createTrumpCardGlyphs 5 : list
+			list null    {'markBaseSpace'} WideWidth1
+			list 0x1F0F2 {'X' 'V' 'I' 'I' 'I'} WideWidth4
+
+	do "Playing card back"
+		createPlayingCardBackGlyphs 1 : list
+			list 0x1F0A0 {'markBaseSpace'} WideWidth4
 
 	do "Single-digit dashed-boxed"
 		local compositions {}
