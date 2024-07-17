@@ -430,51 +430,133 @@ glyph-block AutoBuild-Enclosure : begin
 		set-base-anchor 'enclosureInnerSecondHalf' (0.5 * width - 0.5 * dscale * [Math.min (Width * digits) mockInnerWidth]) 0
 
 	define [createPlayingCardGlyphs digits demands]
-		EnclosureT 'playingCard' PlayingCardBuilder PlayingCardInners digits 2 demands PlayingCardEnclosureShape
-	define [PlayingCardEnclosureShape digits ww gap] : glyph-proc
-		define [object width sw top bot left right] : CircleDimens [Math.max digits 2] ww
-		set-width width
-		include : union
-			HBar.t left  right top sw
-			HBar.b left  right bot sw
-			VBar.l left  bot   top sw
-			VBar.r right bot   top sw
-		include : AddEnclosureMarkPlayingCards digits : CircleDimens digits ww
-	define [AddEnclosureMarkPlayingCards digits dimens] : glyph-proc
-		define [object left right sw] dimens
-		define gap : Math.max ((right - left) / 16) (sw / 2)
-		set-base-anchor 'enclosureInnerFirstHalf'  (left + sw + gap)  0
-		set-base-anchor 'enclosureInnerSecondHalf' (right - sw - gap) 0
+		EnclosureT 'playingCard' PlayingCardBuilder PlayingCardInners digits 2 demands PlayingCardEnclosure.Shape
+
+	define PlayingCardEnclosure : namespace
+		define [Gap dimens] : begin
+			local [object left right sw] dimens
+			return : Math.max ((right - left) / 16) (sw / 2)
+
+		define [CornerRadius dimens] : begin
+			define [object sw left right] dimens
+			return : 1.5 * sw + [Gap dimens]
+
+		define [BorderShape dimens kSw] : glyph-proc
+			local [object width sw top bot left right] dimens
+			local r : CornerRadius dimens
+			include : dispiro
+				widths.rhs (kSw * sw)
+				curl (right - r) top [heading Rightward]
+				archv
+				flat right (top - r) [heading Downward]
+				curl right (bot + r) [heading Downward]
+				arcvh
+				flat (right - r) bot [heading Leftward]
+				curl (left + r) bot [heading Leftward]
+				archv
+				flat left (bot + r) [heading Upward]
+				curl left (top - r) [heading Upward]
+				arcvh
+				flat (left + r) top [heading Rightward]
+				close
+
+		define [BackFillShape dimens] : glyph-proc
+			local [object width sw top bot left right] dimens
+			local gap : Gap dimens
+			local rD : [CornerRadius dimens] - sw - gap
+			local topD : top - sw - gap
+			local botD : bot + sw + gap
+			local leftD : left + sw + gap
+			local rightD : right - sw - gap
+
+			include : spiro-outline
+				widths.rhs sw
+				curl (rightD - rD) topD [heading Rightward]
+				archv
+				flat rightD (topD - rD) [heading Downward]
+				curl rightD (botD + rD) [heading Downward]
+				arcvh
+				flat (rightD - rD) botD [heading Leftward]
+				curl (leftD + rD) botD [heading Leftward]
+				archv
+				flat leftD (botD + rD) [heading Upward]
+				curl leftD (topD - rD) [heading Upward]
+				arcvh
+				flat (leftD + rD) topD [heading Rightward]
+				close
+
+		define [TwoRowMarks dimens] : glyph-proc
+			local [object left right sw] dimens
+			local gap : Gap dimens
+			set-base-anchor 'enclosureInnerFirstHalf'  (left + sw + gap)  0
+			set-base-anchor 'enclosureInnerSecondHalf' (right - sw - gap) 0
+
+		export : define [Shape digits ww] : glyph-proc
+			local dimens : CircleDimens [Math.max digits 3] ww
+			include : BorderShape dimens 1
+			include : TwoRowMarks dimens
+
+		export : define [TrumpShape digits ww] : glyph-proc
+			local dimens : CircleDimens [Math.max digits 3] ww
+			include : BorderShape dimens 1
+			include : AddEnclosureMark digits : CircleDimens digits ww
+
+		export : define [BackShape digits ww] : glyph-proc
+			local dimens : CircleDimens [Math.max digits 3] ww
+			include : BorderShape dimens 0.5
+			include : BackFillShape dimens
+			include : AddEnclosureMark digits : CircleDimens digits ww
+
+	# define [PlayingCardEnclosureShape digits ww gap] : glyph-proc
+	# 	local dimens : CircleDimens [Math.max digits 3] ww
+	# 	define [object width sw top bot left right] : CircleDimens [Math.max digits 2] ww
+	# 	set-width width
+	# 	include : union
+	# 		HBar.t left  right top sw
+	# 		HBar.b left  right bot sw
+	# 		VBar.l left  bot   top sw
+	# 		VBar.r right bot   top sw
+	# 	include : AddEnclosureMarkPlayingCards digits : CircleDimens digits ww
+	# define [PlayingCardRoundCorner dimens] : begin
+	# 	define [object sw left right] dimens
+	# 	define gap : Math.max ((right - left) / 16) (sw / 2)
+	# 	return : 1.5 * sw + gap
+
+	# define [AddEnclosureMarkPlayingCards digits dimens] : glyph-proc
+	# 	define [object left right sw] dimens
+	# 	define gap : Math.max ((right - left) / 16) (sw / 2)
+	# 	set-base-anchor 'enclosureInnerFirstHalf'  (left + sw + gap)  0
+	# 	set-base-anchor 'enclosureInnerSecondHalf' (right - sw - gap) 0
 
 	define [createTrumpCardGlyphs digits demands]
-		EnclosureT 'trumpCard' CircledBuilder StandardInners digits 1 demands TrumpCardEnclosureShape
-	define [TrumpCardEnclosureShape digits ww gap] : glyph-proc
-		define [object width sw top bot left right] : CircleDimens [Math.max digits 5] ww
-		set-width width
-		include : union
-			HBar.t left  right top sw
-			HBar.b left  right bot sw
-			VBar.l left  bot   top sw
-			VBar.r right bot   top sw
-		include : AddEnclosureMark digits : CircleDimens digits ww
+		EnclosureT 'trumpCard' CircledBuilder StandardInners digits 1 demands PlayingCardEnclosure.TrumpShape
+	# define [TrumpCardEnclosureShape digits ww gap] : glyph-proc
+	# 	define [object width sw top bot left right] : CircleDimens [Math.max digits 5] ww
+	# 	set-width width
+	# 	include : union
+	# 		HBar.t left  right top sw
+	# 		HBar.b left  right bot sw
+	# 		VBar.l left  bot   top sw
+	# 		VBar.r right bot   top sw
+	# 	include : AddEnclosureMark digits : CircleDimens digits ww
 
 	define [createPlayingCardBackGlyphs digits demands]
-		EnclosureT 'playingCardBack' InsetBuilder StandardInners digits 1 demands PlayingCardBackShape
-	define [PlayingCardBackShape digits ww gap] : glyph-proc
-		define [object width sw0 sw top bot left right] : CircleDimens digits ww (ww * gap)
-		set-width width
-		define sw1 : Math.min sw0 (sw / 2)
-		include : union
-			HBar.t left  right top sw1
-			HBar.b left  right bot sw1
-			VBar.l left  bot   top sw1
-			VBar.r right bot   top sw1
-		include : Rect
-			top - sw
-			bot + sw
-			left + [HSwToV sw]
-			right - [HSwToV sw]
-		include : AddEnclosureMark digits : CircleDimens digits ww
+		EnclosureT 'playingCardBack' InsetBuilder StandardInners digits 1 demands PlayingCardEnclosure.BackShape
+	# define [PlayingCardBackShape digits ww gap] : glyph-proc
+	# 	define [object width sw0 sw top bot left right] : CircleDimens digits ww (ww * gap)
+	# 	set-width width
+	# 	define sw1 : Math.min sw0 (sw / 2)
+	# 	include : union
+	# 		HBar.t left  right top sw1
+	# 		HBar.b left  right bot sw1
+	# 		VBar.l left  bot   top sw1
+	# 		VBar.r right bot   top sw1
+	# 	include : Rect
+	# 		top - sw
+	# 		bot + sw
+	# 		left + [HSwToV sw]
+	# 		right - [HSwToV sw]
+	# 	include : AddEnclosureMark digits : CircleDimens digits ww
 
 	define [createDashedBoxedGlyphs digits demands]
 		EnclosureT 'dashed-boxed' CircledBuilder StandardInners digits 1 demands DashedBoxEnclosureShape
