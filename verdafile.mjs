@@ -1,4 +1,5 @@
 import * as FS from "fs";
+import { randomUUID } from "node:crypto";
 import * as Path from "path";
 
 import * as toml from "@iarna/toml";
@@ -841,7 +842,9 @@ const SGrSuperTtcFile = file.make(
 async function buildCompositeTtc(out, inputs) {
 	const inputPaths = inputs.map(f => f.full);
 	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), inputPaths);
-	await absolutelySilently.run(MAKE_TTC, ["-o", out.full], inputPaths);
+	await foldWithTempFileRetryImpl(inputPaths, i =>
+		absolutelySilently.run(MAKE_TTC, ["-o", out.full], i),
+	);
 }
 
 // TTC for glyph sharing
@@ -858,7 +861,25 @@ async function buildGlyphSharingTtc(target, parts, out) {
 	const [ttfInputs] = await target.need(parts.map(part => BuildNoGcTtf(part.dir, part.file)));
 	const ttfInputPaths = ttfInputs.map(p => p.full);
 	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), ttfInputPaths);
-	await silently.run(MAKE_TTC, "-u", ["-o", out.full], ttfInputPaths);
+	await foldWithTempFileRetryImpl(ttfInputPaths, i =>
+		silently.run(MAKE_TTC, "-u", ["-o", out.full], i),
+	);
+}
+
+async function foldWithTempFileRetryImpl(inputPaths, fn) {
+	try {
+		return await fn(inputPaths);
+	} catch (e) {
+		// Retry with temporary files
+		const tempPaths = [];
+		for (const input of inputPaths) {
+			let tmp = `${BUILD}/${String(randomUUID())}.${Path.extname(input)}`;
+			await cp(input, tmp);
+			tempPaths.push(tmp);
+		}
+		await fn(tempPaths);
+		for (const tmp of tempPaths) await rm(tmp);
+	}
 }
 
 ///////////////////////////////////////////////////////////
