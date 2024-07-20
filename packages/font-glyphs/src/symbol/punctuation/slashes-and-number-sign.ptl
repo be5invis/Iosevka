@@ -17,11 +17,14 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 	define slashDefautLeft   : SB + HalfStroke
 	define slashDefaultRight : RightSB - HalfStroke
 
-	define [SlashShape l r _t _b _w] : glyph-proc
-		local w : fallback _w Stroke
-		local t : fallback _t ParenTop
-		local b : fallback _b ParenBot
-		local cor : (1 / 2) * HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - Stroke) / (t - b)) 2])]
+	define flex-params [SlashShape] : glyph-proc
+		local-parameter : l
+		local-parameter : r
+		local-parameter : t -- ParenTop
+		local-parameter : b -- ParenBot
+		local-parameter : w -- Stroke
+
+		local cor : (1 / 2) * HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - w) / (t - b)) 2])]
 		include : spiro-outline
 			corner (r - w * cor) t
 			corner (r + w * cor) t
@@ -56,19 +59,32 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 		include : SlashShape (slashDefautLeft + b) (slashDefaultRight + b) TackTop TackBot w
 
 	local backslashWidth : (slashDefaultRight - slashDefautLeft) * (1 + TanSlope * 2)
-	define [BackslashShape l r] : glyph-proc
-		local cor : (1 / 2) * HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - Stroke) / (ParenTop - ParenBot)) 2])]
+	define flex-params [BackslashShape] : glyph-proc
+		local-parameter : l
+		local-parameter : r
+		local-parameter : t -- ParenTop
+		local-parameter : b -- ParenBot
+		local-parameter : w -- Stroke
+
+		local cor : (1 / 2) * HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - w) / (t - b)) 2])]
 		include : spiro-outline
-			corner (l - Stroke * cor) ParenTop
-			corner (l + Stroke * cor) ParenTop
-			corner (r + Stroke * cor) ParenBot
-			corner (r - Stroke * cor) ParenBot
+			corner (l - w * cor) t
+			corner (l + w * cor) t
+			corner (r + w * cor) b
+			corner (r - w * cor) b
 
 	create-glyph 'backslash' "\\" : glyph-proc
-		include : BackslashShape (Middle - backslashWidth / 2) (Middle + backslashWidth / 2)
+		include : BackslashShape slashDefautLeft slashDefaultRight
 
 	alias 'mathSetMinus'  0x2216 'backslash'
 	alias 'mathBackslash' 0x29F5 'backslash'
+
+	define MosaicTop    fontMetrics.os2.sTypoAscender
+	define MosaicBottom fontMetrics.os2.sTypoDescender
+	create-glyph 'bigSolidus' 0x29F8 : glyph-proc
+		include : SlashShape slashDefautLeft slashDefaultRight MosaicTop MosaicBottom
+	create-glyph 'bigBackslash' 0x29F9 : glyph-proc
+		include : BackslashShape slashDefautLeft slashDefaultRight MosaicTop MosaicBottom
 
 	create-glyph 'slashOverbar' 0x29F6 : glyph-proc
 		include : refer-glyph "slash"

@@ -3,7 +3,7 @@ import * as themes from "../themes/index.mjs";
 // prettier-ignore
 const languages = [
     { lang: 'English', sample: 'Shaw, those twelve beige hooks are joined if I patch a young, gooey mouth.' },
-    { lang: 'IPA', sample: '[ɢʷɯʔ.nas.doːŋ.kʰlja] [ŋan.ȵʑi̯wo.ɕi̯uĕn.ɣwa]', localeId :'und-fonipa' },
+    { lang: 'IPA', sample: '[liə̯bə̆ ɡʷɯ̹ʔ̚ daŋ˕ sŋə̆r̥ra] [ʔɹie˦ na˦ ɡɨ˨ tɕie˦] [ʔɣɛw˦˨ tɕi˦˨ ʔɨwk˦ ʔɨwk˦] [jaw⁴ tsɨ³ tʂɨ¹ ʋu² tʂi¹]', localeId :'und-fonipa' },
     { lang: 'Azerbaijani', sample: 'Zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq.', localeId :'az' },
     { lang: 'Belarusian', sample: 'У Іўі худы жвавы чорт у зялёнай камізэльцы пабег пад’есці фаршу з юшкай.' },
     { lang: 'Breton', sample: 'Yec’hed mat Jakez ! Skarzhit ar gwerennoù-mañ, kavet e vo gwin betek fin ho puhez.' },
