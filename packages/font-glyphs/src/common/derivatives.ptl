@@ -42,7 +42,7 @@ glyph-block Common-Derivatives : begin
 
 			foreach gr [items-of SvInheritableRelations] : begin
 				local v : gr.get fromGlyph
-				if v : gr.set this v
+				if v : gr.set currentGlyph v
 
 	glyph-block-export orthographic-italic
 	define [orthographic-italic name unicode] : if para.isItalic
@@ -60,10 +60,15 @@ glyph-block Common-Derivatives : begin
 		return : glyphStore.queryByName id
 
 	glyph-block-export refer-glyph
-	define [refer-glyph id] : lambda [copyAnchors copyWidth] : begin
-		local goal : query-glyph id
-		if [not goal] : throw : new Error "Cannot find glyph '\(id)'"
-		this.includeGlyph goal copyAnchors copyWidth
+	define [refer-glyph id] : new ReferGlyph id
+
+	class ReferGlyph
+		public [new id] : begin
+			set this.id id
+		public [applyToGlyph target copyAnchors copyWidth] : begin
+			local goal : query-glyph this.id
+			if [not goal] : throw : new Error "Cannot find glyph '\(this.id)'"
+			target.includeGlyph goal copyAnchors copyWidth
 
 	glyph-block-export DeriveMeshT
 	define [DeriveMeshT gnSources Query Fn FnLink] : begin
@@ -146,11 +151,11 @@ glyph-block Common-Derivatives : begin
 
 				# This is [FlipAround], but we cannot use it because common-shapes depends on this
 				# glyph block
-				include [this.gizmo.inverse]
+				include [currentGlyph.gizmo.inverse]
 				include : Translate (-x) (-y)
 				include : Scale (-1) (-1)
 				include : Translate x y
-				include this.gizmo
+				include currentGlyph.gizmo
 
 	glyph-block-export link-reduced-variant
 	define [link-reduced-variant] : with-params [dstGid srcGid gr follow shapeFrom] : begin
