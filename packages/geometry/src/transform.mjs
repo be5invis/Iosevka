@@ -71,6 +71,10 @@ export class Transform {
 		);
 	}
 
+	applyToGlyph(g, alsoAnchors) {
+		g.applyTransform(this, alsoAnchors);
+	}
+
 	toString() {
 		return `[[${this.xx} ${this.yx}] [${this.xy} ${this.yy}]] + [[${this.tx}] [${this.ty}]]`;
 	}
