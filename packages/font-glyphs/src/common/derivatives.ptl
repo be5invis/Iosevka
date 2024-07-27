@@ -8,24 +8,24 @@ extern Map
 glyph-module
 
 glyph-block Common-Derivatives : begin
-	define [ApplyCv g shapeFrom follow para] : begin
-		foreach { kPrime prime } para.variants.primes : foreach pv [prime.variants.values] : begin
-			local suffix : pv.resolveFor para follow
-			if suffix : begin
-				local dstName : shapeFrom + '.' + suffix
-				local dstGlyph : query-glyph dstName
-				if dstGlyph : g.dependsOn dstGlyph
+	define [ApplyCv g shapeFrom primaryFollow allFollows para] : begin
+		foreach follow [items-of allFollows] : foreach { kPrime prime } para.variants.primes
+			foreach pv [prime.variants.values] : begin
+				local suffix : pv.resolveFor para follow
+				if suffix : begin
+					local dstName : shapeFrom + '.' + suffix
+					local dstGlyph : query-glyph dstName
+					if dstGlyph : g.dependsOn dstGlyph
 
-				if (para.enableCvSs && pv.tag && pv.rank) : begin
-					pv.set g dstName
-					if pv.nonDeriving : pv.setPreventDeriving g
+					if (follow === primaryFollow && para.enableCvSs && pv.tag && pv.rank) : begin
+						pv.set g dstName
+						if pv.nonDeriving : pv.setPreventDeriving g
 
 	glyph-block-export select-variant
-	define [select-variant] : with-params [name unicode [shapeFrom name] [follow name] [reduction null]] : begin
+	define [select-variant] : with-params [name unicode [shapeFrom name] [follow name]] : begin
 		if [not : glyph-is-needed name] : return nothing
 
-		local variant para.variantSelector.(follow)
-		if reduction : set variant : reduction.(variant) || variant
+		local variant para.variantSelector.([resolveMainFollow follow])
 		if [not variant] : begin
 			throw : new Error "Variant for \(name) (selector: \(shapeFrom)) is not assigned."
 
@@ -38,11 +38,28 @@ glyph-block Common-Derivatives : begin
 			currentGlyph.dependsOn fromGlyph
 			currentGlyph.cloneRankFromGlyph fromGlyph
 
-			ApplyCv currentGlyph shapeFrom follow para
+			ApplyCv currentGlyph shapeFrom [resolveMainFollow follow] [resolveAllFollow follow] para
 
 			foreach gr [items-of SvInheritableRelations] : begin
 				local v : gr.get fromGlyph
 				if v : gr.set currentGlyph v
+
+	define [resolveMainFollow follow] : begin
+		if ([typeof follow] === 'string') : return follow
+		return : follow.resolveMain
+	define [resolveAllFollow follow] : begin
+		if ([typeof follow] === 'string') : return { follow }
+		return : follow.resolveAll
+
+	glyph-block-export conditional-follow
+	define [conditional-follow c f1 f2] : new CConditionalFollow c f1 f2
+	class CConditionalFollow
+		public [new c f1 f2] : begin
+			set this.c c
+			set this.f1 f1
+			set this.f2 f2
+		public [resolveMain] : return : if this.c this.f1 this.f2
+		public [resolveAll] : return { this.f1 this.f2 }
 
 	glyph-block-export orthographic-italic
 	define [orthographic-italic name unicode] : if para.isItalic
