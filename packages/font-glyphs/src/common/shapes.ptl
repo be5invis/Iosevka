@@ -11,15 +11,22 @@ glyph-block CommonShapes : begin
 	glyph-block-import Common-Derivatives
 
 	glyph-block-export no-shape
-	define [no-shape] { .__isNoShape true }
+	define [no-shape] [new NoShape]
+	class NoShape : public [applyToGlyph] : begin
 
 	glyph-block-export tagged
-	define [tagged tag component] : function [ca cw] : begin
-		define t this.ctxTag
-		set this.ctxTag tag
-		define ret : this.include component ca cw
-		set this.ctxTag t
-		return ret
+	define [tagged tag component] : new TagComponentProc tag component
+
+	class TagComponentProc
+		public [new tag component] : begin
+			set this.tag tag
+			set this.component component
+		public [applyToGlyph target copyAnchors copyMetrics] : begin
+			local t target.ctxTag
+			set target.ctxTag this.tag
+			local ret : target.include this.component copyAnchors copyMetrics
+			set target.ctxTag t
+			return ret
 
 	glyph-block-export Rect
 	define [Rect u d l r transformShiftOnly] : glyph-proc
@@ -621,11 +628,11 @@ glyph-block CommonShapes : begin
 
 	glyph-block-export Ungizmo
 	define [Ungizmo] : glyph-proc
-		include [this.gizmo.inverse]
+		include [currentGlyph.gizmo.inverse]
 
 	glyph-block-export Regizmo
 	define [Regizmo] : glyph-proc
-		include this.gizmo
+		include currentGlyph.gizmo
 
 	# Composite transformations
 	glyph-block-export FlipAround
@@ -643,7 +650,7 @@ glyph-block CommonShapes : begin
 	define [Realign x y sx sy] : ApparentTranslate (sx - x) (sy - y)
 
 	glyph-block-export ForceUpright
-	define [ForceUpright] : glyph-proc [set this.gizmo : Transform.Id]
+	define [ForceUpright] : glyph-proc [set currentGlyph.gizmo : Transform.Id]
 
 	glyph-block-export NameUni
 	define [NameUni unicode] : begin
@@ -653,9 +660,9 @@ glyph-block CommonShapes : begin
 
 	glyph-block-export PointingTo
 	define [PointingTo x1 y1 x2 y2 G] : glyph-proc
-		local giz this.gizmo
+		local giz currentGlyph.gizmo
 		local g : new-glyph : glyph-proc
-			set this.gizmo : Transform.Id
+			set currentGlyph.gizmo : Transform.Id
 			local {.x xo .y yo} : [Transform.Id].apply {.x x1 .y y1}
 			local {.x xt .y yt} : [Transform.Id].apply {.x x2 .y y2}
 			local mag : Math.hypot (yo - yt) (xo - xt)

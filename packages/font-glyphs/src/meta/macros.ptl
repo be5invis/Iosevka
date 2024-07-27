@@ -108,15 +108,15 @@ define-macro flex-params : syntax-rules
 ### Necessary macros
 # A glyph construction is a function which "modifies" a glyph.
 define-macro glyph-proc : syntax-rules
-	`[glyph-proc @::steps] : dirty `[lambda [] [begin \\
-		local currentGlyph this
+	`[glyph-proc @::steps] : dirty `[new $Capture$.GlyphProc : function [currentGlyph] [begin \\
+		# local currentGlyph this
 		begin @::[steps.map formOf]
 		return nothing
 	]]
 
 define-macro composite-proc : syntax-rules
-	`[composite-proc @::steps] : dirty `[lambda [] [begin \\
-		local currentGlyph this
+	`[composite-proc @::steps] : dirty `[new $Capture$.GlyphProc : function [currentGlyph] [begin \\
+		# local currentGlyph this
 		begin @::[steps.map : lambda [x j] : if j `[include @[formOf x]] `[include @[formOf x] true true]]
 		return nothing
 	]]
@@ -154,9 +154,8 @@ define-macro create-aliased-glyph : syntax-rules
 	`[create-aliased-glyph @name] : begin
 		dirty `[create-aliased-glyph @[formOf name] null]
 	`[create-aliased-glyph @name @code] : begin
-		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code] [lambda : begin
-			[this.include currentGlyph true true]
-			[this.cloneRankFromGlyph currentGlyph] ]]
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code]
+			[new $Capture$.ForkGlyphProc currentGlyph null] ]
 
 define-macro create-forked-glyph : syntax-rules
 	`[create-forked-glyph @body] : begin
@@ -168,10 +167,8 @@ define-macro create-forked-glyph : syntax-rules
 	`[create-forked-glyph @name @body] : begin
 		dirty `[create-forked-glyph @[formOf name] null @[formOf body]]
 	`[create-forked-glyph @name @code @body] : begin
-		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code] [lambda : begin
-			[this.include currentGlyph true true]
-			[this.cloneRankFromGlyph currentGlyph]
-			[this.include @[formOf body]] ]]
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code]
+			[new $Capture$.ForkGlyphProc currentGlyph @[formOf body]] ]
 
 ###### Glyph modules and Glyph blocks
 
