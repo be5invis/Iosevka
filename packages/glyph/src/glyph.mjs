@@ -89,21 +89,13 @@ export class Glyph {
 
 	// Inclusion
 	include(component, copyAnchors, copyWidth) {
-		if (!component) {
-			throw new Error("Unreachable: Attempt to include a Null or Undefined");
-		} else if (component.applyToGlyph instanceof Function) {
-			return component.applyToGlyph(this, copyAnchors, copyWidth);
-		} else if (component instanceof Function) {
-			return component.call(this, copyAnchors, copyWidth);
-		} else if (component instanceof Transform) {
-			return this.applyTransform(component, copyAnchors);
-		} else if (component instanceof Glyph) {
-			return this.includeGlyph(component, copyAnchors, copyWidth);
-		} else if (component.__isNoShape) {
-			// Do nothing. By design.
-		} else {
-			throw new Error("Invalid component to be introduced.");
-		}
+		if (!component) throw new Error("Unreachable: Attempt to include a Null or Undefined");
+		return component.applyToGlyph(this, copyAnchors, copyWidth);
+	}
+
+	// Glyph inclusion
+	applyToGlyph(g, copyAnchors, copyWidth) {
+		g.includeGlyph(this, copyAnchors, copyWidth);
 	}
 	includeGlyph(g, copyAnchors, copyWidth) {
 		if (g instanceof Function) throw new Error("Unreachable");
@@ -129,6 +121,8 @@ export class Glyph {
 			);
 		}
 	}
+
+	// Geometry inclusion
 	includeGeometry(g) {
 		let deps = g.getDependencies();
 		if (deps && deps.length) for (const dep of deps) this.dependsOn(dep);
@@ -138,6 +132,8 @@ export class Glyph {
 	includeContours(cs) {
 		this.includeGeometry(new Geom.ContourSetGeometry(cs));
 	}
+
+	// Transform inclusion
 	applyTransform(tfm, alsoAnchors) {
 		this.geometry = Geom.TransformedGeometry.create(tfm, this.geometry);
 		if (alsoAnchors) {
@@ -147,6 +143,7 @@ export class Glyph {
 				this.markAnchors[k] = Anchor.transform(tfm, this.markAnchors[k]);
 		}
 	}
+
 	tryBecomeMirrorOf(dst, rankSet) {
 		if (rankSet.has(this) || rankSet.has(dst)) return;
 		if (dst.hasDependency(this)) return;
@@ -163,6 +160,7 @@ export class Glyph {
 	ejectTagged(tag) {
 		this.geometry = this.geometry.filterTag(t => tag !== t);
 	}
+
 	// Anchors
 	combineMarks(g, shift, lm) {
 		if (!g.markAnchors) return;
@@ -243,5 +241,26 @@ export class Glyph {
 	}
 	deleteMarkAnchor(id) {
 		delete this.markAnchors[id];
+	}
+}
+
+export class GlyphProc {
+	constructor(fn) {
+		this.m_fn = fn;
+	}
+	applyToGlyph(g, copyAnchors, copyWidth) {
+		return this.m_fn.call(null, g, copyAnchors, copyWidth);
+	}
+}
+
+export class ForkGlyphProc {
+	constructor(fromGlyph, component) {
+		this.m_fromGlyph = fromGlyph;
+		this.m_component = component;
+	}
+	applyToGlyph(g) {
+		g.include(this.m_fromGlyph, true, true);
+		g.cloneRankFromGlyph(this.m_fromGlyph);
+		if (this.m_component) g.include(this.m_component, true, true);
 	}
 }
