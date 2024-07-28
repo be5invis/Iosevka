@@ -5,6 +5,7 @@ import * as CurveUtil from "./curve-util.mjs";
 import { Point } from "./point.mjs";
 import { QuadifySink } from "./quadify.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
+import { createSpiroPenGeometry } from "./spiro-pen-expander.mjs";
 import { spiroToOutlineWithSimplification } from "./spiro-to-outline.mjs";
 import { strokeArcs } from "./stroke.mjs";
 import { Transform } from "./transform.mjs";
@@ -135,6 +136,83 @@ export class SpiroGeometry extends CachedGeometry {
 		h.beginArray(this.m_knots.length);
 		for (const knot of this.m_knots) h.embed(knot);
 		h.endArray();
+		h.endStruct();
+	}
+}
+
+export class SpiroPenGeometry extends CachedGeometry {
+	constructor(gizmo, closed, pen, knots) {
+		super();
+		this.m_gizmo = gizmo;
+		this.m_closed = closed;
+		this.m_knots = knots;
+		this.m_pen = pen;
+	}
+
+	toContoursImpl() {
+		let contours = createSpiroPenGeometry(
+			this.m_gizmo,
+			this.m_closed,
+			this.m_knots,
+			this.m_pen,
+		);
+
+		if (!contours.length) return [];
+
+		let stack = [];
+		for (const [i, c] of contours.entries()) {
+			stack.push({
+				type: "operand",
+				fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+				shape: CurveUtil.convertShapeToArcs([c]),
+			});
+			if (i > 0) {
+				stack.push({ type: "operator", operator: TypoGeom.Boolean.ClipType.ctUnion });
+			}
+		}
+
+		const arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
+		const ctx = new CurveUtil.BezToContoursSink();
+		TypoGeom.ShapeConv.transferBezArcShape(arcs, ctx);
+		return ctx.contours;
+	}
+
+	toReferences() {
+		return null;
+	}
+	getDependencies() {
+		return null;
+	}
+	filterTag(fn) {
+		return this;
+	}
+
+	measureComplexity() {
+		let cplx = CPLX_NON_EMPTY | CPLX_NON_SIMPLE;
+		for (const z of this.m_pen) {
+			if (!isFinite(z.x) || !isFinite(z.y)) cplx |= CPLX_BROKEN;
+		}
+		for (const z of this.m_knots) {
+			if (!isFinite(z.x) || !isFinite(z.y)) cplx |= CPLX_BROKEN;
+		}
+		return cplx;
+	}
+
+	hash(h) {
+		h.beginStruct("SpiroPenGeometry");
+		h.gizmo(this.m_gizmo);
+		h.bool(this.m_closed);
+
+		// Serialize the pen
+		h.beginArray(this.m_pen.length);
+		for (const z of this.m_pen) h.point(z);
+		h.endArray();
+
+		// Serialize the knots
+		h.beginArray(this.m_knots.length);
+		for (const knot of this.m_knots) h.embed(knot);
+		h.endArray();
+
 		h.endStruct();
 	}
 }

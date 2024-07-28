@@ -89,13 +89,23 @@ export function SetupBuilders(bindings) {
 	const curl = KnotType("right");
 	const close = f => new TerminateInstruction("close", f);
 	const end = f => new TerminateInstruction("end", f);
+
 	const straight = { l: flat, r: curl };
+	const g2c = { l: g2, r: corner };
+	const cg2 = { l: corner, r: g2 };
+	const flatc = { l: flat, r: corner };
+	const ccurl = { l: corner, r: curl };
+
 	{
 		let directions = [
 			{ name: "up", x: 0, y: 1 },
 			{ name: "down", x: 0, y: -1 },
 			{ name: "left", x: -1, y: 0 },
 			{ name: "right", x: 1, y: 0 },
+			{ name: "ru", x: 1, y: 1 },
+			{ name: "rd", x: 1, y: -1 },
+			{ name: "lu", x: -1, y: 1 },
+			{ name: "ld", x: -1, y: -1 },
 		];
 		let adhesions = [
 			{ name: "start", l: 0, r: TINY },
@@ -107,6 +117,10 @@ export function SetupBuilders(bindings) {
 			[g2, g2, g2],
 			[corner, corner, corner],
 			[straight, flat, curl],
+			[g2c, g2, corner],
+			[cg2, corner, g2],
+			[flatc, flat, corner],
+			[ccurl, corner, curl],
 		];
 		for (const [sink, kl, kr] of knotTypes) {
 			for (const d of directions) {
@@ -368,6 +382,10 @@ export function SetupBuilders(bindings) {
 	function spiroOutline(...args) {
 		return new SpiroOutlineImpl(bindings, args);
 	}
+	function spiroCollect(glyph, ...args) {
+		const spb = new SpiroImplBase(bindings, args);
+		return spb.createCollector(glyph);
+	}
 
 	return {
 		g4,
@@ -378,6 +396,10 @@ export function SetupBuilders(bindings) {
 		close,
 		end,
 		straight,
+		g2c,
+		cg2,
+		flatc,
+		ccurl,
 		widths,
 		heading,
 		"disable-contrast": disableContrast,
@@ -391,5 +413,6 @@ export function SetupBuilders(bindings) {
 		arcvh,
 		dispiro,
 		"spiro-outline": spiroOutline,
+		"spiro-collect": spiroCollect,
 	};
 }
