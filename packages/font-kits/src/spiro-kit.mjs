@@ -369,47 +369,6 @@ export function SetupBuilders(bindings) {
 		return new SpiroOutlineImpl(bindings, args);
 	}
 
-	class CCursiveBuilder {
-		constructor(box, sw) {
-			this.box = box;
-			this.sw = sw;
-		}
-
-		withSw(sw) {
-			return new CCursiveBuilder(this.box, sw);
-		}
-
-		x(pX, _pSX, _deltaX) {
-			const pSX = fallback(_pSX, 0);
-			const deltaX = fallback(_deltaX, 0);
-			const sw = this.sw;
-			return mix(this.box.left, this.box.right, pX) + pSX * Contrast * sw + deltaX;
-		}
-		xAT(px, _pSX, _deltaX) {
-			return this.x(px, _pSX, _deltaX) - this.sw * CorrectionOMidX;
-		}
-		xAB(px, _pSX, _deltaX) {
-			return this.x(px, _pSX, _deltaX) + this.sw * CorrectionOMidX;
-		}
-		y(pY, _pSY, _deltaY) {
-			const pSY = fallback(_pSY, 0);
-			const deltaY = fallback(_deltaY, 0);
-			const sw = this.sw;
-			return mix(this.box.bottom, this.box.top, pY) + pSY * sw + deltaY;
-		}
-		s(pS, d) {
-			const sw = fallback(this.sw);
-			if (d) {
-				return widths.heading((1 - pS) * sw, pS * sw, d);
-			} else {
-				return widths((1 - pS) * sw, pS * sw);
-			}
-		}
-	}
-	function CursiveBuilder(box, sw) {
-		return new CCursiveBuilder(box, sw);
-	}
-
 	return {
 		g4,
 		g2,
@@ -432,6 +391,5 @@ export function SetupBuilders(bindings) {
 		arcvh,
 		dispiro,
 		"spiro-outline": spiroOutline,
-		CursiveBuilder,
 	};
 }
