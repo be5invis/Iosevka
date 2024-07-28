@@ -2,7 +2,6 @@ import * as SpiroJs from "spiro";
 import * as TypoGeom from "typo-geom";
 
 import * as CurveUtil from "./curve-util.mjs";
-import { Vec2 } from "./point.mjs";
 
 export function spiroToOutline(knots, fClosed, gizmo) {
 	const s = new CurveUtil.BezToContoursSink(gizmo);

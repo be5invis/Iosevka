@@ -1,0 +1,192 @@
+###### Fraktur letterforms
+###
+### This file is used to define the letterforms of the Fraktur style.
+### For simplicity, the letters here will *NOT* support any variants.
+###
+
+$$include '../meta/macros.ptl'
+
+import [mix fallback] from "@iosevka/util"
+import [SpiroPenGeometry] from "@iosevka/geometry"
+import [Vec2] from "@iosevka/geometry/point"
+
+glyph-module
+
+glyph-block LetterLike-Fraktur-Shared : begin
+	glyph-block-export fraktur-stroke
+	define [fraktur-stroke profile __knots] : begin
+		local knots : {}.slice.call arguments 1
+		return : new FrakturImpl profile knots
+
+	class FrakturImpl
+		public [new profile knots] : begin
+			this.profile = profile
+			this.knots   = knots
+
+		public [applyToGlyph glyph] : begin
+			local c : spiro-collect glyph this.knots
+			local geom : new SpiroPenGeometry
+				begin c.gizmo
+				begin c.collector.closed
+				this.profile.getPenShape
+				c.collector.controls.map : function [k] [k.toMono]
+			return : glyph.includeGeometry geom
+
+
+	define frakThin  : 1.0 * [AdviceStroke 8]
+	define frakThick : 1.0 * Stroke
+	define frakFine  : 1.0 * [AdviceStroke 4]
+
+	class FrakturProfile
+		public [new thick thin] : begin
+			this.thick = 0.25 * [Math.sqrt 2] * thick
+			this.thin  = 0.25 * [Math.sqrt 2] * thin
+
+		public [getPenShape] : list
+			new Vec2 (this.thick - this.thin) (this.thick + this.thin)
+			new Vec2 (this.thick + this.thin) (this.thick + this.thin)
+			new Vec2 (this.thick + this.thin) (this.thick - this.thin)
+			new Vec2 (-this.thick + this.thin) (-this.thick - this.thin)
+			new Vec2 (-this.thick - this.thin) (-this.thick - this.thin)
+			new Vec2 (-this.thick - this.thin) (-this.thick + this.thin)
+
+		public [xl x] : x + this.thick
+		public [xr x] : x - this.thick
+		public [xp l r p] : [mix l r p] - 2 * p * this.thick
+
+		public [yb y] : y + this.thick
+		public [yt y] : y - this.thick
+		public [yp b t p] : [mix b t p] - 2 * p * this.thick
+
+		# Connection to another profile's pen tip position
+		public [connL otherProfile x] : x - otherProfile.thick + this.thick
+		public [connR otherProfile x] : x + otherProfile.thick - this.thick
+		public [connB otherProfile y] : y - otherProfile.thick + this.thick
+		public [connT otherProfile y] : y + otherProfile.thick - this.thick
+
+	glyph-block-export S
+	define S : new FrakturProfile frakThick (0.5 * frakThin)
+
+	glyph-block-export F
+	define F : new FrakturProfile frakFine (0.5 * frakThin)
+
+glyph-block LetterLike-Fraktur : begin
+	glyph-block-import CommonShapes
+	glyph-block-import LetterLike-Fraktur-Shared : S F fraktur-stroke
+
+	define WaveDepth : 0.5 * SHook + S.thick
+	define WaveDepthX : 0.375 * SHook + S.thick
+	define DecoSize : 0.15 * (RightSB - SB)
+
+	define flex-params [HWave pen w l r b t] : begin
+		local-parameter pen
+		local-parameter w
+		local-parameter l
+		local-parameter r
+		local-parameter b
+		local-parameter t
+
+		local startUpward : if w (w > 0) (t > b)
+		local tiny : if startUpward (1 / 64) (-1 / 64)
+		return : fraktur-stroke pen
+			g2  l                      b
+			g2  (l + tiny)             (b + tiny)
+			g2  [mix l r 0.375]        [if w (b + w) t]
+			g2  [mix l r 0.5]          [mix b t 0.5]
+			g2  [mix l r 0.625]        [if w (t - w) b]
+			g2  (r - tiny)             (t - tiny)
+			g2  r                      t
+
+	define flex-params [VCWave pen w x b t] : begin
+		local-parameter pen
+		local-parameter w
+		local-parameter x
+		local-parameter b
+		local-parameter t
+
+		local tiny : if (w > 0) (1 / 64) (-1 / 64)
+		return : fraktur-stroke pen
+			g2  x                                 t
+			g2  (x - tiny)                        (t - tiny)
+			g2  [pen.xl (x - 0.5 * w)]            [mix b t 0.625]
+			g2  x                                 [mix b t 0.5]
+			g2  [pen.xr (x + 0.5 * w)]            [mix b t 0.375]
+			g2  (x + tiny)                        (b + tiny)
+			g2  x                                 b
+
+	create-glyph "frak/I" 0x2111 : glyph-proc
+		include : MarkSet.capital
+
+		# Top Stroke
+		include : HWave S
+			l -- [S.xl SB]
+			r -- [S.xr RightSB]
+			b -- [S.yb (CAP - WaveDepth)]
+			t -- [S.yt CAP]
+
+		# Deocration at top-left
+		include : VCWave F WaveDepthX
+			x -- [F.connL S : S.xl SB]
+			b -- (CAP * 0.625)
+			t -- [F.connB S : S.yb (CAP - WaveDepth)]
+
+		# Main stroke
+		include : fraktur-stroke S
+			g2.ld.start [S.xr RightSB]                 [S.yt CAP]
+			g4          [S.xp SB RightSB 0.75]         [mix ArchDepthA [S.yt CAP] 0.625]
+			g2          [S.xr RightSB]                 ArchDepthA
+			~~~ [arch.rhs [S.yb 0] (blendPost -- null)]
+			corner      [S.xl SB]                      Hook
+			corner      [S.xl (0.5 * SB)]              (Hook - ([S.xl SB] - [S.xl (0.5 * SB)]))
+
+	create-glyph "frak/R" 0x211C : glyph-proc
+		include : MarkSet.capital
+
+		local xExt : mix 0 SB 0.25
+		local xLeftStem : Math.max (xExt + 1.5 * DecoSize) [mix SB RightSB 0.166]
+		local ltHook : 0.25 * Hook
+		local ada : 0.6 * ArchDepthA
+		local adb : 0.6 * ArchDepthB
+
+		# Deocration at top-left
+		include : VCWave F WaveDepthX
+			x -- [F.connL S : S.xl xExt]
+			b -- (CAP * 0.625)
+			t -- [F.connB S : S.yt (CAP - ltHook)]
+
+		local xMidStrokeL : S.xl xLeftStem
+		local xMidStrokeR : S.xp xLeftStem RightSB 0.625
+		local yMidStrokeL : S.yp 0 CAP 0.48
+		local yMidStrokeR : S.yp 0 CAP 0.55
+
+		# Left stroke
+		include : fraktur-stroke S
+			g2.ru.start    [S.xl xExt]                     [S.yt (CAP - ltHook)]
+			~~~ [arch.rhs [S.yt CAP] 0.6 (blendPre -- null)]
+			flat           [S.xl xLeftStem]                ([S.yb CAP] - adb)
+			curl 	       [S.xl xLeftStem]                yMidStrokeL
+			corner         [S.xl xExt]                     ([S.yb 0] + 0.5 * WaveDepth)
+			g2c.right.end  (Middle - DecoSize)             [S.yb 0]
+			corner         Middle                          ([S.yb 0] + 0.5 * DecoSize)
+
+		# Top-right arch
+		include : fraktur-stroke S
+			flat         [S.xl xLeftStem]               ([S.yb CAP] - adb)
+			corner       [S.xp xLeftStem RightSB 0.75]  [S.yt CAP]
+			g2.down.mid  [S.xr RightSB]                 [mix yMidStrokeR [S.yt CAP] 0.5]
+			flat         xMidStrokeR                    yMidStrokeR
+			curl         xMidStrokeL                    yMidStrokeL
+
+		local xLegStart : mix xMidStrokeL xMidStrokeR 0.75
+		local yLegStart : mix yMidStrokeL yMidStrokeR 0.75
+		local xLegEnd   RightSB
+		local yLegEnd : S.yb 0
+
+		# Leg
+		include : fraktur-stroke S
+			g2         xLegStart					     yLegStart
+			g2         [mix xLegStart xMidStrokeR 0.001] [mix yLegStart yMidStrokeR 0.001]
+			flat       [mix xLegStart xLegEnd 0.75]      (yLegStart - adb)
+			curl       [mix xLegStart xLegEnd 0.75]      (yLegEnd  + ada)
+			corner     xLegEnd                           yLegEnd
+			corner     (xLegEnd + DecoSize)              (yLegEnd + 0.5 * DecoSize)
