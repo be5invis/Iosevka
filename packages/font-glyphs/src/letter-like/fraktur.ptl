@@ -13,6 +13,10 @@ import [Vec2] from "@iosevka/geometry/point"
 glyph-module
 
 glyph-block LetterLike-Fraktur-Shared : begin
+
+	# [fraktur-stroke profile ...] will construct a Fraktur stroke from a pen profile and a list
+	# of control knots. The knots will form a (usually open) spiro path, then the result will be
+	# the area that the pen tip covers when moving along the path.
 	glyph-block-export fraktur-stroke
 	define [fraktur-stroke profile __knots] : begin
 		local knots : {}.slice.call arguments 1
@@ -33,13 +37,13 @@ glyph-block LetterLike-Fraktur-Shared : begin
 			return : glyph.includeGeometry geom
 
 
-	define frakThin  : 1.0 * [AdviceStroke 12]
-	define frakThick : 1.0 * Stroke
-	define frakFine  : 1.0 * [AdviceStroke 4]
-
+	# A pen profile describes a virtual flat-tip pen. We use a 45-degree arrangement to
+	# simplify the math.
 	class FrakturProfile
 		public [new thick thin] : begin
+			# .thick is the half length of the flat tip, projected to the X/Y axis
 			this.thick = 0.25 * [Math.sqrt 2] * thick
+			# .thin is the half width of the thin tip, projected to the X/Y axis
 			this.thin  = 0.25 * [Math.sqrt 2] * thin
 
 		public [getPenShape gizmo] : begin
@@ -65,6 +69,11 @@ glyph-block LetterLike-Fraktur-Shared : begin
 		public [connR otherProfile x] : x + otherProfile.thick - this.thick
 		public [connB otherProfile y] : y - otherProfile.thick + this.thick
 		public [connT otherProfile y] : y + otherProfile.thick - this.thick
+
+	# Stroke widths
+	define frakThin  : 1.0 * [AdviceStroke 8]
+	define frakThick : 1.0 * Stroke
+	define frakFine  : 1.0 * [AdviceStroke 4] # For decoration
 
 	glyph-block-export S
 	define S : new FrakturProfile frakThick (0.5 * frakThin)

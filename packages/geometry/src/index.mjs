@@ -199,7 +199,7 @@ export class SpiroPenGeometry extends CachedGeometry {
 	}
 
 	hash(h) {
-		h.beginStruct("SpiroPenGeometry4");
+		h.beginStruct("SpiroPenGeometry");
 		h.gizmo(this.m_gizmo);
 		h.bool(this.m_closed);
 
