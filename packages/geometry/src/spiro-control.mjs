@@ -1,7 +1,3 @@
-import * as Format from "@iosevka/util/formatter";
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
 export class BiKnotCollector {
 	constructor(contrast) {
 		this.contrast = contrast; // stroke contrast
@@ -206,6 +202,7 @@ export class UserControlKnot {
 		if (this.af) this.af.call(ctx);
 	}
 }
+
 export class TerminateInstruction {
 	constructor(type, af) {
 		this.type = type;
@@ -216,6 +213,9 @@ export class TerminateInstruction {
 		// if (this.af) this.af.call(ctx);
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 export class InterpolatorBase {
 	constructor(blender) {
 		this.type = "interpolate";

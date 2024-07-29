@@ -1,9 +1,9 @@
 import { DiSpiroGeometry, SpiroGeometry } from "@iosevka/geometry";
 import {
 	BiKnotCollector,
-	UserControlKnot,
 	Interpolator,
 	TerminateInstruction,
+	UserControlKnot,
 } from "@iosevka/geometry/spiro-control";
 import { bez3, fallback, mix } from "@iosevka/util";
 
@@ -73,15 +73,37 @@ class DiSpiroProxy {
 	}
 }
 
-export function SetupBuilders(bindings) {
-	const { Stroke, Superness, Contrast, CorrectionOMidX, TINY } = bindings;
-	function KnotType(type) {
-		return (x, y, f) => {
-			if (!isFinite(x)) throw new TypeError("NaN detected for X");
-			if (!isFinite(y)) throw new TypeError("NaN detected for Y");
-			return new UserControlKnot(type, x, y, f);
-		};
+/// The builder for directed knot pairs
+class DirectedKnotPairBuilder {
+	constructor(bindings, prevKnotType, nextKnotType, deltaX, deltaY) {
+		const { TINY } = bindings;
+		this.start = DirPairImpl(prevKnotType, nextKnotType, deltaX, deltaY, 0, TINY);
+		this.mid = DirPairImpl(prevKnotType, nextKnotType, deltaX, deltaY, -0.5 * TINY, 0.5 * TINY);
+		this.end = DirPairImpl(prevKnotType, nextKnotType, deltaX, deltaY, -TINY, 0);
 	}
+}
+
+function DirPairImpl(prevKnotType, nextKnotType, dirX, dirY, distPre, distPost) {
+	const fnPre = (x, y, af) => prevKnotType(x + dirX * distPre, y + dirY * distPre, af);
+	const fnPost = (x, y, af) => nextKnotType(x + dirX * distPost, y + dirY * distPost, af);
+	let buildFn = (x, y, af) => [fnPre(x, y, af), fnPost(x, y, af)];
+	buildFn.pre = fnPre;
+	buildFn.post = fnPost;
+	return buildFn;
+}
+
+function KnotType(type) {
+	return (x, y, f) => {
+		if (!isFinite(x)) throw new TypeError("NaN detected for X");
+		if (!isFinite(y)) throw new TypeError("NaN detected for Y");
+		return new UserControlKnot(type, x, y, f);
+	};
+}
+
+export function SetupBuilders(bindings) {
+	const { Stroke, Superness } = bindings;
+
+	// Simple knot types
 	const g4 = KnotType("g4");
 	const g2 = KnotType("g2");
 	const corner = KnotType("corner");
@@ -90,28 +112,15 @@ export function SetupBuilders(bindings) {
 	const close = f => new TerminateInstruction("close", f);
 	const end = f => new TerminateInstruction("end", f);
 
+	// Pair knots
 	const straight = { l: flat, r: curl };
 	const g2c = { l: g2, r: corner };
 	const cg2 = { l: corner, r: g2 };
 	const flatc = { l: flat, r: corner };
 	const ccurl = { l: corner, r: curl };
 
+	// Add the directed/heading knot builders
 	{
-		let directions = [
-			{ name: "up", x: 0, y: 1 },
-			{ name: "down", x: 0, y: -1 },
-			{ name: "left", x: -1, y: 0 },
-			{ name: "right", x: 1, y: 0 },
-			{ name: "ru", x: 1, y: 1 },
-			{ name: "rd", x: 1, y: -1 },
-			{ name: "lu", x: -1, y: 1 },
-			{ name: "ld", x: -1, y: -1 },
-		];
-		let adhesions = [
-			{ name: "start", l: 0, r: TINY },
-			{ name: "mid", l: -0.5 * TINY, r: 0.5 * TINY },
-			{ name: "end", l: -TINY, r: 0 },
-		];
 		let knotTypes = [
 			[g4, g4, g4],
 			[g2, g2, g2],
@@ -122,17 +131,29 @@ export function SetupBuilders(bindings) {
 			[flatc, flat, corner],
 			[ccurl, corner, curl],
 		];
+		let directions = [
+			// Straights
+			{ name: "up", x: 0, y: 1 },
+			{ name: "down", x: 0, y: -1 },
+			{ name: "left", x: -1, y: 0 },
+			{ name: "right", x: 1, y: 0 },
+			{ name: "u", x: 0, y: 1 },
+			{ name: "d", x: 0, y: -1 },
+			{ name: "l", x: -1, y: 0 },
+			{ name: "r", x: 1, y: 0 },
+
+			// Diagonals
+			{ name: "ru", x: 1, y: 1 },
+			{ name: "rd", x: 1, y: -1 },
+			{ name: "lu", x: -1, y: 1 },
+			{ name: "ld", x: -1, y: -1 },
+		];
 		for (const [sink, kl, kr] of knotTypes) {
+			sink.sl = s => new DirectedKnotPairBuilder(bindings, kl, kr, -1, s);
+			sink.sr = s => new DirectedKnotPairBuilder(bindings, kl, kr, 1, s);
+			sink.dir = (dx, dy) => new DirectedKnotPairBuilder(bindings, kl, kr, dx, dy);
 			for (const d of directions) {
-				sink[d.name] = {};
-				for (const a of adhesions) {
-					sink[d.name][a.name] = (x, y, af) => [
-						kl(x + d.x * a.l, y + d.y * a.l, af),
-						kr(x + d.x * a.r, y + d.y * a.r, af),
-					];
-					sink[d.name][a.name].l = (x, y, af) => kl(x + d.x * a.l, y + d.y * a.l, af);
-					sink[d.name][a.name].r = (x, y, af) => kr(x + d.x * a.r, y + d.y * a.r, af);
-				}
+				sink[d.name] = new DirectedKnotPairBuilder(bindings, kl, kr, d.x, d.y);
 			}
 		}
 	}
