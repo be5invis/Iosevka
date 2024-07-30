@@ -9,6 +9,7 @@ $$include '../meta/macros.ptl'
 import [mix fallback] from "@iosevka/util"
 import [SpiroPenGeometry] from "@iosevka/geometry"
 import [Vec2] from "@iosevka/geometry/point"
+import [Box] from "@iosevka/geometry/box"
 import [Interpolator] from "@iosevka/geometry/spiro-control"
 
 glyph-module
@@ -57,6 +58,8 @@ glyph-block LetterLike-Fraktur-Shared : begin
 				new Vec2 (-thickTf.x - this.thin) (-thickTf.y - this.thin)
 				new Vec2 (-thickTf.x - this.thin) (-thickTf.y + this.thin)
 
+		public [box u d l r] : new Box [this.yt u] [this.yb d] [this.xl l] [this.xr r]
+
 		public [xl x] : x + this.thick
 		public [xr x] : x - this.thick
 		public [xp l r p] : mix [this.xl l] [this.xr r] p
@@ -93,8 +96,8 @@ glyph-block LetterLike-Fraktur-Shared : begin
 	define LbFootRise : 0.375 * SHook + 0.375 * S.thick
 
 	glyph-block-export SlopeA SlopeB
-	define SlopeA : DecoSizeY / DecoSizeX
-	define SlopeB   1.0
+	define SlopeA : 0.875 * DecoSizeY / DecoSizeX
+	define SlopeB : 0.875 * -[mix SlopeA 1.0 0.5]
 
 	# Wave blenders
 	glyph-block-export Wave
@@ -115,11 +118,23 @@ glyph-block LetterLike-Fraktur-Shared : begin
 				g2 [mix before.x after.x 0.375]  after.y
 				g2 [mix before.x after.x 0.625]  before.y
 
+	glyph-block-export PHexTop
+	define PHexTop : 0.5 + 0.5 * ([Math.max DecoSizeX frakThin] / (RightSB - SB))
+	glyph-block-export PHexBot
+	define PHexBot : 1 - PHexTop
+
 glyph-block LetterLike-Fraktur : begin
+	glyph-block-import Common-Derivatives
 	glyph-block-import CommonShapes
 	glyph-block-import LetterLike-Fraktur-Shared : S F T fraktur-stroke
 	glyph-block-import LetterLike-Fraktur-Shared : DecoSizeX DecoSizeY SlopeA SlopeB
-	glyph-block-import LetterLike-Fraktur-Shared : Wave LbFootRise FHook
+	glyph-block-import LetterLike-Fraktur-Shared : Wave LbFootRise FHook PHexTop PHexBot
+
+
+	define [LtDecorativeWave sx sy ey] : fraktur-stroke F
+			g2.ld.start [F.connL S : S.xl sx] [F.connB S : S.yt sy]
+			~~~ [Wave.vc (-Wave.DepthX)]
+			g2.ld.end   pre@                  (ey - 2 * S.thick)
 
 	create-glyph "frak/C" 0x212D : glyph-proc
 		include : MarkSet.capital
@@ -137,7 +152,7 @@ glyph-block LetterLike-Fraktur : begin
 		include : fraktur-stroke S
 			g4.ld.start   [S.xp SB RightSB 0.1]     ([S.yt CAP] - 0.1 * ArchDepthA)
 			flat          [S.xl SB]                 ([S.yt CAP] - 0.6 * ArchDepthA)
-			curl 		  same-x                    ([S.yb 0] + ArchDepthB)
+			curl 		  pre@                      ([S.yb 0] + ArchDepthB)
 			~~~ [hookend [S.yb 0] (sw -- S.thick)]
 			g2            [S.xr RightSB]            ([S.yb 0] + SHook)
 
@@ -151,7 +166,7 @@ glyph-block LetterLike-Fraktur : begin
 		include : fraktur-stroke F
 			g2.ld.start  [F.connL S xCenter] [F.connB S : [S.yt CAP] - DecoSizeX]
 			~~~ [Wave.vc (-Wave.DepthX)]
-			g2.ld.end    same-x              (CAP * 0.375)
+			g2.ld.end    pre@                (CAP * 0.375)
 
 	create-glyph "frak/H" 0x210C : glyph-proc
 		include : MarkSet.capDesc
@@ -190,36 +205,32 @@ glyph-block LetterLike-Fraktur : begin
 			g2.ld.start [S.xr RightSB]         [S.yt CAP]
 			~~~ [Wave.h]
 			g2.ld.mid   [S.xl SB]              [S.yt (CAP - Wave.DepthY)]
-		include : fraktur-stroke F
-			g2.ld.start [F.connL S : S.xl SB]  [F.connB S : S.yt (CAP - Wave.DepthY)]
-			~~~ [Wave.vc (-Wave.DepthX)]
-			g2.ld.end   [F.connL S : S.xl SB]  (CAP * 0.625 - 2 * S.thick)
+		include : LtDecorativeWave [S.xl SB] (CAP - Wave.DepthY) (CAP * 0.625)
 
 	create-glyph "frak/I" 0x2111 : glyph-proc
 		include : MarkSet.capital
 		include : IJTopStroke
-		# Main stroke
+
+		local iBox : S.box CAP 0 SB RightSB
 		include : fraktur-stroke S
-			g2.ld.start [S.xr RightSB]                 [S.yt CAP]
-			g4          [S.xp SB RightSB 0.75]         [S.yp ArchDepthA CAP 0.625]
-			g4          [S.xr RightSB]                 [S.yb ArchDepthA]
-			~~~ [hookend [S.yb 0] (sw -- S.thick)]
-			g2          [S.xl SB]                      [S.yb SHook]
+			g2.ld.start iBox.right            iBox.top
+			g4          [iBox.xp 0.7]         [mix@ 0.375]
+			g4          iBox.right            (post@ <+> ArchDepthA)
+			hookend (sw -- S.thick)           iBox.bot
+			g2          iBox.left             (pre@ <+> SHook)
 
 	create-glyph "frak/J" 0x1D50D : glyph-proc
 		include : MarkSet.capDesc
-
 		include : IJTopStroke
 
-		# Main stroke
-		local mainStrokeTop : S.yt (CAP - 1.5 * Wave.DepthY - 2 * S.thick)
+		local jBox : S.box [S.yt (CAP - 1.5 * Wave.DepthY - 2 * S.thick)] Descender SB RightSB
 		include : fraktur-stroke S
-			g4          [S.xr RightSB]                (mainStrokeTop - FHook)
-			~~~ [hookstart mainStrokeTop (sw -- S.thick)]
-			g4          [S.xr : mix SB RightSB 0.6]   (mainStrokeTop - 0.6 * ArchDepthA)
-			g4          [S.xr RightSB]                [S.yb (Descender + ArchDepthA)]
-			~~~ [hookend [S.yb Descender] (sw -- S.thick)]
-			g2          [S.xl SB]                     [S.yb (Descender + SHook)]
+			g4        jBox.right                (post@ <-> FHook)
+			hookstart (sw -- S.thick)           jBox.top
+			g4        ([jBox.xp 0.6] - S.thick) (pre@ <-> 0.6 * ArchDepthA)
+			g4        jBox.right                (post@ <+> ArchDepthA)
+			hookend (sw -- S.thick)             jBox.bot
+			g2        jBox.left                 (pre@ <+> SHook)
 
 	create-glyph "frak/R" 0x211C : glyph-proc
 		include : MarkSet.capital
@@ -231,10 +242,7 @@ glyph-block LetterLike-Fraktur : begin
 		local adb : 0.6 * ArchDepthB
 
 		# Deocration at top-left
-		include : fraktur-stroke F
-			g2.ld.start [F.connL S : S.xl xExt] [F.connB S : S.yt (CAP - ltHook)]
-			~~~ [Wave.vc (-Wave.DepthX)]
-			g2.ld.end   [F.connL S : S.xl xExt] (CAP * 0.625 - 2 * S.thick)
+		include : LtDecorativeWave xExt (CAP - ltHook) (CAP * 0.625)
 
 		local xMidStrokeL : S.xl xLeftStem
 		local xMidStrokeR : S.xp xLeftStem RightSB 0.625
@@ -251,16 +259,16 @@ glyph-block LetterLike-Fraktur : begin
 			g2.ru.start    [S.xl xExt]            [S.yt (CAP - ltHook)]
 			~~~ [arch.rhs [S.yt CAP] 0.6 (blendPre -- null)]
 			flat           [S.xl xLeftStem]       [Math.max ([S.yb CAP] - ada) yArchStart]
-			curl 	       [S.xl xLeftStem]       yMidStrokeL
-			corner         [S.xl xExt]            ([S.yb 0] + LbFootRise)
-			g2c.right.end  (Middle - DecoSizeX)   [S.yb 0]
-			corner         Middle                 ([S.yb 0] + DecoSizeY)
+			curl 	       (pre@ <+> 0)           yMidStrokeL
+			corner         [S.xl xExt]            (post@ <+> LbFootRise)
+			g2c.right.end  (post@ <-> DecoSizeX)  [S.yb 0]
+			corner         Middle                 (pre@ <+> DecoSizeY)
 
 		# Top-right arch
 		include : fraktur-stroke S
 			flat         xArchStart	              yArchStart
 			corner       xArchTop                 yArchTop
-			g2.down.mid  [S.xr RightSB]           [mix yMidStrokeR yArchTop 0.5]
+			g2.down.mid  [S.xr RightSB]           [mix@ 0.5]
 			flat         xMidStrokeR              yMidStrokeR
 			curl         xMidStrokeL              yMidStrokeL
 
@@ -271,32 +279,62 @@ glyph-block LetterLike-Fraktur : begin
 
 		# Leg
 		include : fraktur-stroke S
-			g2         xLegStart					     yLegStart
-			g2         (xLegStart + TINY)                (yLegStart + SlopeA * TINY)
-			flat       [mix xLegStart xLegEnd 0.75]      (yLegStart - adb)
-			curl       [mix xLegStart xLegEnd 0.75]      (yLegEnd  + ada)
-			corner     xLegEnd                           yLegEnd
-			corner     (xLegEnd + DecoSizeX)             (yLegEnd + DecoSizeY)
+			[g2.sr SlopeA].start  xLegStart             yLegStart
+			flat                  [mix@ 0.75]           (pre@  <-> adb)
+			decor@ : curl         pre@                  (post@ <+> ada)
+			corner                xLegEnd               yLegEnd
+			corner                (pre@ <+> DecoSizeX)  (pre@  <+> DecoSizeY)
 
 	create-glyph "frak/Z" 0x2128 : glyph-proc
 		include : MarkSet.capital
 
+		local zBox : S.box CAP 0 SB RightSB
+
 		# Top Stroke
 		include : fraktur-stroke S
-			g2.ld.start [S.xr RightSB]         [S.yt CAP]
+			g2.ld.start zBox.right  zBox.top
 			~~~ [Wave.h]
-			g2.ld.mid   [S.xl SB]              [S.yt (CAP - Wave.DepthY)]
+			g2.ld.mid   zBox.left   (pre@ <-> Wave.DepthY)
 
 		# Bottom Stroke
 		local diag : list
-			corner       [S.xr RightSB]                 [S.yt CAP]
-			corner       [S.xp SB RightSB 0.166]        [S.yp 0 CAP 0.5]
+			corner       zBox.right       zBox.top
+			corner       [zBox.xp 0.166]  [zBox.yp 0.5]
 		include : fraktur-stroke S diag
 		include : difference
 			fraktur-stroke S
-				g2.ru.start  [S.xp SB RightSB 0.166]        [S.yp 0 CAP 0.5]
-				~~~ [arch.rhs [S.yp 0 CAP 0.55] 0.375 (sw -- S.thick)]
-				g2.down.mid  [S.xr RightSB]                 [S.yb ArchDepthA]
-				~~~ [hookend [S.yb 0] (sw -- S.thick)]
-				g2           [S.xl SB]                      [S.yb SHook]
+				g2.ru.start  diag.1.x                   diag.1.y
+				~~~ [arch.rhs [zBox.yp 0.55] 0.375 (sw -- S.thick)]
+				g2.down.mid  zBox.right                 (post@ <+> ArchDepthA)
+				hookend zBox.bot (sw -- S.thick)
+				g2           zBox.left                  (pre@ <+> SHook)
 			MaskAboveLine  diag.0.x diag.0.y diag.1.x diag.1.y 4
+
+
+	create-glyph "frak/e" 0xAB32 : glyph-proc
+		include : MarkSet.e
+		local eBox : S.box XH 0 SB RightSB
+		include : fraktur-stroke S
+			corner                 (eBox.left + S.thick)  [post@slope SlopeA]
+			g2                     eBox.xMid              [eBox.yp DesignParameters.eBarPos]
+			corner                 eBox.right             [pre@slope SlopeA]
+			corner                 [eBox.xp PHexTop]      eBox.top
+			corner                 eBox.left              [pre@slope SlopeA]
+			curl                   pre@                   (post@ <+> ArchDepthB)
+			[g2c.sr (-SlopeA)].end [eBox.xp PHexTop]      eBox.bot
+			corner                 eBox.right             [pre@slope SlopeA]
+
+	alias 'mathFrak/e' 0x1D522 'frak/e'
+
+	create-glyph "frak/o" 0xAB3D : glyph-proc
+		include : MarkSet.e
+		local oBox : S.box XH 0 SB RightSB
+		include : fraktur-stroke S
+			[cg2.sr SlopeB].start  [oBox.xp PHexTop]  oBox.top
+			g2.down.mid            oBox.right         [mix@ 0.5]
+			[g2c.sl SlopeA].start  [oBox.xp PHexBot]  oBox.bot
+			corner                 oBox.left          [pre@slope SlopeB]
+			corner                 pre@               [post@slope SlopeA]
+			close
+
+	alias 'mathFrak/o' 0x1D52C 'frak/o'
