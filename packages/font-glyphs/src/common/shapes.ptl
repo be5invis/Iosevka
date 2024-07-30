@@ -2,8 +2,9 @@ $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback boole boolePn] from "@iosevka/util"
 import [Transform] from "@iosevka/geometry/transform"
-import [Interpolator] from "@iosevka/geometry/spiro-control"
+import [Interpolator WithKnotProxy] from "@iosevka/geometry/spiro-control"
 import [RadicalGeometry StrokeGeometry RemoveHolesGeometry] from "@iosevka/geometry"
+import [CMixCoord] from "@iosevka/font-kits/derived-coordinates"
 
 glyph-module
 
@@ -510,6 +511,9 @@ glyph-block CommonShapes : begin
 	define [hookEndBlender before after args] : begin
 		return : HookShape before after false args
 
+	define [hookProxy args] : begin
+		return : g4 [new CMixCoord 0.5] args.y
+
 	glyph-block-export hookstart
 	define flex-params [hookstart] : begin
 		local-parameter : y
@@ -517,8 +521,8 @@ glyph-block CommonShapes : begin
 		local-parameter : swTerminal     -- sw
 		local-parameter : isTail         -- false
 		local-parameter : noSwash        -- false
-		return : Interpolator hookStartBlender
-			object y sw swTerminal isTail noSwash
+		local args : object y sw swTerminal isTail noSwash
+		return : WithKnotProxy [hookProxy args] : Interpolator hookStartBlender args
 
 	glyph-block-export hookend
 	define flex-params [hookend] : begin
@@ -527,8 +531,8 @@ glyph-block CommonShapes : begin
 		local-parameter : swTerminal     -- sw
 		local-parameter : isTail         -- false
 		local-parameter : noSwash        -- false
-		return : Interpolator hookEndBlender
-			object y sw swTerminal isTail noSwash
+		local args : object y sw swTerminal isTail noSwash
+		return : WithKnotProxy [hookProxy args] : Interpolator hookEndBlender args
 
 	glyph-block-export arch
 	define arch : namespace
@@ -569,6 +573,11 @@ glyph-block CommonShapes : begin
 			set r : 0.5 + (r - 0.5) * (v + w) / (u * 2)
 			return r
 
+		define [archBlenderProxy args] : begin
+			return : [if args.compact g2 g4]
+				new CMixCoord [fallback args.p 0.5] 0 args.mockPre args.mockPost
+				begin args.y
+
 		define [archBlender _before _after args] : begin
 			local before : fallback args.mockPre _before
 			local after : fallback args.mockPost _after
@@ -600,8 +609,8 @@ glyph-block CommonShapes : begin
 			local-parameter : mockPost     -- nothing
 			local-parameter : blendPre     -- [arcvh]
 			local-parameter : blendPost    -- [archv]
-			return : Interpolator archBlender
-				object [lhs true] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost
+			local args : object [lhs true] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost
+			return : WithKnotProxy [archBlenderProxy args] : Interpolator archBlender args
 
 		export : define flex-params [rhs] : begin
 			local-parameter : y
@@ -615,8 +624,8 @@ glyph-block CommonShapes : begin
 			local-parameter : mockPost     -- nothing
 			local-parameter : blendPre     -- [arcvh]
 			local-parameter : blendPost    -- [archv]
-			return : Interpolator archBlender
-				object [lhs false] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost
+			local args : object [lhs false] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost
+			return : WithKnotProxy [archBlenderProxy args] : Interpolator archBlender args
 
 		foreach side {lhs rhs} : begin
 			set side.centerAt : object

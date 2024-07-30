@@ -3,7 +3,7 @@ import { mix } from "@iosevka/util";
 export class Box {
 	constructor(t, b, l, r) {
 		this.top = t;
-		this.bottom = this.bot = b;
+		this.bot = this.bottom = b;
 		this.left = l;
 		this.right = r;
 		this.xMid = this.xMiddle = mix(l, r, 0.5);
@@ -43,6 +43,10 @@ export class Box {
 			this.right,
 		);
 	}
+
+	xp(t) {
+		return this.mixX(t);
+	}
 	mixX(t) {
 		return mix(this.left, this.right, t);
 	}
@@ -51,6 +55,10 @@ export class Box {
 	}
 	mixXMidRight(t) {
 		return mix(this.xMid, this.right, t);
+	}
+
+	yp(t) {
+		return this.mixY(t);
 	}
 	mixY(t) {
 		return mix(this.bottom, this.top, t);

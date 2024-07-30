@@ -182,12 +182,17 @@ class CoordinatePropagator {
 		const stateC = ic ? this.stateY : this.stateX;
 
 		if (stateC[i] === CR_RESOLVED) return;
-		if (stateC[i] === CR_RESOLVING) throw new Error("Circular dependency detected");
+		if (stateC[i] === CR_RESOLVING) {
+			console.log(this);
+			throw new Error("Circular dependency detected");
+		}
 
 		stateC[i] = CR_RESOLVING;
 
 		if (depC[i] & DEP_PRE_X) this.solve(this.cycI(i - 1), 0);
 		if (depC[i] & DEP_PRE_Y) this.solve(this.cycI(i - 1), 1);
+		if (depC[i] & DEP_SAME_X) this.solve(this.cycI(i), 0);
+		if (depC[i] & DEP_SAME_Y) this.solve(this.cycI(i), 1);
 		if (depC[i] & DEP_POST_X) this.solve(this.cycI(i + 1), 0);
 		if (depC[i] & DEP_POST_Y) this.solve(this.cycI(i + 1), 1);
 
@@ -215,8 +220,10 @@ const RES_DEP_STAGE_INTERPOLATION = 2;
 export const DEP_SKIP = 0x1;
 export const DEP_PRE_X = 0x2;
 export const DEP_PRE_Y = 0x4;
-export const DEP_POST_X = 0x8;
-export const DEP_POST_Y = 0x10;
+export const DEP_SAME_X = 0x8;
+export const DEP_SAME_Y = 0x10;
+export const DEP_POST_X = 0x20;
+export const DEP_POST_Y = 0x40;
 
 const DEP_PRE = DEP_PRE_X | DEP_PRE_Y;
 const DEP_POST = DEP_POST_X | DEP_POST_Y;
@@ -239,9 +246,9 @@ export class UserControlKnot {
 	getDependency(stage) {
 		switch (stage) {
 			case RES_DEP_STAGE_COORDINATE_PROPOGATION_X:
-				return typeof this.x === "number" ? 0 : this.x.getDependency(stage);
+				return typeof this.x === "number" ? 0 : this.x.getDependencyForX();
 			case RES_DEP_STAGE_COORDINATE_PROPOGATION_Y:
-				return typeof this.y === "number" ? 0 : this.y.getDependency(stage);
+				return typeof this.y === "number" ? 0 : this.y.getDependencyForY();
 			case RES_DEP_STAGE_INTERPOLATION:
 				return 0;
 			default:
@@ -256,10 +263,10 @@ export class UserControlKnot {
 		// console.log(this, ic, pre, post);
 		switch (ic) {
 			case 0:
-				this.x = this.x.resolve(pre, this, post);
+				this.x = this.x.resolveX(pre, this, post);
 				break;
 			case 1:
-				this.y = this.y.resolve(pre, this, post);
+				this.y = this.y.resolveY(pre, this, post);
 				break;
 		}
 	}
@@ -292,7 +299,7 @@ export class UserCloseKnotPair {
 	}
 
 	getKernelKnot() {
-		return this.center;
+		return this.center.getKernelKnot();
 	}
 	resolveCoordiantePropogation(ic, pre, post) {
 		this.center.resolveCoordiantePropogation(ic, pre, post);
@@ -333,11 +340,10 @@ export class InterpolatorBase {
 				return 0;
 		}
 	}
-
 	getKernelKnot() {
 		throw new Error("Unreachable");
 	}
-	resolveCoordiantePropogation(pre, post) {
+	resolveCoordiantePropogation() {
 		throw new Error("Unreachable");
 	}
 
@@ -346,6 +352,16 @@ export class InterpolatorBase {
 	}
 	resolveInterpolation(pre, post) {
 		throw new Error("Unimplemented");
+	}
+}
+
+export class DecorInterpolator extends InterpolatorBase {
+	constructor(items) {
+		super();
+		this.items = items;
+	}
+	resolveInterpolation(pre, post) {
+		return this.items;
 	}
 }
 
@@ -359,8 +375,44 @@ class FunctionInterpolator extends InterpolatorBase {
 		return this.blendFn(pre, post, this.extraArgs);
 	}
 }
+
+/**
+ * This class denotes an interpolator that has a proxy knot. The proxy could be used in the
+ * coordinate propagation stage to resolve dependencies.
+ */
+export class KnotProxyInterpolator extends InterpolatorBase {
+	constructor(proxy, actual) {
+		super();
+		this.knotProxy = proxy;
+		this.actual = actual;
+	}
+
+	getDependency(stage) {
+		switch (stage) {
+			case RES_DEP_STAGE_COORDINATE_PROPOGATION_X:
+			case RES_DEP_STAGE_COORDINATE_PROPOGATION_Y:
+				return this.knotProxy.getDependency(stage);
+			default:
+				return this.actual.getDependency(stage);
+		}
+	}
+
+	getKernelKnot() {
+		return this.knotProxy.getKernelKnot();
+	}
+	resolveCoordiantePropogation(ic, pre, post) {
+		this.knotProxy.resolveCoordiantePropogation(ic, pre, post);
+	}
+	resolveInterpolation(pre, post) {
+		return this.actual.resolveInterpolation(pre, post);
+	}
+}
+
 export function Interpolator(blender, restParameters) {
 	return new FunctionInterpolator(blender, restParameters);
+}
+export function WithKnotProxy(proxy, actual) {
+	return new KnotProxyInterpolator(proxy, actual);
 }
 
 export class TerminateInstruction {
@@ -378,10 +430,16 @@ export class TerminateInstruction {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 export class DerivedCoordinateBase {
-	getDependency() {
+	getDependencyForX() {
 		throw new Error("Unimplemented");
 	}
-	resolve(pre, curr, post) {
+	getDependencyForY() {
+		throw new Error("Unimplemented");
+	}
+	resolveX(pre, curr, post) {
+		throw new Error("Unimplemented");
+	}
+	resolveY(pre, curr, post) {
 		throw new Error("Unimplemented");
 	}
 }

@@ -1,11 +1,6 @@
 import { DiSpiroGeometry, SpiroGeometry } from "@iosevka/geometry";
 import {
 	BiKnotCollector,
-	DEP_POST_X,
-	DEP_POST_Y,
-	DEP_PRE_X,
-	DEP_PRE_Y,
-	DerivedCoordinateBase,
 	Interpolator,
 	SpiroFlattener,
 	TerminateInstruction,
@@ -109,40 +104,6 @@ function DirPairImpl(kPre, kCenter, kPost, dirX, dirY, dPre, dPost) {
 		new UserCloseKnotPair(kCenter(x, y, af), tyPre, tyPost, dirX, dirY, dPre, dPost);
 }
 
-/// Derivative coordinates
-class CSameX extends DerivedCoordinateBase {
-	getDependency() {
-		return DEP_PRE_X;
-	}
-	resolve(pre) {
-		return pre.x;
-	}
-}
-class CSameY extends DerivedCoordinateBase {
-	getDependency() {
-		return DEP_PRE_Y;
-	}
-	resolve(pre) {
-		return pre.y;
-	}
-}
-class CSameXPost extends DerivedCoordinateBase {
-	getDependency() {
-		return DEP_POST_X;
-	}
-	resolve(pre, curr, post) {
-		return post.x;
-	}
-}
-class CSameYPost extends DerivedCoordinateBase {
-	getDependency() {
-		return DEP_POST_Y;
-	}
-	resolve(pre, curr, post) {
-		return post.y;
-	}
-}
-
 export function SetupBuilders(bindings) {
 	const { Stroke, Superness } = bindings;
 
@@ -193,7 +154,7 @@ export function SetupBuilders(bindings) {
 			{ name: "ld", x: -1, y: -1 },
 		];
 		for (const [sink, kl, kc, kr] of knotTypes) {
-			sink.sl = s => new DirectedKnotPairBuilder(bindings, kl, kc, kr, -1, s);
+			sink.sl = s => new DirectedKnotPairBuilder(bindings, kl, kc, kr, -1, -s);
 			sink.sr = s => new DirectedKnotPairBuilder(bindings, kl, kc, kr, 1, s);
 			sink.dir = (dx, dy) => new DirectedKnotPairBuilder(bindings, kl, kc, kr, dx, dy);
 			for (const d of directions) {
@@ -479,10 +440,5 @@ export function SetupBuilders(bindings) {
 		dispiro,
 		"spiro-outline": spiroOutline,
 		"spiro-collect": spiroCollect,
-
-		"same-x": new CSameX(),
-		"same-y": new CSameY(),
-		"same-x-post": new CSameXPost(),
-		"same-y-post": new CSameYPost(),
 	};
 }
