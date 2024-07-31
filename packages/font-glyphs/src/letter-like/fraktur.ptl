@@ -11,6 +11,7 @@ import [SpiroPenGeometry] from "@iosevka/geometry"
 import [Vec2] from "@iosevka/geometry/point"
 import [Box] from "@iosevka/geometry/box"
 import [Interpolator] from "@iosevka/geometry/spiro-control"
+import [PenKnotCollector] from "@iosevka/geometry/spiro-pen-expand"
 
 glyph-module
 
@@ -30,14 +31,23 @@ glyph-block LetterLike-Fraktur-Shared : begin
 			this.knots   = knots
 
 		public [applyToGlyph glyph] : begin
-			local c : spiro-collect glyph this.knots
-			local geom : new SpiroPenGeometry
-				begin c.gizmo
-				begin c.collector.closed
-				this.profile.getPenShape c.gizmo
-				c.collector.controls.map : function [k] [k.toMono]
-			return : glyph.includeGeometry geom
+			local defaultProfile : this.profile.getPenShape glyph.gizmo
+			local collector : new PenKnotCollector glyph.gizmo defaultProfile
+			local c : spiro-collect collector this.knots
 
+			local geom : new SpiroPenGeometry
+				begin glyph.gizmo
+				begin defaultProfile
+				begin collector.closed
+				begin collector.knots
+
+			glyph.includeGeometry geom
+			return collector.knots
+
+	# Directive to change the profile
+	glyph-block-export change-profile
+	define [change-profile newProfile] : function : begin
+		this.setProfile : newProfile.getPenShape this.gizmo
 
 	# A pen profile describes a virtual flat-tip pen. We use a 45-degree arrangement to
 	# simplify the math.
@@ -126,7 +136,7 @@ glyph-block LetterLike-Fraktur-Shared : begin
 glyph-block LetterLike-Fraktur : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import CommonShapes
-	glyph-block-import LetterLike-Fraktur-Shared : S F T fraktur-stroke
+	glyph-block-import LetterLike-Fraktur-Shared : S F T fraktur-stroke change-profile
 	glyph-block-import LetterLike-Fraktur-Shared : DecoSizeX DecoSizeY SlopeA SlopeB
 	glyph-block-import LetterLike-Fraktur-Shared : Wave LbFootRise FHook PHexTop PHexBot
 
@@ -136,37 +146,78 @@ glyph-block LetterLike-Fraktur : begin
 			~~~ [Wave.vc (-Wave.DepthX)]
 			g2.ld.end   pre@                  (ey - 2 * S.thick)
 
-	create-glyph "frak/C" 0x212D : glyph-proc
-		include : MarkSet.capital
+	do "C, E, and G"
+		define flex-params [FrakCTopAndCenterStroke] : glyph-proc
+			local-parameter : top -- [S.yt CAP]
+			local-parameter : bot -- [S.yp 0 CAP 0.375]
+			local-parameter : left -- [S.xl SB]
+			local-parameter : right -- [S.xr RightSB]
 
-		local xCenter : [mix SB RightSB 0.5] + 0.75 * F.thick
+			local xCenter : [mix left right 0.5] + 0.25 * F.thick
+			local deco : Math.max DecoSizeX (0.5 * ArchDepthA - 2 * S.thick)
+			local waveTop : top - deco
 
-		# Top-right stroke
-		include : fraktur-stroke S
-			g2           [S.xr RightSB]                                  [S.yt CAP]
-			g2.left.mid  [mix (xCenter + DecoSizeX) [S.xr RightSB] 0.5]  ([S.yt CAP] - 0.5 * FHook)
-			corner       (xCenter + DecoSizeX)                           [S.yt CAP]
-			corner       xCenter                                         ([S.yt CAP] - DecoSizeX)
+			# Top-right stroke
+			include : fraktur-stroke S
+				g2           right             top
+				g2.left.mid  [mix@ 0.5]        (top - 0.5 * FHook)
+				corner       (post@ <+> deco)  top
+				corner       xCenter           (top - deco)
 
-		# Left and bottom stroke
-		include : fraktur-stroke S
-			g4.ld.start   [S.xp SB RightSB 0.1]     ([S.yt CAP] - 0.1 * ArchDepthA)
-			flat          [S.xl SB]                 ([S.yt CAP] - 0.6 * ArchDepthA)
-			curl 		  pre@                      ([S.yb 0] + ArchDepthB)
-			~~~ [hookend [S.yb 0] (sw -- S.thick)]
-			g2            [S.xr RightSB]            ([S.yb 0] + SHook)
+			# Inner decoration
+			include : fraktur-stroke F
+				g2.ld.start  [F.connL S xCenter] [F.connB S : top - deco]
+				~~~ [Wave.vc (-Wave.DepthX)]
+				g2.ld.end    pre@                bot
 
-		# A thin connection between the two strokes
-		include : fraktur-stroke T
-			g4.ru.start  [T.connR S : S.xp SB RightSB 0.1] [T.connT S : [S.yt CAP] - 0.1 * ArchDepthA]
-			~~~ [arch.lhs [T.yt CAP] 0.6 (sw -- T.thick) (blendPre -- null) (blendPost -- null)]
-			g4.ld.end    [T.connL S xCenter]               [T.connB S : [S.yt CAP] - DecoSizeX]
+			return : object xCenter [waveTop : top - deco] [waveBot bot]
 
-		# Inner decoration
-		include : fraktur-stroke F
-			g2.ld.start  [F.connL S xCenter] [F.connB S : [S.yt CAP] - DecoSizeX]
-			~~~ [Wave.vc (-Wave.DepthX)]
-			g2.ld.end    pre@                (CAP * 0.375)
+		define flex-params [FrakCOutlineShape] : glyph-proc
+			local-parameter : mode -- 'C'
+			local-parameter : top -- [S.yt CAP]
+			local-parameter : bot -- [S.yb 0]
+			local-parameter : left -- [S.xl SB]
+			local-parameter : right -- [S.xr RightSB]
+
+			local [object xCenter waveTop waveBot] : include : FrakCTopAndCenterStroke
+				bot -- ([mix bot top 0.1] + 2 * Wave.DepthY + 0.5 * S.thick)
+
+			# Left and bottom stroke
+			local mainStroke : include : fraktur-stroke S
+				g4.ru.start   [T.connL S xCenter]  [T.connB S waveTop] [change-profile T]
+				arch.rhs [T.connT S top] (sw -- T.thick) (anglePre -- (-45)) (anglePost -- 0)
+				flat  left  (pre@ <-> 0.6 * ArchDepthA)  [change-profile S]
+				curl  pre@  (post@ <+> ArchDepthB)
+				match mode
+				: [Just 'C'] : list # C and E
+					hookend (sw -- S.thick)  bot
+					g2  [T.connR S right]  (pre@ <+> [T.connT S SHook]) [change-profile T]
+				: [Just 'G'] : list # G
+					arch.lhs (sw -- S.thick)    bot
+					flat              right              (pre@ <+> ArchDepthA)
+					decor@  : curl    pre@               (post@ <-> 0.5 * ArchDepthB)
+					decor@@ : g2      [post@tang-out 1]  [post@tang-out SlopeB]
+					decor@  : corner  [mix@rev PHexTop]  [post@slope SlopeA]
+					decor@  : corner  xCenter            [mix waveTop waveBot 0.5]
+
+			return : object xCenter waveTop waveBot
+
+		create-glyph "frak/C" 0x212D : glyph-proc
+			include : MarkSet.capital
+			include : FrakCOutlineShape (mode -- 'C')
+
+		create-glyph "frak/E" 0x1D508 : glyph-proc
+			include [refer-glyph "frak/C"] AS_BASE ALSO_METRICS
+			local [object xCenter waveTop waveBot] : include : FrakCOutlineShape (mode -- 'C')
+
+			include : fraktur-stroke F
+				corner  [F.connL S xCenter]          [F.connB S : mix waveTop waveBot 0.5]
+				corner  (post@ <-> 0.5 * DecoSizeX)  [pre@slope SlopeA]
+				corner  [F.xr RightSB]               (pre@ <-> 0.5 * DecoSizeY)
+
+		create-glyph "frak/G" 0x1D50A : glyph-proc
+			include : MarkSet.capital
+			include : FrakCOutlineShape (mode -- 'G')
 
 	create-glyph "frak/H" 0x210C : glyph-proc
 		include : MarkSet.capDesc
@@ -200,37 +251,38 @@ glyph-block LetterLike-Fraktur : begin
 			g2.down.mid    [S.xp xLeftStem RightSB 0.75]   [S.yp Descender(XH - FHook) 0.25]
 			g2             [S.xr RightSB]                  [S.yb Descender]
 
-	define [IJTopStroke] : glyph-proc
-		include : fraktur-stroke S
-			g2.ld.start [S.xr RightSB]         [S.yt CAP]
-			~~~ [Wave.h]
-			g2.ld.mid   [S.xl SB]              [S.yt (CAP - Wave.DepthY)]
-		include : LtDecorativeWave [S.xl SB] (CAP - Wave.DepthY) (CAP * 0.625)
+	do "I, J"
+		define [IJTopStroke] : glyph-proc
+			include : fraktur-stroke S
+				g2.ld.start [S.xr RightSB]         [S.yt CAP]
+				~~~ [Wave.h]
+				g2.ld.mid   [S.xl SB]              [S.yt (CAP - Wave.DepthY)]
+			include : LtDecorativeWave [S.xl SB] (CAP - Wave.DepthY) (CAP * 0.625)
 
-	create-glyph "frak/I" 0x2111 : glyph-proc
-		include : MarkSet.capital
-		include : IJTopStroke
+		create-glyph "frak/I" 0x2111 : glyph-proc
+			include : MarkSet.capital
+			include : IJTopStroke
 
-		local iBox : S.box CAP 0 SB RightSB
-		include : fraktur-stroke S
-			g2.ld.start iBox.right            iBox.top
-			g4          [iBox.xp 0.7]         [mix@ 0.375]
-			g4          iBox.right            (post@ <+> ArchDepthA)
-			hookend (sw -- S.thick)           iBox.bot
-			g2          iBox.left             (pre@ <+> SHook)
+			local iBox : S.box CAP 0 SB RightSB
+			include : fraktur-stroke S
+				g2.ld.start iBox.right            iBox.top
+				g4          [iBox.xp 0.7]         [mix@ 0.375]
+				g4          iBox.right            (post@ <+> ArchDepthA)
+				hookend (sw -- S.thick)           iBox.bot
+				g2          iBox.left             (pre@ <+> SHook)
 
-	create-glyph "frak/J" 0x1D50D : glyph-proc
-		include : MarkSet.capDesc
-		include : IJTopStroke
+		create-glyph "frak/J" 0x1D50D : glyph-proc
+			include : MarkSet.capDesc
+			include : IJTopStroke
 
-		local jBox : S.box [S.yt (CAP - 1.5 * Wave.DepthY - 2 * S.thick)] Descender SB RightSB
-		include : fraktur-stroke S
-			g4        jBox.right                (post@ <-> FHook)
-			hookstart (sw -- S.thick)           jBox.top
-			g4        ([jBox.xp 0.6] - S.thick) (pre@ <-> 0.6 * ArchDepthA)
-			g4        jBox.right                (post@ <+> ArchDepthA)
-			hookend (sw -- S.thick)             jBox.bot
-			g2        jBox.left                 (pre@ <+> SHook)
+			local jBox : S.box [S.yt (CAP - 1.5 * Wave.DepthY - 2 * S.thick)] Descender SB RightSB
+			include : fraktur-stroke S
+				g4        jBox.right                (post@ <-> FHook)
+				hookstart (sw -- S.thick)           jBox.top
+				g4        ([jBox.xp 0.6] - S.thick) (pre@ <-> 0.6 * ArchDepthA)
+				g4        jBox.right                (post@ <+> ArchDepthA)
+				hookend (sw -- S.thick)             jBox.bot
+				g2        jBox.left                 (pre@ <+> SHook)
 
 	create-glyph "frak/R" 0x211C : glyph-proc
 		include : MarkSet.capital

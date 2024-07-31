@@ -7,7 +7,6 @@ import {
 	DEP_SAME_X,
 	DEP_SAME_Y,
 	DerivedCoordinateBase,
-	InterpolatorBase,
 } from "@iosevka/geometry/spiro-control";
 
 const TINY = 1 / 128;
@@ -29,6 +28,7 @@ export function SetupBuilders(_bindings) {
 		// mix@: mix between pre and post point's X or Y coordinates
 		// usage [mix@ proportion] or [mix@ proportion delta]
 		"mix@": (p, delta) => new CMixCoord(p, delta),
+		"mix@rev": (p, delta) => new CMixCoord(1 - p, delta),
 
 		// pre@slope, post@slope: Get the coordiante using the pre/post point's coordinate and a
 		// slope. An optional delta can be added to the result. See the definitions for more
@@ -167,5 +167,31 @@ class CAtSlopePost extends DerivedCoordinateBase {
 	}
 	resolveX(pre, curr, post) {
 		return post.x + (curr.y - post.y) / this.slope + this.delta;
+	}
+}
+
+const KBP_X = 1;
+const KBP_Y = 2;
+export class CopyBackKnotProxy {
+	constructor(delegate, bag, options) {
+		this.delegate = delegate;
+		this.bag = bag;
+		this.options = options;
+	}
+
+	getDependency(stage) {
+		return this.delegate.getDependency(stage);
+	}
+	getKernelKnot() {
+		return this.delegate.getKernelKnot();
+	}
+	resolveCoordiantePropogation(ic, pre, post) {
+		let r = this.delegate.resolveCoordiantePropogation(ic, pre, post);
+		if (this.options & KBP_X) this.bag.x = this.delegate.x;
+		if (this.options & KBP_Y) this.bag.y = this.delegate.y;
+		return r;
+	}
+	resolveInterpolation() {
+		return this.delegate.resolveInterpolation();
 	}
 }

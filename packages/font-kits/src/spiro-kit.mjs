@@ -1,71 +1,68 @@
 import { DiSpiroGeometry, SpiroGeometry } from "@iosevka/geometry";
 import {
-	BiKnotCollector,
 	Interpolator,
 	SpiroFlattener,
 	TerminateInstruction,
 	UserCloseKnotPair,
 	UserControlKnot,
+	VirtualControlKnot,
 } from "@iosevka/geometry/spiro-control";
 import { bez3, fallback, mix } from "@iosevka/util";
+import { BiKnotCollector } from "../../geometry/src/spiro-expand.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 class SpiroImplBase {
-	constructor(bindings, args) {
+	constructor(bindings, controls) {
 		this.bindings = bindings;
-		this.args = args;
+		this.controls = controls;
 	}
 
-	createCollector(glyph) {
-		const gizmo = glyph.gizmo || this.bindings.GlobalTransform;
-
+	collectTo(collector) {
 		const flattener = new SpiroFlattener();
-		for (const control of this.args) flattener.add(control);
+		for (const control of this.controls) flattener.add(control);
 		flattener.flatten();
-
-		const collector = new BiKnotCollector(this.bindings.Contrast);
 		flattener.pipe(collector);
-
-		return { gizmo, collector };
 	}
 }
 
 class DispiroImpl extends SpiroImplBase {
-	constructor(bindings, args) {
-		super(bindings, args);
+	constructor(bindings, controls) {
+		super(bindings, controls);
 	}
 	applyToGlyph(glyph) {
-		const { gizmo, collector } = this.createCollector(glyph);
+		const gizmo = glyph.gizmo || this.bindings.GlobalTransform;
+		const collector = new BiKnotCollector(this.bindings.Contrast);
+		this.collectTo(collector);
 		const dsp = new DiSpiroProxy(gizmo, collector);
 		glyph.includeGeometry(dsp.geometry);
 		return dsp;
 	}
 }
+
 class SpiroOutlineImpl extends SpiroImplBase {
-	constructor(bindings, args) {
-		super(bindings, args);
+	constructor(bindings, controls) {
+		super(bindings, controls);
 	}
 	applyToGlyph(glyph) {
-		const { gizmo, collector } = this.createCollector(glyph);
+		const gizmo = glyph.gizmo || this.bindings.GlobalTransform;
+		const collector = new BiKnotCollector(this.bindings.Contrast);
+		this.collectTo(collector);
 		return glyph.includeGeometry(
-			new SpiroGeometry(
-				gizmo,
-				collector.closed,
-				collector.controls.map(k => k.toMono()),
-			),
+			new SpiroGeometry(gizmo, collector.closed, collector.getMonoKnots()),
 		);
 	}
 }
+
 class DiSpiroProxy {
 	constructor(gizmo, collector) {
 		this.geometry = new DiSpiroGeometry(
 			gizmo,
 			collector.contrast,
 			collector.closed,
-			collector.controls,
+			collector.knots,
 		);
-		this.m_origKnots = collector.controls;
+		this.m_origKnots = collector.knots;
 	}
 	get knots() {
 		return this.m_origKnots;
@@ -85,6 +82,12 @@ function KnotType(type) {
 		if (!UserControlKnot.isCoordinateValid(y)) throw new TypeError("NaN detected for Y");
 		return new UserControlKnot(type, x, y, f);
 	};
+}
+
+function virtualKnot(x, y, f) {
+	if (!UserControlKnot.isCoordinateValid(x)) throw new TypeError("NaN detected for X");
+	if (!UserControlKnot.isCoordinateValid(y)) throw new TypeError("NaN detected for Y");
+	return new VirtualControlKnot(x, y, f);
 }
 
 /// The builder for directed knot pairs
@@ -113,6 +116,7 @@ export function SetupBuilders(bindings) {
 	const corner = KnotType("corner");
 	const flat = KnotType("left");
 	const curl = KnotType("right");
+	const virt = virtualKnot;
 	const close = f => new TerminateInstruction("close", f);
 	const end = f => new TerminateInstruction("end", f);
 
@@ -401,16 +405,22 @@ export function SetupBuilders(bindings) {
 		const s = fallback(_s, Superness);
 		return 1 - Math.pow(1 - Math.pow(px, s), 1 / s);
 	};
+	archv.sCos = function (angle, _s) {
+		return Math.pow(Math.cos((angle / 180) * Math.PI), 2 / fallback(_s, Superness));
+	};
+	archv.sSin = function (angle, _s) {
+		return Math.pow(Math.sin((angle / 180) * Math.PI), 2 / fallback(_s, Superness));
+	};
 
-	function dispiro(...args) {
-		return new DispiroImpl(bindings, args);
+	function dispiro(...controls) {
+		return new DispiroImpl(bindings, controls);
 	}
-	function spiroOutline(...args) {
-		return new SpiroOutlineImpl(bindings, args);
+	function spiroOutline(...controls) {
+		return new SpiroOutlineImpl(bindings, controls);
 	}
-	function spiroCollect(glyph, ...args) {
-		const spb = new SpiroImplBase(bindings, args);
-		return spb.createCollector(glyph);
+	function spiroCollect(collector, ...controls) {
+		const spb = new SpiroImplBase(bindings, controls);
+		return spb.collectTo(collector);
 	}
 
 	return {
@@ -419,6 +429,7 @@ export function SetupBuilders(bindings) {
 		corner,
 		flat,
 		curl,
+		virt,
 		close,
 		end,
 		straight,

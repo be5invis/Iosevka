@@ -37,6 +37,7 @@ export class SpiroFlattener {
 		for (const fn of this.preControlFunctions) fn.call(collector);
 		for (const control of this.controls) collector.pushKnot(control);
 		for (const postControl of this.postControls) postControl.applyTo(collector);
+		collector.finish();
 	}
 
 	/// Add a control object (or list) to a sink
@@ -326,6 +327,28 @@ export class UserCloseKnotPair {
 	}
 }
 
+export class VirtualControlKnot {
+	constructor(x, y, af) {
+		this.center = new UserControlKnot("corner", x, y, af);
+	}
+
+	getDependency(stage) {
+		return this.center.getDependency(stage);
+	}
+	getKernelKnot() {
+		return this.center.getKernelKnot();
+	}
+	resolveCoordiantePropogation(ic, pre, post) {
+		this.center.resolveCoordiantePropogation(ic, pre, post);
+	}
+	resolveNonInterpolated() {
+		return [];
+	}
+	resolveInterpolation() {
+		throw new Error("Unreachable");
+	}
+}
+
 export class InterpolatorBase {
 	constructor() {}
 
@@ -415,6 +438,8 @@ export function WithKnotProxy(proxy, actual) {
 	return new KnotProxyInterpolator(proxy, actual);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 export class TerminateInstruction {
 	constructor(type, af) {
 		this.type = type;
@@ -441,141 +466,5 @@ export class DerivedCoordinateBase {
 	}
 	resolveY(pre, curr, post) {
 		throw new Error("Unimplemented");
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-export class BiKnotCollector {
-	constructor(contrast) {
-		this.contrast = contrast; // stroke contrast
-		this.defaultD1 = 0; // default LHS
-		this.defaultD2 = 0; // default RHS sw
-		this.lastKnot = null; // last knot in the processed items
-
-		this.controls = []; // all the control items
-		this.closed = false; // whether the shape is closed
-	}
-
-	pushKnot(c) {
-		let k;
-		if (this.lastKnot) {
-			k = new BiKnot(c.type, c.x, c.y, this.lastKnot.d1, this.lastKnot.d2);
-		} else {
-			k = new BiKnot(c.type, c.x, c.y, this.defaultD1, this.defaultD2);
-		}
-
-		this.controls.push(k);
-		this.lastKnot = k;
-
-		c.applyTo(this);
-	}
-	setWidth(l, r) {
-		if (this.lastKnot) {
-			this.lastKnot.d1 = l;
-			this.lastKnot.d2 = r;
-		} else {
-			this.defaultD1 = l;
-			this.defaultD2 = r;
-		}
-	}
-	headsTo(direction) {
-		if (this.lastKnot) {
-			this.lastKnot.proposedNormal = direction;
-		}
-	}
-	setUnimportant() {
-		if (this.lastKnot) {
-			this.lastKnot.unimportant = 1;
-		}
-	}
-	setContrast(c) {
-		this.contrast = c;
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-export class MonoKnot {
-	constructor(type, unimportant, x, y) {
-		this.type = type;
-		this.x = x;
-		this.y = y;
-		this.unimportant = unimportant;
-	}
-	clone() {
-		const k1 = new MonoKnot(this.type, this.x, this.y, this.unimportant);
-		return k1;
-	}
-	hash(h) {
-		h.beginStruct("MonoKnot");
-		h.str(this.type);
-		h.bool(this.unimportant);
-		h.f64(this.x);
-		h.f64(this.y);
-		h.endStruct();
-	}
-
-	reverseType() {
-		if (this.type === "left") {
-			this.type = "right";
-		} else if (this.type === "right") {
-			this.type = "left";
-		}
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-class BiKnot {
-	constructor(type, x, y, d1, d2) {
-		this.type = type;
-		this.x = x;
-		this.y = y;
-		this.d1 = d1;
-		this.d2 = d2;
-		this.proposedNormal = null;
-		this.unimportant = 0;
-
-		// Derived properties
-		this.origTangent = null;
-	}
-	clone() {
-		const k1 = new BiKnot(this.type, this.x, this.y, this.d1, this.d2);
-		k1.origTangent = this.origTangent;
-		k1.proposedNormal = this.proposedNormal;
-		k1.unimportant = this.unimportant;
-		return k1;
-	}
-	withGizmo(gizmo) {
-		const tfZ = gizmo.applyXY(this.x, this.y);
-		const k1 = new BiKnot(this.type, tfZ.x, tfZ.y, this.d1, this.d2);
-		k1.origTangent = this.origTangent ? gizmo.applyOffset(this.origTangent) : null;
-		k1.proposedNormal = this.proposedNormal ? gizmo.applyOffset(this.proposedNormal) : null;
-		k1.unimportant = this.unimportant;
-		return k1;
-	}
-	hash(h) {
-		h.beginStruct("BiKnot");
-		h.str(this.type);
-		h.bool(this.unimportant);
-		h.f64(this.x);
-		h.f64(this.y);
-
-		h.bool(this.d1 != null);
-		if (this.d1 != null) h.f64(this.d1);
-		h.bool(this.d2 != null);
-		if (this.d2 != null) h.f64(this.d2);
-
-		h.bool(this.proposedNormal != null);
-		if (this.proposedNormal) {
-			h.f64(this.proposedNormal.x);
-			h.f64(this.proposedNormal.y);
-		}
-		h.endStruct();
-	}
-
-	toMono() {
-		return new MonoKnot(this.type, this.unimportant, this.x, this.y);
 	}
 }

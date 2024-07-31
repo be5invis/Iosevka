@@ -21,6 +21,38 @@ export function spiroToOutlineWithSimplification(knots, fClosed, gizmo) {
 	return sink.contours;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+export class MonoKnot {
+	constructor(type, unimportant, x, y) {
+		this.type = type;
+		this.unimportant = unimportant;
+		this.x = x;
+		this.y = y;
+	}
+	clone() {
+		return new MonoKnot(this.type, this.unimportant, this.x, this.y);
+	}
+	hash(h) {
+		h.beginStruct("MonoKnot");
+		h.str(this.type);
+		h.bool(this.unimportant);
+		h.f64(this.x);
+		h.f64(this.y);
+		h.endStruct();
+	}
+
+	reverseType() {
+		if (this.type === "left") {
+			this.type = "right";
+		} else if (this.type === "right") {
+			this.type = "left";
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 class SpiroSimplifier {
 	constructor(knots) {
 		this.m_knots = knots;
