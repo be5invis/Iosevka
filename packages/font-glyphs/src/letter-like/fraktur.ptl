@@ -254,10 +254,11 @@ glyph-block LetterLike-Fraktur : begin
 	do "I, J"
 		define [IJTopStroke] : glyph-proc
 			include : fraktur-stroke S
-				g2.ld.start [S.xr RightSB]         [S.yt CAP]
+				g2.ld.start [S.xr RightSB]  [S.yt CAP]
 				~~~ [Wave.h]
-				g2.ld.end   [S.xl SB]              [S.yt (CAP - Wave.DepthY)]
-			include : LtDecorativeWave [S.xl SB] [S.yt (CAP - Wave.DepthY)] (CAP * 0.625)
+				g2.ld.end   [S.xl SB]       (pre@ <-> Wave.DepthY) [change-profile F]
+				~~~ [Wave.vc (-Wave.DepthX)]
+				g2.ld.end   pre@            (CAP * 0.625 - 2 * F.thick)
 
 		create-glyph "frak/I" 0x2111 : glyph-proc
 			include : MarkSet.capital
@@ -277,9 +278,9 @@ glyph-block LetterLike-Fraktur : begin
 
 			local jBox : S.box [S.yt (CAP - 1.5 * Wave.DepthY - 2 * S.thick)] Descender SB RightSB
 			include : fraktur-stroke S
-				g4        jBox.right                (post@ <-> FHook)
-				hookstart (sw -- S.thick)           jBox.top
-				g4        ([jBox.xp 0.6] - S.thick) (pre@ <-> 0.6 * ArchDepthA)
+				g4        [T.connR S jBox.right]    (post@ <-> FHook) [change-profile T]
+				hookstart (sw -- S.thick)           [T.connT S jBox.top]
+				g4        ([jBox.xp 0.6] - S.thick) (pre@ <-> 0.6 * ArchDepthA) [change-profile S]
 				g4        jBox.right                (post@ <+> ArchDepthA)
 				hookend (sw -- S.thick)             jBox.bot
 				g2        jBox.left                 (pre@ <+> SHook)
@@ -294,7 +295,7 @@ glyph-block LetterLike-Fraktur : begin
 		local adb : 0.6 * ArchDepthB
 
 		# Deocration at top-left
-		include : LtDecorativeWave [S.xl xExt] [S.yt (CAP - Wave.DepthY)] (CAP * 0.625)
+		# include : LtDecorativeWave [S.xl xExt] [S.yt (CAP - Wave.DepthY)] (CAP * 0.625)
 
 		local xMidStrokeL : S.xl xLeftStem
 		local xMidStrokeR : S.xp xLeftStem RightSB 0.625
@@ -307,9 +308,11 @@ glyph-block LetterLike-Fraktur : begin
 		local yArchStart  : yArchTop - SlopeA * (xArchTop - xArchStart)
 
 		# Left stroke
-		include : fraktur-stroke S
-			g2.ru.start    [S.xl xExt]            [S.yt (CAP - ltHook)]
-			~~~ [arch.rhs [S.yt CAP] 0.6 (blendPre -- null)]
+		include : fraktur-stroke F
+			g2.ru.start    post@                  (CAP * 0.625 - 2 * F.thick)
+			~~~ [Wave.vc Wave.DepthX]
+			g2.ru.start    [S.xl xExt]            (post@ <-> ltHook)  [change-profile S]
+			arch.rhs (blendPre -- null)           [S.yt CAP] 0.625
 			flat           [S.xl xLeftStem]       [Math.max ([S.yb CAP] - ada) yArchStart]
 			curl 	       (pre@ <+> 0)           yMidStrokeL
 			corner         [S.xl xExt]            (post@ <+> LbFootRise)
