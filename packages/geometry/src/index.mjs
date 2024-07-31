@@ -5,7 +5,7 @@ import * as CurveUtil from "./curve-util.mjs";
 import { Point } from "./point.mjs";
 import { QuadifySink } from "./quadify.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
-import { createSpiroPenGeometry } from "./spiro-pen-expander.mjs";
+import { PenSpiroExpander } from "./spiro-pen-expand.mjs";
 import { spiroToOutlineWithSimplification } from "./spiro-to-outline.mjs";
 import { strokeArcs } from "./stroke.mjs";
 import { Transform } from "./transform.mjs";
@@ -141,23 +141,23 @@ export class SpiroGeometry extends CachedGeometry {
 }
 
 export class SpiroPenGeometry extends CachedGeometry {
-	constructor(gizmo, closed, pen, knots) {
+	constructor(gizmo, penProfile, closed, knots) {
 		super();
 		this.m_gizmo = gizmo;
+		this.m_penProfile = penProfile;
 		this.m_closed = closed;
 		this.m_knots = knots;
-		this.m_pen = pen;
 	}
 
 	toContoursImpl() {
-		let contours = createSpiroPenGeometry(
+		const expander = new PenSpiroExpander(
 			this.m_gizmo,
+			this.m_penProfile,
 			this.m_closed,
 			this.m_knots,
-			this.m_pen,
 		);
-
-		if (!contours.length) return [];
+		let contours = expander.getGeometry();
+		if (!contours || !contours.length) return [];
 
 		let stack = [];
 		for (const [i, c] of contours.entries()) {
@@ -189,7 +189,7 @@ export class SpiroPenGeometry extends CachedGeometry {
 
 	measureComplexity() {
 		let cplx = CPLX_NON_EMPTY | CPLX_NON_SIMPLE;
-		for (const z of this.m_pen) {
+		for (const z of this.m_penProfile) {
 			if (!isFinite(z.x) || !isFinite(z.y)) cplx |= CPLX_BROKEN;
 		}
 		for (const z of this.m_knots) {
@@ -204,8 +204,8 @@ export class SpiroPenGeometry extends CachedGeometry {
 		h.bool(this.m_closed);
 
 		// Serialize the pen
-		h.beginArray(this.m_pen.length);
-		for (const z of this.m_pen) h.point(z);
+		h.beginArray(this.m_penProfile.length);
+		for (const z of this.m_penProfile) h.point(z);
 		h.endArray();
 
 		// Serialize the knots
