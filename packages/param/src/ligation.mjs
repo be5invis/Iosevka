@@ -1,5 +1,3 @@
-import * as Parameters from "./index.mjs";
-
 export function applyLigationData(data, para, argv) {
 	const simples = data.simple;
 	const composites = { ...data.composite, ...argv.ligtionCompositesFromBuildPlan };
