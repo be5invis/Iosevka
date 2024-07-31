@@ -41,10 +41,10 @@ export function parse(data, argv) {
 		const comp = new Composite(k, data.composite[k]);
 		composites.set(k, comp);
 	}
-	if (argv && argv.compositesFromBuildPlan) {
-		for (const k in argv.compositesFromBuildPlan) {
+	if (argv && argv.variantCompositesFromBuildPlan) {
+		for (const k in argv.variantCompositesFromBuildPlan) {
 			const key = `buildPlans.${k}`;
-			const comp = new Composite(key, argv.compositesFromBuildPlan[k]);
+			const comp = new Composite(key, argv.variantCompositesFromBuildPlan[k]);
 			composites.set(key, comp);
 		}
 	}

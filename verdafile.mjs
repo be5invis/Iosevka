@@ -243,17 +243,40 @@ const GroupFontsOf = computed.group("metadata:group-fonts-of", async (target, gi
 	return plan.targets;
 });
 
-const CompositesFromBuildPlan = computed(`metadata:composites-from-build-plan`, async target => {
-	const [{ buildPlans }] = await target.need(BuildPlans);
-	let data = {};
-	for (const bpn in buildPlans) {
-		let bp = buildPlans[bpn];
-		if (bp.variants) {
-			data[bpn] = bp.variants;
+const VariantCompositesFromBuildPlan = computed(
+	`metadata:variant-composites-from-build-plan`,
+	async target => {
+		const [{ buildPlans }] = await target.need(BuildPlans);
+		let data = {};
+		for (const bpn in buildPlans) {
+			let bp = buildPlans[bpn];
+			if (bp.variants) {
+				data[bpn] = bp.variants;
+			}
 		}
-	}
-	return data;
-});
+		return data;
+	},
+);
+
+const LigtionCompositesFromBuildPlan = computed(
+	`metadata:ligation-composites-from-build-plan`,
+	async target => {
+		const [{ buildPlans }] = await target.need(BuildPlans);
+		let data = {};
+		for (const bpn in buildPlans) {
+			let bp = buildPlans[bpn];
+			if (bp.ligations) {
+				data[`buildPlans.${bpn}`] = bp.ligations;
+			}
+			if (bp.customLigationTags) {
+				for (const [tag, config] of Object.entries(bp.customLigationTags)) {
+					data[`buildPlans.${bpn}.${tag}`] = config;
+				}
+			}
+		}
+		return data;
+	},
+);
 
 // eslint-disable-next-line complexity
 const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileName) => {
@@ -279,7 +302,8 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		};
 	}
 
-	const [compositesFromBuildPlan] = await target.need(CompositesFromBuildPlan);
+	const [variantCompositesFromBuildPlan] = await target.need(VariantCompositesFromBuildPlan);
+	const [ligtionCompositesFromBuildPlan] = await target.need(LigtionCompositesFromBuildPlan);
 
 	return {
 		name: fileName,
@@ -294,6 +318,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		},
 		// Ligations
 		ligations: bp.ligations || null,
+		customLigationTags: bp.customLigationTags || null,
 		// Shape
 		shape: {
 			serifs: bp.serifs || null,
@@ -335,7 +360,8 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		spacingDerive,
 
 		// Composite variants from build plan -- used for variant resolution when building fonts
-		compositesFromBuildPlan,
+		variantCompositesFromBuildPlan,
+		ligtionCompositesFromBuildPlan,
 	};
 });
 
