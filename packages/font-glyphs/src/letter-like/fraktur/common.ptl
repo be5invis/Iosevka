@@ -1,0 +1,140 @@
+$$include '../../meta/macros.ptl'
+
+import [mix fallback] from "@iosevka/util"
+import [SpiroPenGeometry] from "@iosevka/geometry"
+import [Vec2] from "@iosevka/geometry/point"
+import [Box] from "@iosevka/geometry/box"
+import [Interpolator] from "@iosevka/geometry/spiro-control"
+import [PenKnotCollector] from "@iosevka/geometry/spiro-pen-expand"
+
+glyph-module
+
+glyph-block LetterLike-Fraktur-Common : begin
+
+	# [fraktur-stroke profile ...] will construct a Fraktur stroke from a pen profile and a list
+	# of control knots. The knots will form a (usually open) spiro path, then the result will be
+	# the area that the pen tip covers when moving along the path.
+	glyph-block-export fraktur-stroke
+	define [fraktur-stroke profile __knots] : begin
+		local knots : {}.slice.call arguments 1
+		return : new FrakturImpl profile knots
+
+	class FrakturProxy
+		public [new gizmo profile collector] : begin
+			set this.gizmo     gizmo
+			set this.knots     collector.knots
+
+			set this.geometry  : new SpiroPenGeometry
+				begin gizmo
+				begin profile
+				begin collector.closed
+				begin collector.knots
+
+		public [first i] this.knots.[fallback i 0]
+		public [last i]  this.knots.(this.knots.length - [fallback i 1])
+
+	class FrakturImpl
+		public [new profile knots] : begin
+			this.profile = profile
+			this.knots   = knots
+
+		public [applyToGlyph glyph] : begin
+			local defaultProfile : this.profile.getPenShape glyph.gizmo
+			local collector : new PenKnotCollector glyph.gizmo defaultProfile
+			local c : spiro-collect collector this.knots
+
+			local proxy : new FrakturProxy glyph.gizmo defaultProfile collector
+			glyph.includeGeometry proxy.geometry
+			return proxy
+
+	# Directive to change the profile
+	glyph-block-export change-profile
+	define [change-profile newProfile] : function : begin
+		this.setProfile : newProfile.getPenShape this.gizmo
+
+	# A pen profile describes a virtual flat-tip pen. We use a 45-degree arrangement to
+	# simplify the math.
+	class FrakturProfile
+		public [new thick thin] : begin
+			# .thick is the half length of the flat tip, projected to the X/Y axis
+			this.thick = 0.25 * [Math.sqrt 2] * thick
+			# .thin is the half width of the thin tip, projected to the X/Y axis
+			this.thin  = 0.25 * [Math.sqrt 2] * thin
+
+		public [getPenShape gizmo] : begin
+			local thickTf : gizmo.applyOffsetXY this.thick this.thick
+			list
+				new Vec2 (thickTf.x - this.thin) (thickTf.y + this.thin)
+				new Vec2 (thickTf.x + this.thin) (thickTf.y + this.thin)
+				new Vec2 (thickTf.x + this.thin) (thickTf.y - this.thin)
+				new Vec2 (-thickTf.x + this.thin) (-thickTf.y - this.thin)
+				new Vec2 (-thickTf.x - this.thin) (-thickTf.y - this.thin)
+				new Vec2 (-thickTf.x - this.thin) (-thickTf.y + this.thin)
+
+		public [box u d l r] : new Box [this.yt u] [this.yb d] [this.xl l] [this.xr r]
+
+		public [xl x] : x + this.thick
+		public [xr x] : x - this.thick
+		public [xp l r p] : mix [this.xl l] [this.xr r] p
+
+		public [yb y] : y + this.thick
+		public [yt y] : y - this.thick
+		public [yp b t p] : mix [this.yb b] [this.yt t] p
+
+		# Connection to another profile's pen tip position
+		public [connL otherProfile x] : x - otherProfile.thick + this.thick
+		public [connR otherProfile x] : x + otherProfile.thick - this.thick
+		public [connB otherProfile y] : y - otherProfile.thick + this.thick
+		public [connT otherProfile y] : y + otherProfile.thick - this.thick
+
+	# Stroke widths
+	define frakThin  : 1.0 * [AdviceStroke 12]
+	define frakThick : 1.0 * Stroke
+	define frakFine  : 1.0 * [AdviceStroke 4] # For decoration
+
+	glyph-block-export S
+	define S : new FrakturProfile frakThick (0.875 * frakThin)
+
+	glyph-block-export F
+	define F : new FrakturProfile frakFine (0.875 * frakThin)
+
+	glyph-block-export T
+	define T : new FrakturProfile frakThin (0.875 * frakThin)
+
+	# Key metrics
+	glyph-block-export DecoSizeX DecoSizeY FHook Wave.DepthY Wave.DepthX LbFootRise
+	define DecoSizeX  : 0.15 * (RightSB - SB)
+	define DecoSizeY  : 0.08 * (RightSB - SB)
+	define FHook      : 0.4 * SHook - 0.25 * S.thick
+	define LbFootRise : 0.375 * SHook + 0.375 * S.thick
+
+	glyph-block-export SlopeA SlopeB
+	define SlopeA : 0.875 * DecoSizeY / DecoSizeX
+	define SlopeB : 0.875 * -[mix SlopeA 1.0 0.5]
+
+	# Wave blenders
+	glyph-block-export Wave
+	define Wave : namespace
+		export : define DepthY : 0.4 * SHook   - 0.25  * S.thick
+		export : define DepthX : 1 * DecoSizeX
+
+		export : define [vc waveDepth] : Interpolator vcWaveBlender [object waveDepth]
+		define [vcWaveBlender before after args] : begin
+			local [object waveDepth] args
+			return : list
+				g2 (before.x + 0.5 * waveDepth) [mix before.y after.y 0.375]
+				g2 (after.x - 0.5 * waveDepth)  [mix before.y after.y 0.625]
+
+		export : define [h] : Interpolator hWaveBlender [object h]
+		define [hWaveBlender before after] : begin
+			return : list
+				g2 [mix before.x after.x 0.375]  after.y
+				g2 [mix before.x after.x 0.625]  before.y
+
+	glyph-block-export PHexTop
+	define PHexTop : 0.5 + 0.5 * ([Math.max DecoSizeX frakThin] / (RightSB - SB))
+	glyph-block-export PHexBot
+	define PHexBot : 1 - PHexTop
+
+	glyph-block-export FrakDf
+	define [FrakDf div m] : DivFrame [fallback div 1] [fallback m 2] [Math.max 1 : DecoSizeX / SB]

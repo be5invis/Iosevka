@@ -27,6 +27,20 @@ export class Box {
 	withYPadding(d) {
 		return new Box(this.top - d, this.bottom + d, this.left, this.right);
 	}
+
+	padLeft(d) {
+		return new Box(this.top, this.bottom, this.left + d, this.right);
+	}
+	padRight(d) {
+		return new Box(this.top, this.bottom, this.left, this.right - d);
+	}
+	padTop(d) {
+		return new Box(this.top - d, this.bottom, this.left, this.right);
+	}
+	padBottom(d) {
+		return new Box(this.top, this.bottom + d, this.left, this.right);
+	}
+
 	withXMix(pL, pR) {
 		return new Box(
 			this.top,

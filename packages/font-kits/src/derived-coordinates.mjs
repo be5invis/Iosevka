@@ -36,8 +36,11 @@ export function SetupBuilders(_bindings) {
 		"pre@slope": (s, delta) => new CAtSlopePre(s, delta),
 		"post@slope": (s, delta) => new CAtSlopePost(s, delta),
 
-		// Interpolators
+		// Min and max derived coordinates
+		"min@": (...args) => new CMathFold(Math.min, args),
+		"max@": (...args) => new CMathFold(Math.max, args),
 
+		// Interpolators
 		// decor@, decor@@, decor@@@: Add a "delay" to the thing inside when resolving the spiro
 		// controls. This is a very useful utility for coordinate propagation, which allow us to
 		// "skip" the current point and go to the next or previous point. The number of @'s
@@ -95,6 +98,54 @@ class CDeltaPost extends DerivedCoordinateBase {
 	}
 	resolveY(pre, curr, post) {
 		return post.y + this.delta;
+	}
+}
+
+class CMathFold extends DerivedCoordinateBase {
+	constructor(operator, args) {
+		super();
+		this.operator = operator;
+		this.args = args;
+	}
+	getDependencyForX() {
+		let flag = 0;
+		for (const item of this.args) {
+			if (typeof item === "number") continue;
+			flag |= item.getDependencyForX();
+		}
+		return flag;
+	}
+	getDependencyForY() {
+		let flag = 0;
+		for (const item of this.args) {
+			if (typeof item === "number") continue;
+			flag |= item.getDependencyForY();
+		}
+		return flag;
+	}
+	resolveX(pre, curr, post) {
+		let result =
+			typeof this.args[0] === "number"
+				? this.args[0]
+				: this.args[0].resolveX(pre, curr, post);
+		for (let i = 1; i < this.args.length; i++) {
+			const item = this.args[i];
+			const value = typeof item === "number" ? item : item.resolveX(pre, curr, post);
+			result = this.operator(result, value);
+		}
+		return result;
+	}
+	resolveY(pre, curr, post) {
+		let result =
+			typeof this.args[0] === "number"
+				? this.args[0]
+				: this.args[0].resolveY(pre, curr, post);
+		for (let i = 1; i < this.args.length; i++) {
+			const item = this.args[i];
+			const value = typeof item === "number" ? item : item.resolveY(pre, curr, post);
+			result = this.operator(result, value);
+		}
+		return result;
 	}
 }
 
