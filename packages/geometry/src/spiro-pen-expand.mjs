@@ -6,11 +6,12 @@ import { Point } from "./point.mjs";
 import { MonoKnot } from "./spiro-to-outline.mjs";
 
 export class PenKnotCollector {
-	constructor(gizmo, defaultProfile) {
+	constructor(gizmo, defaultProfile, fProfileFixed) {
 		this.gizmo = gizmo;
 		this.m_profile = defaultProfile;
 		this.m_lastKnot = null;
 		this.m_finished = false;
+		this.m_profileFixed = fProfileFixed;
 
 		this.knots = [];
 		this.closed = false;
@@ -35,6 +36,7 @@ export class PenKnotCollector {
 	setContrast() {}
 
 	setProfile(profile) {
+		if (this.m_profileFixed) return;
 		if (profile.length !== this.m_profile.length)
 			throw new Error("Pen profile length mismatch");
 		if (this.m_lastKnot) this.m_lastKnot.profile = profile;
