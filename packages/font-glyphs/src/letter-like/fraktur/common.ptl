@@ -37,10 +37,9 @@ glyph-block LetterLike-Fraktur-Common : begin
 		public [new profile knots] : begin
 			this.profile = profile
 			this.knots   = knots
-
 		public [applyToGlyph glyph] : begin
 			local defaultProfile : this.profile.getPenShape glyph.gizmo
-			local collector : new PenKnotCollector glyph.gizmo defaultProfile
+			local collector : new PenKnotCollector glyph.gizmo defaultProfile this.profile.fixed
 			local c : spiro-collect collector this.knots
 
 			local proxy : new FrakturProxy glyph.gizmo defaultProfile collector
@@ -56,6 +55,7 @@ glyph-block LetterLike-Fraktur-Common : begin
 	# simplify the math.
 	class FrakturProfile
 		public [new thick thin] : begin
+			this.fixed = false
 			# .thick is the half length of the flat tip, projected to the X/Y axis
 			this.thick = 0.25 * [Math.sqrt 2] * thick
 			# .thin is the half width of the thin tip, projected to the X/Y axis
@@ -92,14 +92,29 @@ glyph-block LetterLike-Fraktur-Common : begin
 	define frakThick : 1.0 * Stroke
 	define frakFine  : 1.0 * [AdviceStroke 4] # For decoration
 
+	class MaskingProfile
+		public [new dx dy] : begin
+			this.fixed = true
+			this.dx = dx
+			this.dy = dy
+		public [getPenShape gizmo] : begin
+			local tf : gizmo.applyOffsetXY this.dx this.dy
+			list [new Vec2 0 0] [new Vec2 tf.x tf.y]
+
 	glyph-block-export S
 	define S : new FrakturProfile frakThick (0.875 * frakThin)
+
+	glyph-block-export M
+	define M : new FrakturProfile [AdviceStroke 3 para.diversityM] (0.875 * frakThin)
 
 	glyph-block-export F
 	define F : new FrakturProfile frakFine (0.875 * frakThin)
 
 	glyph-block-export T
 	define T : new FrakturProfile frakThin (0.875 * frakThin)
+
+	glyph-block-export CutMaskLeft
+	define CutMaskLeft : new MaskingProfile (-VERY-FAR) 0
 
 	# Key metrics
 	glyph-block-export DecoSizeX DecoSizeY FHook Wave.DepthY Wave.DepthX LbFootRise
@@ -117,19 +132,32 @@ glyph-block LetterLike-Fraktur-Common : begin
 	define Wave : namespace
 		export : define DepthY : 0.4 * SHook   - 0.25  * S.thick
 		export : define DepthX : 1 * DecoSizeX
+		export : define LTDecoSize : 0.75 * DecoSizeX
 
-		export : define [vc waveDepth] : Interpolator vcWaveBlender [object waveDepth]
-		define [vcWaveBlender before after args] : begin
+		export : define [h] : Interpolator hBlender
+		define [hBlender before after] : begin
+			return : list
+				g2 [mix before.x after.x 0.375]  after.y
+				g2 [mix before.x after.x 0.625]  before.y
+
+		export : define [vc waveDepth] : Interpolator vcBlender [object waveDepth]
+		define [vcBlender before after args] : begin
 			local [object waveDepth] args
 			return : list
 				g2 (before.x + 0.5 * waveDepth) [mix before.y after.y 0.375]
 				g2 (after.x - 0.5 * waveDepth)  [mix before.y after.y 0.625]
 
-		export : define [h] : Interpolator hWaveBlender [object h]
-		define [hWaveBlender before after] : begin
+		export : define [v] : Interpolator vBlender
+		define [vBlender before after] : begin
 			return : list
-				g2 [mix before.x after.x 0.375]  after.y
-				g2 [mix before.x after.x 0.625]  before.y
+				g2 after.x  [mix before.y after.y 0.375]
+				g2 before.x [mix before.y after.y 0.625]
+
+		export : define [vDistAfter d] : Interpolator vDistAfterBlender [object d]
+		define [vDistAfterBlender before after args] : begin
+			return : list
+				g2 after.x  [mix before.y after.y 0.375]
+				g2 (after.x - args.d) [mix before.y after.y 0.625]
 
 	glyph-block-export PHexTop
 	define PHexTop : 0.5 + 0.5 * ([Math.max DecoSizeX frakThin] / (RightSB - SB))
