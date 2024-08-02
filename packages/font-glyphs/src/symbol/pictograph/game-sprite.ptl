@@ -384,3 +384,67 @@ glyph-block Symbol-Pictograph-Game-Sprite : for-width-kinds WideWidth4
 			include : intersection
 				refer-glyph : MangleName "blackTriangleDown"
 				HShade stripes coTop coBot left right
+
+
+	do "Moon Lander"
+		define scaffold : object
+		set scaffold.tipSize     0.2
+		set scaffold.headWidth   0.8
+		set scaffold.headHeight  (3 / 8)
+		set scaffold.bodyWidth   0.4
+		set scaffold.slantHeight (3 / 8)
+		set scaffold.baseWidth   0.2
+		set scaffold.windowWidth     0.2
+		set scaffold.windowTopWidth  0.12
+		set scaffold.windowArchDepth 0.1
+		set scaffold.windowBot       (3 / 8)
+		set scaffold.windowTop       (6 / 8)
+		set scaffold.footLen      0.25
+		set scaffold.legHeight    0.4
+		set scaffold.legTopHeight 0.5
+
+		define [Moonlander top bottom left right sw] : glyph-proc
+			local midX : mix left right 0.5
+			local y1 : mix top bottom scaffold.headHeight
+			local y2 : mix bottom top scaffold.slantHeight
+			local bodyLeft  : mix left right (0.5 - scaffold.bodyWidth / 2)
+			local bodyRight : mix left right (0.5 + scaffold.bodyWidth / 2)
+
+			local windowTop : mix bottom top scaffold.windowTop
+			local windowBot : mix bottom top scaffold.windowBot
+			local windowY3  : mix bottom top (scaffold.windowTop - scaffold.windowArchDepth)
+			local windowLeft  : mix left right (0.5 - scaffold.windowWidth / 2)
+			local windowRight : mix left right (0.5 + scaffold.windowWidth / 2)
+
+			local legY2 : mix bottom top scaffold.legHeight
+			local legY3 : mix bottom top scaffold.legTopHeight
+			include : difference
+				union
+					spiro-outline
+						corner [mix left right (0.5 + scaffold.headWidth / 2)] y1
+						corner [mix left right (0.5 + scaffold.tipSize / 2)] top
+						corner [mix left right (0.5 - scaffold.tipSize / 2)] top
+						corner [mix left right (0.5 - scaffold.headWidth / 2)] y1
+						corner bodyLeft y1
+						corner bodyLeft y2
+						corner [mix left right (0.5 - scaffold.baseWidth / 2)] bottom
+						corner [mix left right (0.5 + scaffold.baseWidth / 2)] bottom
+						corner bodyRight y2
+						corner bodyRight y1
+					HBar.b left  [mix left right scaffold.footLen] bottom sw
+					HBar.b right [mix right left scaffold.footLen] bottom sw
+					VBar.l left  bottom legY2 sw
+					VBar.r right bottom legY2 sw
+					dispiro [widths.rhs sw] [flat left  legY2] [curl midX legY3]
+					dispiro [widths.lhs sw] [flat right legY2] [curl midX legY3]
+				spiro-outline
+					corner windowLeft windowY3
+					corner windowLeft windowBot
+					corner windowRight windowBot
+					corner windowRight windowY3
+					corner [mix left right (0.5 + scaffold.windowTopWidth / 2)] windowTop
+					corner [mix left right (0.5 - scaffold.windowTopWidth / 2)] windowTop
+
+		create-glyph [MangleName "moonLander"] [MangleUnicode 0x1CDF5] : glyph-proc
+			set-width MosaicWidth
+			include : Moonlander top bottom left right graphicSw
