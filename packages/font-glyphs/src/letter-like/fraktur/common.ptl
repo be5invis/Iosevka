@@ -105,15 +105,6 @@ glyph-block LetterLike-Fraktur-Common : begin
 	define frakThick : 1.0 * Stroke
 	define frakFine  : 1.0 * [AdviceStroke 4] # For decoration
 
-	class MaskingProfile
-		public [new dx dy] : begin
-			this.fixed = true
-			this.dx = dx
-			this.dy = dy
-		public [getPenShape gizmo] : begin
-			local tf : gizmo.applyOffsetXY this.dx this.dy
-			list [new Vec2 0 0] [new Vec2 tf.x tf.y]
-
 	glyph-block-export S
 	define S : new FrakturPen frakThick (0.875 * frakThin)
 
@@ -125,6 +116,15 @@ glyph-block LetterLike-Fraktur-Common : begin
 
 	glyph-block-export T
 	define T : new FrakturPen frakThin (0.875 * frakThin)
+
+	class MaskingProfile
+		public [new dx dy] : begin
+			this.fixed = true
+			this.dx = dx
+			this.dy = dy
+		public [getPenShape gizmo] : begin
+			local tf : gizmo.applyOffsetXY this.dx this.dy
+			list [new Vec2 0 0] [new Vec2 tf.x tf.y]
 
 	glyph-block-export CutMaskLeft
 	define CutMaskLeft : new MaskingProfile (-VERY-FAR) 0
@@ -182,5 +182,25 @@ glyph-block LetterLike-Fraktur-Common : begin
 	glyph-block-export PHexBot
 	define PHexBot : 1 - PHexTop
 
-	glyph-block-export FrakDf
-	define [FrakDf div m] : DivFrame [fallback div 1] [fallback m 2] [Math.max 1 : DecoSizeX / SB]
+	glyph-block-export UpperDf
+	define [UpperDf div m] : DivFrame [fallback div 1] [fallback m 2] [Math.max 1 : DecoSizeX / SB]
+
+	glyph-block-export LowerDf
+	define [LowerDf div m] : DivFrame [fallback div 1] [fallback m 2] [Math.max 1 : (1.75 * DecoSizeX - 0.5 * S.thick) / SB]
+
+	glyph-block-export RBDecoration
+	define [RBDecoration cx cy limy] : list
+		curl cx [min@ [fallback limy VERY-FAR] [post@slope : 2 * SlopeB]]
+		[flatc.sr SlopeB].end (pre@ <+> 0.5 * DecoSizeX) cy
+		corner (pre@ <+> DecoSizeX) (pre@ <+> DecoSizeY)
+
+	glyph-block-export LTDecoration
+	define [LTDecoration cx cy limy] : list
+		corner (post@ <-> DecoSizeX) (post@ <-> DecoSizeY)
+		[ccurl.sr SlopeB].start (post@ <-> 0.5 * DecoSizeX) cy
+		flat cx [max@ [fallback limy (-VERY-FAR)] [pre@slope : 2 * SlopeB]]
+
+	set [LTDecoration.g2 cx cy limy] : list
+		corner (post@ <-> DecoSizeX) (post@ <-> DecoSizeY)
+		[ccurl.sr SlopeB].start (post@ <-> 0.5 * DecoSizeX) cy
+		g2 cx [max@ [fallback limy (-VERY-FAR)] [pre@slope : 2 * SlopeB]]
