@@ -424,13 +424,15 @@ glyph-block CommonShapes : begin
 
 	define nHookSegments 12
 	define [HookShape toStraight toFinish isStart args] : begin
-		local [object y sw swTerminal isTail noSwash] args
+		local [object yRef sw swTerminal isTail noSwash overshoot] args
 
-		local atBottom : toStraight.y > y
+		local atBottom : toStraight.y > yRef
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
-		local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
+		local dtu : if isStart (yRef > toFinish.y) (yRef < toFinish.y)
 		local doSwash : !noSwash && !isStart && atBottom && (para.isItalic || isTail) && [if (para.slopeAngle >= 0) ltr [not ltr]]
 		local superness DesignParameters.superness
+
+		local y : yRef + [if dtu (-1) 1] * overshoot
 
 		# Adjust terminal's position if necessary
 		toFinish.x = toFinish.x + OXHook * [if ltr (-1) 1] * [if isStart (-1) 1]
@@ -512,7 +514,7 @@ glyph-block CommonShapes : begin
 		return : HookShape before after false args
 
 	define [hookProxy args] : begin
-		return : new CopyBackKnotProxy [g4 [new CMixCoord 0.5] args.y] args 2
+		return : new CopyBackKnotProxy [g4 [new CMixCoord 0.5] args.yRef] args 2
 
 	glyph-block-export hookstart
 	define flex-params [hookstart] : begin
@@ -521,7 +523,8 @@ glyph-block CommonShapes : begin
 		local-parameter : swTerminal     -- sw
 		local-parameter : isTail         -- false
 		local-parameter : noSwash        -- false
-		local args : object y sw swTerminal isTail noSwash
+		local-parameter : o              -- O
+		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
 		return : WithKnotProxy [hookProxy args] : Interpolator hookStartBlender args
 
 	glyph-block-export hookend
@@ -531,7 +534,8 @@ glyph-block CommonShapes : begin
 		local-parameter : swTerminal     -- sw
 		local-parameter : isTail         -- false
 		local-parameter : noSwash        -- false
-		local args : object y sw swTerminal isTail noSwash
+		local-parameter : o              -- O
+		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
 		return : WithKnotProxy [hookProxy args] : Interpolator hookEndBlender args
 
 	glyph-block-export arch

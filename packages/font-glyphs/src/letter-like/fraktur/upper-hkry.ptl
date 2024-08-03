@@ -7,9 +7,9 @@ glyph-module
 glyph-block LetterLike-Fraktur-Upper-HKR : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import CommonShapes
-	glyph-block-import LetterLike-Fraktur-Common : FrakDf S F T fraktur-stroke change-profile
+	glyph-block-import LetterLike-Fraktur-Common : FrakDf S F T fraktur-stroke change-pen
 	glyph-block-import LetterLike-Fraktur-Common : DecoSizeX DecoSizeY SlopeA SlopeB
-	glyph-block-import LetterLike-Fraktur-Common : Wave LbFootRise FHook PHexTop PHexBot
+	glyph-block-import LetterLike-Fraktur-Common : Wave FHook PHexTop PHexBot
 
 	define [HOuterShape bBody bDeco yConnT yConnB] : fraktur-stroke S
 		g2         bBody.right             (post@ <-> FHook)
@@ -78,6 +78,19 @@ glyph-block LetterLike-Fraktur-Upper-HKR : begin
 
 		include : HOuterShape kBody kDeco leg.yConnT leg.yConnB
 
+	define [RKLeftStroke deco body yConnB pRight] : glyph-proc
+		local s : include : fraktur-stroke F
+			g2.ru.start    post@                    ([deco.yp 0.625] - 2 * F.thick)
+			~~~ [Wave.vc Wave.LTDecoSize]
+			g2.ru.mid      deco.left                (post@ <-> DecoSizeY)  [change-pen S]
+			arch.rhs (blendPre -- {})               body.top 0.625
+			flat           body.left                (body.top - 0.6 * ArchDepthA)
+			curl 	       (pre@ <+> 0)             [min@ yConnB [mix@ 0.5]]
+			corner         deco.left                (post@ <+> 2 * DecoSizeY)
+			g2c.right.end  (post@ <-> DecoSizeX)    [S.yb 0]
+			corner         [body.xp : 0.5 * pRight] (pre@ <+> DecoSizeY)
+		return s
+
 	create-glyph "frak/R" 0x211C : glyph-proc
 		local df : include : FrakDf 1
 		include : df.markSet.capital
@@ -88,15 +101,22 @@ glyph-block LetterLike-Fraktur-Upper-HKR : begin
 
 		# Legs
 		local leg : include : KRLegs rBody
+		local leftStroke : include : RKLeftStroke rDeco rBody leg.yConnB 1
 
-		# Left stroke
-		include : fraktur-stroke F
-			g2.ru.start    post@                  ([rDeco.yp 0.625] - 2 * F.thick)
-			~~~ [Wave.vc Wave.LTDecoSize]
-			g2.ru.mid      rDeco.left             (post@ <-> DecoSizeY)  [change-profile S]
-			arch.rhs (blendPre -- {})             rBody.top 0.625
-			flat           rBody.left             (pre@ <-> 0.6 * ArchDepthA)
-			curl 	       (pre@ <+> 0)           leg.yConnB
-			corner         rDeco.left             (post@ <+> 2 * DecoSizeY)
-			g2c.right.end  (post@ <-> DecoSizeX)  [S.yb 0]
-			corner         [rBody.xp 0.5]         (pre@ <+> DecoSizeY)
+	create-glyph "frak/Y" 0x1D51C : glyph-proc
+		local df : include : FrakDf 1
+		include : df.markSet.capDesc
+
+		local yBox  : S.box CAP 0 df.leftSB df.rightSB
+		local yDeco : yBox.padLeft (-0.25 * DecoSizeX) # top-left decoration ref box
+		local yBody : yBox.padLeft (+1.50 * DecoSizeX) # body ref box
+
+		local leftStroke : include : RKLeftStroke yDeco yBody yBody.top 0.75
+
+		local yRight : yBody.withBottom Descender
+		local rightStroke : include : fraktur-stroke S
+			corner yRight.left [post@slope SlopeA]
+			corner [yRight.xp PHexTop] yRight.top
+			g2.down.mid yRight.right [yRight.yp 0.75]
+			g2.down.mid [yRight.xp 0.75] [yRight.yp 0.25]
+			g2 yRight.right yRight.bot
