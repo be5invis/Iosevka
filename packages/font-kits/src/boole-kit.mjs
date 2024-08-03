@@ -34,9 +34,11 @@ export function SetupBuilders(bindings) {
 		new BooleImpl(bindings, TypoGeom.Boolean.ClipType.ctIntersection, operands);
 	const difference = (...operands) =>
 		new BooleImpl(bindings, TypoGeom.Boolean.ClipType.ctDifference, operands);
+	const withKnockout = (mask, ...operands) => difference(union(...operands), mask);
 	return {
 		union: union,
 		intersection: intersection,
 		difference: difference,
+		"with-knockout": withKnockout,
 	};
 }

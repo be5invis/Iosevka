@@ -1,0 +1,85 @@
+$$include '../../meta/macros.ptl'
+
+glyph-module
+
+glyph-block LetterLike-Fraktur-Lower-BOPVW : begin
+	glyph-block-import Common-Derivatives
+	glyph-block-import CommonShapes
+	glyph-block-import LetterLike-Fraktur-Common : LowerDf S M fraktur-stroke change-pen
+	glyph-block-import LetterLike-Fraktur-Common : DecoSizeX DecoSizeY SlopeA SlopeB
+	glyph-block-import LetterLike-Fraktur-Common : Wave FHook PHexTop PHexBot LTDecoration
+
+	define [ORightShape mode profile oBox] : fraktur-stroke profile
+		corner  oBox.left  [post@slope SlopeA]
+		[cg2.sr SlopeB].start  [oBox.xp PHexTop]  oBox.top
+		g2.down.mid  (oBox.right - OX)  [mix@ 0.5]
+		[g2c.sl SlopeA].start  [oBox.xp PHexBot]  oBox.bot
+		corner  oBox.left  [pre@slope SlopeB]
+		match mode
+			[Just 'o'] : close
+			[Just 'p'] : ~~~ [corner  (pre@ <-> DecoSizeX) (pre@ <-> DecoSizeY)]
+			___        : list
+
+	create-glyph "frak/o" 0xAB3D : glyph-proc
+		local df : include : LowerDf 1
+		include : df.markSet.e
+
+		local oBox : S.box XH 0 df.leftSB df.rightSB
+		include : ORightShape 'o' S oBox
+
+	alias 'mathFrak/o' 0x1D52C 'frak/o'
+
+	create-glyph "frak/b" 0x1D51F : glyph-proc
+		local df : include : LowerDf 1
+		include : df.markSet.b
+
+		local oBox : S.box XH       0 df.leftSB df.rightSB
+		local bBox : S.box Ascender 0 df.leftSB df.rightSB
+
+		local rightStroke : include : ORightShape 'b' S oBox
+		local leftStroke : include : fraktur-stroke S
+			LTDecoration bBox.left bBox.top
+			corner [rightStroke.last].x [rightStroke.last].y
+
+	create-glyph "frak/p" 0x1D52D : glyph-proc
+		local df : include : LowerDf 1
+		include : df.markSet.p
+
+		local oBox : S.box XH 0         df.leftSB df.rightSB
+		local pBox : S.box XH Descender df.leftSB df.rightSB
+
+		local rightStroke : include : ORightShape 'p' S oBox
+		local leftStroke : include : fraktur-stroke S
+			LTDecoration pBox.left pBox.top [rightStroke.first].y
+			corner pre@ pBox.bot
+
+	create-glyph "frak/v" 0x1D533 : glyph-proc
+		local df : include : LowerDf 1
+		include : df.markSet.e
+
+		local vBox : S.box XH 0 df.leftSB df.rightSB
+
+		local rightStroke : include : ORightShape 'v' S vBox
+		local leftStroke : include : fraktur-stroke S
+			LTDecoration vBox.left vBox.top [rightStroke.first].y
+			corner [rightStroke.last].x [rightStroke.last].y
+
+	create-glyph "frak/w" 0x1D534 : glyph-proc
+		local df : include : LowerDf para.diversityM 3
+		include : df.markSet.e
+
+		local wBox : M.box XH 0 df.leftSB df.rightSB
+		local rightHalfBox : wBox.withLeft wBox.xMid
+		local leftHalfBox : wBox.withRight wBox.xMid
+
+		local rightStroke : include : ORightShape 'o' M rightHalfBox
+		local middleStroke : include : fraktur-stroke M
+			corner leftHalfBox.left [post@slope SlopeA]
+			corner [leftHalfBox.xp PHexTop] leftHalfBox.top
+			corner leftHalfBox.right [pre@slope SlopeB]
+			corner pre@ [post@slope SlopeA]
+			corner [leftHalfBox.xp PHexBot] leftHalfBox.bot
+			corner leftHalfBox.left [pre@slope SlopeB]
+		local leftStroke : include : fraktur-stroke M
+			LTDecoration leftHalfBox.left leftHalfBox.top [middleStroke.first].y
+			corner [middleStroke.last].x [middleStroke.last].y
