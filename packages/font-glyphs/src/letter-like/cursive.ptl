@@ -1,0 +1,93 @@
+###### Cursive letter-like symbols
+
+$$include '../meta/macros.ptl'
+
+import [Box] from "@iosevka/geometry/box"
+import [mix fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block LetterLike-Cursive-Shared : begin
+	glyph-block-import CommonShapes
+
+	glyph-block-export DrCursive
+	class DrCursive
+		public [new box sw] : begin
+			this.box = box
+			this.sw  = sw
+
+		public [withSw sw] : new DrCursive this.box sw
+		public [withXMix pL pR] : new DrCursive [this.box.withXMix pL pR] this.sw
+		public [withYMix pB pT] : new DrCursive [this.box.withYMix pB pT] this.sw
+
+		public [x pX _pSX _deltaX] : begin
+			local pSX : fallback _pSX 0
+			local deltaX : fallback _deltaX 0
+			return : [mix this.box.left this.box.right pX] + pSX * HVContrast * this.sw + deltaX
+
+		public [y pY _pSY _deltaY] : begin
+			local pSY : fallback _pSY 0
+			local deltaY : fallback _deltaY 0
+			return : [mix this.box.bottom this.box.top pY] + pSY * this.sw + deltaY
+
+		public [s pS d] : if d
+			then : return : widths.heading ((1 - pS) * this.sw) (pS * this.sw) d
+			else : return : widths         ((1 - pS) * this.sw) (pS * this.sw)
+
+		public [lhs d] : this.s 0   d
+		public [cen d] : this.s 0.5 d
+		public [rhs d] : this.s 1   d
+
+glyph-block LetterLike-Cursive : begin
+	glyph-block-import CommonShapes
+	glyph-block-import LetterLike-Cursive-Shared : DrCursive
+
+	create-glyph 'ell' 0x2113 : glyph-proc
+		include : MarkSet.b
+
+		local loopSize : Width * 0.25 + HalfStroke * HVContrast
+		local l : Middle - loopSize
+		local r : Middle + loopSize
+
+		local dr : new DrCursive [new Box Ascender 0 l r] Stroke
+		local loop : dr.withXMix 0 0.9 :.withSw [AdviceStroke 5.5]
+		local tip : dr.withSw [AdviceStroke 6.5]
+
+		local ada : 0.8 * SmallArchDepthA + 0.25 * dr.sw
+		local adb : 0.8 * SmallArchDepthB + 0.25 * dr.sw
+
+		include : dispiro
+			g2             [loop.x 0]            [loop.y 0.33]               [loop.cen]
+			g2.up.mid      [loop.x 1 0 (-O)]     [loop.y 0.8]                [loop.lhs]
+			~~~ [arch.lhs [loop.y 1 0 O] (sw -- loop.sw) (swAfter -- dr.sw)]
+			flat           [dr.x 0.5 (-0.75)]    [dr.y 1 0 (-ada)]           [dr.lhs]
+			curl           [dr.x 0.5 (-0.75)]    [dr.y 0 0 (+adb)]           [dr.lhs]
+			~~~ [hookend 0 (sw -- dr.sw) (swTerminal -- tip.sw) (isTail -- true)]
+			g2             [tip.x 1]             (SHook + dr.sw * 0.5)       [tip.lhs]
+
+	create-glyph 'weierstrassP' 0x2118 : glyph-proc
+		include : MarkSet.p
+
+		local thick : AdviceStroke 2.5
+		local extSw : AdviceStroke 3.5
+		local fine  : AdviceStroke 5.5
+		local tip   : AdviceStroke 6.5
+
+		local bowl : new DrCursive [new Box XH 0         SB RightSB]               thick
+		local extn : new DrCursive [new Box XH Descender SB [mix SB RightSB 0.3]]  extSw
+		local bowT : bowl.withSw tip
+		local extF : extn.withSw fine
+		local extT : extn.withSw tip
+
+		include : dispiro
+			g2                [extT.x 0.25 0.5]    [extT.y 1]               [extT.cen]
+			g2.down.mid       [extF.x 0 0 O]       [extF.y 0.8]             [extF.lhs]
+			~~~ [alsoThru.g2 0.5 0.5 [extn.cen]]
+			g2.down.mid       [extF.x 1 0.4 (-O)]  [extn.y 0.2 (-TanSlope)] [extn.s (fine / extSw)]
+			~~~ [arch.rhs [extF.y 0 0 0] (sw -- extF.sw)]
+			g2.up.mid         [extF.x 0 0 O]       [extF.y 0.2]             [extF.rhs]
+			~~~ [arch.rhs [bowl.y 1 0 (-O)] 0.625 (sw -- bowl.sw) (swBefore -- extF.sw)
+				  (blendPre -- [bezControls 0 0.5 0.4 1 16])]
+			straight.down.mid [bowl.x 1 0 (-O)]    [bowl.y 0.5]
+			~~~ [arch.rhs [bowl.y 0 0 O] (sw -- bowl.sw) (swAfter -- bowT.sw)]
+			g2                [bowT.x 0.4]         [bowT.y 0.3]             [bowT.rhs Upward]

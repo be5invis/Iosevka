@@ -2218,17 +2218,35 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-alpha-barred-earless-rounded-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-earless-rounded-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-alpha = 'barred-earless-rounded-tailed'</code>, <code>cv67 = 12</code></td></tr>
     <tr><td>Greek lower Alpha (<code>α</code>) with straight right bar, earless (rounded top-right), and curly tail</td></tr>
     </table></details>
+  - Styles for `β` (Greek lower Beta)
+    <details><summary>2 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-beta-standard.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-beta-standard.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-beta = 'standard'</code>, <code>VXAC = 1</code></td></tr>
+    <tr><td>Greek lower Beta (<code>β</code>) with standard shape (default)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-beta-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-beta-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-beta = 'cursive'</code>, <code>VXAC = 2</code></td></tr>
+    <tr><td>Greek lower Beta (<code>β</code>) with cursive shape</td></tr>
+    </table></details>
   - Styles for `Γ` (Greek capital Gamma)
     <details><summary>4 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-gamma-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-gamma-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-gamma = 'serifless'</code>, <code>cv68 = 1</code></td></tr>
-    <tr><td>Standard capital Gamma (<code>Γ</code>) without serifs (default for Sans)</td></tr>
+    <tr><td>Greek capital Gamma (<code>Γ</code>) without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-gamma-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-gamma-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-gamma = 'top-right-serifed'</code>, <code>cv68 = 2</code></td></tr>
-    <tr><td>Standard capital Gamma (<code>Γ</code>) with serifs at top right</td></tr>
+    <tr><td>Greek capital Gamma (<code>Γ</code>) with serifs at top right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-gamma-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-gamma-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-gamma = 'bottom-serifed'</code>, <code>cv68 = 3</code></td></tr>
-    <tr><td>Standard capital Gamma (<code>Γ</code>) with bottom serif</td></tr>
+    <tr><td>Greek capital Gamma (<code>Γ</code>) with bottom serif</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-gamma-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-gamma-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-gamma = 'serifed'</code>, <code>cv68 = 4</code></td></tr>
-    <tr><td>Standard capital Gamma (<code>Γ</code>) with motion serifs at top and bottom (default for Slab)</td></tr>
+    <tr><td>Greek capital Gamma (<code>Γ</code>) with motion serifs at top and bottom (default for Slab)</td></tr>
+    </table></details>
+  - Styles for `γ` (Greek lower Gamma)
+    <details><summary>3 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-gamma-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-gamma-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-gamma = 'straight'</code>, <code>VXAD = 1</code></td></tr>
+    <tr><td>Greek lower Gamma (<code>γ</code>) with straight shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-gamma-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-gamma-curly.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-gamma = 'curly'</code>, <code>VXAD = 2</code></td></tr>
+    <tr><td>Greek lower Gamma (<code>γ</code>) with curly shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-gamma-casual.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-gamma-casual.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-gamma = 'casual'</code>, <code>VXAD = 3</code></td></tr>
+    <tr><td>Greek lower Gamma (<code>γ</code>) with casual shape (default)</td></tr>
     </table></details>
   - Styles for `Δ` (Greek capital Delta (`Δ`))
     <details><summary>2 variants</summary>
@@ -2340,6 +2358,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothless-rounded-serifed'</code>, <code>cv74 = 13</code></td></tr>
     <tr><td>Greek small Mu (<code>μ</code>) with toothless (rounded) shape, and serifs</td></tr>
     </table></details>
+  - Styles for `ν` (Greek lower Nu)
+    <details><summary>3 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-nu-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-nu-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-nu = 'straight'</code>, <code>VXAE = 1</code></td></tr>
+    <tr><td>Greek lower Nu (<code>ν</code>) with straight shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-nu-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-nu-curly.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-nu = 'curly'</code>, <code>VXAE = 2</code></td></tr>
+    <tr><td>Greek lower Nu (<code>ν</code>) with curly shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-nu-casual.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-nu-casual.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-nu = 'casual'</code>, <code>VXAE = 3</code></td></tr>
+    <tr><td>Greek lower Nu (<code>ν</code>) with casual shape (default)</td></tr>
+    </table></details>
   - Styles for `ξ` (Greek lower Xi)
     <details><summary>2 variants</summary>
     <table>
@@ -2373,6 +2401,18 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Tau (<code>τ</code>) with a diagonal tail</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-tau-semi-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-tau-semi-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-tau = 'semi-tailed'</code>, <code>cv77 = 6</code></td></tr>
     <tr><td>Greek lower Tau (<code>τ</code>) with a slightly curly tail (default for Upright)</td></tr>
+    </table></details>
+  - Styles for `υ` (Greek lower Upsilon)
+    <details><summary>4 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-upsilon-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-upsilon-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-upsilon = 'straight-serifless'</code>, <code>VXAF = 1</code></td></tr>
+    <tr><td>Greek lower Upsilon (<code>υ</code>) with straight shape; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-upsilon-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-upsilon-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-upsilon = 'straight-serifed'</code>, <code>VXAF = 2</code></td></tr>
+    <tr><td>Greek lower Upsilon (<code>υ</code>) with straight shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-upsilon-casual-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-upsilon-casual-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-upsilon = 'casual-serifless'</code>, <code>VXAF = 3</code></td></tr>
+    <tr><td>Greek lower Upsilon (<code>υ</code>) with casual shape; without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-upsilon-casual-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-upsilon-casual-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-upsilon = 'casual-serifed'</code>, <code>VXAF = 4</code></td></tr>
+    <tr><td>Greek lower Upsilon (<code>υ</code>) with casual shape, and serifs (default for Slab)</td></tr>
     </table></details>
   - Styles for `χ` (Greek lower Chi)
     <details><summary>13 variants</summary>
@@ -2658,6 +2698,18 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-em-slanted-sides-flat-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-em-slanted-sides-flat-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-em = 'slanted-sides-flat-bottom-serifed'</code>, <code>cv88 = 12</code></td></tr>
     <tr><td>Cyrillic Lower Em (<code>м</code>) with slanted sides, middle aligned to baseline, and serifs</td></tr>
     </table></details>
+  - Styles for `Н` (Cyrillic Capital En)
+    <details><summary>4 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-en-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-en-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-en = 'serifless'</code>, <code>VXAA = 1</code></td></tr>
+    <tr><td>Cyrillic Capital En (<code>Н</code>) without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-en-top-left-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-en-top-left-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-en = 'top-left-serifed'</code>, <code>VXAA = 2</code></td></tr>
+    <tr><td>Cyrillic Capital En (<code>Н</code>) with serif only at top left</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-en-top-left-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-en-top-left-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-en = 'top-left-bottom-right-serifed'</code>, <code>VXAA = 3</code></td></tr>
+    <tr><td>Cyrillic Capital En (<code>Н</code>) with serif only at top left and bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-en-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-en-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-en = 'serifed'</code>, <code>VXAA = 4</code></td></tr>
+    <tr><td>Cyrillic Capital En (<code>Н</code>) with serifs (default for Slab)</td></tr>
+    </table></details>
   - Styles for `н` (Cyrillic Lower En)
     <details><summary>7 variants</summary>
     <table>
@@ -2675,6 +2727,22 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower En (<code>н</code>) with tail, and serifs at top left</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-en-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-en-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-en = 'tailed-serifed'</code>, <code>cv89 = 7</code></td></tr>
     <tr><td>Cyrillic Lower En (<code>н</code>) with tail, and serifs</td></tr>
+    </table></details>
+  - Styles for `Р` (Cyrillic Capital Er)
+    <details><summary>6 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-er-closed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-er-closed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-er = 'closed-serifless'</code>, <code>VXAB = 1</code></td></tr>
+    <tr><td>Cyrillic Capital Er (<code>Р</code>) with closed shape; without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-er-closed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-er-closed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-er = 'closed-motion-serifed'</code>, <code>VXAB = 2</code></td></tr>
+    <tr><td>Cyrillic Capital Er (<code>Р</code>) with closed shape, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-er-closed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-er-closed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-er = 'closed-serifed'</code>, <code>VXAB = 3</code></td></tr>
+    <tr><td>Cyrillic Capital Er (<code>Р</code>) with closed shape, and serifs (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-er-open-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-er-open-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-er = 'open-serifless'</code>, <code>VXAB = 4</code></td></tr>
+    <tr><td>Cyrillic Capital Er (<code>Р</code>) with open shape; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-er-open-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-er-open-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-er = 'open-motion-serifed'</code>, <code>VXAB = 5</code></td></tr>
+    <tr><td>Cyrillic Capital Er (<code>Р</code>) with open shape, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-er-open-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-er-open-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-er = 'open-serifed'</code>, <code>VXAB = 6</code></td></tr>
+    <tr><td>Cyrillic Capital Er (<code>Р</code>) with open shape, and serifs</td></tr>
     </table></details>
   - Styles for `р` (Cyrillic Lower Er)
     <details><summary>7 variants</summary>

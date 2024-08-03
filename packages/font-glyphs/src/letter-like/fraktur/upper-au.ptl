@@ -1,0 +1,53 @@
+$$include '../../meta/macros.ptl'
+
+import [mix fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block LetterLike-Fraktur-Upper-A : begin
+	glyph-block-import Common-Derivatives
+	glyph-block-import CommonShapes
+	glyph-block-import LetterLike-Fraktur-Common : UpperDf S F T fraktur-stroke change-pen
+	glyph-block-import LetterLike-Fraktur-Common : DecoSizeX DecoSizeY SlopeA SlopeB
+	glyph-block-import LetterLike-Fraktur-Common : Wave PHexTop PHexBot LTDecoration RBDecoration
+
+	create-glyph 'frak/A' 0x1D504 : glyph-proc
+		local df : include : UpperDf 1
+		include : df.markSet.capital
+
+		local aBox  : S.box CAP 0 df.leftSB df.rightSB
+
+		include : fraktur-stroke S
+			g2.ru.start (post@) ([aBox.yp 0.625] - 2 * F.thick) [change-pen F]
+			~~~ [Wave.vc Wave.DepthX]
+			g2.ru.mid aBox.left (post@ <-> DecoSizeY) [change-pen S]
+			arch.rhs (sw -- S.thick) (blendPre -- null) aBox.top 0.4
+			straight.down.mid [aBox.xp 0.5] [mix@ 0.375]
+			[flatc.sl SlopeA].end (aBox.left - 0.25 * DecoSizeX) [post@slope SlopeB]
+			corner [aBox.xp PHexBot] aBox.bot
+			corner aBox.right [pre@slope SlopeA]
+
+		include : fraktur-stroke S
+			corner (post@ <-> DecoSizeX) (post@ <-> DecoSizeY)
+			corner aBox.right aBox.top
+			RBDecoration pre@ aBox.bot
+
+	create-glyph 'frak/U' 0x1D518 : glyph-proc
+		local df : include : UpperDf 1
+		include : df.markSet.capital
+
+		local uBox  : S.box CAP 0 df.leftSB df.rightSB
+		local uDeco : uBox.padLeft (-0.25 * DecoSizeX) # top-left decoration ref box
+		local uBody : uBox.padLeft (+1.50 * DecoSizeX) # body ref box
+
+		include : fraktur-stroke S
+			LTDecoration.g2 [mix uDeco.left uBody.left 0.5] uBody.top nothing
+			g2.down.mid uBody.left [mix@ 0.45]
+			corner uDeco.left [post@slope SlopeB]
+			corner [uDeco.xp PHexBot] uDeco.bot
+			corner uDeco.right [pre@slope SlopeA]
+
+		include : fraktur-stroke S
+			corner (post@ <-> DecoSizeX) (post@ <-> DecoSizeY)
+			corner uDeco.right uDeco.top
+			RBDecoration pre@ uBox.bot
