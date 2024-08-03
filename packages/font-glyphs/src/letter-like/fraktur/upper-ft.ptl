@@ -1,0 +1,57 @@
+$$include '../../meta/macros.ptl'
+
+import [mix fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block LetterLike-Fraktur-Upper-F : begin
+	glyph-block-import Common-Derivatives
+	glyph-block-import CommonShapes
+	glyph-block-import LetterLike-Fraktur-Common : UpperDf S M F T fraktur-stroke change-pen
+	glyph-block-import LetterLike-Fraktur-Common : DecoSizeX DecoSizeY SlopeA SlopeB CutMaskLeft
+	glyph-block-import LetterLike-Fraktur-Common : Wave FHook PHexTop PHexBot
+
+	create-glyph "frak/F" 0x1D509 : glyph-proc
+		local df : include : UpperDf 1
+		include : df.markSet.capital
+
+		local fBox : S.box CAP 0 df.leftSB df.rightSB
+		local topStroke : include : fraktur-stroke S
+			g2.ld.start fBox.right fBox.top
+			~~~ [Wave.h O]
+			g2.ld.end fBox.left (pre@ <-> Wave.DepthY) [change-pen F]
+			~~~ [Wave.vc (-Wave.DepthX)]
+			g2.ld.end pre@ ([fBox.yp 0.625] - 2 * F.thick)
+
+		local mainStroke : include : fraktur-stroke S
+			[g2.sl (2 * SlopeA)].start fBox.xMid (fBox.top - 0.5 * Wave.DepthY)
+			g2 [fBox.xp 0.875] (post@ <+> ArchDepthB)
+			hookend (sw -- S.thick) fBox.bot
+			g2 fBox.left (pre@ <+> SHook)
+
+		include : with-knockout [mainStroke.withPen CutMaskLeft] : fraktur-stroke F
+			corner [F.connR S fBox.right] [post@slope SlopeB]
+			corner (fBox.right - 0.5 * DecoSizeX) [post@slope SlopeA]
+			corner fBox.xMid [mix (fBox.top - 0.5 * Wave.DepthY) (fBox.bot + ArchDepthB) 0.5]
+
+	create-glyph "frak/T" 0x1D517 : glyph-proc
+		local df : include : UpperDf 1
+		include : df.markSet.capital
+
+		local tBox : S.box CAP 0 df.leftSB df.rightSB
+		local topStroke : include : fraktur-stroke S
+			g2.ld.start tBox.right tBox.top
+			~~~ [Wave.h O]
+			g2.ld.end tBox.left (pre@ <-> Wave.DepthY) [change-pen F]
+			~~~ [Wave.vc (-Wave.DepthX)]
+			g2.ld.end pre@ ([tBox.yp 0.625] - 2 * F.thick)
+
+		local bottomStroke : include : fraktur-stroke S
+			g2.ld.end tBox.right (tBox.bottom + Wave.DepthY)
+			~~~ [Wave.h O]
+			g2.ld.start tBox.left tBox.bottom
+
+		local middleStroke : include : fraktur-stroke S
+			g2 tBox.xMid (tBox.bottom + 0.5 * Wave.DepthY)
+			~~~ [Wave.vc Wave.DepthX]
+			g2 tBox.xMid (tBox.top - 0.5 * Wave.DepthY)

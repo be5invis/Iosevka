@@ -1,0 +1,90 @@
+$$include '../../meta/macros.ptl'
+
+import [mix] from "@iosevka/util"
+
+glyph-module
+
+glyph-block LetterLike-Fraktur-Lower-F : begin
+	glyph-block-import Common-Derivatives
+	glyph-block-import CommonShapes
+	glyph-block-import LetterLike-Fraktur-Common : LowerDf S F T fraktur-stroke change-pen
+	glyph-block-import LetterLike-Fraktur-Common : DecoSizeX DecoSizeY SlopeA SlopeB
+	glyph-block-import LetterLike-Fraktur-Common : Wave FHook PHexTop PHexBot
+
+	create-glyph "frak/f" 0x1D523 : glyph-proc
+		local df : include : LowerDf 1
+		include : df.markSet.bp
+
+		local box : S.box Ascender Descender df.leftSB df.rightSB
+
+		include : fraktur-stroke S
+			g2 [box.xp (13/16)] (box.top - FHook)
+			hookstart (sw -- S.thick) box.top
+			g2 [box.xp (5/16)] (box.top - 0.5 * ArchDepthA) [change-pen T]
+			flat post@ (XH * DesignParameters.fBarPosToXH - S.thick) [change-pen S]
+			curl box.xMid box.bottom
+
+		include : fraktur-stroke F
+			corner box.left  (XH * DesignParameters.fBarPosToXH)
+			corner box.right (XH * DesignParameters.fBarPosToXH)
+
+	create-glyph "frak/k" 0x1D528 : glyph-proc
+		local df : include : LowerDf 1
+		include : df.markSet.bp
+
+		local box : S.box Ascender 0 df.leftSB df.rightSB
+		local xBox : T.box XH 0 df.leftSB df.rightSB
+
+		local centerStroke : include : fraktur-stroke S
+			corner (post@ <-> DecoSizeX) (post@ <-> DecoSizeY)
+			corner (box.xMid - 0.75 * TBalance) box.top
+			corner pre@ [post@slope SlopeB]
+			corner [mix@ PHexBot] box.bottom
+			corner [box.xp 0.875] [pre@slope SlopeA]
+
+		include : fraktur-stroke F
+			corner box.left  xBox.top
+			corner box.right xBox.top
+
+		include : fraktur-stroke F
+			g2.up.start [centerStroke.first 1].x xBox.top
+			arch.rhs (sw -- F.thick) (blendPost -- {}) [mix xBox.top box.top 0.75] 0.7
+			g2 box.right [mix@ 0.5]
+			g2 [mix@ 0.25] xBox.top
+
+	define [RTBottom box p] : list
+		corner pre@ [post@slope SlopeB]
+		corner [mix@ PHexBot] box.bottom
+		corner [box.xp p] [pre@slope SlopeA]
+
+	create-glyph "frak/r" 0x1D52F : glyph-proc
+		local df : include : LowerDf 1
+		include : df.markSet.bp
+
+		local box : S.box XH 0 df.leftSB df.rightSB
+		local rightHalfBox : box.withLeft [box.xp 0.375]
+		local rightStroke : include : fraktur-stroke S
+			corner rightHalfBox.right [post@slope SlopeB]
+			corner [rightHalfBox.xp PHexTop] rightHalfBox.top
+			straight.down.end rightHalfBox.left [pre@slope : 2 * SlopeA]
+		local leftStroke : include : fraktur-stroke S
+			corner (post@ <-> DecoSizeX) (post@ <-> DecoSizeY)
+			[ccurl.sr SlopeB].start (post@ <-> 0.5 * DecoSizeX) box.top
+			flat rightHalfBox.left [rightStroke.last].y
+			RTBottom box (13/16)
+
+	create-glyph "frak/t" 0x1D531 : glyph-proc
+		local df : include : LowerDf 1
+		include : df.markSet.bp
+
+		local box : S.box Ascender 0 df.leftSB df.rightSB
+		local xBox : T.box XH 0 df.leftSB df.rightSB
+
+		include : fraktur-stroke S
+			corner (post@ <+> DecoSizeX) box.top
+			corner (box.xMid - 0.5 * TBalance) (pre@ <-> DecoSizeY)
+			RTBottom box 0.875
+
+		include : fraktur-stroke F
+			corner box.left  xBox.top
+			corner box.right xBox.top

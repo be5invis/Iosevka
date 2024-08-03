@@ -7,6 +7,19 @@ define-operator "--" 890 'right' : syntax-rules
 define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
+### The operator indicating a "delay"
+define-operator prefix "~~~"  : syntax-rules
+	`(~~~ @x) : dirty `[decor@ @x]
+
+### This operator is a method variant of (+)
+define-operator infix "<+>" 350 'left' : syntax-rules
+	`(@l <+> @r) : dirty `[@l.op_add @r]
+
+### This operator is a method variant of (-)
+define-operator infix "<->" 350 'left' : syntax-rules
+	`(@l <-> @r) : dirty `[@l.op_sub @r]
+
+
 ### Macro for identity match
 define-macro Just : begin
 	local m : syntax-rules
@@ -275,10 +288,14 @@ define-macro glyph-block : syntax-rules
 			AdviceGlottalStopArchDepth StrokeWidthBlend ArchDepthAOf ArchDepthBOf SmoothAdjust
 			MidJutSide MidJutCenter compositeBaseAnchors YSmoothMidR YSmoothMidL HSwToV
 			NarrowUnicodeT WideUnicodeT VERY-FAR TINY]
-		define spiroFnImports `[g4 g2 corner flat curl close end straight widths
-			disable-contrast heading unimportant important alsoThru alsoThruThem bezControls
-			quadControls archv arcvh dispiro spiro-outline CursiveBuilder]
-		define booleFnImports `[union intersection difference]
+		define spiroFnImports `[g4 g2 corner flat curl virt close end straight g2c cg2 flatc ccurl
+			widths disable-contrast heading unimportant important alsoThru alsoThruThem bezControls
+			quadControls archv arcvh dispiro spiro-outline spiro-collect]
+
+		define booleFnImports `[union intersection difference with-knockout]
+
+		define drvCoordImports `[pre@ post@ mix@ mix@rev pre@slope post@slope min@ max@
+			decor@ decor@@ decor@@@ pre@tang-in post@tang-in pre@tang-out post@tang-out]
 
 		dirty `[$GlyphBlocks$.push : lambda [$Capture_Ext$] : begin \\
 			$Capture_Ext$.$Exec$.defineGlyphBlock $Capture_Ext$ @blockName
@@ -287,6 +304,7 @@ define-macro glyph-block : syntax-rules
 					define [object @::[metricImports.filter  : lambda [x] variableSet.(x)]] $Capture$.Metrics
 					define [object @::[spiroFnImports.filter : lambda [x] variableSet.(x)]] $Capture$.SpiroFns
 					define [object @::[booleFnImports.filter : lambda [x] variableSet.(x)]] $Capture$.BooleFns
+					define [object @::drvCoordImports] $Capture$.DerivedCoordinateFns
 
 					* @body
 

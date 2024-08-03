@@ -13,6 +13,7 @@ const TAG_END_STRUCT_TYPE = 0x12340008;
 const TAG_TYPED_POINT = 0x12340010;
 const TAG_GIZMO = 0x12340011;
 const TAG_LIST_LENGTH = 0x12340012;
+const POINT = 0x12340013;
 
 const TAG_EMBED_BEGIN = 0x12340020;
 const TAG_EMBED_END = 0x12340021;
@@ -88,6 +89,12 @@ export class Hasher {
 		return this;
 	}
 
+	point(z) {
+		this.u32(TAG_TYPED_POINT);
+		this.f64(z.x);
+		this.f64(z.y);
+		return this;
+	}
 	typedPoint(z) {
 		this.u32(TAG_TYPED_POINT);
 		this.u32(z.type);

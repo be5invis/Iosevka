@@ -2,8 +2,9 @@ $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback boole boolePn] from "@iosevka/util"
 import [Transform] from "@iosevka/geometry/transform"
-import [Interpolator] from "@iosevka/geometry/spiro-control"
+import [Interpolator WithKnotProxy] from "@iosevka/geometry/spiro-control"
 import [RadicalGeometry StrokeGeometry RemoveHolesGeometry] from "@iosevka/geometry"
+import [CMixCoord CopyBackKnotProxy] from "@iosevka/font-kits/derived-coordinates"
 
 glyph-module
 
@@ -55,30 +56,42 @@ glyph-block CommonShapes : begin
 	define [MaskLeft  x] : Rect VERY-FAR (-VERY-FAR) (-VERY-FAR) x
 	glyph-block-export MaskRight
 	define [MaskRight x] : Rect VERY-FAR (-VERY-FAR) x VERY-FAR
+
 	glyph-block-export MaskAboveLine
-	define [MaskAboveLine x1 y1 x2 y2] : spiro-outline
-		corner x1 (+VERY-FAR)
-		corner x1 y1
-		corner x2 y2
-		corner x2 (+VERY-FAR)
+	define [MaskAboveLine x1 y1 x2 y2 _ext] : begin
+		local ext : fallback _ext 0
+		return : spiro-outline
+			corner [mix x1 x2 (-ext)]    (+VERY-FAR)
+			corner [mix x1 x2 (-ext)]    [mix y1 y2 (-ext)]
+			corner [mix x1 x2 (1 + ext)] [mix y1 y2 (1 + ext)]
+			corner [mix x1 x2 (1 + ext)] (+VERY-FAR)
+
 	glyph-block-export MaskBelowLine
-	define [MaskBelowLine x1 y1 x2 y2] : spiro-outline
-		corner x1 (-VERY-FAR)
-		corner x1 y1
-		corner x2 y2
-		corner x2 (-VERY-FAR)
+	define [MaskBelowLine x1 y1 x2 y2 _ext] : begin
+		local ext : fallback _ext 0
+		return : spiro-outline
+			corner [mix x1 x2 (-ext)]    (-VERY-FAR)
+			corner [mix x1 x2 (-ext)]    [mix y1 y2 (-ext)]
+			corner [mix x1 x2 (1 + ext)] [mix y1 y2 (1 + ext)]
+			corner [mix x1 x2 (1 + ext)] (-VERY-FAR)
+
 	glyph-block-export MaskLeftLine
-	define [MaskLeftLine  x1 y1 x2 y2] : spiro-outline
-		corner (-VERY-FAR) y1
-		corner x1 y1
-		corner x2 y2
-		corner (-VERY-FAR) y2
+	define [MaskLeftLine  x1 y1 x2 y2 _ext] : begin
+		local ext : fallback _ext 0
+		spiro-outline
+			corner (-VERY-FAR)           [mix y1 y2 (-ext)]
+			corner [mix x1 x2 (-ext)]    [mix y1 y2 (-ext)]
+			corner [mix x2 x2 (1 + ext)] [mix y1 y2 (1 + ext)]
+			corner (-VERY-FAR)           [mix y1 y2 (1 + ext)]
+
 	glyph-block-export MaskRightLine
-	define [MaskRightLine x1 y1 x2 y2] : spiro-outline
-		corner (+VERY-FAR) y1
-		corner x1 y1
-		corner x2 y2
-		corner (+VERY-FAR) y2
+	define [MaskRightLine x1 y1 x2 y2 _ext] : begin
+		local ext : fallback _ext 0
+		spiro-outline
+			corner (+VERY-FAR)           [mix y1 y2 (-ext)]
+			corner [mix x1 x2 (-ext)]    [mix y1 y2 (-ext)]
+			corner [mix x2 x2 (1 + ext)] [mix y1 y2 (1 + ext)]
+			corner (+VERY-FAR)           [mix y1 y2 (1 + ext)]
 
 	glyph-block-export HalfRectTriangle
 	define [HalfRectTriangle x1 y1 x2 y2] : spiro-outline
@@ -411,13 +424,15 @@ glyph-block CommonShapes : begin
 
 	define nHookSegments 12
 	define [HookShape toStraight toFinish isStart args] : begin
-		local [object y sw swTerminal isTail noSwash] args
+		local [object yRef sw swTerminal isTail noSwash overshoot] args
 
-		local atBottom : toStraight.y > y
+		local atBottom : toStraight.y > yRef
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
-		local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
+		local dtu : if isStart (yRef > toFinish.y) (yRef < toFinish.y)
 		local doSwash : !noSwash && !isStart && atBottom && (para.isItalic || isTail) && [if (para.slopeAngle >= 0) ltr [not ltr]]
 		local superness DesignParameters.superness
+
+		local y : yRef + [if (yRef > toFinish.y) (-1) 1] * overshoot
 
 		# Adjust terminal's position if necessary
 		toFinish.x = toFinish.x + OXHook * [if ltr (-1) 1] * [if isStart (-1) 1]
@@ -434,7 +449,7 @@ glyph-block CommonShapes : begin
 		local mixRatio : determineMixR w v u sw doSwash
 		local mx : [mix toStraight.x toFinish.x mixRatio] + [if atBottom 1 (-1)] * 0.75 * CorrectionOMidX * sw
 		local keyKnotDirection : if ltr Rightward Leftward
-		local extraSlope : [if ltr 1 (-1)] * 0.25 * (sw - swTerminal) / sw
+		local extraSlope : [if ltr 1 (-1)] * 0.5 * (sw - swTerminal) / sw
 		local finalTurnSlope : keyKnotDirection.x + extraSlope - [if ltr 1 (-1)] * 0.5 * TanSlope
 		local keyKnot : g4.[if ltr "right" "left"].mid
 			begin mx
@@ -498,6 +513,9 @@ glyph-block CommonShapes : begin
 	define [hookEndBlender before after args] : begin
 		return : HookShape before after false args
 
+	define [hookProxy args] : begin
+		return : new CopyBackKnotProxy [g4 [new CMixCoord 0.5] args.yRef] args 2
+
 	glyph-block-export hookstart
 	define flex-params [hookstart] : begin
 		local-parameter : y
@@ -505,8 +523,9 @@ glyph-block CommonShapes : begin
 		local-parameter : swTerminal     -- sw
 		local-parameter : isTail         -- false
 		local-parameter : noSwash        -- false
-		return : Interpolator hookStartBlender
-			object y sw swTerminal isTail noSwash
+		local-parameter : o              -- O
+		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
+		return : WithKnotProxy [hookProxy args] : Interpolator hookStartBlender args
 
 	glyph-block-export hookend
 	define flex-params [hookend] : begin
@@ -515,8 +534,9 @@ glyph-block CommonShapes : begin
 		local-parameter : swTerminal     -- sw
 		local-parameter : isTail         -- false
 		local-parameter : noSwash        -- false
-		return : Interpolator hookEndBlender
-			object y sw swTerminal isTail noSwash
+		local-parameter : o              -- O
+		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
+		return : WithKnotProxy [hookProxy args] : Interpolator hookEndBlender args
 
 	glyph-block-export arch
 	define arch : namespace
@@ -550,12 +570,40 @@ glyph-block CommonShapes : begin
 				if args.rtl g2.left.mid g2.right.mid
 			return : knotType (args.x + italicAdj) (args.y + overshoot) af
 
-		define [mixR w v u sw] : begin
-			if (w < v) : return : 1 - [mixR v w u sw]
-			local superness DesignParameters.superness
-			local r : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) superness]) (1 / superness)] + 1)
-			set r : 0.5 + (r - 0.5) * (v + w) / (u * 2)
-			return r
+		define [superSin angle superness] : begin
+			if [not angle] : return 0
+			local s : Math.sin (angle * Math.PI / 180)
+			local sign : if (s < 0) (-1) 1
+			return : sign * [Math.pow [Math.abs s] (2 / superness)]
+
+		define [superCos angle superness] : begin
+			if [not angle] : return 1
+			local c : Math.cos (angle * Math.PI / 180)
+			local sign : if (c < 0) (-1) 1
+			return : sign * [Math.pow [Math.abs c] (2 / superness)]
+
+		define [mixR w angW v angV u] : begin
+			if (w < v) : return : 1 - [mixR v angV w angW u]
+
+			local super DesignParameters.superness
+
+			if (angV != nothing && angW != nothing)
+			: then : begin
+				local radV : v / (1 - [superSin angV super])
+				local radW : w / (1 - [superSin angW super])
+				local chrV : radV * [superCos angV super]
+				local chrW : radW * [superCos angW super]
+				return : chrW / (chrV + chrW)
+			: else : begin
+				local r : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) super]) (1 / super)] + 1)
+				set r : 0.5 + (r - 0.5) * (v + w) / (u * 2)
+				return r
+
+		define [archBlenderProxy args] : begin
+			local p : [if args.compact g2 g4]
+				new CMixCoord [fallback args.p 0.5] 0 args.mockPre args.mockPost
+				begin args.y
+			return : new CopyBackKnotProxy p args 2
 
 		define [archBlender _before _after args] : begin
 			local before : fallback args.mockPre _before
@@ -564,8 +612,7 @@ glyph-block CommonShapes : begin
 			local u : Math.abs (after.x - before.x)
 			local v : Math.abs (after.y - args.y)
 			local w : Math.abs (before.y - args.y)
-
-			local mixRatio : mixR w v u args.sw
+			local mixRatio : mixR w args.anglePre v args.anglePost u
 
 			set args.x : mix before.x after.x [fallback args.p mixRatio]
 			set args.rtl : before.x > after.x
@@ -582,14 +629,16 @@ glyph-block CommonShapes : begin
 			local-parameter : sw 		   -- Stroke
 			local-parameter : compact      -- false
 			local-parameter : o 		   -- O
+			local-parameter : anglePre     -- nothing
+			local-parameter : anglePost    -- nothing
 			local-parameter : swBefore	   -- sw
 			local-parameter : swAfter	   -- sw
 			local-parameter : mockPre      -- nothing
 			local-parameter : mockPost     -- nothing
-			local-parameter : blendPre     -- [arcvh]
-			local-parameter : blendPost    -- [archv]
-			return : Interpolator archBlender
-				object [lhs true] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost
+			local-parameter : blendPre     -- [if anglePre nothing [arcvh]]
+			local-parameter : blendPost    -- [if anglePost nothing [archv]]
+			local args : object [lhs true] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost anglePre anglePost
+			return : WithKnotProxy [archBlenderProxy args] : Interpolator archBlender args
 
 		export : define flex-params [rhs] : begin
 			local-parameter : y
@@ -597,14 +646,16 @@ glyph-block CommonShapes : begin
 			local-parameter : sw 		   -- Stroke
 			local-parameter : compact      -- false
 			local-parameter : o 		   -- O
+			local-parameter : anglePre     -- nothing
+			local-parameter : anglePost    -- nothing
 			local-parameter : swBefore	   -- sw
 			local-parameter : swAfter	   -- sw
 			local-parameter : mockPre      -- nothing
 			local-parameter : mockPost     -- nothing
-			local-parameter : blendPre     -- [arcvh]
-			local-parameter : blendPost    -- [archv]
-			return : Interpolator archBlender
-				object [lhs false] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost
+			local-parameter : blendPre     -- [if anglePre nothing [arcvh]]
+			local-parameter : blendPost    -- [if anglePost nothing [archv]]
+			local args : object [lhs false] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost anglePre anglePost
+			return : WithKnotProxy [archBlenderProxy args] : Interpolator archBlender args
 
 		foreach side {lhs rhs} : begin
 			set side.centerAt : object

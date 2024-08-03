@@ -1,0 +1,60 @@
+$$include '../../meta/macros.ptl'
+
+import [mix] from "@iosevka/util"
+
+glyph-module
+
+glyph-block LetterLike-Fraktur-Lower-IJL : begin
+	glyph-block-import Common-Derivatives
+	glyph-block-import CommonShapes
+	glyph-block-import Letter-Shared : CreateAccentedComposition
+	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
+	glyph-block-import Mark-Above : StdAnchors aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
+	glyph-block-import LetterLike-Fraktur-Common : LowerDf S F T fraktur-stroke change-pen
+	glyph-block-import LetterLike-Fraktur-Common : DecoSizeX DecoSizeY SlopeA SlopeB
+	glyph-block-import LetterLike-Fraktur-Common : Wave PHexTop PHexBot LTDecoration RBDecoration
+
+	create-glyph "frak/tittleAbove" : glyph-proc
+		set-width 0
+		include : StdAnchors.narrow
+		include : spiro-outline
+			corner (markMiddle + [mix (-DotRadius) (+DotRadius) PHexBot]) (aboveMarkMid - DotRadius)
+			~~~ [curl [pre@tang-out 1] [pre@tang-out SlopeA]]
+			# g2  (markMiddle + 0.5 * DotRadius) aboveMarkMid
+			~~~ [flat [post@tang-out 1] [post@tang-out SlopeB]]
+			corner (markMiddle + [mix (-DotRadius) (+DotRadius) PHexTop]) (aboveMarkMid + DotRadius)
+			~~~ [curl [pre@tang-in 1] [pre@tang-in SlopeA]]
+			# g2  (markMiddle - 0.5 * DotRadius) aboveMarkMid
+			~~~ [flat [post@tang-in 1] [post@tang-in SlopeB]]
+			close
+
+	create-glyph "frak/dotlessi" : glyph-proc
+		local df : include : LowerDf para.diversityI
+		include : df.markSet.e
+
+		local box : S.box XH 0 df.leftSB df.rightSB
+		include : fraktur-stroke S
+			LTDecoration box.xMid box.top
+			RBDecoration box.xMid box.bot
+
+	create-glyph "frak/dotlessj" : glyph-proc
+		local df : include : LowerDf para.diversityI
+		include : df.markSet.p
+
+		local box : S.box XH Descender df.leftSB df.rightSB
+		include : fraktur-stroke S
+			LTDecoration box.xMid box.top
+			corner pre@ [post@slope SlopeA]
+			corner box.left box.bot
+
+	CreateAccentedComposition 'frak/i' 0x1D526 'frak/dotlessi' 'frak/tittleAbove'
+	CreateAccentedComposition 'frak/j' 0x1D527 'frak/dotlessj' 'frak/tittleAbove'
+
+	create-glyph "frak/l" 0x1D529 : glyph-proc
+		local df : include : LowerDf para.diversityI
+		include : df.markSet.b
+
+		local box : S.box Ascender 0 df.leftSB df.rightSB
+		include : fraktur-stroke S
+			LTDecoration box.xMid box.top
+			RBDecoration box.xMid box.bot
