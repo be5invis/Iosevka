@@ -25,10 +25,10 @@ export function SetupBuilders(_bindings) {
 		"pre@tang-in": s => new CDeltaPre(-TINY * s),
 		"post@tang-in": s => new CDeltaPost(-TINY * s),
 
-		// mix@: mix between pre and post point's X or Y coordinates
-		// usage [mix@ proportion] or [mix@ proportion delta]
-		"mix@": (p, delta) => new CMixCoord(p, delta),
-		"mix@rev": (p, delta) => new CMixCoord(1 - p, delta),
+		// pre@mix@post: mix between pre and post point's X or Y coordinates
+		// usage [pre@mix@post proportion] or [pre@mix@post proportion delta]
+		"pre@mix@post": (p, delta) => new CMixCoord(p, delta),
+		"post@mix@pre": (p, delta) => new CMixCoord(1 - p, delta),
 
 		// pre@slope, post@slope: Get the coordiante using the pre/post point's coordinate and a
 		// slope. An optional delta can be added to the result. See the definitions for more
