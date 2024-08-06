@@ -77,7 +77,7 @@ glyph-block Autobuild-Transformed-Shared : begin
 
 	glyph-block-export ToSuperscript
 	define [ToSuperscript div] : glyph-proc
-		local df : DivFrame df
+		local df : DivFrame div
 		include [Ungizmo] true
 		include [Translate (-df.middle) (-CAP)] true
 		include [Scale ToSuperscript.crowdAdjScale] true
@@ -88,7 +88,7 @@ glyph-block Autobuild-Transformed-Shared : begin
 
 	glyph-block-export ToSubscript
 	define [ToSubscript div] : glyph-proc
-		local df : DivFrame df
+		local df : DivFrame div
 		include [Ungizmo] true
 		include [Translate (-df.middle) 0] true
 		include [Scale ToSubscript.crowdAdjScale] true
@@ -368,16 +368,15 @@ glyph-block Autobuild-Transformed : begin
 		local miniatureFont : Miniature pendingGlyphs
 			crowd  -- ToSuperscript.crowd
 			scale  -- ToSuperscript.crowdAdjScale
-			mono   -- true
+			# mono   -- true
 			sbscale -- 0.75
 		foreach { unicode glyphid fRelated } [items-of records]
 			if [not : query-glyph targetNameMap.(glyphid)] : begin
 				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
 					if [not : miniatureFont.queryByName glyphid] : begin
 						throw : new Error "Cannot find glyph \(glyphid)"
-					local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
 					include [miniatureFont.queryByName glyphid] AS_BASE ALSO_METRICS
-					include : ToSuperscript
+					include : ToSuperscript (currentGlyph.advanceWidth / Width)
 					IsSuperscript.set currentGlyph
 				if ([not fRelated] && gr) : gr.set [query-glyph glyphid] (targetNameMap.(glyphid))
 		link-relations relSets
@@ -476,14 +475,13 @@ glyph-block Autobuild-Transformed : begin
 		local miniatureFont : Miniature pendingGlyphs
 			crowd  -- ToSubscript.crowd
 			scale  -- ToSubscript.crowdAdjScale
-			mono   -- true
+			# mono   -- true
 			sbscale -- 0.75
 		foreach { unicode glyphid fRelated } [items-of records]
 			if [not : query-glyph targetNameMap.(glyphid)] : begin
 				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
-					local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
 					include [miniatureFont.queryByName glyphid] AS_BASE ALSO_METRICS
-					include : ToSubscript
+					include : ToSubscript (currentGlyph.advanceWidth / Width)
 					IsSubscript.set currentGlyph
 				if ([not fRelated] && gr) : gr.set [query-glyph glyphid] (targetNameMap.(glyphid))
 		link-relations relSets
