@@ -23,6 +23,9 @@ const BUILD = ".build";
 const DIST = "dist";
 const IMAGES = "images";
 
+const PACKAGES = "packages";
+const TOOLS = "tools";
+
 const IMAGE_TASKS = ".build/image-tasks";
 const GLYF_TTC = ".build/glyf-ttc";
 
@@ -321,8 +324,8 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		customLigationTags: bp.customLigationTags || null,
 		// Shape
 		shape: {
-			serifs: bp.serifs || null,
-			spacing: bp.spacing || null,
+			serifs: bp.serifs || "sans",
+			spacing: bp.spacing || "normal",
 			weight: sfi.shapeWeight,
 			width: sfi.shapeWidth,
 			slope: sfi.shapeSlope,
@@ -482,7 +485,7 @@ const DistUnhintedTTF = file.make(
 			// Ab-initio build
 			const cacheFileName =
 				`${Math.round(1000 * fi.shape.weight)}-${Math.round(1000 * fi.shape.width)}-` +
-				`${Math.round(3600 * fi.shape.slopeAngle)}`;
+				`${Math.round(3600 * fi.shape.slopeAngle)}-${fi.shape.serifs}`;
 			const cachePath = `${SHARED_CACHE}/${cacheFileName}.mpz`;
 			const cacheDiffPath = `${charMapPath.dir}/${fn}.cache.mpz`;
 
@@ -1288,7 +1291,7 @@ const ReleaseAncillary = task(`release:ancillary`, async target => {
 	await target.need(SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
 });
 const ReleaseArchives = task(`release:archives`, async target => {
-	const [collectPlans] = await target.need(CollectPlans, UtilScriptFiles);
+	const [collectPlans] = await target.need(CollectPlans, UtilScripts);
 
 	let goals = [];
 	for (const [cgr, plan] of Object.entries(collectPlans)) {
@@ -1300,7 +1303,7 @@ const ReleaseArchives = task(`release:archives`, async target => {
 });
 
 const ReleaseArchivesFor = task.group(`release:archives-for`, async (target, cgr) => {
-	const [version, collectPlans] = await target.need(Version, CollectPlans, UtilScriptFiles);
+	const [version, collectPlans] = await target.need(Version, CollectPlans, UtilScripts);
 	const plan = collectPlans[cgr];
 	if (!plan || !plan.inRelease) throw new Error(`CollectGroup ${cgr} is not in release.`);
 
@@ -1329,54 +1332,65 @@ const ReleaseArchivesFor = task.group(`release:archives-for`, async (target, cgr
 //////               Script Building                 //////
 ///////////////////////////////////////////////////////////
 
-const MARCOS = [
-	fu`packages/font-glyphs/src/meta/macros.ptl`,
-	fu`packages/font-otl/src/meta/macros.ptl`,
-];
-const ScriptsUnder = oracle.make(
-	(ext, dir) => `${ext}-scripts-under::${dir}`,
-	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target),
-);
-const UtilScriptFiles = computed("util-script-files", async target => {
-	const [mjs, md] = await target.need(ScriptsUnder("mjs", "tools"), ScriptsUnder("md", "tools"));
-	return [...mjs, ...md];
-});
-const ScriptFiles = computed.group("script-files", async (target, ext) => {
-	const [ss] = await target.need(ScriptsUnder(ext, `packages`));
-	return ss;
-});
-const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
-	const [ptl] = await target.need(ScriptFiles("ptl"));
-	return ptl.map(x => replaceExt(".mjs", x));
-});
-function replaceExt(extNew, file) {
-	return Path.posix.join(Path.dirname(file), Path.basename(file, Path.extname(file)) + extNew);
-}
-
-const CompiledJs = file.make(
-	p => p,
-	async (target, out) => {
-		const ptl = replaceExt(".ptl", out.full);
-		await target.need(MARCOS);
-		await target.need(sfu(ptl));
-		echo.action(echo.hl.command("Compile Script"), ptl);
-		await silently.run(PATEL_C, "--strict", "--esm", ptl, "-o", out.full);
-	},
-);
 const Scripts = task("scripts", async target => {
-	const [jsFromPtlList] = await target.need(JavaScriptFromPtl);
-	const [jsList] = await target.need(ScriptFiles("mjs"));
-	const jsFromPtlSet = new Set(jsFromPtlList);
+	const [jsFromPtlMap] = await target.need(JsFilesFromPtl);
+	const [jsList] = await target.need(FindScriptsUnder(`mjs`, PACKAGES));
+	const jsFromPtlSet = new Set(Object.keys(jsFromPtlMap));
 
 	let subGoals = [];
-	for (const js of jsFromPtlSet) subGoals.push(CompiledJs(js));
+	for (const js of jsFromPtlSet) subGoals.push(CompiledJsFromPtl(js));
 	for (const js of jsList) if (!jsFromPtlSet.has(js)) subGoals.push(sfu(js));
 	await target.need(subGoals);
 });
 const UtilScripts = task("util-scripts", async target => {
-	const [files] = await target.need(UtilScriptFiles);
-	await target.need(files.map(fu));
+	const [mjs] = await target.need(FindScriptsUnder("mjs", TOOLS));
+	const [md] = await target.need(FindScriptsUnder("md", TOOLS));
+	await target.need(mjs.map(fu), md.map(fu));
 });
+
+const FindScriptsUnder = oracle.make(
+	(ext, dir) => `${ext}-scripts-under::${dir}`,
+	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target),
+);
+
+const JsFilesFromPtl = computed("scripts-js-from-ptl", async target => {
+	const [ptl] = await target.need(FindScriptsUnder(`ptl`, PACKAGES));
+	return Object.fromEntries(ptl.map(compiledMjsPathFromPtlPath));
+});
+const MacroPtlFiles = computed("macro-ptl-files", async target => {
+	const [jsFromPtlMap] = await target.need(JsFilesFromPtl);
+	let macroGoals = [];
+	for (const [mjs, { isMacro, fromPath }] of Object.entries(jsFromPtlMap)) {
+		if (isMacro) macroGoals.push(sfu(fromPath));
+	}
+	await target.need(macroGoals);
+});
+function compiledMjsPathFromPtlPath(path) {
+	const dirName = Path.dirname(path);
+	const newDirName = dirName.replace(/packages\/([\w-]+)\/src(?=$|\/)/, "packages/$1/lib");
+	const newFileName = Path.basename(path, Path.extname(path)) + ".mjs";
+	const isMacro = Path.basename(path) === "macros.ptl";
+	return [
+		`${newDirName}/${newFileName}`,
+		{ isMacro, fromPath: path, oldOutPath: `${dirName}/${newFileName}` },
+	];
+}
+
+const CompiledJsFromPtl = file.make(
+	p => p,
+	async (target, out) => {
+		const [jsFromPtlMap] = await target.need(JsFilesFromPtl);
+		const ptl = jsFromPtlMap[out.full].fromPath;
+		const oldOutPath = jsFromPtlMap[out.full].oldOutPath;
+
+		await target.need(MacroPtlFiles, sfu(ptl));
+
+		echo.action(echo.hl.command("Compile Script"), ptl);
+		await Promise.all([rm(oldOutPath), rm(out.full)]); // Remove old output file
+		await target.need(de(Path.dirname(out.full))); // Create output directory
+		await silently.run(PATEL_C, "--strict", "--esm", ptl, "-o", out.full);
+	},
+);
 
 const Parameters = task(`meta:parameters`, async target => {
 	await target.need(
