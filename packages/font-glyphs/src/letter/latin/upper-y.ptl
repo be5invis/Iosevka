@@ -32,8 +32,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 			[Just SLAB-MOTION] : include sf.lt.outer
 			[Just SLAB-BASE] : include : HSerif.mb Middle bot MidJutSide
 
-	define [YShape bodyType slabType top bot] : glyph-proc
-		local cross : YCrossPos top bot
+	define [YShape] : with-params [bodyType slabType top bot [cross : YCrossPos top bot]] : glyph-proc
 		local maskLT : slabType == SLAB-ALL || slabType == SLAB-MOTION
 		local maskRT : slabType == SLAB-ALL
 
@@ -51,35 +50,29 @@ glyph-block Letter-Latin-Upper-Y : begin
 		include : HOverlayBar SB RightSB ([mix bot [YCrossPos CAP 0] 0.5] - OverlayStroke * ks)
 		include : HOverlayBar SB RightSB [mix bot [YCrossPos CAP 0] 1.0]
 
-	define [YHookLeftHookedStroke top bot] : begin
-		local cross : YCrossPos top bot
-		return : dispiro
-			widths.lhs
-			straight.right.start (SB - TailX / 3) (top - Stroke - O)
-			g4 (SB + TailX / 3) (top - TailY) [widths.lhs : AdviceStroke 2.75]
-			quadControls 0.55 0.7 32 unimportant
-			g4 (Middle - [HSwToV : 0.5 * Stroke]) cross [widths.lhs : AdviceStroke 3.5]
+	define [YHookLeftHookedStroke top bot cross] : dispiro
+		widths.lhs
+		straight.right.start (SB - TailX / 3) (top - Stroke - O)
+		g4 (SB + TailX / 3) (top - TailY) [widths.lhs : AdviceStroke 2.75]
+		quadControls 0.55 0.7 32 unimportant
+		g4 (Middle - [HSwToV : 0.5 * Stroke]) cross [widths.lhs : AdviceStroke 3.5]
 
-	define [YHookRightHookedStroke top bot] : begin
-		local cross : YCrossPos top bot
-		return : dispiro
-			widths.rhs
-			straight.left.start (RightSB + TailX / 3) (top - Stroke - O)
-			g4 (RightSB - TailX / 3) (top - TailY) [widths.rhs : AdviceStroke 2.75]
-			quadControls 0.55 0.7 32 unimportant
-			g4 (Middle + [HSwToV : 0.5 * Stroke]) cross [widths.rhs : AdviceStroke 3.5]
+	define [YHookRightHookedStroke top bot cross] : dispiro
+		widths.rhs
+		straight.left.start (RightSB + TailX / 3) (top - Stroke - O)
+		g4 (RightSB - TailX / 3) (top - TailY) [widths.rhs : AdviceStroke 2.75]
+		quadControls 0.55 0.7 32 unimportant
+		g4 (Middle + [HSwToV : 0.5 * Stroke]) cross [widths.rhs : AdviceStroke 3.5]
 
-	define [YHookTopShape bodyType slabType top bot] : glyph-proc
-		include : YShape bodyType slabType top bot
+	define [YHookTopShape] : with-params [bodyType slabType top bot [cross : YCrossPos top bot]] : glyph-proc
+		include : YShape bodyType slabType top bot cross
 		eject-contour 'strokeRT'
-		include : YHookRightHookedStroke top bot
+		include : YHookRightHookedStroke top bot cross
 
-	define [UpsilonHookedSymbolShape top bot] : glyph-proc
-		local cross : YCrossPos top bot
-
+	define [UpsilonHookedSymbolShape] : with-params [top bot [cross : YCrossPos top bot]] : glyph-proc
 		include : VBar.m Middle bot (cross + HalfStroke)
-		include : YHookLeftHookedStroke top bot
-		include : YHookRightHookedStroke top bot
+		include : YHookLeftHookedStroke top bot cross
+		include : YHookRightHookedStroke top bot cross
 
 	define YConfig : object
 		straightSerifless     { BODY-STRAIGHT SLAB-NONE   }
@@ -116,7 +109,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 		if (slabType !== SLAB-BASE) : begin
 			create-glyph "cyrl/ue.\(suffix)" : glyph-proc
 				include : MarkSet.p
-				include : YShape bodyType slabType XH Descender
+				include : YShape bodyType slabType XH Descender (cross -- 0)
 				include : YSlabs slabType XH Descender
 
 		if ((slabType === SLAB-NONE || slabType === SLAB-BASE) && bodyType === BODY-STRAIGHT) : begin

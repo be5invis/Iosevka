@@ -2414,6 +2414,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-upsilon-casual-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-upsilon-casual-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-upsilon = 'casual-serifed'</code>, <code>VXAF = 4</code></td></tr>
     <tr><td>Greek lower Upsilon (<code>υ</code>) with casual shape, and serifs (default for Slab)</td></tr>
     </table></details>
+  - Styles for `φ` (Greek lower Phi)
+    <details><summary>3 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-phi-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-phi = 'straight'</code>, <code>VXAG = 1</code></td></tr>
+    <tr><td>Greek lower Phi (<code>φ</code>) with straight shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-phi-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-phi = 'cursive'</code>, <code>VXAG = 2</code></td></tr>
+    <tr><td>Greek lower Phi (<code>φ</code>) with cursive shape (default)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-phi-neo-hellenic.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-neo-hellenic.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-phi = 'neo-hellenic'</code>, <code>VXAG = 3</code></td></tr>
+    <tr><td>Greek lower Phi (<code>ν</code>) with neo-hellenic shape</td></tr>
+    </table></details>
   - Styles for `χ` (Greek lower Chi)
     <details><summary>13 variants</summary>
     <table>
@@ -2443,6 +2453,18 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Chi (<code>χ</code>) with Semi-chancery shape with curly counter-leg, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-chancery.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-chancery.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'chancery'</code>, <code>cv78 = 13</code></td></tr>
     <tr><td>Greek lower Chi (<code>χ</code>) with Chancery shape</td></tr>
+    </table></details>
+  - Styles for `ψ` (Greek lower Psi)
+    <details><summary>4 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'serifless'</code>, <code>VXAH = 1</code></td></tr>
+    <tr><td>Greek lower Psi (<code>ψ</code>) without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'serifed'</code>, <code>VXAH = 2</code></td></tr>
+    <tr><td>Greek lower Psi (<code>ψ</code>) with serifs (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'flat-top-serifless'</code>, <code>VXAH = 3</code></td></tr>
+    <tr><td>Greek lower Psi (<code>ψ</code>) with flat top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'flat-top-serifed'</code>, <code>VXAH = 4</code></td></tr>
+    <tr><td>Greek lower Psi (<code>ψ</code>) with flat top, and serifs</td></tr>
     </table></details>
   - Styles for `а` (Cyrillic A)
     <details><summary>21 variants</summary>

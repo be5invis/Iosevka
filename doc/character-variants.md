@@ -2556,6 +2556,19 @@
 <td colspan="8"> </td>
 </tr>
 <tr>
+<td rowspan="2"><code>VXAG</code></td>
+<td><img src="../images/cv-lower-phi-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-straight.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-phi-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-cursive.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-phi-neo-hellenic.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-neo-hellenic.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
 <td rowspan="4"><code>cv78</code></td>
 <td><img src="../images/cv-lower-chi-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-chi-straight-unilateral-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-straight-unilateral-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -2591,6 +2604,21 @@
 <tr>
 <td>13</td>
 <td colspan="11"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>VXAH</code></td>
+<td><img src="../images/cv-lower-psi-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-psi-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-psi-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-psi-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
 </tr>
 <tr>
 <td rowspan="4"><code>cv79</code></td>

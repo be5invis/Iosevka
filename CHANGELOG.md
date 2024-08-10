@@ -1,5 +1,13 @@
 ## Modifications since last major version
 
+### 31.2.0
+
+* Add variant selectors for Greek lower Phi/Psi (`VXAG`, `VXAH`).
+* Optimize cross position for Cyrillic Lower Straight U (`U+04AF`, `U+04B1`).
+* Optimize glyph shape for `lower-gamma`.`straight` and `lower-gamma`.`curly`.
+* Optimize glyph shape for `U+1DF15`.
+
+
 ### 31.1.0
 
 * Add characters:
