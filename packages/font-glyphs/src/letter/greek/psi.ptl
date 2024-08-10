@@ -1,7 +1,8 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 import [DesignParameters] from "../../meta/aesthetics.mjs"
+import [MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -39,14 +40,20 @@ glyph-block Letter-Greek-Psi : begin
 		include : df.markSet.e
 		include : PsiBaseShape df 0 (XH * 0.3) XH XH SLAB false SLAB SLAB
 
+	define GrekLowerPsiConfig : SuffixCfg.weave
+		object # yBar
+			""                  Ascender
+			flatTop             XH
+		object # slab
+			serifless           false
+			serifed             true
 
-	create-glyph 'grek/psi' 0x3C8 : glyph-proc
-		local df : include : DivFrame para.diversityM 3
-		include : df.markSet.bp
-		include : PsiBaseShape df Descender 0 XH Ascender false false SLAB false
+	foreach { suffix { yBar slab } } [Object.entries GrekLowerPsiConfig] : do
+		create-glyph "grek/psi.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : if (yBar > XH) [df.markSet.bp] [df.markSet.p]
+			include : PsiBaseShape df Descender 0 XH yBar false false slab false
 
-	create-glyph 'cyrl/psi' 0x471 : glyph-proc
-		local df : include : DivFrame para.diversityM 3
-		include : df.markSet.p
-		include : PsiBaseShape df Descender 0 XH XH false false SLAB false
-
+	select-variant 'grek/psi' 0x3C8
+	link-reduced-variant 'grek/psi/sansSerif' 'grek/psi' MathSansSerif
+	select-variant 'cyrl/psi' 0x471 (shapeFrom -- 'grek/psi')
