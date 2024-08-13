@@ -10,6 +10,7 @@ glyph-block Letter-Latin-W : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateTurnedLetter
 	glyph-block-import Letter-Shared-Shapes : DiagTail SerifFrame VerticalHook
+	glyph-block-import Letter-Latin-Lower-M : EarlessRoundedDoubleArchSmallMShape
 	glyph-block-import Letter-Latin-Upper-M : MShape
 
 	define FORM-CURLY      0
@@ -269,6 +270,31 @@ glyph-block Letter-Latin-W : begin
 
 		include : VerticalHook.r df.rightSB (top - TailY - HalfStroke - O) TailX (-TailY)
 
+	define [WRounded df top bodyType slabType] : glyph-proc
+		include : new-glyph : glyph-proc
+			include : EarlessRoundedDoubleArchSmallMShape df top 0 (top * 0.4) 0
+			include : FlipAround (df.width / 2) (top / 2)
+
+		local sf : SerifFrame top 0 df.leftSB df.rightSB
+		include : match slabType
+			[Just SERIFS-AUTO]   : NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full
+			[Just SERIFS-ALL]    : composite-proc sf.lt.full sf.rt.full
+			[Just SERIFS-MOTION] : begin sf.lt.outer
+			___                  : glyph-proc
+
+	define [WHookTopRounded df top bodyType slabType] : glyph-proc
+		include : new-glyph : glyph-proc
+			include : EarlessRoundedDoubleArchSmallMShape df top (TailY + HalfStroke + O) (top * 0.4) 0
+			include : FlipAround (df.width / 2) (top / 2)
+
+		local sf : SerifFrame top 0 df.leftSB df.rightSB
+		include : match slabType
+			[Just SERIFS-AUTO]   : NeedSlab SLAB sf.lt.full
+			[Just SERIFS-ALL]    : begin sf.lt.full
+			[Just SERIFS-MOTION] : begin sf.lt.outer
+			___                  : glyph-proc
+
+		include : VerticalHook.r df.rightSB (top - TailY - HalfStroke - O) TailX (-TailY) (sw -- df.mvs)
 
 	define [WCursiveImplImpl fHookTop df top bodyType slabType] : glyph-proc
 		define fine : AdviceStroke 3.25 df.div
@@ -327,9 +353,10 @@ glyph-block Letter-Latin-W : begin
 			straightDoubleV                    { WShapeImpl   WHooktopShape   FORM-DOUBLE-V   }
 			straightFlatTop                    { WShapeImpl   WHooktopShape   FORM-FLAT-TOP   }
 			straightVerticalSides              { WVertSides   WVSHookTopShape FORM-STRAIGHT   }
+			roundedVerticalSides               { WRounded     WHookTopRounded FORM-CURLY      } 
 			curly                              { WShapeImpl   WHooktopShape   FORM-CURLY      }
 			cursive                            { WCursiveImpl WHookTopCursive FORM-CURLY      }
-			cyrlCapialOmega					   { WShapeImpl   WHooktopShape   FORM-CYRL-OMEGA }
+			cyrlCapialOmega                    { WShapeImpl   WHooktopShape   FORM-CYRL-OMEGA }
 			cyrlSmallOmega                     { WShapeImpl   WHooktopShape   FORM-CYRL-OMEGA }
 
 		# Serifs
