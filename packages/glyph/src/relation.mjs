@@ -137,7 +137,7 @@ export const Joining = {
 		glyph.related.joining = cls;
 	},
 	or(glyph, cls) {
-		Joining.set(glyph, cls | Joining.get(cls));
+		Joining.set(glyph, cls | Joining.get(glyph));
 	},
 	amendOtName(baseName, cl) {
 		switch (cl) {
