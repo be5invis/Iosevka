@@ -1,5 +1,13 @@
 ## Modifications since last major version
 
+### 31.3.0
+
+* Add `diagonal-tailed-cursive` variants for Cyrillic Lower Ef (`cv93`).
+* Add `rounded-vertical-sides` variants for Capital/Lower W (`cv32`, `cv57`).
+* Make Aile and Etoile use `straight` variants for `brace` and `guillemet`.
+* Prevent clipping of texture-extended glyphs in Kitty.
+
+
 ### 31.2.0
 
 * Add variant selectors for Greek lower Phi/Psi (`VXAG`, `VXAH`).
