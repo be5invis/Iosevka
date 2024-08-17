@@ -1001,7 +1001,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>V</code> with curly shape, and serifs</td></tr>
     </table></details>
   - Styles for `W`
-    <details><summary>18 variants</summary>
+    <details><summary>21 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-serifless'</code>, <code>cv32 = 1</code></td></tr>
     <tr><td><code>W</code> with standard, straight body; without serifs (default for Sans)</td></tr>
@@ -1034,11 +1034,17 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-asymmetric-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-asymmetric-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-asymmetric-serifed'</code>, <code>cv32 = 15</code></td></tr>
     <tr><td><code>W</code> with asymmetric shape, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-vertical-sides-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-vertical-sides-serifless'</code>, <code>cv32 = 16</code></td></tr>
-    <tr><td><code>W</code> with body shape with vertical sides; without serifs</td></tr>
+    <tr><td><code>W</code> with straight body shape with vertical sides; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-vertical-sides-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-vertical-sides-motion-serifed'</code>, <code>cv32 = 17</code></td></tr>
-    <tr><td><code>W</code> with body shape with vertical sides, and motion serifs</td></tr>
+    <tr><td><code>W</code> with straight body shape with vertical sides, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-vertical-sides-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-vertical-sides-serifed'</code>, <code>cv32 = 18</code></td></tr>
-    <tr><td><code>W</code> with body shape with vertical sides, and serifs</td></tr>
+    <tr><td><code>W</code> with straight body shape with vertical sides, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-rounded-vertical-sides-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'rounded-vertical-sides-serifless'</code>, <code>cv32 = 19</code></td></tr>
+    <tr><td><code>W</code> with rounded body shape with vertical sides; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-rounded-vertical-sides-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'rounded-vertical-sides-motion-serifed'</code>, <code>cv32 = 20</code></td></tr>
+    <tr><td><code>W</code> with rounded body shape with vertical sides, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-rounded-vertical-sides-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'rounded-vertical-sides-serifed'</code>, <code>cv32 = 21</code></td></tr>
+    <tr><td><code>W</code> with rounded body shape with vertical sides, and serifs</td></tr>
     </table></details>
   - Styles for `X`
     <details><summary>8 variants</summary>
@@ -1821,7 +1827,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>v</code> with cursive body, and serifs</td></tr>
     </table></details>
   - Styles for `w`
-    <details><summary>20 variants</summary>
+    <details><summary>23 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-serifless'</code>, <code>cv57 = 1</code></td></tr>
     <tr><td><code>w</code> with standard, straight body; without serifs (default for Sans)</td></tr>
@@ -1836,11 +1842,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'curly-serifed'</code>, <code>cv57 = 6</code></td></tr>
     <tr><td><code>w</code> with curly body, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-vertical-sides-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-vertical-sides-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-vertical-sides-serifless'</code>, <code>cv57 = 7</code></td></tr>
-    <tr><td><code>w</code> with body shape with vertical sides; without serifs</td></tr>
+    <tr><td><code>w</code> with straight body shape with vertical sides; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-vertical-sides-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-vertical-sides-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-vertical-sides-motion-serifed'</code>, <code>cv57 = 8</code></td></tr>
-    <tr><td><code>w</code> with body shape with vertical sides, and motion serifs</td></tr>
+    <tr><td><code>w</code> with straight body shape with vertical sides, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-vertical-sides-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-vertical-sides-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-vertical-sides-serifed'</code>, <code>cv57 = 9</code></td></tr>
-    <tr><td><code>w</code> with body shape with vertical sides, and serifs</td></tr>
+    <tr><td><code>w</code> with straight body shape with vertical sides, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-flat-top-serifless'</code>, <code>cv57 = 10</code></td></tr>
     <tr><td><code>w</code> with straight body shape that the middle is forced to be aligned the top; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-flat-top-motion-serifed'</code>, <code>cv57 = 11</code></td></tr>
@@ -1863,6 +1869,12 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>w</code> with cursive shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-cursive-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-cursive-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'cursive-serifed'</code>, <code>cv57 = 20</code></td></tr>
     <tr><td><code>w</code> with cursive shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-rounded-vertical-sides-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'rounded-vertical-sides-serifless'</code>, <code>cv57 = 21</code></td></tr>
+    <tr><td><code>w</code> with rounded body shape with vertical sides; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-rounded-vertical-sides-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'rounded-vertical-sides-motion-serifed'</code>, <code>cv57 = 22</code></td></tr>
+    <tr><td><code>w</code> with rounded body shape with vertical sides, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-rounded-vertical-sides-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'rounded-vertical-sides-serifed'</code>, <code>cv57 = 23</code></td></tr>
+    <tr><td><code>w</code> with rounded body shape with vertical sides, and serifs</td></tr>
     </table></details>
   - Styles for `x`
     <details><summary>14 variants</summary>
@@ -2312,51 +2324,51 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-lambda-curly-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-lambda-curly-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-lambda = 'curly-tri-serifed'</code>, <code>cv72 = 8</code></td></tr>
     <tr><td>Greek capital Lambda (<code>Λ</code>) with curly shape, and serifs at both top and base</td></tr>
     </table></details>
-  - Styles for `λ` (Greek small Lambda)
+  - Styles for `λ` (Greek lower Lambda)
     <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'straight'</code>, <code>cv73 = 1</code></td></tr>
-    <tr><td>More-straight Greek small Lambda (<code>λ</code>) (default for Sans Upright, Sans Italic, Slab Italic)</td></tr>
+    <tr><td>More-straight Greek lower Lambda (<code>λ</code>) (default for Sans Upright, Sans Italic, Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-straight-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-straight-turn.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'straight-turn'</code>, <code>cv73 = 2</code></td></tr>
-    <tr><td>Greek small Lambda (<code>λ</code>) with straight upper and a tail turns leftward (default for Slab Upright)</td></tr>
+    <tr><td>Greek lower Lambda (<code>λ</code>) with straight upper and a tail turns leftward (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-tailed-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-tailed-turn.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'tailed-turn'</code>, <code>cv73 = 3</code></td></tr>
-    <tr><td>More curly Greek small Lambda (<code>λ</code>), with a tail turns leftward at top and a tail turns right at bottom-right</td></tr>
+    <tr><td>More curly Greek lower Lambda (<code>λ</code>), with a tail turns leftward at top and a tail turns right at bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-curly.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'curly'</code>, <code>cv73 = 4</code></td></tr>
-    <tr><td>More curly Greek small Lambda (<code>λ</code>), like Iosevka 2.x</td></tr>
+    <tr><td>More curly Greek lower Lambda (<code>λ</code>), like Iosevka 2.x</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-curly-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-curly-turn.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'curly-turn'</code>, <code>cv73 = 5</code></td></tr>
-    <tr><td>More curly Greek small Lambda (<code>λ</code>), like Iosevka 2.x, with a tail turns leftward</td></tr>
+    <tr><td>More curly Greek lower Lambda (<code>λ</code>), like Iosevka 2.x, with a tail turns leftward</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-curly-tailed-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-curly-tailed-turn.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'curly-tailed-turn'</code>, <code>cv73 = 6</code></td></tr>
-    <tr><td>More curly Greek small Lambda (<code>λ</code>), with a tail turns leftward at top, a tail turns right at bottom-right, and curly bottom-left leg</td></tr>
+    <tr><td>More curly Greek lower Lambda (<code>λ</code>), with a tail turns leftward at top, a tail turns right at bottom-right, and curly bottom-left leg</td></tr>
     </table></details>
-  - Styles for `μ` (Greek small Mu)
+  - Styles for `μ` (Greek lower Mu)
     <details><summary>13 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-serifless'</code>, <code>cv74 = 1</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothed shape; without serifs</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with toothed shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-bottom-right-serifed'</code>, <code>cv74 = 2</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothed shape, and serif at bottom-right</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with toothed shape, and serif at bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-motion-serifed'</code>, <code>cv74 = 3</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with toothed shape, and motion serifs at top-left and bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothed-serifed'</code>, <code>cv74 = 4</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothed shape, and serifs</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with toothed shape, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'tailed-serifless'</code>, <code>cv74 = 5</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with tailed shape; without serifs (default for Sans)</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with tailed shape; without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-tailed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-tailed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'tailed-motion-serifed'</code>, <code>cv74 = 6</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with tailed shape, and motion serifs at top-left and bottom-right (default for Slab Italic)</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with tailed shape, and motion serifs at top-left and bottom-right (default for Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'tailed-serifed'</code>, <code>cv74 = 7</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with tailed shape, and serifs (default for Slab Upright)</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with tailed shape, and serifs (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothless-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothless-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothless-corner-serifless'</code>, <code>cv74 = 8</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothless (corner bottom-right) shape; without serifs</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with toothless (corner bottom-right) shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothless-corner-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothless-corner-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothless-corner-motion-serifed'</code>, <code>cv74 = 9</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothless (corner bottom-right) shape, and motion serifs at top-left and bottom-right</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with toothless (corner bottom-right) shape, and motion serifs at top-left and bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothless-corner-serifed'</code>, <code>cv74 = 10</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothless (corner bottom-right) shape, and serifs</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with toothless (corner bottom-right) shape, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothless-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothless-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothless-rounded-serifless'</code>, <code>cv74 = 11</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothless (rounded) shape; without serifs</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with toothless (rounded) shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothless-rounded-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothless-rounded-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothless-rounded-motion-serifed'</code>, <code>cv74 = 12</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothless (rounded) shape, and motion serifs at top-left and bottom-right</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with toothless (rounded) shape, and motion serifs at top-left and bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-mu-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-mu-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-mu = 'toothless-rounded-serifed'</code>, <code>cv74 = 13</code></td></tr>
-    <tr><td>Greek small Mu (<code>μ</code>) with toothless (rounded) shape, and serifs</td></tr>
+    <tr><td>Greek lower Mu (<code>μ</code>) with toothless (rounded) shape, and serifs</td></tr>
     </table></details>
   - Styles for `ν` (Greek lower Nu)
     <details><summary>3 variants</summary>
@@ -2422,7 +2434,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-phi-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-phi = 'cursive'</code>, <code>VXAG = 2</code></td></tr>
     <tr><td>Greek lower Phi (<code>φ</code>) with cursive shape (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-phi-neo-hellenic.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-neo-hellenic.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-phi = 'neo-hellenic'</code>, <code>VXAG = 3</code></td></tr>
-    <tr><td>Greek lower Phi (<code>ν</code>) with neo-hellenic shape</td></tr>
+    <tr><td>Greek lower Phi (<code>φ</code>) with neo-hellenic shape</td></tr>
     </table></details>
   - Styles for `χ` (Greek lower Chi)
     <details><summary>13 variants</summary>
@@ -2466,7 +2478,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'flat-top-serifed'</code>, <code>VXAH = 4</code></td></tr>
     <tr><td>Greek lower Psi (<code>ψ</code>) with flat top, and serifs</td></tr>
     </table></details>
-  - Styles for `а` (Cyrillic A)
+  - Styles for `а` (Cyrillic Lower A)
     <details><summary>21 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-a-double-storey-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-double-storey-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-a = 'double-storey-serifless'</code>, <code>cv79 = 1</code></td></tr>
@@ -2512,7 +2524,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-a-single-storey-earless-rounded-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-earless-rounded-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-a = 'single-storey-earless-rounded-tailed'</code>, <code>cv79 = 21</code></td></tr>
     <tr><td>Cyrillic Lower A (<code>а</code>) with single-storey body, earless (rounded top-right), and curly tail</td></tr>
     </table></details>
-  - Styles for `в` (Cyrillic Ve)
+  - Styles for `в` (Cyrillic Lower Ve)
     <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-standard-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-standard-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'standard-serifless'</code>, <code>cv80 = 1</code></td></tr>
@@ -2546,7 +2558,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-zhe-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-zhe-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-zhe = 'cursive'</code>, <code>cv81 = 5</code></td></tr>
     <tr><td>Cyrillic Capital Zhe (<code>Ж</code>) with cursive legs</td></tr>
     </table></details>
-  - Styles for `ж` (Cyrillic Zhe)
+  - Styles for `ж` (Cyrillic Lower Zhe)
     <details><summary>5 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-zhe-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-zhe-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-zhe = 'straight'</code>, <code>cv82 = 1</code></td></tr>
@@ -2640,7 +2652,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-symmetric-connected-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-symmetric-connected-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'symmetric-connected-serifed'</code>, <code>cv85 = 20</code></td></tr>
     <tr><td>Cyrillic Capital Ka (<code>К</code>) with symmetric legs connected to the vertical bar, and serifs (default for Slab)</td></tr>
     </table></details>
-  - Styles for `к` (Cyrillic Ka)
+  - Styles for `к` (Cyrillic Lower Ka)
     <details><summary>20 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'straight-serifless'</code>, <code>cv86 = 1</code></td></tr>
@@ -2865,7 +2877,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower U (<code>у</code>) with cursive shape, a flat terminal hook, and serifs</td></tr>
     </table></details>
   - Styles for `ф` (Cyrillic Lower Ef)
-    <details><summary>8 variants</summary>
+    <details><summary>10 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ef-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ef = 'serifless'</code>, <code>cv93 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Ef (<code>ф</code>) with straight bar; without serifs (default for Sans Upright)</td></tr>
@@ -2883,6 +2895,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower Ef (<code>ф</code>) with split bowl, straight bar, and serifs at top and bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ef-split-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ef = 'split-cursive'</code>, <code>cv93 = 8</code></td></tr>
     <tr><td>Cyrillic Lower Ef (<code>ф</code>) with split bowl, and cursive bar</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ef-diagonal-tailed-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-diagonal-tailed-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ef = 'diagonal-tailed-cursive'</code>, <code>cv93 = 9</code></td></tr>
+    <tr><td>Cyrillic Lower Ef (<code>ф</code>) with cursive bar, and diagonal tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ef-split-diagonal-tailed-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-diagonal-tailed-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ef = 'split-diagonal-tailed-cursive'</code>, <code>cv93 = 10</code></td></tr>
+    <tr><td>Cyrillic Lower Ef (<code>ф</code>) with split bowl, and cursive bar, and diagonal tail</td></tr>
     </table></details>
   - Styles for `ч` (Cyrillic Lower Che)
     <details><summary>2 variants</summary>
@@ -3074,9 +3090,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="92"><img src="../images/cv-tittle-round.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-tittle-round.dark.svg#gh-dark-mode-only" width=64/></td><td><code>tittle = 'round'</code>, <code>VDAA = 1</code></td></tr>
-    <tr><td>Dots in i/j are round (default)</td></tr>
+    <tr><td>Dots in <code>i</code>/<code>j</code> are round (default)</td></tr>
     <tr><td rowspan="2" width="92"><img src="../images/cv-tittle-square.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-tittle-square.dark.svg#gh-dark-mode-only" width=64/></td><td><code>tittle = 'square'</code>, <code>VDAA = 2</code></td></tr>
-    <tr><td>Dots in i/j are square</td></tr>
+    <tr><td>Dots in <code>i</code>/<code>j</code> are square</td></tr>
     </table></details>
   - Styles for `öẋ` (Dot and Comma shape in diacritics)
     <details><summary>2 variants</summary>

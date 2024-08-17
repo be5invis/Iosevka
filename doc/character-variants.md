@@ -921,7 +921,10 @@
 <td><img src="../images/cv-capital-w-straight-vertical-sides-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-w-straight-vertical-sides-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-w-straight-vertical-sides-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="6"> </td>
+<td><img src="../images/cv-capital-w-rounded-vertical-sides-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-rounded-vertical-sides-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-rounded-vertical-sides-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="3"> </td>
 </tr>
 <tr>
 <td>13</td>
@@ -930,7 +933,10 @@
 <td>16</td>
 <td>17</td>
 <td>18</td>
-<td colspan="6"> </td>
+<td>19</td>
+<td>20</td>
+<td>21</td>
+<td colspan="3"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv33</code></td>
@@ -1884,7 +1890,10 @@
 <td><img src="../images/cv-w-straight-asymmetric-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-asymmetric-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-w-cursive-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-cursive-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-w-cursive-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-cursive-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="4"> </td>
+<td><img src="../images/cv-w-rounded-vertical-sides-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-rounded-vertical-sides-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-rounded-vertical-sides-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="1"> </td>
 </tr>
 <tr>
 <td>13</td>
@@ -1895,7 +1904,10 @@
 <td>18</td>
 <td>19</td>
 <td>20</td>
-<td colspan="4"> </td>
+<td>21</td>
+<td>22</td>
+<td>23</td>
+<td colspan="1"> </td>
 </tr>
 <tr>
 <td rowspan="4"><code>cv58</code></td>
@@ -3094,7 +3106,9 @@
 <td><img src="../images/cv-cyrl-ef-split-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-ef-split-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-ef-split-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-cursive.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="4"> </td>
+<td><img src="../images/cv-cyrl-ef-diagonal-tailed-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-diagonal-tailed-cursive.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-ef-split-diagonal-tailed-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ef-split-diagonal-tailed-cursive.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="2"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -3105,7 +3119,9 @@
 <td>6</td>
 <td>7</td>
 <td>8</td>
-<td colspan="4"> </td>
+<td>9</td>
+<td>10</td>
+<td colspan="2"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv94</code></td>
