@@ -1386,7 +1386,7 @@ const CompiledJsFromPtl = file.make(
 		await target.need(MacroPtlFiles, sfu(ptl));
 
 		echo.action(echo.hl.command("Compile Script"), ptl);
-		await Promise.all([rm(oldOutPath), rm(out.full)]); // Remove old output file
+		await rm(oldOutPath); // Remove old output file
 		await target.need(de(Path.dirname(out.full))); // Create output directory
 		await silently.run(PATEL_C, "--strict", "--esm", ptl, "-o", out.full);
 	},

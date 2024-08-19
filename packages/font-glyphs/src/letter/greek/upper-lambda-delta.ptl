@@ -1,0 +1,152 @@
+$$include '../../meta/macros.ptl'
+
+import [mix fallback SuffixCfg] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
+import [bitOr] from "@iosevka/util/mask-bit"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-Lambda-Delta : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateTurnedLetter
+	glyph-block-import Letter-Latin-Upper-A : AShape ASerifs
+	glyph-block-import Letter-Latin-V : VShapeOutline VShape
+
+	define SLAB-NONE     0
+	define SLAB-TOP      1
+	define SLAB-LEFT     2
+	define SLAB-RIGHT    4
+	define SLAB-CYRL-BGR 8
+
+	define LambeaConfig : SuffixCfg.weave
+		object
+			straight true
+			curly    false
+
+		object
+			serifless    SLAB-NONE
+			topSerifed   SLAB-TOP
+			baseSerifed  [bitOr SLAB-LEFT SLAB-RIGHT]
+			triSerifed   [bitOr SLAB-TOP SLAB-LEFT SLAB-RIGHT]
+
+	glyph-block-export LambdaShape
+	define [LambdaShape] : with-params [df fBarStraight slabKind top sw] : glyph-proc
+		include : VShape df fBarStraight top sw
+		include : FlipAround df.middle (top / 2)
+		include : ASerifs df top sw slabKind
+
+	define [LambdaMask] : with-params [df fBarStraight top sw] : glyph-proc
+		include : VShapeOutline df fBarStraight top sw
+		include : FlipAround df.middle (top / 2)
+
+	foreach { suffix { fStraightBar slabKind } } [Object.entries LambeaConfig] : do
+		create-glyph "grek/Lambda.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : LambdaShape
+				df           -- [DivFrame 1]
+				fBarStraight -- fStraightBar
+				slabKind     -- slabKind
+				top          -- CAP
+				sw           -- Stroke
+
+		create-glyph "grek/smcpLambda.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : LambdaShape
+				df           -- [DivFrame 1]
+				fBarStraight -- fStraightBar
+				slabKind     -- slabKind
+				top          -- XH
+				sw           -- Stroke
+
+		create-glyph "cyrl/el.BGR.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : LambdaShape
+				df           -- [DivFrame 1]
+				fBarStraight -- fStraightBar
+				slabKind     -- [bitOr slabKind SLAB-CYRL-BGR]
+				top          -- XH
+				sw           -- Stroke
+
+	select-variant 'grek/Lambda' 0x39B
+	link-reduced-variant 'grek/Lambda/sansSerif' 'grek/Lambda' MathSansSerif
+	select-variant 'grek/smcpLambda' 0x1D27 (follow -- 'grek/Lambda')
+
+	alias 'cyrl/El.BGR' null 'grek/Lambda'
+	select-variant 'cyrl/el.BGR' (follow -- 'grek/Lambda')
+
+	# Delta
+	glyph-block-export DeltaShape
+	define [DeltaShape] : with-params [df top sw fBarStraight] : union
+		LambdaShape
+			df -- df
+			fBarStraight -- fBarStraight
+			slabKind -- 0
+			top -- top
+			sw -- sw
+		intersection
+			HBar.b 0 df.width 0 sw
+			LambdaMask df fBarStraight top sw
+
+	define DeltaConfig : object
+		straight true
+		curly    false
+
+	foreach { suffix fBarStraight } [pairs-of DeltaConfig] : do
+		create-glyph "grek/Delta.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : DeltaShape
+				df -- [DivFrame 1]
+				fBarStraight -- fBarStraight
+				top -- CAP
+				sw -- Stroke
+
+		create-glyph "increment.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : DeltaShape
+				df -- [DivFrame 1]
+				fBarStraight -- fBarStraight
+				top -- CAP
+				sw -- OperatorStroke
+
+		create-glyph "increment.aplForm.\(suffix)" : glyph-proc
+			include : MarkSet.oper
+			define shapeHeight : OperTop - OperBot
+			include : DeltaShape
+				df -- [DivFrame 1]
+				fBarStraight -- fBarStraight
+				top -- shapeHeight
+				sw -- OperatorStroke
+			include : ApparentTranslate 0 (SymbolMid - shapeHeight / 2)
+
+		create-glyph "increment.aplThin.\(suffix)" : glyph-proc
+			include : MarkSet.oper
+			define shapeHeight : OperTop - OperBot
+			include : DeltaShape
+				df -- [DivFrame 1]
+				fBarStraight -- fBarStraight
+				top -- shapeHeight
+				sw -- [AdviceStroke 3.75]
+			include : ApparentTranslate 0 (SymbolMid - shapeHeight / 2)
+
+	define [CodeNonApl u] : if (para.variantSelector.__enableAplForm === 'enable') null u
+	define [CodeApl    u] : if (para.variantSelector.__enableAplForm === 'enable') u null
+
+	select-variant 'grek/Delta' 0x394
+	select-variant 'increment'      [CodeNonApl 0x2206] (follow -- 'grek/Delta')
+	select-variant 'increment.aplForm' [CodeApl 0x2206] (follow -- 'grek/Delta')
+	select-variant 'increment.aplThin'                  (follow -- 'grek/Delta')
+
+	CreateTurnedLetter 'nabla'      [CodeNonApl 0x2207] 'increment'         HalfAdvance (CAP / 2)
+	CreateTurnedLetter 'nabla.aplForm' [CodeApl 0x2207] 'increment.aplForm' HalfAdvance SymbolMid
+	CreateTurnedLetter 'nabla.aplThin' null             'increment.aplThin' HalfAdvance SymbolMid
+
+	derive-glyphs 'cyrl/De.BGR' null 'grek/Delta' : function [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		local descenderOverflow : if SLAB SideJut ((RightSB - SB) * 0.075)
+		local xCutLeft SB
+		local xCutRight RightSB
+		include : HBar.b (xCutLeft - descenderOverflow) (xCutRight + descenderOverflow) 0
+		include : VBar.l (xCutLeft - descenderOverflow) (-LongJut + HalfStroke) Stroke
+		include : VBar.r (xCutRight + descenderOverflow) (-LongJut + HalfStroke) Stroke
+
