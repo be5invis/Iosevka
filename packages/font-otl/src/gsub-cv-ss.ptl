@@ -58,15 +58,23 @@ class CvLookupManager
 		return lookup
 
 	public [linkDeps] : begin
-		if (this.decompositionLookup && this.altrenatesLookup) : begin
-			this.table.setDependency this.decompositionLookup this.altrenatesLookup
+		if this.decompositionLookup : begin
+			if this.altrenatesLookup : begin
+				this.table.setDependency this.decompositionLookup this.altrenatesLookup
+			foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
+				this.table.setDependency this.decompositionLookup lookupSS
+			foreach lookupCP [items-of this.cherryPickingLookups] : if lookupCP : begin
+				this.table.setDependency this.decompositionLookup lookupCP
+
 		if this.altrenatesLookup : begin
 			foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
 				this.table.setDependency this.altrenatesLookup lookupSS
 			foreach lookupCP [items-of this.cherryPickingLookups] : if lookupCP : begin
 				this.table.setDependency lookupCP this.altrenatesLookup
-				foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
-					this.table.setDependency lookupCP lookupSS
+
+		foreach lookupCP [items-of this.cherryPickingLookups] : if lookupCP : begin
+			foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
+				this.table.setDependency lookupCP lookupSS
 
 	public [linkCrossDeps other] : begin
 		if (this.altrenatesLookup && other.altrenatesLookup) : begin
@@ -119,7 +127,7 @@ export : define [buildCVSS gsub para glyphStore] : begin
 				feature.addLookup cvSingle
 				grSetUsedBySs.add gr
 
-		foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
+		foreach {gn glyph} [glyphStore.namedEntriesWithFilter nonDecomposable] : begin
 			foreach gr [items-of : AnyCv.query glyph] : begin
 				local subst : gr.get glyph
 				if (subst && subst != gn) : begin
@@ -141,7 +149,7 @@ export : define [buildCVSS gsub para glyphStore] : begin
 					if cv.decompositionLookup : feature.addLookup cv.decompositionLookup
 					feature.addLookup lookup
 
-					foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
+					foreach {gn glyph} [glyphStore.namedEntriesWithFilter nonDecomposable] : begin
 						local subst : gr.get glyph
 						if (subst && subst != gn) : begin
 							set lookup.substitutions.(gn) : glyphStore.ensureExists subst
@@ -166,3 +174,4 @@ export : define [buildCVSS gsub para glyphStore] : begin
 	return cvs
 
 define [objectIsNotEmpty obj] : obj && [Object.keys obj].length
+define [nonDecomposable gn g] : not : CvDecompose.get g
