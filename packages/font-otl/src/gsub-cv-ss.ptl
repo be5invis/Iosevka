@@ -102,36 +102,34 @@ export : define [buildCVSS gsub para glyphStore] : begin
 					if [not lookup.substitutions.(gn)] : set lookup.substitutions.(gn) parts
 
 	do "cvxx"
-		local cvGrs {}
-		foreach {name prime} para.variants.primes : foreach {vn variant} prime.variants : begin
-			if (variant.tag && variant.rank) : cvGrs.push variant
-		cvGrs.sort AnyCv.compare
-
 		foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
-			foreach gr [items-of cvGrs] : begin
+			foreach gr [items-of : AnyCv.query glyph] : if (gr.tag && gr.rank) : begin
 				local subst : gr.get glyph
 				if (subst && subst != gn) : begin
 					local cvAlt : [cvs.get gr.tag].createAlternateSubst
 					if [not cvAlt.substitutions.(gn)] : set cvAlt.substitutions.(gn) { }
 					set cvAlt.substitutions.(gn).(gr.rank - 1) : glyphStore.ensureExists subst
 
-	do "ssxx" : foreach {name composition} para.variants.composites : if composition.tag : begin
-		define feature : gsub.addCommonFeature : gsub.createFeature composition.tag
+	do "ssxx"
+		local grSetUsedBySs : new Set
+		foreach {name composition} para.variants.composites : if composition.tag : begin
+			define feature : gsub.addCommonFeature : gsub.createFeature composition.tag
 
-		define decomp : composition.decompose para para.variants.selectorTree
-		local ssGrs {}
-		foreach { prime pv } [items-of decomp] : if (pv.tag && pv.rank) : begin
-			ssGrs.push pv
-			local dl [cvs.get pv.tag].decompositionLookup
-			if dl : feature.addLookup dl
-		ssGrs.sort AnyCv.compare
+			define decomp : composition.decompose para para.variants.selectorTree
+			local ssGrs {}
+			foreach { prime pv } [items-of decomp] : if (pv.tag && pv.rank) : begin
+				ssGrs.push pv
+				local dl [cvs.get pv.tag].decompositionLookup
+				if dl : feature.addLookup dl
+			ssGrs.sort AnyCv.compare
 
-		foreach gr [items-of ssGrs] : begin
-			local cvSingle : [cvs.get gr.tag].createSingleSubstFor gr.rank
-			feature.addLookup cvSingle
+			foreach gr [items-of ssGrs] : begin
+				local cvSingle : [cvs.get gr.tag].createSingleSubstFor gr.rank
+				feature.addLookup cvSingle
+				grSetUsedBySs.add gr
 
 		foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
-			foreach gr [items-of ssGrs] : begin
+			foreach gr [items-of : AnyCv.query glyph] : if [grSetUsedBySs.has gr] : begin
 				local subst : gr.get glyph
 				if (subst && subst != gn) : begin
 					local cvSingle : [cvs.get gr.tag].createSingleSubstFor gr.rank
