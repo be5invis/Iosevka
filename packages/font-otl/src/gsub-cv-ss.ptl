@@ -58,15 +58,23 @@ class CvLookupManager
 		return lookup
 
 	public [linkDeps] : begin
-		if (this.decompositionLookup && this.altrenatesLookup) : begin
-			this.table.setDependency this.decompositionLookup this.altrenatesLookup
+		if this.decompositionLookup : begin
+			if this.altrenatesLookup : begin
+				this.table.setDependency this.decompositionLookup this.altrenatesLookup
+			foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
+				this.table.setDependency this.decompositionLookup lookupSS
+			foreach lookupCP [items-of this.cherryPickingLookups] : if lookupCP : begin
+				this.table.setDependency this.decompositionLookup lookupCP
+
 		if this.altrenatesLookup : begin
 			foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
 				this.table.setDependency this.altrenatesLookup lookupSS
 			foreach lookupCP [items-of this.cherryPickingLookups] : if lookupCP : begin
 				this.table.setDependency lookupCP this.altrenatesLookup
-				foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
-					this.table.setDependency lookupCP lookupSS
+
+		foreach lookupCP [items-of this.cherryPickingLookups] : if lookupCP : begin
+			foreach lookupSS [items-of this.singleSubstLookups] : if lookupSS : begin
+				this.table.setDependency lookupCP lookupSS
 
 	public [linkCrossDeps other] : begin
 		if (this.altrenatesLookup && other.altrenatesLookup) : begin
@@ -101,41 +109,35 @@ export : define [buildCVSS gsub para glyphStore] : begin
 					local lookup : [cvs.get gr.tag].createDecompositionSubst
 					if [not lookup.substitutions.(gn)] : set lookup.substitutions.(gn) parts
 
-	do "cvxx"
-		local cvGrs {}
-		foreach {name prime} para.variants.primes : foreach {vn variant} prime.variants : begin
-			if (variant.tag && variant.rank) : cvGrs.push variant
-		cvGrs.sort AnyCv.compare
+	do "cvxx / ssxx"
+		local grSetUsedBySs : new Set
+		foreach {name composition} para.variants.composites : if composition.tag : begin
+			define feature : gsub.addCommonFeature : gsub.createFeature composition.tag
 
-		foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
-			foreach gr [items-of cvGrs] : begin
-				local subst : gr.get glyph
-				if (subst && subst != gn) : begin
-					local cvAlt : [cvs.get gr.tag].createAlternateSubst
-					if [not cvAlt.substitutions.(gn)] : set cvAlt.substitutions.(gn) { }
-					set cvAlt.substitutions.(gn).(gr.rank - 1) : glyphStore.ensureExists subst
+			define decomp : composition.decompose para para.variants.selectorTree
+			local ssGrs {}
+			foreach { prime pv } [items-of decomp] : if (pv.tag && pv.rank) : begin
+				ssGrs.push pv
+				local dl [cvs.get pv.tag].decompositionLookup
+				if dl : feature.addLookup dl
+			ssGrs.sort AnyCv.compare
 
-	do "ssxx" : foreach {name composition} para.variants.composites : if composition.tag : begin
-		define feature : gsub.addCommonFeature : gsub.createFeature composition.tag
-
-		define decomp : composition.decompose para para.variants.selectorTree
-		local ssGrs {}
-		foreach { prime pv } [items-of decomp] : if (pv.tag && pv.rank) : begin
-			ssGrs.push pv
-			local dl [cvs.get pv.tag].decompositionLookup
-			if dl : feature.addLookup dl
-		ssGrs.sort AnyCv.compare
-
-		foreach gr [items-of ssGrs] : begin
-			local cvSingle : [cvs.get gr.tag].createSingleSubstFor gr.rank
-			feature.addLookup cvSingle
-
-		foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
 			foreach gr [items-of ssGrs] : begin
+				local cvSingle : [cvs.get gr.tag].createSingleSubstFor gr.rank
+				feature.addLookup cvSingle
+				grSetUsedBySs.add gr
+
+		foreach {gn glyph} [glyphStore.namedEntriesWithFilter nonDecomposable] : begin
+			foreach gr [items-of : AnyCv.query glyph] : begin
 				local subst : gr.get glyph
 				if (subst && subst != gn) : begin
-					local cvSingle : [cvs.get gr.tag].createSingleSubstFor gr.rank
-					set cvSingle.substitutions.(gn) : glyphStore.ensureExists subst
+					if (gr.tag && gr.rank) : begin
+						local cvAlt : [cvs.get gr.tag].createAlternateSubst
+						if [not cvAlt.substitutions.(gn)] : set cvAlt.substitutions.(gn) { }
+						set cvAlt.substitutions.(gn).(gr.rank - 1) : glyphStore.ensureExists subst
+					if [grSetUsedBySs.has gr] : begin
+						local cvSingle : [cvs.get gr.tag].createSingleSubstFor gr.rank
+						set cvSingle.substitutions.(gn) : glyphStore.ensureExists subst
 
 	do "CV cherry picking"
 		foreach {name prime} para.variants.primes : if prime.cherryPicking : begin
@@ -147,7 +149,7 @@ export : define [buildCVSS gsub para glyphStore] : begin
 					if cv.decompositionLookup : feature.addLookup cv.decompositionLookup
 					feature.addLookup lookup
 
-					foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
+					foreach {gn glyph} [glyphStore.namedEntriesWithFilter nonDecomposable] : begin
 						local subst : gr.get glyph
 						if (subst && subst != gn) : begin
 							set lookup.substitutions.(gn) : glyphStore.ensureExists subst
@@ -172,3 +174,4 @@ export : define [buildCVSS gsub para glyphStore] : begin
 	return cvs
 
 define [objectIsNotEmpty obj] : obj && [Object.keys obj].length
+define [nonDecomposable gn g] : not : CvDecompose.get g

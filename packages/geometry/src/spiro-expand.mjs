@@ -55,6 +55,11 @@ export class BiKnotCollector {
 			this.lastKnot.proposedNormal = direction;
 		}
 	}
+	setImportant() {
+		if (this.lastKnot) {
+			this.lastKnot.unimportant = 0;
+		}
+	}
 	setUnimportant() {
 		if (this.lastKnot) {
 			this.lastKnot.unimportant = 1;
