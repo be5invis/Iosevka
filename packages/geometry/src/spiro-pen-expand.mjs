@@ -33,6 +33,7 @@ export class PenKnotCollector {
 	setUnimportant() {
 		if (this.m_lastKnot) this.m_lastKnot.profile = null;
 	}
+	setImportant() {} // Not used
 	setContrast() {}
 
 	setProfile(profile) {
