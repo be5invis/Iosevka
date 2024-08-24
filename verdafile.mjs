@@ -14,7 +14,7 @@ import which from "which";
 export const build = Verda.create();
 const { task, file, oracle, computed } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
-const { run, node, cd, cp, rm, fail, echo, silently, absolutelySilently } = build.actions;
+const { run, node, cd, cp, rm, mv, fail, echo, silently, absolutelySilently } = build.actions;
 const { FileList } = build.predefinedFuncs;
 
 ///////////////////////////////////////////////////////////
@@ -611,11 +611,19 @@ function formatSuffix(fmt, unhinted) {
 const DistWoff2 = file.make(
 	(gr, fn, unhinted) => `${DIST}/${gr}/${formatSuffix("WOFF2", unhinted)}/${fn}.woff2`,
 	async (target, out, group, f, unhinted) => {
+		const [rp] = await target.need(RawPlans);
 		const Ctor = unhinted ? DistUnhintedTTF : DistHintedTTF;
-
 		const [from] = await target.need(Ctor(group, f), de`${out.dir}`);
+
 		echo.action(echo.hl.command("Create WOFF2"), out.full, echo.hl.operator("<-"), from.full);
-		await silently.node(`tools/misc/src/ttf-to-woff2.mjs`, from.full, out.full);
+		if (rp.buildOptions && rp.buildOptions.woff2CompressApp) {
+			// woff2_compress does not support specifying output file name.
+			// Thus we need to move it after compression.
+			await absolutelySilently.run(rp.buildOptions.woff2CompressApp, from.full);
+			await mv(`${from.dir}/${from.name}.woff2`, out.full);
+		} else {
+			await silently.node(`tools/misc/src/ttf-to-woff2.mjs`, from.full, out.full);
+		}
 	},
 );
 
@@ -1284,7 +1292,7 @@ const CleanDist = task(`clean-dist`, async () => {
 
 const Release = task(`release`, async target => {
 	await target.need(ReleaseAncillary);
-	await target.need(ReleaseArchives);
+	await target.need(ReleaseArchives, ReleaseSha256Text);
 });
 
 const ReleaseAncillary = task(`release:ancillary`, async target => {
@@ -1299,7 +1307,16 @@ const ReleaseArchives = task(`release:archives`, async target => {
 		goals.push(ReleaseArchivesFor(cgr));
 	}
 
-	await target.need(goals);
+	const [archiveFiles] = await target.need(goals);
+	return archiveFiles.flat(1);
+});
+const ReleaseSha256Text = file(`${ARCHIVE_DIR}/SHA-256.txt`, async (target, out) => {
+	const [files] = await target.need(ReleaseArchives);
+	await node(
+		`tools/misc/src/generate-release-sha-file.mjs`,
+		files.map(f => f.full),
+		out.full,
+	);
 });
 
 const ReleaseArchivesFor = task.group(`release:archives-for`, async (target, cgr) => {

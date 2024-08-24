@@ -318,7 +318,9 @@
 <td><img src="../images/cv-capital-a-curly-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-curly-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-a-curly-base-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-curly-base-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-a-curly-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-curly-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="4"> </td>
+<td><img src="../images/cv-capital-a-round-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-round-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-a-round-top-base-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-round-top-base-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="2"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -329,7 +331,9 @@
 <td>6</td>
 <td>7</td>
 <td>8</td>
-<td colspan="4"> </td>
+<td>9</td>
+<td>10</td>
+<td colspan="2"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv12</code></td>
@@ -3588,7 +3592,12 @@
 <td><img src="../images/cv-dollar-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-open-cap.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-dollar-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-through-cap.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-dollar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="6"> </td>
+<td><img src="../images/cv-dollar-slanted-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-open.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-dollar-slanted-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-through.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-dollar-slanted-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-interrupted.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-dollar-slanted-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-open-cap.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-dollar-slanted-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-through-cap.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-dollar-slanted-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td>
 </tr>
 <tr>
 <td>1</td>
@@ -3597,7 +3606,12 @@
 <td>4</td>
 <td>5</td>
 <td>6</td>
-<td colspan="6"> </td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
 </tr>
 <tr>
 <td rowspan="2"><code>VSAN</code></td>
@@ -3607,7 +3621,12 @@
 <td><img src="../images/cv-cent-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-open-cap.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cent-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-through-cap.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cent-bar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-bar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="6"> </td>
+<td><img src="../images/cv-cent-slanted-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-open.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cent-slanted-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-through.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cent-slanted-bar-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-bar-interrupted.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cent-slanted-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-open-cap.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cent-slanted-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-through-cap.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cent-slanted-bar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-bar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td>
 </tr>
 <tr>
 <td>1</td>
@@ -3616,7 +3635,12 @@
 <td>4</td>
 <td>5</td>
 <td>6</td>
-<td colspan="6"> </td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
 </tr>
 <tr>
 <td rowspan="2"><code>VSAO</code></td>
