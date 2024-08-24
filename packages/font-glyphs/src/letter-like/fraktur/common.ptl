@@ -4,7 +4,7 @@ import [mix fallback] from "@iosevka/util"
 import [SpiroPenGeometry] from "@iosevka/geometry"
 import [Vec2] from "@iosevka/geometry/point"
 import [Box] from "@iosevka/geometry/box"
-import [Interpolator] from "@iosevka/geometry/spiro-control"
+import [AfBase FunctionInterpolator] from "@iosevka/geometry/spiro-control"
 import [PenKnotCollector] from "@iosevka/geometry/spiro-pen-expand"
 
 glyph-module
@@ -61,8 +61,13 @@ glyph-block LetterLike-Fraktur-Common : begin
 
 	# Directive to change the profile
 	glyph-block-export change-pen
-	define [change-pen newPen] : function : begin
-		this.setProfile : newPen.getPenShape this.gizmo
+	define [change-pen newPen] : new AfChangePen newPen
+
+	class AfChangePen : inherits AfBase
+		public [new newPen] : begin
+			this.newPen = newPen
+		public [applyTo target] : begin
+			target.setProfile : this.newPen.getPenShape target.gizmo
 
 	# A pen profile describes a virtual flat-tip pen. We use a 45-degree arrangement to
 	# simplify the math.
@@ -152,26 +157,26 @@ glyph-block LetterLike-Fraktur-Common : begin
 		export : define DepthX : 1 * DecoSizeX
 		export : define LTDecoSize : 0.75 * DecoSizeX
 
-		export : define [h o] : Interpolator hBlender [object o]
+		export : define [h o] : new FunctionInterpolator hBlender [object o]
 		define [hBlender before after args] : begin
 			return : list
 				g2 [mix before.x after.x 0.375]  (after.y + [fallback args.o 0])
 				g2 [mix before.x after.x 0.625]  (before.y - [fallback args.o 0])
 
-		export : define [vc waveDepth] : Interpolator vcBlender [object waveDepth]
+		export : define [vc waveDepth] : new FunctionInterpolator vcBlender [object waveDepth]
 		define [vcBlender before after args] : begin
 			local [object waveDepth] args
 			return : list
 				g2 (before.x + 0.5 * waveDepth) [mix before.y after.y 0.375]
 				g2 (after.x - 0.5 * waveDepth)  [mix before.y after.y 0.625]
 
-		export : define [v] : Interpolator vBlender
+		export : define [v] : new FunctionInterpolator vBlender
 		define [vBlender before after] : begin
 			return : list
 				g2 after.x  [mix before.y after.y 0.375]
 				g2 before.x [mix before.y after.y 0.625]
 
-		export : define [vDistAfter d] : Interpolator vDistAfterBlender [object d]
+		export : define [vDistAfter d] : new FunctionInterpolator vDistAfterBlender [object d]
 		define [vDistAfterBlender before after args] : begin
 			return : list
 				g2 after.x  [mix before.y after.y 0.375]

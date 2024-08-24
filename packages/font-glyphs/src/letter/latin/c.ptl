@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 import [DependentSelector MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -371,50 +371,60 @@ glyph-block Letter-Latin-C : begin
 			CShapeT spiro-outline 0.1 [DivFrame 1] SLAB-NONE SLAB-NONE XH 0 SmallArchDepthA SmallArchDepthB Hook BBS
 			VBar.l (SB + BBD + OX) 0 CAP BBS
 
-	define CentBarConfig : object
-		open           { (Descender / 2) (XH - Descender / 2) 0 "std" }
-		through        { (Descender / 2) (XH - Descender / 2) 1 "std" }
-		interrupted    { (Descender / 2) (XH - Descender / 2) 2 "std" }
-		openCap        { 0               CAP                  0 "cap" }
-		throughCap     { 0               CAP                  1 "cap" }
-		interruptedCap { 0               CAP                  2 "cap" }
+	define CentConfig : SuffixCfg.weave
+		object # slope
+			""          0
+			"slanted"   0.08
+		object # body
+			open        0
+			through     1
+			interrupted 2
+		object # height
+			""         { 0 XH (Descender / 2) (XH - Descender / 2)   "std" }
+			"cap"      { (CAP / 2 - XH / 2) (CAP / 2 + XH / 2) 0 CAP "cap" }
 
-	foreach { suffix { bot top fillType selector } } [Object.entries CentBarConfig] : do
+	foreach { suffix { sl fillType { bMask tMask bot top selector }}} [pairs-of CentConfig] : do
+		define [xBot df] : mix df.leftSB df.rightSB (0.5 - sl)
+		define [xTop df] : mix df.leftSB df.rightSB (0.5 + sl)
+
+		define swBarThick : AdviceStroke 3
+		define swBarFine : AdviceStroke [StrokeWidthBlend 3 5.5]
+
+		define [FullBar df sw] : dispiro
+			flat [xBot df] bot [widths.center.heading sw Downward]
+			curl [xTop df] top [widths.center.heading sw Downward]
+
+		define [InterruptBar df] : begin
+			local cofine : AdviceStroke 4
+			return : union
+				dispiro
+					flat [xTop df] top [widths.center.heading cofine Downward]
+					curl df.middle [mix top bot 0.5] [widths.center.heading swBarFine Downward]
+				dispiro
+					flat [xBot df] bot [widths.center.heading cofine Upward]
+					curl df.middle [mix bot top 0.5] [widths.center.heading swBarFine Upward]
+
+		define [OutlineMask df] : spiro-outline
+			curl (df.leftSB + 0.5 * Stroke)  (post@ <-> SmallArchDepthA)
+			arch.rhs (sw -- Stroke) (tMask - 0.5 * Stroke)
+			flat (df.rightSB - 0.5 * Stroke) (pre@ <-> SmallArchDepthB)
+			curl pre@                        (post@ <+> SmallArchDepthA)
+			arch.rhs (sw -- Stroke) (bMask + 0.5 * Stroke)
+			flat post@ 					     (pre@ <+> SmallArchDepthB)
+
+		define [InterruptMask df] : begin
+			define gap : Math.max (XH / 8) [AdviceStroke2 6 6 XH]
+			return : HBar.m 0 df.width [mix bot top 0.5] gap
+
 		create-glyph "cent/bar.\(suffix)" : glyph-proc
-			define w : AdviceStroke 3
-			define fine : AdviceStroke [StrokeWidthBlend 3 5.5]
-
-			local yMid : mix bot top 0.5
-			local fillBottom : yMid - XH / 2 + HalfStroke
-			local fillTop : yMid + XH / 2 - HalfStroke
-
-			set-base-anchor 'cvDecompose' Middle yMid
-
-			# Draw the outside subbars
-			include : dispiro
-				flat Middle fillTop [widths.center w]
-				curl Middle top     [heading Upward]
-			include : dispiro
-				flat Middle fillBottom [widths.center w]
-				curl Middle bot        [heading Downward]
-
-			include : match fillType
-				[Just 1] : VBar.m Middle fillBottom fillTop fine
-				[Just 2] : begin
-					define cofine : AdviceStroke 4
-					define gap : Math.max (XH / 8) [AdviceStroke2 6 6 XH]
-
-					union
-						dispiro
-							flat Middle fillTop [widths.center.heading cofine Downward]
-							curl Middle (yMid + gap / 2) [widths.center.heading fine Downward]
-						dispiro
-							flat Middle fillBottom [widths.center.heading cofine Upward]
-							curl Middle (yMid - gap / 2) [widths.center.heading fine Upward]
-
-				__ : no-shape
-
+			local df : include : DivFrame 1
+			set-base-anchor 'cvDecompose' df.middle [mix bot top 0.5]
 			DependentSelector.set currentGlyph selector
+
+			include : difference [FullBar df swBarThick] [OutlineMask df]
+			if (fillType === 1) : include : intersection [FullBar df swBarFine] [OutlineMask df]
+			if (fillType === 2) : include : intersection [InterruptBar df]
+				difference [OutlineMask df] [InterruptMask df]
 
 	select-variant 'cent/bar' (follow -- 'cent')
 

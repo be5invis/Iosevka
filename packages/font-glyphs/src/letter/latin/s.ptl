@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 import [DependentSelector MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -461,52 +461,71 @@ glyph-block Letter-Latin-S : begin
 					.y ([if (sign < 0) 0.25 0.375] * sign * BBD * [Math.cos theta])
 				}
 
+	define DollarConfig : SuffixCfg.weave
+		object # slope
+			""          0
+			"slanted"   0.08
+		object # body
+			open        0
+			through     1
+			interrupted 2
+		object # height
+			""         { 0.05 0.95 (Descender / 2) "std" }
+			"cap"      { 0.12 0.88  0              "cap" }
 
+	foreach { suffix { sl fillType { kBot kTop overflow selector } } } [pairs-of DollarConfig] : do
+		define [xBot df] : mix df.leftSB df.rightSB (0.5 - sl)
+		define [xTop df] : mix df.leftSB df.rightSB (0.5 + sl)
+		define bot : CAP * kBot
+		define top : CAP * kTop
 
-	define DollarConfig : object
-		open           { 0.95 0.05 (Descender / 2) 0 "std" }
-		through        { 0.95 0.05 (Descender / 2) 1 "std" }
-		interrupted    { 0.95 0.05 (Descender / 2) 2 "std" }
-		openCap        { 0.88 0.12              0  0 "cap" }
-		throughCap     { 0.88 0.12              0  1 "cap" }
-		interruptedCap { 0.88 0.12              0  2 "cap" }
+		define swBarThick : AdviceStroke 3
+		define swBarFine : AdviceStroke [StrokeWidthBlend 3 5.5]
 
-	foreach { suffix { kTop kBot overflow fillType selector } } [Object.entries DollarConfig] : do
+		define [FullBar df sw] : dispiro
+			flat [xBot df] (0 + overflow) [widths.center.heading sw Downward]
+			curl [xTop df] (CAP - overflow) [widths.center.heading sw Downward]
+
+		define [InterruptBar df] : begin
+			local cofine : AdviceStroke 4
+			return : union
+				dispiro
+					flat [xTop df] (CAP - overflow) [widths.center.heading cofine Downward]
+					curl df.middle [mix top bot 0.5] [widths.center.heading swBarFine Downward]
+				dispiro
+					flat [xBot df] (0 + overflow) [widths.center.heading cofine Upward]
+					curl df.middle [mix bot top 0.5] [widths.center.heading swBarFine Upward]
+
+		define [DollarMask df stroke] : begin
+			define archDepthA : AdviceSArchDepth (top - bot) (-1) stroke
+			define archDepthB : AdviceSArchDepth (top - bot) (+1) stroke
+			return : spiro-outline
+				curl (df.leftSB + 0.5 * stroke)  (post@ <-> archDepthA)
+				arch.rhs (sw -- stroke) (top - 0.5 * stroke)
+				flat (df.rightSB - 0.5 * stroke) (pre@ <-> archDepthB)
+				curl pre@                        (post@ <+> archDepthA)
+				arch.rhs (sw -- stroke) (bot + 0.5 * stroke)
+				flat post@ 					     (pre@ <+> archDepthB)
+
+		define [InterruptMask df] : begin
+			local gap : (swBarThick / Stroke * EssUpper) + [Math.max ((top - bot) / 6) [AdviceStroke2 3 3 (top - bot)]]
+			local yMid : mix bot top 0.5
+			local yTermLeft : mix yMid (top - [AdviceSArchDepth (top - bot) (-1) swBarThick]) 0.5
+			local yTermRight : mix yMid (bot + [AdviceSArchDepth (top - bot) (-1) swBarThick]) 0.5
+
+			return : dispiro [corner 0 yTermLeft : widths.center gap] [corner Width yTermRight]
+
 		create-glyph "dollar/bar.\(suffix)" : glyph-proc
-			define top : CAP * kTop
-			define bot : CAP * kBot
-			define w : AdviceStroke 3
-			define fine : AdviceStroke [StrokeWidthBlend 3 5.5]
-
-			set-base-anchor 'cvDecompose' Middle (CAP / 2)
-
-			include : dispiro
-				widths.center w
-				flat Middle (top - HalfStroke)
-				curl Middle (CAP - overflow) [heading Upward]
-			include : dispiro
-				widths.center w
-				flat Middle overflow [heading Upward]
-				curl Middle (bot + HalfStroke)
-			if (fillType === 1) : include : VBar.m Middle (bot + HalfStroke) (top - HalfStroke) fine
-			if (fillType === 2) : begin
-				local cofine : AdviceStroke 4
-				local gap : (w / Stroke * EssUpper) + [Math.max ((top - bot) / 6) [AdviceStroke2 3 3 (top - bot)]]
-				local yMid : mix bot top 0.5
-				local yTermLeft : mix yMid (top - [AdviceSArchDepth (top - bot) (-1) w]) 0.5
-				local yTermRight : mix yMid (bot + [AdviceSArchDepth (top - bot) (-1) w]) 0.5
-				include : difference
-					union
-						dispiro
-							flat Middle (top - HalfStroke) [widths.center.heading cofine Downward]
-							curl Middle [mix bot top 0.5]  [widths.center.heading fine Downward]
-						dispiro
-							flat Middle (bot + HalfStroke) [widths.center.heading cofine Upward]
-							curl Middle [mix bot top 0.5]  [widths.center.heading fine Upward]
-
-					dispiro [corner 0 yTermLeft : widths.center gap] [corner Width yTermRight]
-
+			local df : include : DivFrame 1
+			set-base-anchor 'cvDecompose' df.middle (CAP / 2)
 			DependentSelector.set currentGlyph selector
+
+			local [outlineMask] : DollarMask df [AdviceStroke2 2 3 CAP]
+
+			include : difference [FullBar df swBarThick] [outlineMask]
+			if (fillType === 1) : include : intersection [FullBar df swBarFine] [outlineMask]
+			if (fillType === 2) : include : intersection [InterruptBar df]
+				difference [outlineMask] [InterruptMask df]
 
 	select-variant 'dollar/bar' (follow -- 'dollar')
 

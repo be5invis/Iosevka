@@ -1,6 +1,7 @@
 import { DiSpiroGeometry, SpiroGeometry } from "@iosevka/geometry";
 import {
-	Interpolator,
+	AfBase,
+	InterpolatorBase,
 	SpiroFlattener,
 	TerminateInstruction,
 	UserCloseKnotPair,
@@ -167,12 +168,21 @@ export function SetupBuilders(bindings) {
 		}
 	}
 
+	class AfSetWidths extends AfBase {
+		constructor(l, r) {
+			super();
+			this.l = l;
+			this.r = r;
+		}
+		applyTo(target) {
+			target.setWidth(this.l, this.r);
+		}
+	}
+
 	function widths(l, r) {
 		if (!isFinite(l)) throw new TypeError("NaN detected for left width");
 		if (!isFinite(r)) throw new TypeError("NaN detected for right width");
-		return function () {
-			if (this.setWidth) this.setWidth(l, r);
-		};
+		return new AfSetWidths(l, r);
 	}
 	widths.lhs = function (w) {
 		w = fallback(w, Stroke);
@@ -190,153 +200,171 @@ export function SetupBuilders(bindings) {
 		return widths(w / 2, w / 2);
 	};
 
+	class AfHeading extends AfBase {
+		constructor(d) {
+			super();
+			this.d = d;
+		}
+		applyTo(target) {
+			target.headsTo(this.d);
+		}
+	}
 	function heading(d) {
 		if (!isFinite(d.x) || !isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
-		return function () {
-			if (this.headsTo) this.headsTo(d);
-		};
+		return new AfHeading(d);
 	}
+
+	class AfWidthsHeading extends AfBase {
+		constructor(l, r, d) {
+			super();
+			this.l = l;
+			this.r = r;
+			this.d = d;
+		}
+		applyTo(target) {
+			target.setWidth(this.l, this.r);
+			target.headsTo(this.d);
+		}
+	}
+
 	widths.heading = function (l, r, d) {
 		if (!isFinite(l)) throw new TypeError("NaN detected for left width");
 		if (!isFinite(r)) throw new TypeError("NaN detected for left width");
 		if (!isFinite(d.x) || !isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
-		return function () {
-			if (this.setWidth) this.setWidth(l, r);
-			if (this.headsTo) this.headsTo(d);
-		};
+		return new AfWidthsHeading(l, r, d);
 	};
 	widths.lhs.heading = function (w, d) {
 		w = fallback(w, Stroke);
 		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
 		if (!isFinite(d.x) || !isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
-		return function () {
-			if (this.setWidth) this.setWidth(w, 0);
-			if (this.headsTo) this.headsTo(d);
-		};
+		return new AfWidthsHeading(w, 0, d);
 	};
 	widths.rhs.heading = function (w, d) {
 		w = fallback(w, Stroke);
 		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
 		if (!isFinite(d.x) || !isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
-		return function () {
-			if (this.setWidth) this.setWidth(0, w);
-			if (this.headsTo) this.headsTo(d);
-		};
+		return new AfWidthsHeading(0, w, d);
 	};
 	widths.center.heading = function (w, d) {
 		w = fallback(w, Stroke);
 		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
 		if (!isFinite(d.x) || !isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
-		return function () {
-			if (this.setWidth) this.setWidth(w / 2, w / 2);
-			if (this.headsTo) this.headsTo(d);
-		};
+		return new AfWidthsHeading(w / 2, w / 2, d);
 	};
 
+	class AfDisableContrast extends AfBase {
+		applyTo(target) {
+			target.setContrast(1);
+		}
+	}
 	function disableContrast() {
-		return function () {
-			if (this.setContrast) this.setContrast(1);
-		};
-	}
-	function unimportant() {
-		if (this.setUnimportant) this.setUnimportant(1);
-	}
-	function important() {
-		return void 0;
+		return new AfDisableContrast();
 	}
 
-	function afInterpolate(before, after, args) {
-		return g4(
-			mix(before.x, after.x, args.rx),
-			mix(before.y, after.y, args.ry),
-			fallback(args.raf, unimportant),
-		);
+	class AfUnimportant extends AfBase {
+		applyTo(target) {
+			target.setUnimportant();
+		}
 	}
-	function afInterpolateDelta(before, after, args) {
-		return g4(
-			mix(before.x, after.x, args.rx) + args.deltaX,
-			mix(before.y, after.y, args.ry) + args.deltaY,
-			fallback(args.raf, unimportant),
-		);
+	const unimportant = new AfUnimportant();
+
+	class AfImportant extends AfBase {
+		applyTo(target) {
+			target.setImportant();
+		}
 	}
-	function afInterpolateG2(before, after, args) {
-		return g2(
-			mix(before.x, after.x, args.rx),
-			mix(before.y, after.y, args.ry),
-			fallback(args.raf, unimportant),
-		);
-	}
-	function afInterpolateThem(before, after, args) {
-		let innerKnots = [];
-		for (const [rx, ry, rt] of args.rs) {
-			innerKnots.push(
-				fallback(args.ty, g2)(
-					mix(before.x, after.x, rx),
-					mix(before.y, after.y, ry),
-					args.raf && args.raf.blend && rt !== void 0
-						? args.raf.blend(rt)
-						: args.raf
-							? args.raf
-							: unimportant,
-				),
+	const important = new AfImportant();
+
+	/// Simple (single mix) interpolator
+	class SimpleMixInterpolator extends InterpolatorBase {
+		constructor(ty, rx, ry, deltaX, deltaY, raf) {
+			super();
+			this.ty = ty;
+			this.rx = rx;
+			this.ry = ry;
+			this.deltaX = deltaX;
+			this.deltaY = deltaY;
+			this.raf = fallback(raf, unimportant);
+		}
+		resolveInterpolation(before, after) {
+			return this.ty(
+				mix(before.x, after.x, this.rx) + this.deltaX,
+				mix(before.y, after.y, this.ry) + this.deltaY,
+				this.raf,
 			);
 		}
-		return innerKnots;
-	}
-	function afInterpolateThemWithDelta(before, after, args) {
-		let innerKnots = [];
-		for (const [rx, ry, deltaX, deltaY, rt] of args.rs) {
-			innerKnots.push(
-				fallback(args.ty, g2)(
-					mix(before.x, after.x, rx) + deltaX,
-					mix(before.y, after.y, ry) + deltaY,
-					args.raf && args.raf.blend && rt !== void 0
-						? args.raf.blend(rt)
-						: args.raf
-							? args.raf
-							: unimportant,
-				),
-			);
-		}
-		return innerKnots;
-	}
-	function afInterpolateThemFromTWithDelta(before, after, args) {
-		let innerKnots = [];
-		for (const rt of args.rs) {
-			innerKnots.push(
-				fallback(args.ty, g2)(
-					mix(before.x, after.x, args.raf.rx(rt)) + args.raf.deltaX(rt),
-					mix(before.y, after.y, args.raf.ry(rt)) + args.raf.deltaY(rt),
-					args.raf.modifier(rt),
-				),
-			);
-		}
-		return innerKnots;
 	}
 
 	function alsoThru(rx, ry, raf) {
-		return Interpolator(afInterpolate, { rx, ry, raf });
+		return new SimpleMixInterpolator(g4, rx, ry, 0, 0, raf);
 	}
 	alsoThru.withOffset = function (rx, ry, deltaX, deltaY, raf) {
-		return Interpolator(afInterpolateDelta, { rx, ry, deltaX, deltaY, raf });
+		return new SimpleMixInterpolator(g4, rx, ry, deltaX, deltaY, raf);
 	};
 	alsoThru.g2 = function (rx, ry, raf) {
-		return Interpolator(afInterpolateG2, { rx, ry, raf });
+		return new SimpleMixInterpolator(g2, rx, ry, 0, 0, raf);
 	};
-	function alsoThruThem(rs, raf, ty) {
-		return Interpolator(afInterpolateThem, { rs, raf, ty });
+
+	/// Multi-mix interpolator
+	class MultiMixInterpolator extends InterpolatorBase {
+		constructor(rs, raf, ty) {
+			super();
+			this.rs = rs;
+			this.raf = raf;
+			this.ty = fallback(ty, g2);
+		}
+		resolveInterpolation(before, after) {
+			let innerKnots = [];
+			for (const [rx, ry, rt] of this.rs) {
+				const x = mix(before.x, after.x, rx);
+				const y = mix(before.y, after.y, ry);
+				const af =
+					this.raf && this.raf.blend && rt !== void 0
+						? this.raf.blend(rt)
+						: this.raf
+							? this.raf
+							: unimportant;
+				innerKnots.push(this.ty(x, y, af));
+			}
+			return innerKnots;
+		}
 	}
-	alsoThruThem.withOffset = function (rs, raf, ty) {
-		return Interpolator(afInterpolateThemWithDelta, { rs, raf, ty });
+	function alsoThruThem(rs, raf, ty) {
+		return new MultiMixInterpolator(rs, raf, ty);
+	}
+
+	/// Multi-mix interpolator that use function set to compute proportion/deltas
+	class MultiMixComputeInterpolator extends InterpolatorBase {
+		constructor(rs, raf, ty) {
+			super();
+			this.rs = rs;
+			this.raf = raf;
+			this.ty = fallback(ty, g2);
+		}
+		resolveInterpolation(before, after) {
+			let innerKnots = [];
+			for (const rt of this.rs) {
+				innerKnots.push(
+					this.ty(
+						mix(before.x, after.x, this.raf.rx(rt)) + this.raf.deltaX(rt),
+						mix(before.y, after.y, this.raf.ry(rt)) + this.raf.deltaY(rt),
+						this.raf.modifier(rt),
+					),
+				);
+			}
+			return innerKnots;
+		}
+	}
+	alsoThruThem.computed = function (rs, raf, ty) {
+		return new MultiMixComputeInterpolator(rs, raf, ty);
 	};
-	alsoThruThem.fromTWithOffset = function (rs, raf, ty) {
-		return Interpolator(afInterpolateThemFromTWithDelta, { rs, raf, ty });
-	};
+
+	// Bezier control interpolator
 
 	function bezControlsImpl(x1, y1, x2, y2, samples, raf, ty) {
 		let rs = [];
@@ -362,44 +390,64 @@ export function SetupBuilders(bindings) {
 		);
 	}
 
-	let DEFAULT_STEPS = 6;
-	let [buildHV, buildVH] = (function (cache) {
-		function build(samples, _superness) {
-			const superness = fallback(_superness, Superness);
-			let hv = [];
-			let vh = [];
-			for (let j = 1; j < samples; j = j + 1) {
-				const theta = (((j + 1) / (samples + 2)) * Math.PI) / 2;
-				const c = Math.pow(Math.cos(theta), 2 / superness);
-				const s = Math.pow(Math.sin(theta), 2 / superness);
-				hv.push([s, 1 - c]);
-				vh.push([1 - c, s]);
+	// ArcHV and ArcVH interpolators
+	class ArcHvInterpolator extends InterpolatorBase {
+		constructor(steps, superness) {
+			super();
+			this.steps = steps;
+			this.superness = superness;
+		}
+		resolveInterpolation(before, after) {
+			let innerKnots = [];
+			for (let j = 1; j < this.steps; j++) {
+				const theta = (((j + 1) / (this.steps + 2)) * Math.PI) / 2;
+				const c = Math.pow(Math.cos(theta), 2 / this.superness);
+				const s = Math.pow(Math.sin(theta), 2 / this.superness);
+				const x = mix(before.x, after.x, s);
+				const y = mix(before.y, after.y, 1 - c);
+				innerKnots.push(g2(x, y, unimportant));
 			}
-			return { hv, vh: vh };
+			return innerKnots;
 		}
-		function buildHVImpl(samples, _superness) {
-			if (_superness) return build(samples, _superness).hv;
-			if (!cache[samples]) cache[samples] = build(samples, _superness);
-			return cache[samples].hv;
+	}
+	class ArcVhInterpolator extends InterpolatorBase {
+		constructor(steps, superness) {
+			super();
+			this.steps = steps;
+			this.superness = superness;
 		}
-		function buildVHImpl(samples, _superness) {
-			if (_superness) return build(samples, _superness).vh;
-			if (!cache[samples]) cache[samples] = build(samples, _superness);
-			return cache[samples].vh;
+		resolveInterpolation(before, after) {
+			let innerKnots = [];
+			for (let j = 1; j < this.steps; j++) {
+				const theta = (((j + 1) / (this.steps + 2)) * Math.PI) / 2;
+				const c = Math.pow(Math.cos(theta), 2 / this.superness);
+				const s = Math.pow(Math.sin(theta), 2 / this.superness);
+				const x = mix(before.x, after.x, 1 - c);
+				const y = mix(before.y, after.y, s);
+				innerKnots.push(g2(x, y, unimportant));
+			}
+			return innerKnots;
 		}
-		return [buildHVImpl, buildVHImpl];
-	})([]);
+	}
+
+	let DEFAULT_STEPS = 6;
 	function archv(samples, superness) {
-		return alsoThruThem(buildHV(fallback(samples, DEFAULT_STEPS), superness));
+		return new ArcHvInterpolator(
+			fallback(samples, DEFAULT_STEPS),
+			fallback(superness, Superness),
+		);
 	}
 	archv.superness = function (s) {
-		return archv(DEFAULT_STEPS, s);
+		return new ArcHvInterpolator(DEFAULT_STEPS, s);
 	};
 	function arcvh(samples, superness) {
-		return alsoThruThem(buildVH(fallback(samples, DEFAULT_STEPS), superness));
+		return new ArcVhInterpolator(
+			fallback(samples, DEFAULT_STEPS),
+			fallback(superness, Superness),
+		);
 	}
 	arcvh.superness = function (s) {
-		return arcvh(DEFAULT_STEPS, s);
+		return new ArcVhInterpolator(DEFAULT_STEPS, s);
 	};
 	archv.yFromX = function (px, _s) {
 		const s = fallback(_s, Superness);

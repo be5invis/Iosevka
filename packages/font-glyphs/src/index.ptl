@@ -1,6 +1,6 @@
 import [Glyph GlyphProc ForkGlyphProc] from "@iosevka/glyph"
 import [GlyphStore] from "@iosevka/glyph/store"
-import [GlyphBlock GlyphBuildExecutor] from "@iosevka/glyph/block"
+import [GlyphBlock GlyphBuildExecutor GlyphSaveSink] from "@iosevka/glyph/block"
 import as Gr from "@iosevka/glyph/relation"
 import as SpiroKit from "@iosevka/font-kits/spiro-kit"
 import as BooleKit from "@iosevka/font-kits/boole-kit"
@@ -15,7 +15,6 @@ $$include './meta/macros.ptl'
 export : define [buildGlyphs para recursive] : begin
 	# Execution and dependency management
 	local $Exec$ : new GlyphBuildExecutor recursive
-	define [glyph-is-needed name] : [not recursive] || [recursive.glyphIsNeeded name]
 
 	# Initialize glyph store
 	local glyphStore : new GlyphStore
@@ -32,45 +31,8 @@ export : define [buildGlyphs para recursive] : begin
 	# Anchor parameters
 	define {AS_BASE ALSO_METRICS} {'AS-BASE' 'ALSO-METRICS'}
 
-	# The callback used to create and save glyphs
-	define [$createAndSaveGlyphImpl$ _1 _2 actions] : begin
-		local saveGlyphName    null
-		local unicode          null
-
-		piecewise
-			([typeof _1] === 'number' && _1) : begin
-				set saveGlyphName : 'uni' + [_1.toString 16 :.padStart 4 '0' :.toUpperCase]
-				set unicode          _1
-			([typeof _1] === 'string' && _1) : begin
-				set saveGlyphName    _1
-				set unicode          _2
-			true : begin
-				set saveGlyphName    null
-				set unicode          null
-
-		if (saveGlyphName && [not : glyph-is-needed saveGlyphName]) : return nothing
-		if para.verbose : console.log saveGlyphName
-
-		local glyphObject [new Glyph saveGlyphName]
-		glyphObject.setWidth Metrics.Width
-		glyphObject.gizmo = Metrics.GlobalTransform
-		glyphObject._m_dependencyManager = $Exec$.dependencyManager
-
-		glyphObject.include actions true true
-
-		$Exec$.setGlyphToBlockDependency glyphObject
-
-		if saveGlyphName : begin
-			if (saveGlyphName.0 != '.' && [glyphStore.queryByName saveGlyphName])
-				throw : new Error "Glyph \(saveGlyphName) already exists"
-			glyphStore.addGlyph saveGlyphName glyphObject
-			if unicode : begin
-				local u unicode
-				if ([typeof unicode] === "string") : begin
-					set u [unicode.codePointAt 0]
-				glyphStore.encodeGlyph u glyphObject
-
-		return glyphObject
+	# Glyph saving sink
+	define $GlyphSaveSink$ : new GlyphSaveSink $Exec$ Metrics glyphStore
 
 	# Spiro kit and boole kit
 	define SpiroFns : SpiroKit.SetupBuilders : object
@@ -86,9 +48,9 @@ export : define [buildGlyphs para recursive] : begin
 
 	# Setup the capture
 	define $$Capture$$ : object
-		$createAndSaveGlyphImpl$
 		$NamedParameterPair$
 		$Exec$
+		$GlyphSaveSink$
 		Metrics : Object.assign {.} Metrics
 		para
 		recursive
@@ -100,7 +62,6 @@ export : define [buildGlyphs para recursive] : begin
 		MarkSet
 		AS_BASE
 		ALSO_METRICS
-		glyph-is-needed
 		buildGlyphs
 		fontMetrics
 		GlyphProc
@@ -147,9 +108,5 @@ export : define [buildGlyphs para recursive] : begin
 		run-glyph-module "./auto-build/composite.mjs"
 
 	$Exec$.executePendingBlocks
-
-	Gr.linkSuffixPairGr glyphStore 'NWID' 'WWID' Gr.Nwid Gr.Wwid
-	Gr.linkSuffixPairGr glyphStore 'lnum' 'onum' Gr.Lnum Gr.Onum
-	Gr.linkSuffixGr     glyphStore 'aplForm'     Gr.AplForm
 
 	return : object glyphStore fontMetrics

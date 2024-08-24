@@ -511,7 +511,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Zero (<code>0</code>) with diamond body shape, and the top-right bit cutout</td></tr>
     </table></details>
   - Styles for `A`
-    <details><summary>8 variants</summary>
+    <details><summary>10 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-a-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-a = 'straight-serifless'</code>, <code>cv11 = 1</code></td></tr>
     <tr><td><code>A</code> with straight shape; without serifs (default for Sans)</td></tr>
@@ -529,6 +529,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>A</code> with curly shape, and serifs at base</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-a-curly-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-curly-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-a = 'curly-tri-serifed'</code>, <code>cv11 = 8</code></td></tr>
     <tr><td><code>A</code> with curly shape, and serifs at both top and base</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-a-round-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-round-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-a = 'round-top-serifless'</code>, <code>cv11 = 9</code></td></tr>
+    <tr><td><code>A</code> with round top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-a-round-top-base-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-a-round-top-base-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-a = 'round-top-base-serifed'</code>, <code>cv11 = 10</code></td></tr>
+    <tr><td><code>A</code> with round top, and serifs at base</td></tr>
     </table></details>
   - Styles for `B`
     <details><summary>12 variants</summary>
@@ -3110,7 +3114,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="220"><img src="../images/cv-punctuation-dot-square.light.svg#gh-light-mode-only" width=192/><img src="../images/cv-punctuation-dot-square.dark.svg#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'square'</code>, <code>VDAC = 2</code></td></tr>
     <tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use square dots</td></tr>
     </table></details>
-  - Styles for `⠭⠽` (Dot shape in braille)
+  - Styles for `⣝⣑` (Dot shape in braille)
     <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="92"><img src="../images/cv-braille-dot-round.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-braille-dot-round.dark.svg#gh-dark-mode-only" width=64/></td><td><code>braille-dot = 'round'</code>, <code>VDAD = 1</code></td></tr>
@@ -3283,36 +3287,60 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>At symbol (<code>@</code>) with compact body</td></tr>
     </table></details>
   - Styles for `$`
-    <details><summary>6 variants</summary>
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'open'</code>, <code>VSAM = 1</code></td></tr>
-    <tr><td>Dollar symbol with open contour</td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with vertical bar, open contour, and normal height</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-through.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'through'</code>, <code>VSAM = 2</code></td></tr>
-    <tr><td>Dollar symbol with strike-through vertical bar (default)</td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with vertical bar, strike-through vertical bar, and normal height (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-interrupted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'interrupted'</code>, <code>VSAM = 3</code></td></tr>
-    <tr><td>Dollar symbol with interrupted strike-through vertical bar</td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with vertical bar, interrupted strike-through vertical bar, and normal height</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-open-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'open-cap'</code>, <code>VSAM = 4</code></td></tr>
-    <tr><td>Dollar symbol with open contour, sized not exceeding baseline and ascender</td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with vertical bar, open contour, and cap height</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-through-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'through-cap'</code>, <code>VSAM = 5</code></td></tr>
-    <tr><td>Dollar symbol with strike-through vertical bar, sized not exceeding baseline and ascender</td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with vertical bar, strike-through vertical bar, and cap height</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'interrupted-cap'</code>, <code>VSAM = 6</code></td></tr>
-    <tr><td>Dollar symbol with interrupted strike-through vertical bar, sized not exceeding baseline and ascender</td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with vertical bar, interrupted strike-through vertical bar, and cap height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-slanted-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'slanted-open'</code>, <code>VSAM = 7</code></td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with slanted bar, open contour, and normal height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-slanted-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-through.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'slanted-through'</code>, <code>VSAM = 8</code></td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with slanted bar, strike-through vertical bar, and normal height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-slanted-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-interrupted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'slanted-interrupted'</code>, <code>VSAM = 9</code></td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with slanted bar, interrupted strike-through vertical bar, and normal height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-slanted-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-open-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'slanted-open-cap'</code>, <code>VSAM = 10</code></td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with slanted bar, open contour, and cap height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-slanted-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-through-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'slanted-through-cap'</code>, <code>VSAM = 11</code></td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with slanted bar, strike-through vertical bar, and cap height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-dollar-slanted-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-dollar-slanted-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>dollar = 'slanted-interrupted-cap'</code>, <code>VSAM = 12</code></td></tr>
+    <tr><td>Dollar symbol (<code>$</code>) with slanted bar, interrupted strike-through vertical bar, and cap height</td></tr>
     </table></details>
   - Styles for `¢`
-    <details><summary>6 variants</summary>
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cent-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'open'</code>, <code>VSAN = 1</code></td></tr>
-    <tr><td>Cent sign (<code>¢</code>) with open contour</td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with vertical bar, open contour, and normal height</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cent-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-through.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'through'</code>, <code>VSAN = 2</code></td></tr>
-    <tr><td>Cent sign (<code>¢</code>) with vertical bar all through the <code>c</code> part (default)</td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with vertical bar, vertical bar all through the <code>c</code> part, and normal height (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cent-bar-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-bar-interrupted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'bar-interrupted'</code>, <code>VSAN = 3</code></td></tr>
-    <tr><td>Cent sign (<code>¢</code>) with vertical bar breaks at center</td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with vertical bar, vertical bar breaks at center, and normal height</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cent-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-open-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'open-cap'</code>, <code>VSAN = 4</code></td></tr>
-    <tr><td>Cent sign (<code>¢</code>) with open contour, sized not exceeding baseline and ascender</td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with vertical bar, open contour, and cap height</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cent-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-through-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'through-cap'</code>, <code>VSAN = 5</code></td></tr>
-    <tr><td>Cent sign (<code>¢</code>) with vertical bar all through the <code>c</code> part, sized not exceeding baseline and ascender</td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with vertical bar, vertical bar all through the <code>c</code> part, and cap height</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cent-bar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-bar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'bar-interrupted-cap'</code>, <code>VSAN = 6</code></td></tr>
-    <tr><td>Cent sign (<code>¢</code>) with vertical bar breaks at center, sized not exceeding baseline and ascender</td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with vertical bar, vertical bar breaks at center, and cap height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-slanted-open.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-open.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'slanted-open'</code>, <code>VSAN = 7</code></td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with slanted bar, open contour, and normal height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-slanted-through.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-through.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'slanted-through'</code>, <code>VSAN = 8</code></td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with slanted bar, vertical bar all through the <code>c</code> part, and normal height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-slanted-bar-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-bar-interrupted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'slanted-bar-interrupted'</code>, <code>VSAN = 9</code></td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with slanted bar, vertical bar breaks at center, and normal height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-slanted-open-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-open-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'slanted-open-cap'</code>, <code>VSAN = 10</code></td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with slanted bar, open contour, and cap height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-slanted-through-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-through-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'slanted-through-cap'</code>, <code>VSAN = 11</code></td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with slanted bar, vertical bar all through the <code>c</code> part, and cap height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cent-slanted-bar-interrupted-cap.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cent-slanted-bar-interrupted-cap.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cent = 'slanted-bar-interrupted-cap'</code>, <code>VSAN = 12</code></td></tr>
+    <tr><td>Cent sign (<code>¢</code>) with slanted bar, vertical bar breaks at center, and cap height</td></tr>
     </table></details>
   - Styles for `%`
     <details><summary>4 variants</summary>

@@ -14,6 +14,11 @@ export class GlyphStore {
 	namedEntries() {
 		return this.nameForward.entries();
 	}
+	*namedEntriesWithFilter(fn) {
+		for (const [name, g] of this.nameForward.entries()) {
+			if (fn(name, g)) yield [name, g];
+		}
+	}
 	glyphNames() {
 		return this.nameForward.keys();
 	}

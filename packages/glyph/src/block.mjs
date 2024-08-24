@@ -1,3 +1,5 @@
+import { Glyph } from "./glyph.mjs";
+
 export class GlyphBuildExecutor {
 	constructor(recursiveBuildFilter) {
 		this.recursiveBuildFilter = recursiveBuildFilter;
@@ -172,5 +174,62 @@ export class GlyphBlock {
 		this.execState.currentBlockId = prevBlockName;
 		this.resolved = 2;
 		return this.exports;
+	}
+}
+
+/// The class used to handle glyph saving.
+export class GlyphSaveSink {
+	constructor(exec, metrics, store) {
+		this.exec = exec;
+		this.metrics = metrics;
+		this.glyphStore = store;
+	}
+
+	glyphIsNeeded(name) {
+		return (
+			!this.exec.recursiveBuildFilter || this.exec.recursiveBuildFilter.glyphIsNeeded(name)
+		);
+	}
+
+	save($1, $2, contents) {
+		// Figure out the glyph name and unicode to save
+		let saveGlyphName = null;
+		let unicode = null;
+		if ($1 && typeof $1 === "string") {
+			saveGlyphName = $1;
+			unicode = $2 || 0;
+		} else if ($1 && typeof $1 === "number") {
+			saveGlyphName = "uni" + $1.toString(16).padStart(4, "0").toUpperCase();
+			unicode = $1;
+		}
+
+		// If we are in a recursive build run, and the glyph is not needed, skip it
+		if (saveGlyphName && !this.glyphIsNeeded(saveGlyphName)) return;
+
+		// Create the glyph object & include the contents
+		const glyphObject = new Glyph(saveGlyphName);
+		glyphObject.setWidth(this.metrics.Width);
+		glyphObject.gizmo = this.metrics.GlobalTransform;
+		glyphObject._m_dependencyManager = this.exec.dependencyManager;
+
+		glyphObject.include(contents, true, true);
+
+		// Set the glyph-to-block dependency
+		this.exec.setGlyphToBlockDependency(glyphObject);
+
+		// Save the glyph if requested
+		if (saveGlyphName) {
+			if (this.glyphStore.queryByName(saveGlyphName)) {
+				throw new Error(`Duplicate glyph: ${saveGlyphName}`);
+			}
+
+			this.glyphStore.addGlyph(saveGlyphName, glyphObject);
+			if (unicode) {
+				let u = typeof unicode === "string" ? unicode.codePointAt(0) : unicode;
+				this.glyphStore.encodeGlyph(u, glyphObject);
+			}
+		}
+
+		return glyphObject;
 	}
 }

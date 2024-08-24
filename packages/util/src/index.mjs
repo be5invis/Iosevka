@@ -71,13 +71,6 @@ export const SuffixCfg = {
 		for (const item of configs) for (const [k, v] of Object.entries(item)) ans[k] = v;
 		return ans;
 	},
-	collect: function (pairs) {
-		let ans = {};
-		for (const pair of pairs) {
-			if (pair) ans[pair.left] = pair.right;
-		}
-		return ans;
-	},
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
