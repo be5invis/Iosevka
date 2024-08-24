@@ -1,7 +1,7 @@
 // This class is used to "flatten" the spiro controls into a plain list of UserControlKnot
 export class SpiroFlattener {
 	constructor() {
-		this.preControlFunctions = [];
+		this.preControls = [];
 		this.controls = [];
 		this.postControls = [];
 	}
@@ -9,13 +9,21 @@ export class SpiroFlattener {
 	add(c) {
 		if (Array.isArray(c)) {
 			for (const item of c) this.add(item);
-		} else if (c instanceof Function) {
-			if (!this.controls.length) this.preControlFunctions.push(c);
-			else throw new Error("Invalid spiro control sequence");
+		} else if (c instanceof AfBase) {
+			if (this.controls.length) {
+				throw new Error(
+					"Invalid spiro control sequence: pre-control functions must be added first",
+				);
+			}
+			this.preControls.push(c);
 		} else if (c instanceof TerminateInstruction) {
 			this.postControls.push(c);
 		} else {
-			if (this.postControls.length) throw new Error("Invalid spiro control sequence");
+			if (this.postControls.length) {
+				throw new Error(
+					"Invalid spiro control sequence: post-control functions must be added last",
+				);
+			}
 			this.controls.push(c);
 		}
 	}
@@ -34,7 +42,7 @@ export class SpiroFlattener {
 	}
 
 	pipe(collector) {
-		for (const fn of this.preControlFunctions) fn.call(collector);
+		for (const fn of this.preControls) fn.applyTo(collector);
 		for (const control of this.controls) collector.pushKnot(control);
 		for (const postControl of this.postControls) postControl.applyTo(collector);
 		collector.finish();
@@ -214,6 +222,27 @@ class CoordinatePropagator {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+/** The "amendmend function" */
+export class AfBase {
+	applyTo() {
+		throw new Error("Unimplemented");
+	}
+}
+
+export class AfCombine extends AfBase {
+	constructor(af1, af2) {
+		super();
+		this.af1 = af1;
+		this.af2 = af2;
+	}
+	applyTo(target) {
+		if (this.af1) this.af1.applyTo(target);
+		if (this.af2) this.af2.applyTo(target);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 const RES_DEP_STAGE_COORDINATE_PROPOGATION_X = 0;
 const RES_DEP_STAGE_COORDINATE_PROPOGATION_Y = 1;
 const RES_DEP_STAGE_INTERPOLATION = 2;
@@ -241,7 +270,7 @@ export class UserControlKnot {
 		this.af = af;
 	}
 	applyTo(ctx) {
-		if (this.af) this.af.call(ctx);
+		if (this.af) this.af.applyTo(ctx);
 	}
 
 	getDependency(stage) {
@@ -261,7 +290,6 @@ export class UserControlKnot {
 		return this;
 	}
 	resolveCoordiantePropogation(ic, pre, post) {
-		// console.log(this, ic, pre, post);
 		switch (ic) {
 			case 0:
 				this.x = this.x.resolveX(pre, this, post);
@@ -388,7 +416,7 @@ export class DecorInterpolator extends InterpolatorBase {
 	}
 }
 
-class FunctionInterpolator extends InterpolatorBase {
+export class FunctionInterpolator extends InterpolatorBase {
 	constructor(blendFn, extraArgs) {
 		super();
 		this.blendFn = blendFn;
@@ -430,10 +458,6 @@ export class KnotProxyInterpolator extends InterpolatorBase {
 		return this.actual.resolveInterpolation(pre, post);
 	}
 }
-
-export function Interpolator(blender, restParameters) {
-	return new FunctionInterpolator(blender, restParameters);
-}
 export function WithKnotProxy(proxy, actual) {
 	return new KnotProxyInterpolator(proxy, actual);
 }
@@ -448,7 +472,6 @@ export class TerminateInstruction {
 	applyTo(ctx) {
 		if (this.type === "close") ctx.closed = true;
 		if (this.af) throw new Error("Unreachable");
-		// if (this.af) this.af.call(ctx);
 	}
 }
 

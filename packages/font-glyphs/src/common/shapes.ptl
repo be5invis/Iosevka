@@ -2,7 +2,7 @@ $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback boole boolePn] from "@iosevka/util"
 import [Transform] from "@iosevka/geometry/transform"
-import [Interpolator WithKnotProxy] from "@iosevka/geometry/spiro-control"
+import [FunctionInterpolator WithKnotProxy AfCombine] from "@iosevka/geometry/spiro-control"
 import [RadicalGeometry StrokeGeometry RemoveHolesGeometry] from "@iosevka/geometry"
 import [CMixCoord CopyBackKnotProxy] from "@iosevka/font-kits/derived-coordinates"
 
@@ -133,7 +133,6 @@ glyph-block CommonShapes : begin
 			local mx ((l + r) / 2)
 			currentGlyph.gizmo = [if transformShiftOnly [Transform.Id] giz]
 			include : dispiro
-				begin [lambda : set this.gizmo currentGlyph.gizmo]
 				widths.rhs [fallback s Stroke]
 				g4 mx d [heading Leftward]
 				archv
@@ -168,7 +167,6 @@ glyph-block CommonShapes : begin
 					local mx ((l + r) / 2)
 					currentGlyph.gizmo = [if transformShiftOnly [Transform.Id] giz]
 					include : spiro-outline
-						begin [lambda : set this.gizmo currentGlyph.gizmo]
 						g4 mx d
 						archv 32 2.0
 						g4 l my
@@ -463,22 +461,16 @@ glyph-block CommonShapes : begin
 			local depth : v + skew0 * sw - sw
 			local shallowLimit : sw / 2
 			local skew : clamp 0 (1 / 2) : skew0 + [clamp 0 shallowLimit (shallowLimit - depth)] / rad
-			local faf toFinish.af
-			if doSwash
-			: then : begin
-				set toFinish.af : lambda [] : begin
-					if faf : faf.apply this arguments
-					if this.headsTo : this.headsTo {
-						.x (Contrast / [Math.hypot 1 skew] * [if dtu (-1) 1])
-						.y (skew / [Math.hypot 1 skew] * [if ltr 1 (-1)])
-					}
-			: else : begin
-				set toFinish.af : lambda [] : begin
-					if faf : faf.apply this arguments
-					if this.headsTo : this.headsTo{
-						.x (Contrast * [if dtu (-1) 1])
-						.y 0
-					}
+
+			local headDirection : if doSwash
+				object
+					x (Contrast / [Math.hypot 1 skew] * [if dtu (-1) 1])
+					y (skew / [Math.hypot 1 skew] * [if ltr 1 (-1)])
+				object
+					x (Contrast * [if dtu (-1) 1])
+					y 0
+
+			set toFinish.af : new AfCombine toFinish.af [heading headDirection]
 
 		# Create the arc knots
 		local segBefore {}
@@ -487,14 +479,14 @@ glyph-block CommonShapes : begin
 			local fraction : j / nHookSegments
 			local mixRatioAdjust : Math.max (1 / 2) : (1 / 2) + [if doSwash 1 (1 / 8)] * (mixRatio - (1 / 2))
 			local fractionAfter : fraction * (1 - mixRatioAdjust) / mixRatioAdjust
-			local myfinal : _SuperXY ((1 - mixRatioAdjust) / mixRatioAdjust) superness
+			local myfinal : 1 - [archv.yFromX ((1 - mixRatioAdjust) / mixRatioAdjust) superness]
 			segBefore.push : g4
 				mix mx toStraight.x fraction
-				mix y toStraight.y (1 - [_SuperXY fraction superness])
+				mix y toStraight.y [archv.yFromX fraction superness]
 				begin unimportant
 			segAfter.push : g4
 				mix mx toFinish.x fraction
-				mix y toFinish.y ((1 - [_SuperXY fractionAfter superness]) / (1 - myfinal))
+				mix y toFinish.y ([archv.yFromX fractionAfter superness] / (1 - myfinal))
 				begin unimportant
 
 		if isStart
@@ -525,7 +517,7 @@ glyph-block CommonShapes : begin
 		local-parameter : noSwash        -- false
 		local-parameter : o              -- O
 		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
-		return : WithKnotProxy [hookProxy args] : Interpolator hookStartBlender args
+		return : WithKnotProxy [hookProxy args] : new FunctionInterpolator hookStartBlender args
 
 	glyph-block-export hookend
 	define flex-params [hookend] : begin
@@ -536,7 +528,7 @@ glyph-block CommonShapes : begin
 		local-parameter : noSwash        -- false
 		local-parameter : o              -- O
 		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
-		return : WithKnotProxy [hookProxy args] : Interpolator hookEndBlender args
+		return : WithKnotProxy [hookProxy args] : new FunctionInterpolator hookEndBlender args
 
 	glyph-block-export arch
 	define arch : namespace
@@ -638,7 +630,8 @@ glyph-block CommonShapes : begin
 			local-parameter : blendPre     -- [if anglePre nothing [arcvh]]
 			local-parameter : blendPost    -- [if anglePost nothing [archv]]
 			local args : object [lhs true] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost anglePre anglePost
-			return : WithKnotProxy [archBlenderProxy args] : Interpolator archBlender args
+			return : WithKnotProxy [archBlenderProxy args]
+				new FunctionInterpolator archBlender args
 
 		export : define flex-params [rhs] : begin
 			local-parameter : y
@@ -655,7 +648,8 @@ glyph-block CommonShapes : begin
 			local-parameter : blendPre     -- [if anglePre nothing [arcvh]]
 			local-parameter : blendPost    -- [if anglePost nothing [archv]]
 			local args : object [lhs false] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost anglePre anglePost
-			return : WithKnotProxy [archBlenderProxy args] : Interpolator archBlender args
+			return : WithKnotProxy [archBlenderProxy args]
+				new FunctionInterpolator archBlender args
 
 		foreach side {lhs rhs} : begin
 			set side.centerAt : object

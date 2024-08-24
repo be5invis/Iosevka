@@ -1,5 +1,16 @@
 ## Modifications since last major version
 
+### 31.4.0
+
+* Add characters:
+  - OCR HOOK (`U+2440`) .. OCR BOW TIE (`U+2445`) (#2465).
+* Add slanted dollar and cent sign (#2408).
+* Add round-top capital A (#2472).
+* Fix `cv41` application to `ss01`, `ss02`, `ss04`, `ss06`, and `ss15`.
+* Fix `cv54` application to `ss01`, `ss03`, `ss04`, `ss06`, `ss07`, `ss09`, `ss12`, `ss14`, `ss15`, `ss17`, and `ss18`.
+* Fix `cv62` application to `ss01`, `ss02`, `ss04`, `ss07`, `ss09`, `ss13`, `ss15`, `ss16`, and `ss18`.
+
+
 ### 31.3.0
 
 * Add `diagonal-tailed-cursive` variants for Cyrillic Lower Ef (`cv93`).
