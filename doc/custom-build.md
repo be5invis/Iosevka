@@ -70,6 +70,7 @@ Inside the plan, top-level properties include:
         - `U+27FE` LONG RIGHTWARDS DOUBLE ARROW FROM BAR
         - `U+27FF` LONG RIGHTWARDS SQUIGGLE ARROW
         - `U+2B33` LONG LEFTWARDS SQUIGGLE ARROW
+        - `U+3000` IDEOGRAPHIC SPACE
     - Remove `NWID` and `WWID` features typographic features
   - `fixed`: Apply `fontconfig-mono` changes and further remove ligations.
 * `serifs`: Optional, String, configures style of serifs.
