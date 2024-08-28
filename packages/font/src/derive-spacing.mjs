@@ -85,7 +85,6 @@ async function deriveFixed_DropWideChars(font) {
 		0x27fe, // LONG RIGHTWARDS DOUBLE ARROW FROM BAR
 		0x27ff, // LONG RIGHTWARDS SQUIGGLE ARROW
 		0x2b33, // LONG LEFTWARDS SQUIGGLE ARROW
-		0x3000, // IDEOGRAPHIC SPACE
 	];
 	for (const ch of longCharCodes) {
 		font.cmap.unicode.delete(ch);
