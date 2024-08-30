@@ -101,7 +101,7 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 	glyph-block-export CyrZe
 	define [CyrZe] : with-params [
 		slabTop slabBot top bot left right blend hook _stroke
-		[xo OX] [op OverlayPos] [ada2 SmallArchDepthA] [adb2 SmallArchDepthB]
+		[xo OX] [yo O] [op OverlayPos] [ada2 SmallArchDepthA] [adb2 SmallArchDepthB]
 		] : namespace
 		export : define [Dim] : begin
 			local stroke : fallback _stroke : AdviceStroke2 2 3 (top - bot)
@@ -109,8 +109,8 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			local midy : mix bot top op
 			local topHeight : top - bot
 			local midyHeight : midy - bot
-			local adb : topHeight - [mix (midyHeight + stroke / 2) (topHeight - O - stroke) (ArchDepthA / (ArchDepthA + ArchDepthB))] + [HSwToV TanSlope] * stroke
-			local ada : [mix (stroke + O) (midyHeight - stroke / 2) (ArchDepthA / (ArchDepthA + ArchDepthB))] - [HSwToV TanSlope] * stroke
+			local adb : topHeight - [mix (midyHeight + stroke / 2) (topHeight - yo - stroke) (ArchDepthA / (ArchDepthA + ArchDepthB))] + [HSwToV TanSlope] * stroke
+			local ada : [mix (stroke + yo) (midyHeight - stroke / 2) (ArchDepthA / (ArchDepthA + ArchDepthB))] - [HSwToV TanSlope] * stroke
 			local fine : stroke * CThin
 			local stemFine : stroke * (ShoulderFine / Stroke)
 			return : object stroke midx midy ada adb fine stemFine
@@ -241,6 +241,22 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			include : MarkSet.p
 			include : let [ze : CyrZe slabTop slabBot XH Descender SB RightSB StdBlend SHook]
 				union [ze.Shape] [ze.AutoStartSerifL] [ze.AutoEndSerifL]
+
+		create-glyph "cyrl/Dhe.\(suffix)" : glyph-proc
+			include [refer-glyph "cyrl/Ze.\(suffix)"] AS_BASE ALSO_METRICS
+			include : ExtendBelowBaseAnchors (-LongJut + 0.5 * Stroke)
+			include : let [zeNoO : CyrZe slabTop slabBot CAP 0 SB RightSB StdBlend Hook (xo -- 0) (yo -- 0)]
+				difference
+					VBar.m Middle (-LongJut + 0.5 * Stroke) (Stroke + O) [AdviceStroke 3.5]
+					zeNoO.ShapeMask
+
+		create-glyph "cyrl/dhe.\(suffix)" : glyph-proc
+			include [refer-glyph "cyrl/ze.\(suffix)"] AS_BASE ALSO_METRICS
+			include : ExtendBelowBaseAnchors (-LongJut + 0.5 * Stroke)
+			include : let [zeNoO : CyrZe slabTop slabBot XH 0 SB RightSB StdBlend SHook (xo -- 0) (yo -- 0)]
+				difference
+					VBar.m Middle (-LongJut + 0.5 * Stroke) (Stroke + O) [AdviceStroke 3.5]
+					zeNoO.ShapeMask
 
 		create-glyph "cyrl/DzjeKomi.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -482,8 +498,22 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 	select-variant 'cyrl/DzjeKomi' 0x506 (follow -- 'cyrl/ZeTopSerifOnly')
 	select-variant 'cyrl/dzjeKomi' 0x507 (follow -- 'cyrl/zeTopSerifOnly')
 
-	derive-composites 'cyrl/Dhe' 0x498 'cyrl/Ze' 'cedillaExtShapeBelowOArc'
-	derive-composites 'cyrl/dhe' 0x499 'cyrl/ze' 'cedillaExtShapeBelowSOArc'
+	select-variant 'cyrl/Dhe' 0x498 (follow -- 'cyrl/Ze')
+	select-variant 'cyrl/dhe' 0x499 (follow -- 'cyrl/ze')
+
+	derive-multi-part-glyphs 'cyrl/Dhe.BSH' null { 'cyrl/Ze' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
+		local { base mark } srcs
+		include : refer-glyph mark
+		include : Translate Width AccentClearance
+		include [refer-glyph base] AS_BASE ALSO_METRICS
+		include : ExtendBelowBaseAnchors (-AccentHeight)
+
+	derive-multi-part-glyphs 'cyrl/dhe.BSH' null { 'cyrl/ze' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
+		local { base mark } srcs
+		include : refer-glyph mark
+		include : Translate Width AccentClearance
+		include [refer-glyph base] AS_BASE ALSO_METRICS
+		include : ExtendBelowBaseAnchors (-AccentHeight)
 
 	select-variant 'latn/epsilon/descBase' (shapeFrom -- 'latn/epsilon')
 	select-variant 'latn/epsilonRev/descBase' (shapeFrom -- 'cyrl/ze') (follow -- 'cyrl/ze/descBase')
