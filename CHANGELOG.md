@@ -1,5 +1,14 @@
 ## Modifications since last major version
 
+### 31.5.0
+
+* Add characters:
+  - KAYAH LI SIGN CWI (`U+A92E`).
+  - ZERO WIDTH NON-BREAKING SPACE (`U+FEFF`).
+* Add APL form (`APLF`) for `U+25E0` and `U+25E1`, for UIUA.
+* Add Cyrillic localization forms for Bashkir and Chuvash.
+
+
 ### 31.4.0
 
 * Add characters:
