@@ -1,0 +1,45 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg fallback SuffixCfg] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Greek-Lower-Alpha : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-Lower-A : SingleStoreyConfig
+
+	###########################################################################################
+	# UNIFIED LETTERFORMS : GREEK ORIGINALS
+	###########################################################################################
+	create-glyph 'grek/alpha.crossing' : glyph-proc
+		include : MarkSet.e
+
+		local middle : mix SB RightSB 0.42
+		local fine   : AdviceStroke 3.25
+		local k1 0.25
+		local k2 0.5
+		local k3 0.35
+		include : dispiro
+			widths.rhs fine
+			g4   (RightSB - OX * 1.75) XH [heading Downward]
+			bezControls k1 k2 k3 1 6
+			arch.rhs.centerAt.rtl.b middle 0
+			archv
+			flat (SB + OX * 2) SmallArchDepthB
+			curl (SB + OX * 2) (XH - SmallArchDepthA)
+			arcvh
+			arch.rhs.centerAt.ltr.t middle XH
+			bezControls (1 - k3) 0 (1 - k1) (1 - k2) 6
+			g4   (RightSB - OX * 2) 0 [widths.heading 0 fine Downward]
+
+		set-base-anchor 'overlay' (middle - OX) (XH * OverlayPos)
+
+	foreach { suffix { body bar } } [Object.entries SingleStoreyConfig] : do
+		create-glyph "grek/alpha.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : body [DivFrame 1] XH bar no-shape
+
+	select-variant 'grek/alpha' 0x3B1
+	link-reduced-variant 'grek/alpha/sansSerif' 'grek/alpha' MathSansSerif
