@@ -1,5 +1,14 @@
 ## Modifications since last major version
 
+### 31.6.0
+
+* Add Latin localization forms for Polish and Romanian.
+* Make Combining Square Below (`U+033B`) slightly narrower.
+* Improve glyph visual for Combining Suspension Mark (`U+1DC3`).
+* Make Cyrillic Capital/Small Letter Uk (`U+0478`..`U+0479`) slightly narrower under Quasi-Proportional.
+* Make Cyrillic Capital/Small Letter Round Omega (`U+047A`..`U+047B`) slightly wider under Quasi-Proportional.
+
+
 ### 31.5.0
 
 * Add characters:
