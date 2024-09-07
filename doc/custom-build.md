@@ -3090,7 +3090,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ya-standing-open-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ya-standing-open-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ya = 'standing-open-tailed-serifed'</code>, <code>VAAA = 36</code></td></tr>
     <tr><td>Cyrillic Lower Ya (<code>я</code>) with standing leg (like Helvetica), open contour, tail, and serifs</td></tr>
     </table></details>
-  - Styles for `ij` (Dots in letters “i” and “j” in particular (not including dots in other letters, even if they are similar))
+  - Styles for `ij` (Dots in letters “i” and “j” in particular)
     <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="92"><img src="../images/cv-tittle-round.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-tittle-round.dark.svg#gh-dark-mode-only" width=64/></td><td><code>tittle = 'round'</code>, <code>VDAA = 1</code></td></tr>
