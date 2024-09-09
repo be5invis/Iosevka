@@ -28,15 +28,22 @@ glyph-block AutoBuild-Accents : begin
 		return amended
 
 	# Here, we build a simplified substitution builder that does the mark substitutions
-	define [substParts parts ignore backtrack input loookAhead production] : begin
+	# This is similar to GSUB lookup type 6 but with more flexibility
+	define flex-params [substParts] : begin
+		local-parameter : parts
+		local-parameter : ignore -- MatchUtil.never
+		local-parameter : backtrack -- {}
+		local-parameter : input
+		local-parameter : lookAhead -- {}
+		local-parameter : replace
 		local igl 0
 		while (igl < parts.length) : begin
-			local m : substMatch parts igl ignore backtrack input loookAhead
+			local m : substMatch parts igl ignore backtrack input lookAhead
 			if [not m]
 			: then : inc igl
 			: else : begin
 				local inputGlyphs : ArrayUtil.mapIndexToItems parts m
-				local producedGlyphs : production.apply null inputGlyphs
+				local producedGlyphs : replace.apply null inputGlyphs
 				foreach i [range (m.length - 1) downtill 0] : begin
 					parts.splice m.(i) 1
 				ArrayUtil.insertSliceAt parts m.0 producedGlyphs
@@ -78,24 +85,22 @@ glyph-block AutoBuild-Accents : begin
 
 		return m
 
+	# Match/replace directives
 	define [dotless g] : begin
 		local gDotless : query-glyph : Dotless.get g
 		if [not gDotless] : return null
 		return {gDotless}
-
 	define [isMark k] : function [g] : begin
 		return : g && g.markAnchors && g.markAnchors.(k)
 	define [isMarkExcluding k] : function [g] : begin
 		return : g && g.markAnchors && [Object.keys g.markAnchors].length && !g.markAnchors.(k)
 	define [hasBaseAnchor k] : function [g] : begin
 		return : g && g.baseAnchors && g.baseAnchors.(k)
-	define [isLeaningMark k] : function [g] : begin
-		return : g && g.markAnchors && g.markAnchors.(k) && [LeaningMark.get g]
-	define [leaningMarkSplit g] : begin
+	define [produceLeaningMark gnSuppressAnchor] : function [g] : begin
 		local spacer : query-glyph : LeaningMarkSpacer.get g
 		local alternative : query-glyph : LeaningMark.get g
 		if (spacer && alternative) : return { spacer alternative }
-		return { g }
+		return { [query-glyph gnSuppressAnchor] g }
 
 	define [markSubst uk] : begin
 		local mapping : new Map
@@ -165,23 +170,48 @@ glyph-block AutoBuild-Accents : begin
 		### Keep the semantics here synchronized with `ccmp` feature
 
 		# Handle dotless form
-		substParts parts [isMarkExcluding 'above'] {} {dotless} {[isMark 'above']} dotless
+		substParts parts
+			ignore    -- [isMarkExcluding 'above']
+			input     -- {dotless}
+			lookAhead -- {[isMark 'above']}
+			replace   -- dotless
 
 		# Handle iota subscript
-		substParts parts iotaLF.ignore {[hasBaseAnchor 'lf']} {iotaLF.matcher} {} iotaLF.production
+		substParts parts
+			ignore    -- iotaLF.ignore
+			backtrack -- {[hasBaseAnchor 'lf']}
+			input     -- {iotaLF.matcher}
+			replace   -- iotaLF.production
 
 		# Handle ogonek
-		substParts parts ogonek.ignore {[hasBaseAnchor 'trailing']} {ogonek.matcher} {} ogonek.production
+		substParts parts
+			ignore    -- ogonek.ignore
+			backtrack -- {[hasBaseAnchor 'trailing']}
+			input     -- {ogonek.matcher}
+			replace   -- ogonek.production
 
 		# Handle mark combinations (Greek)
-		substParts parts MatchUtil.never {} { markComposition.matchFirst markComposition.matchSecond } {} markComposition.production
+		substParts parts
+			input     -- { markComposition.matchFirst markComposition.matchSecond }
+			replace   -- markComposition.production
 
 		# Handle upper Greek Tonos marks
-		substParts parts MatchUtil.never {[hasBaseAnchor 'grekUpperTonos']} {upperTonos.matcher} {} upperTonos.production
+		substParts parts
+			backtrack -- {[hasBaseAnchor 'grekUpperTonos']}
+			input     -- {upperTonos.matcher}
+			replace   -- upperTonos.production
 
 		# Handle leaning marks
-		substParts parts [isMarkExcluding 'above'] {[MatchUtil.either [hasBaseAnchor 'leaningAbove'] [isMark 'leaningAbove']]} {[isLeaningMark 'above']} {} leaningMarkSplit
-		substParts parts [isMarkExcluding 'below'] {[MatchUtil.either [hasBaseAnchor 'leaningBelow'] [isMark 'leaningBelow']]} {[isLeaningMark 'below']} {} leaningMarkSplit
+		substParts parts
+			ignore    -- [isMarkExcluding 'above']
+			backtrack -- {[MatchUtil.either [hasBaseAnchor 'leaningAbove'] [isMark 'leaningAbove']]}
+			input     -- {[isMark 'above']}
+			replace   -- [produceLeaningMark 'mark/suppressLeaningAboveAnchor']
+		substParts parts
+			ignore    -- [isMarkExcluding 'below']
+			backtrack -- {[MatchUtil.either [hasBaseAnchor 'leaningBelow'] [isMark 'leaningBelow']]}
+			input     -- {[isMark 'below']}
+			replace   -- [produceLeaningMark 'mark/suppressLeaningBelowAnchor']
 
 	define [pad _s n] : begin
 		local s _s
