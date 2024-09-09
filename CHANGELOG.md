@@ -1,5 +1,10 @@
 ## Modifications since last major version
 
+### 31.6.1
+
+- Fix broken accent stacking behavior for partially precomposed characters with leaning anchors (#2492).
+
+
 ### 31.6.0
 
 * Add Latin localization forms for Polish and Romanian.
