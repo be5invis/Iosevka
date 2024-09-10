@@ -1,0 +1,72 @@
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [TieMark AnyDerivingCv ScheduleLeaningMark LeaningMark LeaningMarkSpacer] from "@iosevka/glyph/relation"
+
+import [DesignParameters] from "../meta/aesthetics.mjs"
+
+extern Set
+
+glyph-module
+
+glyph-block Mark-Doppelganger : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : TieAnchorMap LeaningAnchorMap
+
+	define [DeriveMarkChange gr gn akFrom akTo] : begin
+		DeriveMeshT {gn} AnyDerivingCv : function [gns] : begin
+			local srcGn gns.0
+			local src : query-glyph srcGn
+			local toGN : gr.amendName srcGn
+			if [not : query-glyph toGN] : begin
+				create-glyph toGN : glyph-proc
+					include [refer-glyph srcGn] AS_BASE ALSO_METRICS
+					set currentGlyph.markAnchors.(akTo) currentGlyph.markAnchors.(akFrom)
+					currentGlyph.deleteMarkAnchor akFrom
+					set currentGlyph.baseAnchors.(akTo) currentGlyph.baseAnchors.(akFrom)
+					currentGlyph.deleteBaseAnchor akFrom
+
+			src.addVariantForRecursiveBuild [query-glyph toGN]
+			gr.set src toGN
+			return toGN
+
+	define [DeriveSpacer gr gn] : begin
+		DeriveMeshT {gn} AnyDerivingCv : function [gns] : begin
+			local srcGn gns.0
+			local src : query-glyph srcGn
+			local toGN : gr.amendName srcGn
+
+			if [not : query-glyph toGN] : begin
+				create-glyph toGN : glyph-proc
+					include [refer-glyph srcGn] AS_BASE ALSO_METRICS
+					currentGlyph.clearGeometry
+
+			src.addVariantForRecursiveBuild [query-glyph toGN]
+			gr.set src toGN
+			return toGN
+
+	# Building the doppelganger and spacer glyph for leaning marks
+	do : foreach { gn g } [glyphStore.namedEntries] : begin
+		DeriveTieMarks gn g
+		DeriveLeaningMark gn g
+	: where
+		[PickTieMarkClasses g] : begin
+			foreach { akFrom akTo } [items-of TieAnchorMap] : begin
+				if (g.markAnchors.(akFrom)) : begin
+					return { akFrom akTo }
+			return null
+		[DeriveTieMarks gn g] : begin
+			local cls : PickTieMarkClasses g
+			if cls : DeriveMarkChange TieMark gn cls.0 cls.1
+
+		[PickLeaningMarkClasses g] : begin
+			foreach { akFrom akTo } [items-of LeaningAnchorMap] : begin
+				if ([ScheduleLeaningMark.get g] && g.markAnchors.(akFrom)) : begin
+					return { akFrom akTo }
+			return null
+		[DeriveLeaningMark gn g] : begin
+			local cls : PickLeaningMarkClasses g
+			if cls : begin
+				DeriveMarkChange LeaningMark gn cls.0 cls.1
+				DeriveSpacer LeaningMarkSpacer gn

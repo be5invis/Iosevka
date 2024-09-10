@@ -12,36 +12,25 @@ glyph-block Letter-Shared : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : TurnMarks LeaningAnchorMap
-
-	glyph-block-export CreateMultiAccentedComposition
-	define [CreateMultiAccentedComposition dst u gnSrc gnAccents]
-		derive-multi-part-glyphs dst u { gnSrc :: gnAccents } : function [gns gr] : glyph-proc
-			local { gnBase :: gnAccents } gns
-
-			include [refer-glyph gnBase] AS_BASE ALSO_METRICS
-			foreach gnAccent [items-of gnAccents] : begin
-				local gAccent : query-glyph gnAccent
-				currentGlyph.includeMarkWithLeaningSupport gAccent LeaningAnchorMap
-
-			if (!gr) : begin
-				if (gnAccents.length === 1 && [gnAccents.0.endsWith 'tittleAbove'])
-				: then : Dotless.set currentGlyph gnBase
-				: else : CvDecompose.set currentGlyph { gnSrc :: gnAccents }
+	glyph-block-import Letter-Accent-Builder : TransformGlyphCompositionSequence
 
 	glyph-block-export CreateAccentedComposition
 	define [CreateAccentedComposition dst u srcGid accentGid]
 		CreateMultiAccentedComposition dst u srcGid { accentGid }
 
-	glyph-block-export CreateOgonekComposition
-	define [CreateOgonekComposition dst u srcGid]
-		derive-multi-part-glyphs dst u { srcGid 'ogonekBelow' 'ogonekTR/spacer' 'ogonekTR' } : function [gns gr] : glyph-proc
-			local { base markBelow spacer markTR } gns
-			include [refer-glyph base] AS_BASE ALSO_METRICS
-			if currentGlyph.baseAnchors.trailing
-				then : begin
-					include [refer-glyph spacer]
-					include [refer-glyph markTR]
-				else : include [refer-glyph markBelow]
+	glyph-block-export CreateMultiAccentedComposition
+	define [CreateMultiAccentedComposition dst u gnSrc gnAccents]
+		derive-multi-part-glyphs dst u { gnSrc :: gnAccents } : function [gns gr] : glyph-proc
+			local glyphParts : gns.map : function [gn] : query-glyph gn
+			TransformGlyphCompositionSequence glyphParts
+
+			include glyphParts.0 AS_BASE ALSO_METRICS
+			foreach part [items-of : glyphParts.slice 1] : if part : include part
+
+			if (!gr) : begin
+				if (gns.length === 2 && [gns.1.endsWith 'tittleAbove'])
+				: then : Dotless.set currentGlyph gns.0
+				: else : CvDecompose.set currentGlyph gns
 
 	glyph-block-export CreateCommaCaronComposition
 	define [CreateCommaCaronComposition dst u sourceGid offset]

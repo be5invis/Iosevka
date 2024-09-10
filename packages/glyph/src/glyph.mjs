@@ -5,8 +5,6 @@ import { Anchor } from "@iosevka/geometry/anchor";
 import { Vec2 } from "@iosevka/geometry/point";
 import { Transform } from "@iosevka/geometry/transform";
 
-import { ScheduleLeaningMark } from "./relation.mjs";
-
 export class Glyph {
 	constructor(identifier) {
 		this._m_identifier = identifier;
@@ -66,11 +64,17 @@ export class Glyph {
 	// Dependency
 	dependsOn(glyph) {
 		if (!this._m_dependencyManager) return;
+		if (!glyph) throw new TypeError("Dependency glyph is null or undefined");
 		this._m_dependencyManager.addDependency(this, glyph);
 	}
 	hasDependency(other) {
 		if (!this._m_dependencyManager) return false;
 		return this._m_dependencyManager.hasGlyphToGlyphDependency(this, other);
+	}
+	addVariantForRecursiveBuild(variantGlyph) {
+		if (!this._m_dependencyManager) return;
+		if (!variantGlyph) throw new TypeError("Variant glyph is null or undefined");
+		this._m_dependencyManager.addVariantDependency(this, variantGlyph);
 	}
 
 	// Copying
@@ -106,11 +110,6 @@ export class Glyph {
 		this.includeGlyphImpl(g, shift.x, shift.y);
 		if (copyAnchors) this.copyAnchors(g);
 		if (copyWidth && g.advanceWidth >= 0) this.advanceWidth = g.advanceWidth;
-	}
-	includeMarkWithLeaningSupport(g, lm) {
-		let shift = new Vec2(0, 0);
-		this.combineMarks(g, shift, lm);
-		this.includeGlyphImpl(g, shift.x, shift.y);
 	}
 	includeGlyphImpl(g, shiftX, shiftY) {
 		if (g._m_identifier) {
@@ -162,21 +161,15 @@ export class Glyph {
 	}
 
 	// Anchors
-	combineMarks(g, shift, lm) {
+	combineMarks(g, shift) {
 		if (!g.markAnchors) return;
-		const fScheduledLeaning = lm && ScheduleLeaningMark.get(g);
 		for (const mk in g.markAnchors) {
 			// Find the base mark class and anchor
 			const baseThisN = this.baseAnchors[mk];
 			if (!baseThisN) continue;
 
 			// Find the leaning base mark class and anchor, if any
-			let mkLeaning = mk;
-			if (fScheduledLeaning) {
-				for (const [mkT, mkLeaningT] of lm)
-					if (mk === mkT && this.baseAnchors[mkLeaningT]) mkLeaning = mkLeaningT;
-			}
-			const baseThisL = this.baseAnchors[mkLeaning];
+			const baseThisL = this.baseAnchors[mk];
 			if (!baseThisL) continue;
 
 			// Find the mark anchor in mark glyph
@@ -195,15 +188,7 @@ export class Glyph {
 						baseThisN.x - markThat.x + baseDerived.x,
 						baseThisN.y - markThat.y + baseDerived.y,
 					);
-					if (mkNewMark === mk) {
-						fSuppress = false;
-						if (mkLeaning !== mk) {
-							this.baseAnchors[mkLeaning] = new Anchor(
-								baseThisL.x - markThat.x + baseDerived.x,
-								baseThisL.y - markThat.y + baseDerived.y,
-							);
-						}
-					}
+					if (mkNewMark === mk) fSuppress = false;
 				}
 			}
 			if (fSuppress) delete this.baseAnchors[mk];
