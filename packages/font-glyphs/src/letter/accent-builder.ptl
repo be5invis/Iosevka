@@ -1,0 +1,199 @@
+$$include '../meta/macros.ptl'
+
+import [fallback ArrayUtil MatchUtil] from "@iosevka/util"
+import [Dotless LeaningMark LeaningMarkSpacer] from "@iosevka/glyph/relation"
+import as UnicodeKnowledge from "../meta/unicode-knowledge.mjs"
+
+extern Map
+extern Set
+
+glyph-module
+
+glyph-block Letter-Accent-Builder : begin
+	glyph-block-import Common-Derivatives : query-glyph refer-glyph
+
+	### Perform in-place transformation of the glyphs used to build accented letters
+	glyph-block-export TransformGlyphCompositionSequence
+	define [TransformGlyphCompositionSequence parts] : begin
+		### Keep the semantics here synchronized with `ccmp` feature
+		# Handle dotless form
+		substParts parts
+			ignore    -- [isMarkExcluding 'above']
+			input     -- {dotless}
+			lookAhead -- {[isMark 'above']}
+			replace   -- dotless
+
+		# Handle iota subscript
+		substParts parts
+			ignore    -- iotaLF.ignore
+			backtrack -- {[hasBaseAnchor 'lf']}
+			input     -- {iotaLF.matcher}
+			replace   -- iotaLF.production
+
+		# Handle ogonek
+		substParts parts
+			ignore    -- ogonek.ignore
+			backtrack -- {[hasBaseAnchor 'trailing']}
+			input     -- {ogonek.matcher}
+			replace   -- ogonek.production
+
+		# Handle mark combinations (Greek)
+		substParts parts
+			input     -- { markComposition.matchFirst markComposition.matchSecond }
+			replace   -- markComposition.production
+
+		# Handle upper Greek Tonos marks
+		substParts parts
+			backtrack -- {[hasBaseAnchor 'grekUpperTonos']}
+			input     -- {upperTonos.matcher}
+			replace   -- upperTonos.production
+
+		# Handle leaning marks
+		substParts parts
+			ignore    -- [isMarkExcluding 'above']
+			backtrack -- {[MatchUtil.either [hasBaseAnchor 'leaningAbove'] [isMark 'leaningAbove']]}
+			input     -- {[isMark 'above']}
+			replace   -- [produceLeaningMark 'mark/suppressLeaningAboveAnchor']
+		substParts parts
+			ignore    -- [isMarkExcluding 'below']
+			backtrack -- {[MatchUtil.either [hasBaseAnchor 'leaningBelow'] [isMark 'leaningBelow']]}
+			input     -- {[isMark 'below']}
+			replace   -- [produceLeaningMark 'mark/suppressLeaningBelowAnchor']
+
+	# Here, we build a simplified substitution builder that does the mark substitutions
+	# This is similar to GSUB lookup type 6 but with more flexibility
+	define flex-params [substParts] : begin
+		local-parameter : parts
+		local-parameter : ignore -- MatchUtil.never
+		local-parameter : backtrack -- {}
+		local-parameter : input
+		local-parameter : lookAhead -- {}
+		local-parameter : replace
+		local igl 0
+		while (igl < parts.length) : begin
+			local m : substMatch parts igl ignore backtrack input lookAhead
+			if [not m]
+			: then : inc igl
+			: else : begin
+				local inputGlyphs : ArrayUtil.mapIndexToItems parts m
+				local producedGlyphs : replace.apply null inputGlyphs
+				foreach i [range (m.length - 1) downtill 0] : begin
+					parts.splice m.(i) 1
+				ArrayUtil.insertSliceAt parts m.0 producedGlyphs
+				set igl : m.(m.length - 1) + 1 + producedGlyphs.length - m.length
+
+		return parts
+
+	define [substMatch parts igl ignore backtrack input lookAhead] : begin
+		if (igl >= parts.length) : return null
+		if [ignore parts.(igl)] : return null
+		if [not : input.0 parts.(igl)] : return null
+
+		local m { igl }
+
+		# Check input
+		local iglInput : igl + 1
+		foreach iInput [range 1 input.length] : begin
+			while (iglInput < parts.length && [ignore parts.(iglInput)]) : inc iglInput
+			if (iglInput >= parts.length) : return null
+			if [not : input.(iInput) parts.(iglInput)] : return null
+			m.push iglInput
+			inc iglInput
+
+		# Check lookahead
+		local iglLookAhead iglInput
+		foreach iLookAhead [range 0 lookAhead.length] : begin
+			while (iglLookAhead < parts.length && [ignore parts.(iglLookAhead)]) : inc iglLookAhead
+			if (iglLookAhead >= parts.length) : return null
+			if [not : lookAhead.(iLookAhead) parts.(iglLookAhead)] : return null
+			inc iglLookAhead
+
+		# Check backtrack
+		local iglBacktrack : igl - 1
+		foreach iBacktrack [range (backtrack.length - 1) downtill 0] : begin
+			while (iglBacktrack >= 0 && [ignore parts.(iglBacktrack)]) : dec iglBacktrack
+			if (iglBacktrack < 0) : return null
+			if [not : backtrack.(iBacktrack) parts.(iglBacktrack)] : return null
+			dec iglBacktrack
+
+		return m
+
+	# Match/replace directives
+	define [dotless g] : begin
+		local gDotless : query-glyph : Dotless.get g
+		if [not gDotless] : return null
+		return {gDotless}
+	define [isMark k] : function [g] : begin
+		return : g && g.markAnchors && g.markAnchors.(k)
+	define [isMarkExcluding k] : function [g] : begin
+		return : g && g.markAnchors && [Object.keys g.markAnchors].length && !g.markAnchors.(k)
+	define [hasBaseAnchor k] : function [g] : begin
+		return : g && g.baseAnchors && g.baseAnchors.(k)
+
+	define [markSubst uk] : begin
+		local mapping : new Map
+		foreach { k v } [Object.entries uk] : begin
+			local gFrom : query-glyph k
+			local gTo : query-glyph v
+			mapping.set gFrom gTo
+
+		define [matcher g] : mapping.has g
+		define [ignore g] : g && g.markAnchors && [Object.keys g.markAnchors].length && ![matcher g]
+		define [production g] : list ([mapping.get g] || g)
+
+		return : object matcher ignore production
+
+	define [markSplit uk] : begin
+		local mapping : new Map
+		foreach { k v } [Object.entries uk] : begin
+			local gFrom : query-glyph k
+			local gsTo : v.map query-glyph
+			mapping.set gFrom gsTo
+
+		define [matcher g] : mapping.has g
+		define [ignore g] : g && g.markAnchors && [Object.keys g.markAnchors].length && ![matcher g]
+		define [production g] : [mapping.get g] || { g }
+
+		return : object matcher ignore production
+
+	define [markCombine uk] : begin
+		local first : new Set
+		local second : new Set
+		local mapping : new Map
+
+		foreach { { k1 k2 } v } [items-of uk] : begin
+			local g1 : query-glyph k1
+			local g2 : query-glyph k2
+			local g3 : query-glyph v
+			if (g1 && g2 && g3) : begin
+				first.add g1
+				second.add g2
+
+				local mm : mapping.get g1
+				if [not mm] : begin
+					set mm : new Map
+					mapping.set g1 mm
+				mm.set g2 g3
+
+		define [matchFirst g] : first.has g
+		define [matchSecond g] : second.has g
+		define [production g1 g2] : begin
+			local mm : mapping.get g1
+			if [not mm] : return { g1 g2 }
+			local g3 : mm.get g2
+			if [not g3] : return { g1 g2 }
+			return { g3 }
+
+		return : object matchFirst matchSecond production
+
+	define iotaLF : markSubst UnicodeKnowledge.iotaBelowToLfTf
+	define ogonek : markSplit UnicodeKnowledge.ogonekBelowToTRTf
+	define upperTonos : markSubst UnicodeKnowledge.upperGrekMarkToTonosTf
+
+	define markComposition : markCombine UnicodeKnowledge.markCompositionTf
+
+	define [produceLeaningMark gnSuppressAnchor] : function [g] : begin
+		local spacer : query-glyph : LeaningMarkSpacer.get g
+		local alternative : query-glyph : LeaningMark.get g
+		if (spacer && alternative) : return { spacer alternative }
+		return { [query-glyph gnSuppressAnchor] g }
