@@ -1,0 +1,110 @@
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Counting-Rod : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define isProportional : para.diversityII < 1
+	define rodDiv : mix 1 para.diversityM 2
+	define rodDf : DivFrame rodDiv 5
+	define rodSw rodDf.mvs
+	define hRodSw : AdviceStroke 3 rodDiv
+	define rodSpace : rodDf.width / 5
+
+	do "Counting Rod Ones"
+		define [RodY i sw] : mix (0 + sw / 2) (CAP - sw / 2) (i / 4)
+		create-glyph 'countingRod1' 0x1D360 : glyph-proc
+			local df : include : DivFrame rodDiv
+			include : df.markSet.capital
+			include : HBar.m df.leftSB df.rightSB [RodY 0 hRodSw] hRodSw
+		create-glyph 'countingRod2' 0x1D361 : glyph-proc
+			local df : include : DivFrame rodDiv
+			include : refer-glyph 'countingRod1' AS_BASE ALSO_METRICS
+			include : HBar.m df.leftSB df.rightSB [RodY 1 hRodSw] hRodSw
+		create-glyph 'countingRod3' 0x1D362 : glyph-proc
+			local df : include : DivFrame rodDiv
+			include : refer-glyph 'countingRod2' AS_BASE ALSO_METRICS
+			include : HBar.m df.leftSB df.rightSB [RodY 2 hRodSw] hRodSw
+		create-glyph 'countingRod4' 0x1D363 : glyph-proc
+			local df : include : DivFrame rodDiv
+			include : refer-glyph 'countingRod3' AS_BASE ALSO_METRICS
+			include : HBar.m df.leftSB df.rightSB [RodY 3 hRodSw] hRodSw
+		create-glyph 'countingRod5' 0x1D364 : glyph-proc
+			local df : include : DivFrame rodDiv
+			include : refer-glyph 'countingRod4' AS_BASE ALSO_METRICS
+			include : HBar.m df.leftSB df.rightSB [RodY 4 hRodSw] hRodSw
+		create-glyph 'countingRod6' 0x1D365 : glyph-proc
+			local df : include : DivFrame rodDiv
+			include : refer-glyph 'countingRod1' AS_BASE ALSO_METRICS
+			include : VBar.m df.middle [RodY 0 hRodSw] CAP rodSw
+		create-glyph 'countingRod7' 0x1D366 : glyph-proc
+			local df : include : DivFrame rodDiv
+			include : refer-glyph 'countingRod2' AS_BASE ALSO_METRICS
+			include : VBar.m df.middle [RodY 1 hRodSw] CAP rodSw
+		create-glyph 'countingRod8' 0x1D367 : glyph-proc
+			local df : include : DivFrame rodDiv
+			include : refer-glyph 'countingRod3' AS_BASE ALSO_METRICS
+			include : VBar.m df.middle [RodY 2 hRodSw] CAP rodSw
+		create-glyph 'countingRod9' 0x1D368 : glyph-proc
+			local df : include : DivFrame rodDiv
+			include : refer-glyph 'countingRod4' AS_BASE ALSO_METRICS
+			include : VBar.m df.middle [RodY 3 hRodSw] CAP rodSw
+
+	do "Counting Rod Tens"
+		define [rodTens nStrokes plusFive] : glyph-proc
+			local df : include : DivFrame rodDiv nStrokes
+			include : df.markSet.capital
+
+			if plusFive : include : HBar.t df.leftSB df.rightSB CAP hRodSw
+
+			if (nStrokes === 1) : begin
+					include : VBar.m df.middle 0 CAP rodSw
+			: else : begin
+				local radius : (rodSpace * (nStrokes - 1)) / 2
+				foreach [j : range 0 nStrokes] : do
+					include : VBar.m (df.middle + [mix (-radius) radius : j / (nStrokes - 1)]) 0 CAP rodSw
+
+		create-glyph 'countingRodTens1' 0x1D369 : glyph-proc
+			include : rodTens 1 0
+		create-glyph 'countingRodTens2' 0x1D36A : glyph-proc
+			include : rodTens 2 0
+		create-glyph 'countingRodTens3' 0x1D36B : glyph-proc
+			include : rodTens 3 0
+		create-glyph 'countingRodTens4' 0x1D36C : glyph-proc
+			include : rodTens 4 0
+		create-glyph 'countingRodTens5' 0x1D36D : glyph-proc
+			include : rodTens 5 0
+		create-glyph 'countingRodTens6' 0x1D36E : glyph-proc
+			include : rodTens 1 1
+		create-glyph 'countingRodTens7' 0x1D36F : glyph-proc
+			include : rodTens 2 1
+		create-glyph 'countingRodTens8' 0x1D370 : glyph-proc
+			include : rodTens 3 1
+		create-glyph 'countingRodTens9' 0x1D371 : glyph-proc
+			include : rodTens 4 1
+
+	do "Tally Marks"
+		create-glyph 'tallyMarkOne' 0x1D377 : glyph-proc
+			local df : include : DivFrame : if isProportional (rodDiv / 4) 1
+			include : df.markSet.capital
+			include : VBar.m df.middle 0 CAP df.mvs
+
+		create-glyph 'tallyMarkFive' 0x1D378 : glyph-proc
+			local df : include : DivFrame rodDiv 4
+			include : df.markSet.capital
+
+			local left  : df.leftSB  + [HSwToV : 0.5 * df.mvs]
+			local right : df.rightSB - [HSwToV : 0.5 * df.mvs]
+
+			include : VBar.m      left              0 CAP df.mvs
+			include : VBar.m [mix left right (1/3)] 0 CAP df.mvs
+			include : VBar.m [mix left right (2/3)] 0 CAP df.mvs
+			include : VBar.m           right        0 CAP df.mvs
+
+			include : dispiro
+				flat (left  - LongJut / 2 + OX) (CAP * (1/3)) [widths.center df.mvs]
+				curl (right + LongJut / 2 - OX) (CAP * (2/3))
