@@ -145,7 +145,7 @@ export class Glyph {
 
 	tryBecomeMirrorOf(dst, rankSet) {
 		if (rankSet.has(this) || rankSet.has(dst)) return;
-		if (dst.hasDependency(this)) return;
+		if (this === dst || dst.hasDependency(this)) return;
 		const csThis = Geom.hashGeometry(this.geometry);
 		const csDst = Geom.hashGeometry(dst.geometry);
 		if (csThis && csDst && csThis === csDst) {
