@@ -49,9 +49,13 @@ export class RecursiveBuildFilter {
 	}
 }
 
+const DEP_TRAVERSE_PENDING = 1,
+	DEP_TRAVERSE_CHECKED = 2;
+
 export class DependencyManager {
 	constructor() {
 		this.glyphToGlyph = new WeakMap();
+		this.glyphToGlyphVariant = new WeakMap();
 		this.glyphToBlock = new WeakMap();
 		this.blockToGlyph = new Map();
 	}
@@ -60,6 +64,14 @@ export class DependencyManager {
 		if (!s) {
 			s = new Set();
 			this.glyphToGlyph.set(dependent, s);
+		}
+		s.add(dependency);
+	}
+	addVariantDependency(dependent, dependency) {
+		let s = this.glyphToGlyphVariant.get(dependent);
+		if (!s) {
+			s = new Set();
+			this.glyphToGlyphVariant.set(dependent, s);
 		}
 		s.add(dependency);
 	}
@@ -84,47 +96,6 @@ export class DependencyManager {
 		return false;
 	}
 
-	traverseGlyphDependenciesImpl(glyphs, fBlockwiseExpand) {
-		let state = new Map();
-		const PENDING = 1,
-			CHECKED = 2;
-
-		for (const glyph of glyphs) state.set(glyph, PENDING);
-
-		// When fBlockwiseExpand is true, we need to expand the initial glyph set
-		// to include all glyphs in the same block.
-		if (fBlockwiseExpand) {
-			let blocks = new Set();
-			for (const glyph of glyphs) {
-				let b = this.glyphToBlock.get(glyph);
-				if (b) blocks.add(b);
-			}
-			for (const b of blocks) {
-				const glyphs = this.blockToGlyph.get(b);
-				if (glyphs) {
-					for (const g of glyphs) state.set(g, PENDING);
-				}
-			}
-		}
-
-		// Traverse the dependency graph
-		for (;;) {
-			let found = false;
-			for (const [glyph, s] of state) {
-				if (s !== PENDING) continue;
-				const deps = this.glyphToGlyph.get(glyph);
-				if (deps) {
-					for (const g of deps) state.set(g, PENDING);
-					found = true;
-				}
-				state.set(glyph, CHECKED);
-			}
-			if (!found) break;
-		}
-
-		return state;
-	}
-
 	traverseDependencies(glyphs) {
 		const gGlyphGraph = this.traverseGlyphDependenciesImpl(glyphs, false);
 		const gBlockGraph = this.traverseGlyphDependenciesImpl(glyphs, true);
@@ -140,6 +111,56 @@ export class DependencyManager {
 		}
 
 		return new RecursiveBuildFilter(glyphIdFilter, blockIdFilter);
+	}
+
+	traverseGlyphDependenciesImpl(glyphs, fBlockwiseExpand) {
+		let state = new Map();
+		for (const glyph of glyphs) if (glyph) state.set(glyph, DEP_TRAVERSE_PENDING);
+
+		for (let cycle = 0; cycle < 64; cycle++) {
+			let szBefore = state.size;
+			this.expandeByVariants(state);
+			if (fBlockwiseExpand) this.blockwiseExpandGlyphs(state);
+			this.traverseDirectDependenciesImpl(state);
+			if (state.size === szBefore) break;
+		}
+
+		return state;
+	}
+	expandeByVariants(state) {
+		for (const glyph of state.keys()) {
+			const vs = this.glyphToGlyphVariant.get(glyph);
+			if (!vs) continue;
+			for (const v of vs) if (v && !state.has(v)) state.set(v, DEP_TRAVERSE_PENDING);
+		}
+	}
+	blockwiseExpandGlyphs(state) {
+		let blocks = new Set();
+		for (const glyph of state.keys()) {
+			let b = this.glyphToBlock.get(glyph);
+			if (b) blocks.add(b);
+		}
+		for (const b of blocks) {
+			const glyphs = this.blockToGlyph.get(b);
+			if (!glyphs) continue;
+			for (const g of glyphs) if (g && !state.has(g)) state.set(g, DEP_TRAVERSE_PENDING);
+		}
+	}
+	traverseDirectDependenciesImpl(state) {
+		// Traverse the dependency graph
+		for (let cycle = 0; cycle < 64; cycle++) {
+			let found = false;
+			for (const [glyph, s] of state) {
+				if (s !== DEP_TRAVERSE_PENDING) continue;
+				const deps = this.glyphToGlyph.get(glyph);
+				if (deps) {
+					for (const g of deps) if (g) state.set(g, DEP_TRAVERSE_PENDING);
+					found = true;
+				}
+				state.set(glyph, DEP_TRAVERSE_CHECKED);
+			}
+			if (!found) break;
+		}
 	}
 }
 
@@ -191,7 +212,14 @@ export class GlyphSaveSink {
 		);
 	}
 
+	saveFalse($1, $2, contents) {
+		return this.saveImpl(true, $1, $2, contents);
+	}
 	save($1, $2, contents) {
+		return this.saveImpl(false, $1, $2, contents);
+	}
+
+	saveImpl(fForce, $1, $2, contents) {
 		// Figure out the glyph name and unicode to save
 		let saveGlyphName = null;
 		let unicode = null;
@@ -204,7 +232,7 @@ export class GlyphSaveSink {
 		}
 
 		// If we are in a recursive build run, and the glyph is not needed, skip it
-		if (saveGlyphName && !this.glyphIsNeeded(saveGlyphName)) return;
+		if (!fForce && saveGlyphName && !this.glyphIsNeeded(saveGlyphName)) return;
 
 		// Create the glyph object & include the contents
 		const glyphObject = new Glyph(saveGlyphName);

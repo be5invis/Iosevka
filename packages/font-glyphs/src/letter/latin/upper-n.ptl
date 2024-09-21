@@ -19,7 +19,8 @@ glyph-block Letter-Latin-Upper-N : begin
 	define SLAB-AUTO    1
 	define SLAB-MOTION  2
 	define SLAB-ALL     3
-	define SLAB-DIGAMMA 4
+	define SLAB-CYRL-I  4
+	define SLAB-DIGAMMA 5
 
 	define [NShape] : with-params [bodyType slabType top left right [crowd 2] [crDiag 4]] : glyph-proc
 		local swDiag : AdviceStroke crDiag
@@ -83,23 +84,21 @@ glyph-block Letter-Latin-Upper-N : begin
 				ExtLineCenter 2 swDiag (left + swDiag) yEnd (right - swDiag) top
 
 		local sf : SerifFrame top 0 left right (swRef -- stroke)
-		local lbSerifs : match bodyType
-			[Just BODY-SYMMETRIC]  sf.lb.outer
-			[Just BODY-ASYMMETRIC] sf.lb.full
 		include : match slabType
-			[Just SLAB-ALL]     : composite-proc sf.lt.full lbSerifs sf.rt.outer sf.rb.full
-			[Just SLAB-AUTO]    : NeedSlab SLAB : composite-proc sf.lt.full lbSerifs sf.rt.outer sf.rb.full
-			[Just SLAB-MOTION]  : composite-proc sf.lt.outer
+			[Just SLAB-ALL]     : composite-proc sf.lt.full sf.rt.outer sf.rb.full
+			[Just SLAB-AUTO]    : NeedSlab SLAB : composite-proc sf.lt.full sf.rt.outer sf.rb.full
+			[Just SLAB-MOTION]  : composite-proc sf.rt.outer
 			[Just SLAB-NONE]    : no-shape
+			[Just SLAB-CYRL-I]  : NeedSlab SLAB : composite-proc sf.lt.full sf.lb.outer sf.rt.outer sf.rb.full
 			[Just SLAB-DIGAMMA] : NeedSlab SLAB : composite-proc sf.lt.full sf.rb.full
 
 	define NConfig : object
 		standardSerifless       { BODY-SYMMETRIC  4 SLAB-NONE   }
 		standardMotionSerifed   { BODY-SYMMETRIC  4 SLAB-MOTION }
-		standardSerifed         { BODY-SYMMETRIC  4 SLAB-ALL   }
+		standardSerifed         { BODY-SYMMETRIC  4 SLAB-ALL    }
 		asymmetricSerifless     { BODY-ASYMMETRIC 3 SLAB-NONE   }
 		asymmetricMotionSerifed { BODY-ASYMMETRIC 3 SLAB-MOTION }
-		asymmetricSerifed       { BODY-ASYMMETRIC 3 SLAB-ALL   }
+		asymmetricSerifed       { BODY-ASYMMETRIC 3 SLAB-ALL    }
 
 	foreach { suffix { bodyType crD slabType } } [Object.entries NConfig] : do
 		create-glyph "N.\(suffix)" : glyph-proc
@@ -114,7 +113,7 @@ glyph-block Letter-Latin-Upper-N : begin
 		create-glyph "Eng.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
 			local [object swEnd] : include : NShape bodyType slabType CAP SB RightSB (crDiag -- crD)
-			include : EngHook RightSB 0 Descender (sw -- [Math.min Stroke (swEnd * 1.5)])
+			include : EngHook RightSB 0 Descender (sw -- [Math.min Stroke (swEnd * 4/3)])
 
 		create-glyph "NHookLeft.\(suffix)" : glyph-proc
 			include [refer-glyph "N.\(suffix)"] AS_BASE ALSO_METRICS
@@ -152,10 +151,10 @@ glyph-block Letter-Latin-Upper-N : begin
 
 	create-glyph 'cyrl/I' 0x418 : glyph-proc
 		include : MarkSet.capital
-		include : NRevShape BODY-SYMMETRIC SLAB-AUTO CAP SB RightSB (crDiag -- crD)
+		include : NRevShape BODY-SYMMETRIC SLAB-CYRL-I CAP SB RightSB (crDiag -- crD)
 	create-glyph 'cyrl/i.upright' : glyph-proc
 		include : MarkSet.e
-		include : NRevShape BODY-SYMMETRIC SLAB-AUTO XH  SB RightSB (crDiag -- crD)
+		include : NRevShape BODY-SYMMETRIC SLAB-CYRL-I XH  SB RightSB (crDiag -- crD)
 
 	create-glyph 'grek/DigammaPamphylian' 0x376 : glyph-proc
 		include : MarkSet.capital
