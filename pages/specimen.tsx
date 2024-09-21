@@ -534,6 +534,7 @@ function CharVariantsImpl(props: SpecimenCharacterProps) {
     const rows = [...typographicFeatures, ...charFeatures];
     for (let iGroup = 0; iGroup < rows.length; iGroup++) {
         const fs = queryCvList(ctx.val.atlas, rows[iGroup]);
+        if (fs.size <= 1) continue;
         const subgroups: JSX.Element[] = [];
 
         for (let iSubgroup = 0; iSubgroup < fs.groups.length; iSubgroup++) {
