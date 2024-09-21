@@ -2,8 +2,8 @@ import fs from "fs";
 import path from "path";
 import url from "url";
 
-import ugc from "@unicode/unicode-15.1.0/General_Category/index.js";
-import ucdNames from "@unicode/unicode-15.1.0/Names/index.js";
+import ugc from "@unicode/unicode-16.0.0/General_Category/index.js";
+import ucdNames from "@unicode/unicode-16.0.0/Names/index.js";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 

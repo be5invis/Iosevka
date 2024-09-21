@@ -8,17 +8,19 @@ glyph-module
 glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateAccentedComposition CreateOgonekComposition
+	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateAccentedComposition
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors
 
 	define [ISeriflessShape df top bot jut] : glyph-proc
 		include : VBar.m df.middle bot top
 
-	define [ISerifShape df top bot jut] : glyph-proc
+	define [ISerifShapeImpl df top bot jut] : glyph-proc
 		include : VBar.m df.middle bot top
-		include : HSerif.mb df.middle bot (jut * df.div)
-		include : HSerif.mt df.middle top (jut * df.div)
-		set-base-anchor 'trailing' (df.middle + jut * df.div) bot
+		include : HSerif.mb df.middle bot jut
+		include : HSerif.mt df.middle top jut
+		set-base-anchor 'trailing' (df.middle + jut) bot
+
+	define [ISerifShape df top bot jut] : ISerifShapeImpl df top bot (jut * df.div)
 
 	define UpperIConfig : object
 		'straight'     { para.diversityI  ISeriflessShape LongJut      }
@@ -63,7 +65,9 @@ glyph-block Letter-Latin-Upper-I : begin
 	create-glyph 'smcpI' 0x26A : glyph-proc
 		local df : include : DivFrame para.diversityI
 		include : df.markSet.e
-		include : ISerifShape df XH 0 MidJutCenter
+		include : ISerifShapeImpl df XH 0 MidJutCenter
+
+	CreateAccentedComposition 'smcpIBarOver' 0x1D7B 'smcpI' 'barOver'
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarCenter
 	create-glyph 'mathbb/I' 0x1D540 : glyph-proc
@@ -71,7 +75,3 @@ glyph-block Letter-Latin-Upper-I : begin
 		include : BBBarCenter Middle 0 CAP
 		include : HBar.t    (Middle - BBD / 2 - Jut) (Middle + BBD / 2 + Jut) CAP BBS
 		include : HBar.b (Middle - BBD / 2 - Jut) (Middle + BBD / 2 + Jut) 0   BBS
-
-	CreateAccentedComposition 'smcpIBarOver' 0x1D7B 'smcpI' 'barOver'
-
-	CreateOgonekComposition 'IOgonek' 0x12E 'I'
