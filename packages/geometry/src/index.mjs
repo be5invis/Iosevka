@@ -771,6 +771,18 @@ export class SimplifyGeometry extends CachedGeometry {
 		h.embed(this.m_geom);
 		h.endStruct();
 	}
+
+	static wrapWithGizmo(g, gizmo) {
+		const needsTransform = !Transform.isTranslate(gizmo);
+		if (needsTransform) {
+			return new TransformedGeometry(
+				gizmo,
+				new SimplifyGeometry(new TransformedGeometry(gizmo.inverse(), g)),
+			);
+		} else {
+			return new SimplifyGeometry(g);
+		}
+	}
 }
 
 // Utility functions

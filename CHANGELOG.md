@@ -1,5 +1,10 @@
 ## Modifications since last major version
 
+### 31.7.1
+
+* Fix internal seams of variants of outlined letters U+1CCE6 and U+1CCEF (#2509).
+
+
 ### 31.7.0
 
 * Fix Macedonian Cyrillic Gje under italics (#2493).
