@@ -14,6 +14,8 @@ glyph-block Letter-Latin-Upper-N : begin
 
 	define BODY-SYMMETRIC  1
 	define BODY-ASYMMETRIC 2
+	define BODY-COMPRESSED 3
+	define BODY-CYRL-I : if SLAB BODY-COMPRESSED BODY-SYMMETRIC
 
 	define SLAB-NONE    0
 	define SLAB-AUTO    1
@@ -63,9 +65,13 @@ glyph-block Letter-Latin-Upper-N : begin
 		local yEnd : match bodyType
 			[Just BODY-SYMMETRIC]    0
 			[Just BODY-ASYMMETRIC] : top * 0.375
+			[Just BODY-COMPRESSED] : if SLAB (stroke * 1.25) 0
+		local yStart : match bodyType
+			[Just BODY-COMPRESSED] : top - yEnd
+			__                       top
 		local swEnd : match bodyType
 			[Just BODY-SYMMETRIC]    swDiag
-			[Just BODY-ASYMMETRIC]   stroke
+			__                       stroke
 
 		include : union
 			match bodyType
@@ -73,15 +79,15 @@ glyph-block Letter-Latin-Upper-N : begin
 					flat left top [widths.lhs.heading stroke Downward]
 					curl left (top * 0.6) [heading Downward]
 					straight.down.end left 0 [widths.lhs.heading swEnd Downward]
-				[Just BODY-ASYMMETRIC] : VBar.l left 0 top swEnd
+				__                    : VBar.l left 0 top swEnd
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
 					flat right 0 [widths.lhs.heading stroke Upward]
 					curl right (top * 0.4) [heading Upward]
 					straight.up.end right top [widths.lhs.heading swEnd Upward]
-				[Just BODY-ASYMMETRIC] : VBar.r right 0 top swEnd
+				__                    : VBar.r right 0 top swEnd
 			intersection [Rect top 0 left right]
-				ExtLineCenter 2 swDiag (left + swDiag) yEnd (right - swDiag) top
+				ExtLineCenter 2 swDiag (left + swDiag) yEnd (right - swDiag) yStart
 
 		local sf : SerifFrame top 0 left right (swRef -- stroke)
 		include : match slabType
@@ -89,7 +95,9 @@ glyph-block Letter-Latin-Upper-N : begin
 			[Just SLAB-AUTO]    : NeedSlab SLAB : composite-proc sf.lt.full sf.rt.outer sf.rb.full
 			[Just SLAB-MOTION]  : composite-proc sf.rt.outer
 			[Just SLAB-NONE]    : no-shape
-			[Just SLAB-CYRL-I]  : NeedSlab SLAB : composite-proc sf.lt.full sf.lb.outer sf.rt.outer sf.rb.full
+			[Just SLAB-CYRL-I]  : NeedSlab SLAB : match bodyType
+				[Just BODY-COMPRESSED] : composite-proc sf.lt.full sf.lb.full  sf.rt.full  sf.rb.full
+				[Just BODY-SYMMETRIC]  : composite-proc sf.lt.full sf.lb.outer sf.rt.outer sf.rb.full
 			[Just SLAB-DIGAMMA] : NeedSlab SLAB : composite-proc sf.lt.full sf.rb.full
 
 	define NConfig : object
@@ -151,18 +159,29 @@ glyph-block Letter-Latin-Upper-N : begin
 
 	create-glyph 'cyrl/I' 0x418 : glyph-proc
 		include : MarkSet.capital
-		include : NRevShape BODY-SYMMETRIC SLAB-CYRL-I CAP SB RightSB (crDiag -- crD)
+		include : NRevShape BODY-CYRL-I SLAB-CYRL-I CAP SB RightSB (crDiag -- 4)
+
+	CreateAccentedComposition 'cyrl/IBreve' 0x419 'cyrl/I' 'breveAbove'
+	CreateAccentedComposition 'cyrl/IGrave' 0x40D 'cyrl/I' 'graveAbove'
+
+	create-glyph 'cyrl/I.BGR' : glyph-proc
+		include : MarkSet.capital
+		include : NRevShape BODY-SYMMETRIC SLAB-CYRL-I CAP SB RightSB (crDiag -- 4)
+
+	CreateAccentedComposition 'cyrl/IBreve.BGR' null 'cyrl/I.BGR' 'breveAbove'
+	CreateAccentedComposition 'cyrl/IGrave.BGR' null 'cyrl/I.BGR' 'graveAbove'
+
 	create-glyph 'cyrl/i.upright' : glyph-proc
 		include : MarkSet.e
-		include : NRevShape BODY-SYMMETRIC SLAB-CYRL-I XH  SB RightSB (crDiag -- crD)
+		include : NRevShape BODY-CYRL-I SLAB-CYRL-I XH SB RightSB (crDiag -- 4)
 
 	create-glyph 'grek/DigammaPamphylian' 0x376 : glyph-proc
 		include : MarkSet.capital
-		include : NRevShape BODY-SYMMETRIC SLAB-DIGAMMA CAP SB RightSB (crDiag -- crD)
+		include : NRevShape BODY-SYMMETRIC SLAB-DIGAMMA CAP SB RightSB (crDiag -- 4)
 	alias 'grek/digammaPamphylian' 0x377 'smcpNRev.standardSerifless'
 
 	derive-composites 'cyrl/IShortTail' 0x48A 'cyrl/I' [refer-glyph 'breveAbove'] [CyrTailDescender.rSideJut RightSB 0]
-	derive-composites 'cyrl/iShortTail.upright' null  'cyrl/i.upright' [refer-glyph 'breveAbove'] [CyrTailDescender.rSideJut RightSB 0]
+	derive-composites 'cyrl/iShortTail.upright' null 'cyrl/i.upright' [refer-glyph 'breveAbove'] [CyrTailDescender.rSideJut RightSB 0]
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/N' 0x2115 : glyph-proc
