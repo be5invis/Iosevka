@@ -13,41 +13,43 @@ glyph-block Letter-Latin-X : begin
 	glyph-block-import Letter-Shared-Shapes : CyrDescender PalatalHook
 
 	glyph-block-export HalfXStrand
-	define [HalfXStrand stb fSlab _leftx lefty rightx righty turn pStraight tension _sw] : glyph-proc
+	define [HalfXStrand stb fSlab _xOuter yOuter xCenter yCenter turn pStraight tension _sw _pConn] : glyph-proc
 		local sw : fallback _sw Stroke
-		local sbCor : if stb ([StrokeWidthBlend 1 6] * OX * ([Math.abs (lefty - righty)] / CAP)) 0
-		local leftx : _leftx + ([HSwToV : 0.5 * sw] + [Math.max (-SideJut) sbCor]) * [if (rightx > _leftx) 1 (-1)]
+		local sbCor : if stb ([StrokeWidthBlend 1 6] * OX * ([Math.abs (yOuter - yCenter)] / CAP)) 0
+		local xOuter : _xOuter + ([HSwToV : 0.5 * sw] + [Math.max (-SideJut) sbCor]) * [if (xCenter > _xOuter) 1 (-1)]
 
 		if stb : begin
-			local hst : (0.5 * sw) * [DiagCor (righty - lefty) (rightx - leftx) 0 0]
+			local hst : (0.5 * sw) * [DiagCor (yCenter - yOuter) (xCenter - xOuter) 0 0]
 			local hse : (0.5 * sw) * [Math.min 0.97 ([AdviceStroke 3] / Stroke)]
-			local leftx2 : _leftx + ([HSwToV hst] + [Math.max (-SideJut) sbCor]) * [if (rightx > _leftx) 1 (-1)]
+			local xOuterAdjusted : _xOuter + ([HSwToV hst] + [Math.max (-SideJut) sbCor]) * [if (xCenter > _xOuter) 1 (-1)]
 			include : dispiro
-				corner leftx2 lefty [widths.heading hst hst [if (lefty < righty) Upward Downward]]
-				corner rightx righty [widths.center : 2 * hse]
+				corner xOuterAdjusted yOuter [widths.heading hst hst [if (yOuter < yCenter) Upward Downward]]
+				corner xCenter yCenter [widths.center : 2 * hse]
 
 		: else : begin
-			local height : Math.abs (lefty - righty)
+			local height : Math.abs (yOuter - yCenter)
 			local slabClearance : if fSlab ((sw / Stroke) * [AdviceStroke2 2 3 height]) 0
-			local turnyleft : mix lefty righty [if fSlab [Math.max turn (slabClearance / height)] turn]
-			local cyleft : mix turnyleft righty tension
-			local straightxleft : mix leftx rightx pStraight
-			local straightyleft : mix cyleft righty pStraight
+			local turnyOuter : mix yOuter yCenter [if fSlab [Math.max turn (slabClearance / height)] turn]
+			local cyOuter : mix turnyOuter yCenter tension
+			local straightXOuter : mix xOuter xCenter pStraight
+			local straightYOuter : mix cyOuter yCenter pStraight
+			local xCenterAdj : mix xCenter xOuter [fallback _pConn 0]
+			local yCenterAdj : mix yCenter cyOuter [fallback _pConn 0]
 			include : dispiro
 				widths.center sw
-				flat leftx lefty [heading [if (lefty < righty) Upward Downward]]
-				curl leftx turnyleft [heading [if (lefty < righty) Upward Downward]]
-				quadControls 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
-				flat straightxleft straightyleft
-				curl rightx righty
+				flat xOuter yOuter [heading [if (yOuter < yCenter) Upward Downward]]
+				curl xOuter turnyOuter [heading [if (yOuter < yCenter) Upward Downward]]
+				quadControls 0 ((cyOuter - turnyOuter) / (straightYOuter - turnyOuter)) 24
+				flat straightXOuter straightYOuter
+				curl xCenterAdj yCenterAdj
 
 	glyph-block-export XStrand
-	define [XStrand stb slab _leftx lefty _rightx righty turn pStraight tension _sw] : glyph-proc
-		local middlex : mix _leftx _rightx 0.5
-		local middley : mix lefty righty 0.5
+	define [XStrand stb slab xLeft yLeft xRight yRight turn pStraight tension _sw] : glyph-proc
+		local xMid : mix xLeft xRight 0.5
+		local yMid : mix yLeft yRight 0.5
 
-		include : HalfXStrand stb slab _leftx lefty middlex middley turn pStraight tension _sw
-		include : HalfXStrand stb slab _rightx righty middlex middley turn pStraight tension _sw
+		include : HalfXStrand stb slab xLeft yLeft xMid yMid turn pStraight tension _sw (-0.001)
+		include : HalfXStrand stb slab xRight yRight xMid yMid turn pStraight tension _sw (-0.001)
 
 	define [XChanceryStrand sign leftX leftY rightX rightY fHalf _sw] : begin
 		local sw : fallback _sw Stroke

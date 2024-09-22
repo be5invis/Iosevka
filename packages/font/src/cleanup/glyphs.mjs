@@ -20,19 +20,8 @@ function regulateGlyphStore(cache, para, skew, glyphStore) {
 
 function flattenSimpleGlyph(cache, para, skew, g) {
 	try {
-		let gSimplified;
-		const needsTransform = g.gizmo ? !Transform.isTranslate(g.gizmo) : skew != 0;
-		if (needsTransform) {
-			const tfBack = g.gizmo ? g.gizmo.inverse() : new Transform(1, -skew, 0, 1, 0, 0);
-			const tfForward = g.gizmo ? g.gizmo : new Transform(1, +skew, 0, 1, 0, 0);
-			gSimplified = Geom.TransformedGeometry.create(
-				tfForward,
-				new Geom.SimplifyGeometry(Geom.TransformedGeometry.create(tfBack, g.geometry)),
-			);
-		} else {
-			gSimplified = new Geom.SimplifyGeometry(g.geometry);
-		}
-
+		if (!g.gizmo) throw new TypeError("No gizmo");
+		const gSimplified = Geom.SimplifyGeometry.wrapWithGizmo(g.geometry, g.gizmo);
 		const cs = gSimplified.toContours({ cache });
 		g.clearGeometry();
 		g.includeContours(cs);
