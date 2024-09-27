@@ -1,0 +1,42 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Letter-Latin-Archaic-M : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+
+	define [ExtLineJct ke ks sw x1 y1 kl1 kr1 x2 y2 kl2 kr2] : dispiro
+		flat [mix x1 x2 (-ke)]  [mix y1 y2 (-ke)]  [widths (sw * kl1) (sw * kr1)]
+		curl [mix x1 x2 0]      [mix y1 y2 0]      [widths (sw * kl1) (sw * kr1)]
+		flat [mix x1 x2 ks]	    [mix y1 y2 ks]     [widths.center sw]
+		curl [mix x1 x2 (1-ks)]	[mix y1 y2 (1-ks)] [widths.center sw]
+		flat [mix x1 x2 1]      [mix y1 y2 1]      [widths (sw * kl2) (sw * kr2)]
+		curl [mix x1 x2 (1+ke)] [mix y1 y2 (1+ke)] [widths (sw * kl2) (sw * kr2)]
+
+	define [ArchaicMShape df top bottom] : glyph-proc
+		local sw df.mvs
+		local cl : df.leftSB  + 0.5 * HVContrast * sw
+		local cr : df.rightSB - 0.5 * HVContrast * sw
+		local kt 0.2
+		local ko 0.5
+
+		include : intersection [Rect top bottom df.leftSB df.rightSB] : union
+			ExtLineJct 4 0.45 sw [mix cl cr 0.0] bottom ko ko [mix cl cr 0.2] top    ko kt
+			ExtLineJct 4 0.45 sw [mix cl cr 0.2] top    ko kt [mix cl cr 0.4] bottom kt ko
+			ExtLineJct 4 0.45 sw [mix cl cr 0.4] bottom kt ko [mix cl cr 0.6] top    ko kt
+			ExtLineJct 4 0.45 sw [mix cl cr 0.6] top    ko kt [mix cl cr 0.8] bottom kt ko
+			ExtLineJct 4 0.45 sw [mix cl cr 0.8] bottom kt ko [mix cl cr 1.0] top    ko ko
+
+		if SLAB : begin
+			local sf : SerifFrame.fromDf df top bottom (fForceSymmetric -- true)
+			include : difference sf.lb.full [MaskRight : mix cl cr 0.3]
+			include : difference sf.rt.full [MaskLeft  : mix cl cr 0.7]
+
+	create-glyph "ArchaicM" 0xA7FF : glyph-proc
+		local df : include : DivFrame para.diversityM 4.5
+		include : df.markSet.capital
+		include : ArchaicMShape df CAP 0
