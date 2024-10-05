@@ -1,6 +1,6 @@
 $$include '../meta/macros.ptl'
 
-import [clamp fallback] from "@iosevka/util"
+import [mix clamp fallback] from "@iosevka/util"
 
 glyph-module
 
@@ -67,3 +67,26 @@ glyph-block Recursive-Build : begin
 		return : Fork glyphs forkedPara
 
 	glyph-block-export Fork Miniature MiniatureParaT Thinner Widen
+
+glyph-block Recursive-Build-ParaTfm : begin
+	glyph-block-export ForkTfm
+	define ForkTfm : namespace
+		define [boldGrade g] : begin
+			local pGrade : (900 - g) / 100
+			return : 900 - 100 * (2 / 25) * pGrade * pGrade
+
+		export : define [Bold   a]     : begin [set a.shape.weight : boldGrade a.shape.weight]
+		export : define [Italic a]     : begin
+			set a.shape.slope 'italic'
+			set a.shape.slopeAngle : mix (para.slopeAngle || 0) 15 (94 / 150)
+		export : define [Sans   a]     : begin [set a.shape.serifs 'sans']
+
+		export : define [BoldItalic a] : begin [Bold a] [Italic a]
+		export : define [SansBold   a]     : begin [Sans a] [Bold a]
+		export : define [SansItalic a]     : begin [Sans a] [Italic a]
+		export : define [SansBoldItalic a] : begin [Sans a] [Bold a] [Italic a]
+
+		export : define [TypeWriter a] : begin
+			set a.shape.spacing 'fixed'
+			if (a.derivingVariants && a.derivingVariants.mathtt)
+				set a.variants a.derivingVariants.mathtt
