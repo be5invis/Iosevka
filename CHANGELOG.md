@@ -1,5 +1,20 @@
 ## Modifications since last major version
 
+### 31.8.0
+
+* Add characters:
+  - LATIN EPIGRAPHIC LETTER ARCHAIC M (`U+A7FF`) (#2517).
+  - MUSICAL SYMBOL RINFORZANDO (`U+1D18C`) ... MUSICAL SYMBOL FORTE (`U+1D191`) (#2522).
+* Improve glyph for Cyrillic I (`И`/`и`) under slab (#2489).
+  - Bulgarian locale (`'BGR '`) uses original style for capital.
+* Optimize glyph for Tonos Above (`U+0384`) in accented Greek letters.
+* Optimize stroke width of bar for split bowl variants of Cyrillic Lower Ef (`ф`).
+* Optimize glyph for Cyrillic Capital Ef (`Ф`) under Bulgarian locale (`'BGR '`) under slab.
+* Fix seam in glyphs of Cyrillic Capital/Small Letter Zhwe (`U+A684`..`U+A685`).
+* Fix broken shape of certain power and playback symbols under quasi-proportional (#2528).
+* Fix alignment of the suit part of Playing Cards glyphs under quasi-Proportional (#2529).
+
+
 ### 31.7.1
 
 * Fix internal seams of variants of outlined letters U+1CCE6 and U+1CCEF (#2509).
