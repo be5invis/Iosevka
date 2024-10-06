@@ -23,6 +23,7 @@ export const VS01 = LinkedGlyphProp("VS01");
 export const TieMark = LinkedGlyphProp("TieMark");
 export const LeaningMark = LinkedGlyphProp("LeaningMark");
 export const LeaningMarkSpacer = LinkedGlyphProp("LeaningMarkSpacer");
+export const NLDAcuteVariant = LinkedGlyphProp("NLDAcuteVariant");
 
 export const LocalizedForm = {
 	SRB: {

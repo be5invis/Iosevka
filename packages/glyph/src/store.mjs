@@ -88,9 +88,19 @@ export class GlyphStore {
 	queryByUnicode(u) {
 		return this.encodingForward.get(u);
 	}
+	queryByUnicodeEnsured(u) {
+		const g = this.encodingForward.get(u);
+		if (!g) throw new Error(`Glyph for Unicode ${u} doesn't exist.`);
+		return g;
+	}
 	queryNameByUnicode(u) {
 		const g = this.queryByUnicode(u);
 		if (!g) return undefined;
+		return this.queryNameOf(g);
+	}
+	queryNameByUnicodeEnsured(u) {
+		const g = this.queryByUnicode(u);
+		if (!g) throw new Error(`Glyph for Unicode ${u} doesn't exist.`);
 		return this.queryNameOf(g);
 	}
 	queryUnicodeOf(g) {
