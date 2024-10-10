@@ -230,7 +230,7 @@ export function SetupBuilders(bindings) {
 
 	widths.heading = function (l, r, d) {
 		if (!isFinite(l)) throw new TypeError("NaN detected for left width");
-		if (!isFinite(r)) throw new TypeError("NaN detected for left width");
+		if (!isFinite(r)) throw new TypeError("NaN detected for right width");
 		if (!isFinite(d.x) || !isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
 		return new AfWidthsHeading(l, r, d);
