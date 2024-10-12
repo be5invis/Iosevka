@@ -7,6 +7,6 @@ export const unicodeGcMap = new Map();
 export const unicodeNameMap = new Map();
 
 for (const [u, gc, name] of rawUnicodeDataMap) {
-    unicodeGcMap.set(u, gc);
-    unicodeNameMap.set(u, name);
+	unicodeGcMap.set(u, gc);
+	unicodeNameMap.set(u, name);
 }

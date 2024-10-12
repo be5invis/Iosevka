@@ -12,21 +12,21 @@ import { TerminalSampler } from "../shared/index-parts/terminal-sampler";
 import { WidthSampler } from "../shared/index-parts/width-sampler";
 
 export default function Index() {
-    return (
-        <div className="page">
-            <Head>
-                <title>Iosevka</title>
-            </Head>
-            <Banner />
-            <GrandIntro />
-            <StatDashboard />
-            <WidthSampler />
-            <TerminalSampler />
-            <CharacterVariantSampler />
-            <LigationSampler />
-            <ProportionalSampler />
-            <SupportedLanguagesList />
-            <Footer />
-        </div>
-    );
+	return (
+		<div className="page">
+			<Head>
+				<title>Iosevka</title>
+			</Head>
+			<Banner />
+			<GrandIntro />
+			<StatDashboard />
+			<WidthSampler />
+			<TerminalSampler />
+			<CharacterVariantSampler />
+			<LigationSampler />
+			<ProportionalSampler />
+			<SupportedLanguagesList />
+			<Footer />
+		</div>
+	);
 }

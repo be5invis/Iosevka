@@ -4,31 +4,31 @@ import rawAtlas_Etoile from "./raw/atlas-IosevkaEtoile.json";
 import rawAtlas_Slab from "./raw/atlas-IosevkaSlab.json";
 
 export type SingleFeatureApp = {
-    css: string;
-    description?: string;
+	css: string;
+	description?: string;
 };
 export type FeatureSeries = {
-    name: string;
-    size: number;
-    groups: SingleFeatureApp[][];
+	name: string;
+	size: number;
+	groups: SingleFeatureApp[][];
 };
 export type Block = {
-    name: string;
-    characters: Character[];
+	name: string;
+	characters: Character[];
 };
 export type Character = {
-    lch: number;
-    inFont: boolean;
-    isCompositeOrLigature?: boolean;
-    typographicFeatureSets?: number[];
-    cvFeatureSetsUpright?: number[];
-    cvFeatureSetsItalic?: number[];
-    cvFeatureSetsOblique?: number[];
+	lch: number;
+	inFont: boolean;
+	isCompositeOrLigature?: boolean;
+	typographicFeatureSets?: number[];
+	cvFeatureSetsUpright?: number[];
+	cvFeatureSetsItalic?: number[];
+	cvFeatureSetsOblique?: number[];
 };
 
 export type Atlas = {
-    featureSeries: FeatureSeries[];
-    unicodeCoverage: Block[];
+	featureSeries: FeatureSeries[];
+	unicodeCoverage: Block[];
 };
 
 export const Atlas_Sans = rawAtlas_Sans as Atlas;
