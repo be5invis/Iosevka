@@ -22,6 +22,9 @@ export class GeometryBase {
 	toReferences() {
 		throw new Error("Unimplemented");
 	}
+	toIndependent() {
+		throw new Error("Unimplemented");
+	}
 	getDependencies() {
 		throw new Error("Unimplemented");
 	}
@@ -49,6 +52,9 @@ export class ContourSetGeometry extends GeometryBase {
 	}
 	toReferences() {
 		return null;
+	}
+	toIndependent() {
+		return this;
 	}
 	getDependencies() {
 		return null;
@@ -102,7 +108,22 @@ export class CachedGeometry extends GeometryBase {
 	}
 }
 
-export class SpiroGeometry extends CachedGeometry {
+class SimpleGeometry extends CachedGeometry {
+	toReferences() {
+		return null;
+	}
+	toIndependent() {
+		return this;
+	}
+	getDependencies() {
+		return null;
+	}
+	filterTag(fn) {
+		return this;
+	}
+}
+
+export class SpiroGeometry extends SimpleGeometry {
 	constructor(gizmo, closed, knots) {
 		super();
 		this.m_knots = knots;
@@ -112,15 +133,7 @@ export class SpiroGeometry extends CachedGeometry {
 	toContoursImpl() {
 		return spiroToOutlineWithSimplification(this.m_knots, this.m_closed, this.m_gizmo);
 	}
-	toReferences() {
-		return null;
-	}
-	getDependencies() {
-		return null;
-	}
-	filterTag(fn) {
-		return this;
-	}
+
 	measureComplexity() {
 		let cplx = CPLX_NON_EMPTY | CPLX_NON_SIMPLE;
 		for (const z of this.m_knots) {
@@ -140,7 +153,7 @@ export class SpiroGeometry extends CachedGeometry {
 	}
 }
 
-export class SpiroPenGeometry extends CachedGeometry {
+export class SpiroPenGeometry extends SimpleGeometry {
 	constructor(gizmo, penProfile, closed, knots) {
 		super();
 		this.m_gizmo = gizmo;
@@ -177,16 +190,6 @@ export class SpiroPenGeometry extends CachedGeometry {
 		return ctx.contours;
 	}
 
-	toReferences() {
-		return null;
-	}
-	getDependencies() {
-		return null;
-	}
-	filterTag(fn) {
-		return this;
-	}
-
 	measureComplexity() {
 		let cplx = CPLX_NON_EMPTY | CPLX_NON_SIMPLE;
 		for (const z of this.m_penProfile) {
@@ -217,7 +220,7 @@ export class SpiroPenGeometry extends CachedGeometry {
 	}
 }
 
-export class DiSpiroGeometry extends CachedGeometry {
+export class DiSpiroGeometry extends SimpleGeometry {
 	constructor(gizmo, contrast, closed, biKnots) {
 		super();
 		this.m_biKnots = biKnots; // untransformed
@@ -261,15 +264,7 @@ export class DiSpiroGeometry extends CachedGeometry {
 		}
 		return expander.expand();
 	}
-	toReferences() {
-		return null;
-	}
-	getDependencies() {
-		return null;
-	}
-	filterTag(fn) {
-		return this;
-	}
+
 	measureComplexity() {
 		let cplx = CPLX_NON_EMPTY | CPLX_NON_SIMPLE;
 		for (const z of this.m_biKnots) {
@@ -298,14 +293,24 @@ export class ReferenceGeometry extends GeometryBase {
 		this.m_x = x || 0;
 		this.m_y = y || 0;
 	}
-	unwrap() {
+
+	toIndependent() {
+		// Do unlinking *recursively*
+		return TransformedGeometry.create(
+			Transform.Translate(this.m_x, this.m_y),
+			this.m_glyph.geometry.toIndependent(),
+		);
+	}
+	unwrapSimple() {
+		// Do unlinking *for only one level*
 		return TransformedGeometry.create(
 			Transform.Translate(this.m_x, this.m_y),
 			this.m_glyph.geometry,
 		);
 	}
+
 	toContours(ctx) {
-		return this.unwrap().toContours(ctx);
+		return this.unwrapSimple().toContours(ctx);
 	}
 	toReferences() {
 		if (this.m_glyph.geometry.measureComplexity() & CPLX_NON_EMPTY) {
@@ -319,13 +324,13 @@ export class ReferenceGeometry extends GeometryBase {
 		return [this.m_glyph];
 	}
 	filterTag(fn) {
-		return this.unwrap().filterTag(fn);
+		return this.unwrapSimple().filterTag(fn);
 	}
 	measureComplexity() {
 		return this.m_glyph.geometry.measureComplexity();
 	}
 	hash(h) {
-		this.unwrap().hash(h);
+		this.unwrapSimple().hash(h);
 	}
 }
 
@@ -340,6 +345,9 @@ export class TaggedGeometry extends GeometryBase {
 	}
 	toReferences() {
 		return this.m_geom.toReferences();
+	}
+	toIndependent() {
+		return new TaggedGeometry(this.m_geom.toIndependent(), this.m_tag);
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -395,6 +403,9 @@ export class TransformedGeometry extends GeometryBase {
 			result.push({ glyph, x: x + this.m_transform.tx, y: y + this.m_transform.ty });
 		return result;
 	}
+	toIndependent() {
+		return TransformedGeometry.create(this.m_transform, this.m_geom.toIndependent());
+	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
 	}
@@ -428,6 +439,9 @@ export class RadicalGeometry extends GeometryBase {
 	}
 	toReferences() {
 		return null;
+	}
+	toIndependent() {
+		return new RadicalGeometry(this.m_geom.toIndependent());
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -479,6 +493,9 @@ export class CombineGeometry extends GeometryBase {
 			}
 		}
 		return results;
+	}
+	toIndependent() {
+		return new CombineGeometry(this.m_parts.map(x => x.toIndependent()));
 	}
 	getDependencies() {
 		let results = [];
@@ -557,8 +574,15 @@ export class BooleanGeometry extends CachedGeometry {
 			if (i > 0) sink.push({ type: "operator", operator: this.m_operator });
 		}
 	}
+
 	toReferences() {
 		return null;
+	}
+	toIndependent() {
+		return new BooleanGeometry(
+			this.m_operator,
+			this.m_operands.map(x => x.toIndependent()),
+		);
 	}
 	getDependencies() {
 		let results = [];
@@ -633,6 +657,15 @@ export class StrokeGeometry extends CachedGeometry {
 	}
 	toReferences() {
 		return null;
+	}
+	toIndependent() {
+		return new StrokeGeometry(
+			this.m_geom.toIndependent(),
+			this.m_gizmo,
+			this.m_radius,
+			this.m_contrast,
+			this.m_fInside,
+		);
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -709,6 +742,9 @@ export class RemoveHolesGeometry extends CachedGeometry {
 	toReferences() {
 		return null;
 	}
+	toIndependent() {
+		return new RemoveHolesGeometry(this.m_geom.toIndependent(), this.m_gizmo);
+	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
 	}
@@ -755,6 +791,9 @@ export class SimplifyGeometry extends CachedGeometry {
 	}
 	toReferences() {
 		return null;
+	}
+	toIndependent() {
+		return new SimplifyGeometry(this.m_geom.toIndependent());
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();

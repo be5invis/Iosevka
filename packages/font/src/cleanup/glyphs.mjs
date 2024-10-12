@@ -1,5 +1,4 @@
 import * as Geom from "@iosevka/geometry";
-import { Transform } from "@iosevka/geometry/transform";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -12,6 +11,9 @@ export function finalizeGlyphs(cache, para, glyphStore) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 function regulateGlyphStore(cache, para, skew, glyphStore) {
+	for (const g of glyphStore.glyphs()) {
+		if (!g.geometry.toReferences()) g.geometry = g.geometry.toIndependent();
+	}
 	for (const g of glyphStore.glyphs()) {
 		if (!(g.geometry.measureComplexity() & Geom.CPLX_NON_EMPTY)) continue;
 		if (!g.geometry.toReferences()) flattenSimpleGlyph(cache, para, skew, g);
@@ -27,6 +29,7 @@ function flattenSimpleGlyph(cache, para, skew, g) {
 		g.includeContours(cs);
 	} catch (e) {
 		console.error("Detected broken geometry when processing", g._m_identifier);
+		console.error(e);
 		console.error(
 			`${para.naming.family} ${para.naming.weight} ${para.naming.width} ${para.naming.slope}`,
 		);
