@@ -1,4 +1,4 @@
-import * as themes from "../themes/index.mjs";
+import themes from "../themes/index.mjs";
 
 // prettier-ignore
 const ssStrings = [

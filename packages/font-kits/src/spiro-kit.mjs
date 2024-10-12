@@ -9,6 +9,7 @@ import {
 	VirtualControlKnot,
 } from "@iosevka/geometry/spiro-control";
 import { bez3, fallback, mix } from "@iosevka/util";
+
 import { BiKnotCollector } from "../../geometry/src/spiro-expand.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
+import { linreg } from "@iosevka/util";
 import * as SpiroJs from "spiro";
 
-import { linreg } from "@iosevka/util";
 import * as CurveUtil from "./curve-util.mjs";
 import { Point } from "./point.mjs";
 import { MonoKnot } from "./spiro-to-outline.mjs";
