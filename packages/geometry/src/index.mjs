@@ -102,16 +102,7 @@ export class CachedGeometry extends GeometryBase {
 	}
 }
 
-export class SpiroGeometry extends CachedGeometry {
-	constructor(gizmo, closed, knots) {
-		super();
-		this.m_knots = knots;
-		this.m_closed = closed;
-		this.m_gizmo = gizmo;
-	}
-	toContoursImpl() {
-		return spiroToOutlineWithSimplification(this.m_knots, this.m_closed, this.m_gizmo);
-	}
+class SimpleGeometry extends CachedGeometry {
 	toReferences() {
 		return null;
 	}
@@ -121,6 +112,19 @@ export class SpiroGeometry extends CachedGeometry {
 	filterTag(fn) {
 		return this;
 	}
+}
+
+export class SpiroGeometry extends SimpleGeometry {
+	constructor(gizmo, closed, knots) {
+		super();
+		this.m_knots = knots;
+		this.m_closed = closed;
+		this.m_gizmo = gizmo;
+	}
+	toContoursImpl() {
+		return spiroToOutlineWithSimplification(this.m_knots, this.m_closed, this.m_gizmo);
+	}
+
 	measureComplexity() {
 		let cplx = CPLX_NON_EMPTY | CPLX_NON_SIMPLE;
 		for (const z of this.m_knots) {
@@ -140,7 +144,7 @@ export class SpiroGeometry extends CachedGeometry {
 	}
 }
 
-export class SpiroPenGeometry extends CachedGeometry {
+export class SpiroPenGeometry extends SimpleGeometry {
 	constructor(gizmo, penProfile, closed, knots) {
 		super();
 		this.m_gizmo = gizmo;
@@ -177,16 +181,6 @@ export class SpiroPenGeometry extends CachedGeometry {
 		return ctx.contours;
 	}
 
-	toReferences() {
-		return null;
-	}
-	getDependencies() {
-		return null;
-	}
-	filterTag(fn) {
-		return this;
-	}
-
 	measureComplexity() {
 		let cplx = CPLX_NON_EMPTY | CPLX_NON_SIMPLE;
 		for (const z of this.m_penProfile) {
@@ -217,7 +211,7 @@ export class SpiroPenGeometry extends CachedGeometry {
 	}
 }
 
-export class DiSpiroGeometry extends CachedGeometry {
+export class DiSpiroGeometry extends SimpleGeometry {
 	constructor(gizmo, contrast, closed, biKnots) {
 		super();
 		this.m_biKnots = biKnots; // untransformed
@@ -261,15 +255,7 @@ export class DiSpiroGeometry extends CachedGeometry {
 		}
 		return expander.expand();
 	}
-	toReferences() {
-		return null;
-	}
-	getDependencies() {
-		return null;
-	}
-	filterTag(fn) {
-		return this;
-	}
+
 	measureComplexity() {
 		let cplx = CPLX_NON_EMPTY | CPLX_NON_SIMPLE;
 		for (const z of this.m_biKnots) {
@@ -298,12 +284,14 @@ export class ReferenceGeometry extends GeometryBase {
 		this.m_x = x || 0;
 		this.m_y = y || 0;
 	}
+
 	unwrap() {
 		return TransformedGeometry.create(
 			Transform.Translate(this.m_x, this.m_y),
 			this.m_glyph.geometry,
 		);
 	}
+
 	toContours(ctx) {
 		return this.unwrap().toContours(ctx);
 	}
@@ -557,6 +545,7 @@ export class BooleanGeometry extends CachedGeometry {
 			if (i > 0) sink.push({ type: "operator", operator: this.m_operator });
 		}
 	}
+
 	toReferences() {
 		return null;
 	}

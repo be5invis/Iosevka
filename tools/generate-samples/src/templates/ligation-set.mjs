@@ -1,4 +1,4 @@
-import * as themes from "../themes/index.mjs";
+import themes from "../themes/index.mjs";
 
 function* makeSample(theme, args) {
 	const groupSet = new Set(args.ligSets);

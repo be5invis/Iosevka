@@ -1,9 +1,10 @@
 $$include './meta/macros.ptl'
 
 import [UkMapToLookup UkLigatureToLookup] from "./table-util.mjs"
-import [Dotless TieMark TieGlyph OgonekTrY IsSuperscript IsSubscript LeaningMark LeaningMarkSpacer] from "@iosevka/glyph/relation"
+import [Dotless TieMark TieGlyph OgonekTrY IsSuperscript IsSubscript LeaningMark LeaningMarkSpacer NLDAcuteVariant] from "@iosevka/glyph/relation"
 import as UnicodeKnowledge from "@iosevka/font-glyphs/unicode-knowledge"
 
+extern Map
 extern Set
 
 define-macro Ccmp-Group : syntax-rules
@@ -42,7 +43,6 @@ export : define [buildCCMP gsub glyphStore markGlyphs] : begin
 		export-lookup combineLookup
 
 	Ccmp-Group "Mark transforms" : begin
-
 		define groupGrekUpperTonos {}
 		define groupLF             {}
 		define dotlessFrom         {}
@@ -121,6 +121,17 @@ export : define [buildCCMP gsub glyphStore markGlyphs] : begin
 				object [from : list "h" "dotAbove"] [to "hDot"]
 				object [from : list "k" "dotAbove"] [to "kDot"]
 
+	Ccmp-Group "IJ-Acute composites" : begin
+		local substitutions {}
+		foreach { gn g } [glyphStore.namedEntries] : begin
+			local nldVariant : NLDAcuteVariant.get g
+			if nldVariant : substitutions.push
+				object [from : list gn 'acuteAbove'] [to nldVariant]
+
+		export-lookup : gsub.createLookup : object
+			.type 'gsub_ligature'
+			.substitutions substitutions
+
 	Ccmp-Group "Leaning Mark Trasnform" : begin
 		define LeaningAnchorMap : list
 			list 'above' 'leaningAbove'
@@ -154,8 +165,6 @@ export : define [buildCCMP gsub glyphStore markGlyphs] : begin
 						.inputBegins   1
 						.inputEnds     2
 						.apply         {{.at 1 .lookup lookupTurnMarkIntoLeaningAndSpacer}}
-
-
 
 	Ccmp-Group "Rhotic Hook Transform" : begin
 		define superscripts        {}

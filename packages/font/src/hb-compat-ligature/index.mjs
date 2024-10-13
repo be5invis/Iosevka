@@ -25,7 +25,7 @@ export async function buildCompatLigatures(para, font) {
 		const buffer = hb.createBuffer();
 		buffer.addText(entry.sequence);
 		buffer.guessSegmentProperties();
-		hb.shapeWithTrace(hbFont, buffer, entry.featureTag, 0xffff, 0);
+		hb.shape(hbFont, buffer, entry.featureTag);
 		const shapingResults = buffer.json();
 		buffer.destroy();
 
