@@ -22,9 +22,6 @@ export class GeometryBase {
 	toReferences() {
 		throw new Error("Unimplemented");
 	}
-	toIndependent() {
-		throw new Error("Unimplemented");
-	}
 	getDependencies() {
 		throw new Error("Unimplemented");
 	}
@@ -52,9 +49,6 @@ export class ContourSetGeometry extends GeometryBase {
 	}
 	toReferences() {
 		return null;
-	}
-	toIndependent() {
-		return this;
 	}
 	getDependencies() {
 		return null;
@@ -111,9 +105,6 @@ export class CachedGeometry extends GeometryBase {
 class SimpleGeometry extends CachedGeometry {
 	toReferences() {
 		return null;
-	}
-	toIndependent() {
-		return this;
 	}
 	getDependencies() {
 		return null;
@@ -294,15 +285,7 @@ export class ReferenceGeometry extends GeometryBase {
 		this.m_y = y || 0;
 	}
 
-	toIndependent() {
-		// Do unlinking *recursively*
-		return TransformedGeometry.create(
-			Transform.Translate(this.m_x, this.m_y),
-			this.m_glyph.geometry.toIndependent(),
-		);
-	}
-	unwrapSimple() {
-		// Do unlinking *for only one level*
+	unwrap() {
 		return TransformedGeometry.create(
 			Transform.Translate(this.m_x, this.m_y),
 			this.m_glyph.geometry,
@@ -310,7 +293,7 @@ export class ReferenceGeometry extends GeometryBase {
 	}
 
 	toContours(ctx) {
-		return this.unwrapSimple().toContours(ctx);
+		return this.unwrap().toContours(ctx);
 	}
 	toReferences() {
 		if (this.m_glyph.geometry.measureComplexity() & CPLX_NON_EMPTY) {
@@ -324,13 +307,13 @@ export class ReferenceGeometry extends GeometryBase {
 		return [this.m_glyph];
 	}
 	filterTag(fn) {
-		return this.unwrapSimple().filterTag(fn);
+		return this.unwrap().filterTag(fn);
 	}
 	measureComplexity() {
 		return this.m_glyph.geometry.measureComplexity();
 	}
 	hash(h) {
-		this.unwrapSimple().hash(h);
+		this.unwrap().hash(h);
 	}
 }
 
@@ -345,9 +328,6 @@ export class TaggedGeometry extends GeometryBase {
 	}
 	toReferences() {
 		return this.m_geom.toReferences();
-	}
-	toIndependent() {
-		return new TaggedGeometry(this.m_geom.toIndependent(), this.m_tag);
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -403,9 +383,6 @@ export class TransformedGeometry extends GeometryBase {
 			result.push({ glyph, x: x + this.m_transform.tx, y: y + this.m_transform.ty });
 		return result;
 	}
-	toIndependent() {
-		return TransformedGeometry.create(this.m_transform, this.m_geom.toIndependent());
-	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
 	}
@@ -439,9 +416,6 @@ export class RadicalGeometry extends GeometryBase {
 	}
 	toReferences() {
 		return null;
-	}
-	toIndependent() {
-		return new RadicalGeometry(this.m_geom.toIndependent());
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -493,9 +467,6 @@ export class CombineGeometry extends GeometryBase {
 			}
 		}
 		return results;
-	}
-	toIndependent() {
-		return new CombineGeometry(this.m_parts.map(x => x.toIndependent()));
 	}
 	getDependencies() {
 		let results = [];
@@ -578,12 +549,6 @@ export class BooleanGeometry extends CachedGeometry {
 	toReferences() {
 		return null;
 	}
-	toIndependent() {
-		return new BooleanGeometry(
-			this.m_operator,
-			this.m_operands.map(x => x.toIndependent()),
-		);
-	}
 	getDependencies() {
 		let results = [];
 		for (const part of this.m_operands) {
@@ -657,15 +622,6 @@ export class StrokeGeometry extends CachedGeometry {
 	}
 	toReferences() {
 		return null;
-	}
-	toIndependent() {
-		return new StrokeGeometry(
-			this.m_geom.toIndependent(),
-			this.m_gizmo,
-			this.m_radius,
-			this.m_contrast,
-			this.m_fInside,
-		);
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
@@ -742,9 +698,6 @@ export class RemoveHolesGeometry extends CachedGeometry {
 	toReferences() {
 		return null;
 	}
-	toIndependent() {
-		return new RemoveHolesGeometry(this.m_geom.toIndependent(), this.m_gizmo);
-	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
 	}
@@ -791,9 +744,6 @@ export class SimplifyGeometry extends CachedGeometry {
 	}
 	toReferences() {
 		return null;
-	}
-	toIndependent() {
-		return new SimplifyGeometry(this.m_geom.toIndependent());
 	}
 	getDependencies() {
 		return this.m_geom.getDependencies();
