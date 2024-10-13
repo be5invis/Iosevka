@@ -9,6 +9,7 @@ import {
 	VirtualControlKnot,
 } from "@iosevka/geometry/spiro-control";
 import { bez3, fallback, mix } from "@iosevka/util";
+
 import { BiKnotCollector } from "../../geometry/src/spiro-expand.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,7 +231,7 @@ export function SetupBuilders(bindings) {
 
 	widths.heading = function (l, r, d) {
 		if (!isFinite(l)) throw new TypeError("NaN detected for left width");
-		if (!isFinite(r)) throw new TypeError("NaN detected for left width");
+		if (!isFinite(r)) throw new TypeError("NaN detected for right width");
 		if (!isFinite(d.x) || !isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
 		return new AfWidthsHeading(l, r, d);

@@ -12,6 +12,19 @@ export function createNamingDictFromArgv(argv) {
 		weight: argv.menu.weight - 0,
 		width: argv.menu.width - 0,
 		slope: argv.menu.slope,
+
+		menuNameMap: {
+			weight: { ...WeightToMenuMap, ...argv.namingOverride?.menuNameMap?.weight },
+			width: { ...WidthToMenuMap, ...argv.namingOverride?.menuNameMap?.width },
+			slope: { ...SlopeToMenuMap, ...argv.namingOverride?.menuNameMap?.slope },
+
+			weightShort: {
+				...WeightToMenuShortMap,
+				...argv.namingOverride?.menuNameMap?.weightShort,
+			},
+			widthShort: { ...WidthToMenuShortMap, ...argv.namingOverride?.menuNameMap?.widthShort },
+			slopeShort: { ...SlopeToMenuShortMap, ...argv.namingOverride?.menuNameMap?.slopeShort },
+		},
 	};
 }
 
@@ -26,7 +39,7 @@ export function assignFontNames(font, naming, isQuasiProportional) {
 function setMainNames(font, naming) {
 	// Preferred names
 	const family = naming.family.trim();
-	const style = getStyle(naming.weight, naming.width, naming.slope);
+	const style = getStyle(naming.menuNameMap, naming.weight, naming.width, naming.slope);
 
 	nameFont(font, Ot.Name.NameID.PreferredFamily, family);
 	nameFont(font, Ot.Name.NameID.PreferredSubfamily, style);
@@ -34,7 +47,12 @@ function setMainNames(font, naming) {
 	nameFont(font, Ot.Name.NameID.WwsSubfamily, style);
 
 	// Compat names
-	const compat = getStyleLinkedStyles(naming.weight, naming.width, naming.slope);
+	const compat = getStyleLinkedStyles(
+		naming.menuNameMap,
+		naming.weight,
+		naming.width,
+		naming.slope,
+	);
 	let compatFamily = family;
 	if (compat.familySuffix !== "Regular") compatFamily = family + " " + compat.familySuffix;
 	if (compatFamily.length >= 31) compatFamily = family + " " + compat.familySuffixShort;
@@ -155,7 +173,7 @@ function applyMiscProps(font) {
 	);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 function accumulateFlags(...entries) {
 	let s = 0;
@@ -165,7 +183,7 @@ function accumulateFlags(...entries) {
 	return s;
 }
 
-function getStyleLinkedStyles(weight, width, slope) {
+function getStyleLinkedStyles(menuNameMap, weight, width, slope) {
 	let linkWeight = weight;
 	let linkSlope = slope;
 	let nameSuffixWeight = 400;
@@ -183,9 +201,14 @@ function getStyleLinkedStyles(weight, width, slope) {
 	}
 
 	return {
-		style: getStyle(linkWeight, 5, linkSlope),
-		familySuffix: getStyle(nameSuffixWeight, nameSuffixWidth, nameSuffixSlope),
-		familySuffixShort: getShortStyle(nameSuffixWeight, nameSuffixWidth, nameSuffixSlope),
+		style: getStyle(menuNameMap, linkWeight, 5, linkSlope),
+		familySuffix: getStyle(menuNameMap, nameSuffixWeight, nameSuffixWidth, nameSuffixSlope),
+		familySuffixShort: getShortStyle(
+			menuNameMap,
+			nameSuffixWeight,
+			nameSuffixWidth,
+			nameSuffixSlope,
+		),
 	};
 }
 
@@ -205,22 +228,24 @@ function nameFontImpl(records, platformID, encodingID, languageID, nameID, value
 	records.push({ platformID, encodingID, languageID, nameID, value });
 }
 
-function getStyle(weight, width, slope) {
-	const weightPart = weightToMenuStyleMap[weight] ?? "W" + weight;
-	const widthPart = widthToMenuStyleMap[width] ?? "Wd" + width;
-	const slopePart = slopeToMenuStyleMap[slope] ?? "";
+function getStyle(menuNameMap, weight, width, slope) {
+	const weightPart = menuNameMap.weight[weight] ?? "W" + weight;
+	const widthPart = menuNameMap.width[width] ?? "Wd" + width;
+	const slopePart = menuNameMap.slope[slope] ?? "";
 	const rawName = weightPart + " " + widthPart + " " + slopePart;
 	return rawName.replace(/ +/g, " ").trim() || "Regular";
 }
-function getShortStyle(weight, width, slope) {
-	const weightPart = weightToMenuStyleMapShort[weight] ?? "W" + weight;
-	const widthPart = widthToMenuStyleMapShort[width] ?? "Wd" + width;
-	const slopePart = slopeToMenuStyleMapShort[slope] ?? "";
+function getShortStyle(menuNameMap, weight, width, slope) {
+	const weightPart = menuNameMap.weightShort[weight] ?? "W" + weight;
+	const widthPart = menuNameMap.widthShort[width] ?? "Wd" + width;
+	const slopePart = menuNameMap.slopeShort[slope] ?? "";
 	const rawName = weightPart + " " + widthPart + " " + slopePart;
 	return rawName.replace(/ +/g, " ").trim() || "Regular";
 }
 
-const weightToMenuStyleMap = {
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+const WeightToMenuMap = {
 	100: "Thin",
 	200: "Extralight",
 	300: "Light",
@@ -233,7 +258,7 @@ const weightToMenuStyleMap = {
 	800: "Extrabold",
 	900: "Heavy",
 };
-const widthToMenuStyleMap = {
+const WidthToMenuMap = {
 	1: "Ultra-Condensed",
 	2: "Extra-Condensed",
 	3: "Condensed",
@@ -244,12 +269,12 @@ const widthToMenuStyleMap = {
 	8: "Extra-Extended",
 	9: "Ultra-Extended",
 };
-const slopeToMenuStyleMap = {
+const SlopeToMenuMap = {
 	normal: "",
 	italic: "Italic",
 	oblique: "Oblique",
 };
-const weightToMenuStyleMapShort = {
+const WeightToMenuShortMap = {
 	100: "Th",
 	200: "XLt",
 	300: "Lt",
@@ -262,7 +287,7 @@ const weightToMenuStyleMapShort = {
 	800: "XBd",
 	900: "Hv",
 };
-const widthToMenuStyleMapShort = {
+const WidthToMenuShortMap = {
 	1: "UltCn",
 	2: "XCn",
 	3: "Cn",
@@ -273,13 +298,13 @@ const widthToMenuStyleMapShort = {
 	8: "XEx",
 	9: "UltEx",
 };
-const slopeToMenuStyleMapShort = {
+const SlopeToMenuShortMap = {
 	normal: "",
 	italic: "It",
 	oblique: "Obl",
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 function ancNameEntry(input) {
 	return input.replace(/\{\{currentYear\}\}/g, () => String(new Date().getFullYear()));

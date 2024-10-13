@@ -1,10 +1,12 @@
 import globals from "globals";
 import js from "@eslint/js";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+import importPlugin from "eslint-plugin-import";
 
 export default [
 	js.configs.recommended,
 	eslintPluginPrettierRecommended,
+	importPlugin.flatConfigs.recommended,
 
 	// Ignore machine-generated files
 	{
@@ -37,6 +39,19 @@ export default [
 			"no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
 			"no-unused-vars": ["off"],
 			complexity: ["warn", 16],
+
+			// eslint-import rules
+			"import/no-unresolved": "off", // ESLint does not support subpath exports, but we do
+			"import/no-extraneous-dependencies": "error",
+			"import/newline-after-import": ["error", { count: 1 }],
+			"import/order": [
+				"error",
+				{
+					groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
+					"newlines-between": "always",
+					alphabetize: { order: "asc", caseInsensitive: true },
+				},
+			],
 		},
 	},
 ];

@@ -7,6 +7,7 @@ glyph-module
 glyph-block Symbol-Math-Geometry : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Shared-Symbol-Shapes : VZigzag
 
 	local kBox : 2 / 3
 	local leftBox : SB * kBox
@@ -123,3 +124,53 @@ glyph-block Symbol-Math-Geometry : begin
 				mix bottomBox topBox : 0.5 + 0.5 * [Wave : 2 * Math.PI * t / N]
 
 		include : dispiro [widths.center GeometryStroke] knots
+
+	create-glyph 'wavyLine' 0x2307 : glyph-proc
+		define N 64
+		local knots {}
+		define [Wave x] : [Math.sin x] + 0.05 * [Math.sin (3 * x)]
+		foreach t [range 0 till N] : begin
+			knots.push : g2
+				mix leftBox rightBox : 0.5 + 0.1 * [Wave : 4 * Math.PI * t / N]
+				mix TackBot TackTop (t / N)
+
+		include : dispiro [widths.center GeometryStroke] knots
+
+	create-glyph 'wigglyLine' 0x2E3E : glyph-proc
+		define N 4
+		local knots {}
+		local stroke : AdviceStroke2 4 11 (ParenTop - ParenBot)
+		local halfSw : 0.5 * stroke
+		local halfVSw : HSwToV halfSw
+
+		local bot : ParenBot + halfSw
+		local top : ParenTop - halfSw
+		local left  : Middle - [Math.max (radiusBox / 4) (halfVSw * 1.1)] - halfVSw
+		local right : Middle + [Math.max (radiusBox / 4) (halfVSw * 1.1)] + halfVSw
+
+		foreach t [range 0 N] : begin
+			knots.push : list
+				g4 [mix right left 0.5] [mix bot top (t / N)]
+				g4.up.mid (right - halfVSw) [mix bot top ((t + 0.25) / N)]
+				g4 [mix right left 0.5] [mix bot top ((t + 0.5) / N)]
+				g4.up.mid (left + halfVSw) [mix bot top ((t + 0.75) / N)]
+
+		include : dispiro
+			widths.center stroke
+			straight.right.start left bot
+			* knots
+			g4 [mix right left 0.5] top
+			straight.right.end right top
+
+	do 'Zigzags'
+		create-glyph 'zigzag' 0x299A : VZigzag Middle ParenBot ParenTop (radiusBox / 4) 9 0 GeometryStroke
+		create-glyph 'wigglyFenceLeft'  0x29D8 : VZigzag Middle ParenBot ParenTop (radiusBox / 4) 10 1 GeometryStroke
+		create-glyph 'wigglyFenceRight' 0x29D9 : VZigzag Middle ParenBot ParenTop (radiusBox / 4) 10 0 GeometryStroke
+
+		define space : (rightBox - leftBox - [HSwToV GeometryStroke] * 2) / 3
+		create-glyph 'doubleWigglyFenceLeft' 0x29DA : glyph-proc
+			include : with-transform [ApparentTranslate   space  0] : refer-glyph 'wigglyFenceLeft'
+			include : with-transform [ApparentTranslate (-space) 0] : refer-glyph 'wigglyFenceLeft'
+		create-glyph 'doubleWigglyFenceRight' 0x29DB : glyph-proc
+			include : with-transform [ApparentTranslate   space  0] : refer-glyph 'wigglyFenceRight'
+			include : with-transform [ApparentTranslate (-space) 0] : refer-glyph 'wigglyFenceRight'

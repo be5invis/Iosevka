@@ -27,15 +27,19 @@ glyph-block Symbol-Punctuation-Ellipsis : begin
 		include : DrawAt xMid [yp (2 / 3)] (radius - overshoot)
 		include : DrawAt xMid [yp 1]       (radius - overshoot)
 
+	define [VNDotShape nDots DrawAt radius overshoot xMid bottom top] : glyph-proc
+		local [yp p] : mix (bottom + radius) (top - radius) p
+		foreach [j : range 0 nDots] : include : DrawAt xMid [yp (j / (nDots - 1))] (radius - overshoot)
+
 	for-width-kinds WideWidth1 "Ellipsis"
 		foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
-			create-glyph "\[MangleName 'onedotLeader'].\(suffix)" : glyph-proc
+			create-glyph "\[MangleName 'oneDotLeader'].\(suffix)" : glyph-proc
 				local width : MosaicWidth * [mix para.diversityF para.diversityII (MosaicWidthScalar - 1)]
 				set-width width
 				local radius : [EllipsisDotRadius 2 MosaicWidth] * kDotRadius
 				include : DrawAt (width / 2) radius (radius - overshoot)
 
-			create-glyph "\[MangleName 'twodotsLEader'].\(suffix)" : glyph-proc
+			create-glyph "\[MangleName 'twoDotsLeader'].\(suffix)" : glyph-proc
 				local width : MosaicWidth * [mix 1 para.diversityF (MosaicWidthScalar - 1)]
 				set-width width
 				local radius : [EllipsisDotRadius 2 MosaicWidth] * kDotRadius
@@ -67,8 +71,8 @@ glyph-block Symbol-Punctuation-Ellipsis : begin
 				create-forked-glyph "\[MangleName 'mathCD2Dots'].\(suffix)" : begin
 					VThreeDotsShape DrawAt radius overshoot left right (+1) (bot - radius) (top + radius)
 
-		select-variant [MangleName 'onedotLeader'] [MangleUnicode 0x2024] (follow -- 'punctuationDot')
-		select-variant [MangleName 'twodotsLEader'] [MangleUnicode 0x2025] (follow -- 'punctuationDot')
+		select-variant [MangleName 'oneDotLeader'] [MangleUnicode 0x2024] (follow -- 'punctuationDot')
+		select-variant [MangleName 'twoDotsLeader'] [MangleUnicode 0x2025] (follow -- 'punctuationDot')
 		select-variant [MangleName 'ellipsis'] [MangleUnicode 0x2026] (follow -- 'punctuationDot')
 		select-variant [MangleName 'mathCDots'] [MangleUnicode 0x22EF] (follow -- 'punctuationDot')
 		select-variant [MangleName 'mathCVDots'] [MangleUnicode 0x22EE] (follow -- 'punctuationDot')
@@ -95,7 +99,12 @@ glyph-block Symbol-Punctuation-Ellipsis : begin
 			local df : include : DivFrame para.diversityF
 			include : VFourDotShape DrawAt radius overshoot df.middle (SymbolMid - XH * 2 / 3) (SymbolMid + XH * 2 / 3)
 
+		create-glyph "vSixDots.\(suffix)" : glyph-proc
+			local radius : kDotRadius * [EllipsisDotRadius 7 (ParenTop - ParenBot)]
+			include : VNDotShape 6 DrawAt radius overshoot Middle ParenBot ParenTop
+
 	select-variant "triColon"  0x205D (follow -- 'punctuationDot')
 	select-variant "quadColon" 0x205E (follow -- 'punctuationDot')
 	select-variant "mathTriColon" 0x2AF6 (follow -- 'punctuationDot')
 	select-variant "mathQuadColon" 0x2999 (follow -- 'punctuationDot')
+	select-variant "vSixDots" 0x2E3D (follow -- 'punctuationDot')
