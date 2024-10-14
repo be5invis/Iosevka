@@ -1,5 +1,11 @@
 ## Modifications since last major version
 
+### 31.9.1
+
+* Optimize glyphs for `round-top-serifless` and `round-top-base-serifed` variants for `A` part (`cv11`) of Capital AE (`U+00C6`) under Quasi-Proportional.
+* Fix metrics of `U+27D9` and `U+2A05` under Fixed (#2548).
+
+
 ### 31.9.0
 
 * Add IJ-acute ligatures (#2483).
