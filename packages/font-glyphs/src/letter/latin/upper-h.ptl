@@ -25,6 +25,7 @@ glyph-block Letter-Latin-Upper-H : begin
 	define SLAB-ALL                    4
 	define SLAB-ALL-BGR                5
 	define SLAB-TAILED-CYRILLIC-BGR    6
+	define SLAB-SMALL-HETA             7
 
 	define [HSerifs slabType t b l r sw] : begin
 		local sf : SerifFrame t b l r (swRef -- [fallback sw Stroke])
@@ -36,6 +37,7 @@ glyph-block Letter-Latin-Upper-H : begin
 			[Just SLAB-ALL] : composite-proc sf.lt.full sf.rt.full sf.lb.full sf.rb.full
 			[Just SLAB-ALL-BGR] : composite-proc sf.lt.outer sf.rt.inner sf.lb.full sf.rb.full
 			[Just SLAB-TAILED-CYRILLIC-BGR] : composite-proc sf.lt.outer sf.rt.inner sf.lb.full
+			[Just SLAB-SMALL-HETA] : NeedSlab SLAB : begin sf.lt.outer
 
 	define [HShape l r top _sw] : glyph-proc
 		local sw : fallback _sw Stroke
@@ -45,7 +47,22 @@ glyph-block Letter-Latin-Upper-H : begin
 
 	define [HTurned l r top _sw] : glyph-proc
 		local sw : fallback _sw Stroke
+		include : LeaningAnchor.Below.VBar.r r
 		include : tagged 'strokeL' : VBar.l l (top * HBarPos - sw / 2) top sw
+		include : tagged 'strokeR' : VBar.r r 0 top sw
+		include : HBar.m (l - O) (r + O) (top * HBarPos) sw
+
+	define [HLeftHalf l r top _sw] : glyph-proc
+		local sw : fallback _sw Stroke
+		include : LeaningAnchor.Above.VBar.l l
+		include : LeaningAnchor.Below.VBar.l l
+		include : tagged 'strokeL' : VBar.l l 0 top sw
+		include : HBar.m (l - O) (r + O) (top * HBarPos) sw
+
+	define [HRightHalf l r top _sw] : glyph-proc
+		local sw : fallback _sw Stroke
+		include : LeaningAnchor.Above.VBar.r r
+		include : LeaningAnchor.Below.VBar.r r
 		include : tagged 'strokeR' : VBar.r r 0 top sw
 		include : HBar.m (l - O) (r + O) (top * HBarPos) sw
 
@@ -94,22 +111,22 @@ glyph-block Letter-Latin-Upper-H : begin
 			Math.min OverlayStroke (0.625 * (yt - yb))
 
 	define HConfig : object
-		serifless                        { HShape       HTurned SLAB-NONE                  }
-		tailedSerifless                  { TailedHShape HTurned SLAB-NONE                  }
-		topLeftSerifed                   { HShape       HTurned SLAB-TOP-LEFT              }
-		tailedTopLeftSerifed             { TailedHShape HTurned SLAB-TOP-LEFT              }
-		topLeftBottomRightSerifed        { HShape       HTurned SLAB-TOP-LEFT-BOTTOM-RIGHT }
-		serifed                          { HShape       HTurned SLAB-ALL                   }
-		tailedSerifed                    { TailedHShape HTurned SLAB-TAILED-CYRILLIC       }
-		serifedExceptBottomRight         { HShape       HTurned SLAB-TAILED-CYRILLIC       }
-		serifedBGR                       { HShape       HTurned SLAB-ALL-BGR               }
-		tailedSerifedBGR                 { TailedHShape HTurned SLAB-TAILED-CYRILLIC-BGR   }
+		serifless                        { HShape       HTurned HLeftHalf HRightHalf SLAB-NONE                  }
+		tailedSerifless                  { TailedHShape HTurned HLeftHalf HRightHalf SLAB-NONE                  }
+		topLeftSerifed                   { HShape       HTurned HLeftHalf HRightHalf SLAB-TOP-LEFT              }
+		tailedTopLeftSerifed             { TailedHShape HTurned HLeftHalf HRightHalf SLAB-TOP-LEFT              }
+		topLeftBottomRightSerifed        { HShape       HTurned HLeftHalf HRightHalf SLAB-TOP-LEFT-BOTTOM-RIGHT }
+		serifed                          { HShape       HTurned HLeftHalf HRightHalf SLAB-ALL                   }
+		tailedSerifed                    { TailedHShape HTurned HLeftHalf HRightHalf SLAB-TAILED-CYRILLIC       }
+		serifedExceptBottomRight         { HShape       HTurned HLeftHalf HRightHalf SLAB-TAILED-CYRILLIC       }
+		serifedBGR                       { HShape       HTurned HLeftHalf HRightHalf SLAB-ALL-BGR               }
+		tailedSerifedBGR                 { TailedHShape HTurned HLeftHalf HRightHalf SLAB-TAILED-CYRILLIC-BGR   }
 
 	define EnGheGheConfig : object
 		serifless       false
 		topRightSerifed true
 
-	foreach { suffix { Body TurnedBody slabType } } [Object.entries HConfig] : do
+	foreach { suffix { Body TurnedBody LeftHalfBody RightHalfBody slabType } } [Object.entries HConfig] : do
 		create-glyph "H.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : Body SB RightSB CAP
@@ -121,7 +138,6 @@ glyph-block Letter-Latin-Upper-H : begin
 
 		create-glyph "HTurned.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : LeaningAnchor.Below.VBar.r RightSB
 			include : TurnedBody SB RightSB CAP
 			include : HSerifs slabType CAP 0 SB RightSB
 			eject-contour 'serifLB'
@@ -133,40 +149,28 @@ glyph-block Letter-Latin-Upper-H : begin
 
 		create-glyph "leftHalfH.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : LeaningAnchor.Above.VBar.l SB
-			include : LeaningAnchor.Below.VBar.l SB
-			include : Body SB RightSB CAP
-			eject-contour 'strokeR'
+			include : LeftHalfBody SB RightSB CAP
 			include : HSerifs slabType CAP 0 SB RightSB
 			eject-contour 'serifRT'
 			eject-contour 'serifRB'
 
 		create-glyph "rightHalfH.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : LeaningAnchor.Above.VBar.r RightSB
-			include : LeaningAnchor.Below.VBar.r RightSB
-			include : Body SB RightSB CAP
-			eject-contour 'strokeL'
+			include : RightHalfBody SB RightSB CAP
 			include : HSerifs slabType CAP 0 SB RightSB
 			eject-contour 'serifLT'
 			eject-contour 'serifLB'
 
 		create-glyph "leftHalfSmcpH.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : LeaningAnchor.Above.VBar.l SB
-			include : LeaningAnchor.Below.VBar.l SB
-			include : Body SB RightSB XH
-			eject-contour 'strokeR'
+			include : LeftHalfBody SB RightSB XH
 			include : HSerifs slabType XH 0 SB RightSB
 			eject-contour 'serifRT'
 			eject-contour 'serifRB'
 
 		create-glyph "rightHalfSmcpH.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : LeaningAnchor.Above.VBar.r RightSB
-			include : LeaningAnchor.Below.VBar.r RightSB
-			include : Body SB RightSB XH
-			eject-contour 'strokeL'
+			include : RightHalfBody SB RightSB XH
 			include : HSerifs slabType XH 0 SB RightSB
 			eject-contour 'serifLT'
 			eject-contour 'serifLB'
@@ -236,7 +240,6 @@ glyph-block Letter-Latin-Upper-H : begin
 			include : HSerifs slabType XH 0 df.leftSB xm df.mvs
 			include : MidHook.m df XH
 
-
 	select-variant 'H' 'H'
 	link-reduced-variant 'H/sansSerif' 'H' MathSansSerif
 	select-variant 'H/descBase' (shapeFrom -- 'H')
@@ -247,7 +250,6 @@ glyph-block Letter-Latin-Upper-H : begin
 	select-variant 'cyrl/En/descBase' (shapeFrom -- 'H')
 	select-variant 'leftHalfH' 0x2C75
 	select-variant 'rightHalfH' 0xA7F5
-	select-variant 'grek/Heta' 0x370 (shapeFrom -- 'leftHalfH')
 
 	select-variant 'smcpH' 0x29C (follow -- 'H')
 	select-variant 'leftHalfSmcpH' 0x2C76 (follow -- 'leftHalfH')
@@ -255,7 +257,13 @@ glyph-block Letter-Latin-Upper-H : begin
 	select-variant 'cyrl/en' 0x43D (shapeFrom -- 'smcpH')
 	select-variant 'cyrl/en/descBase' (shapeFrom -- 'smcpH')
 	select-variant 'cyrl/en.BGR' (shapeFrom -- 'smcpH')
-	select-variant 'grek/heta' 0x371 (shapeFrom -- 'leftHalfSmcpH')
+
+	alias 'grek/Heta' 0x370 'leftHalfH'
+
+	create-glyph 'grek/heta' 0x371 : glyph-proc
+		include : MarkSet.e
+		include : LeftHalfBody SB RightSB XH
+		include : HSerifs SLAB-SMALL-HETA XH 0 SB RightSB
 
 	derive-composites 'HDescender' 0x2C67 'H/descBase' [CyrDescender.rSideJut RightSB 0]
 
@@ -279,18 +287,6 @@ glyph-block Letter-Latin-Upper-H : begin
 
 	select-variant 'cyrl/NjeKomi' 0x050A
 	select-variant 'cyrl/njeKomi' 0x050B
-
-	create-glyph 'mathbb/H' 0x210D : glyph-proc
-		include : MarkSet.capital
-		include : VBar.l  SB 0 CAP BBS
-		include : VBar.r RightSB 0 CAP BBS
-		include : VBar.l  (SB + BBD) 0 CAP BBS
-		include : VBar.r (RightSB - BBD) 0 CAP BBS
-		include : HBar.m (SB + BBD) (RightSB - BBD)  (CAP * HBarPos) BBS
-		include : HBar.t SB (SB + BBD) CAP BBS
-		include : HBar.t (RightSB - BBD) RightSB CAP BBS
-		include : HBar.b SB (SB + BBD) 0 BBS
-		include : HBar.b (RightSB - BBD) RightSB 0 BBS
 
 	derive-glyphs 'HCedilla' 0x1E28 'H' : lambda [src gr] : glyph-proc
 		local shift : Width + SB - Middle + [HSwToV HalfStroke]
@@ -317,12 +313,24 @@ glyph-block Letter-Latin-Upper-H : begin
 	derive-glyphs 'cyrl/EnHook' 0x4C7 'cyrl/En/descBase' DProcCapitalHeng
 	derive-glyphs 'cyrl/enHook' 0x4C8 'cyrl/en/descBase' DProcSmallHeng
 
-	derive-glyphs 'cyrl/EnLHook' 0x528 'cyrl/En' : lambda [src srl] : glyph-proc
+	derive-glyphs 'cyrl/EnHookLeft' 0x528 'cyrl/En' : lambda [src srl] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		eject-contour 'serifLB'
 		include : PalatalHook.lExt SB 0
 
-	derive-glyphs 'cyrl/enLHook' 0x529 'cyrl/en' : lambda [src srl] : glyph-proc
+	derive-glyphs 'cyrl/enHookLeft' 0x529 'cyrl/en' : lambda [src srl] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		eject-contour 'serifLB'
 		include : PalatalHook.lExt SB 0
+
+	create-glyph 'mathbb/H' 0x210D : glyph-proc
+		include : MarkSet.capital
+		include : VBar.l  SB 0 CAP BBS
+		include : VBar.r RightSB 0 CAP BBS
+		include : VBar.l  (SB + BBD) 0 CAP BBS
+		include : VBar.r (RightSB - BBD) 0 CAP BBS
+		include : HBar.m (SB + BBD) (RightSB - BBD)  (CAP * HBarPos) BBS
+		include : HBar.t SB (SB + BBD) CAP BBS
+		include : HBar.t (RightSB - BBD) RightSB CAP BBS
+		include : HBar.b SB (SB + BBD) 0 BBS
+		include : HBar.b (RightSB - BBD) RightSB 0 BBS
