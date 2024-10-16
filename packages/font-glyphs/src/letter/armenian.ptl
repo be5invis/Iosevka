@@ -21,8 +21,8 @@ glyph-block Letter-Armenian : begin
 	alias 'armn/ho' 0x570 'h'
 
 	## From lower-j:
-	alias 'armn/yi' 0x575 'dotlessj'
-	alias 'armn/yiBar' 0x588 'dotlessjBar'
+	alias 'armn/yi' 0x575 [if SLAB 'dotlessj.flatHookSerifed' 'dotlessj.flatHookSerifless']
+	alias 'armn/yiBar' 0x588 [if SLAB 'dotlessjBar.flatHookSerifed' 'dotlessjBar.flatHookSerifless']
 
 	## From lower-n:
 	alias 'armn/vo' 0x578 'n'
@@ -40,7 +40,7 @@ glyph-block Letter-Armenian : begin
 	alias 'armn/co' 0x581 'g'
 
 	## From phi:
-	alias 'armn/Piur' 0x553 'cyrl/Ef.BGR'
+	alias 'armn/Piur' 0x553 'grek/Phi'
 
 	## From o:
 	alias 'armn/Oh' 0x555 'O'
@@ -85,7 +85,7 @@ glyph-block Letter-Armenian : begin
 			include sf.lb.full
 
 	define JUT-NORMAL 0
-	define JUT-LONG 1
+	define JUT-SHORT 1
 	define JUT-RIGHT 2
 	define JUT-LEFT 3
 
@@ -95,9 +95,10 @@ glyph-block Letter-Armenian : begin
 			[Just JUT-LEFT]  (df.leftSB - jut)
 			--               df.leftSB
 		define right : match hPos
-			[Just JUT-NORMAL] df.rightSB
+			[Just JUT-RIGHT]  (df.rightSB + jut)
+			[Just JUT-SHORT]  (df.rightSB - jut)
 			[Just JUT-LEFT]   df.leftSB
-			--                (df.rightSB + jut)
+			--                df.rightSB
 
 		export : define [top] : glyph-proc
 			include : HBar.t left right [if fCapital CAP Ascender] df.mvs
@@ -109,6 +110,8 @@ glyph-block Letter-Armenian : begin
 			include : HBar.b left right 0 df.mvs
 		export : define [desc] : glyph-proc
 			include : HBar.b left right Descender df.mvs
+		export : define [at y] : glyph-proc
+			include : HBar.m left right y df.mvs
 
 	# Modified from straight '2'
 	define [TwoNeck df top bot _left _right _adb _flatp] : begin
@@ -200,7 +203,7 @@ glyph-block Letter-Armenian : begin
 			include : df.markSet.capital
 			include : LeftHook df CAP df.mvs SLAB 0
 			include : FlipAround df.middle (CAP / 2)
-			include : [ArmHBar df 1 JUT-LONG].high
+			include : [ArmHBar df 1 JUT-NORMAL].high
 
 		create-glyph 'armn/ech' 0x565 : glyph-proc
 			local df : include : DivFrame 1
@@ -213,7 +216,7 @@ glyph-block Letter-Armenian : begin
 				stroke -- df.mvs
 			include : FlipAround df.middle 0
 			include : VBar.r df.rightSB 0 [mix 0 XH 0.6] df.mvs
-			include : [ArmHBar df 0 JUT-LONG].high
+			include : [ArmHBar df 0 JUT-NORMAL].high
 			if SLAB : include : USerifs.Toothed df Ascender df.mvs
 			eject-contour 'serifRT'
 
@@ -244,8 +247,8 @@ glyph-block Letter-Armenian : begin
 			local df : include : DivFrame 1
 			include : df.markSet.capital
 			include : VBar.l df.leftSB 0 CAP df.mvs
-			include : [ArmHBar df 1 JUT-NORMAL].base
-			include : [ArmHBar df 1 JUT-LONG].high
+			include : [ArmHBar df 1 JUT-SHORT].base
+			include : [ArmHBar df 1 JUT-NORMAL].high
 			if SLAB : begin
 				local sf : SerifFrame.fromDf df CAP 0
 				include : composite-proc sf.lt.full sf.lb.outer
@@ -254,8 +257,8 @@ glyph-block Letter-Armenian : begin
 			local df : include : DivFrame para.diversityF
 			include : df.markSet.b
 			include : VBar.l df.leftSB 0 Ascender df.mvs
-			include : [ArmHBar df 0 JUT-NORMAL].base
-			include : [ArmHBar df 0 JUT-LONG].high
+			include : [ArmHBar df 0 JUT-SHORT].base
+			include : [ArmHBar df 0 JUT-NORMAL].high
 			if SLAB : begin
 				local sf : SerifFrame.fromDf df CAP 0
 				include sf.lt.outer
@@ -290,7 +293,7 @@ glyph-block Letter-Armenian : begin
 					include : composite-proc sf.lb.full sf2.rb.full
 
 	do "T'o"
-		create-glyph "armn/To" 0x539 : glyph-proc
+		create-glyph 'armn/To' 0x539 : glyph-proc
 			local df : include : DivFrame 1 3
 			local barPosT : barPos + df.mvs / 2
 			include : dispiro
@@ -337,7 +340,7 @@ glyph-block Letter-Armenian : begin
 					include sf.lb.full
 
 	do "Zhe"
-		create-glyph "armn/Zhe" 0x53A : glyph-proc
+		create-glyph 'armn/Zhe' 0x53A : glyph-proc
 			local df : include : DivFrame 1
 			include : dispiro
 				widths.rhs df.mvs
@@ -456,8 +459,8 @@ glyph-block Letter-Armenian : begin
 				local sf2 : SerifFrame.fromDf df XH 0
 				include sf.lt.outer
 				if para.isItalic
-					include : composite-proc sf.rb.outer
-					include : composite-proc sf.lb.full sf2.rt.inner sf.rb.outer
+					include : composite-proc sf2.rb.outer
+					include : composite-proc sf.lb.full sf2.rt.inner sf2.rb.outer
 
 	do "Ca"
 		create-glyph 'armn/Ca' 0x53E : glyph-proc
@@ -516,7 +519,7 @@ glyph-block Letter-Armenian : begin
 			local midy : XH / 2 - df.mvs / 2
 			include : dispiro
 				widths.lhs df.mvs
-				flat df.leftSB CAP
+				flat df.leftSB CAP [heading Downward]
 				curl df.leftSB (midy + ArchDepthB)
 				arch.lhs midy (sw -- df.mvs)
 				flat df.rightSB (midy + ArchDepthA)
@@ -847,8 +850,9 @@ glyph-block Letter-Armenian : begin
 		create-glyph 'armn/Jheh' 0x54B : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			local x1 : df.middle + [HSwToV : [StrokeWidthBlend 0 0.1] * df.mvs]
+			local fine2 : df.adviceStroke 5
 			local fine : df.mvs * (ShoulderFine / Stroke)
+			local x1 : df.middle + [HSwToV : [StrokeWidthBlend 0 0.5] * fine2]
 			include : dispiro
 				widths.rhs df.mvs
 				straight.up.start df.leftSB (CAP - ArchDepthA)
@@ -862,8 +866,8 @@ glyph-block Letter-Armenian : begin
 				flat df.leftSB (CAP - ArchDepthA)
 				curl df.leftSB (CAP - 1.1 * ArchDepthA)
 				g4 [pre@mix@post 0.5] [pre@mix@post 0.5] [widths.center df.mvs]
-				flat x1 (1.1 * ArchDepthB) [widths.rhs df.mvs]
-				curl x1 ArchDepthB [widths.rhs df.mvs]
+				flat x1 (0.55 * ArchDepthB) [widths.rhs fine2]
+				curl x1 (0.5 * ArchDepthB) [widths.rhs fine2]
 				arcvh
 				flat df.leftSB (df.mvs - fine) [widths.rhs fine]
 			include : VBar.l df.leftSB 0 VJut df.mvs
@@ -1038,20 +1042,24 @@ glyph-block Letter-Armenian : begin
 		create-glyph 'armn/Co' 0x551 : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : [ArmHBar df 1 JUT-LEFT].high
+			local midy : CAP * HBarPos
+			local midyTop : midy + 0.5 * df.mvs
+			local midyBot : midy - 0.5 * df.mvs
+			include : [ArmHBar df 1 JUT-LEFT].at midy
 			include : dispiro
 				widths.lhs df.mvs
-				flat df.leftSB (highBarPos - df.mvs)
-				curl df.middle (highBarPos - df.mvs)
-				flatside.ru df.rightSB (highBarPos - df.mvs) CAP ArchDepthA ArchDepthB
-				hookstart CAP (sw -- df.mvs)
-				flatside.ld df.leftSB (highBarPos - df.mvs) CAP ArchDepthA ArchDepthB
-				straight.right.end df.middle (highBarPos - df.mvs) [heading Rightward]
+				flat df.leftSB midyBot
+				curl df.middle midyBot
+				archv
+				flatside.ru df.rightSB midyBot CAP ArchDepthA ArchDepthB
+				arch.lhs CAP (sw -- df.mvs)
+				flatside.ld df.leftSB midyBot CAP ArchDepthA ArchDepthB
+				arcvh
+				straight.right.end df.middle midyBot [heading Rightward]
 			include : dispiro
 				widths.rhs df.mvs
-				straight.right.start df.middle highBarPos [heading Rightward]
-				flat df.rightSB (highBarPos - SmallArchDepthB)
-				curl df.rightSB SmallArchDepthA
+				straight.right.start df.middle midyTop [heading Rightward]
+				flatside.rd df.rightSB 0 midyTop SmallArchDepthA SmallArchDepthB
 				hookend 0 (sw -- df.mvs)
 				g4 df.leftSB Hook
 
@@ -1120,21 +1128,33 @@ glyph-block Letter-Armenian : begin
 		create-glyph 'armn/keh' 0x584 : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.p
-			include : refer-glyph 'p'
-			include : HCrossBar (df.leftSB - jut) (df.rightSB + jut) [mix 0 (Descender + [if SLAB df.mvs 0]) 0.5]
+			local bot : Math.max (0.25 * XH) (1.2 * df.mvs)
+			include : OBarLeft.shape
+				left  -- df.leftSB
+				right -- df.rightSB
+				bot   -- bot
+				sw    -- df.mvs
+				fine  -- (df.mvs * ShoulderFine / Stroke)
+			include : VBar.l df.leftSB Descender XH df.mvs
+			include : HCrossBar.bottom (df.leftSB - jut) df.rightSB 0
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					include sf.lb.full
 
 	do "Feh"
 		define [FehBody df top bot ada adb] : glyph-proc
+			local midy : mix bot top HBarPos
 			include : dispiro
 				widths.lhs df.mvs
 				straight.left.start df.middle top
-				g4 (df.leftSB * 1.5) [YSmoothMidR top (highBarPos - df.mvs) ada adb]
-				straight.right.end df.middle (highBarPos - df.mvs) [heading Rightward]
+				g4 (df.leftSB * 1.5) [YSmoothMidR top (midy - 0.5 * df.mvs) ada adb]
+				straight.right.end df.middle (midy - 0.5 * df.mvs) [heading Rightward]
 			include : dispiro
 				widths.rhs df.mvs
-				straight.right.start df.middle highBarPos [heading Rightward]
-				flat df.rightSB (highBarPos - SmallArchDepthB)
-				curl df.rightSB SmallArchDepthA
+				straight.right.start df.middle (midy + 0.5 * df.mvs) [heading Rightward]
+				flatside.rd df.rightSB 0 (midy + 0.5 * df.mvs) SmallArchDepthA SmallArchDepthB
 				hookend 0 (sw -- df.mvs)
 				g4 df.leftSB Hook
 
