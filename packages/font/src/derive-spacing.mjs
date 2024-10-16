@@ -73,6 +73,8 @@ async function deriveTerm(font) {
 // Drop the following "long" characters.
 async function deriveFixed_DropWideChars(font) {
 	const longCharCodes = [
+		0x27dd, // LONG RIGHT TACK
+		0x27de, // LONG LEFT TACK
 		0x27f5, // LONG LEFTWARDS ARROW
 		0x27f6, // LONG RIGHTWARDS ARROW
 		0x27f7, // LONG LEFT RIGHT ARROW
