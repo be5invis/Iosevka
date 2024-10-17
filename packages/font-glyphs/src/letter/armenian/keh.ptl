@@ -1,0 +1,52 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Armenian-Keh : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : OBarRight OBarLeft
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+
+	# Common Params
+	define barPos : XH / 2
+	define highBarPos XH
+	define jut Jut
+
+	do "K'eh"
+		create-glyph 'armn/Keh' 0x554 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local bot : Math.max (XH - (CAP - XH)) (2.2 * df.mvs)
+			include : OBarLeft.roundedTop
+				top -- CAP
+				bot -- bot
+				left -- df.leftSB
+				right -- df.rightSB
+				yTerminal -- 0
+				sw -- df.mvs
+			include : HBar.m (df.leftSB - jut) (df.rightSB + jut) [mix [if SLAB df.mvs 0] bot 0.5] df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.lb.full
+
+		create-glyph 'armn/keh' 0x584 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			local bot : Math.max (0.25 * XH) (1.2 * df.mvs)
+			include : OBarLeft.shape
+				left  -- df.leftSB
+				right -- df.rightSB
+				bot   -- bot
+				sw    -- df.mvs
+				fine  -- (df.mvs * ShoulderFine / Stroke)
+			include : VBar.l df.leftSB Descender XH df.mvs
+			include : HCrossBar.bottom (df.leftSB - jut) df.rightSB 0
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					include sf.lb.full
