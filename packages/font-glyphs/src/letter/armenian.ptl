@@ -1,0 +1,1197 @@
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Armenian : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : CurlyTail nShoulder nShoulderKnots OBarRight OBarLeft
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Latin-U : UShape USerifs
+
+	# Borrowable:
+	## From lower-m:
+	alias 'armn/aybTurned' 0x560 'm'
+	alias 'armn/ayb' 0x561 'turnm'
+	alias 'armn/peh' 0x57A 'turnmLeg'
+
+	## From lower-h:
+	alias 'armn/ho' 0x570 'h'
+
+	## From lower-j:
+	alias 'armn/yi' 0x575 [if SLAB 'dotlessj.flatHookSerifed' 'dotlessj.flatHookSerifless']
+	alias 'armn/yiBar' 0x588 [if SLAB 'dotlessjBar.flatHookSerifed' 'dotlessjBar.flatHookSerifless']
+
+	## From lower-n:
+	alias 'armn/vo' 0x578 'n'
+
+	## From lower-u:
+	alias 'armn/seh' 0x57D 'u'
+
+	## From upper-u:
+	alias 'armn/Seh' 0x54D 'U'
+
+	## From s:
+	alias 'armn/Tiun' 0x54F 'S/sansSerif'
+
+	## From lower-g:
+	alias 'armn/co' 0x581 'g'
+
+	## From phi:
+	alias 'armn/Piur' 0x553 'grek/Phi'
+
+	## From o:
+	alias 'armn/Oh' 0x555 'O'
+	alias 'armn/oh' 0x585 'o'
+
+	# Common Params
+	define barPos : XH / 2
+	define highBarPos XH
+	define jut Jut
+
+	# Common parts:
+	define [RightHook df top sw baseSerif hookSerif _base _hookY] : glyph-proc
+		local base : fallback _base 0
+		local hookY : fallback _hookY (top - Hook)
+		include : dispiro
+			widths.lhs df.mvs
+			g4 df.rightSB hookY
+			hookstart top (sw -- sw)
+			flat df.leftSB (top - ArchDepthA)
+			curl df.leftSB base [heading Downward]
+		if baseSerif : begin
+			local sf : SerifFrame.fromDf df top base
+			include sf.lb.full
+		if hookSerif : begin
+			local sf : SerifFrame.fromDf df top hookY
+			include sf.rb.full
+
+	define [LeftHook df top sw baseSerif hookSerif _base _hookY] : glyph-proc
+		local base : fallback _base 0
+		local hookY : fallback _hookY (top - Hook)
+		include : dispiro
+			widths.rhs df.mvs
+			g4 df.leftSB hookY
+			hookstart top (sw -- sw)
+			flat df.rightSB (top - ArchDepthB)
+			curl df.rightSB base [heading Downward]
+		if baseSerif : begin
+			local sf : SerifFrame.fromDf df top base
+			include sf.rb.full
+		if hookSerif : begin
+			local sf : SerifFrame.fromDf df top hookY
+			include sf.lb.full
+
+	define JUT-NORMAL 0
+	define JUT-SHORT 1
+	define JUT-RIGHT 2
+	define JUT-LEFT 3
+
+	define [ArmHBar df fCapital hPos] : namespace
+		define left : match hPos
+			[Just JUT-RIGHT] df.rightSB
+			[Just JUT-LEFT]  (df.leftSB - jut)
+			--               df.leftSB
+		define right : match hPos
+			[Just JUT-RIGHT]  (df.rightSB + jut)
+			[Just JUT-SHORT]  (df.rightSB - jut)
+			[Just JUT-LEFT]   df.leftSB
+			--                df.rightSB
+
+		export : define [top] : glyph-proc
+			include : HBar.t left right [if fCapital CAP Ascender] df.mvs
+		export : define [high] : glyph-proc
+			include : HBar.t left right highBarPos df.mvs
+		export : define [mid] : glyph-proc
+			include : HBar.m left right barPos df.mvs
+		export : define [base] : glyph-proc
+			include : HBar.b left right 0 df.mvs
+		export : define [desc] : glyph-proc
+			include : HBar.b left right Descender df.mvs
+		export : define [at y] : glyph-proc
+			include : HBar.m left right y df.mvs
+
+	# Modified from straight '2'
+	define [TwoNeck df top bot _left _right _adb _flatp] : begin
+		local adb : fallback _adb SmallArchDepthB
+		local flatp : fallback _flatp 0.75
+		local left : fallback _left df.leftSB
+		local right : fallback _right df.rightSB
+		local refY : top - adb * 1.5 - df.mvs / 2 * (1 - TanSlope)
+		return : list
+			g4.down.mid right (top - adb)
+			flat [mix left right flatp] [mix (bot + df.mvs) refY flatp]
+			curl left (bot + df.mvs) [widths.lhs df.mvs]
+
+	do "Ayb"
+		glyph-block-import Letter-Latin-Upper-Q : QCrossing
+		create-glyph 'armn/Ayb' 0x531 : glyph-proc
+			local df : include : DivFrame 1 3
+			include : df.markSet.capital
+			include : UShape df CAP 1 df.mvs
+			include : QCrossing df CAP df.mvs
+			if SLAB : include : USerifs.Toothless df CAP df.mvs
+
+	do "Ben"
+		create-glyph 'armn/Ben' 0x532 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : RightHook df CAP df.mvs SLAB 0
+			include : [ArmHBar df 1 JUT-NORMAL].mid
+
+		create-glyph 'armn/ben' 0x562 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			include : VBar.l df.leftSB Descender XH df.mvs
+			include : nShoulder
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				top -- XH
+				bottom -- (XH / 2)
+				stroke -- df.mvs
+			include : [ArmHBar df 0 JUT-NORMAL].base
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					local sf2 : SerifFrame.fromDf df XH (XH / 2)
+					include : composite-proc sf.lb.full sf2.rb.full
+
+	do "Gim"
+		create-glyph 'armn/Gim' 0x533 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local barPosB : barPos - df.mvs / 2
+			include : dispiro
+				widths.lhs df.mvs
+				flat df.rightSB 0 [heading Upward]
+				curl df.rightSB (CAP - ArchDepthB)
+				arch.lhs CAP (sw -- df.mvs)
+				flat df.leftSB (CAP - ArchDepthA)
+				curl df.leftSB (barPosB + ArchDepthB)
+				arcvh
+				flat df.middle barPosB
+				curl (df.rightSB + Jut) barPosB
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.rb.full
+
+		create-glyph 'armn/gim' 0x563 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			include : refer-glyph 'q'
+			include : [ArmHBar df 0 JUT-RIGHT].base
+
+	do "Da"
+		create-glyph 'armn/Da' 0x534 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : LeftHook df CAP df.mvs SLAB 0
+			include : [ArmHBar df 1 JUT-RIGHT].mid
+
+		create-glyph 'armn/da' 0x564 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			include : refer-glyph 'latn/eta'
+			include : [ArmHBar df 0 JUT-RIGHT].base
+
+	do "Ech"
+		create-glyph 'armn/Ech' 0x535 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : LeftHook df CAP df.mvs SLAB 0
+			include : FlipAround df.middle (CAP / 2)
+			include : [ArmHBar df 1 JUT-NORMAL].high
+
+		create-glyph 'armn/ech' 0x565 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.b
+			include : nShoulder
+				top -- 0
+				bottom -- (-Ascender)
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : FlipAround df.middle 0
+			include : VBar.r df.rightSB 0 [mix 0 XH 0.6] df.mvs
+			include : [ArmHBar df 0 JUT-NORMAL].high
+			if SLAB : include : USerifs.Toothed df Ascender df.mvs
+			eject-contour 'serifRT'
+
+	do "Za"
+		create-glyph 'armn/Za' 0x536 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : LeftHook df CAP df.mvs 0 0 (CAP / 2)
+			local fine : df.mvs * (ShoulderFine / Stroke)
+			include : dispiro
+				widths.rhs df.mvs
+				flat df.rightSB (CAP / 2)
+				curl df.rightSB (df.mvs - fine + ArchDepthA)
+				arcvh
+				flat df.leftSB (df.mvs - fine) [widths.rhs fine]
+			include : VBar.l df.leftSB 0 VJut df.mvs
+			include : [ArmHBar df 1 JUT-NORMAL].base
+
+		create-glyph 'armn/za' 0x566 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			include : refer-glyph 'q'
+			eject-contour 'serifRB'
+			include : [ArmHBar df 0 JUT-RIGHT].desc
+
+	do "E"
+		create-glyph 'armn/E' 0x537 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : VBar.l df.leftSB 0 CAP df.mvs
+			include : [ArmHBar df 1 JUT-SHORT].base
+			include : [ArmHBar df 1 JUT-NORMAL].high
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include : composite-proc sf.lt.full sf.lb.outer
+
+		create-glyph 'armn/e' 0x567 : glyph-proc
+			local df : include : DivFrame para.diversityF
+			include : df.markSet.b
+			include : VBar.l df.leftSB 0 Ascender df.mvs
+			include : [ArmHBar df 0 JUT-SHORT].base
+			include : [ArmHBar df 0 JUT-NORMAL].high
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.lt.outer
+				if [not para.isItalic] : include sf.lb.outer
+
+	do "Et"
+		create-glyph 'armn/Et' 0x538 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : RightHook df CAP df.mvs
+			include : [ArmHBar df 1 JUT-NORMAL].base
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.lb.outer
+
+		create-glyph 'armn/et' 0x568 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.b
+			include : VBar.l df.leftSB Descender XH df.mvs
+			include : nShoulder
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				top -- XH
+				bottom -- 0
+				stroke -- df.mvs
+			include : [ArmHBar df 0 JUT-NORMAL].desc
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					local sf2 : SerifFrame.fromDf df XH 0
+					include : composite-proc sf.lb.full sf2.rb.full
+
+	do "T'o"
+		create-glyph 'armn/To' 0x539 : glyph-proc
+			local df : include : DivFrame 1 3
+			local barPosT : barPos + df.mvs / 2
+			include : dispiro
+				widths.rhs df.mvs
+				flat df.leftSB 0 [heading Upward]
+				curl df.leftSB (CAP - ArchDepthA)
+				arch.rhs CAP (sw -- df.mvs)
+				flat df.rightSB (CAP - ArchDepthB)
+				curl df.rightSB (0 + ArchDepthA)
+				arch.rhs 0 (sw -- df.mvs)
+				g4 (df.middle - [HSwToV : df.mvs / 2]) [mix 0 barPosT 0.5]
+				arcvh
+				flat [mix df.leftSB df.rightSB 0.7] barPosT
+				curl df.rightSB barPosT
+			include : [ArmHBar df 1 JUT-RIGHT].mid
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.lb.full
+
+		create-glyph 'armn/to' 0x569 : glyph-proc
+			local df : include : DivFrame 1 3
+			include : df.markSet.p
+			include : VBar.l df.leftSB Descender XH df.mvs
+			local barPosT : XH / 2 + df.mvs / 2
+			include : nShoulder
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				top -- XH
+				bottom -- (XH / 2)
+				stroke -- df.mvs
+			include : dispiro
+				widths.rhs df.mvs
+				flat df.rightSB (XH / 2)
+				curl df.rightSB (0 + ArchDepthA)
+				arch.rhs 0 (sw -- df.mvs)
+				g4 (df.middle - [HSwToV : df.mvs / 2]) [mix 0 barPosT 0.5]
+				arcvh
+				flat [mix df.leftSB df.rightSB 0.7] barPosT
+				curl (df.rightSB + Jut) barPosT
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					include sf.lb.full
+
+	do "Zhe"
+		create-glyph 'armn/Zhe' 0x53A : glyph-proc
+			local df : include : DivFrame 1
+			include : dispiro
+				widths.rhs df.mvs
+				flat df.rightSB CAP [heading Downward]
+				curl df.rightSB (0 + ArchDepthA)
+				arch.rhs 0 (sw -- df.mvs)
+				flat (df.leftSB + OX) (0 + ArchDepthB)
+				curl (df.leftSB + OX) (highBarPos - ArchDepthA)
+				arcvh
+				flat df.middle highBarPos
+				curl df.rightSB highBarPos
+			include : [ArmHBar df 1 JUT-RIGHT].high
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.rt.full
+
+		create-glyph 'armn/zhe' 0x56A : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.b
+			include : dispiro
+				widths.rhs df.mvs
+				flat df.rightSB Ascender [heading Downward]
+				curl df.rightSB (0 + SmallArchDepthA)
+				arch.rhs 0 (sw -- df.mvs)
+				flat (df.leftSB + OX) (0 + SmallArchDepthB)
+				curl (df.leftSB + OX) (highBarPos - SmallArchDepthA)
+				arcvh
+				flat df.middle highBarPos
+				curl df.rightSB highBarPos
+			include : [ArmHBar df 0 JUT-RIGHT].high
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df Ascender 0
+				include sf.rt.inner
+
+	do "Ini"
+		create-glyph 'armn/Ini' 0x53B : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : RightHook df XH df.mvs
+			include : VBar.l df.leftSB 0 CAP
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include : composite-proc sf.lt.full sf.lb.full
+
+		create-glyph 'armn/ini' 0x56B : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.bp
+			include : VBar.l df.leftSB Descender Ascender df.mvs
+			include : nShoulder
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				top -- XH
+				bottom -- 0
+				stroke -- df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df Ascender Descender
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					local sf2 : SerifFrame.fromDf df XH 0
+					include : composite-proc sf.lb.full sf2.rb.full
+
+	do "Liwn"
+		create-glyph 'armn/Liwn' 0x53C : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : VBar.l df.leftSB 0 CAP df.mvs
+			include : [ArmHBar df 1 JUT-NORMAL].base
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include : composite-proc sf.lt.full sf.lb.outer
+
+		create-glyph 'armn/liwn' 0x56C : glyph-proc
+			local df : include : DivFrame para.diversityII
+			include : df.markSet.p
+			include : VBar.m df.middle Descender XH df.mvs
+			include : HBar.b df.middle (df.middle + [HSwToV : 0.5 * df.mvs] + jut) Descender df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include sf.mt.left
+
+	do "Xe"
+		glyph-block-import Letter-Latin-Lower-AE-OE : SubDfAndShift
+		create-glyph 'armn/Xe' 0x53D : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			local { subDf shift } : SubDfAndShift 1 df
+			include : df.markSet.capital
+			include : VBar.l df.leftSB 0 CAP df.mvs
+			include : HBar.t df.leftSB df.middle XH df.mvs
+			include : with-transform [ApparentTranslate shift 0] : UShape subDf XH 0 subDf.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include : composite-proc sf.lt.full sf.lb.full
+				local sf2 : SerifFrame.fromDf subDf XH 0
+				include : with-transform [ApparentTranslate shift 0] : USerifs.Toothless subDf XH df.mvs
+
+		create-glyph 'armn/xe' 0x56D : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.bp
+			include : nShoulder
+				top -- XH
+				bottom -- (XH / 2)
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- (df.middle + [HSwToV : df.mvs / 2])
+				stroke -- df.mvs
+			include : FlipAround df.middle (XH / 2)
+			include : nShoulder
+				top -- XH
+				bottom -- (XH / 2)
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- (df.middle + [HSwToV : df.mvs / 2])
+				stroke -- df.mvs
+			include : VBar.l df.leftSB Descender Ascender df.mvs
+			include : VBar.r df.rightSB 0 XH df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df Ascender Descender
+				local sf2 : SerifFrame.fromDf df XH 0
+				include sf.lt.outer
+				if para.isItalic
+					include : composite-proc sf2.rb.outer
+					include : composite-proc sf.lb.full sf2.rt.inner sf2.rb.outer
+
+	do "Ca"
+		create-glyph 'armn/Ca' 0x53E : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : VBar.l df.leftSB (CAP - VJut) CAP df.mvs
+			local yStart : CAP - VJut + df.mvs
+			include : dispiro
+				widths.rhs.heading df.mvs Rightward
+				flat df.leftSB yStart
+				curl df.middle yStart
+				archv
+				flat df.rightSB (yStart - ArchDepthB)
+				curl df.rightSB (0 + ArchDepthA)
+				arch.rhs 0 (sw -- df.mvs)
+				flat df.leftSB (0 + ArchDepthB)
+				curl df.leftSB (yStart - ArchDepthA)
+				arcvh
+				flat df.rightSB CAP
+				curl (df.rightSB + jut) CAP
+
+		create-glyph 'armn/ca' 0x56E : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.b
+
+			local x1 : mix df.leftSB df.rightSB 0.45
+			local x2 : mix df.leftSB df.rightSB 0.3
+			local xOffset : 0.5 * [HSwToV df.mvs]
+			local y2 : mix Ascender XH 0.5
+			include : dispiro
+				widths.rhs df.mvs
+				flat (x1 + xOffset) Ascender [heading Downward]
+				curl (x2 + xOffset) y2 [heading Downward]
+
+			local x3 : mix df.leftSB df.rightSB 0.1
+			local x4 : mix df.leftSB df.rightSB 0.6
+
+			include : intersection [MaskBelowLine (x1 - xOffset) Ascender (x2 - xOffset) y2 100] : dispiro
+				widths.rhs df.mvs
+				flat (x3 + xOffset) Ascender
+				curl (x4 + xOffset) XH
+				# arcvh
+				straight.down.end (df.rightSB + OX) (XH - SmallArchDepthB)
+				curl (df.rightSB + OX) (0 + SmallArchDepthA)
+				arch.rhs 0 (sw -- df.mvs)
+				flat (df.leftSB - OX) (0 + SmallArchDepthB)
+				curl (df.leftSB - OX) (XH - SmallArchDepthA)
+				arcvh
+				flat df.middle XH
+				curl df.rightSB XH
+
+	do "Ken"
+		create-glyph 'armn/Ken' 0x53F : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local midy : XH / 2 - df.mvs / 2
+			include : dispiro
+				widths.lhs df.mvs
+				flat df.leftSB CAP [heading Downward]
+				curl df.leftSB (midy + ArchDepthB)
+				arch.lhs midy (sw -- df.mvs)
+				flat df.rightSB (midy + ArchDepthA)
+				curl df.rightSB XH [heading Upward]
+			include : VBar.r df.rightSB 0 XH
+
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				local sf2 : SerifFrame.fromDf df XH 0
+				include : composite-proc sf.lt.full sf2.rt.full sf.rb.full
+
+		create-glyph 'armn/ken' 0x56F : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.bp
+			include : nShoulder
+				top -- 0
+				bottom -- (-Ascender)
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : FlipAround df.middle 0
+			include : VBar.r df.rightSB Descender XH df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df Ascender 0
+				local sf2 : SerifFrame.fromDf df XH Descender
+				include sf.lt.outer
+				if [not para.isItalic] : include : composite-proc sf2.rt.inner sf2.rb.full
+
+	do "Ho"
+		create-glyph 'armn/Ho' 0x540 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+
+			local x1 : mix df.leftSB df.rightSB 0.1
+			local midy : CAP * HBarPos
+			include : dispiro
+				widths.rhs df.mvs
+				flat x1 CAP
+				curl df.middle CAP
+				archv
+				g4 df.rightSB [YSmoothMidR CAP (midy - df.mvs / 2) ArchDepthA ArchDepthB]
+				flat df.middle (midy - df.mvs / 2) [heading Downward]
+
+			include : dispiro
+				widths.rhs df.mvs
+				flat (df.leftSB - jut) (midy + df.mvs / 2)
+				curl df.middle (midy + df.mvs / 2)
+				archv
+				flat (df.rightSB - O * 2) [YSmoothMidR (midy + df.mvs / 2) 0 ArchDepthA ArchDepthB]
+				curl (df.rightSB - O * 2) 0
+
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.rb.full
+
+	do "Dz'a"
+		create-glyph 'armn/Dza' 0x541 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : dispiro
+				widths.rhs df.mvs
+				g4 df.leftSB (CAP - Hook)
+				hookstart CAP (sw -- df.mvs)
+				flat (df.rightSB - OX) (CAP - ArchDepthB)
+				curl (df.rightSB - OX) (CAP / 2)
+				CurlyTail.n df.mvs 0 df.leftSB df.rightSB 0 (yLoopTop -- (CAP - Hook) * 0.5)
+
+		create-glyph 'armn/dza' 0x571 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.b
+			local x1 : mix df.leftSB df.rightSB 0.25
+			local x2 : mix df.leftSB df.rightSB 0.75
+			local xOffset : 0.5 * [HSwToV df.mvs]
+			local y2 : Math.min [mix Ascender XH 0.5] (XH + 0.5 * SmallArchDepthA)
+			include : dispiro
+				widths.center df.mvs
+				straight.down.start x1 Ascender [heading Downward]
+				arcvh
+				flat df.middle y2
+				curl x2 y2 [heading Rightward]
+
+			local stemFine : df.mvs * (ShoulderFine / Stroke)
+			include : dispiro
+				widths.lhs df.mvs
+				curl x2 (y2 + 0.5 * df.mvs)
+				archv.superness 1.5
+				straight.down.end df.leftSB (XH - SmallArchDepthA)
+				curl df.leftSB (0 + SmallArchDepthB)
+				OBarRight.arcEnd 0 df.leftSB df.rightSB df.mvs stemFine SmallArchDepthA SmallArchDepthB
+			include : intersection
+				spiro-outline
+					curl x2 (y2 + 0.5 * df.mvs)
+					archv.superness 1.5
+					# curl df.middle XH
+					straight.down.end df.leftSB (XH - SmallArchDepthA)
+					corner df.leftSB 0
+					corner VERY-FAR 0
+					corner VERY-FAR Ascender
+				dispiro
+					widths.rhs df.mvs
+					flat df.leftSB XH
+					curl df.middle XH
+					archv
+					flat df.rightSB (XH - SmallArchDepthB)
+					curl df.rightSB 0 [heading Downward]
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df Ascender 0
+				include sf.rb.outer
+
+	do "Ghat"
+		create-glyph 'armn/Ghat' 0x542 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : LeftHook df CAP df.mvs SLAB 0
+			include : [ArmHBar df 1 JUT-RIGHT].base
+
+		create-glyph 'armn/ghat' 0x572 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			include : VBar.l df.leftSB 0 XH df.mvs
+			include : nShoulder
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				top -- XH
+				bottom -- Descender
+				stroke -- df.mvs
+			include : [ArmHBar df 0 JUT-RIGHT].desc
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH 0
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					local sf2 : SerifFrame.fromDf df XH Descender
+					include : composite-proc sf.lb.full sf2.rb.full
+
+	do "Che"
+		create-glyph 'armn/Che' 0x543 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local x1 : mix df.leftSB df.rightSB 0.75
+			include : dispiro
+				widths.lhs df.mvs
+				flat x1 CAP
+				curl df.middle CAP
+				archv
+				flat df.leftSB (CAP - ArchDepthA)
+				curl df.leftSB (0 + ArchDepthB)
+				arcvh
+				flat df.middle 0
+				curl df.rightSB 0
+			include : dispiro
+				widths.rhs df.mvs
+				flat (df.leftSB - jut) XH
+				curl df.middle XH
+				archv
+				flat df.rightSB (XH - ArchDepthA)
+				curl df.rightSB 0 [heading Downward]
+
+		create-glyph 'armn/che' 0x573 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.b
+			local x1 : mix df.leftSB df.rightSB 0.75
+			local stemFine : df.mvs * (ShoulderFine / Stroke)
+			include : dispiro
+				widths.lhs df.mvs
+				flat df.rightSB Ascender
+				curl x1 Ascender
+				archv
+				flat df.leftSB (XH - SmallArchDepthA)
+				curl df.leftSB (0 + SmallArchDepthB)
+				OBarRight.arcEnd 0 df.leftSB df.rightSB df.mvs stemFine SmallArchDepthA SmallArchDepthB
+			include : dispiro
+				widths.rhs df.mvs
+				flat df.leftSB XH
+				curl df.middle XH
+				archv
+				flat df.rightSB (XH - SmallArchDepthB)
+				curl df.rightSB 0 [heading Downward]
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df Ascender 0
+				include sf.rb.outer
+
+	do "Men"
+		create-glyph 'armn/Men' 0x544 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : UShape df CAP 0 df.mvs
+			include : [ArmHBar df 1 JUT-RIGHT].top
+			if SLAB : begin
+				include : USerifs.Toothless df CAP df.mvs
+
+		create-glyph 'armn/men' 0x574 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.b
+			include : nShoulder
+				top -- 0
+				bottom -- (-XH)
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : FlipAround df.middle 0
+			include : VBar.r df.rightSB 0 Ascender df.mvs
+			include : [ArmHBar df 0 JUT-RIGHT].top
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH 0
+				local sf2 : SerifFrame.fromDf df Ascender 0
+				include sf.lt.outer
+				if [not para.isItalic] : include sf2.rb.outer
+
+	do "Yi"
+		glyph-block-import Letter-Greek-Lower-Epsilon : CyrZe
+		create-glyph 'armn/Yi' 0x545 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local blend : 1 + 2 * O / (df.rightSB - df.leftSB)
+			local midy : mix 0 CAP OverlayPos
+			local ze : CyrZe 0 0 CAP 0 df.leftSB df.rightSB blend Hook
+			include : ze.Shape
+			if SLAB : begin
+				local yiJut : Math.min VJut : CAP - 2 * Hook - df.mvs
+				include : VBar.l (df.leftSB - 2 * O) (midy - 0.5 * yiJut) (midy + 0.5 * yiJut) df.mvs
+
+	do "Nu"
+		create-glyph 'armn/Nu' 0x546 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : LeftHook df CAP df.mvs SLAB SLAB
+			include : FlipAround df.middle (CAP / 2)
+			include : [ArmHBar df 1 JUT-LEFT].top
+
+		create-glyph 'armn/nu' 0x576 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.b
+			include : nShoulder
+				top -- 0
+				bottom -- (-Ascender)
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : FlipAround df.middle 0
+			include : VBar.r df.rightSB 0 XH df.mvs
+			include : [ArmHBar df 0 JUT-LEFT].top
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH 0
+				if [not para.isItalic] : include sf.rb.outer
+
+	do "Sha"
+		create-glyph 'armn/Sha' 0x547 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local fine : df.mvs * (ShoulderFine / Stroke)
+			include : dispiro
+				widths.rhs df.mvs
+				curl df.leftSB CAP [heading Rightward]
+				flat df.middle ([mix XH CAP 0.5] + df.mvs - fine) [heading Rightward]
+				curl df.rightSB (XH + df.mvs) [heading Rightward]
+			include : dispiro
+				widths.rhs df.mvs
+				g4 df.rightSB Hook
+				hookstart 0 (sw -- df.mvs)
+				flat df.leftSB ArchDepthB
+				curl df.leftSB ([mix XH CAP 0.5] - ArchDepthA)
+				arcvh
+				flat df.middle [mix XH CAP 0.5] [widths.rhs fine]
+
+		create-glyph 'armn/sha' 0x577 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			include : dispiro
+				widths.rhs df.mvs
+				g4 df.leftSB (XH - SHook)
+				hookstart XH (sw -- df.mvs)
+				TwoNeck df XH Descender
+			include : [ArmHBar df 0 JUT-NORMAL].desc
+
+	do "Vo"
+		create-glyph 'armn/Vo' 0x548 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : UShape df CAP 1 df.mvs
+			include : FlipAround Middle (CAP / 2)
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include : composite-proc sf.lb.full sf.rb.full
+
+	do "Ch'a"
+		create-glyph 'armn/Cha' 0x549 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : LeftHook df CAP df.mvs 0 0 (CAP - ArchDepthB - TINY)
+			local fine : df.mvs * (ShoulderFine / Stroke)
+			include : dispiro
+				widths.rhs df.mvs
+				flat df.rightSB (CAP - ArchDepthB - TINY)
+				curl df.rightSB ([mix (0.5 * XH) df.mvs 0.5] - fine + ArchDepthA)
+				arcvh
+				flat df.middle ([mix (0.5 * XH) df.mvs 0.5] - fine) [widths.rhs fine]
+			include : dispiro
+				widths.rhs df.mvs
+				flat [mix df.leftSB df.rightSB 0.1] (0.5 * XH) [heading Rightward]
+				curl [mix df.leftSB df.rightSB 0.9] df.mvs [heading Rightward]
+
+		create-glyph 'armn/cha' 0x579 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			local x1 : mix df.leftSB df.rightSB 0.1
+			local x2 : mix df.leftSB df.rightSB 0.9
+			local y2 : XH / 2
+			include : dispiro
+				widths.center df.mvs
+				straight.down.start (x1 + [HSwToV : 0.5 * df.mvs]) XH [heading Downward]
+				arcvh
+				flat df.middle y2
+				curl x2 y2 [heading Rightward]
+			include : dispiro
+				widths.rhs df.mvs
+				flat x2 (y2 - df.mvs / 2)
+				curl df.leftSB (Descender + df.mvs) [widths.lhs df.mvs]
+			include : [ArmHBar df 0 JUT-NORMAL].desc
+
+	do "Peh"
+		create-glyph 'armn/Peh' 0x54A : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : LeftHook df CAP df.mvs SLAB
+			include : VBar.m df.middle (XH / 2) (CAP - 0.5 * df.mvs) df.mvs
+
+	do "Jheh"
+		create-glyph 'armn/Jheh' 0x54B : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local fine2 : df.adviceStroke 5
+			local fine : df.mvs * (ShoulderFine / Stroke)
+			local x1 : df.middle + [HSwToV : [StrokeWidthBlend 0 0.5] * fine2]
+			include : dispiro
+				widths.rhs df.mvs
+				straight.up.start df.leftSB (CAP - ArchDepthA)
+				arch.rhs CAP (sw -- df.mvs)
+				flat df.rightSB (CAP - ArchDepthB)
+				curl df.rightSB (df.mvs - fine + ArchDepthA)
+				arcvh
+				flat df.leftSB (df.mvs - fine) [widths.rhs fine]
+			include : dispiro
+				widths.lhs df.mvs
+				flat df.leftSB (CAP - ArchDepthA)
+				curl df.leftSB (CAP - 1.1 * ArchDepthA)
+				g4 [pre@mix@post 0.5] [pre@mix@post 0.5] [widths.center df.mvs]
+				flat x1 (0.55 * ArchDepthB) [widths.rhs fine2]
+				curl x1 (0.5 * ArchDepthB) [widths.rhs fine2]
+				arcvh
+				flat df.leftSB (df.mvs - fine) [widths.rhs fine]
+			include : VBar.l df.leftSB 0 VJut df.mvs
+			include : [ArmHBar df 1 JUT-NORMAL].base
+
+		create-glyph 'armn/jheh' 0x57B : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			local refY : XH - SmallArchDepthB * 1.5 - df.mvs / 2 * (1 - TanSlope)
+			local x1 : df.middle + [HSwToV : [StrokeWidthBlend 0 0.4] * df.mvs]
+			local y1 : mix (Descender + df.mvs) refY [StrokeWidthBlend 0.65 0.7]
+
+			include : dispiro
+				widths.lhs df.mvs
+				straight.up.start x1 y1 [heading Upward]
+				g4 [pre@mix@post 0.5] [pre@mix@post 0.5] [widths.center df.mvs]
+				flat df.leftSB (XH - 1.1 * SmallArchDepthA) [widths.rhs df.mvs]
+				curl df.leftSB (XH - SmallArchDepthA)
+				arch.rhs XH (sw -- df.mvs)
+				TwoNeck df XH Descender
+
+			local dx : df.leftSB - df.rightSB
+			local dy : (Descender + df.mvs) - refY
+			local hypot : Math.hypot dx dy
+			local cosAngle : dy / hypot
+			local sinAngle : (-dx) / hypot
+			local joinX : mix df.leftSB (df.rightSB + cosAngle * df.mvs) 0.2
+			local joinY : mix (Descender + df.mvs) (refY + sinAngle * [HSwToV df.mvs]) 0.2
+			local fine : df.mvs * (ShoulderFine / Stroke)
+
+			include : dispiro
+				widths.lhs df.mvs
+				straight.down.start (x1 - [HSwToV df.mvs]) y1 [heading Downward]
+				flat joinX joinY [widths.lhs fine]
+				curl df.leftSB (Descender + df.mvs)
+			include : [ArmHBar df 0 JUT-NORMAL].desc
+
+	do "Rra"
+		create-glyph 'armn/Rra' 0x54C : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : UShape df CAP 1 df.mvs
+			include : FlipAround Middle (CAP / 2)
+			include : [ArmHBar df 1 JUT-RIGHT].mid
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include : composite-proc sf.lb.full sf.rb.full
+
+		create-glyph 'armn/rra' 0x57C : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.e
+			include : VBar.l df.leftSB 0 XH df.mvs
+
+			# Straight 'n' form
+			# include :	nShoulder
+			# 	left -- (df.leftSB + [HSwToV df.mvs])
+			# 	right -- df.rightSB
+			# 	top -- XH
+			# 	bottom -- 0
+			# 	stroke -- df.mvs
+			# include : [ArmHBar df 0 JUT-RIGHT].base
+			# if SLAB : begin
+			# 	local sf : SerifFrame.fromDf df XH 0
+			# 	include sf.lt.outer
+			# 	if [not para.isItalic] : begin
+			# 		include : composite-proc sf.lb.full
+
+			# Combination of nShoulderKnots and the straight 2 shape
+			local fine : df.mvs * (ShoulderFine / Stroke)
+			local left : Math.max (df.rightSB - jut - [HSwToV df.mvs]) df.middle
+			include : dispiro
+				widths.rhs fine
+				flat (df.leftSB + [HSwToV : df.mvs - fine]) (XH - SmallArchDepthA - TINY)
+				curl (df.leftSB + [HSwToV : df.mvs - fine]) (XH - SmallArchDepthA)
+				arch.rhs XH (sw -- df.mvs) (swBefore -- fine)
+				TwoNeck df XH 0 left
+			include : HBar.b left (left + [HSwToV df.mvs] + jut) 0 df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH 0
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					include : composite-proc sf.lb.outer
+
+	do "Vew"
+		create-glyph 'armn/Vew' 0x54E : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local midy : XH / 2 - df.mvs / 2
+			include : dispiro
+				widths.lhs df.mvs
+				flat df.leftSB XH [heading Downward]
+				curl df.leftSB (midy + ArchDepthB)
+				arch.lhs midy (sw -- df.mvs)
+				flat df.rightSB (midy + ArchDepthA)
+				curl df.rightSB XH [heading Upward]
+			include : VBar.r df.rightSB 0 CAP df.mvs
+			include : [ArmHBar df 1 JUT-RIGHT].base
+
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH 0
+				local sf2 : SerifFrame.fromDf df CAP 0
+				include : composite-proc sf.lt.full sf2.rt.full sf.rb.full
+
+		create-glyph 'armn/vew' 0x57E : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.bp
+			include : nShoulder
+				top -- 0
+				bottom -- (-XH)
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : FlipAround df.middle 0
+			include : VBar.r df.rightSB Descender Ascender df.mvs
+			include : [ArmHBar df 1 JUT-RIGHT].desc
+
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH 0
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					local sf2 : SerifFrame.fromDf df Ascender Descender
+					include sf2.rt.inner
+
+	do "Tiun"
+		create-glyph 'armn/tiun' 0x57F : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.e
+			include : nShoulder
+				top -- XH
+				bottom -- 0
+				left -- (df.middle + [HSwToV : df.mvs / 2])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : FlipAround df.middle (XH / 2)
+			include : nShoulder
+				top -- XH
+				bottom -- 0
+				left -- (df.middle + [HSwToV : df.mvs / 2])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : VBar.m df.middle 0 XH df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH 0
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					include : composite-proc sf.mt.left sf.mb.right sf.rb.outer
+
+	do "Reh"
+		create-glyph 'armn/Reh' 0x550 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : RightHook df CAP df.mvs SLAB 0
+
+		create-glyph 'armn/reh' 0x580 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.b
+			include : nShoulder
+				top -- XH
+				bottom -- 0
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : VBar.l df.leftSB Descender XH df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					local sf2 : SerifFrame.fromDf df XH 0
+					include : composite-proc sf.lb.full sf2.rb.full
+
+	do "C'o"
+		create-glyph 'armn/Co' 0x551 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local midy : CAP * HBarPos
+			local midyTop : midy + 0.5 * df.mvs
+			local midyBot : midy - 0.5 * df.mvs
+			include : [ArmHBar df 1 JUT-LEFT].at midy
+			include : dispiro
+				widths.lhs df.mvs
+				flat df.leftSB midyBot
+				curl df.middle midyBot
+				archv
+				flatside.ru df.rightSB midyBot CAP ArchDepthA ArchDepthB
+				arch.lhs CAP (sw -- df.mvs)
+				flatside.ld df.leftSB midyBot CAP ArchDepthA ArchDepthB
+				arcvh
+				straight.right.end df.middle midyBot [heading Rightward]
+			include : dispiro
+				widths.rhs df.mvs
+				straight.right.start df.middle midyTop [heading Rightward]
+				flatside.rd df.rightSB 0 midyTop SmallArchDepthA SmallArchDepthB
+				hookend 0 (sw -- df.mvs)
+				g4 df.leftSB Hook
+
+	do "Hiun"
+		create-glyph 'armn/Hiun' 0x552 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : VBar.l df.leftSB 0 CAP df.mvs
+			include : [ArmHBar df 1 JUT-NORMAL].high
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include : composite-proc sf.lt.full sf.lb.full
+
+		create-glyph 'armn/hiun' 0x582 : glyph-proc
+			local df : include : DivFrame para.diversityF
+			include : VBar.l df.leftSB 0 XH df.mvs
+			include : [ArmHBar df 1 JUT-NORMAL].base
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH 0
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					include sf.lb.full
+
+	do "P'iur"
+		create-glyph 'armn/piur' 0x583 : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.bp
+			include : nShoulder
+				top -- XH
+				bottom -- 0
+				left -- (df.middle + [HSwToV : df.mvs / 2])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : FlipAround df.middle (XH / 2)
+			include : nShoulder
+				top -- XH
+				bottom -- 0
+				left -- (df.middle + [HSwToV : df.mvs / 2])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : VBar.m df.middle Descender Ascender df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH 0
+				local sf2 : SerifFrame.fromDf df Ascender Descender
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					include : composite-proc sf2.mt.left sf2.mb.full sf.rb.full
+
+	do "K'eh"
+		create-glyph 'armn/Keh' 0x554 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local bot : Math.max (XH - (CAP - XH)) (2.2 * df.mvs)
+			include : OBarLeft.roundedTop
+				top -- CAP
+				bot -- bot
+				left -- df.leftSB
+				right -- df.rightSB
+				yTerminal -- 0
+				sw -- df.mvs
+			include : HBar.m (df.leftSB - jut) (df.rightSB + jut) [mix [if SLAB df.mvs 0] bot 0.5] df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.lb.full
+
+		create-glyph 'armn/keh' 0x584 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			local bot : Math.max (0.25 * XH) (1.2 * df.mvs)
+			include : OBarLeft.shape
+				left  -- df.leftSB
+				right -- df.rightSB
+				bot   -- bot
+				sw    -- df.mvs
+				fine  -- (df.mvs * ShoulderFine / Stroke)
+			include : VBar.l df.leftSB Descender XH df.mvs
+			include : HCrossBar.bottom (df.leftSB - jut) df.rightSB 0
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					include sf.lb.full
+
+	do "Feh"
+		define [FehBody df top bot ada adb] : glyph-proc
+			local midy : mix bot top HBarPos
+			include : dispiro
+				widths.lhs df.mvs
+				straight.left.start df.middle top
+				g4 (df.leftSB * 1.5) [YSmoothMidR top (midy - 0.5 * df.mvs) ada adb]
+				straight.right.end df.middle (midy - 0.5 * df.mvs) [heading Rightward]
+			include : dispiro
+				widths.rhs df.mvs
+				straight.right.start df.middle (midy + 0.5 * df.mvs) [heading Rightward]
+				flatside.rd df.rightSB 0 (midy + 0.5 * df.mvs) SmallArchDepthA SmallArchDepthB
+				hookend 0 (sw -- df.mvs)
+				g4 df.leftSB Hook
+
+		create-glyph 'armn/Feh' 0x556 : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.capital
+			include : FehBody df CAP 0 ArchDepthA ArchDepthB
+			include : VBar.m df.middle 0 CAP df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.mt.right
+
+		create-glyph 'armn/feh' 0x586 : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.bp
+			include : FehBody df Ascender 0 ArchDepthA ArchDepthB
+			include : VBar.m df.middle Descender Ascender df.mvs
+			if (SLAB && [not para.Italic]) : begin
+				local sf : SerifFrame.fromDf df Ascender Descender
+				include sf.mb.full
+
+	do "Ew"
+		create-glyph 'armn/ew' 0x587 : glyph-proc
+			local df : include : DivFrame para.diversityM 3
+			include : df.markSet.b
+			include : nShoulder
+				top -- 0
+				bottom -- (-Ascender)
+				left -- (df.middle + [HSwToV : df.mvs / 2])
+				right -- df.rightSB
+				stroke -- df.mvs
+			include : FlipAround df.middle 0
+			include : VBar.m df.middle 0 XH df.mvs
+			include : HBar.b df.middle df.rightSB 0 df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df Ascender 0
+				include sf.lt.outer
+				if [not para.isItalic] : begin
+					local sf2 : SerifFrame.fromDf df XH 0
+					include sf2.mt.left
