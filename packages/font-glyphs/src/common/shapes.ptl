@@ -192,34 +192,17 @@ glyph-block CommonShapes : begin
 		local width : fallback _width Stroke
 		local ada : fallback _ada SmallArchDepthA
 		local adb : fallback _adb SmallArchDepthB
-		if (u - d > ada + adb) : then : begin
-			return : sink
-				widths width 0
-				arch.lhs.centerAt.rtl.t middle u (sw -- width)
-				archv
-				flat (l + OX) (u - ada)
-				curl (l + OX) (d + adb)
-				arcvh
-				arch.lhs.centerAt.ltr.b middle d (sw -- width)
-				archv
-				flat (r - OX) (d + ada)
-				curl (r - OX) (u - adb)
-				arcvh
-				close
-		: else : begin
-			local ymiddlea : mix d u (adb / (ada + adb))
-			local ymiddleb : mix d u (ada / (ada + adb))
-			return : sink
-				widths width 0
-				arch.lhs.centerAt.rtl.t middle u (sw -- width)
-				archv
-				g4 (l + OX) ymiddlea
-				arcvh
-				arch.lhs.centerAt.ltr.b middle d (sw -- width)
-				archv
-				g4 (r - OX) ymiddleb
-				arcvh
-				close
+		return : sink
+			widths width 0
+			arch.lhs.centerAt.rtl.t middle u (sw -- width)
+			archv
+			flatside.ld (l + OX) d u ada adb
+			arcvh
+			arch.lhs.centerAt.ltr.b middle d (sw -- width)
+			archv
+			flatside.ru (r - OX) d u ada adb
+			arcvh
+			close
 
 	glyph-block-export OShape
 	define [OShape u d l r _width _ada _adb] : OShapeT dispiro u d l r _width _ada _adb
@@ -235,39 +218,20 @@ glyph-block CommonShapes : begin
 		local width : fallback _width Stroke
 		local ada : fallback _ada SmallArchDepthA
 		local adb : fallback _adb SmallArchDepthB
-		if (u - d > ada + adb) : then : begin
-			include : dispiro
-				widths.lhs width
-				arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.rtl.t (middle - gap / 2) u (sw -- width) (knot-ty -- curl)
-				archv
-				flat (l + OX) (u - ada)
-				curl (l + OX) (d + adb)
-				arcvh
-				arch.lhs.centerAt.ltr.b (middle - gap / 2) d (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.ltr.b (middle + gap / 2) d (sw -- width) (knot-ty -- curl)
-				archv
-				flat (r - OX) (d + ada)
-				curl (r - OX) (u - adb)
-				arcvh
-				arch.lhs.centerAt.rtl.t (middle + gap / 2) u (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- curl)
-		: else : begin
-			local ymiddlea : mix d u (adb / (ada + adb))
-			local ymiddleb : mix d u (ada / (ada + adb))
-			include : dispiro
-				arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.rtl.t (middle - gap / 2) u (sw -- width) (knot-ty -- curl)
-				archv
-				g4 (l + OX) ymiddlea
-				arcvh
-				arch.lhs.centerAt.ltr.b (middle - gap / 2) d (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.ltr.b (middle + gap / 2) d (sw -- width) (knot-ty -- curl)
-				archv
-				g4 (r - OX) ymiddleb
-				arcvh
-				arch.lhs.centerAt.rtl.t (middle + gap / 2) u (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- curl)
+		include : dispiro
+			widths.lhs width
+			arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- flat)
+			arch.lhs.centerAt.rtl.t (middle - gap / 2) u (sw -- width) (knot-ty -- curl)
+			archv
+			flatside.ld (l + OX) d u ada adb
+			arcvh
+			arch.lhs.centerAt.ltr.b (middle - gap / 2) d (sw -- width) (knot-ty -- flat)
+			arch.lhs.centerAt.ltr.b (middle + gap / 2) d (sw -- width) (knot-ty -- curl)
+			archv
+			flatside.ru (r - OX) d u ada adb
+			arcvh
+			arch.lhs.centerAt.rtl.t (middle + gap / 2) u (sw -- width) (knot-ty -- flat)
+			arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- curl)
 
 	glyph-block-export HSerif
 	define HSerif : namespace
@@ -529,6 +493,36 @@ glyph-block CommonShapes : begin
 		local-parameter : o              -- O
 		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
 		return : WithKnotProxy [hookProxy args] : new FunctionInterpolator hookEndBlender args
+
+	glyph-block-export flatside
+	define flatside : namespace
+		export : define [ld l d u ada adb _af] : return
+			if (u - d > ada + adb)
+				list
+					flat l (u - ada) _af
+					curl l (d + adb)
+				g4 l [mix d u (adb / (ada + adb))] _af
+
+		export : define [lu l d u ada adb _af] : return
+			if (u - d > ada + adb)
+				list
+					flat l (d + adb) _af
+					curl l (u - ada)
+				g4 l [mix d u (adb / (ada + adb))] _af
+
+		export : define [rd r d u ada adb _af] : return
+			if (u - d > ada + adb)
+				list
+					flat r (u - adb) _af
+					curl r (d + ada)
+				g4 r [mix d u (ada / (ada + adb))] _af
+
+		export : define [ru r d u ada adb _af] : return
+			if (u - d > ada + adb)
+				list
+					flat r (d + ada) _af
+					curl r (u - adb)
+				g4 r [mix d u (ada / (ada + adb))] _af
 
 	glyph-block-export arch
 	define arch : namespace
