@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback strokeOffset] from "@iosevka/util"
 import [DesignParameters] from "../../meta/aesthetics.mjs"
 
 glyph-module
@@ -612,7 +612,7 @@ glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 		StdWhiteShape RightArrowHeadShape 'whiteArrowHeadRight' null {.sw ([Math.min GeometryStroke : AdviceStroke 4.75 : Math.sqrt Geom.Scalar] * [Math.sqrt 5])}
 
 	do "Other Polygon"
-		glyph-block-import Shared-Symbol-Shapes : TriangleShape
+		glyph-block-import Shared-Symbol-Shapes : TriangleShape HZigzag
 
 		define fineGeometryStroke : AdviceStroke2 4 4 (Geom.Size * 2)
 
@@ -636,3 +636,25 @@ glyph-block Symbol-Geometric-Plain : for-width-kinds WideWidth1
 		create-glyph [MangleName 'slope'] [MangleUnicode 0x2333] : glyph-proc
 			set-width Geom.Width
 			include : TriangleShape Geom.Left Geom.Bot Geom.Left Geom.MidY Geom.Right Geom.Bot fineGeometryStroke
+
+		create-glyph [MangleName 'horiZigzag'] [MangleUnicode 0x1CEB0] : glyph-proc
+			set-width Geom.Width
+			define left : SB * MosaicWidthScalar
+			define right : RightSB * MosaicWidthScalar
+			define amp : (OperTop - OperBot) / 8
+			define sgmts : 4 * MosaicWidthScalar + 1
+
+			define dx  : (right - left) / sgmts
+			define rhs : strokeOffset left (Geom.MidY - amp) dx (2 * amp) (GeometryStroke / 2) HVContrast
+			define bot : linreg rhs.x rhs.y (rhs.x + dx) (rhs.y + 2 * amp) left
+			define top : Geom.MidY * 2 - bot
+			include : union
+				HZigzag Geom.MidY left right amp sgmts 1 GeometryStroke
+				dispiro
+					widths.lhs GeometryStroke
+					flat  left        bot
+					curl (left + dx) (bot + 2 * amp)
+				dispiro
+					widths.lhs GeometryStroke
+					flat  right        top
+					curl (right - dx) (top - 2 * amp)

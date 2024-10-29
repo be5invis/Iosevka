@@ -33,6 +33,13 @@ export function boolePn(b) {
 	if (b) return 1;
 	else return -1;
 }
+export function strokeOffset(x, y, dx, dy, offset, contrast) {
+	const r = Math.hypot(dx, dy);
+	return {
+		x: x + (dy / r) * offset * contrast,
+		y: y - (dx / r) * offset
+	};
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
