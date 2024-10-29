@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
+import [mix linreg clamp fallback] from "@iosevka/util"
 import [DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -8,18 +8,29 @@ glyph-module
 glyph-block Letter-Armenian-Lower-Q-Group : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Shared-Shapes : SerifFrame OBarRight
 	glyph-block-import Letter-Armenian-Shared-Shapes : ArmHBar
-	glyph-block-import Letter-Latin-Lower-Q : QConfig
 
-	foreach { suffix { Body {terminal fTail} {sRT sRB} } } [Object.entries QConfig] : if [not fTail] : do
-		create-glyph "armn/gim.\(suffix)" : glyph-proc
-			include [refer-glyph "q.\(suffix)"] AS_BASE ALSO_METRICS
-			include : [ArmHBar.right [DivFrame 1] 0].base
+	do "Gim"
+		create-glyph 'armn/gim' 0x563 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			include : OBarRight.shape (top -- XH)
+			include : VBar.r df.rightSB Descender XH
+			include : [ArmHBar.right df 0].base
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include sf.rb.fullSide
+				if [not para.isItalic] : begin
+					include sf.rt.outer
 
-		if [not sRB] : create-glyph "armn/za.\(suffix)" : glyph-proc
-			include [refer-glyph "q.\(suffix)"] AS_BASE ALSO_METRICS
-			include : [ArmHBar.right [DivFrame 1] 0].desc
-
-	select-variant 'armn/gim' 0x563 (follow -- 'q/tailless')
-	select-variant 'armn/za'  0x566 (follow -- 'qRTail')
+	do "Za"
+		create-glyph 'armn/za' 0x566 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			include : OBarRight.shape (top -- XH)
+			include : VBar.r df.rightSB Descender XH
+			include : [ArmHBar.right df 0].desc
+			if (SLAB && [not para.isItalic]) : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include sf.rt.outer
