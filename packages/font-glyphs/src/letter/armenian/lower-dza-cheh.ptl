@@ -8,8 +8,12 @@ glyph-module
 glyph-block Letter-Armenian-Lower-Dza-Cheh : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : OBarRight OBarLeft
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Shared-Shapes : OBarRight SerifFrame
+
+	# Common Params
+	define barPos : XH / 2
+	define highBarPos XH
+	define jut Jut
 
 	do "Dz'a"
 		create-glyph 'armn/dza' 0x571 : glyph-proc
@@ -17,7 +21,6 @@ glyph-block Letter-Armenian-Lower-Dza-Cheh : begin
 			include : df.markSet.b
 			local x1 : mix df.leftSB df.rightSB 0.25
 			local x2 : mix df.leftSB df.rightSB 0.75
-			local xOffset : 0.5 * [HSwToV df.mvs]
 			local y2 : Math.min [mix Ascender XH 0.5] (XH + 0.5 * SmallArchDepthA)
 			include : dispiro
 				widths.center df.mvs
@@ -26,27 +29,26 @@ glyph-block Letter-Armenian-Lower-Dza-Cheh : begin
 				flat df.middle y2
 				curl x2 y2 [heading Rightward]
 
-			local stemFine : df.mvs * (ShoulderFine / Stroke)
+			local stemFine : ShoulderFine * (df.mvs / Stroke)
+			define [knots] : list
+				straight.left.start x2 (y2 + 0.5 * df.mvs)
+				archv
+				flat df.leftSB (XH - SmallArchDepthA)
+				curl df.leftSB (0 + SmallArchDepthB) [heading Downward]
 			include : dispiro
 				widths.lhs df.mvs
-				curl x2 (y2 + 0.5 * df.mvs)
-				archv.superness 1.5
-				straight.down.end df.leftSB (XH - SmallArchDepthA)
-				curl df.leftSB (0 + SmallArchDepthB)
+				knots
 				OBarRight.arcEnd 0 df.leftSB df.rightSB df.mvs stemFine SmallArchDepthA SmallArchDepthB
 			include : intersection
 				spiro-outline
-					curl x2 (y2 + 0.5 * df.mvs)
-					archv.superness 1.5
-					# curl df.middle XH
-					straight.down.end df.leftSB (XH - SmallArchDepthA)
+					knots
 					corner df.leftSB 0
 					corner VERY-FAR 0
 					corner VERY-FAR Ascender
 				dispiro
 					widths.rhs df.mvs
 					flat df.leftSB XH
-					curl df.middle XH
+					curl df.middle XH [heading Rightward]
 					archv
 					flat df.rightSB (XH - SmallArchDepthB)
 					curl df.rightSB 0 [heading Downward]
@@ -59,21 +61,21 @@ glyph-block Letter-Armenian-Lower-Dza-Cheh : begin
 			local df : include : DivFrame 1
 			include : df.markSet.b
 			local x1 : mix df.leftSB df.rightSB 0.75
-			local stemFine : df.mvs * (ShoulderFine / Stroke)
+			local stemFine : ShoulderFine * (df.mvs / Stroke)
 			include : dispiro
 				widths.lhs df.mvs
-				flat df.rightSB Ascender
-				curl x1 Ascender
+				flat x1 Ascender
+				curl df.middle Ascender [heading Leftward]
 				archv
-				flat df.leftSB (XH - SmallArchDepthA)
-				curl df.leftSB (0 + SmallArchDepthB)
+				flat df.leftSB (Ascender - SmallArchDepthA)
+				curl df.leftSB (0 + SmallArchDepthB) [heading Downward]
 				OBarRight.arcEnd 0 df.leftSB df.rightSB df.mvs stemFine SmallArchDepthA SmallArchDepthB
 			include : dispiro
 				widths.rhs df.mvs
-				flat df.leftSB XH
-				curl df.middle XH
+				flat (df.leftSB - jut + [HSwToV : 0.5 * df.mvs]) highBarPos
+				curl df.middle highBarPos [heading Rightward]
 				archv
-				flat df.rightSB (XH - SmallArchDepthB)
+				flat df.rightSB (highBarPos - SmallArchDepthB)
 				curl df.rightSB 0 [heading Downward]
 			if SLAB : begin
 				local sf : SerifFrame.fromDf df Ascender 0
