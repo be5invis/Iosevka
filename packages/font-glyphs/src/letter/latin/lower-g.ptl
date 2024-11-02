@@ -116,8 +116,8 @@ glyph-block Letter-Latin-Lower-G : begin
 			include : SeriflessBody df top
 			include : spiro-outline
 				corner df.rightSB                     top
-				corner df.rightSB                     (top - Stroke / 2)
-				corner (df.rightSB - [HSwToV Stroke]) (top - Stroke / 2)
+				corner df.rightSB                     (top - HalfStroke)
+				corner (df.rightSB - [HSwToV Stroke]) (top - HalfStroke)
 
 		export : define [SeriflessBody df top] : glyph-proc
 			include : OBarRight.shape (top -- top) (left -- df.leftSB) (right -- df.rightSB) (sw -- df.mvs)
@@ -128,7 +128,7 @@ glyph-block Letter-Latin-Lower-G : begin
 
 		export : define [AutoSerifedBody df top] : glyph-proc
 			include : SeriflessBody df top
-			if SLAB : include : tagged 'serifRT' : HSerif.rt df.rightSB top SideJut
+			if (SLAB && [not para.isItalic]) : include : tagged 'serifRT' : HSerif.rt df.rightSB top SideJut
 
 		export : define [EarlessCornerBody df top] : glyph-proc
 			include : OBarLeft.toothless
@@ -160,7 +160,7 @@ glyph-block Letter-Latin-Lower-G : begin
 			earlessCorner         { SingleStorey.EarlessCornerBody  DToothlessRise         }
 			earlessCornerHTB      { SingleStorey.EarlessCornerBody  0                      }
 			earlessRounded        { SingleStorey.EarlessRoundedBody (XH - SmallArchDepthA) }
-			scriptCut             { SingleStorey.ScriptCutBody      (Stroke / 2)           }
+			scriptCut             { SingleStorey.ScriptCutBody      HalfStroke             }
 
 	foreach { suffix { hookShape {bodyShape hookStart} } } [Object.entries SingleStoreyConfig] : do
 		create-glyph "g.\(suffix)" : glyph-proc
@@ -196,33 +196,30 @@ glyph-block Letter-Latin-Lower-G : begin
 			include [refer-glyph "g.\(suffix)"] AS_BASE ALSO_METRICS
 			include : OverlayW [AdviceStroke2 2 4 XH]
 
-		create-glyph "gScriptCrossedTail.\(suffix)" : glyph-proc
-			include : MarkSet.p
-			set-base-anchor 'overlay' Middle (XH / 2)
-			define df : DivFrame 1
-			include : bodyShape df XH
-			include : SingleStorey.CrossedHook df (XH - hookStart)
-
 	select-variant 'g' 'g'
 	link-reduced-variant 'g/sansSerif' 'g' MathSansSerif
 	CreateTurnedLetter 'turng' 0x1D77 'g' HalfAdvance [mix Descender XH 0.5]
 	select-variant "gBar" 0x1E5 (follow -- 'g')
-	select-variant 'g/single' null (shapeFrom -- 'g')
-
-	select-variant 'g/hookTopBase' null (shapeFrom -- 'g')
 
 	select-variant 'gScript' 0x261 (shapeFrom -- 'g') (follow -- 'gScript')
 	select-variant 'GScript' 0xA7AC (follow -- 'gScript')
 	select-variant 'gScriptPalatalHook' 0x1D83 (follow -- 'gScript')
-	select-variant 'gScriptCrossedTail' 0xAB36
 
-	alias 'cyrl/de.BGR' null 'g/single'
-	alias 'cyrl/de.SRB' null 'g/single'
+	select-variant 'cyrl/de.BGR' (shapeFrom -- 'g') (follow -- [conditional-follow SLAB 'g/single/autoSerifed/slab' 'g/single/autoSerifed/sans'])
+	alias 'cyrl/de.SRB' null 'cyrl/de.BGR'
 
+	select-variant 'g/hookTopBase' (shapeFrom -- 'g')
 	derive-glyphs 'gHookTop' 0x260 "g/hookTopBase" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : TopHook.rBarOuter RightSB 0 XH
 		include : LeaningAnchor.Above.VBar.r RightSB
+
+	create-glyph 'gScriptCrossedTail' 0xAB36 : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		define df : DivFrame 1
+		include : SingleStorey.ScriptCutBody df XH
+		include : SingleStorey.CrossedHook df (XH - HalfStroke)
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	create-glyph 'mathbb/g' 0x1D558 : glyph-proc

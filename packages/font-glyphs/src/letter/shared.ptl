@@ -126,7 +126,7 @@ glyph-block Letter-Blackboard : begin
 glyph-block Letter-Shared-Metrics : begin
 	glyph-block-export BowlXDepth
 	define [BowlXDepth top bottom left right sw] : begin
-		local trShrink : Math.pow (((right - left) / (top - bottom))) 0.5
+		local trShrink : Math.sqrt : (right - left) / (top - bottom)
 		return : Math.max
 			HSwToV : 1.25 * sw
 			trShrink * [Math.min ((top - bottom) * 0.45) ((right - left + [HSwToV sw]) * 0.875)]
@@ -288,74 +288,67 @@ glyph-block Letter-Shared-Shapes : begin
 				curl xend yend
 
 		export : define [shape] : with-params [
-				[top XH] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
+				[top XH] [bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : begin
 			return : dispiro
 				widths.lhs fine
-				flat (left + [HSwToV : sw - fine]) (top - ada - TINY)
-				curl (left + [HSwToV : sw - fine]) (0 + adb)
-				arch.lhs 0 (sw -- sw) (swBefore -- fine)
-				flat (right - OX) (0 + ada)
-				curl (right - OX) (top - adb)
+				flatside.ld (left + [HSwToV : sw - fine]) bot top ada adb 0
+				arch.lhs bot (sw -- sw) (swBefore -- fine)
+				flatside.ru right bot top ada adb
 				arch.lhs top (sw -- sw) (swAfter -- fine)
-				flat (left + [HSwToV : sw - fine]) (top - ada) [widths.lhs fine]
-				curl (left + [HSwToV : sw - fine]) (top - ada - TINY)
+				flatside.ld (left + [HSwToV : sw - fine]) bot top ada adb 0 (af -- [widths.lhs fine])
 
 		export : define [toothless] : with-params [
-				[top XH] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
+				[top XH] [bot 0] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
 				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : begin
 			return : dispiro
-				g4 left rise [widths.lhs sw]
+				g4 left (bot + rise) [widths.lhs sw]
 				alsoThru.g2 0.5 mBlend important
-				arch.lhs.centerAt.ltr.b [mix left right 0.5] 0 (sw -- sw)
+				arch.lhs.centerAt.ltr.b [mix left right 0.5] bot (sw -- sw)
 				archv
-				flat (right - OX) (0 + ada)
-				curl (right - OX) (top - adb)
+				flatside.ru right bot top ada adb
 				arch.lhs top (sw -- sw) (swAfter -- fine)
 				flat (left + [HSwToV : sw - fine]) (top - ada) [widths.lhs fine]
 				curl (left + [HSwToV : sw - fine]) (top - ada - TINY) [widths.lhs fine]
 
 		export : define [rounded] : with-params [
-				[top XH] [left SB] [right RightSB] [yTerminal CAP] [sw Stroke] [fine ShoulderFine]
+				[top XH] [bot 0] [left SB] [right RightSB] [yTerminal CAP] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : begin
 			return : dispiro
 				flat left yTerminal [widths.lhs.heading sw Downward]
 				curl left [Math.min adb (yTerminal - TINY)]
-				arch.lhs 0 (sw -- sw)
-				flat (right - OX) (0 + ada)
-				curl (right - OX) (top - adb)
+				arch.lhs bot (sw -- sw)
+				flatside.ru right bot top ada adb
 				arch.lhs top (sw -- sw) (swAfter -- fine)
 				flat (left + [HSwToV : sw - fine]) (top - ada + TINY) [widths.lhs fine]
 				curl (left + [HSwToV : sw - fine]) (top - ada) [widths.lhs fine]
 
 		export : define [toothlessTop] : with-params [
-				[top XH] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
+				[top XH] [bot 0] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
 				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : begin
 			return : dispiro
-				flat (left + [HSwToV : sw - fine]) (top - ada - TINY) [widths.lhs fine]
-				curl (left + [HSwToV : sw - fine]) (0 + adb) [widths.lhs fine]
-				arch.lhs 0 (sw -- sw) (swBefore -- fine)
-				flat (right - OX) (0 + ada)
-				curl (right - OX) (top - adb)
+				flat (left + [HSwToV : sw - fine]) (bot + adb + TINY) [widths.lhs fine]
+				curl (left + [HSwToV : sw - fine]) (bot + adb) [widths.lhs fine]
+				arch.lhs bot (sw -- sw) (swBefore -- fine)
+				flatside.ru right bot top ada adb
 				arcvh
 				arch.lhs.centerAt.rtl.t [mix left right 0.5] top (sw -- sw)
 				alsoThru.g2 0.5 (1 - mBlend) important
 				g4 left (top - rise) [widths.lhs sw]
 
 		export : define [roundedTop] : with-params [
-				[top XH] [left SB] [right RightSB] [yTerminal Descender] [sw Stroke]
+				[top XH] [bot 0] [left SB] [right RightSB] [yTerminal Descender] [sw Stroke]
 				[fine ShoulderFine] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : begin
 			return : dispiro
-				flat (left + [HSwToV : sw - fine]) (top - ada - TINY) [widths.lhs fine]
-				curl (left + [HSwToV : sw - fine]) (0 + adb) [widths.lhs fine]
-				arch.lhs 0 (sw -- sw) (swBefore -- fine)
-				flat (right - OX) (0 + ada)
-				curl (right - OX) (top - adb)
+				flat (left + [HSwToV : sw - fine]) (bot + adb + TINY) [widths.lhs fine]
+				curl (left + [HSwToV : sw - fine]) (bot + adb) [widths.lhs fine]
+				arch.lhs bot (sw -- sw) (swBefore -- fine)
+				flatside.ru right bot top ada adb
 				arch.lhs top (sw -- sw)
 				flat left [Math.max (yTerminal + TINY - TanSlope * Stroke) (top - ada)]
 				curl left yTerminal [widths.lhs.heading sw Downward]
@@ -386,25 +379,27 @@ glyph-block Letter-Shared-Shapes : begin
 				curl xend yend
 
 		export : define [shape] : with-params [
-				[top XH] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
+				[top XH] [bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : new-glyph : glyph-proc
 			include : OBarLeft.shape
 				top -- top
+				bot -- bot
 				left -- left
 				right -- right
 				sw -- sw
 				fine -- fine
 				ada -- ada
 				adb -- adb
-			include : FlipAround [mix left right 0.5] (top / 2)
+			include : FlipAround [mix left right 0.5] [mix bot top 0.5]
 
 		export : define [toothless] : with-params [
-				[top XH] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
+				[top XH] [bot 0] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
 				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : new-glyph : glyph-proc
 			include : OBarLeft.toothlessTop
 				top -- top
+				bot -- bot
 				left -- left
 				right -- right
 				rise -- rise
@@ -413,14 +408,15 @@ glyph-block Letter-Shared-Shapes : begin
 				mBlend -- mBlend
 				ada -- ada
 				adb -- adb
-			include : FlipAround [mix left right 0.5] (top / 2)
+			include : FlipAround [mix left right 0.5] [mix bot top 0.5]
 
 		export : define [rounded] : with-params [
-				[top XH] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
+				[top XH] [bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[yTerminal CAP] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : new-glyph : glyph-proc
 			include : OBarLeft.roundedTop
 				top -- top
+				bot -- bot
 				left -- left
 				right -- right
 				sw -- sw
@@ -428,7 +424,7 @@ glyph-block Letter-Shared-Shapes : begin
 				yTerminal -- (top - yTerminal)
 				ada -- ada
 				adb -- adb
-			include : FlipAround [mix left right 0.5] (top / 2)
+			include : FlipAround [mix left right 0.5] [mix bot top 0.5]
 
 	glyph-block-export FlatHookDepth
 	define [FlatHookDepth df s] : object
@@ -711,6 +707,11 @@ glyph-block Letter-Shared-Shapes : begin
 				[rightAt x] : tagged 'serifMB' : HSerif.mbAsymmetric x bot 0 jutIn swSerif
 			set this.mt : object
 				full : tagged 'serifMT' : HSerif.mtAsymmetric [mix lBarCenter rBarCenter 0.5] top jutIn jutIn swSerif
+				[fullAt x] : tagged 'serifMT' : HSerif.mtAsymmetric x top jutIn jutIn swSerif
+				left : tagged 'serifMT' : HSerif.mtAsymmetric [mix lBarCenter rBarCenter 0.5] top jutIn 0 swSerif
+				[leftAt x] : tagged 'serifMT' : HSerif.mtAsymmetric x top jutIn 0 swSerif
+				right : tagged 'serifMT' : HSerif.mtAsymmetric [mix lBarCenter rBarCenter 0.5] top 0 jutIn swSerif
+				[rightAt x] : tagged 'serifMT' : HSerif.mtAsymmetric x top 0 jutIn swSerif
 
 		public [slice l r] : begin
 			local ink : HSwToV this.swRef

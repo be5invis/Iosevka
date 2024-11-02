@@ -1,0 +1,61 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Armenian-To : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : nShoulderKnots SerifFrame
+	glyph-block-import Letter-Armenian-Shared-Shapes : ArmHBar
+
+	# Common Params
+	define barPos : XH / 2
+	define highBarPos XH
+	define jut Jut
+
+	do "T'o"
+		create-glyph 'armn/To' 0x539 : glyph-proc
+			local df : include : DivFrame 1
+			local fine : df.adviceStroke2 6 3 CAP
+			local barPosT : barPos + df.mvs / 2
+			include : dispiro
+				widths.rhs df.mvs
+				flat df.leftSB 0 [heading Upward]
+				curl df.leftSB (CAP - ArchDepthA)
+				arch.rhs CAP (sw -- df.mvs)
+				flat df.rightSB (CAP - ArchDepthB)
+				curl df.rightSB (0 + ArchDepthA)
+				arch.rhs 0 (sw -- df.mvs) (swAfter -- fine)
+				g4 (df.middle - [HSwToV : fine / 2]) [mix 0 barPosT 0.5] [widths.rhs fine]
+				arcvh
+				flat [mix df.leftSB df.rightSB 0.7] barPosT [widths.rhs df.mvs]
+				curl df.rightSB barPosT
+			include : [ArmHBar.right df 1].mid
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.lb.full
+
+		create-glyph 'armn/to' 0x569 : glyph-proc
+			local df : include : DivFrame 1
+			local fine : df.adviceStroke2 6 3 XH
+			include : df.markSet.p
+			include : VBar.l df.leftSB Descender XH df.mvs
+			local barPosT : XH / 2 + df.mvs / 2
+			include : dispiro
+				nShoulderKnots
+					left -- (df.leftSB + [HSwToV df.mvs])
+					right -- df.rightSB
+					top -- XH
+					bottom -- (0 + ArchDepthA)
+					stroke -- df.mvs
+				arch.rhs 0 (sw -- df.mvs) (swAfter -- fine)
+				g4 (df.middle - [HSwToV : fine / 2]) [mix 0 barPosT 0.5] [widths.rhs fine]
+				arcvh
+				flat [mix df.leftSB df.rightSB 0.7] barPosT [widths.rhs df.mvs]
+				curl (df.rightSB + jut - [HSwToV : 0.5 * df.mvs]) barPosT
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df XH Descender
+				include : composite-proc sf.lt.outer sf.lb.fullSide
