@@ -58,6 +58,8 @@ Inside the plan, top-level properties include:
   - `fontconfig-mono`: Apply `term` spacing changes and further apply changes to be compatible with FontConfig's Mono spacing, which recognizes a font as monospace if and only if its every non-combining characters having the same width. The changes include:
     - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
       - As a consequence, the following characters will be **removed**:
+        - `U+27DD` LONG RIGHT TACK
+        - `U+27DE` LONG LEFT TACK
         - `U+27F5` LONG LEFTWARDS ARROW
         - `U+27F6` LONG RIGHTWARDS ARROW
         - `U+27F7` LONG LEFT RIGHT ARROW

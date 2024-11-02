@@ -20,7 +20,6 @@ glyph-block Letter-Latin-Lower-Q : begin
 
 	glyph-block-export RDiagTailedBar
 	define [RDiagTailedBar x0 yb yt _sw] : begin
-		local df : DivFrame 1
 		local sw : fallback _sw Stroke
 		local xMid : x0 - [HSwToV : 0.5 * sw]
 		return : dispiro
@@ -31,7 +30,7 @@ glyph-block Letter-Latin-Lower-Q : begin
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
 		include : OBarRight.shape (top -- top)
 		include : match terminal
-			[Just TERMINAL-NORMAL] : VBar.r          RightSB bottom top
+			[Just TERMINAL-NORMAL] : VBar.r             RightSB bottom top
 			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom top
 			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom top
 
@@ -40,7 +39,7 @@ glyph-block Letter-Latin-Lower-Q : begin
 		include : OBarLeft.toothless (top -- top) (rise -- DToothlessRise) (mBlend -- DMBlend)
 		include : FlipAround Middle (top / 2)
 		include : match terminal
-			[Just TERMINAL-NORMAL] : VBar.r          RightSB bottom (top - DToothlessRise)
+			[Just TERMINAL-NORMAL] : VBar.r             RightSB bottom (top - DToothlessRise)
 			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - DToothlessRise)
 			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - DToothlessRise)
 
@@ -49,7 +48,7 @@ glyph-block Letter-Latin-Lower-Q : begin
 		include : OBarLeft.rounded (top -- top) (yTerminal -- (SmallArchDepthB - O))
 		include : FlipAround Middle (top / 2)
 		include : match terminal
-			[Just TERMINAL-NORMAL] : VBar.r          RightSB bottom (top - SmallArchDepthB)
+			[Just TERMINAL-NORMAL] : VBar.r             RightSB bottom (top - SmallArchDepthB)
 			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - SmallArchDepthB)
 			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - SmallArchDepthB)
 
@@ -66,16 +65,16 @@ glyph-block Letter-Latin-Lower-Q : begin
 			earlessCorner        EarlessCornerBody
 			earlessRounded       EarlessRoundedBody
 		object # tail
-			straight             TERMINAL-NORMAL
-			tailed               TERMINAL-TAILED
-			diagonalTailed       TERMINAL-DIAG
+			straight           { TERMINAL-NORMAL false }
+			tailed             { TERMINAL-TAILED true  }
+			diagonalTailed     { TERMINAL-DIAG   true  }
 		object # serifs
 			serifless          { nothing nothing }
 			motionSerifed      { RtSerif nothing }
 			bottomSerifed      { nothing RbSerif }
 			serifed            { RtSerif RbSerif }
 
-	foreach { suffix { Body terminal {sRT sRB} } } [Object.entries QConfig] : do
+	foreach { suffix { Body {terminal fTail} {sRT sRB} } } [Object.entries QConfig] : do
 		create-glyph "q.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			include : Body terminal XH Descender
@@ -83,19 +82,20 @@ glyph-block Letter-Latin-Lower-Q : begin
 			if sRB : include : sRB Descender
 			include : LeaningAnchor.Below.VBar.r RightSB
 
-		create-glyph "QRTail.\(suffix)" : glyph-proc
-			include : MarkSet.capDesc
-			include : Body terminal CAP 0
-			include : RetroflexHook.rExt RightSB 0
-			if sRT : include : sRT CAP
-			include : LeaningAnchor.Below.VBar.r RightSB
+		if (!fTail && !sRB) : begin
+			create-glyph "QRTail.\(suffix)" : glyph-proc
+				include : MarkSet.capDesc
+				include : Body terminal CAP 0
+				include : RetroflexHook.rExt RightSB 0
+				if sRT : include : sRT CAP
+				include : LeaningAnchor.Below.VBar.r RightSB
 
-		create-glyph "qRTail.\(suffix)" : glyph-proc
-			include : MarkSet.p
-			include : Body terminal XH 0
-			include : RetroflexHook.rExt RightSB 0
-			if sRT : include : sRT XH
-			include : LeaningAnchor.Below.VBar.r RightSB
+			create-glyph "qRTail.\(suffix)" : glyph-proc
+				include : MarkSet.p
+				include : Body terminal XH 0
+				include : RetroflexHook.rExt RightSB 0
+				if sRT : include : sRT XH
+				include : LeaningAnchor.Below.VBar.r RightSB
 
 	select-variant 'q' 'q'
 	link-reduced-variant 'q/sansSerif' 'q' MathSansSerif

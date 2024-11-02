@@ -192,34 +192,17 @@ glyph-block CommonShapes : begin
 		local width : fallback _width Stroke
 		local ada : fallback _ada SmallArchDepthA
 		local adb : fallback _adb SmallArchDepthB
-		if (u - d > ada + adb) : then : begin
-			return : sink
-				widths width 0
-				arch.lhs.centerAt.rtl.t middle u (sw -- width)
-				archv
-				flat (l + OX) (u - ada)
-				curl (l + OX) (d + adb)
-				arcvh
-				arch.lhs.centerAt.ltr.b middle d (sw -- width)
-				archv
-				flat (r - OX) (d + ada)
-				curl (r - OX) (u - adb)
-				arcvh
-				close
-		: else : begin
-			local ymiddlea : mix d u (adb / (ada + adb))
-			local ymiddleb : mix d u (ada / (ada + adb))
-			return : sink
-				widths width 0
-				arch.lhs.centerAt.rtl.t middle u (sw -- width)
-				archv
-				g4 (l + OX) ymiddlea
-				arcvh
-				arch.lhs.centerAt.ltr.b middle d (sw -- width)
-				archv
-				g4 (r - OX) ymiddleb
-				arcvh
-				close
+		return : sink
+			widths width 0
+			arch.lhs.centerAt.rtl.t middle u (sw -- width)
+			archv
+			flatside.ld l d u ada adb
+			arcvh
+			arch.lhs.centerAt.ltr.b middle d (sw -- width)
+			archv
+			flatside.ru r d u ada adb
+			arcvh
+			close
 
 	glyph-block-export OShape
 	define [OShape u d l r _width _ada _adb] : OShapeT dispiro u d l r _width _ada _adb
@@ -235,39 +218,20 @@ glyph-block CommonShapes : begin
 		local width : fallback _width Stroke
 		local ada : fallback _ada SmallArchDepthA
 		local adb : fallback _adb SmallArchDepthB
-		if (u - d > ada + adb) : then : begin
-			include : dispiro
-				widths.lhs width
-				arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.rtl.t (middle - gap / 2) u (sw -- width) (knot-ty -- curl)
-				archv
-				flat (l + OX) (u - ada)
-				curl (l + OX) (d + adb)
-				arcvh
-				arch.lhs.centerAt.ltr.b (middle - gap / 2) d (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.ltr.b (middle + gap / 2) d (sw -- width) (knot-ty -- curl)
-				archv
-				flat (r - OX) (d + ada)
-				curl (r - OX) (u - adb)
-				arcvh
-				arch.lhs.centerAt.rtl.t (middle + gap / 2) u (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- curl)
-		: else : begin
-			local ymiddlea : mix d u (adb / (ada + adb))
-			local ymiddleb : mix d u (ada / (ada + adb))
-			include : dispiro
-				arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.rtl.t (middle - gap / 2) u (sw -- width) (knot-ty -- curl)
-				archv
-				g4 (l + OX) ymiddlea
-				arcvh
-				arch.lhs.centerAt.ltr.b (middle - gap / 2) d (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.ltr.b (middle + gap / 2) d (sw -- width) (knot-ty -- curl)
-				archv
-				g4 (r - OX) ymiddleb
-				arcvh
-				arch.lhs.centerAt.rtl.t (middle + gap / 2) u (sw -- width) (knot-ty -- flat)
-				arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- curl)
+		include : dispiro
+			widths.lhs width
+			arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- flat)
+			arch.lhs.centerAt.rtl.t (middle - gap / 2) u (sw -- width) (knot-ty -- curl)
+			archv
+			flatside.ld l d u ada adb
+			arcvh
+			arch.lhs.centerAt.ltr.b (middle - gap / 2) d (sw -- width) (knot-ty -- flat)
+			arch.lhs.centerAt.ltr.b (middle + gap / 2) d (sw -- width) (knot-ty -- curl)
+			archv
+			flatside.ru r d u ada adb
+			arcvh
+			arch.lhs.centerAt.rtl.t (middle + gap / 2) u (sw -- width) (knot-ty -- flat)
+			arch.lhs.centerAt.rtl.t middle u (sw -- width) (knot-ty -- curl)
 
 	glyph-block-export HSerif
 	define HSerif : namespace
@@ -529,6 +493,68 @@ glyph-block CommonShapes : begin
 		local-parameter : o              -- O
 		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
 		return : WithKnotProxy [hookProxy args] : new FunctionInterpolator hookEndBlender args
+
+	glyph-block-export flatside
+	define flatside : namespace
+		export : define flex-params [ld]: begin
+			local-parameter : x              # X-position of the stroke, without overshoot
+			local-parameter : d              # Y-position of the ring's bottom
+			local-parameter : u              # Y-position of the ring's top
+			local-parameter : ada -- ArchDepthA
+			local-parameter : adb -- ArchDepthB
+			local-parameter : overshoot -- OX
+			local-parameter : af  -- nothing # Additional function for the control knots
+
+			return : if (u - d > ada + adb)
+				list
+					flat (x + overshoot) (u - ada) af
+					curl (x + overshoot) (d + adb)
+				g4 (x + overshoot) [mix d u (adb / (ada + adb))] af
+
+		export : define flex-params [lu]: begin
+			local-parameter : x              # X-position of the stroke, without overshoot
+			local-parameter : d              # Y-position of the ring's bottom
+			local-parameter : u              # Y-position of the ring's top
+			local-parameter : ada -- ArchDepthA
+			local-parameter : adb -- ArchDepthB
+			local-parameter : overshoot -- OX
+			local-parameter : af  -- nothing # Additional function for the control knots
+
+			return : if (u - d > ada + adb)
+				list
+					flat (x + overshoot) (d + adb) af
+					curl (x + overshoot) (u - ada)
+				g4 (x + overshoot) [mix d u (adb / (ada + adb))] af
+
+		export : define flex-params [rd]: begin
+			local-parameter : x              # X-position of the stroke, without overshoot
+			local-parameter : d              # Y-position of the ring's bottom
+			local-parameter : u              # Y-position of the ring's top
+			local-parameter : ada -- ArchDepthA
+			local-parameter : adb -- ArchDepthB
+			local-parameter : overshoot -- OX
+			local-parameter : af  -- nothing # Additional function for the control knots
+
+			return : if (u - d > ada + adb)
+				list
+					flat (x - overshoot) (u - adb) af
+					curl (x - overshoot) (d + ada)
+				g4 (x - overshoot) [mix d u (ada / (ada + adb))] af
+
+		export : define flex-params [ru]: begin
+			local-parameter : x              # X-position of the stroke, without overshoot
+			local-parameter : d              # Y-position of the ring's bottom
+			local-parameter : u              # Y-position of the ring's top
+			local-parameter : ada -- ArchDepthA
+			local-parameter : adb -- ArchDepthB
+			local-parameter : overshoot -- OX
+			local-parameter : af  -- nothing # Additional function for the control knots
+
+			return : if (u - d > ada + adb)
+				list
+					flat (x - overshoot) (d + ada) af
+					curl (x - overshoot) (u - adb)
+				g4 (x - overshoot) [mix d u (ada / (ada + adb))] af
 
 	glyph-block-export arch
 	define arch : namespace

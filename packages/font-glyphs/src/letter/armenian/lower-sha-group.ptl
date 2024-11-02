@@ -1,0 +1,78 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback strokeOffset] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Armenian-Lower-Sha-Group : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Armenian-Shared-Shapes : ArmHBar TwoNeck
+
+	# Common Params
+	define barPos : XH / 2
+	define highBarPos XH
+	define jut Jut
+
+	do "Sha"
+		create-glyph 'armn/sha' 0x577 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			include : dispiro
+				widths.rhs df.mvs
+				g4 df.leftSB (XH - SHook)
+				hookstart XH (sw -- df.mvs)
+				TwoNeck df XH Descender
+			include : [ArmHBar.normal df 0].desc
+
+	do "Ch'a"
+		create-glyph 'armn/cha' 0x579 : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			local x1 : mix df.leftSB df.rightSB 0.1
+			local x2 : mix df.leftSB df.rightSB 0.9
+			local y2 : XH / 2
+			include : dispiro
+				widths.center df.mvs
+				straight.down.start (x1 + [HSwToV : 0.5 * df.mvs]) XH [heading Downward]
+				arcvh
+				flat (df.middle + [HSwToV : 0.5 * df.mvs]) y2
+				curl x2 y2 [heading Rightward]
+			include : dispiro
+				widths.rhs df.mvs
+				flat x2 (y2 - df.mvs / 2)
+				curl df.leftSB (Descender + df.mvs) [widths.lhs df.mvs]
+			include : [ArmHBar.normal df 0].desc
+
+	do "Jheh"
+		create-glyph 'armn/jheh' 0x57B : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			local refY : XH - SmallArchDepthB * 1.5 - df.mvs / 2 * (1 - TanSlope)
+			local x1 : df.middle + [HSwToV : [StrokeWidthBlend 0 0.4] * df.mvs]
+			local y1 : mix (Descender + df.mvs) refY [StrokeWidthBlend 0.65 0.7]
+
+			include : dispiro
+				widths.lhs df.mvs
+				straight.up.start x1 y1 [heading Upward]
+				g4 [pre@mix@post 0.5] [pre@mix@post 0.5] [widths.center df.mvs]
+				flat df.leftSB (XH - 1.1 * SmallArchDepthA) [widths.rhs df.mvs]
+				curl df.leftSB (XH - SmallArchDepthA)
+				arch.rhs XH (sw -- df.mvs)
+				TwoNeck df XH Descender
+
+			local dx : df.leftSB - df.rightSB
+			local dy : (Descender + df.mvs) - refY
+			local rhs : strokeOffset df.rightSB refY dx dy df.mvs HVContrast
+			local joinX : mix df.leftSB rhs.x 0.2
+			local joinY : mix (Descender + df.mvs) rhs.y 0.2
+			local fine : df.mvs * (ShoulderFine / Stroke)
+
+			include : dispiro
+				widths.lhs df.mvs
+				straight.down.start (x1 - [HSwToV df.mvs]) y1 [heading Downward]
+				flat joinX joinY [widths.lhs fine]
+				curl df.leftSB (Descender + df.mvs)
+			include : [ArmHBar.normal df 0].desc

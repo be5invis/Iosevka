@@ -1,0 +1,102 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Armenian-Shared-Shapes : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+
+	define barPos : XH / 2
+	define highBarPos XH
+	define jut Jut
+
+	define JUT-NORMAL 0
+	define JUT-SHORT 1
+	define JUT-RIGHT 2
+	define JUT-LEFT 3
+
+	glyph-block-export ArmHBar
+	define [ArmHBar hPos df fCapital fOverslab] : namespace
+		define left : match hPos
+			[Just JUT-RIGHT] df.rightSB
+			[Just JUT-LEFT]  (df.leftSB - (jut * [if fOverslab 1.5 1]) + [HSwToV : 0.5 * df.mvs])
+			--               df.leftSB
+		define right : match hPos
+			[Just JUT-RIGHT]  (df.rightSB + (jut * [if fOverslab 1.5 1]) - [HSwToV : 0.5 * df.mvs])
+			[Just JUT-SHORT]  (df.rightSB - (jut - [HSwToV : 0.5 * df.mvs]) * df.div)
+			[Just JUT-LEFT]   df.leftSB
+			--                df.rightSB
+
+		export : define [top] : glyph-proc
+			include : HBar.t left right [if fCapital CAP Ascender] df.mvs
+		export : define [high] : glyph-proc
+			include : HBar.t left right highBarPos df.mvs
+		export : define [mid] : glyph-proc
+			include : HBar.m left right barPos df.mvs
+		export : define [base] : glyph-proc
+			include : HBar.b left right 0 df.mvs
+		export : define [desc] : glyph-proc
+			include : HBar.b left right Descender df.mvs
+		export : define [at y] : glyph-proc
+			include : HBar.m left right y df.mvs
+
+	set [ArmHBar.normal df fCapital fOverslab] : ArmHBar JUT-NORMAL df fCapital fOverslab
+	set [ArmHBar.short  df fCapital fOverslab] : ArmHBar JUT-SHORT  df fCapital fOverslab
+	set [ArmHBar.right  df fCapital fOverslab] : ArmHBar JUT-RIGHT  df fCapital fOverslab
+	set [ArmHBar.left   df fCapital fOverslab] : ArmHBar JUT-LEFT   df fCapital fOverslab
+
+	glyph-block-export RightHook
+	define [RightHook df top sw baseSerif hookSerif _base _hookY _ada _adb] : glyph-proc
+		local base : fallback _base 0
+		local hookY : fallback _hookY (top - Hook)
+		local ada : fallback _ada ArchDepthA
+		local adb : fallback _adb ArchDepthB
+		local yMidDepth : if (top - base > ada + adb) ada ((top - base) * (ada / (ada + adb)))
+		include : dispiro
+			widths.lhs df.mvs
+			g4 df.rightSB hookY
+			hookstart top (sw -- sw)
+			flat df.leftSB (top - yMidDepth)
+			curl df.leftSB base [heading Downward]
+		if baseSerif : begin
+			local sf : SerifFrame.fromDf df top base
+			include sf.lb.full
+		if hookSerif : begin
+			local sf : SerifFrame.fromDf df top hookY
+			include sf.rb.full
+
+	glyph-block-export LeftHook
+	define [LeftHook df top sw baseSerif hookSerif _base _hookY _ada _adb] : glyph-proc
+		local base : fallback _base 0
+		local hookY : fallback _hookY (top - Hook)
+		local ada : fallback _ada ArchDepthA
+		local adb : fallback _adb ArchDepthB
+		local yMidDepth : if (top - base > ada + adb) adb ((top - base) * (adb / (ada + adb)))
+		include : dispiro
+			widths.rhs df.mvs
+			g4 df.leftSB hookY
+			hookstart top (sw -- sw)
+			flat df.rightSB (top - yMidDepth)
+			curl df.rightSB base [heading Downward]
+		if baseSerif : begin
+			local sf : SerifFrame.fromDf df top base
+			include sf.rb.full
+		if hookSerif : begin
+			local sf : SerifFrame.fromDf df top hookY
+			include sf.lb.full
+
+	glyph-block-export TwoNeck
+	define [TwoNeck df top bot _left _right _adb _flatp] : begin
+		local adb : fallback _adb SmallArchDepthB
+		local flatp : fallback _flatp 0.75
+		local left : fallback _left df.leftSB
+		local right : fallback _right df.rightSB
+		local refY : top - adb * 1.5 - df.mvs / 2 * (1 - TanSlope)
+		return : list
+			g4.down.mid right (top - adb)
+			flat [mix left right flatp] [mix (bot + df.mvs) refY flatp]
+			curl left (bot + df.mvs) [widths.lhs df.mvs]

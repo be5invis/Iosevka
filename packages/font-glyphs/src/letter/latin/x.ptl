@@ -51,7 +51,7 @@ glyph-block Letter-Latin-X : begin
 		include : HalfXStrand stb slab xLeft yLeft xMid yMid turn pStraight tension _sw (-0.001)
 		include : HalfXStrand stb slab xRight yRight xMid yMid turn pStraight tension _sw (-0.001)
 
-	define [XChanceryStrand sign leftX leftY rightX rightY fHalf _sw] : begin
+	define [XChanceryStrand sign fSlab leftX leftY rightX rightY fHalf _sw] : begin
 		local sw : fallback _sw Stroke
 		local blendK1X : StrokeWidthBlend 0.58 0.65
 		local blendK1Y   0.2
@@ -63,17 +63,22 @@ glyph-block Letter-Latin-X : begin
 
 		local fine : [AdviceStroke 3] * (sw / Stroke)
 
+		local leftXExt  : leftX  - [if fSlab SideJut 0]
+		local rightXExt : rightX + [if fSlab SideJut 0]
+
 		return : dispiro
 			if fHalf
 				flat [mix leftX rightX 0.5] [mix leftY rightY 0.5] [widths.center fine]
 				list
-					straight.right.start leftX  (leftY - sign * sw / 2) [widths.center sw]
+					flat leftXExt (leftY - sign * sw / 2) [widths.center.heading sw Rightward]
+					curl (leftX + TINY) (leftY - sign * sw / 2) [widths.center.heading sw Rightward]
 					alsoThruThem {{blendK1X blendK1Y} {blendK2X blendK2Y}}
 					flat [mix leftX rightX pStraightX] [mix leftY rightY pStraightY] [widths.center : mix sw fine 0.5]
 					corner [mix leftX rightX 0.5] [mix leftY rightY 0.5] [widths.center fine]
 			curl [mix leftX rightX (1 - pStraightX)] [mix leftY rightY (1 - pStraightY)] [widths.center : mix sw fine 0.5]
 			alsoThruThem {{(1 - blendK2X) (1 - blendK2Y)} {(1 - blendK1X) (1 - blendK1Y)}}
-			straight.right.end   rightX (rightY + sign * sw / 2) [widths.center sw]
+			flat (rightX - TINY) (rightY + sign * sw / 2) [widths.center.heading sw Rightward]
+			curl rightXExt (rightY + sign * sw / 2) [widths.center.heading sw Rightward]
 
 	glyph-block-export XCursiveHalfShape
 	define [XCursiveHalfShape] : with-params [
@@ -142,7 +147,7 @@ glyph-block Letter-Latin-X : begin
 			include : match stroke1
 				[Just STROKE-STRAIGHT] : XStrand true  fSlab df.leftSB bot df.rightSB top turn 0.4 tension sw
 				[Just STROKE-CURLY]    : XStrand false fSlab df.leftSB bot df.rightSB top turn 0.4 tension sw
-				[Just STROKE-CHANCERY] : XChanceryStrand (-1) df.leftSB bot df.rightSB top false sw
+				[Just STROKE-CHANCERY] : XChanceryStrand (-1) fSlab df.leftSB bot df.rightSB top false sw
 				([Just STROKE-CURSIVE] || [Just STROKE-CURSIVE-FLAT]) : composite-proc
 					XCursiveHalfShape top bot df.middle df.rightSB
 						swCoEnd -- swCursiveCoEnd
@@ -154,7 +159,7 @@ glyph-block Letter-Latin-X : begin
 			include : match stroke2
 				[Just STROKE-STRAIGHT] : XStrand true  fSlab df.leftSB top df.rightSB bot turn 0.4 tension sw
 				[Just STROKE-CURLY]    : XStrand false fSlab df.leftSB top df.rightSB bot turn 0.4 tension sw
-				[Just STROKE-CHANCERY] : XChanceryStrand (+1) df.leftSB top df.rightSB bot false sw
+				[Just STROKE-CHANCERY] : XChanceryStrand (+1) fSlab df.leftSB top df.rightSB bot false sw
 				[Just STROKE-CURSIVE]  : XCursiveHalfShape top bot df.middle df.rightSB
 					swCoEnd -- swCursiveCoEnd
 					swEnd -- swCursiveEnd
@@ -168,12 +173,12 @@ glyph-block Letter-Latin-X : begin
 			include : match stroke1
 				[Just STROKE-STRAIGHT] : HalfXStrand true  fSlab df.rightSB top df.middle midy turn 0.4 tension sw
 				[Just STROKE-CURLY]    : HalfXStrand false fSlab df.rightSB top df.middle midy turn 0.4 tension sw
-				[Just STROKE-CHANCERY] : XChanceryStrand (-1) df.leftSB bot df.rightSB top true sw
+				[Just STROKE-CHANCERY] : XChanceryStrand (-1) fSlab df.leftSB bot df.rightSB top true sw
 				__ : glyph-proc
 			include : match stroke2
 				[Just STROKE-STRAIGHT] : HalfXStrand true  fSlab df.rightSB bot df.middle midy turn 0.4 tension sw
 				[Just STROKE-CURLY]    : HalfXStrand false fSlab df.rightSB bot df.middle midy turn 0.4 tension sw
-				[Just STROKE-CHANCERY] : XChanceryStrand (+1) df.leftSB top df.rightSB bot true sw
+				[Just STROKE-CHANCERY] : XChanceryStrand (+1) fSlab df.leftSB top df.rightSB bot true sw
 				[Just STROKE-CURSIVE]  : XCursiveHalfShape top bot df.middle df.rightSB
 					swCoEnd -- swCursiveCoEnd
 					swEnd -- swCursiveEnd
