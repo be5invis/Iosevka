@@ -593,7 +593,7 @@ type SpecimenCharacterImplProps = SpecimenCharacterProps & {
 function SpecimenCharacterImpl(props: SpecimenCharacterImplProps) {
 	const pCtx = useContext(SpecimenContext);
 	const gc = unicodeGcMap.get(props.char.lch) || "?";
-	const isMark = props.char.inFont && gc === "Nonspacing_Mark";
+	const isMark = charIsMark(props.char, gc);
 	const isSpace =
 		props.char.inFont &&
 		(gc === "Space_Separator" ||
@@ -671,6 +671,10 @@ function SpecimenCharacterImpl(props: SpecimenCharacterImplProps) {
 			/>
 		</div>
 	);
+}
+
+function charIsMark(ch: Coverage.Character, gc: string) {
+	return ch.inFont && (gc === "Nonspacing_Mark" || ch.lch === 0x55f);
 }
 
 function formatUnicode(lch: number) {
