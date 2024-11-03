@@ -1,5 +1,10 @@
 ## Modifications since last major version
 
+### 32.0.1
+
+* Fix inconsistent serifs of `U+0284` and `U+10798` with the variants of `j` (#2569).
+
+
 ### 32.0.0
 
 * Add Armenian letters:
