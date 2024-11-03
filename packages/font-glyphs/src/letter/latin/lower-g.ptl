@@ -53,7 +53,7 @@ glyph-block Letter-Latin-Lower-G : begin
 
 	derive-composites "gBar.doubleStorey" null "g.doubleStorey" [OverlayW obwDoubleStorey]
 
-	create-glyph 'g.openDoubleStorey' : glyph-proc
+	create-glyph 'g.doubleStoreyOpen' : glyph-proc
 		include : MarkSet.p
 		local obot : XH * DesignParameters.gBarPos - O - Stroke * 0.4
 		include : OShape XH obot SB (RightSB - 0.3 * SB)
@@ -81,10 +81,10 @@ glyph-block Letter-Latin-Lower-G : begin
 		set-base-anchor 'overlay' Middle [mix (Descender + O) groundy 0.5]
 		set-base-anchor 'strike' Middle (XH / 2)
 
-	derive-composites "gBar.openDoubleStorey" null "g.openDoubleStorey" [OverlayW obwDoubleStorey]
+	derive-composites "gBar.doubleStoreyOpen" null "g.doubleStoreyOpen" [OverlayW obwDoubleStorey]
 
 	define SingleStorey : namespace
-		export : define [RoundHookT sink df yTop offset sw] : sink
+		export : define [BentHookT sink df yTop offset sw] : sink
 			widths.rhs sw
 			[if (sink == spiro-outline) corner flat] (df.rightSB - offset) yTop [heading Downward]
 			curl (df.rightSB - offset) (Descender + SmallArchDepthA)
@@ -92,7 +92,7 @@ glyph-block Letter-Latin-Lower-G : begin
 			g4 (df.leftSB + offset) (Descender + SHook)
 			if (sink == spiro-outline) {[corner df.leftSB XH]} {}
 
-		export : define [RoundHook df y0] : RoundHookT dispiro df y0 0 df.mvs
+		export : define [BentHook df y0] : BentHookT dispiro df y0 0 df.mvs
 		export : define [FlatHook df y0] : begin
 			local hd : FlatHookDepth df (9 / 8)
 			local xTerminal : Math.min (df.rightSB - hd.x - TINY) : mix df.leftSB df.rightSB (1 / 5)
@@ -126,10 +126,6 @@ glyph-block Letter-Latin-Lower-G : begin
 			include : SeriflessBody df top
 			include : tagged 'serifRT' : HSerif.rt df.rightSB top SideJut
 
-		export : define [AutoSerifedBody df top] : glyph-proc
-			include : SeriflessBody df top
-			if (SLAB && [not para.isItalic]) : include : tagged 'serifRT' : HSerif.rt df.rightSB top SideJut
-
 		export : define [EarlessCornerBody df top] : glyph-proc
 			include : OBarLeft.toothless
 				top -- top
@@ -151,10 +147,9 @@ glyph-block Letter-Latin-Lower-G : begin
 
 	define SingleStoreyConfig : SuffixCfg.weave
 		object # hook
-			singleStorey            SingleStorey.RoundHook
+			singleStorey            SingleStorey.BentHook
 			singleStoreyFlatHook    SingleStorey.FlatHook
 		object # ear/serif
-			""                    { SingleStorey.AutoSerifedBody    0                      }
 			serifless             { SingleStorey.SeriflessBody      0                      }
 			serifed               { SingleStorey.SerifedBody        0                      }
 			earlessCorner         { SingleStorey.EarlessCornerBody  DToothlessRise         }
@@ -231,8 +226,8 @@ glyph-block Letter-Latin-Lower-G : begin
 			left -- SB
 			right -- RightSB - BBD
 			sw -- BBS
-		include : SingleStorey.RoundHookT dispiro [DivFrame 1] XH 0 BBS
+		include : SingleStorey.BentHookT dispiro [DivFrame 1] XH 0 BBS
 		include : HBar.t (RightSB - BBD) RightSB XH BBS
 		include : intersection
 			VBar.r (RightSB - BBD) Descender XH BBS
-			SingleStorey.RoundHookT spiro-outline [DivFrame 1] XH 1 BBS
+			SingleStorey.BentHookT spiro-outline [DivFrame 1] XH 1 BBS
