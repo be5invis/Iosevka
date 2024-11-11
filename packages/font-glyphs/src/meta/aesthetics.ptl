@@ -76,20 +76,24 @@ export : define [calculateMetrics para] : begin
 	define SmallArchDepth para.smallArchDepth
 
 	# Weight Control
-	# We will estimate blackness using lower-case 'e'
+	# We will estimate darkness using lower-case 'e'
 	define DarknessMockWidth : if (Width < HalfUPM) (HalfUPM * [Math.sqrt : Width / HalfUPM]) Width
 	define DarknessMockWidth2 : HalfUPM * [Math.sqrt : Width / HalfUPM]
 	define [BaseFillRate con] : 1 / 2 + para.stroke / ([Math.max HalfUPM DarknessMockWidth2] - SB * 2)
-	define [InverseCrowdedness con cow] : [Math.tanh (cow * [Math.sqrt con])] / (cow * [Math.sqrt con])
-	define [advicestrokeImpl con cow div mul] : begin
-		local gap : DarknessMockWidth * [fallback div 1] - SB * 2
-		local shrink : [BaseFillRate con] * [InverseCrowdedness con cow]
-		return : Math.min para.stroke ([fallback mul 1] * gap * shrink)
-	define [AdviceStroke cow div mul] : advicestrokeImpl HVContrast cow div mul
-	define [AdviceStroke2 cowX cowY refH div] : Math.min
-		advicestrokeImpl HVContrast cowX div
-		advicestrokeImpl 1          cowY (refH / DarknessMockWidth2)
-
+	define [StrokeWeightControlSigmoid x] : Math.tanh x
+	define [AdviceStrokeInSpace availSpace contrast crowdedness mul] : begin
+		local adjCrowdedness : crowdedness * [Math.sqrt contrast]
+		local fillRateScalar : [StrokeWeightControlSigmoid adjCrowdedness] / adjCrowdedness
+		return : Math.min para.stroke (mul * fillRateScalar * [BaseFillRate contrast] * availSpace)
+	define [AdviceStroke crowdedness div mul] : begin
+		local spaceH : DarknessMockWidth * [fallback div 1] - SB * 2
+		AdviceStrokeInSpace spaceH HVContrast crowdedness [fallback mul 1]
+	define [AdviceStroke2 cowX cowY refH div] : begin
+		local spaceH : DarknessMockWidth * [fallback div 1] - SB * 2
+		local spaceV : refH - SB * 2
+		return : Math.min
+			AdviceStrokeInSpace spaceH HVContrast cowX 1
+			AdviceStrokeInSpace spaceV 1          cowY 1
 
 	define Stroke : AdviceStroke 2
 	define DotSize : fallback para.dotSize Stroke
