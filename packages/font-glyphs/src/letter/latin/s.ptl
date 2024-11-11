@@ -28,7 +28,7 @@ glyph-block Letter-Latin-S : begin
 	define [AdviceSArchDepth y sign _stroke] : begin
 		# Handle with extreme care.
 		local stroke : fallback _stroke Stroke
-		local strokeFactor : stroke * [clamp 1 2 : linreg 126 1 137 1.025 stroke] * [clamp 0 1 : Math.pow (Width / HalfUPM) 0.5]
+		local strokeFactor : stroke * [clamp 1 2 : linreg 126 1 137 1.025 stroke] * [clamp 0 1 : Math.sqrt : Width / HalfUPM]
 		local widthFactor : RightSB - SB
 		local ss : y * 0.22 + 0.12 * strokeFactor + 0.05 * widthFactor
 		return : ss + sign * TanSlope * SmoothAdjust
@@ -340,14 +340,22 @@ glyph-block Letter-Latin-S : begin
 
 	select-variant 'S' 'S'
 	link-reduced-variant 'S/sansSerif' 'S' MathSansSerif
+
 	select-variant 's' 's'
 	link-reduced-variant 's/sansSerif' 's' MathSansSerif
+
 	select-variant 'smcpS' 0xA731 (follow -- 'S')
+
+	select-variant 's/phoneticRight'
+
 	select-variant 'revS' 0x1A7 (follow -- 'S')
 	select-variant 'revs' 0x1A8 (follow -- 's')
+
 	alias 'cyrl/Dze' 0x405 'S'
 	alias 'cyrl/dze' 0x455 's'
-	alias 'cyrl/ghe.italic' null 'revs'
+
+	select-variant 'cyrl/ghe.italic' (shapeFrom -- 'revs') (follow -- 's')
+	alias 'cyrl/ghe.BGR' null 'cyrl/ghe.italic'
 
 	alias 'cyrl/DzeRev' 0xA644 'revS'
 	alias 'cyrl/dzeRev' 0xA645 'revs'
@@ -360,25 +368,25 @@ glyph-block Letter-Latin-S : begin
 
 	select-variant 'SSwash' 0x2C7E
 	select-variant 'sSwash' 0x23F
+
 	select-variant 'sCurlyTail' 0x1DF1E (follow -- 'sSwash')
 
 	select-variant 'S/descBase' (shapeFrom -- 'S') (follow -- 'SRTail')
-	select-variant 's/ascBase' (shapeFrom -- 's')
 	select-variant 's/descBase' (shapeFrom -- 's') (follow -- 'sRTail')
-	select-variant 'revs/descBase' (shapeFrom -- 'revs') (follow -- 'sRTail')
-
-	select-variant 's/phoneticRight'
 
 	derive-composites 'SRTail' 0xA7C5 'S/descBase'
 		RetroflexHook.l SB 0 (yAttach -- DToothlessRise) (refSw -- [AdviceStroke2 2 3 CAP])
 	derive-composites 'sRTail' 0x282 's/descBase'
 		RetroflexHook.l SB 0 (yAttach -- DToothlessRise) (refSw -- [AdviceStroke2 2 3 XH])
-	derive-composites 'cyrl/gheDescender.italic' null 'revs/descBase'
+
+	select-variant 'cyrl/ghe.italic/descBase' (shapeFrom -- 'revs') (follow -- 'sRTail')
+
+	derive-composites 'cyrl/gheDescender.italic' null 'cyrl/ghe.italic/descBase'
 		CyrDescender.r DfLower.rightSB 0 (yAttach -- DToothlessRise) (refSw -- [AdviceStroke2 2 3 XH])
-	derive-composites 'cyrl/gheDHook.italic' null 'revs/descBase'
+	derive-composites 'cyrl/gheDHook.italic' null 'cyrl/ghe.italic/descBase'
 		PalatalHook.r DfLower.rightSB 0 (yAttach -- DToothlessRise) (refSw -- [AdviceStroke2 2 3 XH])
 
-	derive-composites 'cyrl/ghayn.italic' null 'revs'
+	derive-composites 'cyrl/ghayn.italic' null 'cyrl/ghe.italic'
 		FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
 	derive-composites 'cyrl/gheStrokeHook.italic' null 'cyrl/gheDHook.italic'
 		FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
@@ -387,6 +395,8 @@ glyph-block Letter-Latin-S : begin
 		x -- [mix [arch.adjust-x.bot Middle] DfLower.rightSB 0.75]
 		y -- 0
 		yAttach -- [mix O [AdviceSArchDepth XH (-1) [AdviceStroke2 2 3 XH]] : archv.yFromX 0.75]
+
+	select-variant 's/ascBase' (shapeFrom -- 's')
 
 	derive-composites "s/compLigLeft" null "s/ascBase" : glyph-proc
 		eject-contour 'arcStartSerifR'
