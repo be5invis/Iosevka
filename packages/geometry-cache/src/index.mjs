@@ -2,17 +2,19 @@ import fs from "fs";
 import { setTimeout } from "node:timers/promises";
 import zlib from "zlib";
 
-import * as CurveUtil from "@iosevka/geometry/curve-util";
+import * as ContourSetEncoding from "@iosevka/geometry/encoding";
 import { encode, decode } from "@msgpack/msgpack";
 
-const Edition = 50;
+const Edition = 60;
 const MAX_AGE = 16;
+
 class GfEntry {
-	constructor(age, value) {
+	constructor(age, valueBuffer) {
 		this.age = age;
-		this.value = value;
+		this.valueBuffer = valueBuffer;
 	}
 }
+
 class Cache {
 	constructor(freshAgeKey) {
 		this.freshAgeKey = freshAgeKey;
@@ -25,15 +27,16 @@ class Cache {
 		this.historyAgeKeys = rep.ageKeys.slice(0, MAX_AGE);
 		const ageKeySet = new Set(this.historyAgeKeys);
 		for (const [k, e] of Object.entries(rep.gf)) {
-			if (ageKeySet.has(e.age))
-				this.gf.set(k, new GfEntry(e.age, CurveUtil.repToShape(e.value)));
+			if (ageKeySet.has(e.age)) {
+				this.gf.set(k, new GfEntry(e.age, Buffer.from(e.buf, "base64")));
+			}
 		}
 	}
 	toRep(version, diffOnly) {
 		let gfRep = {};
 		for (const [k, e] of this.gf) {
 			if (!diffOnly || this.diff.has(k)) {
-				gfRep[k] = { age: e.age, value: e.value };
+				gfRep[k] = { age: e.age, buf: e.valueBuffer.toString("base64") };
 			}
 		}
 		const mergedAgeKeys =
@@ -56,7 +59,7 @@ class Cache {
 	getGF(k) {
 		const entry = this.gf.get(k);
 		if (!entry) return undefined;
-		else return entry.value;
+		else return ContourSetEncoding.decode(entry.valueBuffer);
 	}
 	refreshGF(k) {
 		const entry = this.gf.get(k);
@@ -66,10 +69,12 @@ class Cache {
 			entry.age = this.freshAgeKey;
 		}
 	}
-	saveGF(k, v) {
-		this.gf.set(k, new GfEntry(this.freshAgeKey, v));
+	saveGF(k, cs) {
+		const buf = ContourSetEncoding.encode(cs);
+		this.gf.set(k, new GfEntry(this.freshAgeKey, buf));
 		this.diff.add(k);
 	}
+	// Merging
 	merge(other) {
 		for (const [k, e] of other.gf) {
 			this.gf.set(k, e);
