@@ -76,24 +76,26 @@ export : define [calculateMetrics para] : begin
 	define SmallArchDepth para.smallArchDepth
 
 	# Weight Control
-	# We will estimate darkness using lower-case 'e'
 	define DarknessMockWidth : if (Width < HalfUPM) (HalfUPM * [Math.sqrt : Width / HalfUPM]) Width
-	define DarknessMockWidth2 : HalfUPM * [Math.sqrt : Width / HalfUPM]
-	define [BaseFillRate con] : 1 / 2 + para.stroke / ([Math.max HalfUPM DarknessMockWidth2] - SB * 2)
-	define [StrokeWeightControlSigmoid x] : Math.tanh x
+
+	define BaseFillRate : Math.min 0.95 : 2 * HVContrast * para.stroke / (DarknessMockWidth - SB * 2)
+	define WeightControlFactor : [Math.atanh BaseFillRate] / BaseFillRate
+	define [StrokeWeightControlSigmoid x] : Math.tanh : WeightControlFactor * x
+
 	define [AdviceStrokeInSpace availSpace contrast crowdedness mul] : begin
-		local adjCrowdedness : crowdedness * [Math.sqrt contrast]
-		local fillRateScalar : [StrokeWeightControlSigmoid adjCrowdedness] / adjCrowdedness
-		return : Math.min para.stroke (mul * fillRateScalar * [BaseFillRate contrast] * availSpace)
+		local nonAdjustedFillRate : crowdedness * contrast * para.stroke / availSpace
+		local adjustedFillRate : StrokeWeightControlSigmoid nonAdjustedFillRate
+		local strokeWidthScalar : Math.min 1 (mul * adjustedFillRate / nonAdjustedFillRate)
+		return : para.stroke * strokeWidthScalar
 	define [AdviceStroke crowdedness div mul] : begin
 		local spaceH : DarknessMockWidth * [fallback div 1] - SB * 2
-		AdviceStrokeInSpace spaceH HVContrast crowdedness [fallback mul 1]
-	define [AdviceStroke2 cowX cowY refH div] : begin
+		return : AdviceStrokeInSpace spaceH HVContrast crowdedness [fallback mul 1]
+	define [AdviceStroke2 crwX crwY refH div] : begin
 		local spaceH : DarknessMockWidth * [fallback div 1] - SB * 2
-		local spaceV : refH - SB * 2
+		local spaceV   refH
 		return : Math.min
-			AdviceStrokeInSpace spaceH HVContrast cowX 1
-			AdviceStrokeInSpace spaceV 1          cowY 1
+			AdviceStrokeInSpace spaceH HVContrast crwX 1
+			AdviceStrokeInSpace spaceV 1          crwY 1
 
 	define Stroke : AdviceStroke 2
 	define DotSize : fallback para.dotSize Stroke
@@ -395,8 +397,6 @@ export : define DesignParameters : object
 	braceCurlyM1               0.6
 	braceCurlyM2               0.45
 	braceOvershoot             0.02
-	# Crosdedness
-	lllcrowdedness             (3 + 1 / 3)
 	# Bar position
 	hBarPos                    0.525
 	eBarPos                    0.5
