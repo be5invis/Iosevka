@@ -76,20 +76,24 @@ export : define [calculateMetrics para] : begin
 	define SmallArchDepth para.smallArchDepth
 
 	# Weight Control
-	# We will estimate blackness using lower-case 'e'
-	define DarknessMockWidth : if (Width < HalfUPM) (HalfUPM * [Math.sqrt : Width / HalfUPM]) Width
-	define DarknessMockWidth2 : HalfUPM * [Math.sqrt : Width / HalfUPM]
-	define [BaseFillRate con] : 1 / 2 + para.stroke / ([Math.max HalfUPM DarknessMockWidth2] - SB * 2)
-	define [InverseCrowdedness con cow] : [Math.tanh (cow * [Math.sqrt con])] / (cow * [Math.sqrt con])
-	define [advicestrokeImpl con cow div mul] : begin
-		local gap : DarknessMockWidth * [fallback div 1] - SB * 2
-		local shrink : [BaseFillRate con] * [InverseCrowdedness con cow]
-		return : Math.min para.stroke ([fallback mul 1] * gap * shrink)
-	define [AdviceStroke cow div mul] : advicestrokeImpl HVContrast cow div mul
-	define [AdviceStroke2 cowX cowY refH div] : Math.min
-		advicestrokeImpl HVContrast cowX div
-		advicestrokeImpl 1          cowY (refH / DarknessMockWidth2)
+	define BaseFillRate : Math.min 0.95 : 2 * HVContrast * para.stroke / (Width - SB * 2)
+	define WeightControlFactor : [Math.atanh BaseFillRate] / BaseFillRate
+	define [StrokeWeightControlSigmoid x] : Math.tanh : WeightControlFactor * x
 
+	define [AdviceStrokeInSpace availSpace contrast crowdedness mul] : begin
+		local nonAdjustedFillRate : crowdedness * contrast * para.stroke / availSpace
+		local adjustedFillRate : StrokeWeightControlSigmoid nonAdjustedFillRate
+		local strokeWidthScalar : Math.min 1 (mul * adjustedFillRate / nonAdjustedFillRate)
+		return : para.stroke * strokeWidthScalar
+	define [AdviceStroke crowdedness div mul] : begin
+		local spaceH : Width * [fallback div 1] - SB * 2
+		return : AdviceStrokeInSpace spaceH HVContrast crowdedness [fallback mul 1]
+	define [AdviceStroke2 crwX crwY refH div] : begin
+		local spaceH : Width * [fallback div 1] - SB * 2
+		local spaceV   refH
+		return : Math.min
+			AdviceStrokeInSpace spaceH HVContrast crwX 1
+			AdviceStrokeInSpace spaceV 1          crwY 1
 
 	define Stroke : AdviceStroke 2
 	define DotSize : fallback para.dotSize Stroke
@@ -179,7 +183,7 @@ export : define [calculateMetrics para] : begin
 	define OverlayStroke : AdviceStroke 3.75
 	define OperatorStroke : AdviceStroke 2.75
 	define GeometryStroke : AdviceStroke 4
-	define ShoulderFine : Math.min (Stroke * para.shoulderFineMin) [AdviceStroke 16]
+	define ShoulderFine : Math.min (Stroke * para.shoulderFineMin) [AdviceStroke 24]
 
 	define [AdviceGlottalStopArchDepth y sign] : begin
 		return : ((y - Stroke) * 0.24 + Stroke * 0.625) + sign * TanSlope * SmoothAdjust
@@ -391,8 +395,6 @@ export : define DesignParameters : object
 	braceCurlyM1               0.6
 	braceCurlyM2               0.45
 	braceOvershoot             0.02
-	# Crosdedness
-	lllcrowdedness             (3 + 1 / 3)
 	# Bar position
 	hBarPos                    0.525
 	eBarPos                    0.5

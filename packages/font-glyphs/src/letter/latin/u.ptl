@@ -10,10 +10,9 @@ glyph-block Letter-Latin-U : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Shared-Metrics : markHalfStroke
 	glyph-block-import Mark-Adjustment : LeaningAnchor
-	glyph-block-import Letter-Shared : CreateAccentedComposition
-	glyph-block-import Letter-Shared : SetGrekUpperTonos
-	glyph-block-import Letter-Shared-Shapes : nShoulder RightwardTailedBar DToothlessRise SerifFrame
-	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender RetroflexHook VerticalHook
+	glyph-block-import Letter-Shared : CreateAccentedComposition SetGrekUpperTonos
+	glyph-block-import Letter-Shared-Shapes : uBowl RightwardTailedBar DToothlessRise SerifFrame
+	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender RetroflexHook VerticalHook TopHook
 
 	glyph-block-export UShape USerifs
 
@@ -39,32 +38,30 @@ glyph-block Letter-Latin-U : begin
 	define [UShapeGroup ada adb] : namespace
 		export : define [Toothed df top sw fHookLeft fShortLeg] : glyph-proc
 			set-base-anchor 'trailing' df.rightSB 0
-			include : nShoulder
-				top -- top
-				bottom -- [if fHookLeft (TailY + HalfStroke) 0]
-				left -- (df.leftSB + [HSwToV sw])
-				right -- df.rightSB
+			include : uBowl.shape
+				top -- (top - [if fHookLeft (TailY + HalfStroke) 0])
+				bottom -- 0
+				left -- df.leftSB
+				right -- (df.rightSB - [HSwToV sw])
 				stroke -- sw
 				fine -- ShoulderFine
 				ada -- ada
 				adb -- adb
-			if fHookLeft : include : RetroflexHook.rExt df.rightSB (TailY + HalfStroke) (sw -- sw)
-			include : FlipAround df.middle (top / 2)
+			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB (adb + TINY) top (sw -- sw)
 			include : tagged 'strokeR' : VBar.r df.rightSB 0 [if fShortLeg [mix ada top 0.5] top] sw
 
 		export : define [Tailed df top sw fHookLeft fShortLeg] : glyph-proc
 			set-base-anchor 'trailing' (df.rightSB + SideJut) 0
-			include : nShoulder
-				top -- top
-				bottom -- [if fHookLeft (TailY + HalfStroke) 0]
-				left -- (df.leftSB + [HSwToV sw])
-				right -- df.rightSB
+			include : uBowl.shape
+				top -- (top - [if fHookLeft (TailY + HalfStroke) 0])
+				bottom -- 0
+				left -- df.leftSB
+				right -- (df.rightSB - [HSwToV sw])
 				stroke -- sw
 				fine -- ShoulderFine
 				ada -- ada
 				adb -- adb
-			if fHookLeft : include : RetroflexHook.rExt df.rightSB (TailY + HalfStroke) (sw -- sw)
-			include : FlipAround df.middle (top / 2)
+			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB (adb + TINY) top (sw -- sw)
 			include : tagged 'strokeR' : RightwardTailedBar df.rightSB 0 [if fShortLeg [mix ada top 0.5] top] (sw -- sw)
 
 		export : define [ToothlessRounded df top sw fHookLeft fShortLeg] : glyph-proc
@@ -312,6 +309,7 @@ glyph-block Letter-Latin-U : begin
 	select-variant 'U/withTonos' (follow -- 'U')
 	link-reduced-variant 'U/sansSerif' 'U' MathSansSerif
 	select-variant 'smcpU' 0x1D1C (follow -- 'U')
+
 	select-variant 'u' 'u'
 	link-reduced-variant 'u/sansSerif' 'u' MathSansSerif
 	select-variant 'u/uRTailBase' (shapeFrom -- 'u')
@@ -352,7 +350,7 @@ glyph-block Letter-Latin-U : begin
 
 	derive-glyphs 'cyrl/pe.SRB' null 'cyrl/i.italic' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include [refer-glyph 'sbRsbOverlineAbove']
+		include [refer-glyph 'cyrl/pe.SRB/overlineAbove']
 
 	derive-glyphs 'cyrl/tetse.italic' null 'cyrl/tse.italic' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS

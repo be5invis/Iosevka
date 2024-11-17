@@ -10,34 +10,45 @@ glyph-block Letter-Armenian-Feh : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
 
-	define [FehBody df top bot ada adb] : glyph-proc
+	define [FehBody df top bot sw hook ada adb] : glyph-proc
 		local midy : mix bot top HBarPos
+		local midyTop : midy + 0.5 * sw
+		local midyBot : midy - 0.5 * sw
 		include : dispiro
-			widths.lhs df.mvs
+			widths.lhs sw
 			straight.left.start df.middle top
-			g4 df.leftSB [YSmoothMidR top (midy - 0.5 * df.mvs) ada adb]
-			straight.right.end df.middle (midy - 0.5 * df.mvs) [heading Rightward]
+			archv
+			flatside.ld df.leftSB midyBot top ada adb
+			arcvh
+			straight.right.end df.middle midyBot [heading Rightward]
 		include : dispiro
-			widths.rhs df.mvs
-			straight.right.start df.middle (midy + 0.5 * df.mvs) [heading Rightward]
-			flatside.rd df.rightSB 0 (midy + 0.5 * df.mvs) SmallArchDepthA SmallArchDepthB
-			hookend 0 (sw -- df.mvs)
-			g4 (df.leftSB + OX) Hook
+			widths.rhs sw
+			straight.right.start df.middle midyTop [heading Rightward]
+			archv
+			flatside.rd df.rightSB 0 midyTop ada adb
+			hookend 0 (sw -- sw)
+			g4 (df.leftSB + OX) (0 + hook)
 
 	create-glyph 'armn/Feh' 0x556 : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.capital
-		include : FehBody df CAP 0 ArchDepthA ArchDepthB
-		include : VBar.m df.middle 0 CAP df.mvs
+		local sw : Math.min df.mvs : AdviceStroke2 3 3 CAP df.div
+		local ada : df.archDepthA ArchDepth sw
+		local adb : df.archDepthB ArchDepth sw
+		include : FehBody df CAP 0 sw Hook ada adb
+		include : VBar.m df.middle 0 CAP sw
 		if SLAB : begin
-			local sf : SerifFrame.fromDf df CAP 0
+			local sf : SerifFrame.fromDf df CAP 0 (swSerif -- sw)
 			include sf.mt.right
 
 	create-glyph 'armn/feh' 0x586 : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.bp
-		include : FehBody df Ascender 0 ArchDepthA ArchDepthB
-		include : VBar.m df.middle Descender Ascender df.mvs
+		local sw : Math.min df.mvs : AdviceStroke2 3 3 Ascender df.div
+		local ada : df.archDepthA SmallArchDepth sw
+		local adb : df.archDepthB SmallArchDepth sw
+		include : FehBody df Ascender 0 sw Hook ada adb
+		include : VBar.m df.middle Descender Ascender sw
 		if SLAB : begin
-			local sf : SerifFrame.fromDf df Ascender Descender
+			local sf : SerifFrame.fromDf df Ascender Descender (swSerif -- sw)
 			include sf.mb.full

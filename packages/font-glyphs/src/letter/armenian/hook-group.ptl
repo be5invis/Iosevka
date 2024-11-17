@@ -8,37 +8,72 @@ glyph-module
 glyph-block Letter-Armenian-Hook-Group : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
-	glyph-block-import Letter-Armenian-Shared-Shapes : ArmHBar LeftHook RightHook
+	glyph-block-import Letter-Shared-Shapes : nShoulder uBowl SerifFrame
+	glyph-block-import Letter-Armenian-Shared-Shapes : ArmHBar
+
+	define [RightHook df top bot _sw _hook _ada _adb] : glyph-proc
+		local sw : fallback _sw df.mvs
+		local hook : fallback _hook Hook
+		local ada : fallback _ada ArchDepthA
+		local adb : fallback _adb ArchDepthB
+		local yMid : if (top - bot > ada + adb) (top - ada) : mix top bot (ada / (ada + adb))
+		include : dispiro
+			widths.lhs sw
+			g4 df.rightSB (top - hook)
+			hookstart top (sw -- sw)
+			flat df.leftSB yMid
+			curl df.leftSB bot [heading Downward]
+
+	define [LeftHook df top bot _sw _hook _ada _adb] : glyph-proc
+		local sw : fallback _sw df.mvs
+		local hook : fallback _hook Hook
+		local ada : fallback _ada ArchDepthA
+		local adb : fallback _adb ArchDepthB
+		local yMid : if (top - bot > ada + adb) (top - adb) : mix top bot (adb / (ada + adb))
+		include : dispiro
+			widths.rhs sw
+			g4 df.leftSB (top - hook)
+			hookstart top (sw -- sw)
+			flat df.rightSB yMid
+			curl df.rightSB bot [heading Downward]
 
 	do "Ben"
 		create-glyph 'armn/Ben' 0x532 : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : RightHook df CAP df.mvs SLAB 0
-			include : [ArmHBar.normal df 1].mid
+			include : RightHook df CAP 0 df.mvs
+			include : [ArmHBar.normal df].mid
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.lb.full
 
 	do "Da"
 		create-glyph 'armn/Da' 0x534 : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : LeftHook df CAP df.mvs SLAB 0
-			include : [ArmHBar.right df 1 SLAB].mid
+			include : LeftHook df CAP 0 df.mvs
+			include : [ArmHBar.right df].mid
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.rb.full
 
 	do "Ech"
 		create-glyph 'armn/Ech' 0x535 : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : LeftHook df CAP df.mvs SLAB 0
+			include : LeftHook df CAP 0 df.mvs
 			include : FlipAround df.middle (CAP / 2)
-			include : [ArmHBar.normal df 1].high
+			include : [ArmHBar.normal df].high
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.lt.full
 
 	do "Et"
 		create-glyph 'armn/Et' 0x538 : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : RightHook df CAP df.mvs
-			include : [ArmHBar.normal df 1].base
+			include : RightHook df CAP 0 df.mvs
+			include : [ArmHBar.normal df].base
 			if SLAB : begin
 				local sf : SerifFrame.fromDf df CAP 0
 				include sf.lb.outer
@@ -47,7 +82,14 @@ glyph-block Letter-Armenian-Hook-Group : begin
 		create-glyph 'armn/Ini' 0x53B : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : RightHook df XH df.mvs
+			include : nShoulder.shape
+				left -- (df.leftSB + [HSwToV df.mvs])
+				right -- df.rightSB
+				top -- XH
+				bottom -- (XH / 2)
+				ada -- ArchDepthA
+				adb -- ArchDepthB
+				stroke -- df.mvs
 			include : VBar.l df.leftSB 0 CAP
 			if SLAB : begin
 				local sf : SerifFrame.fromDf df CAP 0
@@ -58,13 +100,14 @@ glyph-block Letter-Armenian-Hook-Group : begin
 			local df : include : DivFrame 1
 			include : df.markSet.capital
 			local midy : XH / 2 - df.mvs / 2
-			include : dispiro
-				widths.lhs df.mvs
-				flat df.leftSB CAP [heading Downward]
-				curl df.leftSB (midy + ArchDepthB)
-				arch.lhs midy (sw -- df.mvs)
-				flat df.rightSB (midy + ArchDepthA)
-				curl df.rightSB XH [heading Upward]
+			include : uBowl.shape
+				left -- df.leftSB
+				right -- (df.rightSB - [HSwToV df.mvs])
+				top -- CAP
+				bottom -- midy
+				ada -- ArchDepthA
+				adb -- ArchDepthB
+				stroke -- df.mvs
 			include : VBar.r df.rightSB 0 XH
 
 			if SLAB : begin
@@ -76,16 +119,22 @@ glyph-block Letter-Armenian-Hook-Group : begin
 		create-glyph 'armn/Ghat' 0x542 : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : LeftHook df CAP df.mvs SLAB 0
-			include : [ArmHBar.right df 1 SLAB].base
+			include : LeftHook df CAP 0 df.mvs
+			include : [ArmHBar.right df].base
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.rb.full
 
 	do "Nu"
 		create-glyph 'armn/Nu' 0x546 : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : LeftHook df CAP df.mvs SLAB SLAB
+			include : LeftHook df CAP 0 df.mvs
 			include : FlipAround df.middle (CAP / 2)
-			include : [ArmHBar.left df 1 SLAB].top
+			include : [ArmHBar.left df].cap
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.lt.full
 
 	do "Peh"
 		create-glyph 'armn/Peh' 0x54A : glyph-proc
@@ -93,24 +142,27 @@ glyph-block Letter-Armenian-Hook-Group : begin
 			include : df.markSet.capital
 			local ada : df.archDepthA ArchDepth df.mvs
 			local adb : df.archDepthB ArchDepth df.mvs
-			include : LeftHook df CAP df.mvs SLAB 0 nothing nothing ada adb
+			include : LeftHook df CAP 0 df.mvs Hook ada adb
 			include : VBar.m df.middle (XH / 2) (CAP - 0.5 * df.mvs) df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.rb.full
 
 	do "Vew"
 		create-glyph 'armn/Vew' 0x54E : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
 			local midy : XH / 2 - df.mvs / 2
-			include : dispiro
-				widths.lhs df.mvs
-				flat df.leftSB XH [heading Downward]
-				curl df.leftSB (midy + ArchDepthB)
-				arch.lhs midy (sw -- df.mvs)
-				flat df.rightSB (midy + ArchDepthA)
-				curl df.rightSB XH [heading Upward]
+			include : uBowl.shape
+				left -- df.leftSB
+				right -- (df.rightSB - [HSwToV df.mvs])
+				top -- XH
+				bottom -- midy
+				ada -- ArchDepthA
+				adb -- ArchDepthB
+				stroke -- df.mvs
 			include : VBar.r df.rightSB 0 CAP df.mvs
-			include : [ArmHBar.right df 1 SLAB].base
-
+			include : [ArmHBar.right df].base
 			if SLAB : begin
 				local sf : SerifFrame.fromDf df XH 0
 				local sf2 : SerifFrame.fromDf df CAP 0
@@ -120,13 +172,19 @@ glyph-block Letter-Armenian-Hook-Group : begin
 		create-glyph 'armn/Reh' 0x550 : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : RightHook df CAP df.mvs SLAB 0
+			include : RightHook df CAP 0 df.mvs
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.lb.full
 
 	do "Dram"
 		glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
 		create-glyph 'armn/Dram' 0x58F : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : LeftHook df CAP df.mvs SLAB 0
+			include : LeftHook df CAP 0 df.mvs
 			include : LetterBarOverlay.r df.rightSB (CAP * 0.37)
 			include : LetterBarOverlay.r df.rightSB (CAP * 0.60 - OverlayStroke * 0.25)
+			if SLAB : begin
+				local sf : SerifFrame.fromDf df CAP 0
+				include sf.rb.full
