@@ -230,37 +230,86 @@ glyph-block Letter-Shared-Shapes : begin
 			quadControls ((x1 - mid) / (x2 - mid)) 0 8
 			g4   x2 y2
 
-	glyph-block-export nShoulderKnots
-	define flex-params [nShoulderKnots] : begin
-		local-parameter : left
-		local-parameter : right
-		local-parameter : fine              -- ShoulderFine
-		local-parameter : top               -- XH
-		local-parameter : bottom            -- 0
-		local-parameter : ada               -- SmallArchDepthA
-		local-parameter : adb               -- SmallArchDepthB
-		local-parameter : stroke            -- Stroke
-		local-parameter : fMask             -- false
-		local-parameter : leftY0            -- nothing
+	glyph-block-export nShoulder
+	define nShoulder : namespace
+		export : define flex-params [knots] : begin
+			local-parameter : left
+			local-parameter : right
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : top               -- XH
+			local-parameter : bottom            -- 0
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+			local-parameter : stroke            -- Stroke
+			local-parameter : fMask             -- false
+			local-parameter : leftY0            -- (top - ada - 2)
 
-		return : list
-			flat (left - [HSwToV fine]) [fallback leftY0 (top - ada - 2)] [widths.rhs fine]
-			curl (left - [HSwToV fine]) (top - ada)
-			arch.rhs top (sw -- stroke) (swBefore -- fine)
-			flat right (top - adb) [widths.rhs stroke]
-			[if fMask corner curl] right bottom [widths.rhs.heading stroke Downward]
-			if [not fMask] {} {[corner left bottom]}
+			return : list
+				flat (left - [HSwToV fine]) leftY0 [widths.rhs fine]
+				curl (left - [HSwToV fine]) (top - ada)
+				arch.rhs top (sw -- stroke) (swBefore -- fine)
+				flat right (top - adb) [widths.rhs stroke]
+				[if fMask corner curl] right bottom [widths.rhs.heading stroke Downward]
+				if [not fMask] {} {[corner left bottom]}
 
-	glyph-block-export nShoulder nShoulderMask
-	define [nShoulder] : begin
-		local a : Array.prototype.slice.call arguments 0
-		glyph-proc
-			include : dispiro : nShoulderKnots.apply null a
+		export : define [shape] : begin
+			local a : Array.prototype.slice.call arguments 0
+			glyph-proc
+				include : dispiro : knots.apply null a
 
-	define [nShoulderMask] : begin
-		local a : Array.prototype.slice.call arguments 0
-		glyph-proc
-			include : spiro-outline : nShoulderKnots.apply null [a.concat { (fMask -- true) }]
+		export : define [mask] : begin
+			local a : Array.prototype.slice.call arguments 0
+			glyph-proc
+				include : spiro-outline : knots.apply null [a.concat { (fMask -- true) }]
+
+	glyph-block-export uBowl
+	define uBowl : namespace
+		export : define flex-params [knots] : begin
+			local-parameter : left
+			local-parameter : right
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : top               -- XH
+			local-parameter : bottom            -- 0
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+			local-parameter : stroke            -- Stroke
+			local-parameter : fMask             -- false
+			local-parameter : rightY0           -- (bottom + ada + TINY)
+
+			return : list
+				flat (right + [HSwToV fine]) rightY0 [widths.rhs fine]
+				curl (right + [HSwToV fine]) (bottom + ada)
+				arch.rhs bottom (sw -- stroke) (swBefore -- fine)
+				flat left (bottom + adb) [widths.rhs stroke]
+				[if fMask corner curl] left top [widths.rhs.heading stroke Upward]
+				if fMask {[corner right top]} {}
+		export : define [shape] : begin
+			local a : Array.prototype.slice.call arguments 0
+			glyph-proc
+				include : dispiro : knots.apply null a
+		export : define [mask] : begin
+			local a : Array.prototype.slice.call arguments 0
+			glyph-proc
+				include : spiro-outline : knots.apply null [a.concat { (fMask -- true) }]
+
+	glyph-block-export cheBowl
+	define cheBowl : namespace
+		export : define flex-params [shape] : begin
+			local-parameter : left
+			local-parameter : right
+			local-parameter : top
+			local-parameter : bottom
+			local-parameter : adb       -- ArchDepthB
+			local-parameter : sw        -- Stroke
+
+			define xMid : mix left right 0.5
+			define rise   DToothlessRise
+
+			return : dispiro
+				flat left top [widths.lhs.heading sw Downward]
+				curl left (bottom + adb)
+				arch.lhs.centerAt.ltr.b (xMid + [HSwToV : 0.2 * sw]) bottom
+				g4 right (bottom + rise + 0.25 * sw)
 
 	glyph-block-export : OBarLeft
 	define OBarLeft : namespace
@@ -913,7 +962,7 @@ glyph-block Letter-Shared-Shapes : begin
 		glyph-block-export MidHook
 		define MidHook : namespace
 			export : define [general] : with-params [left right top [bottom 0] ada adb [sw Stroke] [xDepth (-HookX)]] : composite-proc
-				nShoulder
+				nShoulder.shape
 					left -- left
 					right -- right
 					top -- top
@@ -945,37 +994,48 @@ glyph-block Letter-Shared-Shapes : begin
 		# Upward hook shape
 		glyph-block-export TopHook
 		define TopHook : namespace
-			export : define [lBarOuter] : with-params [x yBot yTop [sw Stroke]] : glyph-proc
-				local fullDepth : (Ascender - XH) - 0.5 * sw - O
-				local yHookStart : yTop + (fullDepth - TailY)
-				include : ExtendAboveBaseAnchors (yTop + (Ascender - XH))
-				include : union
-					VBar.l x yBot yHookStart sw
-					VerticalHook.l x yHookStart TailX (-TailY) (sw -- sw)
+			define [ward sign] : namespace
+				# Reference point at a bar's left edge, hook placed above yTop
+				export : define [lBarOuter] : with-params [x yBot yTop [sw Stroke]] : glyph-proc
+					local fullDepth : (Ascender - XH) - 0.5 * sw - O
+					local yHookStart : yTop + (fullDepth - TailY)
+					include : ExtendAboveBaseAnchors (yTop + (Ascender - XH))
+					include : union
+						VBar.l x yBot yHookStart sw
+						VerticalHook.l x yHookStart (sign * TailX) (-TailY) (sw -- sw)
 
-			export : define [lBarInner] : with-params [x yBot yTop [sw Stroke]] : glyph-proc
-				local yHookStart : yTop - O - TailY - 0.5 * sw
-				include : union
-					VBar.l x yBot yHookStart sw
-					VerticalHook.l x yHookStart TailX (-TailY) (sw -- sw)
+				# Reference point at a bar's left edge, hook placed below yTop
+				export : define [lBarInner] : with-params [x yBot yTop [sw Stroke]] : glyph-proc
+					local yHookStart : yTop - O - TailY - 0.5 * sw
+					include : union
+						VBar.l x yBot yHookStart sw
+						VerticalHook.l x yHookStart (sign * TailX) (-TailY) (sw -- sw)
 
-			export : define [rBarOuter] : with-params [x yBot yTop [sw Stroke]] : begin
-				return : lBarOuter (x - [HSwToV sw]) yBot yTop (sw -- sw)
-			export : define [rBarInner] : with-params [x yBot yTop [sw Stroke]] : begin
-				return : lBarInner (x - [HSwToV sw]) yBot yTop (sw -- sw)
+				# Reference point at a bar's right edge, hook placed above yTop
+				export : define [rBarOuter] : with-params [x yBot yTop [sw Stroke]] : begin
+					return : lBarOuter (x - [HSwToV sw]) yBot yTop (sw -- sw)
+				# Reference point at a bar's right edge, hook placed below yTop
+				export : define [rBarInner] : with-params [x yBot yTop [sw Stroke]] : begin
+					return : lBarInner (x - [HSwToV sw]) yBot yTop (sw -- sw)
 
-			export : define [mBarOuter] : with-params [x yBot yTop [sw Stroke]] : begin
-				return : lBarOuter (x - [HSwToV : 0.5 * sw]) yBot yTop (sw -- sw)
-			export : define [mBarInner] : with-params [x yBot yTop [sw Stroke]] : begin
-				return : lBarInner (x - [HSwToV : 0.5 * sw]) yBot yTop (sw -- sw)
+				# Reference point at a bar's centerline, hook placed above yTop
+				export : define [mBarOuter] : with-params [x yBot yTop [sw Stroke]] : begin
+					return : lBarOuter (x - [HSwToV : 0.5 * sw]) yBot yTop (sw -- sw)
+				# Reference point at a bar's centerline, hook placed below yTop
+				export : define [mBarInner] : with-params [x yBot yTop [sw Stroke]] : begin
+					return : lBarInner (x - [HSwToV : 0.5 * sw]) yBot yTop (sw -- sw)
 
-			export : define [arcStart] : with-params [cx cy hookY [refSw Stroke]] : begin
-				local sw : ArcStartSerifWidth refSw
-				local fullDepth : (Ascender - XH) - 0.5 * sw - O
-				local yHookStart : cy + (fullDepth - TailY)
-				return : union
-					VBar.r cx (cy - hookY + O * 2) yHookStart sw
-					VerticalHook.r cx yHookStart TailX (-TailY) sw
+				# Special case for arc-start shapes
+				export : define [arcStart] : with-params [cx cy hookY [refSw Stroke]] : begin
+					local sw : ArcStartSerifWidth refSw
+					local fullDepth : (Ascender - XH) - 0.5 * sw - O
+					local yHookStart : cy + (fullDepth - TailY)
+					return : union
+						VBar.r cx (cy - hookY + O * 2) yHookStart sw
+						VerticalHook.r cx yHookStart (sign * TailX) (-TailY) sw
+
+			export : define toLeft : ward (-1)
+			export : define toRight : ward (+1)
 
 		# Leftward hook
 		glyph-block-export LeftHook

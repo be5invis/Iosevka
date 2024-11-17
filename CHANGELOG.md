@@ -1,5 +1,15 @@
 ## Modifications since last major version
 
+### 32.1.0
+
+* Make dense letters less outstanding (#2581).
+* Optimize glyphs for Armenian Capital Ini (`U+053B`), Ken (`U+053F`), and Vew (`U+054E`).
+* Remove bottom-right serif from Armenian Capital Now (`U+0546`).
+* Remove top-right serif from Armenian Lower Ben (`U+0562`).
+* Make serif of Armenian Lower Yi (`U+0575`) consistent with Armenian Lower Liwn (`U+056C`).
+* Make hook of Armenian Lower Co (`U+0581`) consistent with Armenian Lower Yi (`U+0575`).
+
+
 ### 32.0.1
 
 * Fix inconsistent serifs of `U+0284` and `U+10798` with the variants of `j` (#2569).

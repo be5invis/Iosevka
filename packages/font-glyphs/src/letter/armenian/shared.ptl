@@ -14,25 +14,28 @@ glyph-block Letter-Armenian-Shared-Shapes : begin
 	define highBarPos XH
 	define jut Jut
 
-	define JUT-NORMAL 0
-	define JUT-SHORT 1
-	define JUT-RIGHT 2
-	define JUT-LEFT 3
+	define JUT : object
+		NORMAL 0
+		SHORT  1
+		RIGHT  2
+		LEFT   3
 
 	glyph-block-export ArmHBar
-	define [ArmHBar hPos df fCapital fOverslab] : namespace
+	define [ArmHBar hPos df] : namespace
 		define left : match hPos
-			[Just JUT-RIGHT] df.rightSB
-			[Just JUT-LEFT]  (df.leftSB - (jut * [if fOverslab 1.5 1]) + [HSwToV : 0.5 * df.mvs])
-			--               df.leftSB
+			[Just JUT.RIGHT]  df.rightSB
+			[Just JUT.LEFT]  (df.leftSB - (jut * [if SLAB 1.5 1]) + [HSwToV : 0.5 * df.mvs])
+			--                df.leftSB
 		define right : match hPos
-			[Just JUT-RIGHT]  (df.rightSB + (jut * [if fOverslab 1.5 1]) - [HSwToV : 0.5 * df.mvs])
-			[Just JUT-SHORT]  (df.rightSB - (jut - [HSwToV : 0.5 * df.mvs]) * df.div)
-			[Just JUT-LEFT]   df.leftSB
+			[Just JUT.RIGHT] (df.rightSB + (jut * [if SLAB 1.5 1]) - [HSwToV : 0.5 * df.mvs])
+			[Just JUT.SHORT] (df.rightSB - (jut - [HSwToV : 0.5 * df.mvs]) * df.div)
+			[Just JUT.LEFT]   df.leftSB
 			--                df.rightSB
 
-		export : define [top] : glyph-proc
-			include : HBar.t left right [if fCapital CAP Ascender] df.mvs
+		export : define [cap] : glyph-proc
+			include : HBar.t left right CAP df.mvs
+		export : define [asc] : glyph-proc
+			include : HBar.t left right Ascender df.mvs
 		export : define [high] : glyph-proc
 			include : HBar.t left right highBarPos df.mvs
 		export : define [mid] : glyph-proc
@@ -44,50 +47,10 @@ glyph-block Letter-Armenian-Shared-Shapes : begin
 		export : define [at y] : glyph-proc
 			include : HBar.m left right y df.mvs
 
-	set [ArmHBar.normal df fCapital fOverslab] : ArmHBar JUT-NORMAL df fCapital fOverslab
-	set [ArmHBar.short  df fCapital fOverslab] : ArmHBar JUT-SHORT  df fCapital fOverslab
-	set [ArmHBar.right  df fCapital fOverslab] : ArmHBar JUT-RIGHT  df fCapital fOverslab
-	set [ArmHBar.left   df fCapital fOverslab] : ArmHBar JUT-LEFT   df fCapital fOverslab
-
-	glyph-block-export RightHook
-	define [RightHook df top sw baseSerif hookSerif _base _hookY _ada _adb] : glyph-proc
-		local base : fallback _base 0
-		local hookY : fallback _hookY (top - Hook)
-		local ada : fallback _ada ArchDepthA
-		local adb : fallback _adb ArchDepthB
-		local yMidDepth : if (top - base > ada + adb) ada ((top - base) * (ada / (ada + adb)))
-		include : dispiro
-			widths.lhs df.mvs
-			g4 df.rightSB hookY
-			hookstart top (sw -- sw)
-			flat df.leftSB (top - yMidDepth)
-			curl df.leftSB base [heading Downward]
-		if baseSerif : begin
-			local sf : SerifFrame.fromDf df top base
-			include sf.lb.full
-		if hookSerif : begin
-			local sf : SerifFrame.fromDf df top hookY
-			include sf.rb.full
-
-	glyph-block-export LeftHook
-	define [LeftHook df top sw baseSerif hookSerif _base _hookY _ada _adb] : glyph-proc
-		local base : fallback _base 0
-		local hookY : fallback _hookY (top - Hook)
-		local ada : fallback _ada ArchDepthA
-		local adb : fallback _adb ArchDepthB
-		local yMidDepth : if (top - base > ada + adb) adb ((top - base) * (adb / (ada + adb)))
-		include : dispiro
-			widths.rhs df.mvs
-			g4 df.leftSB hookY
-			hookstart top (sw -- sw)
-			flat df.rightSB (top - yMidDepth)
-			curl df.rightSB base [heading Downward]
-		if baseSerif : begin
-			local sf : SerifFrame.fromDf df top base
-			include sf.rb.full
-		if hookSerif : begin
-			local sf : SerifFrame.fromDf df top hookY
-			include sf.lb.full
+	set [ArmHBar.normal df] : ArmHBar JUT.NORMAL df
+	set [ArmHBar.short  df] : ArmHBar JUT.SHORT  df
+	set [ArmHBar.right  df] : ArmHBar JUT.RIGHT  df
+	set [ArmHBar.left   df] : ArmHBar JUT.LEFT   df
 
 	glyph-block-export TwoNeck
 	define [TwoNeck df top bot _left _right _adb _flatp] : begin
