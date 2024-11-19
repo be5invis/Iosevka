@@ -11,6 +11,7 @@ glyph-block Letter-Cyrillic-Tje : begin
 	glyph-block-import Letter-Shared : CreateDependentComposite
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
 	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
+	glyph-block-import Letter-Latin-Upper-T : TConfig
 	glyph-block-import Letter-Cyrillic-Yeri : YeriConfig YeriBarPos
 
 	define [LeftHalf df top slabTop slabBot] : glyph-proc
@@ -33,40 +34,33 @@ glyph-block Letter-Cyrillic-Tje : begin
 	define [RightHalf Yeri df top] : glyph-proc
 		local { jutTop jutBot jutMid } : EFVJutLength top YeriBarPos df.mvs
 		include : Yeri top
-			left   -- [mix df.leftSB df.rightSB 0.3] + OX
+			left   -- ([mix df.leftSB df.rightSB 0.3] + OX)
 			right  -- df.rightSB
 			stroke -- df.mvs
-			bowl   -- YeriBarPos * top + [Math.min HalfStroke jutMid]
+			bowl   -- (YeriBarPos * top + [Math.min HalfStroke jutMid])
 		eject-contour 'serifYeriLT'
 		eject-contour 'serifYeriLB'
 
-	define Config : object
-		serifless     { false false }
-		motionSerifed { true  false }
-		serifed       { true  true  }
-
-	foreach { suffix { doST doSB } } [Object.entries Config] : do
-		local df : DivFrame [mix 1 para.diversityM 0.5] 3
-
+	foreach { suffix { div doST doSB } } [Object.entries TConfig] : do
 		create-glyph "cyrl/Tje/leftHalf.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame para.diversityT 3
 			include : df.markSet.capital
 			include : LeftHalf df CAP doST doSB
 
 		create-glyph "cyrl/tje.upright/leftHalf.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame para.diversityT 3
 			include : df.markSet.e
 			include : LeftHalf df XH doST doSB
 
 	foreach { suffix { Uc Lc } } [Object.entries YeriConfig] : do
 		create-glyph "cyrl/Tje/rightHalf.\(suffix)"  : glyph-proc
-			local df : include : DivFrame [mix 1 para.diversityM 0.5] 3
+			local df : include : DivFrame para.diversityT 3
 			include : df.markSet.capital
 			include : RightHalf Uc df CAP
 			DependentSelector.set currentGlyph : if (suffix === "corner") 'full' 'reduced'
 
 		create-glyph "cyrl/tje.upright/rightHalf.\(suffix)" : glyph-proc
-			local df : include : DivFrame [mix 1 para.diversityM 0.5] 3
+			local df : include : DivFrame para.diversityT 3
 			include : df.markSet.e
 			include : RightHalf Lc df XH
 			DependentSelector.set currentGlyph : if (suffix === "corner") 'full' 'reduced'

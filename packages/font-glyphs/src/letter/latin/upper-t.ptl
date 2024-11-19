@@ -73,22 +73,21 @@ glyph-block Letter-Latin-Upper-T : begin
 			include : tagged 'serifMB' : HSerif.lb (xRight - [HSwToV HalfStroke]) 0 MidJutSide
 			include : tagged 'serifRT' : HSerif.rt xRight top SideJut
 
+	glyph-block-export TConfig
 	define TConfig : object
-		serifless     { 1                           false false }
-		motionSerifed { [mix 1 para.diversityM 0.5] true  false }
-		serifed       { [mix 1 para.diversityM 0.5] true  true  }
+		serifless     { 1               false false }
+		motionSerifed { para.diversityT true  false }
+		serifed       { para.diversityT true  true  }
 
 	foreach { suffix { div doST doSB } } [Object.entries TConfig] : do
-		local df : DivFrame div
-
 		create-glyph "T.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame div
 			include : df.markSet.capital
 			set-base-anchor 'bottomRight' (df.middle + [HSwToV HalfStroke]) 0
 			include : TShape df CAP doST doSB
 
 		create-glyph "cyrl/TeDescender.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame div
 			include : df.markSet.capital
 			set-base-anchor 'bottomRight' (df.middle + [HSwToV HalfStroke]) 0
 			include : TShape df CAP doST doSB
@@ -98,42 +97,44 @@ glyph-block Letter-Latin-Upper-T : begin
 				jut -- [if doSB MidJutCenter Jut]
 
 		create-glyph "TStroke.\(suffix)" : glyph-proc
+			local df : DivFrame div
 			include [refer-glyph "T.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.m.in df.middle 0 CAP 0.45
 
 		create-glyph "Thookleft.\(suffix)" : glyph-proc
+			local df : DivFrame div
 			include [refer-glyph "T.\(suffix)"] AS_BASE ALSO_METRICS
 			eject-contour 'serifLT'
 			eject-contour 'strokeLT'
 			include : LeftHook (df.leftSB + LeftHook.extension) CAP df.middle
 
 		create-glyph "smcpT.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame div
 			include : df.markSet.e
 			set-base-anchor 'bottomRight' (df.middle + [HSwToV HalfStroke]) 0
 			include : TShape df XH doST doSB
 
 		create-glyph "cyrl/Twe/upper.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame div
 			include : df.markSet.capital
 			include : TweUpperShape df CAP doST doSB
 			set-base-anchor 'cvDecompose' (df.width / 2) CAP
 
 		create-glyph "cyrl/twe/upper.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame div
 			include : df.markSet.e
 			include : TweUpperShape df XH doST doSB
 			set-base-anchor 'cvDecompose' (df.width / 2) XH
 
 		create-glyph "currency/tengeSign.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame div
 			include : df.markSet.capital
 			local gap : Math.max (CAP * 0.1) [AdviceStroke2 2 6 CAP]
 			include : HBar.t [TLeftX df] [TRightX df] CAP OverlayStroke
 			include : TShape df (CAP - gap - OverlayStroke) doST doSB
 
 		create-glyph "cyrl/teDescender.upright.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame div
 			include : df.markSet.e
 			include : TShape df XH doST doSB
 			include : CyrDescender.rSideJut
@@ -142,8 +143,9 @@ glyph-block Letter-Latin-Upper-T : begin
 				jut -- [if doSB MidJutCenter Jut]
 
 		create-glyph "TRTailBR.\(suffix)" : glyph-proc
+			local df : DivFrame div
 			include [refer-glyph "T.\(suffix)"] AS_BASE ALSO_METRICS
-			include : MarkSet.capital
+			include : df.markSet.capital
 			include : RetroflexHook.mExt df.middle 0
 
 		create-glyph "cyrl/TjeKomi.\(suffix)" : glyph-proc
@@ -196,7 +198,7 @@ glyph-block Letter-Latin-Upper-T : begin
 	CreateAccentedComposition 'TComma'   0x021A 'T' 'commaBelow'
 
 	create-glyph 'capitalSmcpI' 0xA7AE : glyph-proc
-		local df : include : DivFrame [if SLAB [mix 1 para.diversityM 0.5] 1]
+		local df : include : DivFrame : if SLAB para.diversityT 1
 		include : df.markSet.capital
 		local l : TLeftX df
 		local r : TRightX df
@@ -212,7 +214,7 @@ glyph-block Letter-Latin-Upper-T : begin
 			include : tagged 'serifLB' : VSerif.ul l 0 VJut
 
 	create-glyph 'mathbb/T' 0x1D54B : glyph-proc
-		local df : DivFrame 1
+		local df : include : DivFrame 1
 		include : df.markSet.capital
 		include : HBar.t [TLeftX df] [TRightX df] CAP BBS
 		include : VBar.m (df.middle - BBD / 2) 0 CAP BBS
