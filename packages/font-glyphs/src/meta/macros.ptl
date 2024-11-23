@@ -19,7 +19,6 @@ define-operator infix "<+>" 350 'left' : syntax-rules
 define-operator infix "<->" 350 'left' : syntax-rules
 	`(@l <-> @r) : dirty `[@l.op_sub @r]
 
-
 ### Macro for identity match
 define-macro Just : begin
 	local m : syntax-rules
@@ -32,6 +31,118 @@ define-macro Just : begin
 				assign  : lambda [t locallyQ] : ex `[begin] env
 
 	return m
+
+# Macro for "at-lifting" form. In this form we could use @ sign to prefix some "ad-hoc" variables
+# which will be replaced with the actual values at the time of the form evaluation.
+#
+# This is a handy tool for defineing a stroke's coordinates. Given a form like
+#
+#     lift-@ : dispiro
+#         g4 (@1 = 0) (@y = XH)
+#         g2 [mix @1 @2 0.5] @y
+#         g4 (@2 = Width) @y
+#
+# The macro will transform it into something like
+#
+#     begin
+#         local t1 0
+#         local t2 Width
+#         local ty XH
+#         dispiro
+#             g4 t1 ty
+#             g2 [mix t1 t2 0.5] ty
+#             g4 t2 ty
+define-macro lift-@ : syntax-rules
+	`[lift-@ @x] : begin
+		define xEnv : scopeOf x
+
+		# Detect whether a form is {".unquote" <string>} (indicating @identifier) or
+		# {".unquote" {".quote" literal}} (indicating @literal)
+		# Return the string representation of the identifier or the literal, or null if neither
+		define [isUnquote form] : match form
+			{".unquote" {".quote" lit}} : String lit
+			{".unquote" ident} [atom ident] : String ident
+			otherwise null
+
+		# Detect whether a form is {".operatorPiece" x "=" ...} where x matches isUnquote
+		# Return the RHS when the form is a match, or null if not
+		define [isUnquoteAssign form] : match form
+			{".operatorPiece" lhs "=" rhs} : begin
+				local unquoteId : isUnquote lhs
+				if unquoteId : return {unquoteId rhs}
+				else : return null
+			{".operatorPiece" lhs "=" :: rhs} : begin
+				local unquoteId : isUnquote lhs
+				if unquoteId : return {unquoteId {".operatorPiece" :: rhs}}
+				else : return null
+			otherwise null
+
+		define atFormMap {.}
+		define [fetchAtFormMappedObj identifier] : begin
+			local existing atFormMap.(identifier)
+			if existing : return existing
+
+			local t : env.newt
+			local mapObj : object
+				t t
+				def `[begin undefined]
+				dependencies {}
+				sorted false
+			set atFormMap.(identifier) mapObj
+			return mapObj
+
+		define [addDeps mapObj form] : begin
+			if [not : Array.isArray form] : return nothing
+
+			local unquoteId : isUnquote form
+			if unquoteId : begin
+				mapObj.dependencies.push unquoteId
+				return nothing
+
+			foreach [j : range 0 form.length] : begin
+				addDeps mapObj form.(j)
+
+		define [transform form] : begin
+			if [not : Array.isArray form] : return form
+
+			# Handle definitions
+			local unquoteDef : isUnquoteAssign form
+			if unquoteDef : begin
+				local {unquoteId rhs} unquoteDef
+				local mapObj : fetchAtFormMappedObj unquoteId
+				set mapObj.def rhs
+				addDeps mapObj rhs
+				return mapObj.t
+
+			# Handle usages
+			local unquoteId : isUnquote form
+			if unquoteId : begin
+				local mapObj : fetchAtFormMappedObj unquoteId
+				return mapObj.t
+
+			# None of the cases above match, perform in-place transformation of the form's children
+			foreach [j : range 0 form.length] : begin
+				set form.(j) : transform form.(j)
+			return form
+
+		define [pushAtDef sink identifier] : begin
+			local mapObj : fetchAtFormMappedObj identifier
+			if mapObj.sorted : return nothing
+
+			foreach [dep : items-of mapObj.dependencies] : begin
+				pushAtDef sink dep
+
+			sink.push `[local @(mapObj.t) @(mapObj.def)]
+			set mapObj.sorted true
+
+		local body : transform : formOf x
+
+		local result `[begin]
+		foreach k [items-of : Object.keys atFormMap] : begin
+			pushAtDef result k
+
+		result.push body
+		return : dirty result
 
 define-macro $$InitFlexParameters$$ : syntax-rules
 	`[$$InitFlexParameters$$ @::$pairs] : begin
