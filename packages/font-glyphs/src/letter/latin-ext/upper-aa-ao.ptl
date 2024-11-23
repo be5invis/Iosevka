@@ -9,7 +9,7 @@ glyph-block Letter-Latin-Upper-AA-AO : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Latin-Lower-AE-OE : SubDfAndShift
-	glyph-block-import Letter-Latin-Lower-M : MEnoughSpaceForFullSerifs dfM
+	glyph-block-import Letter-Latin-Lower-M : MEnoughSpaceForFullSerifs
 
 	do "A glyphs"
 		glyph-block-import Letter-Latin-Upper-A : AShape AConfig
@@ -30,46 +30,46 @@ glyph-block Letter-Latin-Upper-AA-AO : begin
 		define SLAB-RIGHT   4
 
 		define ALetters : object
-			AA     { 0xA732 'capital' CAP }
-			smcpAA { null   'e'       XH  }
+			AA     { 0xA732 para.diversityM 'capital' CAP }
+			smcpAA { null   para.diversityT 'e'       XH  }
 
-		foreach { prefix { code mk height } } [Object.entries ALetters] : do
+		foreach { prefix { code div mk height } } [Object.entries ALetters] : do
 			foreach { suffix { bodyShape slabKind } } [Object.entries AConfig] : do
 				define skLeft  : maskOffBits slabKind SLAB-RIGHT
 				define skRight : maskOffBits slabKind SLAB-LEFT
 
 				create-glyph "\(prefix)/Left.\(suffix)" : glyph-proc
-					define df : include : DivFrame para.diversityM 3.5
+					define df : include : DivFrame div 3.5
 					include : df.markSet.(mk)
 					set-base-anchor 'cvDecompose' 0 0
 					include : AHalfShape 0 df height bodyShape skLeft
 
 				create-glyph "\(prefix)/LeftMask.\(suffix)" : glyph-proc
-					define df : include : DivFrame para.diversityM 3.5
+					define df : include : DivFrame div 3.5
 					include : df.markSet.(mk)
 					set-base-anchor 'cvDecompose' 0 0
 					include : AHalfShapeMask 0 df height bodyShape skLeft
 
 				create-glyph "\(prefix)/Right.\(suffix)" : glyph-proc
-					define df : DivFrame para.diversityM 3.5
+					define df : DivFrame div 3.5
 					set-width 0
 					include : df.markSet.(mk)
 					set-mark-anchor 'cvDecompose' 0 0 0 0
 					include : AHalfShape 1 df height bodyShape skRight
 
 				create-glyph "\(prefix)/RightMask.\(suffix)" : glyph-proc
-					define df : DivFrame para.diversityM 3.5
+					define df : DivFrame div 3.5
 					set-width 0
 					include : df.markSet.(mk)
 					set-mark-anchor 'cvDecompose' 0 0 0 0
 					include : AHalfShapeMask 1 df height bodyShape skRight
 
 				create-glyph "\(prefix)/AU/Left.\(suffix)" : glyph-proc
-					define df : include : DivFrame para.diversityM 3.5
+					define df : include : DivFrame div 3.5
 					local { subDf shift } : SubDfAndShift 1 df
 					include : AShape.LetterBottomRightRemoved subDf bodyShape slabKind CAP df.mvs
 				create-glyph "\(prefix)/AU/LeftMask.\(suffix)" : glyph-proc
-					define df : include : DivFrame para.diversityM 3.5
+					define df : include : DivFrame div 3.5
 					local { subDf shift } : SubDfAndShift 1 df
 					include : union
 						MaskAbove : [AShape.BarPos bodyShape slabKind CAP] - df.mvs
@@ -84,7 +84,7 @@ glyph-block Letter-Latin-Upper-AA-AO : begin
 			derive-multi-part-glyphs prefix code
 				list "\(prefix)/Left" "\(prefix)/LeftMask" "\(prefix)/Right" "\(prefix)/RightMask"
 				function [srcs gr] : glyph-proc
-					define df : DivFrame para.diversityM 3.5
+					define df : DivFrame div 3.5
 					define topSerifGap : Math.max (0.1 * (df.rightSB - df.leftSB)) [AdviceStroke 6]
 					define { left leftMask right rightMask } srcs
 
@@ -116,7 +116,7 @@ glyph-block Letter-Latin-Upper-AA-AO : begin
 				include : with-transform [ApparentTranslate shift 0]
 					union [Base subDf CAP df.mvs] [Slabs subDf CAP]
 
-		select-variant "AU/Right" (follow -- [conditional-follow [MEnoughSpaceForFullSerifs : dfM] 'AU/U/full' 'AU/U/reduced'])
+		select-variant "AU/Right" (follow -- [conditional-follow [MEnoughSpaceForFullSerifs] 'AU/U/full' 'AU/U/reduced'])
 
 	do "AU"
 		select-variant 'AA/AU/Left' (follow -- 'A')
