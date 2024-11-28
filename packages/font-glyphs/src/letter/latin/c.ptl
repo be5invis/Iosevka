@@ -37,8 +37,7 @@ glyph-block Letter-Latin-C : begin
 				g4 (df.rightSB - offset) (top - [fallback hook Hook])
 				hookstart (top - offset) (sw -- sw)
 
-		flat (df.leftSB + OX + offset) (top - ada)
-		curl (df.leftSB + OX + offset) (bot + adb)
+		flatside.ld (df.leftSB + offset) bot top ada adb
 
 		match sb
 			[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs (df.rightSB - offset) bot sw [fallback hook Hook] origBar
@@ -64,8 +63,7 @@ glyph-block Letter-Latin-C : begin
 				g4 (df.leftSB + offset) (top - [fallback hook Hook])
 				hookstart (top - offset) (sw -- sw)
 
-		flat (df.rightSB - OX + offset) (top - ada)
-		curl (df.rightSB - OX + offset) (bot + adb)
+		flatside.rd (df.rightSB + offset) bot top ada adb
 
 		match sb
 			[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs (df.leftSB + offset) bot sw [fallback hook Hook]
@@ -107,8 +105,7 @@ glyph-block Letter-Latin-C : begin
 				[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs RightSB XH sw Hook
 				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs RightSB XH sw Hook
 				__ : list [g4 RightSB (XH - Hook) [widths.lhs sw]] [hookstart XH (sw -- sw)]
-			flat (SB + OX) (XH - SmallArchDepthA)
-			curl (SB + OX) SmallArchDepthB
+			flatside.ld SB 0 XH SmallArchDepthA SmallArchDepthB
 			CurlyTail.n fine 0 RightSB 0 0 (yLoopTop -- XH * 0.45)
 
 	glyph-block-export CLetterForm
@@ -214,13 +211,13 @@ glyph-block Letter-Latin-C : begin
 				include : Translate 0 (SB / 2)
 
 		create-glyph "cyrl/esWide.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.diversityM 3
+			local df : include : DivFrame para.diversityT 3
 			include : df.markSet.e
-			local desc : -LongJut + 0.5 * Stroke
+			local desc : (-LongJut) + HalfStroke
 			include : ExtendBelowBaseAnchors desc
 			local lf : CLetterForm df sty styBot XH desc
-				ada -- [df.archDepthA SmallArchDepth df.mvs]
-				adb -- [df.archDepthB SmallArchDepth df.mvs]
+				ada -- [df.archDepthA SmallArchDepth Stroke]
+				adb -- [df.archDepthB SmallArchDepth Stroke]
 			include : lf.full
 
 		create-glyph "cHookTop.\(suffix)" : glyph-proc
@@ -240,10 +237,12 @@ glyph-block Letter-Latin-C : begin
 		create-glyph "stretchedC.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			local lf : CLetterForm [DivFrame 1] sty styBot XH Descender
+				ada -- SmallArchDepthA
+				adb -- SmallArchDepthB
 			include : lf.full
 
 		define [KoppaShapeT styTop styBot top base] : union
-			VBar.r (Middle + [HSwToV Stroke]) Descender (Stroke / 2)
+			VBar.r (Middle + [HSwToV Stroke]) Descender HalfStroke
 			difference base
 				Rect (top / 2) Descender (Middle + [HSwToV Stroke]) (Width * 4)
 				Rect (XH / 2) [mix Stroke Hook 0.5] Middle (Width * 4)
@@ -357,9 +356,10 @@ glyph-block Letter-Latin-C : begin
 
 	derive-glyphs 'cyrl/The' 0x4AA "cyrl/Es" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : ExtendBelowBaseAnchors (-LongJut + 0.5 * Stroke)
+		local desc : (-LongJut) + HalfStroke
+		include : ExtendBelowBaseAnchors desc
 		include : difference
-			VBar.m [arch.adjust-x.bot Middle] (-LongJut + 0.5 * Stroke) (Stroke + O) [AdviceStroke 3.5]
+			VBar.m [arch.adjust-x.bot Middle] desc (Stroke + O) [AdviceStroke 3.5]
 			OShapeOutline.NoOvershoot CAP 0 SB RightSB Stroke ArchDepthA ArchDepthB
 
 	derive-multi-part-glyphs 'cyrl/The.BSH' null { 'cyrl/Es' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
@@ -373,9 +373,10 @@ glyph-block Letter-Latin-C : begin
 
 	derive-glyphs 'cyrl/the' 0x4AB "cyrl/es" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : ExtendBelowBaseAnchors (-LongJut + 0.5 * Stroke)
+		local desc : (-LongJut) + HalfStroke
+		include : ExtendBelowBaseAnchors desc
 		include : difference
-			VBar.m [arch.adjust-x.bot Middle] (-LongJut + 0.5 * Stroke) (Stroke + O) [AdviceStroke 3.5]
+			VBar.m [arch.adjust-x.bot Middle] desc (Stroke + O) [AdviceStroke 3.5]
 			OShapeOutline.NoOvershoot XH 0 SB RightSB Stroke SmallArchDepthA SmallArchDepthB
 
 	derive-multi-part-glyphs 'cyrl/the.BSH' null { 'cyrl/es' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
@@ -441,12 +442,12 @@ glyph-block Letter-Latin-C : begin
 					curl df.middle [mix bot top 0.5] [widths.center.heading swBarFine Upward]
 
 		define [OutlineMask df] : spiro-outline
-			curl (df.leftSB + 0.5 * Stroke)  (post@ <-> SmallArchDepthA)
-			arch.rhs (sw -- Stroke) (tMask - 0.5 * Stroke)
-			flat (df.rightSB - 0.5 * Stroke) (pre@ <-> SmallArchDepthB)
-			curl pre@                        (post@ <+> SmallArchDepthA)
-			arch.rhs (sw -- Stroke) (bMask + 0.5 * Stroke)
-			flat post@ 					     (pre@ <+> SmallArchDepthB)
+			curl (df.leftSB + HalfStroke)  (post@ <-> SmallArchDepthA)
+			arch.rhs (sw -- Stroke) (tMask - HalfStroke)
+			flat (df.rightSB - HalfStroke) (pre@  <-> SmallArchDepthB)
+			curl pre@                      (post@ <+> SmallArchDepthA)
+			arch.rhs (sw -- Stroke) (bMask + HalfStroke)
+			flat post@                     (pre@  <+> SmallArchDepthB)
 
 		define [InterruptMask df] : begin
 			define gap : Math.max (XH / 8) [AdviceStroke2 6 6 XH]
