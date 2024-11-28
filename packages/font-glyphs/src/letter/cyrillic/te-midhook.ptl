@@ -8,6 +8,7 @@ glyph-block Letter-Cyrillic-Te-MidHook : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : MidHook
+	glyph-block-import Letter-Latin-Upper-T : TConfig
 
 	define [Shape df top pArc slabTop slabBot] : glyph-proc
 		local left : [mix df.leftSB df.rightSB 0.3] + OX
@@ -21,9 +22,9 @@ glyph-block Letter-Cyrillic-Te-MidHook : begin
 		include : MidHook.general
 			left   -- (left + [HSwToV df.mvs])
 			right  -- df.rightSB
-			top    -- top * HBarPos + df.mvs / 4
-			ada    -- ArchDepthA * pArc
-			adb    -- ArchDepthB * pArc
+			top    -- (top * HBarPos + df.mvs / 4)
+			ada    -- (ArchDepthA * pArc)
+			adb    -- (ArchDepthB * pArc)
 			sw     -- df.mvs
 
 		if slabTop : begin
@@ -33,21 +34,14 @@ glyph-block Letter-Cyrillic-Te-MidHook : begin
 		if slabBot : begin
 			include : HSerif.mb (left + [HSwToV : 0.5 * df.mvs]) 0 Jut
 
-	define Config : object
-		serifless     { 1                           false false }
-		motionSerifed { [mix 1 para.diversityM 0.5] true  false }
-		serifed       { [mix 1 para.diversityM 0.5] true  true  }
-
-	foreach { suffix { div doST doSB } } [Object.entries Config] : do
-		local df : DivFrame div 3
-
+	foreach { suffix { div doST doSB } } [Object.entries TConfig] : do
 		create-glyph "cyrl/TeMidHook.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame div
 			include : df.markSet.capDesc
 			include : Shape df CAP 1 doST doSB
 
 		create-glyph "cyrl/teMidHook.upright.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame div
 			include : df.markSet.p
 			include : Shape df XH [Math.pow HBarPos 0.3] doST doSB
 

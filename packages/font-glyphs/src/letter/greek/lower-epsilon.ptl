@@ -44,7 +44,7 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			local ada : topHeight - [mix (midyHeight + stroke / 2) (topHeight - O - stroke) (ArchDepthB / (ArchDepthA + ArchDepthB))] - [HSwToV TanSlope] * stroke
 			local adb : [mix (stroke + O) (midyHeight - stroke / 2) (ArchDepthB / (ArchDepthA + ArchDepthB))] + [HSwToV TanSlope] * stroke
 			local fine : stroke * CThin
-			local stemFine : stroke * (ShoulderFine / Stroke)
+			local stemFine : ShoulderFine * (stroke / Stroke)
 			return : object stroke midx midy ada adb fine stemFine
 
 		export : define [UpperShape] : begin
@@ -114,7 +114,7 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			local adb : topHeight - [mix (midyHeight + stroke / 2) (topHeight - yo - stroke) (ArchDepthA / (ArchDepthA + ArchDepthB))] + [HSwToV TanSlope] * stroke
 			local ada : [mix (stroke + yo) (midyHeight - stroke / 2) (ArchDepthA / (ArchDepthA + ArchDepthB))] - [HSwToV TanSlope] * stroke
 			local fine : stroke * CThin
-			local stemFine : stroke * (ShoulderFine / Stroke)
+			local stemFine : ShoulderFine * (stroke / Stroke)
 			return : object stroke midx midy ada adb fine stemFine
 
 		define [UpperShapeT sink] : begin
@@ -246,18 +246,20 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 
 		create-glyph "cyrl/Dhe.\(suffix)" : glyph-proc
 			include [refer-glyph "cyrl/Ze.\(suffix)"] AS_BASE ALSO_METRICS
-			include : ExtendBelowBaseAnchors (-LongJut + 0.5 * Stroke)
+			local desc : (-LongJut) + HalfStroke
+			include : ExtendBelowBaseAnchors desc
 			include : let [zeNoO : CyrZe slabTop slabBot CAP 0 (hook -- Hook) (xo -- 0) (yo -- 0)]
 				difference
-					VBar.m [arch.adjust-x.bot Middle] (-LongJut + 0.5 * Stroke) (Stroke + O) [AdviceStroke 3.5]
+					VBar.m [arch.adjust-x.bot Middle] desc (Stroke + O) [AdviceStroke 3.5]
 					zeNoO.ShapeMask
 
 		create-glyph "cyrl/dhe.\(suffix)" : glyph-proc
 			include [refer-glyph "cyrl/ze.\(suffix)"] AS_BASE ALSO_METRICS
-			include : ExtendBelowBaseAnchors (-LongJut + 0.5 * Stroke)
+			local desc : (-LongJut) + HalfStroke
+			include : ExtendBelowBaseAnchors desc
 			include : let [zeNoO : CyrZe slabTop slabBot XH 0 (hook -- SHook) (xo -- 0) (yo -- 0)]
 				difference
-					VBar.m [arch.adjust-x.bot Middle] (-LongJut + 0.5 * Stroke) (Stroke + O) [AdviceStroke 3.5]
+					VBar.m [arch.adjust-x.bot Middle] desc (Stroke + O) [AdviceStroke 3.5]
 					zeNoO.ShapeMask
 
 		create-glyph "cyrl/DzjeKomi.\(suffix)" : glyph-proc
@@ -376,47 +378,47 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 	do "Volapuk AE"
 		glyph-block-import Letter-Latin-Lower-A : SingleStorey
 
-		define [FullBarBody df height bar hook ada2 adb2] : glyph-proc
-			local eps : SmallEpsilon CLOSED-STEM CLOSED-STEM height 0
+		define [FullBarBody df top bar hook ada adb] : glyph-proc
+			local eps : SmallEpsilon CLOSED-STEM CLOSED-STEM top 0
 				blend    -- VolBlend
 				hook     -- hook
 				overflow -- 0
-				ada2     -- ada2
-				adb2     -- adb2
+				ada2     -- ada
+				adb2     -- adb
 			define [object stroke] : eps.Dim
 			include : eps.Shape
-			include : bar df height no-shape stroke
+			include : bar df top stroke
 
-		define [EarlessCornerBody df height bar hook ada2 adb2] : glyph-proc
-			local eps : SmallEpsilon SLAB-INWARD CLOSED-STEM height 0
+		define [EarlessCornerBody df top bar hook ada adb] : glyph-proc
+			local eps : SmallEpsilon SLAB-INWARD CLOSED-STEM top 0
 				blend    -- VolBlend
 				hook     -- hook
 				overflow -- 0
-				ada2     -- ada2
-				adb2     -- adb2
+				ada2     -- ada
+				adb2     -- adb
 			define [object stroke] : eps.Dim
 			include : eps.Shape
-			include : bar df (height - DToothlessRise) no-shape stroke
+			include : bar df (top - DToothlessRise) stroke
 
-		define [EarlessRoundedBody df height bar hook ada2 adb2] : glyph-proc
-			local eps : SmallEpsilon CLOSED-ROUND CLOSED-STEM height 0
+		define [EarlessRoundedBody df top bar hook ada adb] : glyph-proc
+			local eps : SmallEpsilon CLOSED-ROUND CLOSED-STEM top 0
 				blend    -- VolBlend
 				hook     -- hook
 				overflow -- 0
-				ada2     -- ada2
-				adb2     -- adb2
+				ada2     -- ada
+				adb2     -- adb
 			define [object stroke] : eps.Dim
 			include : eps.Shape
-			include : bar df (height - adb2) no-shape stroke
+			include : bar df (top - adb) stroke
 
 		define SingleStoreyConfig : object
 			singleStoreySerifless               { FullBarBody        SingleStorey.SeriflessBar     }
 			singleStoreyEarlessCornerSerifless  { EarlessCornerBody  SingleStorey.SeriflessBar     }
 			singleStoreyEarlessRoundedSerifless { EarlessRoundedBody SingleStorey.SeriflessBar     }
 
-			singleStoreySerifed                 { FullBarBody        SingleStorey.SerifedBar       }
-			singleStoreyEarlessCornerSerifed    { EarlessCornerBody  SingleStorey.SerifedBar       }
-			singleStoreyEarlessRoundedSerifed   { EarlessRoundedBody SingleStorey.SerifedBar       }
+			singleStoreySerifed                 { FullBarBody        SingleStorey.BottomSerifedBar }
+			singleStoreyEarlessCornerSerifed    { EarlessCornerBody  SingleStorey.BottomSerifedBar }
+			singleStoreyEarlessRoundedSerifed   { EarlessRoundedBody SingleStorey.BottomSerifedBar }
 
 			singleStoreyDoubleSerifed           { FullBarBody        SingleStorey.DoubleSerifedBar }
 
@@ -428,65 +430,67 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 
 		foreach { suffix { body bar } } [Object.entries SingleStoreyConfig] : do
 			create-glyph "AeVolapuk.\(suffix)" : glyph-proc
-				include : MarkSet.capital
-				include : body [DivFrame 1] CAP bar Hook ArchDepthA ArchDepthB
+				local df : include : DivFrame 1
+				include : df.markSet.capital
+				include : body df CAP bar Hook ArchDepthA ArchDepthB
 			create-glyph "aeVolapuk.\(suffix)" : glyph-proc
-				include : MarkSet.e
-				include : body [DivFrame 1] XH bar SHook SmallArchDepthA SmallArchDepthB
+				local df : include : DivFrame 1
+				include : df.markSet.e
+				include : body df XH bar SHook SmallArchDepthA SmallArchDepthB
 
 	do "Volapuk UE"
 		glyph-block-import Letter-Latin-U : USerifs
 		glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
 
-		define [UToothed df height slab hook ada2 adb2] : glyph-proc
+		define [UToothed df top slab hook ada adb] : glyph-proc
 			set-base-anchor 'trailing' df.rightSB 0
-			local eps : SmallEpsilon OPEN-VERTICAL CLOSED-STEM height 0
+			local eps : SmallEpsilon OPEN-VERTICAL CLOSED-STEM top 0
 				blend    -- VolBlend
 				hook     -- hook
 				overflow -- 0
-				ada2     -- ada2
-				adb2     -- adb2
+				ada2     -- ada
+				adb2     -- adb
 			define [object stroke] : eps.Dim
 			include : eps.Shape
-			include : VBar.r df.rightSB 0 height stroke
-			include : slab df height
+			include : VBar.r df.rightSB 0 top stroke
+			include : slab df top
 
-		define [UTailed df height slab hook ada2 adb2] : glyph-proc
+		define [UTailed df top slab hook ada adb] : glyph-proc
 			set-base-anchor 'trailing' (df.rightSB + SideJut) 0
-			local eps : SmallEpsilon OPEN-VERTICAL CLOSED-STEM height 0
+			local eps : SmallEpsilon OPEN-VERTICAL CLOSED-STEM top 0
 				blend    -- VolBlend
 				hook     -- hook
 				overflow -- 0
-				ada2     -- ada2
-				adb2     -- adb2
+				ada2     -- ada
+				adb2     -- adb
 			define [object stroke] : eps.Dim
 			include : eps.Shape
-			include : RightwardTailedBar df.rightSB 0 height stroke
-			include : slab df height
+			include : RightwardTailedBar df.rightSB 0 top stroke
+			include : slab df top
 
-		define [UToothlessRounded df height slab hook ada2 adb2] : glyph-proc
-			local eps : SmallEpsilon OPEN-VERTICAL CLOSED-ROUND height 0
+		define [UToothlessRounded df top slab hook ada adb] : glyph-proc
+			local eps : SmallEpsilon OPEN-VERTICAL CLOSED-ROUND top 0
 				blend    -- VolBlend
 				hook     -- hook
 				overflow -- 0
-				ada2     -- ada2
-				adb2     -- adb2
+				ada2     -- ada
+				adb2     -- adb
 			define [object stroke] : eps.Dim
 			include : eps.Shape
-			include : VBar.r df.rightSB ada2 height stroke
-			include : slab df height
+			include : VBar.r df.rightSB ada top stroke
+			include : slab df top
 
-		define [UToothlessCorner df height slab hook ada2 adb2] : glyph-proc
-			local eps : SmallEpsilon OPEN-VERTICAL SLAB-INWARD height 0
+		define [UToothlessCorner df top slab hook ada adb] : glyph-proc
+			local eps : SmallEpsilon OPEN-VERTICAL SLAB-INWARD top 0
 				blend    -- VolBlend
 				hook     -- hook
 				overflow -- 0
-				ada2     -- ada2
-				adb2     -- adb2
+				ada2     -- ada
+				adb2     -- adb
 			define [object stroke] : eps.Dim
 			include : eps.Shape
-			include : VBar.r df.rightSB DToothlessRise height stroke
-			include : slab df height stroke
+			include : VBar.r df.rightSB DToothlessRise top stroke
+			include : slab df top stroke
 
 		define SmallUConfig : SuffixCfg.weave
 			object # body

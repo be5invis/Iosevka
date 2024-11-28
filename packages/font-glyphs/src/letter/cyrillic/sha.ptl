@@ -10,27 +10,27 @@ glyph-block Letter-Cyrillic-Sha : begin
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar CyrDescender SerifFrame
 
 	glyph-block-export CyrShaShape
-	define [CyrShaShape] : with-params [df top bot [fine Stroke] [doSerif false] [fInv false]] : glyph-proc
+	define [CyrShaShape] : with-params [df top bot [fine Stroke] [doSerif false] [fInv false] [fCompact false]] : glyph-proc
 		local cofine : fine * df.mvs / Stroke
 		include : union
 			[if fInv HBar.t HBar.b] df.leftSB df.rightSB [if fInv top bot] fine
-			VBar.l df.leftSB bot top cofine
+			VBar.l df.leftSB  bot top cofine
 			VBar.r df.rightSB bot top cofine
-			VBar.m df.middle bot top cofine
+			VBar.m df.middle  bot top cofine
 
 		if doSerif : begin
 			local sf : SerifFrame.fromDf df top bot (swSerif -- cofine)
 
 			if fInv : then : begin
 				include : composite-proc sf.lt.outer sf.rt.outer
-				if sf.enoughSpaceForFullSerifs
-					include : composite-proc sf.lb.full sf.mb.full sf.rb.full
-					include : composite-proc sf.lb.outer sf.rb.outer
+				include : if (sf.enoughSpaceForFullSerifs && !fCompact)
+					composite-proc sf.lb.full sf.mb.full sf.rb.full
+					composite-proc sf.lb.outer sf.rb.outer
 			: else : begin
 				include : composite-proc sf.lb.outer sf.rb.outer
-				if sf.enoughSpaceForFullSerifs
-					include : composite-proc sf.lt.full sf.mt.full sf.rt.full
-					include : composite-proc sf.lt.outer sf.rt.outer
+				include : if (sf.enoughSpaceForFullSerifs && !fCompact)
+					composite-proc sf.lt.full sf.mt.full sf.rt.full
+					composite-proc sf.lt.outer sf.rt.outer
 
 	create-glyph 'cyrl/Sha' 0x428 : glyph-proc
 		local df : include : DivFrame para.diversityM 3
@@ -49,7 +49,10 @@ glyph-block Letter-Cyrillic-Sha : begin
 		include : df.markSet.e
 		include : CyrShaShape df XH 0 (doSerif -- SLAB) (fInv -- true)
 
-	alias 'smcpMTurned' 0xA7FA 'cyrl/sha.upright'
+	create-glyph 'smcpMTurned' 0xA7FA : glyph-proc
+		local df : include : DivFrame para.diversityT 3
+		include : df.markSet.e
+		include : CyrShaShape df XH 0 (doSerif -- SLAB) (fCompact -- true)
 
 	define [CyrShchaShape] : with-params [df top bot [fine Stroke] [doSerif false]] : glyph-proc
 		local cofine : fine * df.mvs / Stroke

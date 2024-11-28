@@ -10,10 +10,10 @@ glyph-block Letter-Latin-Upper-D : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay LeftHook
 
-	define [DArcShapeT sink df top right offset sw fRound] : glyph-proc
+	define [DArcShapeT sink df top right offset sw fRound ySmooth] : glyph-proc
 		local mockWidth : right + (df.width - df.rightSB)
 		local maxXSmoothWidth : mockWidth - df.leftSB * 2 - [HSwToV sw]
-		local dsmooth : clamp (sw * 1.5) (top * 0.499) ((top / CAP) * ArchDepth * 1.1)
+		local dsmooth : fallback ySmooth : clamp (sw * 1.5) (top / 2 - TINY) ((top / CAP) * ArchDepth * 1.1)
 		local bsmooth : clamp (sw * 1.5) maxXSmoothWidth ((mockWidth / Width) * ArchDepth * 1.1)
 		local barchDepthRd : clamp (sw * 1.5) maxXSmoothWidth ((mockWidth / Width) * ArchDepth * 1.25)
 
@@ -34,14 +34,14 @@ glyph-block Letter-Latin-Upper-D : begin
 			[if offset corner flat] (df.leftSB - O) (top - offset) [heading Rightward]
 			curl [arch.adjust-x.top (right - bsmooth)] (top - offset)
 			archv
-			flatside.rd (right - OX - offset) 0 top ada adb
+			flatside.rd (right - offset) 0 top ada adb
 			arcvh
 			flat [arch.adjust-x.bot (right - bsmooth)] offset
 			[if offset corner curl] (df.leftSB - O) offset [heading Leftward]
 
-	define [DShape df top right fRound slabTop slabBot] : glyph-proc
+	define [DShape df top right fRound ySmooth slabTop slabBot] : glyph-proc
 		include : VBar.l df.leftSB 0 top df.mvs
-		include : DArcShapeT dispiro df top right 0 df.mvs fRound
+		include : DArcShapeT dispiro df top right 0 df.mvs fRound ySmooth
 		if slabTop : include : tagged 'serifLT' : HSerif.lt df.leftSB top SideJut
 		if slabBot : include : tagged 'serifLB' : HSerif.lb df.leftSB 0 SideJut
 
@@ -58,8 +58,9 @@ glyph-block Letter-Latin-Upper-D : begin
 		local fMotion : fSlabTop && !fSlabBot
 
 		create-glyph "D.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : DShape [DivFrame 1] CAP RightSB fRound fSlabTop fSlabBot
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			include : DShape df CAP df.rightSB fRound nothing fSlabTop fSlabBot
 
 		if (!fMotion) : create-glyph "Dhookleft.\(suffix)" : glyph-proc
 			include [refer-glyph "D.\(suffix)"] AS_BASE ALSO_METRICS
@@ -67,24 +68,25 @@ glyph-block Letter-Latin-Upper-D : begin
 			include : LeftHook SB CAP
 
 		create-glyph "smcpD.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : DShape [DivFrame 1] XH RightSB fRound fSlabTop fSlabBot
+			local df : include : DivFrame 1
+			include : df.markSet.e
+			include : DShape df XH df.rightSB fRound ArchDepth fSlabTop fSlabBot
 
 		create-glyph "romanFiveThousand.\(suffix)" : glyph-proc
-			local df : DivFrame 1 3
-			include : MarkSet.capital
-			include : DShape df CAP df.rightSB fRound fSlabTop fSlabBot
+			local df : include : DivFrame 1 3
+			include : df.markSet.capital
+			include : DShape df CAP df.rightSB fRound nothing fSlabTop fSlabBot
 			include : with-transform [ApparentTranslate 0 (CAP * 0.2)]
 				DShape df (CAP * 0.6) (df.middle + [HSwToV : 0.5 * df.mvs]) fRound
 
 		create-glyph "romanFiftyThousand.\(suffix)" : glyph-proc
-			local df : DivFrame 1 4
+			local df : include : DivFrame 1 4
+			include : df.markSet.capital
 			local innerDist : df.rightSB - df.leftSB - [HSwToV : 4 * df.mvs]
 			local arcX1 : df.leftSB + innerDist * (1 / 3) + [HSwToV : 2 * df.mvs]
 			local arcX2 : df.leftSB + innerDist * (2 / 3) + [HSwToV : 3 * df.mvs]
 			local heightGap : df.mvs + (CAP - df.mvs * 6) / 6
-			include : MarkSet.capital
-			include : DShape df CAP df.rightSB fRound fSlabTop fSlabBot
+			include : DShape df CAP df.rightSB fRound nothing fSlabTop fSlabBot
 			include : with-transform [ApparentTranslate 0 heightGap]
 				DShape df (CAP - 2 * heightGap) arcX2 fRound
 			include : with-transform [ApparentTranslate 0 (2 * heightGap)]
@@ -103,7 +105,7 @@ glyph-block Letter-Latin-Upper-D : begin
 	select-variant 'Dhookleft' 0x18A
 
 	derive-composites 'Dbar' 0xA7C7 'D'
-		HBar.m (SB - OX) (RightSB + OX) (CAP * 0.5) OverlayStroke
+		HBar.m (SB - OX) (RightSB + OX) (CAP / 2) OverlayStroke
 
 	select-variant 'smcpD' 0x1D05 (follow -- 'D')
 	derive-glyphs 'smcpEth' 0x1D06 'smcpD' : lambda [src gr] : glyph-proc
@@ -113,7 +115,7 @@ glyph-block Letter-Latin-Upper-D : begin
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/D' 0x1D53B : glyph-proc
-		define df : DivFrame 1
+		define df : include : DivFrame 1
 		include : df.markSet.capital
 		include : VBar.l df.leftSB 0 CAP BBS
 		include : DArcShapeT dispiro df CAP df.rightSB 0 BBS false
