@@ -37,8 +37,18 @@ export function strokeOffset(x, y, dx, dy, offset, contrast) {
 	const r = Math.hypot(dx, dy);
 	return {
 		x: x + (dy / r) * offset * contrast,
-		y: y - (dx / r) * offset
+		y: y - (dx / r) * offset,
 	};
+}
+
+export const min = Math.min;
+export const max = Math.max;
+
+export function slY(x0, y0, x1, slope) {
+	return y0 + slope * (x1 - x0);
+}
+export function slX(x0, y0, y1, slope) {
+	return x0 + (y1 - y0) / slope;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -43,7 +43,7 @@ glyph-block Letter-Latin-S : begin
 		local adjustFactor : 0.1 * (df.rightSB - df.leftSB) / height
 		return : list
 			~~~ [alsoThru 0.5 (0.7 + adjustFactor)]
-			g4 [pre@mix@post 0.5] [pre@mix@post 0.5] [widths.center ess]
+			alsoThru.g4 0.5 0.5 [widths.center ess]
 			~~~ [alsoThru 0.5 (0.3 - adjustFactor)]
 
 	define [SStrokeImpl df top bot st sb stroke refSwEss] : begin
@@ -118,15 +118,15 @@ glyph-block Letter-Latin-S : begin
 		define soStart : stroke - swStart
 		define soEnd   : stroke - swEnd
 		define archDepth : AdviceSArchDepth top (-1) stroke
-		return : dispiro
+		return : lift-@ : dispiro
 			widths.lhs fine
 			g4   (df.rightSB + OX / 4 - [HSwToV soStart]) (top - hook)
 			hookstart (top - soStart) (sw -- fine)
-			g4   (df.leftSB + oXLeftTop + offsetLT.x) (top - archDepth + offsetLT.y)
-			~~~ [virt pre@ (top - archDepth)]
-			~~~ [g4 [pre@mix@post 0.5 offsetC.x] [pre@mix@post 0.5 offsetC.y] [widths.center stroke]]
-			~~~ [virt post@ (archDepth)]
-			g4   (df.rightSB - SOBot - offsetRB.x) (archDepth + offsetRB.y) [widths.rhs fine]
+			g4   @x1                                        (@y1 + offsetLT.y)
+			virt (@x1 = df.leftSB + oXLeftTop + offsetLT.x) (@y1 = top - archDepth)
+			~~~ [g4 ([mix @x1 @x2 0.5] + offsetC.x) ([mix @y1 @y2 0.5] + offsetC.y) [widths.center stroke]]
+			virt (@x2 = df.rightSB - SOBot - offsetRB.x) (@y2 = archDepth)
+			g4    @x2                                    (@y2 + offsetRB.y) [widths.rhs fine]
 			hookend soEnd (sw -- fine)
 			g4   (df.leftSB + SOBot + [HSwToV soEnd]) (hook) [widths.rhs fine]
 
@@ -518,13 +518,13 @@ glyph-block Letter-Latin-S : begin
 		define [DollarMask df stroke] : begin
 			define archDepthA : AdviceSArchDepth (top - bot) (-1) stroke
 			define archDepthB : AdviceSArchDepth (top - bot) (+1) stroke
-			return : spiro-outline
-				curl (df.leftSB + 0.5 * stroke)  (post@ <-> archDepthA)
-				arch.rhs (sw -- stroke) (top - 0.5 * stroke)
-				flat (df.rightSB - 0.5 * stroke) (pre@ <-> archDepthB)
-				curl pre@                        (post@ <+> archDepthA)
-				arch.rhs (sw -- stroke) (bot + 0.5 * stroke)
-				flat post@ 					     (pre@ <+> archDepthB)
+			return : lift-@ : spiro-outline
+				curl (@x1 = df.leftSB + 0.5 * stroke)  (@y2 - archDepthA)
+				arch.rhs (sw -- stroke)                (@y2 = top - 0.5 * stroke)
+				flat (@x3 = df.rightSB - 0.5 * stroke) (@y2 - archDepthB)
+				curl  @x3                              (@y5 + archDepthA)
+				arch.rhs (sw -- stroke)                (@y5 = bot + 0.5 * stroke)
+				flat  @x1                              (@y5 + archDepthB)
 
 		define [InterruptMask df] : begin
 			local gap : (swBarThick / Stroke * EssUpper) + [Math.max ((top - bot) / 6) [AdviceStroke2 3 3 (top - bot)]]

@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix] from "@iosevka/util"
+import [mix slY] from "@iosevka/util"
 
 glyph-module
 
@@ -21,7 +21,7 @@ glyph-block LetterLike-Fraktur-Lower-F : begin
 			g2 [box.xp (13/16)] (box.top - FHook)
 			hookstart (sw -- S.thick) box.top
 			g2 [box.xp (5/16)] (box.top - 0.5 * ArchDepthA) [change-pen T]
-			flat post@ (XH * DesignParameters.fBarPosToXH - S.thick) [change-pen S]
+			flat box.xMid (XH * DesignParameters.fBarPosToXH - S.thick) [change-pen S]
 			curl box.xMid box.bottom
 
 		include : fraktur-stroke F
@@ -35,27 +35,27 @@ glyph-block LetterLike-Fraktur-Lower-F : begin
 		local box : S.box Ascender 0 df.leftSB df.rightSB
 		local xBox : T.box XH 0 df.leftSB df.rightSB
 
-		local centerStroke : include : fraktur-stroke S
-			corner (post@ <-> DecoSizeX) (post@ <-> DecoSizeY)
-			corner (box.xMid - 0.75 * TBalance) box.top
-			corner pre@ [post@slope SlopeB]
-			corner [pre@mix@post PHexBot] box.bottom
-			corner [box.xp 0.875] [pre@slope SlopeA]
+		local centerStroke : include : lift-@ : fraktur-stroke S
+			corner (@xC - DecoSizeX)                  (@yT - DecoSizeY)
+			corner (@xC = box.xMid - 0.75 * TBalance) (@yT = box.top)
+			corner  @xC                               [slY @xB @yB @xC SlopeB]
+			corner (@xB = [mix @xC @xR PHexBot])      (@yB = box.bottom)
+			corner (@xR = [box.xp 0.875])             [slY @xB @yB @xR SlopeA]
 
 		include : fraktur-stroke F
 			corner box.left  xBox.top
 			corner box.right xBox.top
 
-		include : fraktur-stroke F
-			g2.up.start [centerStroke.first 1].x xBox.top
-			arch.rhs (sw -- F.thick) (blendPost -- {}) [mix xBox.top box.top 0.75] 0.7
-			g2 box.right [pre@mix@post 0.5]
-			g2 [pre@mix@post 0.25] xBox.top
+		include : lift-@ : fraktur-stroke F
+			g2.up.start (@xL = [centerStroke.first 1].x)  xBox.top
+			arch.rhs (sw -- F.thick) (blendPost -- {})   (@yM = [mix xBox.top box.top 0.75]) 0.7
+			g2 (@xR = box.right)                         [mix @yM @yT 0.5]
+			g2 [mix @xR @xL 0.25]                        (@yT = xBox.top)
 
-	define [RTBottom box p] : list
-		corner pre@ [post@slope SlopeB]
-		corner [pre@mix@post PHexBot] box.bottom
-		corner [box.xp p] [pre@slope SlopeA]
+	define [RTBottom xS box p] : lift-@ : list
+		corner xS                           [slY @xB @yB xS SlopeB]
+		corner (@xB = [mix xS @xE PHexBot]) (@yB = box.bottom)
+		corner (@xE = [box.xp p])           [slY @xB @yB @xE SlopeA]
 
 	create-glyph "frak/r" 0x1D52F : glyph-proc
 		local df : include : LowerDf 1
@@ -63,15 +63,15 @@ glyph-block LetterLike-Fraktur-Lower-F : begin
 
 		local box : S.box XH 0 df.leftSB df.rightSB
 		local rightHalfBox : box.withLeft [box.xp 0.375]
-		local rightStroke : include : fraktur-stroke S
-			corner rightHalfBox.right [post@slope SlopeB]
-			corner [rightHalfBox.xp PHexTop] rightHalfBox.top
-			straight.down.end rightHalfBox.left [pre@slope : 2 * SlopeA]
-		local leftStroke : include : fraktur-stroke S
-			corner (post@ <-> DecoSizeX) (post@ <-> DecoSizeY)
-			[ccurl.sr SlopeB].start (post@ <-> 0.5 * DecoSizeX) box.top
-			flat rightHalfBox.left [rightStroke.last].y
-			RTBottom box (13/16)
+		local rightStroke : include : lift-@ : fraktur-stroke S
+			corner (@xR = rightHalfBox.right)           [slY @xT @yT @xR SlopeB]
+			corner (@xT = [rightHalfBox.xp PHexTop])    (@yT = rightHalfBox.top)
+			straight.down.end (@xL = rightHalfBox.left) [slY @xT @yT @xL : 2 * SlopeA]
+		local leftStroke : include : lift-@ : fraktur-stroke S
+			corner                  (@xT - DecoSizeX)              (@yT - DecoSizeY)
+			[ccurl.sr SlopeB].start (@xT = @xC - 0.5 * DecoSizeX)  (@yT = box.top)
+			flat                    (@xC = rightHalfBox.left)      (@yC = [rightStroke.last].y)
+			RTBottom @xC box (13/16)
 
 	create-glyph "frak/t" 0x1D531 : glyph-proc
 		local df : include : LowerDf 1
@@ -80,10 +80,10 @@ glyph-block LetterLike-Fraktur-Lower-F : begin
 		local box : S.box Ascender 0 df.leftSB df.rightSB
 		local xBox : T.box XH 0 df.leftSB df.rightSB
 
-		include : fraktur-stroke S
-			corner (post@ <+> DecoSizeX) box.top
-			corner (box.xMid - 0.5 * TBalance) (pre@ <-> DecoSizeY)
-			RTBottom box 0.875
+		include : lift-@ : fraktur-stroke S
+			corner (@xC + DecoSizeX)                 (@yT = box.top)
+			corner (@xC = box.xMid - 0.5 * TBalance) (@yT - DecoSizeY)
+			RTBottom @xC box 0.875
 
 		include : fraktur-stroke F
 			corner box.left  xBox.top
