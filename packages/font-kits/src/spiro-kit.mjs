@@ -7,6 +7,7 @@ import {
 	UserCloseKnotPair,
 	UserControlKnot,
 	VirtualControlKnot,
+	DecorInterpolator,
 } from "@iosevka/geometry/spiro-control";
 import { bez3, fallback, mix } from "@iosevka/util";
 
@@ -310,6 +311,9 @@ export function SetupBuilders(bindings) {
 	alsoThru.g2 = function (rx, ry, raf) {
 		return new SimpleMixInterpolator(g2, rx, ry, 0, 0, raf);
 	};
+	alsoThru.g4 = function (rx, ry, raf) {
+		return new SimpleMixInterpolator(g4, rx, ry, 0, 0, raf);
+	};
 
 	/// Multi-mix interpolator
 	class MultiMixInterpolator extends InterpolatorBase {
@@ -500,5 +504,8 @@ export function SetupBuilders(bindings) {
 		dispiro,
 		"spiro-outline": spiroOutline,
 		"spiro-collect": spiroCollect,
+		"decor@": x => new DecorInterpolator(x),
+		"decor@@": x => new DecorInterpolator(new DecorInterpolator(x)),
+		"decor@@@": x => new DecorInterpolator(new DecorInterpolator(new DecorInterpolator(x))),
 	};
 }

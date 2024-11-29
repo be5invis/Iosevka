@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix fallback] from "@iosevka/util"
+import [mix fallback slY] from "@iosevka/util"
 
 glyph-module
 
@@ -16,37 +16,37 @@ glyph-block LetterLike-Fraktur-DOQ : begin
 		include : df.markSet.capital
 
 		local box : S.box CAP 0 df.leftSB df.rightSB
-		local frame : include : fraktur-stroke S
-			cg2.ru.start (box.left - 0.25 * DecoSizeX) box.bottom
-			~~~ [g2.right.mid [pre@mix@post (1/3)] (pre@ <+> Wave.DepthY - O)]
-			g2 [box.xp 0.625] (pre@ <+> O)
-			~~~ ~~~ ~~~ [archv]
-			~~~ ~~~ [straight.up.mid (box.right - OX) [box.yp 0.5]]
-			~~~ ~~~ [arch.lhs (sw -- S.thick) (blendPost -- {}) box.top]
-			corner [T.connL S : box.left - 0.5 * DecoSizeX] [T.connB S : box.top - FHook] [change-pen T]
+		local frame : include : lift-@ : fraktur-stroke S
+			cg2.ru.start (@xLB = box.left - 0.25 * DecoSizeX) (@yB = box.bottom)
+			~~~ [g2.right.mid [mix @xLB @xB (1/3)] (@yB + Wave.DepthY - O)]
+			g2 (@xB = [box.xp 0.625]) (@yB + O)
+			~~~ [archv]
+			straight.up.mid (box.right - OX) [box.yp 0.5]
+			arch.lhs (sw -- S.thick) (blendPost -- {}) (@yT = box.top)
+			corner [T.connL S : @xLB - 0.25 * DecoSizeX] [T.connB S : @yT - FHook] [change-pen T]
 
 		local inner : include : intersection
 			union
 				intersection [MaskAbove : box.yMid - TINY] [frame.withPen CutMaskDown]
 				intersection [MaskBelow : box.yMid + TINY] [frame.withPen CutMaskUp]
-			fraktur-stroke S
-				corner [frame.first 2].x [frame.first 2].y
+			lift-@ : fraktur-stroke S
+				corner (@xS = [frame.first 2].x) [frame.first 2].y
 				~~~ [Wave.vc (0.75 * Wave.DepthX)]
-				corner pre@ (box.top - 0.25 * SHook)
-				corner pre@ box.top
+				corner @xS (box.top - 0.25 * SHook)
+				corner @xS  box.top
 
 
-	define [FrakOShape box] : fraktur-stroke S
-		cg2.ru.start (box.left - 0.25 * DecoSizeX) box.bottom
-		~~~ [g2.right.mid [pre@mix@post (1/3)] (pre@ <+> Wave.DepthY - O)]
-		g2 [box.xp 0.625] (pre@ <+> O)
-		~~~ ~~~ ~~~ [archv]
-		~~~ ~~~ [straight.up.mid (box.right - OX) [box.yp 0.5]]
-		~~~ ~~~ [arch.lhs (sw -- S.thick) (blendPost -- {}) box.top]
-		~~~ ~~~ [corner [box.xp 0.25] (box.top - FHook)]
-		~~~ ~~~ [corner (pre@ <-> DecoSizeX) (pre@ <+> DecoSizeY)]
-		~~~ ~~~ ~~~ [Wave.vc (0.75 * -Wave.DepthX)]
-		~~~ [corner [post@mix@pre (1/3)] (post@ <+> Wave.DepthY - O)]
+	define [FrakOShape box] : lift-@ : fraktur-stroke S
+		cg2.ru.start (@xLB = box.left - 0.25 * DecoSizeX) (@yB = box.bottom)
+		~~~ [g2.right.mid (@xLB2 = [mix @xLB @xB (1/3)]) (@yLB2 = @yB + Wave.DepthY - O)]
+		g2 (@xB = [box.xp 0.625]) (@yB + O)
+		~~~ [archv]
+		straight.up.mid (box.right - OX) [box.yp 0.5]
+		arch.lhs (sw -- S.thick) (blendPost -- {}) (@yT = box.top)
+		~~~ [corner (@xTI = [box.xp 0.25]) (@yTI = @yT - FHook)]
+		corner (@xTL = @xTI - DecoSizeX) (@yTI + DecoSizeY)
+		~~~ [Wave.vc (0.75 * -Wave.DepthX)]
+		corner @xLB2 @yLB2
 
 	create-glyph "frak/O" 0x1D512 : glyph-proc
 		local df : include : UpperDf 1
@@ -62,7 +62,7 @@ glyph-block LetterLike-Fraktur-DOQ : begin
 		local box : S.box CAP 0 df.leftSB df.rightSB
 		local frame : include : FrakOShape box
 
-		include : with-knockout [frame.withPen CutMaskUp] : fraktur-stroke S
-			corner (post@ <+> DecoSizeX) (post@ <+> DecoSizeY)
-			corner (box.right + O) (box.bottom + O)
-			corner (pre@ <-> 2 * DecoSizeX) [pre@slope SlopeB]
+		include : with-knockout [frame.withPen CutMaskUp] : lift-@ : fraktur-stroke S
+			corner (@xR + DecoSizeX)           (@yR + DecoSizeY)
+			corner (@xR = box.right + O)       (@yR = box.bottom + O)
+			corner (@xL = @xR - 2 * DecoSizeX) [slY @xR @yR @xL SlopeB]

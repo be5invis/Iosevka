@@ -1,5 +1,7 @@
 $$include '../../meta/macros.ptl'
 
+import [mix fallback min max slY] from "@iosevka/util"
+
 glyph-module
 
 glyph-block LetterLike-Fraktur-Lower-BOPVW : begin
@@ -9,15 +11,15 @@ glyph-block LetterLike-Fraktur-Lower-BOPVW : begin
 	glyph-block-import LetterLike-Fraktur-Common : DecoSizeX DecoSizeY SlopeA SlopeB
 	glyph-block-import LetterLike-Fraktur-Common : Wave FHook PHexTop PHexBot LTDecoration
 
-	define [ORightShape mode profile oBox] : fraktur-stroke profile
-		corner  oBox.left  [post@slope SlopeA]
-		[cg2.sr SlopeB].start  [oBox.xp PHexTop]  oBox.top
-		g2.down.mid  (oBox.right - OX)  [pre@mix@post 0.5]
-		[g2c.sl SlopeA].start  [oBox.xp PHexBot]  oBox.bot
-		corner  oBox.left  [pre@slope SlopeB]
+	define [ORightShape mode profile oBox] : lift-@ : fraktur-stroke profile
+		corner                 (@x1 = oBox.left)          [slY @x2 @y2 @x1 SlopeA]
+		[cg2.sr SlopeB].start  (@x2 = [oBox.xp PHexTop])  (@y2 = oBox.top)
+		g2.down.mid            (oBox.right - OX)          [oBox.yp 0.5]
+		[g2c.sl SlopeA].start  (@x4 = [oBox.xp PHexBot])  (@y4 = oBox.bot)
+		corner                 (@x5 = oBox.left)          (@y5 = [slY @x4 @y4 @x5 SlopeB])
 		match mode
 			[Just 'o'] : close
-			[Just 'p'] : ~~~ [corner  (pre@ <-> DecoSizeX) (pre@ <-> DecoSizeY)]
+			[Just 'p'] : ~~~ [corner (@x5 - DecoSizeX) (@y5 - DecoSizeY)]
 			___        : list
 
 	create-glyph "frak/o" 0xAB3D : glyph-proc
@@ -51,7 +53,7 @@ glyph-block LetterLike-Fraktur-Lower-BOPVW : begin
 		local rightStroke : include : ORightShape 'p' S oBox
 		local leftStroke : include : fraktur-stroke S
 			LTDecoration pBox.left pBox.top [rightStroke.first].y
-			corner pre@ pBox.bot
+			corner       pBox.left pBox.bot
 
 	create-glyph "frak/v" 0x1D533 : glyph-proc
 		local df : include : LowerDf 1
@@ -73,13 +75,13 @@ glyph-block LetterLike-Fraktur-Lower-BOPVW : begin
 		local leftHalfBox : wBox.withRight wBox.xMid
 
 		local rightStroke : include : ORightShape 'o' M rightHalfBox
-		local middleStroke : include : fraktur-stroke M
-			corner leftHalfBox.left [post@slope SlopeA]
-			corner [leftHalfBox.xp PHexTop] leftHalfBox.top
-			corner leftHalfBox.right [pre@slope SlopeB]
-			corner pre@ [post@slope SlopeA]
-			corner [leftHalfBox.xp PHexBot] leftHalfBox.bot
-			corner leftHalfBox.left [pre@slope SlopeB]
+		local middleStroke : include : lift-@ : fraktur-stroke M
+			corner (@x1 = leftHalfBox.left)         [slY @x2 @y2 @x1 SlopeA]
+			corner (@x2 = [leftHalfBox.xp PHexTop]) (@y2 = leftHalfBox.top)
+			corner (@x3 = leftHalfBox.right)        [slY @x2 @y2 @x3 SlopeB]
+			corner  @x3                             [slY @x5 @y5 @x3 SlopeA]
+			corner (@x5 = [leftHalfBox.xp PHexBot]) (@y5 = leftHalfBox.bot)
+			corner (@x6 = leftHalfBox.left)		    [slY @x5 @y5 @x6 SlopeB]
 		local leftStroke : include : fraktur-stroke M
 			LTDecoration leftHalfBox.left leftHalfBox.top [middleStroke.first].y
 			corner [middleStroke.last].x [middleStroke.last].y

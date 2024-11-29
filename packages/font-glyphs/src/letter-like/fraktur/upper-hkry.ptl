@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix fallback] from "@iosevka/util"
+import [mix min max fallback slY] from "@iosevka/util"
 
 glyph-module
 
@@ -11,36 +11,36 @@ glyph-block LetterLike-Fraktur-Upper-HKR : begin
 	glyph-block-import LetterLike-Fraktur-Common : DecoSizeX DecoSizeY SlopeA SlopeB
 	glyph-block-import LetterLike-Fraktur-Common : Wave FHook PHexTop PHexBot
 
-	define [HOuterShape bBody bDeco yConnT yConnB] : fraktur-stroke S
-		g2         bBody.right             (post@ <-> FHook)
-		arch.lhs bBody.top (sw -- S.thick) (blendPre -- {})
-		~~~ [corner (post@ <-> 0.5 * DecoSizeX) [post@slope SlopeB]]
-		corner     bBody.left              [max@ yConnT (pre@ <-> 0.75 * ArchDepthA)]
-		curl       pre@                    [min@ yConnB (post@ <+> ArchDepthA)]
-		corner     bDeco.left              (post@ <+> 2 * DecoSizeY)
-		g2c.r.end  (post@ <-> DecoSizeX)   bBody.bot
-		corner     bBody.xMid              (pre@ <+> DecoSizeY)
+	define [HOuterShape bBody bDeco yConnT yConnB] : lift-@ : fraktur-stroke S
+		g2          bBody.right                   (@yT - FHook)
+		arch.lhs (sw -- S.thick) (blendPre -- {}) (@yT = bBody.top)
+		corner     (@xLD = @xL - 0.5 * DecoSizeX) [slY @xL @yL @xLD SlopeB]
+		corner     (@xL = bBody.left)             (@yL = [max yConnT (@yT - 0.75 * ArchDepthA)])
+		curl        @xL                           [min yConnB (@yBD + ArchDepthA)]
+		corner      bDeco.left                    (@yBD = @yB + 2 * DecoSizeY)
+		g2c.r.end  (@xM - DecoSizeX)              (@yB = bBody.bot)
+		corner     (@xM = bBody.xMid)             (@yB + DecoSizeY)
 
 	define [KRLegs box] : glyph-proc
 		# Top-right arch
-		local c : include : fraktur-stroke S
-			flat         box.left          [post@slope SlopeA]
-			corner       [box.xp PHexTop]  box.top
-			g2.down.mid  box.right         [pre@mix@post 0.5]
-			flat         [box.xp 0.625]    [box.yp 0.55]
-			curl         box.left          [pre@slope SlopeA]
+		local c : include : lift-@ : fraktur-stroke S
+			flat         (@xL = box.left)          [slY @xT @yT @xL SlopeA]
+			corner       (@xT = [box.xp PHexTop])  (@yT = box.top)
+			g2.down.mid  box.right                 [mix @yT @yRB 0.5]
+			flat         (@xRB = [box.xp 0.625])   (@yRB = [box.yp 0.55])
+			curl          @xL                      [slY @xRB @yRB @xL SlopeA]
 
 
 		local xLegStart : mix [c.last 1].x [c.last 2].x 0.75
 		local yLegStart : mix [c.last 1].y [c.last 2].y 0.75
 
 		# Leg
-		include : fraktur-stroke S
-			[g2.sr SlopeA].start  xLegStart                      yLegStart
-			flat                  [pre@mix@post 0.75]                    (pre@  <-> 0.6 * ArchDepthB)
-			decor@ : curl         pre@                           (post@ <+> 2 * DecoSizeY)
-			corner                (box.right + 0.5 * DecoSizeX)  box.bot
-			corner                (pre@ <+> DecoSizeX)           (pre@  <+> DecoSizeY)
+		include : lift-@ : fraktur-stroke S
+			[g2.sr SlopeA].start  (@xS = xLegStart)                    (@yS = yLegStart)
+			flat                  (@xM = [mix @xS @xB 0.75])           (@yS - 0.6 * ArchDepthB)
+			~~~ [ curl             @xM                                 (@yB + 2 * DecoSizeY) ]
+			corner                (@xB = box.right + 0.5 * DecoSizeX)  (@yB = box.bot)
+			corner                (@xB + DecoSizeX)                    (@yB + DecoSizeY)
 
 		return : object [yConnT [c.first].y] [yConnB [c.last].y]
 
@@ -54,9 +54,9 @@ glyph-block LetterLike-Fraktur-Upper-HKR : begin
 		local hInner : [hBody.withTop : hBody.yp 0.6].withBottom Descender
 
 		# Inner stroke
-		local c : include : fraktur-stroke S
-			corner       hInner.left            [post@slope SlopeA]
-			corner       [hInner.xp PHexTop]    hInner.top
+		local c : include : lift-@ : fraktur-stroke S
+			corner       (@xL = hInner.left)            [slY @xT @yT @xL SlopeA]
+			corner       (@xT = [hInner.xp PHexTop])    (@yT = hInner.top)
 			g2.down.mid  hInner.right           [hInner.yp 0.75]
 			~~~ [alsoThru.g2 0.5 0.5]
 			g2.down.mid  [hInner.xp 0.75]       [hInner.yp 0.25]
@@ -79,16 +79,16 @@ glyph-block LetterLike-Fraktur-Upper-HKR : begin
 		include : HOuterShape kBody kDeco leg.yConnT leg.yConnB
 
 	define [RKLeftStroke deco body yConnB pRight] : glyph-proc
-		local s : include : fraktur-stroke F
-			g2.ru.start    post@                    ([deco.yp 0.625] - 2 * F.thick)
+		local s : include : lift-@ : fraktur-stroke F
+			g2.ru.start     @xdL                            ([deco.yp 0.625] - 2 * F.thick)
 			~~~ [Wave.vc Wave.LTDecoSize]
-			g2.ru.mid      deco.left                (post@ <-> DecoSizeY)  [change-pen S]
-			arch.rhs (blendPre -- {})               body.top 0.625
-			flat           body.left                (body.top - 0.6 * ArchDepthA)
-			curl 	       (pre@ <+> 0)             [min@ yConnB [pre@mix@post 0.5]]
-			corner         deco.left                (post@ <+> 2 * DecoSizeY)
-			g2c.right.end  (post@ <-> DecoSizeX)    [S.yb 0]
-			corner         [body.xp : 0.5 * pRight] (pre@ <+> DecoSizeY)
+			g2.ru.mid      (@xdL = deco.left)               (@yT - DecoSizeY)  [change-pen S]
+			arch.rhs (blendPre -- {})                       (@yT = body.top) 0.625
+			flat           (@xbL = body.left)               (@ybT = body.top - 0.6 * ArchDepthA)
+			curl 	        @xbL                            [min yConnB [mix @ybT @ybB 0.5]]
+			corner          @xdL                            (@ybB = @yB + 2 * DecoSizeY)
+			g2c.right.end  (@xR - DecoSizeX)                (@yB = [S.yb 0])
+			corner         (@xR = [body.xp : 0.5 * pRight]) (@yB + DecoSizeY)
 		return s
 
 	create-glyph "frak/R" 0x211C : glyph-proc
@@ -114,9 +114,9 @@ glyph-block LetterLike-Fraktur-Upper-HKR : begin
 		local leftStroke : include : RKLeftStroke yDeco yBody yBody.top 0.75
 
 		local yRight : yBody.withBottom Descender
-		local rightStroke : include : fraktur-stroke S
-			corner yRight.left [post@slope SlopeA]
-			corner [yRight.xp PHexTop] yRight.top
+		local rightStroke : include : lift-@ : fraktur-stroke S
+			corner (@xL = yRight.left) [slY @xT @yT @xL SlopeA]
+			corner (@xT = [yRight.xp PHexTop]) (@yT = yRight.top)
 			g2.down.mid yRight.right [yRight.yp 0.75]
 			g2.down.mid [yRight.xp 0.75] [yRight.yp 0.25]
 			g2 yRight.right yRight.bot
