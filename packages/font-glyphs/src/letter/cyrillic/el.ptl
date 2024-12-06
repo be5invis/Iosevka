@@ -35,7 +35,7 @@ glyph-block Letter-Cyrillic-El : begin
 		include : HBar.m xCutLeft right (top - halfSw) sw
 		include : LegShape
 			ztop -- [Point.fromXY Point.Type.Corner xCutLeft top]
-			zbot -- [Point.fromXY Point.Type.Corner [mix SB 0 [if SLAB 1 0.75]] 0]
+			zbot -- [Point.fromXY Point.Type.Corner [mix SB 0 : if SLAB 1 0.75] 0]
 			xb   -- xCutLeft
 			fine -- sw
 
@@ -55,15 +55,16 @@ glyph-block Letter-Cyrillic-El : begin
 				[Just SLAB-LOWER]  : HSerif.rb right 0 SideJut sw
 				__                 : glyph-proc
 
-	define [CyrSoftElShape left right top bodyType slabType _sw vSlab] : glyph-proc
+	define [CyrSoftElShape df top bodyType slabType _sw vSlab] : glyph-proc
 		local sw : fallback _sw Stroke
 		local xm : if SLAB
-			[mix left right 0.625] + [HSwToV : 0.25 * sw]
-			mix left right 0.75
+			[mix df.leftSB df.rightSB 0.625] + [HSwToV : 0.25 * sw]
+			mix df.leftSB df.rightSB : if (df.div > 1) (2 / 3) (3 / 4)
+		local xTopBarRightEnd : mix df.width df.rightSB : if vSlab 0.25 0.375
 
-		include : CyrElShape left xm top bodyType slabType _sw
-		include : HBar.t xm right top sw
-		if vSlab : include : VSerif.dr right top VJut (sw * VJutStroke / Stroke)
+		include : CyrElShape df.leftSB xm top bodyType slabType sw
+		include : HBar.t xm xTopBarRightEnd top sw
+		if vSlab : include : VSerif.dr xTopBarRightEnd top VJut (VJutStroke * sw / Stroke)
 
 	create-glyph 'cyrl/El' 0x41B : glyph-proc
 		include : MarkSet.capital
@@ -84,12 +85,12 @@ glyph-block Letter-Cyrillic-El : begin
 	create-glyph 'cyrl/ElSoft.serifless' : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.capital
-		include : CyrSoftElShape df.leftSB df.rightSB CAP BODY-STRAIGHT [if SLAB SLAB-ALL SLAB-NONE] df.mvs false
+		include : CyrSoftElShape df CAP BODY-STRAIGHT [if SLAB SLAB-ALL SLAB-NONE] df.mvs false
 
 	create-glyph 'cyrl/ElSoft.topRightSerifed' : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.capital
-		include : CyrSoftElShape df.leftSB df.rightSB CAP BODY-STRAIGHT [if SLAB SLAB-ALL SLAB-NONE] df.mvs true
+		include : CyrSoftElShape df CAP BODY-STRAIGHT [if SLAB SLAB-ALL SLAB-NONE] df.mvs true
 
 	select-variant 'cyrl/ElSoft' 0xA664 (follow -- 'cyrl/EnGhe/GhePart')
 
@@ -122,7 +123,7 @@ glyph-block Letter-Cyrillic-El : begin
 			create-glyph "cyrl/elSoft.\(suffix).\(suffixGhe)" : glyph-proc
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
-				include : CyrSoftElShape cyrSoftElDf.leftSB cyrSoftElDf.rightSB XH body [if SLAB [if para.isItalic slabItalic slabUpright] SLAB-NONE] cyrSoftElDf.mvs cyrSoftElVSlab
+				include : CyrSoftElShape cyrSoftElDf XH body [if SLAB [if para.isItalic slabItalic slabUpright] SLAB-NONE] cyrSoftElDf.mvs cyrSoftElVSlab
 
 		select-variant "cyrl/elSoft.\(suffix)" (follow -- 'cyrl/enghe/ghePart')
 
