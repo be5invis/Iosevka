@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix fallback] from "@iosevka/util"
+import [mix fallback slY] from "@iosevka/util"
 
 glyph-module
 
@@ -12,23 +12,23 @@ glyph-block LetterLike-Fraktur-X : begin
 	glyph-block-import LetterLike-Fraktur-Common : Wave FHook PHexTop PHexBot
 
 	define [XShapeHalf pen box] : glyph-proc
-		include : fraktur-stroke pen
-			corner (post@ <-> DecoSizeX) (post@ <-> DecoSizeY)
-			corner box.left box.top
-			straight.down.mid box.xMid [pre@mix@post 0.5]
-			corner box.left box.bot
-			corner (pre@ <-> DecoSizeX) (pre@ <+> DecoSizeY)
+		include : lift-@ : fraktur-stroke pen
+			corner (@xL - DecoSizeX)   (@yT - DecoSizeY)
+			corner (@xL = box.left)    (@yT = box.top)
+			straight.down.mid box.xMid  box.yMid
+			corner  @xL                (@yB = box.bot)
+			corner (@xL - DecoSizeX)   (@yB + DecoSizeY)
 
 	define [XSHapeImpl pen box] : glyph-proc
 		local bodyBox : box.withXPadding (0.5 * DecoSizeX)
 		include : XShapeHalf pen bodyBox
 		include : FlipAround box.xMid box.yMid
 		include : XShapeHalf pen bodyBox
-		include : fraktur-stroke F
-			corner ([box.xp 0.25] - 0.5 * DecoSizeX) [post@slope : 0.25 * SlopeA]
-			corner box.xMid box.yMid
-			corner [box.xp 0.75] [pre@slope : 0.25 * SlopeA]
-			corner (pre@ <+> 0.5 * DecoSizeX) (pre@ <-> 0.5 * DecoSizeY)
+		include : lift-@ : fraktur-stroke F
+			corner (@xL = [box.xp 0.25] - 0.5 * DecoSizeX) [slY @xM @yM @xL : 0.25 * SlopeA]
+			corner (@xM = box.xMid)                        (@yM = box.yMid)
+			corner (@xR = [box.xp 0.75])                   (@yR = [slY @xM @yM @xR : 0.25 * SlopeA])
+			corner (@xR + 0.5 * DecoSizeX)                 (@yR - 0.5 * DecoSizeY)
 
 	create-glyph "frak/X" 0x1D51B : glyph-proc
 		local df : include : UpperDf 1

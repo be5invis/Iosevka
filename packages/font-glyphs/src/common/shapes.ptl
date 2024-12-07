@@ -2,9 +2,8 @@ $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback boole boolePn] from "@iosevka/util"
 import [Transform] from "@iosevka/geometry/transform"
-import [FunctionInterpolator WithKnotProxy AfCombine] from "@iosevka/geometry/spiro-control"
+import [FunctionInterpolator AfCombine] from "@iosevka/geometry/spiro-control"
 import [RadicalGeometry StrokeGeometry RemoveHolesGeometry] from "@iosevka/geometry"
-import [CMixCoord CopyBackKnotProxy] from "@iosevka/font-kits/derived-coordinates"
 
 glyph-module
 
@@ -372,7 +371,7 @@ glyph-block CommonShapes : begin
 		local superness DesignParameters.superness
 		local r : piecewise
 			(w <= v)   0.5
-			true     : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) superness]) (1 / superness)] + 1)
+			true     : 1 / (((1 - ((1 - v / w) ** superness)) ** (1 / superness)) + 1)
 		if swash : begin
 			local idepth : w - sw
 			local iwidth : u * r - sw
@@ -469,9 +468,6 @@ glyph-block CommonShapes : begin
 	define [hookEndBlender before after args] : begin
 		return : HookShape before after false args
 
-	define [hookProxy args] : begin
-		return : new CopyBackKnotProxy [g4 [new CMixCoord 0.5] args.yRef] args 2
-
 	glyph-block-export hookstart
 	define flex-params [hookstart] : begin
 		local-parameter : y
@@ -481,7 +477,7 @@ glyph-block CommonShapes : begin
 		local-parameter : noSwash        -- false
 		local-parameter : o              -- O
 		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
-		return : WithKnotProxy [hookProxy args] : new FunctionInterpolator hookStartBlender args
+		return : new FunctionInterpolator hookStartBlender args
 
 	glyph-block-export hookend
 	define flex-params [hookend] : begin
@@ -492,7 +488,7 @@ glyph-block CommonShapes : begin
 		local-parameter : noSwash        -- false
 		local-parameter : o              -- O
 		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
-		return : WithKnotProxy [hookProxy args] : new FunctionInterpolator hookEndBlender args
+		return : new FunctionInterpolator hookEndBlender args
 
 	glyph-block-export flatside
 	define flatside : namespace
@@ -592,13 +588,13 @@ glyph-block CommonShapes : begin
 			if [not angle] : return 0
 			local s : Math.sin (angle * Math.PI / 180)
 			local sign : if (s < 0) (-1) 1
-			return : sign * [Math.pow [Math.abs s] (2 / superness)]
+			return : sign * ([Math.abs s] ** (2 / superness))
 
 		define [superCos angle superness] : begin
 			if [not angle] : return 1
 			local c : Math.cos (angle * Math.PI / 180)
 			local sign : if (c < 0) (-1) 1
-			return : sign * [Math.pow [Math.abs c] (2 / superness)]
+			return : sign * ([Math.abs c] ** (2 / superness))
 
 		define [mixR w angW v angV u] : begin
 			if (w < v) : return : 1 - [mixR v angV w angW u]
@@ -613,15 +609,9 @@ glyph-block CommonShapes : begin
 				local chrW : radW * [superCos angW super]
 				return : chrW / (chrV + chrW)
 			: else : begin
-				local r : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) super]) (1 / super)] + 1)
+				local r : 1 / (((1 - ((1 - v / w) ** super)) ** (1 / super)) + 1)
 				set r : 0.5 + (r - 0.5) * (v + w) / (u * 2)
 				return r
-
-		define [archBlenderProxy args] : begin
-			local p : [if args.compact g2 g4]
-				new CMixCoord [fallback args.p 0.5] 0 args.mockPre args.mockPost
-				begin args.y
-			return : new CopyBackKnotProxy p args 2
 
 		define [archBlender _before _after args] : begin
 			local before : fallback args.mockPre _before
@@ -656,8 +646,7 @@ glyph-block CommonShapes : begin
 			local-parameter : blendPre     -- [if anglePre nothing [arcvh]]
 			local-parameter : blendPost    -- [if anglePost nothing [archv]]
 			local args : object [lhs true] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost anglePre anglePost
-			return : WithKnotProxy [archBlenderProxy args]
-				new FunctionInterpolator archBlender args
+			return : new FunctionInterpolator archBlender args
 
 		export : define flex-params [rhs] : begin
 			local-parameter : y
@@ -674,8 +663,7 @@ glyph-block CommonShapes : begin
 			local-parameter : blendPre     -- [if anglePre nothing [arcvh]]
 			local-parameter : blendPost    -- [if anglePost nothing [archv]]
 			local args : object [lhs false] y p sw compact o swBefore swAfter mockPre mockPost blendPre blendPost anglePre anglePost
-			return : WithKnotProxy [archBlenderProxy args]
-				new FunctionInterpolator archBlender args
+			return : new FunctionInterpolator archBlender args
 
 		foreach side {lhs rhs} : begin
 			set side.centerAt : object

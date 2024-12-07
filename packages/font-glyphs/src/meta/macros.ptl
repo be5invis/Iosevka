@@ -7,17 +7,13 @@ define-operator "--" 890 'right' : syntax-rules
 define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
-### The operator indicating a "delay"
+### The operator indicating a "delay" for the knot controls. Equivalent to a call to [decor@].
 define-operator prefix "~~~"  : syntax-rules
 	`(~~~ @x) : dirty `[decor@ @x]
 
-### This operator is a method variant of (+)
-define-operator infix "<+>" 350 'left' : syntax-rules
-	`(@l <+> @r) : dirty `[@l.op_add @r]
-
-### This operator is a method variant of (-)
-define-operator infix "<->" 350 'left' : syntax-rules
-	`(@l <-> @r) : dirty `[@l.op_sub @r]
+### Exponentiation operator
+define-operator "**" 150 "right" : syntax-rules
+    `(@l ** @r) `[Math.pow @l @r]
 
 ### Macro for identity match
 define-macro Just : begin
@@ -110,8 +106,8 @@ define-macro lift-@ : syntax-rules
 			if unquoteDef : begin
 				local {unquoteId rhs} unquoteDef
 				local mapObj : fetchAtFormMappedObj unquoteId
-				set mapObj.def rhs
 				addDeps mapObj rhs
+				set mapObj.def : transform rhs
 				return mapObj.t
 
 			# Handle usages
@@ -384,7 +380,7 @@ define-macro glyph-block : syntax-rules
 			PictTop PictBot BgOpTop BgOpBot BgTkTop BgTkBot Italify Upright Scale Translate
 			ApparentTranslate Rotate GlobalTransform TanSlope HVContrast Upward Downward Rightward
 			Leftward O OX OXHook Hook AHook SHook RHook JHook HookX TailX TailY ArchDepth
-			SmallArchDepth Stroke DotSize PeriodSize HBarPos OverlayPos LongJut Jut VJut
+			SmallArchDepth Stroke DotSize PeriodSize HBarPos OverlayPos LongJut LongVJut Jut VJut
 			VJutStroke AccentStackOffset AccentWidth AccentClearance AccentHeight CThin CThinB
 			SLAB IBalance IBalance2 JBalance JBalance2 TBalance TBalance2 RBalance RBalance2
 			FBalance OneBalance WideWidth0 WideWidth1 WideWidth2 WideWidth3 WideWidth4 EssUpper
@@ -394,14 +390,14 @@ define-macro glyph-block : syntax-rules
 			AdviceGlottalStopArchDepth StrokeWidthBlend ArchDepthAOf ArchDepthBOf SmoothAdjust
 			MidJutSide MidJutCenter compositeBaseAnchors YSmoothMidR YSmoothMidL HSwToV
 			NarrowUnicodeT WideUnicodeT VERY-FAR TINY]
+
 		define spiroFnImports `[g4 g2 corner flat curl virt close end straight g2c cg2 flatc ccurl
 			widths disable-contrast heading unimportant important alsoThru alsoThruThem bezControls
 			quadControls archv arcvh dispiro spiro-outline spiro-collect]
 
-		define booleFnImports `[union intersection difference with-knockout]
+		define spiroFnImportsAlways `[decor@ decor@@ decor@@@]
 
-		define drvCoordImports `[pre@ post@ pre@mix@post post@mix@pre pre@slope post@slope min@ max@
-			decor@ decor@@ decor@@@ pre@tang-in post@tang-in pre@tang-out post@tang-out]
+		define booleFnImports `[union intersection difference with-knockout]
 
 		dirty `[$GlyphBlocks$.push : lambda [$Capture_Ext$] : begin \\
 			$Capture_Ext$.$Exec$.defineGlyphBlock $Capture_Ext$ @blockName
@@ -409,8 +405,8 @@ define-macro glyph-block : syntax-rules
 					define [object @::[captureImports.filter : lambda [x] variableSet.(x)]] $Capture$
 					define [object @::[metricImports.filter  : lambda [x] variableSet.(x)]] $Capture$.Metrics
 					define [object @::[spiroFnImports.filter : lambda [x] variableSet.(x)]] $Capture$.SpiroFns
+					define [object @::spiroFnImportsAlways] $Capture$.SpiroFns
 					define [object @::[booleFnImports.filter : lambda [x] variableSet.(x)]] $Capture$.BooleFns
-					define [object @::drvCoordImports] $Capture$.DerivedCoordinateFns
 
 					* @body
 

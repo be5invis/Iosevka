@@ -106,7 +106,7 @@ glyph-block Letter-Latin-C : begin
 				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs RightSB XH sw Hook
 				__ : list [g4 RightSB (XH - Hook) [widths.lhs sw]] [hookstart XH (sw -- sw)]
 			flatside.ld SB 0 XH SmallArchDepthA SmallArchDepthB
-			CurlyTail.n fine 0 RightSB 0 0 (yLoopTop -- XH * 0.45)
+			CurlyTail.n fine 0 RightSB 0 0 (yLoopTop -- (XH * 0.45))
 
 	glyph-block-export CLetterForm
 	define [CLetterForm] : with-params [df sty styBot top bot [ada ArchDepthA] [adb ArchDepthB] [hook Hook] [sw Stroke] [ob nothing]] : namespace
@@ -205,7 +205,7 @@ glyph-block Letter-Latin-C : begin
 			local top : Width - SB
 			local p : mix 1 (Width / UPM) 0.5
 			include : PointingTo Width XH Width 0 : function [] : glyph-proc
-				local lf : CLetterForm df sty styBot top 0 (hook -- Hook * p)
+				local lf : CLetterForm df sty styBot top 0 (hook -- (Hook * p))
 				include : lf.full
 				include : FlipAround df.middle (top / 2)
 				include : Translate 0 (SB / 2)
@@ -213,7 +213,7 @@ glyph-block Letter-Latin-C : begin
 		create-glyph "cyrl/esWide.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityT 3
 			include : df.markSet.e
-			local desc : (-LongJut) + HalfStroke
+			local desc : (-LongVJut) + HalfStroke
 			include : ExtendBelowBaseAnchors desc
 			local lf : CLetterForm df sty styBot XH desc
 				ada -- [df.archDepthA SmallArchDepth Stroke]
@@ -356,10 +356,10 @@ glyph-block Letter-Latin-C : begin
 
 	derive-glyphs 'cyrl/The' 0x4AA "cyrl/Es" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		local desc : (-LongJut) + HalfStroke
+		local desc : (-LongVJut) + HalfStroke
 		include : ExtendBelowBaseAnchors desc
 		include : difference
-			VBar.m [arch.adjust-x.bot Middle] desc (Stroke + O) [AdviceStroke 3.5]
+			VBar.m [arch.adjust-x.bot Middle] desc (Stroke + O) VJutStroke
 			OShapeOutline.NoOvershoot CAP 0 SB RightSB Stroke ArchDepthA ArchDepthB
 
 	derive-multi-part-glyphs 'cyrl/The.BSH' null { 'cyrl/Es' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
@@ -373,10 +373,10 @@ glyph-block Letter-Latin-C : begin
 
 	derive-glyphs 'cyrl/the' 0x4AB "cyrl/es" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		local desc : (-LongJut) + HalfStroke
+		local desc : (-LongVJut) + HalfStroke
 		include : ExtendBelowBaseAnchors desc
 		include : difference
-			VBar.m [arch.adjust-x.bot Middle] desc (Stroke + O) [AdviceStroke 3.5]
+			VBar.m [arch.adjust-x.bot Middle] desc (Stroke + O) VJutStroke
 			OShapeOutline.NoOvershoot XH 0 SB RightSB Stroke SmallArchDepthA SmallArchDepthB
 
 	derive-multi-part-glyphs 'cyrl/the.BSH' null { 'cyrl/es' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
@@ -441,13 +441,13 @@ glyph-block Letter-Latin-C : begin
 					flat [xBot df] bot [widths.center.heading cofine Upward]
 					curl df.middle [mix bot top 0.5] [widths.center.heading swBarFine Upward]
 
-		define [OutlineMask df] : spiro-outline
-			curl (df.leftSB + HalfStroke)  (post@ <-> SmallArchDepthA)
-			arch.rhs (sw -- Stroke) (tMask - HalfStroke)
-			flat (df.rightSB - HalfStroke) (pre@  <-> SmallArchDepthB)
-			curl pre@                      (post@ <+> SmallArchDepthA)
-			arch.rhs (sw -- Stroke) (bMask + HalfStroke)
-			flat post@                     (pre@  <+> SmallArchDepthB)
+		define [OutlineMask df] : lift-@ : spiro-outline
+			curl     (@x1 = df.leftSB + HalfStroke)  (@y2 - SmallArchDepthA)
+			arch.rhs (sw -- Stroke)                  (@y2 = tMask - HalfStroke)
+			flat     (@x3 = df.rightSB - HalfStroke) (@y2 - SmallArchDepthB)
+			curl      @x3                            (@y5 + SmallArchDepthA)
+			arch.rhs (sw -- Stroke)                  (@y5 = bMask + HalfStroke)
+			flat      @x1                            (@y5 + SmallArchDepthB)
 
 		define [InterruptMask df] : begin
 			define gap : Math.max (XH / 8) [AdviceStroke2 6 6 XH]

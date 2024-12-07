@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix] from "@iosevka/util"
+import [mix slY] from "@iosevka/util"
 
 glyph-module
 
@@ -17,15 +17,15 @@ glyph-block LetterLike-Fraktur-Lower-IJL : begin
 	create-glyph "frak/tittleAbove" : glyph-proc
 		set-width 0
 		include : StdAnchors.narrow
-		include : spiro-outline
-			corner (markMiddle + [mix (-DotRadius) (+DotRadius) PHexBot]) (aboveMarkMid - DotRadius)
-			~~~ [curl [pre@tang-out 1] [pre@tang-out SlopeA]]
-			# g2  (markMiddle + 0.5 * DotRadius) aboveMarkMid
-			~~~ [flat [post@tang-out 1] [post@tang-out SlopeB]]
-			corner (markMiddle + [mix (-DotRadius) (+DotRadius) PHexTop]) (aboveMarkMid + DotRadius)
-			~~~ [curl [pre@tang-in 1] [pre@tang-in SlopeA]]
-			# g2  (markMiddle - 0.5 * DotRadius) aboveMarkMid
-			~~~ [flat [post@tang-in 1] [post@tang-in SlopeB]]
+		local xC markMiddle
+		local yC aboveMarkMid
+		include : lift-@ : spiro-outline
+			corner (@xB = xC + [mix (-DotRadius) (+DotRadius) PHexBot]) (@yB = yC - DotRadius)
+			~~~ [curl (@xB + TINY) (@yB + SlopeA * TINY)]
+			~~~ [flat (@xT + TINY) (@yT + SlopeB * TINY)]
+			corner (@xT = xC + [mix (-DotRadius) (+DotRadius) PHexTop]) (@yT = yC + DotRadius)
+			~~~ [curl (@xT - TINY) (@yT - SlopeA * TINY)]
+			~~~ [flat (@xB - TINY) (@yB - SlopeB * TINY)]
 			close
 
 	create-glyph "frak/dotlessi" : glyph-proc
@@ -42,10 +42,10 @@ glyph-block LetterLike-Fraktur-Lower-IJL : begin
 		include : df.markSet.p
 
 		local box : S.box XH Descender df.leftSB df.rightSB
-		include : fraktur-stroke S
-			LTDecoration box.xMid box.top
-			corner pre@ [post@slope SlopeA]
-			corner box.left box.bot
+		include : lift-@ : fraktur-stroke S
+			LTDecoration (@xM = box.xMid)  box.top
+			corner        @xM             [slY @xB @yB @xM SlopeA]
+			corner       (@xB = box.left) (@yB = box.bot)
 
 	CreateAccentedComposition 'frak/i' 0x1D526 'frak/dotlessi' 'frak/tittleAbove'
 	CreateAccentedComposition 'frak/j' 0x1D527 'frak/dotlessj' 'frak/tittleAbove'

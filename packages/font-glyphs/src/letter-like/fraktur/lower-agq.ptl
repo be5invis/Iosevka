@@ -1,5 +1,7 @@
 $$include '../../meta/macros.ptl'
 
+import [mix slY] from "@iosevka/util"
+
 glyph-module
 
 glyph-block LetterLike-Fraktur-Lower-AQ : begin
@@ -9,12 +11,12 @@ glyph-block LetterLike-Fraktur-Lower-AQ : begin
 	glyph-block-import LetterLike-Fraktur-Common : DecoSizeX DecoSizeY SlopeA SlopeB
 	glyph-block-import LetterLike-Fraktur-Common : Wave PHexTop PHexBot RBDecoration
 
-	define [LeftHalfShape mode box] : fraktur-stroke S
-		corner box.right [post@slope SlopeB]
-		corner [box.xp PHexTop] box.top
-		g2.down.mid (box.left - OX) [pre@mix@post 0.5]
-		corner [box.xp PHexBot] box.bot
-		corner box.right [pre@slope SlopeA]
+	define [LeftHalfShape mode box] : lift-@ : fraktur-stroke S
+		corner      (@xR = box.right)         [slY @xT @yT @xR SlopeB]
+		corner      (@xT = [box.xp PHexTop])  (@yT = box.top)
+		g2.down.mid (box.left - OX)            box.yMid
+		corner      (@xB = [box.xp PHexBot])  (@yB = box.bot)
+		corner       @xR                      [slY @xB @yB @xR SlopeA]
 
 	create-glyph "frak/a" 0x1D51E : glyph-proc
 		local df : include : LowerDf 1
@@ -35,12 +37,12 @@ glyph-block LetterLike-Fraktur-Lower-AQ : begin
 		local gBox : S.box XH Descender df.leftSB df.rightSB
 
 		local leftStroke : include : LeftHalfShape 'p' aBox
-		local rightStroke : include : fraktur-stroke S
-			corner [leftStroke.first].x [leftStroke.first].y
-			corner pre@ [leftStroke.last].y
-			g2 (pre@ <+> 0.5 * DecoSizeX) (post@ <+> SmallArchDepthA)
-			hookend (sw -- S.thick) gBox.bot
-			g4 gBox.left (pre@ <+> SHook)
+		local rightStroke : include : lift-@ : fraktur-stroke S
+			corner [leftStroke.first].x        [leftStroke.first].y
+			corner (@xR = [leftStroke.last].x) [leftStroke.last].y
+			g2     (@xR + 0.5 * DecoSizeX)     (@yB + SmallArchDepthA)
+			hookend (sw -- S.thick)            (@yB = gBox.bot)
+			g4      gBox.left                  (@yB + SHook)
 
 
 	create-glyph "frak/q" 0x1D52E : glyph-proc
