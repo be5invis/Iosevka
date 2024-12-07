@@ -1,5 +1,7 @@
 $$include '../../meta/macros.ptl'
 
+import [mix slY] from "@iosevka/util"
+
 glyph-module
 
 glyph-block LetterLike-Fraktur-Lower-HY : begin
@@ -9,17 +11,17 @@ glyph-block LetterLike-Fraktur-Lower-HY : begin
 	glyph-block-import LetterLike-Fraktur-Common : DecoSizeX DecoSizeY SlopeA SlopeB
 	glyph-block-import LetterLike-Fraktur-Common : Wave FHook PHexTop PHexBot LTDecoration
 
-	define [LeftHalfShape mode box] : fraktur-stroke S
+	define [LeftHalfShape mode box] : lift-@ : fraktur-stroke S
 		LTDecoration box.left box.top
-		corner box.left [post@slope SlopeB]
-		corner (post@ <-> DecoSizeX) box.bottom
-		corner box.xMid (pre@ <+> DecoSizeY)
+		corner (@xL = box.left)        [slY @xB @yB @xL SlopeB]
+		corner (@xB = @xM - DecoSizeX) (@yB = box.bottom)
+		corner (@xM = box.xMid)        (@yB + DecoSizeY)
 
-	define [RightHalfShape mode box] : fraktur-stroke S
-		corner box.left [post@slope SlopeA]
-		[cg2.sr SlopeB].start [box.xp PHexTop] box.top
-		straight.down.mid box.right [pre@mix@post 0.5]
-		corner [box.xp PHexTop] box.bottom
+	define [RightHalfShape mode box] : lift-@ : fraktur-stroke S
+		corner                (@xL = box.left)         [slY @xT @yT @xL SlopeA]
+		[cg2.sr SlopeB].start (@xT = [box.xp PHexTop]) (@yT = box.top)
+		straight.down.mid     (@xR = box.right)         box.yMid
+		corner                [box.xp PHexTop]          box.bottom
 
 	create-glyph "frak/h" 0x1D525 : glyph-proc
 		local df : include : LowerDf 1

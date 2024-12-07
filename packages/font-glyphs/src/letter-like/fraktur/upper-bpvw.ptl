@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix fallback] from "@iosevka/util"
+import [mix fallback slY] from "@iosevka/util"
 
 glyph-module
 
@@ -18,20 +18,20 @@ glyph-block LetterLike-Fraktur-Upper-BVW : begin
 
 	define [StartStroke mode box profile pRight] : begin
 		local { body deco } : deriveBoxes box
-		return : fraktur-stroke profile
-			g2.ru.start (post@) ([deco.yp 0.625] - 2 * F.thick) [change-pen F]
+		return : lift-@ : fraktur-stroke profile
+			g2.ru.start @xL ([deco.yp 0.625] - 2 * F.thick) [change-pen F]
 			~~~ [Wave.vc Wave.LTDecoSize]
-			g2.ru.mid deco.left (post@ <-> DecoSizeY) [change-pen M]
-			arch.rhs (sw -- S.thick) (blendPre -- null) deco.top 0.4
+			g2.ru.mid (@xL = deco.left) (@yT - DecoSizeY) [change-pen M]
+			arch.rhs (sw -- S.thick) (blendPre -- null) (@yT = deco.top) 0.4
 			match mode
 				[Just "P"] : list
-					flat body.left [pre@mix@post 0.375]
-					virt pre@      body.bot
-					curl body.left Descender
+					flat (@xLB = body.left) [mix @yT @yB 0.375]
+					virt  @xLB              (@yB = body.bot)
+					curl  @xLB               Descender
 				_ : list
-					straight.down.mid body.left [pre@mix@post 0.375]
-					corner deco.left [post@slope SlopeB]
-					virt   [body.xp : pRight * PHexBot] body.bot
+					straight.down.mid   @xLB                    [mix @yT @yLC 0.375]
+					corner  @xL                                 (@yLC = [slY @xE @yE @xL SlopeB])
+					virt   (@xE = [body.xp : pRight * PHexBot]) (@yE = body.bot)
 
 	create-glyph 'frak/B' 0x1D505 : glyph-proc
 		local df : include : UpperDf 1
@@ -45,14 +45,14 @@ glyph-block LetterLike-Fraktur-Upper-BVW : begin
 			fraktur-stroke S
 				corner [leftStroke.last].x [leftStroke.last].y
 				corner [body.xp PHexBot] body.bot
-				decor@ : g2.up.mid (body.right - OX) [pre@mix@post 0.5]
+				~~~ [g2.up.mid (body.right - OX) [body.yp 0.275]]
 				corner [body.xp 0.625] [body.yp 0.55]
-			fraktur-stroke S
-				corner deco.left [post@slope SlopeA]
-				corner [body.xp PHexTop] body.top
-				decor@ : g2.down.mid body.right [pre@mix@post 0.5]
-				corner [body.xp 0.625] [body.yp 0.55]
-				corner deco.left [pre@slope : 0.5 * SlopeA]
+			lift-@ : fraktur-stroke S
+				corner (@xL = deco.left) [slY @xT @yT @xL SlopeA]
+				corner (@xT = [body.xp PHexTop]) (@yT = body.top)
+				~~~ [g2.down.mid body.right [body.yp 0.775]]
+				corner (@xM = [body.xp 0.625]) (@yM = [body.yp 0.55])
+				corner  @xL [slY @xM @yM @xL : 0.5 * SlopeA]
 
 	create-glyph 'frak/P' 0x1D513 : glyph-proc
 		local df : include : UpperDf 1
@@ -64,16 +64,16 @@ glyph-block LetterLike-Fraktur-Upper-BVW : begin
 		local leftStroke : include : StartStroke "P" box S 1
 
 		local rightStroke : include : difference
-			fraktur-stroke S
-				g2 deco.left (post@ <+> Wave.DepthY)
-				~~~ [g2 [deco.xp 0.21] (pre@ <+> Wave.DepthY)]
-				g2 [deco.xp 0.625] body.bottom
+			lift-@ : fraktur-stroke S
+				g2 deco.left (@yS = @yB + Wave.DepthY)
+				~~~ [g2 [deco.xp 0.21] (@yS + Wave.DepthY)]
+				g2 [deco.xp 0.625] (@yB = body.bottom)
 				~~~ [Wave.vDistAfter : 1.5 * Wave.DepthX]
-				[g2c.sr SlopeA].end (body.right + 0.25 * DecoSizeX) ([body.yp 0.75] + S.thick)
-				~~~ [curl [pre@tang-in 1] [pre@tang-in SlopeB]]
-				g2 (pre@ <-> Wave.DepthX) [pre@mix@post 0.5]
-				arch.rhs (sw -- S.thick) (blendPre -- {}) body.top
-				corner (body.left - S.thick) (pre@ <-> ArchDepthA)
+				[g2c.sr SlopeA].end (@xR = body.right + 0.25 * DecoSizeX) (@yR = [body.yp 0.75] + S.thick)
+				~~~ [curl (@xR - TINY) [@yR - SlopeB * TINY]]
+				g2 (@xR - Wave.DepthX) [mix @yR @yT 0.5]
+				arch.rhs (sw -- S.thick) (blendPre -- {}) (@yT = body.top)
+				corner (body.left - S.thick) (@yT - ArchDepthA)
 			intersection [leftStroke.withPen CutMaskLeft] [MaskAbove body.yMid]
 
 	create-glyph 'frak/V' 0x1D519 : glyph-proc
@@ -84,15 +84,15 @@ glyph-block LetterLike-Fraktur-Upper-BVW : begin
 		local { body deco } : deriveBoxes box
 
 		local leftStroke : include : StartStroke 'V' box S 1
-		include : with-knockout [leftStroke.withPen CutMaskLeft] : fraktur-stroke S
+		include : with-knockout [leftStroke.withPen CutMaskLeft] : lift-@ : fraktur-stroke S
 			corner [leftStroke.last].x [leftStroke.last].y
 			[cg2.sr SlopeA].start [body.xp PHexBot] body.bottom
 			~~~ [Wave.vDistAfter : 1.5 * Wave.DepthX]
-			[g2c.sr SlopeA].end (body.right + 0.25 * DecoSizeX) ([body.yp 0.75] + S.thick)
-			~~~ [curl [pre@tang-in 1] [pre@tang-in SlopeB]]
-			g2 (pre@ <-> Wave.DepthX) [pre@mix@post 0.5]
-			arch.rhs (sw -- S.thick) (blendPre -- {}) body.top
-			corner (body.left - S.thick) (pre@ <-> ArchDepthA)
+			[g2c.sr SlopeA].end (@xR = body.right + 0.25 * DecoSizeX) (@yR = [body.yp 0.75] + S.thick)
+			~~~ [curl (@xR - TINY) [@yR - SlopeB * TINY]]
+			g2 (@xR - Wave.DepthX) [mix @yR @yT 0.5]
+			arch.rhs (sw -- S.thick) (blendPre -- {}) (@yT = body.top)
+			corner (body.left - S.thick) (@yT - ArchDepthA)
 
 	create-glyph 'frak/W' 0x1D51A : glyph-proc
 		local df : include : UpperDf para.diversityM 3
@@ -103,22 +103,22 @@ glyph-block LetterLike-Fraktur-Upper-BVW : begin
 
 		local leftStroke : include : StartStroke 'W' box M 0.5 1
 
-		local rightStroke : include : fraktur-stroke M
+		local rightStroke : include : lift-@ : fraktur-stroke M
 			corner [leftStroke.last].x [leftStroke.last].y
 			corner [deco.xp : 0.5 * PHexBot] box.bottom
-			corner deco.xMid [post@slope SlopeB]
-			[cg2.sr SlopeA].start [deco.xp : mix 0.5 1 PHexBot] body.bot
+			corner (@xM = deco.xMid) [slY @xB @yB @xM SlopeB]
+			[cg2.sr SlopeA].start (@xB = [deco.xp : mix 0.5 1 PHexBot]) (@yB = body.bot)
 			~~~ [Wave.vDistAfter : 0.75 * Wave.DepthX]
-			[g2c.sr SlopeA].end (body.right + 0.5 * DecoSizeX) ([body.yp 0.75] + S.thick)
-			~~~ [curl [pre@tang-in 1] [pre@tang-in SlopeB]]
-			g2 (pre@ <-> 0.75 * Wave.DepthX) [pre@mix@post 0.5]
-			arch.rhs (sw -- M.thick) (blendPre -- {}) body.top
-			corner body.xMid (body.top - 0.5 * Wave.DepthY)
+			[g2c.sr SlopeA].end (@xR = body.right + 0.5 * DecoSizeX) (@yR = [body.yp 0.75] + S.thick)
+			~~~ [curl (@xR - TINY) [@yR - SlopeB * TINY]]
+			g2 (@xR - 0.75 * Wave.DepthX) [mix @yR @yT 0.5]
+			arch.rhs (sw -- M.thick) (blendPre -- {}) (@yT = body.top)
+			corner body.xMid (@yE = @yT - 0.5 * Wave.DepthY)
 			~~~ [arch.rhs (sw -- M.thick) (blendPre -- {}) (blendPost -- {}) body.top]
-			corner body.left pre@
+			corner body.left @yE
 
-		local middleStroke : include : fraktur-stroke M
-			virt [deco.xp : mix 0.5 1 PHexBot] body.bot
-			corner deco.xMid [pre@slope SlopeB]
+		local middleStroke : include : lift-@ : fraktur-stroke M
+			virt (@xT = [deco.xp : mix 0.5 1 PHexBot]) (@yT = body.bot)
+			corner (@xM = deco.xMid) [slY @xT @yT @xM SlopeB]
 			~~~ [Wave.vDistAfter : 0.375 * Wave.DepthX]
 			corner body.xMid (body.top - 0.5 * Wave.DepthY)

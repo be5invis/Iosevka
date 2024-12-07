@@ -61,23 +61,13 @@ export class SpiroFlattener {
 			}
 			sink.push(c);
 
-			const cHasDependency =
-				c.getDependency(RES_DEP_STAGE_COORDINATE_PROPOGATION_X) ||
-				c.getDependency(RES_DEP_STAGE_COORDINATE_PROPOGATION_Y) ||
-				c.getDependency(RES_DEP_STAGE_INTERPOLATION);
+			const cHasDependency = c.getDependency(RES_DEP_STAGE_INTERPOLATION);
 			return cHasDependency ? 1 : 0;
 		}
 	}
 
 	flattenImpl() {
-		this.propagateCoordinates();
 		return this.doInterpolate();
-	}
-
-	propagateCoordinates() {
-		const propagator = new CoordinatePropagator(this.controls);
-		if (!propagator.nDependencies) return;
-		propagator.solveAll();
 	}
 
 	doInterpolate() {
@@ -101,7 +91,7 @@ export class SpiroFlattener {
 		return nd;
 	}
 
-	getDependenciesForInterpolation(skipKind) {
+	getDependenciesForInterpolation() {
 		let nNonDependent = 0;
 		let nDependent = 0;
 		let deps = [];
@@ -156,70 +146,6 @@ export class SpiroFlattener {
 	}
 }
 
-/// Utility class to propagate coordinates
-class CoordinatePropagator {
-	constructor(subjects) {
-		this.nDependencies = 0;
-		this.subjects = [];
-		this.depX = [];
-		this.stateX = [];
-		this.depY = [];
-		this.stateY = [];
-
-		for (const subject of subjects) {
-			let dx = subject.getDependency(RES_DEP_STAGE_COORDINATE_PROPOGATION_X);
-			let dy = subject.getDependency(RES_DEP_STAGE_COORDINATE_PROPOGATION_Y);
-			if (dx === DEP_SKIP && dy === DEP_SKIP) continue;
-
-			this.subjects.push(subject);
-			this.depX.push(dx), this.depY.push(dy);
-			this.stateX.push(dx > DEP_SKIP ? CR_UNRESOLVED : CR_RESOLVED);
-			this.stateY.push(dy > DEP_SKIP ? CR_UNRESOLVED : CR_RESOLVED);
-			if (dx > DEP_SKIP) this.nDependencies += 1;
-			if (dy > DEP_SKIP) this.nDependencies += 1;
-		}
-	}
-
-	solveAll() {
-		for (let i = 0; i < this.subjects.length; i++) {
-			this.solve(i, 0);
-			this.solve(i, 1);
-		}
-	}
-	solve(i, ic) {
-		const depC = ic ? this.depY : this.depX;
-		const stateC = ic ? this.stateY : this.stateX;
-
-		if (stateC[i] === CR_RESOLVED) return;
-		if (stateC[i] === CR_RESOLVING) {
-			console.log(this);
-			throw new Error("Circular dependency detected");
-		}
-
-		stateC[i] = CR_RESOLVING;
-
-		if (depC[i] & DEP_PRE_X) this.solve(this.cycI(i - 1), 0);
-		if (depC[i] & DEP_PRE_Y) this.solve(this.cycI(i - 1), 1);
-		if (depC[i] & DEP_SAME_X) this.solve(this.cycI(i), 0);
-		if (depC[i] & DEP_SAME_Y) this.solve(this.cycI(i), 1);
-		if (depC[i] & DEP_POST_X) this.solve(this.cycI(i + 1), 0);
-		if (depC[i] & DEP_POST_Y) this.solve(this.cycI(i + 1), 1);
-
-		// console.log(i, ic, this);
-		this.subjects[i].resolveCoordiantePropogation(
-			ic,
-			this.subjects[this.cycI(i - 1)].getKernelKnot(),
-			this.subjects[this.cycI(i + 1)].getKernelKnot(),
-		);
-
-		stateC[i] = CR_RESOLVED;
-	}
-
-	cycI(i) {
-		return (i + this.subjects.length) % this.subjects.length;
-	}
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 /** The "amendmend function" */
@@ -243,9 +169,7 @@ export class AfCombine extends AfBase {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-const RES_DEP_STAGE_COORDINATE_PROPOGATION_X = 0;
-const RES_DEP_STAGE_COORDINATE_PROPOGATION_Y = 1;
-const RES_DEP_STAGE_INTERPOLATION = 2;
+const RES_DEP_STAGE_INTERPOLATION = 1;
 
 export const DEP_SKIP = 0x1;
 export const DEP_PRE_X = 0x2;
@@ -258,10 +182,6 @@ export const DEP_POST_Y = 0x40;
 const DEP_PRE = DEP_PRE_X | DEP_PRE_Y;
 const DEP_POST = DEP_POST_X | DEP_POST_Y;
 
-const CR_UNRESOLVED = 0;
-const CR_RESOLVING = 1;
-const CR_RESOLVED = 2;
-
 export class UserControlKnot {
 	constructor(type, x, y, af) {
 		this.type = type;
@@ -273,17 +193,8 @@ export class UserControlKnot {
 		if (this.af) this.af.applyTo(ctx);
 	}
 
-	getDependency(stage) {
-		switch (stage) {
-			case RES_DEP_STAGE_COORDINATE_PROPOGATION_X:
-				return typeof this.x === "number" ? 0 : this.x.getDependencyForX();
-			case RES_DEP_STAGE_COORDINATE_PROPOGATION_Y:
-				return typeof this.y === "number" ? 0 : this.y.getDependencyForY();
-			case RES_DEP_STAGE_INTERPOLATION:
-				return 0;
-			default:
-				return 0;
-		}
+	getDependency() {
+		return 0;
 	}
 
 	getKernelKnot() {
@@ -308,7 +219,7 @@ export class UserControlKnot {
 	}
 
 	static isCoordinateValid(x) {
-		return (typeof x === "number" && isFinite(x)) || x instanceof DerivedCoordinateBase;
+		return isFinite(x);
 	}
 }
 
@@ -382,9 +293,6 @@ export class InterpolatorBase {
 
 	getDependency(stage) {
 		switch (stage) {
-			case RES_DEP_STAGE_COORDINATE_PROPOGATION_X:
-			case RES_DEP_STAGE_COORDINATE_PROPOGATION_Y:
-				return DEP_SKIP;
 			case RES_DEP_STAGE_INTERPOLATION:
 				return DEP_PRE | DEP_POST;
 			default:
@@ -406,6 +314,11 @@ export class InterpolatorBase {
 	}
 }
 
+/**
+ * Used in [decor@] (and thus operator (~~~)).
+ * Make a list of control items "delayed" till resolution of interpolator.
+ * Useful for specifying the decoration features of a path.
+ */
 export class DecorInterpolator extends InterpolatorBase {
 	constructor(items) {
 		super();
@@ -427,41 +340,6 @@ export class FunctionInterpolator extends InterpolatorBase {
 	}
 }
 
-/**
- * This class denotes an interpolator that has a proxy knot. The proxy could be used in the
- * coordinate propagation stage to resolve dependencies.
- */
-export class KnotProxyInterpolator extends InterpolatorBase {
-	constructor(proxy, actual) {
-		super();
-		this.knotProxy = proxy;
-		this.actual = actual;
-	}
-
-	getDependency(stage) {
-		switch (stage) {
-			case RES_DEP_STAGE_COORDINATE_PROPOGATION_X:
-			case RES_DEP_STAGE_COORDINATE_PROPOGATION_Y:
-				return this.knotProxy.getDependency(stage);
-			default:
-				return this.actual.getDependency(stage);
-		}
-	}
-
-	getKernelKnot() {
-		return this.knotProxy.getKernelKnot();
-	}
-	resolveCoordiantePropogation(ic, pre, post) {
-		this.knotProxy.resolveCoordiantePropogation(ic, pre, post);
-	}
-	resolveInterpolation(pre, post) {
-		return this.actual.resolveInterpolation(pre, post);
-	}
-}
-export function WithKnotProxy(proxy, actual) {
-	return new KnotProxyInterpolator(proxy, actual);
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 export class TerminateInstruction {
@@ -472,22 +350,5 @@ export class TerminateInstruction {
 	applyTo(ctx) {
 		if (this.type === "close") ctx.closed = true;
 		if (this.af) throw new Error("Unreachable");
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-export class DerivedCoordinateBase {
-	getDependencyForX() {
-		throw new Error("Unimplemented");
-	}
-	getDependencyForY() {
-		throw new Error("Unimplemented");
-	}
-	resolveX(pre, curr, post) {
-		throw new Error("Unimplemented");
-	}
-	resolveY(pre, curr, post) {
-		throw new Error("Unimplemented");
 	}
 }

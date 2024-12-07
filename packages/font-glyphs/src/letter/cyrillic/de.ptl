@@ -11,7 +11,7 @@ glyph-block Letter-Cyrillic-De : begin
 	glyph-block-import Letter-Greek-Lower-Epsilon : CyrZe EpsilonConfig
 
 	glyph-block-export BottomExtension
-	local BottomExtension : 0.25 * Stroke - LongJut
+	local BottomExtension : 0.25 * Stroke - LongVJut
 
 	glyph-block-export CyrDeBottom
 	define [CyrDeBottom left right _sw _desc] : glyph-proc
@@ -56,21 +56,22 @@ glyph-block Letter-Cyrillic-De : begin
 
 		return : object desc xTopLeft xTopRight
 
-	define [CyrSoftDeShape top left right _sw vSlab] : glyph-proc
-		local descenderOverflow : if SLAB SideJut ((right - left) * 0.075)
+	define [CyrSoftDeShape top df _sw vSlab] : glyph-proc
+		local descenderOverflow : if SLAB SideJut ((df.rightSB - df.leftSB) * 0.075)
 		local sw : fallback _sw Stroke
 		local xm : if SLAB
-			[mix left right 0.625] + [HSwToV : 0.25 * sw]
-			mix left right 0.75
-		local xTopRight : mix left xm : StrokeWidthBlend 0.95 0.96
+			[mix df.leftSB df.rightSB 0.625] + [HSwToV : 0.25 * sw]
+			mix df.leftSB df.rightSB : if (df.div > 1) (2 / 3) (3 / 4)
+		local xTopRight : mix df.leftSB xm : StrokeWidthBlend 0.95 0.96
+		local xTopBarRightEnd : mix df.width df.rightSB : if vSlab 0.25 0.375
 
-		include : CyrDeShape top left xm _sw
+		include : CyrDeShape top df.leftSB xm sw
 
 		include : if SLAB
-			then : HBar.t (xTopRight + descenderOverflow) right top sw
-			else : HBar.t xTopRight right top sw
+			then : HBar.t (xTopRight + descenderOverflow) xTopBarRightEnd top sw
+			else : HBar.t xTopRight xTopBarRightEnd top sw
 
-		if vSlab : include : VSerif.dr right top VJut (sw * VJutStroke / Stroke)
+		if vSlab : include : VSerif.dr xTopBarRightEnd top VJut (VJutStroke * sw / Stroke)
 
 	create-glyph 'cyrl/De' 0x414 : glyph-proc
 		include : MarkSet.capital
@@ -90,13 +91,13 @@ glyph-block Letter-Cyrillic-De : begin
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.capital
 		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrSoftDeShape CAP df.leftSB df.rightSB df.mvs false
+		include : CyrSoftDeShape CAP df df.mvs false
 
 	create-glyph 'cyrl/DeSoft.topRightSerifed' : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.capital
 		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrSoftDeShape CAP df.leftSB df.rightSB df.mvs true
+		include : CyrSoftDeShape CAP df df.mvs true
 
 	select-variant 'cyrl/DeSoft' 0xA662 (follow -- 'cyrl/EnGhe/GhePart')
 
@@ -104,13 +105,13 @@ glyph-block Letter-Cyrillic-De : begin
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.e
 		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrSoftDeShape XH df.leftSB df.rightSB df.mvs false
+		include : CyrSoftDeShape XH df df.mvs false
 
 	create-glyph 'cyrl/deSoft.topRightSerifed' : glyph-proc
 		local df : include : DivFrame para.diversityM 3
 		include : df.markSet.e
 		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrSoftDeShape XH df.leftSB df.rightSB df.mvs true
+		include : CyrSoftDeShape XH df df.mvs true
 
 	select-variant 'cyrl/deSoft' 0xA663 (follow -- 'cyrl/enghe/ghePart')
 
@@ -126,7 +127,7 @@ glyph-block Letter-Cyrillic-De : begin
 				right  -- sr
 				hook   -- hook
 				stroke -- sw
-				xo     -- 0.5 * O
+				xo     -- (0.5 * O)
 				op     -- 0.5
 			return : union [ze.Shape] [ze.AutoEndSerifL]
 
