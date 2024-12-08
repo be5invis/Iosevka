@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix barMixL linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback] from "@iosevka/util"
 
 glyph-module
 
@@ -18,24 +18,32 @@ glyph-block Letter-Cyrillic-Yu : begin
 	define SLAB-OUTWARD		2
 
 	define [CyrYuShape df slabType top xtop ada adb] : glyph-proc
-		local xm : barMixL df.leftSB df.rightSB [HSwToV df.mvs] [StrokeWidthBlend 0.4 0.45]
-		include : OShape top 0 xm df.rightSB df.mvs (ada * 0.7 * df.div) (adb * 0.7 * df.div)
+		local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
+		local divSub : (df.width - gap - df.mvs) / Width
+		local subDf : DivFrame divSub 2
+
+		local shift : Width * (df.div - divSub)
+		include : with-transform [ApparentTranslate shift 0]
+			OShape top 0 subDf.leftSB subDf.rightSB df.mvs (ada * 0.7 * df.div) (adb * 0.7 * df.div)
 
 		include : if (slabType === SLAB-BULGARIAN)
-			Iotified.ascender df xtop xm (top / 2)
-			Iotified.full df xtop xm (top / 2) (fCapital -- (slabType === SLAB-ALL))
+			Iotified.ascender df xtop (shift + subDf.leftSB + [HSwToV : 0.5 * df.mvs]) (top / 2)
+			Iotified.full     df xtop (shift + subDf.leftSB + [HSwToV : 0.5 * df.mvs]) (top / 2)
+				fCapital -- (slabType === SLAB-ALL)
 
 	define [CyrRevYuShape df slabType top xtop ada adb fTail] : glyph-proc
-		local xm : barMixL df.leftSB df.rightSB [HSwToV df.mvs] [StrokeWidthBlend 0.4 0.45]
-		local revXm : df.leftSB + df.rightSB - xm
-		include : OShape top 0 df.leftSB revXm df.mvs (ada * 0.7 * df.div) (adb * 0.7 * df.div)
+		local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
+		local divSub : (df.width - gap - df.mvs) / Width
+		local subDf : DivFrame divSub 2
+
+		include : OShape top 0 subDf.leftSB subDf.rightSB df.mvs (ada * 0.7 * df.div) (adb * 0.7 * df.div)
 
 		local useItalicShape : slabType !== SLAB-ALL && para.isItalic
 		local slabTop : if useItalicShape SLAB-NONE SLAB-FULL
 		local slabBottom : if useItalicShape SLAB-OUTWARD SLAB-FULL
 
 		include : Iotified.RevShape df xtop
-			hBarLeft   -- revXm
+			hBarLeft   -- (subDf.rightSB - [HSwToV : 0.5 * df.mvs])
 			hBarY      -- (top / 2)
 			slabTop    -- slabTop
 			slabBottom -- slabBottom
