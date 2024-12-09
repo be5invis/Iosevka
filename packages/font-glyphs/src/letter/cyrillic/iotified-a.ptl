@@ -9,7 +9,6 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
-	glyph-block-import Letter-Latin-Lower-AE-OE : SubDfAndShift
 
 	define SLAB-NONE		0
 	define SLAB-FULL		1
@@ -134,20 +133,31 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 				define df : include : DivFrame para.diversityM 3
 				include : df.markSet.e
 
-				local { subDf shift } : SubDfAndShift 1 df
-				include : with-transform [ApparentTranslate shift 0] [body subDf hookStyle df.mvs]
+				local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
+				local divSub : (df.width - gap - df.mvs) / Width
+				local subDf : DivFrame divSub 2
+
+				local shift : Width * (df.div - divSub)
+				include : with-transform [ApparentTranslate shift 0]
+					body subDf hookStyle df.mvs
 
 				include : difference
 					Iotified.full df XH [mix df.leftSB df.rightSB (3 / 4)] (XH / 2)
-					with-transform [ApparentTranslate shift 0] [DoubleStorey.GetMask body df df.mvs]
+					with-transform [ApparentTranslate shift 0]
+						DoubleStorey.GetMask body df df.mvs
 
 		foreach { suffix { body bar } } [Object.entries SingleStoreyConfig] : do
 			create-glyph "cyrl/aIotified.\(suffix)" : glyph-proc
 				define df : include : DivFrame para.diversityM 3
 				include : df.markSet.e
 
-				local { subDf shift } : SubDfAndShift 1 df
-				include : with-transform [ApparentTranslate shift 0] [body subDf XH bar df.mvs]
+				local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
+				local divSub : (df.width - gap - df.mvs) / Width
+				local subDf : DivFrame divSub 2
+
+				local shift : Width * (df.div - divSub)
+				include : with-transform [ApparentTranslate shift 0]
+					body subDf XH bar df.mvs
 
 				include : Iotified.full df XH (shift + subDf.leftSB + [HSwToV : 0.5 * df.mvs]) (XH / 2)
 
@@ -165,12 +175,18 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 				define df : include : DivFrame para.diversityM 3
 				include : df.markSet.e
 
-				local { subDf shift } : SubDfAndShift 1 df OX
-				local ada : subDf.archDepthA SmallArchDepth df.mvs
-				local adb : subDf.archDepthB SmallArchDepth df.mvs
-				include : with-transform [ApparentTranslate shift 0] [body subDf XH (stroke -- df.mvs) (ada -- ada) (adb -- adb)]
+				local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
+				local divSub : (df.width - gap - df.mvs) / Width
+				local subDf : DivFrame divSub 2
 
-				include : Iotified.full df XH df.middle (XH / 2)
+				local shift : Width * (df.div - divSub)
+				include : with-transform [ApparentTranslate shift 0]
+					body subDf XH
+						stroke -- df.mvs
+						ada -- (SmallArchDepthA * 0.7 * df.div)
+						adb -- (SmallArchDepthB * 0.7 * df.div)
+
+				include : Iotified.full df XH (shift + subDf.leftSB + [HSwToV : 0.5 * df.mvs]) (XH / 2)
 
 	select-variant 'cyrl/AIotified' 0xA656 (follow -- 'A')
 	select-variant 'cyrl/aIotified' 0xA657 (follow -- 'cyrl/a')
