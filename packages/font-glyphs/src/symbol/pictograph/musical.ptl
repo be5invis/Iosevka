@@ -80,35 +80,56 @@ glyph-block Symbol-Pictograph-Musical : begin
 				x2 + 0
 				0 - bandWidth
 
-	do "sharp, flat and natural"
+	do "Accidentals"
+		glyph-block-import Symbol-Arrow : ArrowShape
 		local nsTop PictTop
 		local nsBot PictBot
 		local fine : AdviceStroke 3.5
 		local fine2 : AdviceStroke 4
-		local l : SB - fine * 0
-		local r : RightSB + fine * 0
-		local hsp : ((r - l) - [HSwToV : 2 * fine]) * 0.3
+		local lAcc : SB - fine * 0
+		local rAcc : RightSB + fine * 0
+		local hsp : ((rAcc - lAcc) - [HSwToV : 2 * fine]) * 0.3
 		local skew 0.2
+
+		local krNat 0.5
+		local lSharp : lAcc + hsp * krNat
+		local rSharp : rAcc - hsp * krNat
+		local lFlat : mix SB RightSB 0.07
+		local rFlat : mix RightSB SB 0.07
+		local lNat : lAcc + hsp * krNat
+		local rNat : rAcc - hsp * krNat
+
+		local halfVFine : HSwToV : 0.5 * fine
+		local xUpSharp   : rSharp - halfVFine
+		local xDownSharp : rSharp - halfVFine
+		local xUpFlat    : lFlat + halfVFine
+		local xDownFlat  : lFlat + halfVFine
+		local xUpNat     : lNat + halfVFine
+		local xDownNat   : rNat - halfVFine
+		local arrowWidth : (RightSB - SB) * 0.35
+		local arrowSpace : Math.max (0.9 * arrowWidth) (ParenTop - PictTop)
+		local arrowTop   : nsTop + arrowSpace
+		local arrowBot   : nsBot - arrowSpace
 
 		create-glyph 'sharpTone' 0x266F : glyph-proc
 			include : dispiro
 				widths.center
-				flat l ([mix nsTop nsBot 0.3] - (Middle - l) * skew) [heading Rightward]
-				curl r ([mix nsTop nsBot 0.3] - (Middle - r) * skew) [heading Rightward]
+				flat lAcc ([mix nsTop nsBot 0.3] - (Middle - lAcc) * skew) [heading Rightward]
+				curl rAcc ([mix nsTop nsBot 0.3] - (Middle - rAcc) * skew) [heading Rightward]
 			include : dispiro
 				widths.center
-				flat l ([mix nsTop nsBot 0.7] - (Middle - l) * skew) [heading Rightward]
-				curl r ([mix nsTop nsBot 0.7] - (Middle - r) * skew) [heading Rightward]
-			include : VBar.l  (l + hsp) (nsBot - (Middle - l - hsp) * skew) (nsTop - (Middle - l - hsp) * skew) fine
-			include : VBar.r (r - hsp) (nsBot - (Middle - r + hsp) * skew) (nsTop - (Middle - r + hsp) * skew) fine
+				flat lAcc ([mix nsTop nsBot 0.7] - (Middle - lAcc) * skew) [heading Rightward]
+				curl rAcc ([mix nsTop nsBot 0.7] - (Middle - rAcc) * skew) [heading Rightward]
+			include : VBar.l lSharp (nsBot - (Middle - lSharp) * skew) (nsTop - (Middle - lSharp) * skew) fine
+			include : VBar.r rSharp (nsBot - (Middle - rSharp) * skew) (nsTop - (Middle - rSharp) * skew) fine
 
 		define [FlatToneShape _l _r _sw] : glyph-proc
 			local yTerminal : mix nsBot nsTop 0.55
 			local curly 0.65
 			local curly2 1.1
 			local curly3 0.3
-			local l : fallback _l [mix SB RightSB 0.07]
-			local r : fallback _r [mix RightSB SB 0.07]
+			local l : fallback _l lFlat
+			local r : fallback _r rFlat
 			local sw : fallback _sw fine
 
 			define [archShapeT offset] : list
@@ -147,41 +168,38 @@ glyph-block Symbol-Pictograph-Musical : begin
 
 		create-glyph 'naturalTone' 0x266E : glyph-proc
 			local k : 0.25 - (Stroke * 0.25 / (nsTop - nsBot))
-			local kr 0.5
-			local ll (l + hsp * kr)
-			local rr (r - hsp * kr)
 
-			local barLeft  : VBar.l  ll [mix nsBot nsTop k] nsTop fine
-			local barRight : VBar.r rr nsBot [mix nsBot nsTop (1 - k)] fine
+			local barLeft  : VBar.l lNat [mix nsBot nsTop k] nsTop fine
+			local barRight : VBar.r rNat nsBot [mix nsBot nsTop (1 - k)] fine
 			local diagLow : dispiro
 				widths.lhs fine
-				flat ll [mix nsBot nsTop k]
-				curl rr ([mix nsBot nsTop k] + (rr - ll) * skew)
+				flat lNat [mix nsBot nsTop k]
+				curl rNat ([mix nsBot nsTop k] + (rNat - lNat) * skew)
 			local belowDiagLow : spiro-outline
-				corner ll [mix nsBot nsTop k]
-				corner rr ([mix nsBot nsTop k] + (rr - ll) * skew)
-				corner rr nsBot
-				corner ll nsBot
+				corner lNat [mix nsBot nsTop k]
+				corner rNat ([mix nsBot nsTop k] + (rNat - lNat) * skew)
+				corner rNat nsBot
+				corner lNat nsBot
 			local diagHigh : dispiro
 				widths.lhs fine
-				flat rr [mix nsBot nsTop (1 - k)]
-				curl ll ([mix nsBot nsTop (1 - k)] - (rr - ll) * skew)
+				flat rNat [mix nsBot nsTop (1 - k)]
+				curl lNat ([mix nsBot nsTop (1 - k)] - (rNat - lNat) * skew)
 			local aboveDiagHigh : spiro-outline
-				corner rr [mix nsBot nsTop (1 - k)]
-				corner ll ([mix nsBot nsTop (1 - k)] - (rr - ll) * skew)
-				corner ll nsTop
-				corner rr nsTop
+				corner rNat [mix nsBot nsTop (1 - k)]
+				corner lNat ([mix nsBot nsTop (1 - k)] - (rNat - lNat) * skew)
+				corner lNat nsTop
+				corner rNat nsTop
 			local outsideBars : difference
 				spiro-outline
-					corner (ll - UPM) (nsBot - UPM)
-					corner (ll - UPM) (nsTop + UPM)
-					corner (rr + UPM) (nsTop + UPM)
-					corner (rr + UPM) (nsBot - UPM)
+					corner (lNat - UPM) (nsBot - UPM)
+					corner (lNat - UPM) (nsTop + UPM)
+					corner (rNat + UPM) (nsTop + UPM)
+					corner (rNat + UPM) (nsBot - UPM)
 				spiro-outline
-					corner ll nsBot
-					corner ll nsTop
-					corner rr nsTop
-					corner rr nsBot
+					corner lNat nsBot
+					corner lNat nsTop
+					corner rNat nsTop
+					corner rNat nsBot
 
 			include : union
 				difference barLeft belowDiagLow
@@ -190,10 +208,10 @@ glyph-block Symbol-Pictograph-Musical : begin
 				difference diagHigh barLeft barRight outsideBars
 
 		create-glyph 'dblSharpTone' 0x1D12A : glyph-proc
-			local w : r - l
+			local w : rAcc - lAcc
 			local t : nsTop - fine * 0
 			local b : t - w
-			local cx : mix l r 0.5
+			local cx : mix lAcc rAcc 0.5
 			local cy : mix t b 0.5
 			local cofine : Math.min (w / 3) (w / 2 - Stroke)
 			local p 0.5
@@ -201,13 +219,13 @@ glyph-block Symbol-Pictograph-Musical : begin
 			include : union
 				difference
 					spiro-outline
-						corner l t
-						corner r t
-						corner r b
-						corner l b
+						corner lAcc t
+						corner rAcc t
+						corner rAcc b
+						corner lAcc b
 					union
 						VBar.m cx t b cofine
-						HBar.m l r cy cofine
+						HBar.m lAcc rAcc cy cofine
 				spiro-outline
 					corner (cx - size) (cy + size)
 					g4     cx (cy + p * size)
@@ -222,20 +240,39 @@ glyph-block Symbol-Pictograph-Musical : begin
 		create-glyph 'dblFlatTone' 0x1D12B : glyph-proc
 			local sw : AdviceStroke 4
 			include : union
-				FlatToneShape l (Middle + sw / 3) sw
-				FlatToneShape (Middle - sw / 3) r sw
+				FlatToneShape lAcc (Middle + sw / 3) sw
+				FlatToneShape (Middle - sw / 3) rAcc sw
 
 		create-glyph 'qtrSharpTone' 0x1D132 : glyph-proc
 			include : dispiro
 				widths.center
-				flat l ([mix nsTop nsBot 0.3] - (Middle - l) * skew) [heading Rightward]
-				curl r ([mix nsTop nsBot 0.3] - (Middle - r) * skew) [heading Rightward]
+				flat lAcc ([mix nsTop nsBot 0.3] - (Middle - lAcc) * skew) [heading Rightward]
+				curl rAcc ([mix nsTop nsBot 0.3] - (Middle - rAcc) * skew) [heading Rightward]
 			include : dispiro
 				widths.center
-				flat l ([mix nsTop nsBot 0.7] - (Middle - l) * skew) [heading Rightward]
-				curl r ([mix nsTop nsBot 0.7] - (Middle - r) * skew) [heading Rightward]
+				flat lAcc ([mix nsTop nsBot 0.7] - (Middle - lAcc) * skew) [heading Rightward]
+				curl rAcc ([mix nsTop nsBot 0.7] - (Middle - rAcc) * skew) [heading Rightward]
 			include : VBar.m Middle nsBot nsTop fine
 
 		create-glyph 'qtrFlatTone' 0x1D133 : glyph-proc
 			include : FlatToneShape
 			include : FlipAround Middle SymbolMid (-1) 1
+
+		create-glyph 'flatToneUp' 0x1D12C : composite-proc
+			refer-glyph 'flatTone' AS_BASE ALSO_METRICS
+			ArrowShape xUpFlat SymbolMid xUpFlat arrowTop arrowWidth halfVFine
+		create-glyph 'flatToneDown' 0x1D12D : composite-proc
+			refer-glyph 'flatTone' AS_BASE ALSO_METRICS
+			ArrowShape xDownFlat SymbolMid xDownFlat arrowBot arrowWidth halfVFine
+		create-glyph 'naturalToneUp' 0x1D12E : composite-proc
+			refer-glyph 'naturalTone' AS_BASE ALSO_METRICS
+			ArrowShape xUpNat SymbolMid xUpNat arrowTop arrowWidth halfVFine
+		create-glyph 'naturalToneDown' 0x1D12F : composite-proc
+			refer-glyph 'naturalTone' AS_BASE ALSO_METRICS
+			ArrowShape xDownNat SymbolMid xDownNat arrowBot arrowWidth halfVFine
+		create-glyph 'sharpToneUp' 0x1D130 : composite-proc
+			refer-glyph 'sharpTone' AS_BASE ALSO_METRICS
+			ArrowShape xUpSharp SymbolMid xUpSharp arrowTop arrowWidth halfVFine
+		create-glyph 'sharpToneDown' 0x1D131 : composite-proc
+			refer-glyph 'sharpTone' AS_BASE ALSO_METRICS
+			ArrowShape xDownSharp SymbolMid xDownSharp arrowBot arrowWidth halfVFine
