@@ -16,19 +16,22 @@ glyph-block Letter-Latin-Gha : begin
 	define TERMINAL-TAILED  1
 	define TERMINAL-DIAG    2
 
-	define [GhaShape df terminal top bot slab] : glyph-proc
-		local abarRight : df.middle + [HSwToV : 0.5 * df.mvs]
-		local ada : ArchDepthAOf [Math.max (df.mvs * 1.125) (SmallArchDepth * 0.6 * df.div)] (Width * df.div)
-		local adb : ArchDepthBOf [Math.max (df.mvs * 1.125) (SmallArchDepth * 0.6 * df.div)] (Width * df.div)
-		include : OShape top 0 df.leftSB abarRight df.mvs ada adb
+	define [GhaShape df terminal top bot _ada _adb slab] : glyph-proc
+		local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
+		local divSub : (df.width - gap - df.mvs) / Width
+		local subDf : DivFrame divSub 2
+
+		local ada : _ada * 0.7 * df.div
+		local adb : _adb * 0.7 * df.div
+		include : OShape top 0 subDf.leftSB subDf.rightSB df.mvs ada adb
 		include : match terminal
 			[Just TERMINAL-NORMAL] : VBar.r             (df.rightSB - O) bot top df.mvs
 			[Just TERMINAL-TAILED] : RightwardTailedBar (df.rightSB - O) bot top df.mvs
 			[Just TERMINAL-DIAG]   : RDiagTailedBar     (df.rightSB - O) bot top df.mvs
 		include : dispiro
 			widths.lhs df.mvs
-			flat df.middle (top - adb) [heading Rightward]
-			curl (df.middle + 1) (top - adb) [heading Rightward]
+			flat (subDf.rightSB - [HSwToV : 0.5 * df.mvs])        (top - adb) [heading Rightward]
+			curl (subDf.rightSB - [HSwToV : 0.5 * df.mvs] + TINY) (top - adb) [heading Rightward]
 			alsoThru 0.5 0.15
 			g4   (df.rightSB - O - [HSwToV df.mvs]) top [widths 0 df.mvs]
 
@@ -46,13 +49,13 @@ glyph-block Letter-Latin-Gha : begin
 		create-glyph "Gha.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 3
 			include : df.markSet.capDesc
-			include : GhaShape df terminal CAP Descender doSerif
+			include : GhaShape df terminal CAP Descender ArchDepthA ArchDepthB doSerif
 			include : LeaningAnchor.Below.VBar.r (df.rightSB - O)
 
 		create-glyph "gha.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 3
 			include : df.markSet.p
-			include : GhaShape df terminal XH Descender doSerif
+			include : GhaShape df terminal XH Descender SmallArchDepthA SmallArchDepthB doSerif
 			include : LeaningAnchor.Below.VBar.r (df.rightSB - O)
 
 	select-variant 'Gha' 0x1A2 (follow -- 'gha')

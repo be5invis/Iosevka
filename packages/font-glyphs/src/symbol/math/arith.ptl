@@ -137,7 +137,7 @@ glyph-block Symbol-Math-Arith : begin
 				intersection
 					MultiplyMask 1 1 1
 					union
-						VBar.l  (Middle - Size) (SymbolMid - Size) (SymbolMid + Size) swBowtieHv
+						VBar.l (Middle - Size) (SymbolMid - Size) (SymbolMid + Size) swBowtieHv
 						VBar.r (Middle + Size) (SymbolMid - Size) (SymbolMid + Size) swBowtieHv
 				intersection
 					Rect ParenTop ParenBot (Middle - Size) (Middle + Size)
@@ -197,6 +197,39 @@ glyph-block Symbol-Math-Arith : begin
 		create-glyph 'timesWithRightHalfBlack' 0x29D5 : union
 			refer-glyph 'bowtieRight'
 			MultiplyMask 1 0 1
+
+		define [JoinLeft ] : union
+			HBar.t [Math.max 0 : Middle - Size - Jut + [HSwToV : 0.5 * swBowtieHv]] (Middle - Size) (SymbolMid + Size) swBowtie
+			HBar.b [Math.max 0 : Middle - Size - Jut + [HSwToV : 0.5 * swBowtieHv]] (Middle - Size) (SymbolMid - Size) swBowtie
+		define [JoinRight] : union
+			HBar.t (Middle + Size) [Math.min Width : Middle + Size + Jut - [HSwToV : 0.5 * swBowtieHv]] (SymbolMid + Size) swBowtie
+			HBar.b (Middle + Size) [Math.min Width : Middle + Size + Jut - [HSwToV : 0.5 * swBowtieHv]] (SymbolMid - Size) swBowtie
+		define [JoinLeftMask ] : union
+			MaskAboveLine 0 (SymbolMid + Size) Middle (SymbolMid + Size)
+			MaskBelowLine 0 (SymbolMid - Size) Middle (SymbolMid - Size)
+		define [JoinRightMask] : union
+			MaskAboveLine Middle (SymbolMid + Size) Width (SymbolMid + Size)
+			MaskBelowLine Middle (SymbolMid - Size) Width (SymbolMid - Size)
+		create-glyph 'joinLeft'  0x27D5 : glyph-proc
+			include : difference
+				union
+					refer-glyph 'bowtie'
+					JoinLeft
+				JoinLeftMask
+		create-glyph 'joinRight' 0x27D6 : glyph-proc
+			include : difference
+				union
+					refer-glyph 'bowtie'
+					JoinRight
+				JoinRightMask
+		create-glyph 'joinFull'  0x27D7 : glyph-proc
+			include : difference
+				union
+					refer-glyph 'bowtie'
+					JoinLeft
+					JoinRight
+				JoinLeftMask
+				JoinRightMask
 
 		define HourglassStretch 1.6
 		create-glyph 'whiteHourglass' 0x29D6 : glyph-proc
@@ -353,57 +386,83 @@ glyph-block Symbol-Math-Arith : begin
 		select-variant 'minusFallingDots' 0x2A2B (follow -- 'punctuationDot')
 		select-variant 'minusRisingDots' 0x2A2C (follow -- 'punctuationDot')
 
-	do
-		define fine : AdviceStroke 5.5
-		define radius : Math.max ((RightSB - SB) / 8) (fine / 2)
-		define barOffset radius
-		define dotCenterOffset : OX + fine + radius
+	do "small circles"
+		glyph-block-import Symbol-Arrow : TrigArrowShape
 
-		create-glyph 'originalOf' 0x22B6 : glyph-proc
-			include : difference
-				union
-					HBar.m (SB + barOffset) (RightSB - barOffset) SymbolMid OperatorStroke
-					DotAt (SB + dotCenterOffset) SymbolMid (radius + fine)
-					DotAt (RightSB - dotCenterOffset) SymbolMid (radius + fine)
-				DotAt (SB + dotCenterOffset) SymbolMid radius
+		define fine : AdviceStroke 6
+		define radius : (RightSB - SB - [HSwToV : 4 * fine]) / 6 + [HSwToV fine] - OX
+		define gap : (RightSB - SB) / 2 - (radius - OX) * 2
+		define dotCenterOffset : radius + OX
 
-		create-glyph 'imageOf' 0x22B7 : glyph-proc
-			include : difference
-				union
-					HBar.m (SB + barOffset) (RightSB - barOffset) SymbolMid OperatorStroke
-					DotAt (SB + dotCenterOffset) SymbolMid (radius + fine)
-					DotAt (RightSB - dotCenterOffset) SymbolMid (radius + fine)
-				DotAt (RightSB - dotCenterOffset) SymbolMid radius
+		create-glyph : glyph-proc
+			local bar : HBar.m (SB + dotCenterOffset) (RightSB - dotCenterOffset) SymbolMid OperatorStroke
 
-		define singleSideFine : AdviceStroke 4
-		define singleSideRadius : Math.max ((RightSB - SB) / 6) (singleSideFine / 2)
+			local leftFilled  : RingAt (SB + dotCenterOffset) SymbolMid radius
+			local rightFilled : RingAt (RightSB - dotCenterOffset) SymbolMid radius
+			local leftHollow  : RingStrokeAt (SB + dotCenterOffset) SymbolMid radius fine
+			local rightHollow : RingStrokeAt (RightSB - dotCenterOffset) SymbolMid radius fine
+
+			create-forked-glyph 'originalOf' 0x22B6 : union [difference bar leftFilled] leftHollow rightFilled
+			create-forked-glyph 'imageOf' 0x22B7 : union [difference bar rightFilled] leftFilled rightHollow
+			create-forked-glyph 'doubleMultimap' 0x29DF : union [difference bar leftFilled rightFilled] leftHollow rightHollow
+
+		define sFine : AdviceStroke 4.5
+		define sRadius : Math.min
+			(RightSB - SB) / 2 * DesignParameters.geometric_small_x
+			(RightSB - SB - [HSwToV : 2 * sFine]) / 4 + [HSwToV sFine] - OX
+		define sGap : (RightSB - SB) / 2 - (sRadius - OX) * 2
+		define sDotCenterOffset : sRadius + OX
 
 		create-glyph 'multimap' 0x22B8 : glyph-proc
-			include : difference
-				union
-					HBar.m SB (RightSB - singleSideRadius) SymbolMid OperatorStroke
-					DotAt (RightSB - dotCenterOffset) SymbolMid (singleSideRadius + singleSideFine)
-				DotAt (RightSB - dotCenterOffset) SymbolMid singleSideRadius
+			include : union
+				difference
+					HBar.m SB (RightSB - sDotCenterOffset) SymbolMid OperatorStroke
+					RingAt (RightSB - sDotCenterOffset) SymbolMid sRadius
+				RingStrokeAt (RightSB - sDotCenterOffset) SymbolMid sRadius sFine
 
 		create-glyph 'leftMultimap' 0x27DC : glyph-proc
-			include : difference
-				union
-					HBar.m (SB + singleSideRadius) RightSB SymbolMid OperatorStroke
-					DotAt (SB + dotCenterOffset) SymbolMid (singleSideRadius + singleSideFine)
-				DotAt (SB + dotCenterOffset) SymbolMid singleSideRadius
+			include : union
+				difference
+					HBar.m (SB + sDotCenterOffset) RightSB SymbolMid OperatorStroke
+					RingAt (SB + sDotCenterOffset) SymbolMid sRadius
+				RingStrokeAt (SB + sDotCenterOffset) SymbolMid sRadius sFine
 
-		create-glyph 'doubleMultimap' 0x29DF : glyph-proc
-			include : difference
-				union
-					HBar.m (SB + barOffset) (RightSB - barOffset) SymbolMid OperatorStroke
-					DotAt (SB + dotCenterOffset) SymbolMid (radius + fine)
-					DotAt (RightSB - dotCenterOffset) SymbolMid (radius + fine)
-				union
-					DotAt (SB + dotCenterOffset) SymbolMid radius
-					DotAt (RightSB - dotCenterOffset) SymbolMid radius
+		# Pawn symbols
+		define unitedGap : (radius - OX) + gap / 2
+		define separatedGap : (radius - OX) + SB
+		create-glyph 'unitedPawn' 0x2BFA : glyph-proc
+			include : RingStrokeAt (Middle + unitedGap) SymbolMid radius fine
+			include : RingStrokeAt (Middle - unitedGap) SymbolMid radius fine
+
+		foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+			create-glyph "separatedPawn.\(suffix)" : glyph-proc
+				include : RingStrokeAt (Middle + separatedGap) SymbolMid radius fine
+				include : RingStrokeAt (Middle - separatedGap) SymbolMid radius fine
+
+				define space : 2 * SB
+				define dFine : AdviceStrokeInSpace space HVContrast 3.5 1
+				define dr : DotRadius * kDotRadius * dFine / Stroke
+				include : DrawAt (Middle - space / 4) SymbolMid dr
+				include : DrawAt (Middle + space / 4) SymbolMid dr
+
+		select-variant 'separatedPawn' 0x2BFB (follow -- 'punctuationDot')
+
+		create-glyph 'doubledPawn' 0x2BFC : glyph-proc
+			include : RingStrokeAt Middle (SymbolMid + unitedGap) radius fine
+			include : RingStrokeAt Middle (SymbolMid - unitedGap) radius fine
+
+		create-glyph 'passedPawn' 0x2BFD : glyph-proc
+			include : TrigArrowShape
+				* Middle
+				SymbolMid - unitedGap + radius - (fine / 2)
+				* Middle
+				SymbolMid + unitedGap + radius
+				radius * 0.8
+				fine / 2
+			include : RingStrokeAt Middle (SymbolMid - unitedGap) radius fine
 
 		create-glyph 'mathSmallCircle' 0x2218
-			RingStrokeAt Middle SymbolMid (singleSideRadius + singleSideFine) singleSideFine
+			RingStrokeAt Middle SymbolMid sRadius sFine
 		alias 'ringpoint' 0x2E30 'mathSmallCircle'
 
 	create-glyph 'wreathProduct' 0x2240 : glyph-proc

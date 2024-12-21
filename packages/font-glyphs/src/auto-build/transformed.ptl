@@ -295,8 +295,9 @@ glyph-block Autobuild-Transformed-Texture : begin
 		local forkedPara : Object.assign {.} para
 		if (extL + extR > 0)
 		: then : begin
-			forkedPara.diversityM = 1 + extL + extR
-			forkedPara.diversityT = 1 + extL + extR
+			forkedPara.diversityMM = 1 + extL + extR
+			forkedPara.diversityM  = 1 + extL + extR
+			forkedPara.diversityT  = 1 + extL + extR
 		: else : begin
 			forkedPara.diversityF  = 1 + extL + extR
 			forkedPara.diversityI  = 1 + extL + extR
@@ -468,46 +469,6 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 	CreateMathBoldFraktur 0x1D56C UpperLatin
 	CreateMathBoldFraktur 0x1D586 LowerLatin
 
-glyph-block Autobuild-Rhotic : begin
-	glyph-block-import Mark-Shared-Metrics : markFine markstroke
-	glyph-block-import CommonShapes
-	glyph-block-import Common-Derivatives
-	glyph-block-import Recursive-Build : Widen
-	glyph-block-import Letter-Latin-Rhotic : ErTail
-	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations
-	glyph-block-import Letter-Shared-Shapes : RetroflexHook
-
-	define [ErTailAttachment y] : ErTail (Width * 0.85 - SB - [HSwToV : 1.25 * markFine]) y (XH * 0.2)
-	define [RhoticTailAttachment] : RetroflexHook.r
-		x -- [mix RightSB Width 0.5]
-		y -- 0
-		yAttach -- (XH / 2 - HalfStroke)
-		xLink -- (Width * 0.85 - SB - [HSwToV : 1.25 * markFine])
-		refSw -- [AdviceStroke 4]
-
-	define [createRhotics groupName tail _records] : begin
-		local {records relSets targetNameMap} : extendRelatedGlyphs "rhotic_\(groupName)" _records
-		local pendingGlyphs : records.map : [record] => record.1
-		local thinFont : Widen pendingGlyphs 0.85 1
-		foreach {unicode glyphid pri} [items-of records]
-			if [not : query-glyph targetNameMap.(glyphid)]
-				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
-					if [not : thinFont.queryByName glyphid] : begin
-						throw : new Error "Cannot find glyph \(glyphid)"
-					include : MarkSet.e
-					include : thinFont.queryByName glyphid
-					include   tail
-
-		link-relations relSets
-		return { targetNameMap records }
-
-	createRhotics 'er' [ErTailAttachment (XH / 2)]
-		list { 0x25A 'schwa' }
-	createRhotics 'rhotic' [RhoticTailAttachment]
-		list { 0x1D95 'schwa' }
-	createRhotics 'revLatinEpsilonEr' [ErTailAttachment (XH * [mix 0.65 1 0.5])]
-		list { 0x25D 'latn/epsilonRev' }
-
 glyph-block Autobuild-Rotated : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
@@ -526,7 +487,7 @@ glyph-block Autobuild-Rotated : begin
 				set-width MosaicWidth
 				if [not : df.queryByName gns] : throw : new Error "Cannot find glyph \(gns)"
 				include : df.queryByName gns
-				include : Translate (-(Width / 2)) (-CAP / 2)
+				include : Translate ((-Width) / 2) ((-CAP) / 2)
 				include : Rotate (Math.PI / 2)
 				include : Scale s
 				include : Translate (MosaicWidth / 2) SymbolMid

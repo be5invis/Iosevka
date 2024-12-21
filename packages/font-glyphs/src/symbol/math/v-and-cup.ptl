@@ -7,7 +7,7 @@ glyph-module
 glyph-block Symbol-Math-VAndCup : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Latin-U : UShape
+	glyph-block-import Letter-Latin-U : UShape USerifs
 	glyph-block-import Letter-Greek-Pi : PiShape
 	glyph-block-import Letter-Cyrillic-Sha : CyrShaShape
 	glyph-block-import Symbol-Arrow : ArrowShape
@@ -126,6 +126,31 @@ glyph-block Symbol-Math-VAndCup : begin
 	turned 'math/logic/equalOr' 0x2A62 'math/logic/andEqual' Middle SymbolMid
 	turned 'math/logic/orEqual' 0x2A63 'math/logic/equalAnd' Middle SymbolMid
 
+	create-glyph 'wedgeMiddleStem' 0x2A5A : glyph-proc
+		include : union
+			WedgeShape OperTop OperBot [AdviceStroke 4]
+			VBar.m Middle OperBot OperTop [AdviceStroke 4]
+
+	create-glyph 'veeMiddleStem' 0x2A5B : glyph-proc
+		include : union
+			VeeShape OperTop OperBot [AdviceStroke 4]
+			VBar.m Middle OperBot OperTop [AdviceStroke 4]
+
+	create-glyph 'veeSlanted' 0x2A57 : glyph-proc
+		include : union
+			dispiro
+				widths.lhs OperatorStroke
+				flat SB OperTop [heading Downward]
+				curl SB OperBot [heading Downward]
+			dispiro
+				widths.rhs OperatorStroke
+				flat RightSB OperTop [heading Downward]
+				curl (SB + [HSwToV Stroke]) OperBot [heading Downward]
+
+	turned 'wedgeSlanted' 0x2A58 'veeSlanted' Middle SymbolMid
+
+	# Cup
+
 	create-glyph 'cup' 0x222A : glyph-proc
 		include : UShape [DivFrame 1] OperTop OperBot (stroke -- OperatorStroke)
 
@@ -171,7 +196,7 @@ glyph-block Symbol-Math-VAndCup : begin
 
 	create-glyph 'doubleCup' 0x22D3 : glyph-proc
 		local sw : AdviceStroke 6
-		local gap : Math.max (Width / 8) (sw / 2)
+		local gap : Math.min ((RightSB - SB - [HSwToV : 4 * sw]) / 3) : Math.max (Width / 8) (sw / 2)
 		include : UShape [DivFrame 1] OperTop OperBot (stroke -- sw)
 		include : UShape [DivFrame 1] OperTop OperBot
 			stroke -- sw
@@ -230,11 +255,30 @@ glyph-block Symbol-Math-VAndCup : begin
 			flat SB OperBot
 			curl RightSB OperTop
 
+	create-glyph 'cupClosedSerifed' 0x2A4C : glyph-proc
+		include : UShape [DivFrame 1] OperTop OperBot (stroke -- OperatorStroke)
+		include : HBar.t SB RightSB OperTop OperatorStroke
+		include : USerifs.Toothless [DivFrame 1] OperTop OperatorStroke
+
+	turned 'capClosedSerifed' 0x2A4D 'cupClosedSerifed' Middle SymbolMid
+
+
+	# Square Cup
+
 	create-glyph 'squareCap' 0x2293 : glyph-proc
 		include : PiShape [DivFrame 1] OperTop OperBot (shrinkRate -- 0) (fine -- OperatorStroke) (doSerif -- false)
 
 	turned 'squareCup' 0x2294 'squareCap' Middle SymbolMid
 
 	create-glyph 'shuffleProduct' 0x29E2 : glyph-proc
-		local df : include : DivFrame para.diversityM 3
+		local df : include : DivFrame para.diversityMM 3
 		include : CyrShaShape df OperTop OperBot (fine -- OperatorStroke) (doSerif -- false)
+
+	create-glyph 'doubleSquareCap' 0x2A4E : glyph-proc
+		local sw : AdviceStroke 6
+		local gap : Math.min ((RightSB - SB - [HSwToV : 4 * sw]) / 3) : Math.max (Width / 8) (sw / 2)
+		local shrinkRate : (sw + gap) / (RightSB - SB)
+		include : PiShape [DivFrame 1] OperTop OperBot (fine -- sw) (shrinkRate -- 0) (fine -- sw) (doSerif -- false)
+		include : PiShape [DivFrame 1] (OperTop - sw - gap) OperBot (fine -- sw) (shrinkRate -- shrinkRate) (endShrink -- shrinkRate) (doSerif -- false)
+
+	turned 'doubleSquareCup' 0x2A4F 'doubleSquareCap' Middle SymbolMid
