@@ -16,10 +16,10 @@ glyph-block Letter-Latin-Lower-E : begin
 	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 	glyph-block-import Letter-Latin-C : CConfig
 
-	define [HookHeightFull top stroke noSwash] : Math.min Hook (AHook / XH * top)
+	define [HookHeightFull top stroke noSwash] : Math.min Hook : AHook / XH * top
 
 	define [HookHeight top stroke noSwash] : Math.min [HookHeightFull top stroke noSwash]
-		if (para.isItalic && !noSwash) top (stroke + 0.277 * (top - stroke * 3))
+		if (para.isItalic && !noSwash) top : stroke + 0.277 * (top - stroke * 3)
 
 	define SLAB-NONE       0
 	define SLAB-CLASSICAL  1
@@ -121,35 +121,35 @@ glyph-block Letter-Latin-Lower-E : begin
 			g4 (df.leftSB + 0.5 * OX) [HookHeight top stroke true]
 
 	define [AbkCheShape] : with-params [
-		fDesc Body df top [stroke df.mvs] [barpos nothing]
+		fDesc Body df top [stroke : Math.min df.mvs : AdviceStroke2 2 3 top] [barpos nothing]
 		[ada SmallArchDepthA] [adb SmallArchDepthB] [tailSlab nothing]
 		] : glyph-proc
-		local gap : (df.width - 2 * df.leftSB - 2.5 * stroke) * 0.375 - [HSwToV : 0.25 * stroke]
+		local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * stroke) - [HSwToV : 0.25 * stroke]
 		define divSub : (df.width - gap - stroke) / Width
-		define dfSub : DivFrame divSub 2
-		include : Body dfSub top
+		define subDf : DivFrame divSub 2
+		include : Body subDf top
 			stroke -- stroke
 			barpos -- barpos
-			ada -- [clamp (stroke * 1.5) (top - adb * divSub - TINY) (ada * divSub)]
-			adb -- [clamp (stroke * 1.5) (top - ada * divSub - TINY) (adb * divSub)]
+			ada -- (ada * 0.7 * df.div)
+			adb -- (adb * 0.7 * df.div)
 			tailSlab -- tailSlab
-		define offset : Width * (df.div - divSub)
+		define shift : Width * (df.div - divSub)
 		if fDesc : begin
 			local desc : (-LongVJut) + HalfStroke
 			include : ExtendBelowBaseAnchors desc
 			include : difference
-				VBar.m dfSub.middle desc (stroke + O) [AdviceStroke 3.5 df.div]
-				OShapeOutline.NoOvershoot top 0 dfSub.leftSB dfSub.rightSB stroke
-		include : Translate offset 0
+				VBar.m subDf.middle desc (stroke + O) [AdviceStroke 3.5 df.div]
+				OShapeOutline.NoOvershoot top 0 subDf.leftSB subDf.rightSB stroke
+		include : Translate shift 0
 
 		local hd : FlatHookDepth df
 		local yBar : top * DesignParameters.eBarPos - 0.5 * stroke
-		include : intersection [MaskLeft : dfSub.leftSB + offset] : dispiro
+		include : intersection [MaskLeft : subDf.leftSB + shift] : dispiro
 			flat (df.leftSB - [HSwToV : 0.25 * stroke]) (yBar + Hook) [widths.lhs.heading stroke Downward]
 			curl (df.leftSB - [HSwToV : 0.25 * stroke]) (yBar + [Math.min Hook hd.y] - 0.25 * stroke) [heading Downward]
 			arcvh
-			flat [Math.min (df.leftSB + hd.x - [HSwToV : 0.5 * stroke]) (dfSub.leftSB + offset)] yBar
-			curl (dfSub.middle + offset) yBar
+			flat [Math.min (df.leftSB + hd.x - [HSwToV : 0.5 * stroke]) (subDf.leftSB + shift)] yBar
+			curl (subDf.middle + shift) yBar
 
 	define SmallEConfig : object
 		flatCrossbar { SmallEShape        RevSmallEShape        }
@@ -171,14 +171,14 @@ glyph-block Letter-Latin-Lower-E : begin
 
 			# Connected Ogonek shape
 			local fine : AdviceStroke 8
-			local depth : 0 - Descender - markStroke
+			local depth : (-Descender) - markStroke
 			local extL : (7 / 16) * depth + 0.25 * markStress
 			local extR : Math.max (0.0625 * markExtend) (1.5 * TanSlope * markStroke)
 			local beginCoSlope : if para.isItalic 0.2 0
 
-			set-base-anchor 'trailing' (RightSB + extR) (-depth + 0.5 * O - markStroke)
-			set-base-anchor 'belowBraceL' (RightSB - extL - [HSwToV : 0.25 * markStroke]) (-0.75 * depth)
-			set-base-anchor 'belowBraceR' (RightSB - 0.75 * extL) (-0.75 * depth)
+			set-base-anchor 'trailing' (RightSB + extR) ((-depth) + 0.5 * O - markStroke)
+			set-base-anchor 'belowBraceL' (RightSB - extL - [HSwToV : 0.25 * markStroke]) ((-0.75) * depth)
+			set-base-anchor 'belowBraceR' (RightSB - 0.75 * extL) ((-0.75) * depth)
 
 			local turnSlope : 0.5 * ((markStroke - fine) / markStroke - (ArchDepthB - ArchDepth) / ArchDepth)
 
@@ -190,13 +190,13 @@ glyph-block Letter-Latin-Lower-E : begin
 					alsoThruThem.computed { (1/3) (2/3) } : object
 						rx       : function [rt] rt
 						deltaX   : function [rt] 0
-						ry       : function [rt] : 1/24 + rt + (1/2 - rt) * (3/8)
-						deltaY   : function [rt] (-0.25 * [mix fine markStroke rt])
+						ry       : function [rt] : (1/24) + rt + ((1/2) - rt) * (3/8)
+						deltaY   : function [rt] : (-0.25) * [mix fine markStroke rt]
 						modifier : function [rt] : widths.rhs [mix fine markStroke : rt ** 2]
-					g4.down.mid (RightSB - extL) (-0.75 * depth) [widths.rhs.heading markStroke {.x HVContrast .y turnSlope}]
+					g4.down.mid (RightSB - extL) ((-0.75) * depth) [widths.rhs.heading markStroke {.x HVContrast .y turnSlope}]
 					arcvh [widths.rhs markStroke]
-					g4 (RightSB + [mix (-extL) extR (11/16)]) (-depth + O) [heading Rightward]
-					g4 (RightSB + extR) (-depth + 0.5 * O) [heading Rightward]
+					g4 (RightSB + [mix (-extL) extR (11/16)]) ((-depth) + O) [heading Rightward]
+					g4 (RightSB + extR) ((-depth) + 0.5 * O) [heading Rightward]
 
 		create-glyph "eWithNotch.\(suffix)" : glyph-proc
 			include : MarkSet.e
@@ -215,13 +215,14 @@ glyph-block Letter-Latin-Lower-E : begin
 
 		create-glyph "eRetroflexHook.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			local lastKnot : include : Body [DivFrame 1] XH
+			include : Body [DivFrame 1] XH
 				ada -- SmallArchDepthA
 				adb -- SmallArchDepthB
+				tailSlab -- SLAB-CLASSICAL
 			include : RetroflexHook.r
-				x -- lastKnot.x
+				x -- RightSB
 				y -- 0
-				yAttach -- lastKnot.y
+				yAttach -- AHook
 
 		create-glyph "Schwa.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -234,6 +235,24 @@ glyph-block Letter-Latin-Lower-E : begin
 			include [refer-glyph "e.\(suffix)"] AS_BASE ALSO_METRICS
 			include : FlipAround Middle (XH / 2)
 
+		create-glyph "schwaRetroflexHook.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 1
+			include : df.markSet.e
+			local divSub : Math.min 1 : 0.85 * para.diversityM
+			local dfSub : DivFrame divSub 2
+			local stroke : AdviceStroke2 2 3 XH divSub
+			include : Body dfSub XH
+				stroke -- stroke
+				ada -- [dfSub.archDepthA SmallArchDepth stroke]
+				adb -- [dfSub.archDepthB SmallArchDepth stroke]
+			include : FlipAround dfSub.middle (XH / 2)
+			include : RetroflexHook.r
+				x -- [mix RightSB df.width 0.5]
+				y -- 0
+				yAttach -- (XH / 2 - HalfStroke)
+				xLink -- (dfSub.rightSB - [HSwToV : 0.5 * stroke])
+				refSw -- [AdviceStroke 4]
+
 		create-glyph "eRev.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : RevBody [DivFrame 1] XH
@@ -243,7 +262,7 @@ glyph-block Letter-Latin-Lower-E : begin
 		create-glyph "eBar.\(suffix)" : glyph-proc
 			include [refer-glyph "e.\(suffix)"] AS_BASE ALSO_METRICS
 			include : HBar.m [mix SB 0 0.7] [mix RightSB Width 0.7] (XH * 0.25 + Stroke * 0.25)
-				Math.min [AdviceStroke 5] (0.25 * (XH - 3 * Stroke))
+				Math.min (0.25 * (XH - 3 * Stroke)) : AdviceStroke 5
 
 		DefineSelectorGlyph "cyrl/Schwa" suffix [DivFrame 1] 'capital'
 		DefineSelectorGlyph "cyrl/schwa" suffix [DivFrame 1] 'e'
@@ -321,6 +340,7 @@ glyph-block Letter-Latin-Lower-E : begin
 
 	select-variant 'Schwa' 0x18F
 	select-variant 'schwa' 0x259
+	select-variant 'schwaRetroflexHook' 0x1D95 (follow -- 'schwa')
 
 	select-variant 'eRev' 0x258 (follow -- 'e')
 
