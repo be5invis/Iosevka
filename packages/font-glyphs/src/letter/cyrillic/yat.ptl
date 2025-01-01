@@ -12,28 +12,28 @@ glyph-block Letter-Cyrillic-Yat : begin
 	glyph-block-import Letter-Shared : CreateDependentComposite
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
-	glyph-block-import Letter-Cyrillic-Yeri : YeriConfig
+	glyph-block-import Letter-Cyrillic-Yeri : YeriConfig YeriBarPos
 	glyph-block-import Letter-Cyrillic-Iotified-A : Iotified
 
 	define [xBarLeft df] : Math.max (df.rightSB - (RightSB - SB)) : if SLAB
 		Just ([mix df.leftSB df.rightSB 0.35] - [HSwToV : 0.5 * df.mvs])
 		Just  [mix df.leftSB df.rightSB 0.2]
 
-	define [YatShape] : with-params [df Yeri top [pBar 0.5] [fLowerCase false] [sw df.mvs] [xCrossbarLeftOverride nothing] [yCrossbarOverride nothing]] : glyph-proc
+	define [YatShape] : with-params [df Yeri top [pBar YeriBarPos] [fLowerCase false] [fIotifiedBase false] [sw df.mvs] [xCrossbarLeftOverride nothing] [yCrossbarOverride nothing]] : glyph-proc
 		local xYeriLeft : xBarLeft df
 
 		include : Yeri top
-			left -- xYeriLeft
-			right -- (df.rightSB - O * 2)
-			pBar -- pBar
+			left   -- xYeriLeft
+			right  -- (df.rightSB - O * 2)
+			pBar   -- pBar
 			stroke -- sw
 
 		local cTop : if SLAB (top - Stroke / 2) top
 
-		local _xCrossbarLeft : mix 0 df.leftSB [if SLAB 0.25 0.375]
+		local _xCrossbarLeft : mix 0 df.leftSB : if SLAB 0.25 0.375
 		local xCrossbarLeft : fallback xCrossbarLeftOverride _xCrossbarLeft
 		local xCrossbarRight : mix _xCrossbarLeft (xYeriLeft + [HSwToV : 0.5 * sw]) 2
-		local yCrossbar : fallback yCrossbarOverride : [mix (top * pBar + sw / 2) cTop [if SLAB 0.625 0.5]] + 0.25 * OverlayStroke
+		local yCrossbar : fallback yCrossbarOverride : [mix (top * pBar + sw / 2) cTop : if SLAB 0.625 0.5] + 0.25 * OverlayStroke
 		include : HBar.t xCrossbarLeft xCrossbarRight yCrossbar OverlayStroke
 
 		if SLAB : begin
@@ -44,25 +44,24 @@ glyph-block Letter-Cyrillic-Yat : begin
 
 			if fLowerCase : begin
 				eject-contour 'serifYeriLT'
-				include : tagged 'serifLT' : HSerif.lt xYeriLeft top SideJut sw
+				include : tagged 'serifLT' : if (fIotifiedBase && para.isItalic) [glyph-proc] [HSerif.lt xYeriLeft top SideJut sw]
 
-	define [IotifiedYatShape] : with-params [df Yeri top [pBar 0.5] [fLowerCase false]] : glyph-proc
-		local gap : 0.25 * (df.width - 2 * df.leftSB - [if SLAB 2.5 4.5] * df.mvs)
-		define divSub : (df.width - gap - df.mvs) / Width
+	define [IotifiedYatShape] : with-params [df Yeri top [pBar YeriBarPos] [fLowerCase false] [sw df.mvs]] : glyph-proc
+		local gap : 0.25 * (df.width - 2 * df.leftSB - [if SLAB 2.5 4.5] * sw)
+		define divSub : (df.width - gap - sw) / Width
 		define dfSub : DivFrame divSub 2
 
 		local shift : Width * (df.div - divSub)
 		include : with-transform [ApparentTranslate shift 0]
 			YatShape dfSub Yeri top
-				pBar -- pBar
-				fLowerCase -- fLowerCase
-				sw -- df.mvs
+				pBar          -- pBar
+				fLowerCase    -- fLowerCase
+				fIotifiedBase -- true
+				sw            -- sw
 				xCrossbarLeftOverride -- (df.leftSB - shift)
 		eject-contour 'serifDL'
 
-		if fLowerCase
-			include : Iotified.ascender df top 0 (fCapital -- false)
-			include : Iotified.full df top 0 (fCapital -- true)
+		include : Iotified.[if fLowerCase 'ascender' 'full'] df top 0 (fCapital -- (!fLowerCase))
 
 	foreach { suffix { Uc Lc } } [pairs-of YeriConfig] : do
 		create-glyph "cyrl/Yat.\(suffix)" : glyph-proc
@@ -75,27 +74,31 @@ glyph-block Letter-Cyrillic-Yat : begin
 			local df : include : DivFrame para.diversityT
 			include : df.markSet.b
 			include : YatShape df Lc Ascender
-				pBar -- (0.55 * XH / Ascender)
+				pBar -- (YeriBarPos * XH / Ascender)
 				fLowerCase -- true
 
 		create-glyph "cyrl/yatTall.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityT
 			include : df.markSet.b
-			include : ExtendAboveBaseAnchors (Ascender + 0.5 * AccentStackOffset)
-			include : YatShape df Lc (Ascender + 0.5 * AccentStackOffset)
-				pBar -- (0.55 * XH / (Ascender + 0.5 * AccentStackOffset))
+			local asc : Ascender + 0.5 * AccentStackOffset
+			include : ExtendAboveBaseAnchors asc
+			include : YatShape df Lc asc
+				pBar -- (YeriBarPos * XH / asc)
 				fLowerCase -- true
 				yCrossbarOverride -- (Ascender - [if SLAB (0.25 * df.mvs) 0])
 
 		create-glyph "cyrl/YatIotified.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 3
 			include : df.markSet.capital
-			include : IotifiedYatShape df Uc CAP (pBar -- 0.5)
+			include : IotifiedYatShape df Uc CAP
+				pBar -- 0.5
 
 		create-glyph "cyrl/yatIotified.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 3
 			include : df.markSet.b
-			include : IotifiedYatShape df Lc Ascender (pBar -- 0.375) (fLowerCase -- true)
+			include : IotifiedYatShape df Lc Ascender
+				pBar -- 0.375
+				fLowerCase -- true
 
 		# Italic Yat
 		create-glyph "cyrl/yat.italic/yeri.\(suffix)" : glyph-proc

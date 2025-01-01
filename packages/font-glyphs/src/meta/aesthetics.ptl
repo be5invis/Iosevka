@@ -39,13 +39,13 @@ export : define [calculateMetrics para] : begin
 
 	# Transform constructors
 	define [Italify angle shift] : begin
-		local slope [Math.tan ([fallback angle para.slopeAngle] / 180 * Math.PI)]
-		return : new Transform 1 slope 0 1 [fallback shift : -slope * SymbolMid] 0
+		local slope : Math.tan ([fallback angle para.slopeAngle] / 180 * Math.PI)
+		return : new Transform 1 slope 0 1 [fallback shift : (-slope) * SymbolMid] 0
 	define [Upright angle shift] [Italify angle shift :.inverse]
 	define [Scale sx sy] : new Transform sx 0 0 [fallback sy sx] 0 0
 	define [Translate x y] : new Transform 1 0 0 1 x y
 	define [ApparentTranslate x y] : Translate (x + TanSlope * y) y
-	define [Rotate angle] : new Transform [Math.cos angle] (-[Math.sin angle]) [Math.sin angle] [Math.cos angle] 0 0
+	define [Rotate angle] : new Transform [Math.cos angle] [Math.sin (-angle)] [Math.sin angle] [Math.cos angle] 0 0
 
 	define GlobalTransform : Italify para.slopeAngle
 	define TanSlope   GlobalTransform.xy
@@ -53,6 +53,7 @@ export : define [calculateMetrics para] : begin
 	define CosSlope : Math.cos (para.slopeAngle / 180 * Math.PI)
 	define HVContrast : Contrast * CosSlope + SinSlope * TanSlope
 	define [HSwToV sw] : sw * HVContrast
+	define [VSwToH sw] : sw / HVContrast
 
 	# Orient parameters
 	define Upward    : new Point Point.Type.Corner (-HVContrast)  0
@@ -83,7 +84,7 @@ export : define [calculateMetrics para] : begin
 	define [AdviceStrokeInSpace availSpace contrast crowdedness mul] : begin
 		local nonAdjustedFillRate : crowdedness * contrast * para.stroke / availSpace
 		local adjustedFillRate : StrokeWeightControlSigmoid nonAdjustedFillRate
-		local strokeWidthScalar : Math.min 1 (mul * adjustedFillRate / nonAdjustedFillRate)
+		local strokeWidthScalar : Math.min 1 : mul * adjustedFillRate / nonAdjustedFillRate
 		return : para.stroke * strokeWidthScalar
 	define [AdviceStroke crowdedness div mul] : begin
 		local spaceH : Width * [fallback div 1] - SB * 2
@@ -159,8 +160,8 @@ export : define [calculateMetrics para] : begin
 		local delta : (adb - ada) / 2
 		local smOfSma : ada + delta
 		local smOfSmb : adb - delta
-		local yNotAdjusted : mix top bot (smOfSmb / (smOfSma + smOfSmb))
-		return : yNotAdjusted - delta * [Math.min 1 ((top - bot) / (ada + adb))]
+		local yNotAdjusted : mix top bot : smOfSmb / (smOfSma + smOfSmb)
+		return : yNotAdjusted - delta * [Math.min 1 : (top - bot) / (ada + adb)]
 	set YSmoothMidR.cr : function [c r _ada _adb] : YSmoothMidR (c + r) (c - r) _ada _adb
 	define [YSmoothMidL top bot _ada _adb] : begin
 		local ada : fallback _ada ArchDepthA
@@ -168,8 +169,8 @@ export : define [calculateMetrics para] : begin
 		local delta : (adb - ada) / 2
 		local smOfSma : ada + delta
 		local smOfSmb : adb - delta
-		local yNotAdjusted : mix top bot (smOfSma / (smOfSma + smOfSmb))
-		return : yNotAdjusted + delta * [Math.min 1 ((top - bot) / (ada + adb))]
+		local yNotAdjusted : mix top bot : smOfSma / (smOfSma + smOfSmb)
+		return : yNotAdjusted + delta * [Math.min 1 : (top - bot) / (ada + adb)]
 	set YSmoothMidL.cr : function [c r _ada _adb] : YSmoothMidL (c + r) (c - r) _ada _adb
 
 	define ArchDepthA : ArchDepth - TanSlope * SmoothAdjust
@@ -184,7 +185,7 @@ export : define [calculateMetrics para] : begin
 	define OverlayStroke : AdviceStroke 3.75
 	define OperatorStroke : AdviceStroke 2.75
 	define GeometryStroke : AdviceStroke 4
-	define ShoulderFine : Math.min (Stroke * para.shoulderFineMin) [AdviceStroke 24]
+	define ShoulderFine : Math.min (Stroke * para.shoulderFineMin) : AdviceStroke 24
 
 	define [AdviceGlottalStopArchDepth y sign] : begin
 		return : ((y - Stroke) * 0.24 + Stroke * 0.625) + sign * TanSlope * SmoothAdjust
@@ -205,7 +206,7 @@ export : define [calculateMetrics para] : begin
 		SideJut ArchDepthA ArchDepthB SmallArchDepthA SmallArchDepthB CorrectionOMidX CorrectionOMidS
 		compositeBaseAnchors AdviceStroke AdviceStroke2 AdviceStrokeInSpace OverlayStroke OperatorStroke
 		GeometryStroke ShoulderFine AdviceGlottalStopArchDepth StrokeWidthBlend ArchDepthAOf ArchDepthBOf
-		SmoothAdjust MidJutSide MidJutCenter YSmoothMidR YSmoothMidL HSwToV NarrowUnicodeT
+		SmoothAdjust MidJutSide MidJutCenter YSmoothMidR YSmoothMidL HSwToV VSwToH NarrowUnicodeT
 		WideUnicodeT VERY-FAR TINY]
 
 export : define [setFontMetrics para metrics fm] : begin
@@ -237,9 +238,9 @@ export : define [setFontMetrics para metrics fm] : begin
 
 	local slope : Math.tan para.slopeAngle
 	set fm.post.italicAngle       : Math.round (0 - para.slopeAngle)
-	set fm.hhea.caretSlopeRise    : if para.slopeAngle (1000)                    1
-	set fm.hhea.caretSlopeRun     : if para.slopeAngle (-slope * 1000)           0
-	set fm.hhea.caretOffset       : if para.slopeAngle (-slope * para.symbolMid) 0
+	set fm.hhea.caretSlopeRise    : if para.slopeAngle (1000)                      1
+	set fm.hhea.caretSlopeRun     : if para.slopeAngle ((-slope) * 1000)           0
+	set fm.hhea.caretOffset       : if para.slopeAngle ((-slope) * para.symbolMid) 0
 
 	# Fixed metrics
 	set fm.os2.yStrikeoutPosition    para."os2.yStrikeoutPosition"

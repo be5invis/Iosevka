@@ -7,19 +7,20 @@ glyph-module
 glyph-block Letter-Latin-Sakha-Yat : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Latin-Lower-M : MEnoughSpaceForFullSerifs
 	glyph-block-import Letter-Cyrillic-Yeri : YeriConfig
 	glyph-block-import Letter-Cyrillic-Iotified-A : Iotified
 
 	define [SakhaYatShape Yeri df top] : glyph-proc
-		local jut : Math.min Jut : Jut * 0.75 * df.div
 		include : Yeri top
 			left -- (df.middle - [HSwToV : 0.5 * df.mvs])
 			right -- df.rightSB
 			stroke -- df.mvs
-			jut -- jut
+			jut -- [Math.min Jut : Jut * 0.75 * df.div]
 
-		include : Iotified.outer df top (df.middle + [HSwToV : 0.5 * df.mvs]) (top - df.mvs * 0.5)
+		local fEnoughSpaceForFullSerifs : MEnoughSpaceForFullSerifs df
+		if [not fEnoughSpaceForFullSerifs] : eject-contour 'serifYeriLB'
+		include : Iotified.[if fEnoughSpaceForFullSerifs 'full' 'outer'] df top (df.middle + [HSwToV : 0.5 * df.mvs]) (top - df.mvs * 0.5)
 
 	foreach { suffix { Uc Lc } } [Object.entries YeriConfig] : do
 		create-glyph "latn/yatSakha.upright.\(suffix)" : glyph-proc
