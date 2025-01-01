@@ -1,0 +1,277 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Symbol-Geometric-Rotational : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
+
+	define [OpenRadius sw sides] : sw / 2 / [Math.tan : Math.PI / sides]
+
+	define [Line sw] : lambda [r] : dispiro
+		widths.center sw
+		corner 0 0
+		corner r 0
+
+	define [Maltese sw sw2] : lambda [r] : lift-@ : spiro-outline
+		corner (@x1 = 0) (sw / 2)
+		flat (@x2 = TINY) (sw / 2)
+		curl (@x3 = [clamp (0.5 * r) (0.75 * r) : @x4 - (sw2 - sw)]) (sw / 2)
+		archv
+		corner (@x4 = r) sw2
+		corner @x4 (-sw2)
+		arcvh
+		flat @x3 (-sw / 2)
+		curl @x2 (-sw / 2)
+		corner @x1 (-sw / 2)
+
+	define [TeardropImpl r sw sw2 fPetal] : lift-@ : list
+		corner (@x1 = 0) (sw / 2)
+		if fPetal [list] : list
+			flat (@x2 = TINY) (sw / 2)
+			curl (@x3 = [clamp (2 * TINY) (0.4 * r) : r - (r - @x4) * 3]) (sw / 2)
+		alsoThru.g2 0.5 0.5
+		g4 (@x4 = [clamp (0.5 * r) (0.9 * r) : r - sw2 / 2]) (sw2 / 2)
+		archv
+		g4 r 0
+		arcvh
+		g4 @x4 (-sw2 / 2)
+		alsoThru.g2 0.5 0.5
+		if fPetal [list] : list
+			flat @x3 (-sw / 2)
+			curl @x2 (-sw / 2)
+		corner @x1 (-sw / 2)
+
+	define [Teardrop sw sw2] : lambda [r] : spiro-outline
+		TeardropImpl r sw sw2 0
+
+	define [PinwheelTeardrop sw sw2] : lambda [r] : union
+		intersection [MaskAbove 0] : dispiro [widths.rhs : sw / 2] : TeardropImpl r sw sw2 0
+		intersection [MaskBelow 0] : spiro-outline : TeardropImpl r sw sw2 0
+
+	define [Petal sw sw2] : lambda [r] : spiro-outline
+		TeardropImpl r sw sw2 1
+
+	define [WhitePetal sw sw2] : lambda [r] : dispiro
+		widths.rhs (sw / 2)
+		TeardropImpl r sw sw2 1
+
+	define [Balloon sw ballR] : lambda [r] : union
+		dispiro [widths.center sw] [corner 0 0] [corner (r - ballR) 0]
+		RingAt (r - ballR) 0 ballR
+
+	define [Club sw refBallR] : lambda [r] : glyph-proc
+		local ballR : (9 / 19) * refBallR
+		local clubCenter : r - refBallR
+		local clubRadius : refBallR - ballR
+		local cosAngle 0.5
+		local sinAngle : [Math.sqrt 3] / 2
+		include : union
+			dispiro [widths.center sw] [corner 0 0] [corner clubCenter 0]
+			RingAt (clubCenter + clubRadius) 0 ballR
+			RingAt (clubCenter - cosAngle * clubRadius) ( sinAngle * clubRadius) ballR
+			RingAt (clubCenter - cosAngle * clubRadius) (-sinAngle * clubRadius) ballR
+			spiro-outline
+				corner (clubCenter + clubRadius) 0
+				corner (clubCenter - cosAngle * clubRadius) ( sinAngle * clubRadius)
+				corner (clubCenter - cosAngle * clubRadius) (-sinAngle * clubRadius)
+
+	define [Snowflake sw sw2 sides fTight] : lambda [r] : glyph-proc
+		local sinAngle : Math.sin : 2 * Math.PI / sides
+		local cosAngle : Math.cos : 2 * Math.PI / sides
+		local branchPos : [if fTight 0.4 0.55] * r - sw2 / 2
+		local branchLen : [if fTight 1 0.45] * r
+		local shape : union
+			dispiro [widths.center sw] [corner 0 0] [corner r 0]
+			intersection [MaskAbove 0] : dispiro [disable-contrast] [widths.rhs sw2]
+				corner branchPos 0
+				corner (branchPos + branchLen * cosAngle) (branchLen * sinAngle)
+			intersection [MaskBelow 0] : dispiro [disable-contrast] [widths.lhs sw2]
+				corner branchPos 0
+				corner (branchPos + branchLen * cosAngle) (-branchLen * sinAngle)
+
+		if fTight
+		: then : begin
+			local sinHalfAngle : Math.sin : Math.PI / sides
+			local cosHalfAngle : Math.cos : Math.PI / sides
+
+			include : intersection shape : spiro-outline
+				corner 0 0
+				corner (2 * r * cosHalfAngle) ( 2 * r * sinHalfAngle)
+				corner (2 * r * cosHalfAngle) (-2 * r * sinHalfAngle)
+		: else : begin
+			include shape
+
+	for-width-kinds WideWidth1 : begin
+		define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+		define lightSw      : UnicodeWeightGrade 3    Geom.Scalar
+		define normalSw     : UnicodeWeightGrade 4    Geom.Scalar
+		define semiBoldSw   : UnicodeWeightGrade 6    Geom.Scalar
+		define boldSw       : UnicodeWeightGrade 7    Geom.Scalar
+		define heavySw      : UnicodeWeightGrade 9    Geom.Scalar
+
+		define [for-rotational-pointing sides phase mag gap fn] : begin
+			local shapes {}
+			foreach [j : range 0 sides] : begin
+				local angle : (j + phase) * 2 * Math.PI / sides
+				shapes.push : PointingTo
+					Geom.MidX + [Math.sin angle] * mag
+					Geom.MidY + [Math.cos angle] * mag
+					Geom.MidX + [Math.sin angle] * gap
+					Geom.MidY + [Math.cos angle] * gap
+					* fn
+
+			return shapes
+
+		define centerSw : heavySw * 1.2
+		define ballRad : Geom.Size * (1 / 7) + normalSw / 2
+		define bigBallRad : ballRad + centerSw / 2
+		define bigBallRad2 : ballRad + centerSw / 4
+		define teardropSw : Geom.Size * (2 / 7) + normalSw / 2
+		define teardropHeavySw : Geom.Size * (2 / 7) + boldSw / 2
+		define [BallCenter] : RingAt Geom.MidX Geom.MidY (centerSw / 2)
+		define [BallOpenCenter] : RingStrokeAt Geom.MidX Geom.MidY (centerSw / 2) (centerSw / 4)
+		define [BigBallCenter] : RingAt Geom.MidX Geom.MidY ballRad
+
+		# Open Center
+		create-glyph [MangleName 'openCenterCross'] [MangleUnicode 0x271B] : glyph-proc
+			set-width Geom.Width
+			include : union.apply null : for-rotational-pointing 4 0 Geom.Size [OpenRadius normalSw 4] : Line normalSw
+		create-glyph [MangleName 'openCenterCrossHeavy'] [MangleUnicode 0x271C] : glyph-proc
+			set-width Geom.Width
+			include : union.apply null : for-rotational-pointing 4 0 Geom.Size [OpenRadius heavySw 4] : Line heavySw
+		create-glyph [MangleName 'openCenterAsterisk6'] [MangleUnicode 0x2732] : glyph-proc
+			set-width Geom.Width
+			include : union.apply null : for-rotational-pointing 6 0 Geom.Size [OpenRadius normalSw 6] : Line normalSw
+
+		# Teardrop
+		create-glyph [MangleName 'teardropAsterisk4'] [MangleUnicode 0x2722] : glyph-proc
+			set-width Geom.Width
+			include : union
+				union.apply null : for-rotational-pointing 4 0 Geom.Size 0 : Teardrop normalSw teardropSw
+				BallCenter
+		create-glyph [MangleName 'teardropAsterisk6'] [MangleUnicode 0x273B] : glyph-proc
+			set-width Geom.Width
+			include : union
+				union.apply null : for-rotational-pointing 6 0 Geom.Size 0 : Teardrop normalSw teardropSw
+				BallCenter
+		create-glyph [MangleName 'teardropOpenAsterisk6'] [MangleUnicode 0x273C] : glyph-proc
+			set-width Geom.Width
+			include : union
+				difference
+					union.apply null : for-rotational-pointing 6 0 Geom.Size 0 : Teardrop normalSw teardropSw
+					BallCenter
+				BallOpenCenter
+		create-glyph [MangleName 'teardropHeavyAsterisk6'] [MangleUnicode 0x273D] : glyph-proc
+			set-width Geom.Width
+			include : union
+				union.apply null : for-rotational-pointing 6 0 Geom.Size 0 : Teardrop normalSw teardropHeavySw
+				BallCenter
+		create-glyph [MangleName 'teardropHeavyPinwheelAsterisk6'] [MangleUnicode 0x2743] : glyph-proc
+			set-width Geom.Width
+			include : union
+				union.apply null : for-rotational-pointing 6 0 Geom.Size 0 : PinwheelTeardrop normalSw teardropHeavySw
+				BallCenter
+		create-glyph [MangleName 'teardropAsterisk8'] [MangleUnicode 0x274A] : glyph-proc
+			set-width Geom.Width
+			include : union
+				union.apply null : for-rotational-pointing 8 0 Geom.Size 0 : Teardrop normalSw teardropSw
+				BallCenter
+		create-glyph [MangleName 'teardropHeavyAsterisk8'] [MangleUnicode 0x274B] : glyph-proc
+			set-width Geom.Width
+			include : union
+				union.apply null : for-rotational-pointing 8 0 Geom.Size 0 : Teardrop normalSw teardropHeavySw
+				BallCenter
+
+		# Florette
+		create-glyph [MangleName 'blackAndWhiteFlorette6'] [MangleUnicode 0x273E] : glyph-proc
+			set-width Geom.Width
+			include : union
+				union.apply null : for-rotational-pointing 3 0.5 Geom.Size 0 : Petal normalSw (Geom.Size * 4.5 / 7)
+				union.apply null : for-rotational-pointing 3 0 Geom.Size 0 : WhitePetal normalSw (Geom.Size * 4.5 / 7)
+				BallCenter
+		create-glyph [MangleName 'blackFlorette5'] [MangleUnicode 0x273F] : glyph-proc
+			set-width Geom.Width
+			include : difference
+				union.apply null : for-rotational-pointing 5 0 Geom.Size 0 : Petal normalSw (Geom.Size * 5 / 7)
+				refer-glyph : MangleName 'blackSlightlySmallCircle'
+		create-glyph [MangleName 'whiteFlorette5'] [MangleUnicode 0x2740] : glyph-proc
+			set-width Geom.Width
+			include : union
+				union.apply null : for-rotational-pointing 5 0 Geom.Size 0 : WhitePetal normalSw (Geom.Size * 5 / 7)
+				refer-glyph : MangleName 'blackSlightlySmallCircle'
+		create-glyph [MangleName 'outlinedFlorette8'] [MangleUnicode 0x2741] : glyph-proc
+			set-width Geom.Width
+			local innerSw : clamp (normalSw / 2) normalSw (Geom.Size * 4 / 7 - normalSw * 2)
+			local offset : (Geom.Size * 4 / 7 - innerSw) / 2
+			include : union
+				difference
+					union
+						union.apply null : for-rotational-pointing 8 0 Geom.Size 0 : WhitePetal normalSw (Geom.Size * 4 / 7)
+						union.apply null : for-rotational-pointing 8 0 (Geom.Size - offset) 0 : Petal (innerSw / 2) innerSw
+					refer-glyph : MangleName 'blackSlightlySmallCircle'
+				refer-glyph : MangleName 'whiteSlightlySmallCircle'
+
+		# Balloon
+		create-glyph [MangleName 'balloonAsterisk4'] [MangleUnicode 0x2723] : glyph-proc
+			set-width Geom.Width
+			include : union.apply null : for-rotational-pointing 4 0 Geom.Size 0 : Balloon normalSw ballRad
+		create-glyph [MangleName 'balloonHeavyAsterisk4'] [MangleUnicode 0x2724] : glyph-proc
+			set-width Geom.Width
+			include : union.apply null : for-rotational-pointing 4 0 Geom.Size 0 : Balloon heavySw (ballRad * 1.35)
+		create-glyph [MangleName 'balloonAsterisk6'] [MangleUnicode 0x2749] : glyph-proc
+			set-width Geom.Width
+			include : union.apply null : for-rotational-pointing 6 0 Geom.Size 0 : Balloon normalSw ballRad
+
+		create-glyph [MangleName 'clubAsterisk4'] [MangleUnicode 0x2725] : glyph-proc
+			set-width Geom.Width
+			include : union.apply null : for-rotational-pointing 4 0 Geom.Size 0 : Club normalSw (ballRad * 1.35)
+
+		# Snowflake
+		create-glyph [MangleName 'snowflake'] [MangleUnicode 0x2744] : glyph-proc
+			set-width Geom.Width
+			include : union.apply null : for-rotational-pointing 6 0 Geom.Size 0 : Snowflake lightSw lightSw 6 0
+		create-glyph [MangleName 'snowflakeTight'] [MangleUnicode 0x2745] : glyph-proc
+			set-width Geom.Width
+			include : union.apply null : for-rotational-pointing 6 0 Geom.Size 0 : Snowflake lightSw lightSw 6 1
+		create-glyph [MangleName 'snowflakeHeavyChevron'] [MangleUnicode 0x2746] : glyph-proc
+			set-width Geom.Width
+			include : union.apply null : for-rotational-pointing 6 0 Geom.Size 0 : Snowflake lightSw semiBoldSw 6 0
+
+		# Sparkle
+		create-glyph [MangleName 'sparkle'] [MangleUnicode 0x2747] : glyph-proc
+			set-width Geom.Width
+			include : union
+				union.apply null : for-rotational-pointing 4 0 Geom.Size bigBallRad2 : Teardrop normalSw teardropSw
+				union.apply null : for-rotational-pointing 4 0.5 Geom.Size bigBallRad : Line normalSw
+				BigBallCenter
+		create-glyph [MangleName 'sparkleHeavy'] [MangleUnicode 0x2748] : glyph-proc
+			set-width Geom.Width
+			include : union
+				union.apply null : for-rotational-pointing 4 0 Geom.Size bigBallRad2 : Teardrop normalSw teardropHeavySw
+				union.apply null : for-rotational-pointing 4 0.5 Geom.Size bigBallRad : Line boldSw
+				BigBallCenter
+
+glyph-block Symbol-Other-Rotational : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [EternitySymbol sign] : glyph-proc
+		define sw : AdviceStroke 6.5
+		define radius : (RightSB - Middle) / 2
+
+		foreach [j : range 0 8] : do
+			local angle : sign * j * Math.PI / 4
+			local angle2 : sign * (j + 1) * Math.PI / 4
+			include : difference
+				Circle.Outline.At (Middle + radius * [Math.cos angle ]) (SymbolMid + radius * [Math.sin angle ]) radius sw
+				Circle.Outline.At (Middle + radius * [Math.cos angle ]) (SymbolMid + radius * [Math.sin angle ]) (radius - sw) sw
+				Circle.Outline.At (Middle + radius * [Math.cos angle2]) (SymbolMid + radius * [Math.sin angle2]) radius sw
+
+	create-glyph 'armn/eternitySignLeft'  0x58E : EternitySymbol   1
+	create-glyph 'armn/eternitySignRight' 0x58D : EternitySymbol (-1)

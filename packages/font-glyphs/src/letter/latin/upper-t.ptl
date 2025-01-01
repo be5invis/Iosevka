@@ -15,8 +15,9 @@ glyph-block Letter-Latin-Upper-T : begin
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay UpwardHookShape
 	glyph-block-import Letter-Shared-Shapes : CyrDescender SerifFrame FlatHookDepth LeftHook RetroflexHook
 
-	define [TLeftX df]  : df.leftSB  + 0.75 * OX
-	define [TRightX df] : df.rightSB - 0.75 * OX
+	define ox : 0.75 * OX
+	define [TLeftX df]  : df.leftSB  + ox
+	define [TRightX df] : df.rightSB - ox
 	define [TShape df top doTopSerifs doBottomSerifs] : glyph-proc
 		include : tagged 'strokeV' : VBar.m df.middle 0 top
 		local l : TLeftX df
@@ -60,18 +61,24 @@ glyph-block Letter-Latin-Upper-T : begin
 		eject-contour 'strokeV'
 
 	define [CyrlTallTeShape df top doTopSerifs doBottomSerifs] : glyph-proc
-		local xRight : df.width - 1.5 * df.leftSB
-		local xLeft : df.leftSB - 0.75 * OX
+		define doFullSerifs : doTopSerifs && doBottomSerifs && !para.isItalic
 
-		include : HBar.t xLeft xRight top
-		include : VBar.r xRight 0 top
+		local xRight : df.width - 1.5 * df.leftSB
+		local xLeft : df.leftSB - ox
+
+		include : tagged 'strokeLT' : HBar.t xLeft xRight top
+		include : tagged 'strokeV'  : VBar.r xRight 0 top
 
 		if doTopSerifs : begin
 			include : tagged 'serifLT' : VSerif.dl xLeft top VJut
 		if doBottomSerifs : begin
-			include : tagged 'serifMB' : HSerif.rb (xRight - [HSwToV HalfStroke]) 0 Jut
-			include : tagged 'serifMB' : HSerif.lb (xRight - [HSwToV HalfStroke]) 0 MidJutSide
+			include : tagged 'serifMB' : if para.isItalic [HSerif.rb xRight 0 SideJut] : composite-proc
+				HSerif.rb (xRight - [HSwToV HalfStroke]) 0 Jut
+				HSerif.lb (xRight - [HSwToV HalfStroke]) 0 MidJutSide
+		if doFullSerifs : begin
 			include : tagged 'serifRT' : HSerif.rt xRight top SideJut
+
+		include : LeaningAnchor.Below.VBar.r xRight
 
 	glyph-block-export TConfig
 	define TConfig : object
@@ -158,11 +165,10 @@ glyph-block Letter-Latin-Upper-T : begin
 			include : df.markSet.e
 			include : TjeShape df XH doST
 
-		create-glyph "cyrl/teTall.upright.\(suffix)" : glyph-proc
+		create-glyph "cyrl/teTall.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.b
 			include : CyrlTallTeShape df Ascender doST doSB
-			include : LeaningAnchor.Below.VBar.r (df.width - 1.5 * df.leftSB)
 
 	select-variant 'T' 'T'
 	link-reduced-variant 'T/sansSerif' 'T' MathSansSerif
@@ -191,8 +197,7 @@ glyph-block Letter-Latin-Upper-T : begin
 
 	select-variant 'currency/tengeSign' 0x20B8 (follow -- 'T')
 
-	select-variant 'cyrl/teTall.upright' (follow -- 'T')
-	select-variant 'cyrl/teTall.italic' (shapeFrom -- 'cyrl/teTall.upright') (follow -- 'T/rtailBase')
+	select-variant 'cyrl/teTall' 0x1C84 (follow -- 'T')
 
 	CreateAccentedComposition 'TCedilla' 0x0162 'T' 'cedillaBelow'
 	CreateAccentedComposition 'TComma'   0x021A 'T' 'commaBelow'
