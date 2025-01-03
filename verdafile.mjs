@@ -1172,6 +1172,7 @@ const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t,
 	await FS.promises.writeFile(out.full, JSON.stringify(releaseNoteGroups, null, "  "));
 });
 const AmendLicenseYear = task("amend-readme:license-year", async target => {
+	await target.need(Version, Parameters, UtilScripts);
 	return node(`tools/amend-readme/src/license-year.mjs`, {
 		path: "LICENSE.md",
 	});
