@@ -160,8 +160,7 @@ glyph-block Letter-Shared-Shapes : begin
 			flat (x + hookTurn)  (high - overshoot) [heading Rightward]
 			curl (x + hookDepth + sw * TanSlope) (high - overshoot)
 
-	glyph-block-export DToothlessRise
-	glyph-block-export DMBlend
+	glyph-block-export DToothlessRise DMBlend
 	define DToothlessRise : Hook * 0.25 + Stroke / 16
 	define DMBlend          0.80
 
@@ -589,7 +588,7 @@ glyph-block Letter-Shared-Shapes : begin
 	glyph-block-export ArcStartSerifDepth
 	define [ArcStartSerifDepth hook] : hook - 0
 
-	define [ArcStartInwardSerifDepth hook stroke] : Math.max hook (DToothlessRise + stroke)
+	define [ArcStartInwardSerifDepth hook stroke] : Math.max hook : DToothlessRise + stroke
 
 	glyph-block-export : ArcStartSerif
 	define ArcStartSerif : namespace
@@ -641,8 +640,8 @@ glyph-block Letter-Shared-Shapes : begin
 			define dxTurn : [HSwToV : 0.5 * sw] + rIn + 0.5 * sign * TanSlope * fine
 			define dxTailStart : dxTurn + sinAngle * (r * [mix 1 HVContrast sinAngle])
 			define dyTailStart : (rIn + fine) - cosAngle * r
-			define dxDepth : (depth - 0.25 * sw) * +dSinAngle
-			define dyDepth : (depth - 0.25 * sw) * -dCosAngle
+			define dxDepth : (depth - 0.25 * sw) * (+dSinAngle)
+			define dyDepth : (depth - 0.25 * sw) * (-dCosAngle)
 			return : list
 				g4.[if (sign > 0) "right" "left"].mid
 					cx + sign * dxTurn
@@ -688,7 +687,7 @@ glyph-block Letter-Shared-Shapes : begin
 	define [JutIn left right jut swRef hSplit] : begin
 		local ink : HSwToV swRef
 		local gap : (right - left - hSplit * ink) / (hSplit - 1)
-		Math.min jut (0.5 * ink + [Math.max (Stroke * TanSlope) (0.375 * gap)])
+		Math.min jut : 0.5 * ink + [Math.max (Stroke * TanSlope) (0.375 * gap)]
 
 	class CSerifFrame
 		public [new top bot left right swRef swSerif div hSplit fForceSymmetric] : begin
@@ -707,7 +706,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 
 			local jutFS   MidJutSide
-			local jut     : mix [HSwToV : 0.5 * swRef] Jut [Math.min 1 : div * 2.25 / hSplit]
+			local jut     : mix [HSwToV : 0.5 * swRef] Jut : Math.min 1 : div * 2.25 / hSplit
 			local sideJut : jut - 0.5 * ink
 
 			local jutIn     : if fForceSymmetric jut : JutIn left right jut swRef hSplit
@@ -823,6 +822,20 @@ glyph-block Letter-Shared-Shapes : begin
 			archv
 			flat right ada
 			curl right yend [heading Upward]
+
+	glyph-block-export RhoticHookShape
+	define [RhoticHookShape] : with-params [left right y rise [sw [AdviceStroke 5]] [doHook false]] : glyph-proc
+		local mid : mix left right 0.5
+		include : dispiro
+			widths.rhs sw
+			g2 (left - [HSwToV : 0.5 * sw]) (y)
+			g2 (mid  - [HSwToV : 0.5 * sw]) (y + rise)
+		include : dispiro
+			widths.center sw
+			flat mid (y + rise) [heading Downward]
+			curl mid (y + [if doHook 0 (rise - 1)]) [heading Downward]
+			if doHook {[hookend (y - rise) (sw -- sw)]} {[arcvh]}
+			g4 (right - [if doHook sw 0]) (y - [if doHook (rise * 0.5) rise]) [if doHook nothing [heading Rightward]]
 
 	# Generic "connected" vertical hooks
 	glyph-block-export VerticalHook
@@ -941,7 +954,7 @@ glyph-block Letter-Shared-Shapes : begin
 						xDepth -- (-TailX)
 						yDepth -- TailY
 						sw -- sw
-						yExtension -- [Math.max 0 (yAttach + yOverflow - y + (fullDepth - TailY))]
+						yExtension -- [Math.max 0 : yAttach + yOverflow - y + (fullDepth - TailY)]
 				if maskOut maskOut [no-shape]
 
 		# Retroflex hooks
@@ -957,7 +970,7 @@ glyph-block Letter-Shared-Shapes : begin
 					xDepth -- TailX
 					yDepth -- TailY
 					sw -- sw
-					yExtension -- [Math.max 0 (yAttach + yOverflow - y + (fullDepth - TailY))]
+					yExtension -- [Math.max 0 : yAttach + yOverflow - y + (fullDepth - TailY)]
 
 		# Cyrillic "Middle Hook" Characters
 		glyph-block-export MidHook
@@ -983,7 +996,7 @@ glyph-block Letter-Shared-Shapes : begin
 					ada    -- ArchDepthA
 					adb    -- ArchDepthB
 					sw     -- df.mvs
-					xDepth -- (-[Math.max [HSwToV df.mvs] : Math.min HookX (0.5 * (df.rightSB - df.leftSB - [HSwToV : 2 * df.mvs]))])
+					xDepth -- (-[Math.max [HSwToV df.mvs] : Math.min HookX : 0.5 * (df.rightSB - df.leftSB) - [HSwToV df.mvs]])
 
 		# Hook for Eng shape
 		glyph-block-export EngHook
