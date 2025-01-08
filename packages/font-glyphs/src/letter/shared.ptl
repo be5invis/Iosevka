@@ -241,7 +241,7 @@ glyph-block Letter-Shared-Shapes : begin
 			local-parameter : adb               -- SmallArchDepthB
 			local-parameter : stroke            -- Stroke
 			local-parameter : fMask             -- false
-			local-parameter : leftY0            -- (top - ada - 2)
+			local-parameter : leftY0            -- (top - ada - TINY)
 
 			return : list
 				flat (left - [HSwToV fine]) leftY0 [widths.rhs fine]
@@ -1082,15 +1082,15 @@ glyph-block Letter-Shared-Shapes : begin
 		set BeltOverlay.at BeltOverlayAt
 
 	do "Letter bar overlays"
-		glyph-block-export LetterBarOverlay
-		define [LetterBarOverlay] : with-params [x y space refSw pXInSw sw] : begin
+		glyph-block-export LetterBarOverlay LetterObliqueBarOverlay
+		define [BarOverlayImpl] : with-params [barFunc x y space refSw pXInSw sw] : begin
 			local {xLeftSpace xRightSpace} space
 			local xLeftEdge  : x - pXInSw * [HSwToV refSw]
 			local xRightEdge : x + (1 - pXInSw) * [HSwToV refSw]
 			local p : (xLeftEdge - xLeftSpace) / ((xRightSpace - xRightEdge) + (xLeftEdge - xLeftSpace))
 			local xC : mix xLeftEdge xRightEdge [mix 0.5 (1 - p) 0.5]
 			local jut : 0.75 * LongJut
-			return : HOverlayBar
+			return : barFunc
 				Math.min (xLeftEdge - SideJut)
 					Math.max (xC - jut) [mix xLeftSpace xLeftEdge 0.3]
 				Math.max (xRightEdge + SideJut)
@@ -1098,33 +1098,39 @@ glyph-block Letter-Shared-Shapes : begin
 				begin y
 				begin sw
 
-		set LetterBarOverlay.l : function []
-			with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw)
-		set LetterBarOverlay.m : function []
-			with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw)
-		set LetterBarOverlay.r : function []
-			with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw)
-
 		define [calcYAndSw bot top py sw] : begin
 			local y : mix bot top py
 			local sw1 : Math.min sw (1.25 * (top - bot) * py) (1.25 * (top - bot) * (1 - py))
 			return { y sw1 }
 
-		set LetterBarOverlay.l.in : function []
-			with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-			: begin
-				local { y sw1 } : calcYAndSw bot top py sw
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw1)
-		set LetterBarOverlay.m.in : function []
-			with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-			: begin
-				local { y sw1 } : calcYAndSw bot top py sw
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw1)
-		set LetterBarOverlay.r.in : function []
-			with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-			: begin
-				local { y sw1 } : calcYAndSw bot top py sw
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw1)
+		define [LetterBarOverlay] : with-params [x y space refSw pXInSw sw]
+			BarOverlayImpl HOverlayBar x y space refSw pXInSw sw
+		define [LetterObliqueBarOverlay] : with-params [x y space refSw pXInSw sw]
+			BarOverlayImpl HOverlayObliqueBar x y space refSw pXInSw sw
+
+		foreach base {LetterBarOverlay LetterObliqueBarOverlay} : let [base] : begin
+			set base.l : function []
+				with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw)
+			set base.m : function []
+				with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw)
+			set base.r : function []
+				with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw)
+
+			set base.l.in : function []
+				with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+				: begin
+					local { y sw1 } : calcYAndSw bot top py sw
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw1)
+			set base.m.in : function []
+				with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+				: begin
+					local { y sw1 } : calcYAndSw bot top py sw
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw1)
+			set base.r.in : function []
+				with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+				: begin
+					local { y sw1 } : calcYAndSw bot top py sw
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw1)
