@@ -168,7 +168,7 @@ glyph-block Letter-Shared-Shapes : begin
 	define CurlyTail : namespace
 		define [normalBlender before _after args] : begin
 			local ltr : args.xOuter > before.x
-			local rInner : 0.5 * ([Math.abs (args.xOuter - before.x)] - (2 * [HSwToV args.fine]))
+			local rInner : 0.5 * [Math.abs : args.xOuter - before.x] - [HSwToV args.fine]
 			local top : fallback args.yLoopTop : args.bottom + 2 * (args.fine + rInner)
 			local yOuter : [if ltr YSmoothMidR YSmoothMidL] top args.bottom
 
@@ -687,7 +687,7 @@ glyph-block Letter-Shared-Shapes : begin
 	define [JutIn left right jut swRef hSplit] : begin
 		local ink : HSwToV swRef
 		local gap : (right - left - hSplit * ink) / (hSplit - 1)
-		Math.min jut : 0.5 * ink + [Math.max (Stroke * TanSlope) (0.375 * gap)]
+		return : Math.min jut : 0.5 * ink + [Math.max (Stroke * TanSlope) (0.375 * gap)]
 
 	class CSerifFrame
 		public [new top bot left right swRef swSerif div hSplit fForceSymmetric] : begin
@@ -816,7 +816,7 @@ glyph-block Letter-Shared-Shapes : begin
 		include : dispiro
 			widths.lhs sw
 			flat left ybegin [heading Downward]
-			curl left [Math.min (ybegin - TINY) adb]
+			curl left [Math.min adb : ybegin - TINY]
 			arcvh
 			g4 [mix left right 0.5] bottom [heading Rightward]
 			archv
@@ -923,7 +923,7 @@ glyph-block Letter-Shared-Shapes : begin
 		# Diacritical descender of cyrillics
 		glyph-block-export CyrDescender
 		define CyrDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
-			local extension : QuarterStroke - LongVJut
+			local extension : (-LongVJut) + QuarterStroke
 			include : ExtendBelowBaseAnchors (y + extension)
 			include : union
 				xLinkStroke xLink x yAttach sw
@@ -931,7 +931,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 		glyph-block-export CyrTailDescender
 		define CyrTailDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
-			local extension : QuarterStroke - LongVJut
+			local extension : (-LongVJut) + QuarterStroke
 			include : ExtendBelowBaseAnchors (y + extension)
 			include : union
 				xLinkStroke xLink x yAttach sw
@@ -943,7 +943,7 @@ glyph-block Letter-Shared-Shapes : begin
 		# Palatal Hooks
 		glyph-block-export PalatalHook
 		define PalatalHook : Descenders : function [x y xLink yAttach yOverflow sw maskOut] : glyph-proc
-			local fullDepth : 0 - Descender - 0.5 * sw - O
+			local fullDepth : (-Descender) - 0.5 * sw - O
 			include : ExtendBelowBaseAnchors (y + Descender)
 			include : difference
 				union
@@ -960,7 +960,7 @@ glyph-block Letter-Shared-Shapes : begin
 		# Retroflex hooks
 		glyph-block-export RetroflexHook
 		define RetroflexHook : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
-			local fullDepth : 0 - Descender - 0.5 * sw - O
+			local fullDepth : (-Descender) - 0.5 * sw - O
 			include : ExtendBelowBaseAnchors (y + Descender)
 			include : union
 				xLinkStroke xLink x yAttach sw
@@ -1002,7 +1002,7 @@ glyph-block Letter-Shared-Shapes : begin
 		glyph-block-export EngHook
 		define [EngHook] : with-params [x yStart yEnd [sw Stroke]] : begin
 			return : VerticalHook.r x (yEnd + Hook + 0.5 * sw) (-HookX) Hook
-				yExtension -- [Math.max 0 (yStart - (yEnd + Hook + 0.5 * sw))]
+				yExtension -- [Math.max 0 : yStart - (yEnd + Hook + 0.5 * sw)]
 				sw -- sw
 
 		# Upward hook shape
@@ -1085,22 +1085,24 @@ glyph-block Letter-Shared-Shapes : begin
 		glyph-block-export LetterBarOverlay LetterObliqueBarOverlay
 		define [BarOverlayImpl] : with-params [barFunc x y space refSw pXInSw sw] : begin
 			local {xLeftSpace xRightSpace} space
-			local xLeftEdge  : x - pXInSw * [HSwToV refSw]
+			local xLeftEdge  : x - (0 + pXInSw) * [HSwToV refSw]
 			local xRightEdge : x + (1 - pXInSw) * [HSwToV refSw]
 			local p : (xLeftEdge - xLeftSpace) / ((xRightSpace - xRightEdge) + (xLeftEdge - xLeftSpace))
-			local xC : mix xLeftEdge xRightEdge [mix 0.5 (1 - p) 0.5]
+			local xC : mix xLeftEdge xRightEdge : mix 0.5 (1 - p) 0.5
 			local jut : 0.75 * LongJut
 			return : barFunc
 				Math.min (xLeftEdge - SideJut)
-					Math.max (xC - jut) [mix xLeftSpace xLeftEdge 0.3]
+					Math.max (xC - jut) : mix xLeftSpace xLeftEdge 0.3
 				Math.max (xRightEdge + SideJut)
-					Math.min [mix xRightSpace xRightEdge 0.3] (xC + jut)
+					Math.min (xC + jut) : mix xRightSpace xRightEdge 0.3
 				begin y
 				begin sw
 
 		define [calcYAndSw bot top py sw] : begin
 			local y : mix bot top py
-			local sw1 : Math.min sw (1.25 * (top - bot) * py) (1.25 * (top - bot) * (1 - py))
+			local sw1 : Math.min sw
+				1.25 * (top - bot) * (0 + py)
+				1.25 * (top - bot) * (1 - py)
 			return { y sw1 }
 
 		define [LetterBarOverlay] : with-params [x y space refSw pXInSw sw]
