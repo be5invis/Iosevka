@@ -9,32 +9,47 @@ glyph-block Symbol-Punctuation-Pilcrow : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	create-glyph : glyph-proc
-		set-width Width
-		local sw : AdviceStroke 3.6
+	define [BulletShape top bot left right sw] : glyph-proc
+		local vsw : HSwToV sw
+		local midx : [mix left right 0.5] - vsw / 4
 
 		include : union
-			dispiro
-				widths.center sw
-				flat (RightSB - sw / 4) (CAP - sw / 2) [heading Leftward]
-				curl (Middle - sw / 4) (CAP - sw / 2) [heading Leftward]
-				archv
-				g4.down.mid (SB + sw / 2) [mix (CAP * 0.5) (CAP - sw / 2) 0.5] [heading Downward]
-				arcvh
-				straight.right.end (Middle - sw / 4) (CAP * 0.5) [heading Rightward]
 			spiro-outline
-				straight.left.start (Middle - sw / 4) (CAP - sw / 2 - TINY)
+				straight.left.start midx top
 				archv
-				g4.down.mid (SB + sw / 2 + 0.2) [mix (CAP * 0.5) (CAP - sw / 2) 0.5]
+				g4.down.mid left [mix top bot 0.5]
 				arcvh
-				straight.right.end (Middle - sw / 4) (CAP * 0.5 + TINY)
+				straight.right.end midx bot
+			HBar.t midx right top sw
+
+	create-glyph : glyph-proc
+		set-width Width
+		local sw : AdviceStroke 1.5 0.5
+		local vsw : HSwToV sw
+
+		local bulletBot : CAP * 0.5 - sw / 2
+		local midbarX : Middle + vsw / 4
+
+		include : BulletShape CAP bulletBot SB RightSB sw
 
 		create-forked-glyph 'pilcrow.high' : glyph-proc
-			include : VBar.m (Middle + sw / 4) 0 CAP sw
-			include : VBar.m (RightSB - sw / 2) 0 CAP sw
+			include : VBar.m midbarX 0 CAP sw
+			include : VBar.r RightSB 0 CAP sw
 		create-forked-glyph 'pilcrow.low' : glyph-proc
-			include : VBar.m (Middle + sw / 4) Descender CAP sw
-			include : VBar.m (RightSB - sw / 2) Descender CAP sw
+			include : VBar.m midbarX Descender CAP sw
+			include : VBar.r RightSB Descender CAP sw
+		create-forked-glyph 'pilcrow.curved' : glyph-proc
+			include : dispiro
+				widths.rhs sw
+				flat RightSB CAP [heading Downward]
+				curl RightSB (0 + SmallArchDepthA)
+				hookend 0 (sw -- sw)
+				g4 SB (0 + SHook)
+			include : VBar.m midbarX bulletBot CAP sw
+
+			create-forked-glyph 'curvedPilcrow' 0x2761 : glyph-proc
+				include : HBar.t midbarX [mix RightSB Width 0.5] CAP sw
+				include : HBar.b midbarX RightSB bulletBot sw
 
 	select-variant 'pilcrow' 0xB6
 
@@ -45,35 +60,25 @@ glyph-block Symbol-Punctuation-Pilcrow : begin
 		create-forked-glyph 'revPilcrow.low' : glyph-proc
 			include [refer-glyph 'pilcrow.low'] AS_BASE
 			include : FlipAround Middle (CAP / 2) (-1) 1
+		create-forked-glyph 'revPilcrow.curved' : glyph-proc
+			include [refer-glyph 'pilcrow.curved'] AS_BASE
+			include : FlipAround Middle (CAP / 2) (-1) 1
 
 	select-variant 'revPilcrow' 0x204B
 
 	create-glyph 'leftBullet' 0x204C : glyph-proc
 		set-width Width
-		local sw : AdviceStroke 3.6
+		local sw : AdviceStroke 1.5 0.5
+		local vsw : HSwToV sw
 
-		include : union
-			dispiro
-				widths.center sw
-				flat (RightSB - sw / 4) (PlusTop - sw / 2) [heading Leftward]
-				curl (Middle - sw / 4) (PlusTop - sw / 2) [heading Leftward]
-				archv
-				g4.down.mid (SB + sw / 2) SymbolMid [heading Downward]
-				arcvh
-				flat (Middle - sw / 4) (PlusBot + sw / 2) [heading Rightward]
-				curl (RightSB - sw / 4) (PlusBot + sw / 2) [heading Rightward]
-			spiro-outline
-				straight.left.start (Middle - sw / 4) (PlusTop - sw / 2 - TINY) [heading Leftward]
-				archv
-				g4.down.mid (SB + sw / 2 + TINY) SymbolMid [heading Downward]
-				arcvh
-				straight.right.end (Middle - sw / 4) (PlusBot + sw / 2 + TINY) [heading Rightward]
+		local midbarX : Middle + vsw / 4
 
-		include : VBar.m (Middle + sw / 4)  PlusBot PlusTop sw
-		include : VBar.m (RightSB - sw / 2) PlusBot PlusTop sw
+		include : BulletShape PlusTop PlusBot SB RightSB sw
+
+		include : VBar.m midbarX PlusBot PlusTop sw
+		include : VBar.r RightSB PlusBot PlusTop sw
+		include : HBar.b midbarX RightSB PlusBot sw
 
 	create-glyph 'rightBullet' 0x204D : glyph-proc
 		include [refer-glyph 'leftBullet'] AS_BASE
 		include : FlipAround Middle SymbolMid (-1) 1
-
-
