@@ -78,19 +78,19 @@ glyph-block Symbol-Currency : begin
 			include : LetterObliqueBarOverlay.l SB (CAP * 0.60 - OverlayStroke * 0.25)
 			if serifGrade : begin
 				local sf : SerifFrame.fromDf [DivFrame 1] CAP 0
-				include : composite-proc sf.lt.full sf.lb.outer
+				include : composite-proc sf.lt.fullSide sf.lb.outer
 
 	select-variant 'currency/turkishLiraSign' 0x20BA
 
 	create-glyph 'currency/sheqelSign' 0x20AA : glyph-proc
-		local df : include : DivFrame para.diversityMM 4
+		local df : include : DivFrame para.diversityM 4
 		include : df.markSet.e
 
 		define pX 0.7
 		define pY 0.8
 
 		local vswPlusGap : (df.rightSB - df.leftSB - [HSwToV df.mvs]) / 3
-		local barShrink : Math.min (XH * 0.3) : vswPlusGap - [HSwToV df.mvs] + df.mvs * 1.5
+		local barShrink : Math.min (XH * 0.3) (vswPlusGap - [HSwToV df.mvs] + df.mvs * 1.5)
 		include : VBar.l df.leftSB 0 XH df.mvs
 		include : VBar.l (df.leftSB + vswPlusGap) 0 (XH - barShrink) df.mvs
 		include : lift-@ : dispiro
@@ -109,19 +109,29 @@ glyph-block Symbol-Currency : begin
 			curl df.rightSB XH [heading Upward]
 
 	create-glyph 'currency/manatSign' 0x20BC : glyph-proc
-		local df : include : DivFrame para.diversityM 3
+		local df : include : DivFrame para.diversityT 3
 		include : df.markSet.e
 
 		define pY 0.8
 		local archTop : mix 0 XH pY
-		include : VBar.m df.middle 0 XH df.mvs
+
+		local sw : Math.min df.mvs : AdviceStroke2 3 2 archTop df.div
+
+		local ada : df.archDepthA SmallArchDepth sw
+		local adb : df.archDepthB SmallArchDepth sw
+
+		include : VBar.m df.middle [if SLAB sw 0] XH sw
 		include : dispiro
-			widths.rhs df.mvs
-			flat df.leftSB 0 [heading Upward]
-			curl df.leftSB (archTop - SmallArchDepthA)
-			arch.rhs archTop (sw -- df.mvs)
-			flat df.rightSB (archTop - SmallArchDepthB)
+			widths.rhs sw
+			flat df.leftSB  0 [heading Upward]
+			curl df.leftSB  [if (ada + adb < archTop) (archTop - ada) : mix archTop 0 (ada / (ada + adb))]
+			arch.rhs archTop (sw -- sw)
+			flat df.rightSB [if (ada + adb < archTop) (archTop - adb) : mix archTop 0 (adb / (ada + adb))]
 			curl df.rightSB 0 [heading Downward]
+
+		if SLAB : begin
+			local sf : SerifFrame.fromDf df XH 0 (swSerif -- sw)
+			include : composite-proc sf.lb.full sf.rb.full
 
 	create-glyph 'currency/lariSign' 0x20BE : glyph-proc
 		local df : include : DivFrame para.diversityM 3
@@ -133,14 +143,17 @@ glyph-block Symbol-Currency : begin
 			CAP * 0.5
 			CAP - df.mvs + Descender
 
+		local ada : df.archDepthA ArchDepth df.mvs
+		local adb : df.archDepthB ArchDepth df.mvs
+
 		include : HBar.b df.leftSB df.rightSB 0 df.mvs
 		include : dispiro
 			widths.lhs df.mvs
 			g4 (df.rightSB - OX) (CAP - Hook)
 			hookstart CAP (sw -- df.mvs)
-			flatside.ld df.leftSB 0 CAP ArchDepthA ArchDepthB
+			flatside.ld df.leftSB 0 CAP ada adb
 			arcvh
-			flat df.middle (df.mvs - df.shoulderFine) [widths.lhs df.shoulderFine]
+			flat df.middle  (df.mvs - df.shoulderFine) [widths.lhs df.shoulderFine]
 			curl df.rightSB (df.mvs - df.shoulderFine) [heading Rightward]
 		include : VBar.r (df.middle - offset) barBot (CAP - Descender / 2) fine
 		include : VBar.l (df.middle + offset) barBot (CAP - Descender / 2) fine
@@ -151,7 +164,7 @@ glyph-block Symbol-Currency-Letter-Derived : begin
 	glyph-block-import Letter-Shared-Shapes : LetterObliqueBarOverlay
 
 	derive-composites 'currency/colonSign' 0x20A1 'C' 'dblLongSlash'
-	derive-composites 'currency/millSign' 0x20A5 'm' 'shortSlash'
+	derive-composites 'currency/millSign'  0x20A5 'm' 'shortSlash'
 
 	create-glyph 'currency/overlay/NS' : glyph-proc
 		define sw : Math.min OverlayStroke : AdviceStroke2 2 4 CAP
@@ -341,7 +354,7 @@ glyph-block Symbol-Letter : begin
 			dispiro
 				widths.rhs
 				g4 (SB + O) (y - O)
-				g4 Middle (y + O)
+				g4 Middle  (y + O)
 				g4 RightSB (y - O)
 
 		create-glyph 'tironianEt' 0x204A : glyph-proc
@@ -378,7 +391,7 @@ glyph-block Symbol-Cyrl-Thousands : begin
 	create-glyph 'cyrlThousandsSign' 0x482 : glyph-proc
 		define fine : AdviceStroke 3
 		include : ExtLineCenter (-0.1) fine SB Descender RightSB XH
-		include : ExtLineCenter (-0.1) fine [mix SB RightSB 0.1] [mix Descender XH 0.8] [mix SB RightSB 1.1] [mix Descender XH 0.5]
+		include : ExtLineCenter (-0.1) fine [mix SB RightSB (+0.1)] [mix Descender XH 0.8] [mix SB RightSB 1.1] [mix Descender XH 0.5]
 		include : ExtLineCenter (-0.1) fine [mix SB RightSB (-0.1)] [mix Descender XH 0.5] [mix SB RightSB 0.9] [mix Descender XH 0.2]
 
 glyph-block Symbol-Letter-Phonetic : begin
