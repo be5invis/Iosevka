@@ -10,10 +10,10 @@ glyph-block Letter-Latin-Upper-D : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay LeftHook
 
-	define [DArcShapeT sink df top right offset sw fRound ySmooth] : glyph-proc
+	define [DArcShapeT sink df top right offset sw fRound smooth] : glyph-proc
 		local mockWidth : right + (df.width - df.rightSB)
 		local maxXSmoothWidth : mockWidth - df.leftSB * 2 - [HSwToV sw]
-		local dsmooth : fallback ySmooth : clamp (sw * 1.5) (top / 2 - TINY) ((top / CAP) * ArchDepth * 1.1)
+		local dsmooth : fallback smooth : clamp (sw * 1.5) (top / 2 - TINY) ((top / CAP) * ArchDepth * 1.1)
 		local bsmooth : clamp (sw * 1.5) maxXSmoothWidth ((mockWidth / Width) * ArchDepth * 1.1)
 		local barchDepthRd : clamp (sw * 1.5) maxXSmoothWidth ((mockWidth / Width) * ArchDepth * 1.25)
 
@@ -39,9 +39,9 @@ glyph-block Letter-Latin-Upper-D : begin
 			flat [arch.adjust-x.bot (right - bsmooth)] offset
 			[if offset corner curl] (df.leftSB - O) offset [heading Leftward]
 
-	define [DShape df top right fRound ySmooth slabTop slabBot] : glyph-proc
+	define [DShape df top right fRound smooth slabTop slabBot] : glyph-proc
 		include : VBar.l df.leftSB 0 top df.mvs
-		include : DArcShapeT dispiro df top right 0 df.mvs fRound ySmooth
+		include : DArcShapeT dispiro df top right 0 df.mvs fRound smooth
 		if slabTop : include : tagged 'serifLT' : HSerif.lt df.leftSB top SideJut
 		if slabBot : include : tagged 'serifLB' : HSerif.lb df.leftSB 0 SideJut
 
@@ -67,7 +67,7 @@ glyph-block Letter-Latin-Upper-D : begin
 			eject-contour 'serifLT'
 			include : LeftHook SB CAP
 
-		create-glyph "smcpD.\(suffix)" : glyph-proc
+		if fRound : create-glyph "smcpD.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.e
 			include : DShape df XH df.rightSB fRound ArchDepth fSlabTop fSlabBot
@@ -107,7 +107,7 @@ glyph-block Letter-Latin-Upper-D : begin
 	derive-composites 'Dbar' 0xA7C7 'D'
 		HBar.m (SB - OX) (RightSB + OX) (CAP / 2) OverlayStroke
 
-	select-variant 'smcpD' 0x1D05 (follow -- 'D')
+	select-variant 'smcpD' 0x1D05
 	derive-glyphs 'smcpEth' 0x1D06 'smcpD' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : LetterBarOverlay.l.in SB Stroke (XH - Stroke)
