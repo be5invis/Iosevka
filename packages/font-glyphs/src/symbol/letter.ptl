@@ -13,7 +13,7 @@ glyph-module
 glyph-block Symbol-Currency : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay LetterObliqueBarOverlay SerifFrame
 
 	create-glyph 'currency' 0xA4 : glyph-proc
 		local sw : AdviceStroke 3.5
@@ -33,7 +33,6 @@ glyph-block Symbol-Currency : begin
 	foreach { suffix { serifGrade } } [Object.entries SterlingConfig] : do
 		define xBarLeft : [mix SB RightSB 0.2] - Stroke * 0.1
 		define [BaseShape] : glyph-proc
-			local xBarLeft : [mix SB RightSB 0.2] - Stroke * 0.1
 			local hookEndX : Math.max (xBarLeft + [HSwToV : 2.25 * Stroke]) [mix SB RightSB 0.95]
 			include : union
 				dispiro
@@ -59,18 +58,116 @@ glyph-block Symbol-Currency : begin
 	select-variant 'currency/sterlingSign'   0xA3
 	select-variant 'currency/liraSymbolSign' 0x20A4 (follow -- 'currency/sterlingSign')
 
+	define TurkLiraConfig : object
+		serifless { 0 }
+		serifed   { 1 }
+
+	foreach { suffix { serifGrade } } [Object.entries TurkLiraConfig] : do
+		create-glyph "currency/turkishLiraSign.\(suffix)" : glyph-proc
+			set-width Width
+			include : MarkSet.capital
+			include : union
+				dispiro
+					widths.lhs Stroke
+					flat SB 0 [heading Rightward]
+					curl Middle 0
+					archv
+					straight.up.end RightSB Hook [heading Upward]
+				VBar.l SB 0 CAP
+			include : LetterObliqueBarOverlay.l SB (CAP * 0.37)
+			include : LetterObliqueBarOverlay.l SB (CAP * 0.60 - OverlayStroke * 0.25)
+			if serifGrade : begin
+				local sf : SerifFrame.fromDf [DivFrame 1] CAP 0
+				include : composite-proc sf.lt.fullSide sf.lb.outer
+
+	select-variant 'currency/turkishLiraSign' 0x20BA
+
+	create-glyph 'currency/sheqelSign' 0x20AA : glyph-proc
+		local df : include : DivFrame para.diversityM 4
+		include : df.markSet.e
+
+		define pX 0.7
+		define pY 0.8
+
+		local vswPlusGap : (df.rightSB - df.leftSB - [HSwToV df.mvs]) / 3
+		local barShrink : Math.min (XH * 0.3) (vswPlusGap - [HSwToV df.mvs] + df.mvs * 1.5)
+		include : VBar.l df.leftSB 0 XH df.mvs
+		include : VBar.l (df.leftSB + vswPlusGap) 0 (XH - barShrink) df.mvs
+		include : lift-@ : dispiro
+			widths.rhs df.mvs
+			flat df.leftSB XH [heading Rightward]
+			curl [Math.min (@right - [HSwToV : Stroke * 1.5]) [mix df.leftSB @right pX]] XH
+			archv
+			flat @right [Math.min (XH - Stroke * 1.5) [mix 0 XH pY]]
+			curl (@right = df.rightSB - vswPlusGap) barShrink [heading Downward]
+		include : lift-@ : dispiro
+			widths.lhs df.mvs
+			flat (@left = df.leftSB + vswPlusGap) 0 [heading Rightward]
+			curl [Math.min (df.rightSB - [HSwToV : Stroke * 1.5]) [mix @left df.rightSB pX]] 0
+			archv
+			flat df.rightSB [Math.max (Stroke * 1.5) [mix XH 0 pY]]
+			curl df.rightSB XH [heading Upward]
+
+	create-glyph 'currency/manatSign' 0x20BC : glyph-proc
+		local df : include : DivFrame para.diversityT 3
+		include : df.markSet.e
+
+		define pY 0.8
+		local archTop : mix 0 XH pY
+
+		local sw : Math.min df.mvs : AdviceStroke2 3 2 archTop df.div
+
+		local ada : df.archDepthAOf SmallArchDepth sw
+		local adb : df.archDepthBOf SmallArchDepth sw
+
+		include : VBar.m df.middle [if SLAB sw 0] XH sw
+		include : dispiro
+			widths.rhs sw
+			flat df.leftSB  0 [heading Upward]
+			curl df.leftSB  [if (ada + adb < archTop) (archTop - ada) : mix archTop 0 (ada / (ada + adb))]
+			arch.rhs archTop (sw -- sw)
+			flat df.rightSB [if (ada + adb < archTop) (archTop - adb) : mix archTop 0 (adb / (ada + adb))]
+			curl df.rightSB 0 [heading Downward]
+
+		if SLAB : begin
+			local sf : SerifFrame.fromDf df XH 0 (swSerif -- sw)
+			include : composite-proc sf.lb.full sf.rb.full
+
+	create-glyph 'currency/lariSign' 0x20BE : glyph-proc
+		local df : include : DivFrame para.diversityM 3
+		local gap : df.rightSB - df.leftSB - [HSwToV : 2 * df.mvs]
+		local fine : Math.min OverlayStroke
+			AdviceStrokeInSpace gap HVContrast 3 1 1
+		local offset : (gap - [HSwToV : 2 * fine]) / 6
+		local barBot : Math.max
+			CAP * 0.5
+			CAP - df.mvs + Descender
+
+		include : HBar.b df.leftSB df.rightSB 0 df.mvs
+		include : dispiro
+			widths.lhs df.mvs
+			g4 (df.rightSB - OX) (CAP - Hook)
+			hookstart CAP (sw -- df.mvs)
+			flatside.ld df.leftSB 0 CAP df.archDepthA df.archDepthB
+			arcvh
+			flat df.middle  (df.mvs - df.shoulderFine) [widths.lhs df.shoulderFine]
+			curl df.rightSB (df.mvs - df.shoulderFine) [heading Rightward]
+		include : VBar.r (df.middle - offset) barBot (CAP - Descender / 2) fine
+		include : VBar.l (df.middle + offset) barBot (CAP - Descender / 2) fine
+
 glyph-block Symbol-Currency-Letter-Derived : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : LetterObliqueBarOverlay
 
 	derive-composites 'currency/colonSign' 0x20A1 'C' 'dblLongSlash'
-	derive-composites 'currency/millSign' 0x20A5 'm' 'shortSlash'
+	derive-composites 'currency/millSign'  0x20A5 'm' 'shortSlash'
 
 	create-glyph 'currency/overlay/NS' : glyph-proc
 		define sw : Math.min OverlayStroke : AdviceStroke2 2 4 CAP
 		define gap : Math.max (CAP / 8) (sw / 2)
 		include : HBar.b [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 + gap / 2) sw
-		include : HBar.t    [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 - gap / 2) sw
+		include : HBar.t [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 - gap / 2) sw
 
 	derive-composites 'currency/nairaSign' 0x20A6 'currency/nairaSignBase' 'currency/overlay/NS'
 	derive-composites 'currency/hryvniaSign' 0x20B4 'revS' 'currency/overlay/NS'
@@ -79,15 +176,18 @@ glyph-block Symbol-Currency-Letter-Derived : begin
 	derive-composites 'currency/kipSign' 0x20AD 'K' 'hStrike'
 
 	create-glyph 'currency/tugrikOverride' : glyph-proc
-		local l : mix (Middle - [HSwToV HalfStroke]) SB       0.75
-		local r : mix (Middle + [HSwToV HalfStroke]) RightSB  0.75
-		local kSlope 0.05
 		set-width 0
-		set-mark-anchor 'overlay' [mix l r 0.5] (CAP * 0.5)
-		include : intersection [Rect 0 CAP l r] : union
-			ExtLineCenter 4 OverlayStroke l (CAP * (0.6 - kSlope)) r (CAP * (0.6 + kSlope))
-			ExtLineCenter 4 OverlayStroke l (CAP * (0.35 - kSlope)) r (CAP * (0.35 + kSlope))
-
+		set-mark-anchor 'overlay' Middle (CAP * 0.5)
+		include : LetterObliqueBarOverlay.m.in
+			x   -- Middle
+			bot -- 0
+			top -- CAP
+			py  -- 0.35
+		include : LetterObliqueBarOverlay.m.in
+			x   -- Middle
+			bot -- 0
+			top -- (CAP - Stroke)
+			py  -- 0.65
 	derive-composites 'currency/tugrikSign' 0x20AE 'T' 'currency/tugrikOverride'
 
 	derive-composites 'currency/guaraniSign' 0x20B2 'G' 'longVStrokeOver'
@@ -251,7 +351,7 @@ glyph-block Symbol-Letter : begin
 			dispiro
 				widths.rhs
 				g4 (SB + O) (y - O)
-				g4 Middle (y + O)
+				g4 Middle  (y + O)
 				g4 RightSB (y - O)
 
 		create-glyph 'tironianEt' 0x204A : glyph-proc
@@ -288,7 +388,7 @@ glyph-block Symbol-Cyrl-Thousands : begin
 	create-glyph 'cyrlThousandsSign' 0x482 : glyph-proc
 		define fine : AdviceStroke 3
 		include : ExtLineCenter (-0.1) fine SB Descender RightSB XH
-		include : ExtLineCenter (-0.1) fine [mix SB RightSB 0.1] [mix Descender XH 0.8] [mix SB RightSB 1.1] [mix Descender XH 0.5]
+		include : ExtLineCenter (-0.1) fine [mix SB RightSB (+0.1)] [mix Descender XH 0.8] [mix SB RightSB 1.1] [mix Descender XH 0.5]
 		include : ExtLineCenter (-0.1) fine [mix SB RightSB (-0.1)] [mix Descender XH 0.5] [mix SB RightSB 0.9] [mix Descender XH 0.2]
 
 glyph-block Symbol-Letter-Phonetic : begin
@@ -317,14 +417,14 @@ glyph-block Symbol-Letter-Phonetic : begin
 
 		include : BreveShape
 			xMiddle -- Middle
-			width   -- markExtend * 3.0
+			width   -- (3 * markExtend)
 			top     -- XH
-			bottom  -- XH - AccentHeight
+			bottom  -- (XH - AccentHeight)
 			hs      -- markHalfStroke
 
 		include : InvBreveShape
 			xMiddle -- Middle
-			width   -- markExtend * 3.0
+			width   -- (3 * markExtend)
 			top     -- AccentHeight
 			bottom  -- 0
 			hs      -- markHalfStroke

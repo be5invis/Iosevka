@@ -8,9 +8,8 @@ glyph-module
 glyph-block Letter-Latin-V : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-export VShape VShapeOutline
 	glyph-block-import Letter-Shared : CreateTurnedLetter
-	glyph-block-import Letter-Shared-Shapes : DiagTail SerifFrame PalatalHook
+	glyph-block-import Letter-Shared-Shapes : DiagTail SerifFrame PalatalHook VerticalHook
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	glyph-block-export VCornerHalfWidth
@@ -26,6 +25,7 @@ glyph-block Letter-Latin-V : begin
 	define StraightSbShrink : mix 1 (DesignParameters.straightVShapeSbShrink * [StrokeWidthBlend 1 0.75]) : if SLAB 0.75 1
 	define [VShapeTopFlat top] : if SLAB [Math.min (top - Stroke) (top * 0.9)] (top * 0.9)
 
+	glyph-block-export VShapeOutline
 	define [VShapeOutline] : with-params [df fBarStraight top [sw Stroke]] : glyph-proc
 		define cornerHW : VCornerHalfWidth * sw / Stroke
 		define dgCor : DiagCor top (Width / 2) 0 (sw * 2)
@@ -63,6 +63,7 @@ glyph-block Letter-Latin-V : begin
 			corner (df.middle - cornerHW) 0
 			corner df.middle [Math.min sw : if fBarStraight VShapeFineStraight VShapeFine]
 
+	glyph-block-export VShape
 	define [VShape] : with-params [df fBarStraight top [sw Stroke]] : glyph-proc
 		define cornerHW : VCornerHalfWidth * (sw / Stroke)
 		define fine : Math.min sw : [if fBarStraight VShapeFineStraight VShapeFine] * (sw / Stroke)
@@ -137,7 +138,7 @@ glyph-block Letter-Latin-V : begin
 			straight.left.start (df.rightSB + hookWidthOuter) (top - sw - O)
 			g4 (df.rightSB - hookWidthInner) (top - 0.5 * sw - TailY)
 			quadControls 0.4 0.75 64 unimportant
-			g4 (df.middle + VCornerHalfWidth * sw / Stroke) 0 [widths.rhs (VShapeFine * sw / Stroke)]
+			g4 (df.middle + VCornerHalfWidth * sw / Stroke) 0 [widths.rhs : VShapeFine * sw / Stroke]
 
 	define [VLoopShape] : with-params [df fBarStraight top [sw Stroke]] : glyph-proc
 		include : VShape df fBarStraight top (sw -- sw)
@@ -248,11 +249,11 @@ glyph-block Letter-Latin-V : begin
 				x -- (Middle + [HSwToV HalfStroke] + [PalatalHook.adviceGap Stroke])
 				y -- 0
 
-	define CursiveConfig : object
+	define VCursiveConfig : object
 		cursiveSerifless     { (1/24) false }
 		cursiveSerifed       { (1/16) true  }
 
-	foreach { suffix { pxBar fDoSerif } } [Object.entries CursiveConfig] : do
+	foreach { suffix { pxBar fDoSerif } } [Object.entries VCursiveConfig] : do
 		create-glyph "v.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : VCursiveShape pxBar XH Stroke
@@ -290,6 +291,40 @@ glyph-block Letter-Latin-V : begin
 	CreateTurnedLetter 'turnV' 0x245 'V' HalfAdvance (CAP / 2)
 	CreateTurnedLetter 'turnv' 0x28C 'v' HalfAdvance (XH / 2)
 
+	define [VHookTopShape df top ada adb] : glyph-proc
+		include : dispiro
+			widths.lhs
+			flat df.leftSB top [heading Downward]
+			curl df.leftSB adb
+			arch.lhs 0
+			flat df.rightSB ada
+			curl df.rightSB (top - Hook - HalfStroke) [heading Upward]
+		include : VerticalHook.r
+			x -- df.rightSB
+			y -- (top - Hook - HalfStroke)
+			xDepth -- ((-RightSB) + Middle + [HSwToV HalfStroke])
+			yDepth -- (-Hook)
+
+	create-glyph 'VHookTop.serifless' : glyph-proc
+		include : MarkSet.capital
+		include : VHookTopShape [DivFrame 1] CAP ArchDepthA ArchDepthB
+
+	create-glyph 'VHookTop.serifed' : glyph-proc
+		include [refer-glyph "VHookTop.serifless"] AS_BASE ALSO_METRICS
+		include : tagged 'serifLT' : HSerif.lt SB CAP SideJut
+
+	select-variant 'VHookTop' 0x1B2
+
+	create-glyph 'vHookTop.serifless' : glyph-proc
+		include : MarkSet.e
+		include : VHookTopShape [DivFrame 1] XH SmallArchDepthA SmallArchDepthB
+
+	create-glyph 'vHookTop.serifed' : glyph-proc
+		include [refer-glyph "vHookTop.serifless"] AS_BASE ALSO_METRICS
+		include : tagged 'serifLT' : HSerif.lt SB XH SideJut
+
+	select-variant 'vHookTop' 0x28B
+
 	glyph-block-export BBVShape BBVInnerMaskShape BBVOuterMaskShape
 	define [BBVShape l r kd ks top] : glyph-proc
 		local m : mix l r 0.5
@@ -299,10 +334,10 @@ glyph-block Letter-Latin-V : begin
 		include : intersection
 			Rect top 0 (-Width) (2 * Width)
 			union
-				ExtLineCenter 1 bbs  l                 top (m - kDiag * bbd / 2) 0
-				ExtLineCenter 1 bbs  (l + kDiag * bbd) top (m + kDiag * bbd / 2) 0
-				ExtLineCenter 1 bbs  r                 top (m + kDiag * bbd / 2) 0
-		include : HBar.t    l                     (l + kDiag * bbd)     top bbs
+				ExtLineCenter 1 bbs  l                top (m - kDiag * bbd / 2) 0
+				ExtLineCenter 1 bbs (l + kDiag * bbd) top (m + kDiag * bbd / 2) 0
+				ExtLineCenter 1 bbs  r                top (m + kDiag * bbd / 2) 0
+		include : HBar.t  l                    (l + kDiag * bbd)     top bbs
 		include : HBar.b (m - kDiag * bbd / 2) (m + kDiag * bbd / 2) 0   bbs
 
 	define [BBVInnerMaskShape l r kd ks top] : glyph-proc
@@ -311,7 +346,7 @@ glyph-block Letter-Latin-V : begin
 		local kDiag : DiagCorDs top ((r - l) / 2) (bbd / 2)
 		include : spiro-outline
 			corner (l + kDiag * bbd) top
-			corner r                 top
+			corner  r                top
 			corner (m + kDiag * bbd / 2) 0
 
 	define [BBVOuterMaskShape l r kd ks top] : glyph-proc
@@ -319,8 +354,8 @@ glyph-block Letter-Latin-V : begin
 		local bbd : BBD * kd
 		local kDiag : DiagCorDs top ((r - l) / 2) (bbd / 2)
 		include : spiro-outline
-			corner l top
-			corner r top
+			corner  l top
+			corner  r top
 			corner (m + kDiag * bbd / 2) 0
 			corner (m - kDiag * bbd / 2) 0
 

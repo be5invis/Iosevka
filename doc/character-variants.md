@@ -1096,7 +1096,9 @@
 <td><img src="../images/cv-a-single-storey-earless-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-earless-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-a-single-storey-earless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-earless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-a-single-storey-earless-rounded-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-earless-rounded-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="3"> </td>
+<td><img src="../images/cv-a-single-storey-top-cut-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-top-cut-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-a-single-storey-top-cut-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-top-cut-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-a-single-storey-top-cut-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-top-cut-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
 </tr>
 <tr>
 <td>13</td>
@@ -1108,7 +1110,9 @@
 <td>19</td>
 <td>20</td>
 <td>21</td>
-<td colspan="3"> </td>
+<td>22</td>
+<td>23</td>
+<td>24</td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv37</code></td>
@@ -1119,7 +1123,9 @@
 <td><img src="../images/cv-b-toothless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-b-toothless-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothless-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-b-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="5"> </td>
+<td><img src="../images/cv-b-bottom-cut-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-bottom-cut-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-b-bottom-cut-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-bottom-cut-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="3"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -1129,7 +1135,9 @@
 <td>5</td>
 <td>6</td>
 <td>7</td>
-<td colspan="5"> </td>
+<td>8</td>
+<td>9</td>
+<td colspan="3"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv38</code></td>
@@ -1249,7 +1257,8 @@
 <td><img src="../images/cv-g-single-storey-flat-hook-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-flat-hook-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-g-single-storey-flat-hook-earless-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-flat-hook-earless-corner.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-g-single-storey-flat-hook-earless-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-flat-hook-earless-rounded.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="2"> </td>
+<td><img src="../images/cv-g-single-storey-top-cut.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-top-cut.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-g-single-storey-flat-hook-top-cut.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-flat-hook-top-cut.dark.svg#gh-dark-mode-only" width=32/></td>
 </tr>
 <tr>
 <td>1</td>
@@ -1262,7 +1271,8 @@
 <td>8</td>
 <td>9</td>
 <td>10</td>
-<td colspan="2"> </td>
+<td>11</td>
+<td>12</td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv43</code></td>
@@ -1662,14 +1672,22 @@
 <td><img src="../images/cv-q-earless-rounded-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-earless-rounded-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-q-earless-rounded-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-earless-rounded-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-q-earless-rounded-diagonal-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-earless-rounded-diagonal-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="8"> </td>
+<td><img src="../images/cv-q-top-cut-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-q-top-cut-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-q-top-cut-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-q-top-cut-diagonal-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-diagonal-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="4"> </td>
 </tr>
 <tr>
 <td>13</td>
 <td>14</td>
 <td>15</td>
 <td>16</td>
-<td colspan="8"> </td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td colspan="4"> </td>
 </tr>
 <tr>
 <td rowspan="4"><code>cv52</code></td>
@@ -2303,7 +2321,7 @@
 <td colspan="9"> </td>
 </tr>
 <tr>
-<td rowspan="2"><code>cv67</code></td>
+<td rowspan="4"><code>cv67</code></td>
 <td><img src="../images/cv-lower-alpha-crossing.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-crossing.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-alpha-barred.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-lower-alpha-barred-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -2330,6 +2348,18 @@
 <td>10</td>
 <td>11</td>
 <td>12</td>
+</tr>
+<tr>
+<td><img src="../images/cv-lower-alpha-barred-top-cut.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-top-cut.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-alpha-barred-top-cut-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-top-cut-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-alpha-barred-top-cut-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-top-cut-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td colspan="9"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>VXAC</code></td>
@@ -2675,7 +2705,9 @@
 <td><img src="../images/cv-cyrl-a-single-storey-earless-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-earless-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-a-single-storey-earless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-earless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-a-single-storey-earless-rounded-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-earless-rounded-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="3"> </td>
+<td><img src="../images/cv-cyrl-a-single-storey-top-cut-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-top-cut-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-a-single-storey-top-cut-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-top-cut-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-a-single-storey-top-cut-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-top-cut-tailed.dark.svg#gh-dark-mode-only" width=32/></td>
 </tr>
 <tr>
 <td>13</td>
@@ -2687,7 +2719,9 @@
 <td>19</td>
 <td>20</td>
 <td>21</td>
-<td colspan="3"> </td>
+<td>22</td>
+<td>23</td>
+<td>24</td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv80</code></td>
@@ -3685,12 +3719,14 @@
 <td rowspan="2"><code>VSAR</code></td>
 <td><img src="../images/cv-pilcrow-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-high.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-pilcrow-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-low.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="10"> </td>
+<td><img src="../images/cv-pilcrow-curved.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-curved.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="9"> </td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
-<td colspan="10"> </td>
+<td>3</td>
+<td colspan="9"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>VSAS</code></td>

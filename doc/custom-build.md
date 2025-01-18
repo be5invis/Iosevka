@@ -74,6 +74,7 @@ Inside the plan, top-level properties include:
         - `U+2B33` LONG LEFTWARDS SQUIGGLE ARROW
     - Remove `NWID` and `WWID` features typographic features
   - `fixed`: Apply `fontconfig-mono` changes and further remove ligations.
+  - `wide-mosaic`: Similar to `normal`, but all mosaic (box-drawing characters and block elements) will be wide.
 * `serifs`: Optional, String, configures style of serifs.
   - When set to `slab`, the font will be converted into slab-serif.
   - Otherwise the font will be sans-serif.
@@ -1151,7 +1152,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>Z</code> with cursive body shape, and a horizontal crossbar</td></tr>
     </table></details>
   - Styles for `a`
-    <details><summary>21 variants</summary>
+    <details><summary>24 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-a-double-storey-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-double-storey-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'double-storey-serifless'</code>, <code>cv36 = 1</code></td></tr>
     <tr><td><code>a</code> with double-storey body, and serifless hook; without serif at terminal (default for Sans Upright)</td></tr>
@@ -1195,9 +1196,15 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>a</code> with single-storey body, earless (rounded top-right), and serif at terminal</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-a-single-storey-earless-rounded-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-earless-rounded-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'single-storey-earless-rounded-tailed'</code>, <code>cv36 = 21</code></td></tr>
     <tr><td><code>a</code> with single-storey body, earless (rounded top-right), and curly tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-a-single-storey-top-cut-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-top-cut-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'single-storey-top-cut-serifless'</code>, <code>cv36 = 22</code></td></tr>
+    <tr><td><code>a</code> with single-storey body, and a diagonal cut at top; without serif at terminal</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-a-single-storey-top-cut-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-top-cut-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'single-storey-top-cut-serifed'</code>, <code>cv36 = 23</code></td></tr>
+    <tr><td><code>a</code> with single-storey body, a diagonal cut at top, and serif at terminal</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-a-single-storey-top-cut-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-a-single-storey-top-cut-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>a = 'single-storey-top-cut-tailed'</code>, <code>cv36 = 24</code></td></tr>
+    <tr><td><code>a</code> with single-storey body, a diagonal cut at top, and curly tail</td></tr>
     </table></details>
   - Styles for `b`
-    <details><summary>7 variants</summary>
+    <details><summary>9 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-b-toothed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'toothed-serifless'</code>, <code>cv37 = 1</code></td></tr>
     <tr><td><code>b</code> with toothed shape; without serifs (default for Sans)</td></tr>
@@ -1213,6 +1220,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>b</code> with toothless (rounded) shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-b-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'toothless-rounded-serifed'</code>, <code>cv37 = 7</code></td></tr>
     <tr><td><code>b</code> with toothless (rounded) shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-b-bottom-cut-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-bottom-cut-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'bottom-cut-serifless'</code>, <code>cv37 = 8</code></td></tr>
+    <tr><td><code>b</code> with a diagonal cut at bottom; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-b-bottom-cut-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-b-bottom-cut-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>b = 'bottom-cut-serifed'</code>, <code>cv37 = 9</code></td></tr>
+    <tr><td><code>b</code> with a diagonal cut at bottom, and serifs</td></tr>
     </table></details>
   - Styles for `c`
     <details><summary>5 variants</summary>
@@ -1305,7 +1316,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>f</code> with flat top hook, diagonal tail, and crossbar at X-height</td></tr>
     </table></details>
   - Styles for `g`
-    <details><summary>10 variants</summary>
+    <details><summary>12 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-g-double-storey.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-double-storey.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'double-storey'</code>, <code>cv42 = 1</code></td></tr>
     <tr><td><code>g</code> with double-storey shape</td></tr>
@@ -1327,6 +1338,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>g</code> with single-storey shape, flat bottom hook, and earless (cornered top-right)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-g-single-storey-flat-hook-earless-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-flat-hook-earless-rounded.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'single-storey-flat-hook-earless-rounded'</code>, <code>cv42 = 10</code></td></tr>
     <tr><td><code>g</code> with single-storey shape, flat bottom hook, and earless (rounded top-right)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-g-single-storey-top-cut.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-top-cut.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'single-storey-top-cut'</code>, <code>cv42 = 11</code></td></tr>
+    <tr><td><code>g</code> with single-storey shape, and a diagonal cut at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-g-single-storey-flat-hook-top-cut.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-g-single-storey-flat-hook-top-cut.dark.svg#gh-dark-mode-only" width=32/></td><td><code>g = 'single-storey-flat-hook-top-cut'</code>, <code>cv42 = 12</code></td></tr>
+    <tr><td><code>g</code> with single-storey shape, flat bottom hook, and a diagonal cut at top</td></tr>
     </table></details>
   - Styles for `h`
     <details><summary>7 variants</summary>
@@ -1637,7 +1652,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>p</code> with earless (rounded) shape, and serifs</td></tr>
     </table></details>
   - Styles for `q`
-    <details><summary>16 variants</summary>
+    <details><summary>20 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-serifless'</code>, <code>cv51 = 1</code></td></tr>
     <tr><td><code>q</code> with straight terminal; without serifs (default for Sans)</td></tr>
@@ -1671,6 +1686,14 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>q</code> with earless (rounded) shape, and tailed terminal; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-earless-rounded-diagonal-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-earless-rounded-diagonal-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'earless-rounded-diagonal-tailed-serifless'</code>, <code>cv51 = 16</code></td></tr>
     <tr><td><code>q</code> with earless (rounded) shape, and diagonally tailed terminal; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-q-top-cut-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'top-cut-straight-serifless'</code>, <code>cv51 = 17</code></td></tr>
+    <tr><td><code>q</code> with a diagonal cut at top, and straight terminal; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-q-top-cut-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'top-cut-straight-serifed'</code>, <code>cv51 = 18</code></td></tr>
+    <tr><td><code>q</code> with a diagonal cut at top, straight terminal, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-q-top-cut-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'top-cut-tailed-serifless'</code>, <code>cv51 = 19</code></td></tr>
+    <tr><td><code>q</code> with a diagonal cut at top, and tailed terminal; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-q-top-cut-diagonal-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-diagonal-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'top-cut-diagonal-tailed-serifless'</code>, <code>cv51 = 20</code></td></tr>
+    <tr><td><code>q</code> with a diagonal cut at top, and diagonally tailed terminal; without serifs</td></tr>
     </table></details>
   - Styles for `r`
     <details><summary>20 variants</summary>
@@ -2209,7 +2232,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Lowercase Thorn (<code>þ</code>) with serifs (default for Slab)</td></tr>
     </table></details>
   - Styles for `α` (Greek lower Alpha)
-    <details><summary>12 variants</summary>
+    <details><summary>15 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-alpha-crossing.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-crossing.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-alpha = 'crossing'</code>, <code>cv67 = 1</code></td></tr>
     <tr><td>Greek lower Alpha (<code>α</code>) with cross-like shape at right (default)</td></tr>
@@ -2235,6 +2258,12 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Alpha (<code>α</code>) with straight right bar, earless (rounded top-right), and serif at terminal</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-alpha-barred-earless-rounded-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-earless-rounded-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-alpha = 'barred-earless-rounded-tailed'</code>, <code>cv67 = 12</code></td></tr>
     <tr><td>Greek lower Alpha (<code>α</code>) with straight right bar, earless (rounded top-right), and curly tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-alpha-barred-top-cut.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-top-cut.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-alpha = 'barred-top-cut'</code>, <code>cv67 = 13</code></td></tr>
+    <tr><td>Greek lower Alpha (<code>α</code>) with straight right bar, and a diagonal cut at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-alpha-barred-top-cut-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-top-cut-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-alpha = 'barred-top-cut-serifed'</code>, <code>cv67 = 14</code></td></tr>
+    <tr><td>Greek lower Alpha (<code>α</code>) with straight right bar, a diagonal cut at top, and serif at terminal</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-alpha-barred-top-cut-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-alpha-barred-top-cut-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-alpha = 'barred-top-cut-tailed'</code>, <code>cv67 = 15</code></td></tr>
+    <tr><td>Greek lower Alpha (<code>α</code>) with straight right bar, a diagonal cut at top, and curly tail</td></tr>
     </table></details>
   - Styles for `β` (Greek lower Beta)
     <details><summary>2 variants</summary>
@@ -2485,7 +2514,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Psi (<code>ψ</code>) with flat top, and serifs</td></tr>
     </table></details>
   - Styles for `а` (Cyrillic Lower A)
-    <details><summary>21 variants</summary>
+    <details><summary>24 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-a-double-storey-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-double-storey-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-a = 'double-storey-serifless'</code>, <code>cv79 = 1</code></td></tr>
     <tr><td>Cyrillic Lower A (<code>а</code>) with double-storey body, and serifless hook; without serif at terminal (default for Sans Upright)</td></tr>
@@ -2529,6 +2558,12 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower A (<code>а</code>) with single-storey body, earless (rounded top-right), and serif at terminal</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-a-single-storey-earless-rounded-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-earless-rounded-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-a = 'single-storey-earless-rounded-tailed'</code>, <code>cv79 = 21</code></td></tr>
     <tr><td>Cyrillic Lower A (<code>а</code>) with single-storey body, earless (rounded top-right), and curly tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-a-single-storey-top-cut-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-top-cut-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-a = 'single-storey-top-cut-serifless'</code>, <code>cv79 = 22</code></td></tr>
+    <tr><td>Cyrillic Lower A (<code>а</code>) with single-storey body, and a diagonal cut at top; without serif at terminal</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-a-single-storey-top-cut-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-top-cut-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-a = 'single-storey-top-cut-serifed'</code>, <code>cv79 = 23</code></td></tr>
+    <tr><td>Cyrillic Lower A (<code>а</code>) with single-storey body, a diagonal cut at top, and serif at terminal</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-a-single-storey-top-cut-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-a-single-storey-top-cut-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-a = 'single-storey-top-cut-tailed'</code>, <code>cv79 = 24</code></td></tr>
+    <tr><td>Cyrillic Lower A (<code>а</code>) with single-storey body, a diagonal cut at top, and curly tail</td></tr>
     </table></details>
   - Styles for `в` (Cyrillic Lower Ve)
     <details><summary>8 variants</summary>
@@ -3375,12 +3410,14 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Question mark (<code>?</code>) with a corner at middle and flat hook</td></tr>
     </table></details>
   - Styles for `¶`
-    <details><summary>2 variants</summary>
+    <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-pilcrow-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>pilcrow = 'high'</code>, <code>VSAR = 1</code></td></tr>
     <tr><td>Higher pilcrow sign <code>¶</code> (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-pilcrow-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>pilcrow = 'low'</code>, <code>VSAR = 2</code></td></tr>
     <tr><td>Lower pilcrow sign <code>¶</code></td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-pilcrow-curved.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-pilcrow-curved.dark.svg#gh-dark-mode-only" width=32/></td><td><code>pilcrow = 'curved'</code>, <code>VSAR = 3</code></td></tr>
+    <tr><td>Curved pilcrow sign <code>¶</code></td></tr>
     </table></details>
   - Styles for `∂` (Partial derivative symbol)
     <details><summary>2 variants</summary>

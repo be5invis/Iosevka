@@ -40,25 +40,19 @@ glyph-block Letter-Latin-O : begin
 	create-glyph 'cyrl/Uk/O' : glyph-proc
 		local df : include : DivFrame para.diversityF 2
 		include : df.markSet.capital
-		local ada : df.archDepthA ArchDepth df.mvs
-		local adb : df.archDepthB ArchDepth df.mvs
-		include : OShape CAP 0 df.leftSB df.rightSB df.mvs ada adb
+		include : OShape CAP 0 df.leftSB df.rightSB df.mvs df.archDepthA df.archDepthB
 
 	create-glyph 'cyrl/uk/o' : glyph-proc
 		local df : include : DivFrame para.diversityF 2
 		include : df.markSet.e
-		local ada : df.archDepthA SmallArchDepth df.mvs
-		local adb : df.archDepthB SmallArchDepth df.mvs
-		include : OShape XH 0 df.leftSB df.rightSB df.mvs ada adb
+		include : OShape XH 0 df.leftSB df.rightSB df.mvs df.smallArchDepthA df.smallArchDepthB
 
 	create-glyph 'cyrl/oNarrow' 0x1C82 : glyph-proc
 		local df : include : DivFrame para.diversityF 2
 		include : df.markSet.e
 		local subDf : DivFrame (5 / 6) 2
-		local ada : subDf.archDepthA SmallArchDepth subDf.mvs
-		local adb : subDf.archDepthB SmallArchDepth subDf.mvs
 		include : with-transform [ApparentTranslate (0.5 * (df.width - subDf.width)) 0]
-			OShape XH 0 subDf.leftSB subDf.rightSB subDf.mvs ada adb
+			OShape XH 0 subDf.leftSB subDf.rightSB subDf.mvs subDf.smallArchDepthA subDf.smallArchDepthB
 
 	define rBroadOn : DotRadius * [StrokeWidthBlend 1.625 1]
 	create-glyph 'cyrl/BroadOn' 0x47A : glyph-proc
@@ -68,9 +62,7 @@ glyph-block Letter-Latin-O : begin
 		local gap : Math.min
 			Math.max (0.25 * dist) [HSwToV : Math.SQRT2 * rBroadOn]
 			Math.max (dist - [HSwToV : 3 * df.mvs]) [HSwToV df.mvs]
-		local ada : df.archDepthA ArchDepth df.mvs
-		local adb : df.archDepthB ArchDepth df.mvs
-		include : OShapeFlatTB CAP 0 df.leftSB df.rightSB df.mvs ada adb gap
+		include : OShapeFlatTB CAP 0 df.leftSB df.rightSB df.mvs df.archDepthA df.archDepthB gap
 		include : DotAt df.middle (df.mvs / 2 + O) rBroadOn
 		include : DotAt df.middle (CAP - df.mvs / 2 - O) rBroadOn
 
@@ -81,9 +73,7 @@ glyph-block Letter-Latin-O : begin
 		local gap : Math.min
 			Math.max (0.25 * dist) [HSwToV : Math.SQRT2 * rBroadOn]
 			Math.max (dist - [HSwToV : 3 * df.mvs]) [HSwToV df.mvs]
-		local ada : df.archDepthA SmallArchDepth df.mvs
-		local adb : df.archDepthB SmallArchDepth df.mvs
-		include : OShapeFlatTB XH 0 df.leftSB df.rightSB df.mvs ada adb gap
+		include : OShapeFlatTB XH 0 df.leftSB df.rightSB df.mvs df.smallArchDepthA df.smallArchDepthB gap
 		include : DotAt df.middle (df.mvs / 2 + O) rBroadOn
 		include : DotAt df.middle (XH - df.mvs / 2 - O) rBroadOn
 
@@ -138,12 +128,20 @@ glyph-block Letter-Latin-O : begin
 				curl (XH - SB - O - fine) [mix 0 Width 1.05]
 
 	create-glyph 'Obar' 0x19F : glyph-proc
-		include [refer-glyph 'O'] AS_BASE
-		include : HBar.m (SB + OX + 1) (RightSB - OX - 1) (CAP * 0.5) OverlayStroke
+		include : MarkSet.capital
+		local stroke : AdviceStroke2 2 3 CAP
+		include : OShape CAP 0 SB RightSB stroke ArchDepthA ArchDepthB
+		include : intersection
+			OShapeOutline.NoOvershoot CAP 0 SB RightSB stroke ArchDepthA ArchDepthB
+			HBar.m (SB + OX) (RightSB - OX) (CAP * 0.5) stroke
 
 	create-glyph 'obar' 0x275 : glyph-proc
-		include [refer-glyph 'o'] AS_BASE
-		include : HBar.m (SB + OX + 1) (RightSB - OX - 1) (XH * 0.5) OverlayStroke
+		include : MarkSet.e
+		local stroke : AdviceStroke2 2 3 XH
+		include : OShape XH 0 SB RightSB stroke nothing nothing
+		include : intersection
+			OShapeOutline.NoOvershoot XH 0 SB RightSB stroke nothing nothing
+			HBar.m (SB + OX) (RightSB - OX) (XH * 0.5) stroke
 
 	alias 'grek/capSymbolTheta' 0x3F4 'Obar'
 
@@ -158,16 +156,24 @@ glyph-block Letter-Latin-O : begin
 	alias 'bullEye' 0x298 'cyrl/OMonocular'
 
 	create-glyph 'cyrl/OCross' 0xA69A : glyph-proc
-		include [refer-glyph 'O'] AS_BASE
-		local fine ([StrokeWidthBlend 1 0.5] * OverlayStroke)
-		include : HBar.m (SB + OX + 1) (RightSB - OX - 1) (CAP * 0.5) fine
-		include : VBar.m Middle (O + 1) (CAP - O - 1) fine
+		include : MarkSet.capital
+		local stroke : AdviceStroke2 3 3 CAP
+		include : OShape CAP 0 SB RightSB stroke ArchDepthA ArchDepthB
+		include : intersection
+			OShapeOutline.NoOvershoot CAP 0 SB RightSB stroke ArchDepthA ArchDepthB
+			union
+				HBar.m (SB + OX) (RightSB - OX) (CAP * 0.5) stroke
+				VBar.m Middle O (CAP - O) [Math.min stroke : VSwToH : (RightSB - SB) / 2 - [HSwToV stroke]]
 
 	create-glyph 'cyrl/oCross' 0xA69B : glyph-proc
-		include [refer-glyph 'o'] AS_BASE
-		local fine ([StrokeWidthBlend 1 0.5] * OverlayStroke)
-		include : HBar.m (SB + OX + 1) (RightSB - OX - 1) (XH * 0.5) fine
-		include : VBar.m Middle (O + 1) (XH - O - 1) fine
+		include : MarkSet.e
+		local stroke : AdviceStroke2 3 3 XH
+		include : OShape XH 0 SB RightSB stroke nothing nothing
+		include : intersection
+			OShapeOutline.NoOvershoot XH 0 SB RightSB stroke nothing nothing
+			union
+				HBar.m (SB + OX) (RightSB - OX) (XH * 0.5) stroke
+				VBar.m Middle O (XH - O) [Math.min stroke : VSwToH : (RightSB - SB) / 2 - [HSwToV stroke]]
 
 	create-glyph 'romanThousandCD' 0x2180 : glyph-proc
 		local df : include : DivFrame para.diversityMM 3
@@ -233,9 +239,9 @@ glyph-block Letter-Latin-O : begin
 		include : dispiro
 			widths.rhs
 			flat (SB + OX) (XH / 2) [heading Upward]
-			curl (SB + OX) (XH - [Math.min (XH / 2 - TINY) SmallArchDepthA])
+			curl (SB + OX) (XH - [Math.min SmallArchDepthA : XH / 2 - TINY])
 			arch.rhs XH
-			flat (RightSB - OX) (XH - [Math.min (XH / 2 - TINY) SmallArchDepthB])
+			flat (RightSB - OX) (XH - [Math.min SmallArchDepthB : XH / 2 - TINY])
 			curl (RightSB - OX) (XH / 2) [heading Downward]
 
 	create-glyph 'olowerhalf' 0x1D17 : glyph-proc
@@ -243,9 +249,9 @@ glyph-block Letter-Latin-O : begin
 		include : dispiro
 			widths.lhs
 			flat (SB + OX) (XH / 2) [heading Downward]
-			curl (SB + OX) [Math.min (XH / 2 - TINY) SmallArchDepthB]
+			curl (SB + OX) [Math.min SmallArchDepthB : XH / 2 - TINY]
 			arch.lhs 0
-			flat (RightSB - OX) [Math.min (XH / 2 - TINY) SmallArchDepthA]
+			flat (RightSB - OX) [Math.min SmallArchDepthA : XH / 2 - TINY]
 			curl (RightSB - OX) (XH / 2) [heading Upward]
 
 	create-glyph 'oWithLightCentralizationStroke' : glyph-proc
@@ -284,18 +290,18 @@ glyph-block Letter-Latin-O : begin
 	create-glyph 'OPolish' 0xA7C0 : glyph-proc
 		include [refer-glyph 'O'] AS_BASE
 		include : MarkSet.capital
-		include : ExtendAboveBaseAnchors (CAP + LongVJut - HalfStroke)
-		include : ExtendBelowBaseAnchors (-LongVJut + HalfStroke)
-		include : VBar.m Middle CAP (CAP + LongVJut - HalfStroke)
-		include : VBar.m Middle (-LongVJut + HalfStroke) 0
+		include : ExtendAboveBaseAnchors (CAP + LongVJut - QuarterStroke)
+		include : ExtendBelowBaseAnchors (0   - LongVJut + QuarterStroke)
+		include : VBar.m Middle CAP (CAP + LongVJut - QuarterStroke) VJutStroke
+		include : VBar.m Middle 0   (0   - LongVJut + QuarterStroke) VJutStroke
 
 	create-glyph 'oPolish' 0xA7C1 : glyph-proc
 		include [refer-glyph 'o'] AS_BASE
 		include : MarkSet.e
-		include : ExtendAboveBaseAnchors (XH + LongVJut - HalfStroke)
-		include : ExtendBelowBaseAnchors (-LongVJut + HalfStroke)
-		include : VBar.m Middle XH (XH + LongVJut - HalfStroke)
-		include : VBar.m Middle (-LongVJut + HalfStroke) 0
+		include : ExtendAboveBaseAnchors (XH + LongVJut - QuarterStroke)
+		include : ExtendBelowBaseAnchors (0  - LongVJut + QuarterStroke)
+		include : VBar.m Middle XH (XH + LongVJut - QuarterStroke) VJutStroke
+		include : VBar.m Middle 0  (0  - LongVJut + QuarterStroke) VJutStroke
 
 	derive-composites 'oRetroflexHook' 0x1DF1B 'o' : RetroflexHook.l
 		x -- [mix [arch.adjust-x.bot Middle] SB 0.75]
@@ -308,7 +314,7 @@ glyph-block Letter-Latin-O : begin
 		include : intersection
 			OShapeOutline.NoOvershoot CAP 0 SB RightSB BBS ArchDepthA ArchDepthB
 			union
-				VBar.l  (SB + OX + BBD) 0 CAP BBS
+				VBar.l (SB + OX + BBD) 0 CAP BBS
 				VBar.r (RightSB - OX - BBD) 0 CAP BBS
 
 	create-glyph 'mathbb/o' 0x1D560 : glyph-proc
@@ -317,5 +323,5 @@ glyph-block Letter-Latin-O : begin
 		include : intersection
 			OShapeOutline.NoOvershoot XH 0 SB RightSB BBS
 			union
-				VBar.l  (SB + OX + BBD) 0 XH BBS
+				VBar.l (SB + OX + BBD) 0 XH BBS
 				VBar.r (RightSB - OX - BBD) 0 XH BBS
