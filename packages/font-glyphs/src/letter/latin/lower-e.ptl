@@ -9,7 +9,7 @@ glyph-block Letter-Latin-Lower-E : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph CreateTurnedLetter
-	glyph-block-import Letter-Shared-Shapes : FlatHookDepth RetroflexHook
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth RetroflexHook RhoticHookShape
 	glyph-block-import Letter-Shared-Shapes : SerifedArcEnd InwardSlabArcEnd ArcEndSerif
 	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
 	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
@@ -135,10 +135,10 @@ glyph-block Letter-Latin-Lower-E : begin
 			tailSlab -- tailSlab
 		define shift : Width * (df.div - divSub)
 		if fDesc : begin
-			local desc : (-LongVJut) + HalfStroke
+			local desc : (-LongVJut) + QuarterStroke
 			include : ExtendBelowBaseAnchors desc
 			include : difference
-				VBar.m subDf.middle desc (stroke + O) [AdviceStroke 3.5 df.div]
+				VBar.m subDf.middle desc (stroke + O) (VJutStroke * subDf.mvs / Stroke)
 				OShapeOutline.NoOvershoot top 0 subDf.leftSB subDf.rightSB stroke
 		include : Translate shift 0
 
@@ -235,6 +235,19 @@ glyph-block Letter-Latin-Lower-E : begin
 			include [refer-glyph "e.\(suffix)"] AS_BASE ALSO_METRICS
 			include : FlipAround Middle (XH / 2)
 
+		create-glyph "schwaRhoticHook.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.diversityM 1
+			include : df.markSet.e
+			local divSub : Math.min 1 : 0.85 * para.diversityM
+			local dfSub : DivFrame divSub 2
+			local stroke : AdviceStroke2 2 3 XH divSub
+			include : Body dfSub XH
+				stroke -- stroke
+				ada -- [dfSub.archDepthAOf SmallArchDepth stroke]
+				adb -- [dfSub.archDepthBOf SmallArchDepth stroke]
+			include : FlipAround dfSub.middle (XH / 2)
+			include : RhoticHookShape (dfSub.rightSB - [HSwToV : 1.25 * markFine]) df.width (XH * 0.5) (XH * 0.2)
+
 		create-glyph "schwaRetroflexHook.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.diversityM 1
 			include : df.markSet.e
@@ -243,8 +256,8 @@ glyph-block Letter-Latin-Lower-E : begin
 			local stroke : AdviceStroke2 2 3 XH divSub
 			include : Body dfSub XH
 				stroke -- stroke
-				ada -- [dfSub.archDepthA SmallArchDepth stroke]
-				adb -- [dfSub.archDepthB SmallArchDepth stroke]
+				ada -- [dfSub.archDepthAOf SmallArchDepth stroke]
+				adb -- [dfSub.archDepthBOf SmallArchDepth stroke]
 			include : FlipAround dfSub.middle (XH / 2)
 			include : RetroflexHook.r
 				x -- [mix RightSB df.width 0.5]
@@ -261,7 +274,7 @@ glyph-block Letter-Latin-Lower-E : begin
 
 		create-glyph "eBar.\(suffix)" : glyph-proc
 			include [refer-glyph "e.\(suffix)"] AS_BASE ALSO_METRICS
-			include : HBar.m [mix SB 0 0.7] [mix RightSB Width 0.7] (XH * 0.25 + Stroke * 0.25)
+			include : HBar.m [mix SB 0 0.7] [mix RightSB Width 0.7] (XH * 0.25 + QuarterStroke)
 				Math.min (0.25 * (XH - 3 * Stroke)) : AdviceStroke 5
 
 		DefineSelectorGlyph "cyrl/Schwa" suffix [DivFrame 1] 'capital'
@@ -340,6 +353,7 @@ glyph-block Letter-Latin-Lower-E : begin
 
 	select-variant 'Schwa' 0x18F
 	select-variant 'schwa' 0x259
+	select-variant 'schwaRhoticHook' 0x25A (follow -- 'schwa')
 	select-variant 'schwaRetroflexHook' 0x1D95 (follow -- 'schwa')
 
 	select-variant 'eRev' 0x258 (follow -- 'e')

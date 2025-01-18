@@ -1,0 +1,85 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+import [DesignParameters] from "../../meta/aesthetics.mjs"
+
+glyph-module
+
+glyph-block Symbol-Geometric-Technical : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
+	glyph-block-import Shared-Symbol-Shapes : TriangleShape
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+	define Size : GeometricSizes Geom
+
+	define fineGeometryStroke : AdviceStroke2 4 4 Geom.Size
+
+	do "Dimensions"
+		create-glyph [MangleName 'straightness'] [MangleUnicode 0x23E4] : glyph-proc
+			set-width Geom.Width
+			include : HBar.m Geom.Left Geom.Right Geom.MidY GeometryStroke
+
+		create-glyph [MangleName 'symmetry'] [MangleUnicode 0x232F] : glyph-proc
+			set-width Geom.Width
+			define yOffset : Geom.Size * 0.4
+			define xShrink : Geom.Size * 0.25
+			include : HBar.m Geom.Left Geom.Right Geom.MidY GeometryStroke
+			include : HBar.b (Geom.Left + xShrink) (Geom.Right - xShrink) (Geom.MidY + yOffset) GeometryStroke
+			include : HBar.t (Geom.Left + xShrink) (Geom.Right - xShrink) (Geom.MidY - yOffset) GeometryStroke
+
+		create-glyph [MangleName 'conicalTaper'] [MangleUnicode 0x2332] : glyph-proc
+			set-width Geom.Width
+			include : TriangleShape Geom.Left (Geom.MidY - Geom.Size * 0.8) Geom.Left (Geom.MidY + Geom.Size * 0.8) Geom.Right Geom.MidY fineGeometryStroke
+			include : HBar.m [mix 0 Geom.Left 0.5] [mix Geom.Right Geom.Width 0.5] Geom.MidY GeometryStroke
+
+		create-glyph [MangleName 'slope'] [MangleUnicode 0x2333] : glyph-proc
+			set-width Geom.Width
+			include : TriangleShape Geom.Left Geom.Bot Geom.Left Geom.MidY Geom.Right Geom.Bot fineGeometryStroke
+
+	create-glyph [MangleName 'viewdataSquare'] [MangleUnicode 0x2317] : glyph-proc
+		set-width Geom.Width
+		define shrink : Geom.Size * 2 * 0.13
+		include : HBar.t Geom.Left Geom.Right (Geom.Top - shrink) GeometryStroke
+		include : HBar.b Geom.Left Geom.Right (Geom.Bot + shrink) GeometryStroke
+		include : VBar.l (Geom.Left  + shrink) Geom.Bot Geom.Top GeometryStroke
+		include : VBar.r (Geom.Right - shrink) Geom.Bot Geom.Top GeometryStroke
+
+	create-glyph [MangleName 'loopedSquare'] [MangleUnicode 0x2318] : glyph-proc
+		set-width Geom.Width
+
+		define stroke : AdviceStrokeInSpace (Geom.Size * 2) HVContrast 6 1
+		define gap : (Geom.Size * 2 - [HSwToV : stroke * 4]) / 6
+		include : lift-@ : dispiro
+			widths.lhs stroke
+			flat Geom.MidX @y3
+			curl (@x5 = [mix @x4 @x6 0.5]) (@y3 = Geom.MidY + gap)
+			archv 4
+			g4.up.mid (@x6 = Geom.Right) @y2
+			arcvh 4
+			g4.left.mid @x5 (@y1 = Geom.Top)
+			archv 4
+			flat (@x4 = Geom.MidX + gap) (@y2 = [mix @y1 @y3 0.5])
+			curl @x4 @y5
+			arcvh 4
+			g4.right.mid @x5 @y6
+			archv 4
+			g4.up.mid @x6 @y5
+			arcvh 4
+			flat @x5 @y4
+			curl (@x2 = [mix @x1 @x3 0.5]) (@y4 = Geom.MidY - gap)
+			archv 4
+			g4.down.mid (@x1 = Geom.Left) @y5
+			arcvh 4
+			g4.right.mid @x2 (@y6 = Geom.Bot)
+			archv 4
+			flat (@x3 = Geom.MidX - gap) (@y5 = [mix @y4 @y6 0.5])
+			curl @x3 @y2
+			arcvh 4
+			g4.left.mid @x2 @y1
+			archv 4
+			g4.down.mid @x1 @y2
+			arcvh 4
+			flat @x2 @y3
+			curl Geom.MidX @y3

@@ -97,21 +97,21 @@ glyph-block Letter-Blackboard : begin
 	define [BBBarLeft] : with-params [x yBot yTop [bbs BBS] [bbd BBD]] : union
 		VBar.l x         yBot yTop bbs
 		VBar.l (x + bbd) yBot yTop bbs
-		HBar.t    x (x + bbd) yTop bbs
+		HBar.t x (x + bbd) yTop bbs
 		HBar.b x (x + bbd) yBot bbs
 
 	glyph-block-export BBBarCenter
 	define [BBBarCenter] : with-params [x yBot yTop [bbs BBS] [bbd BBD]] : union
 		VBar.m (x - bbd / 2) yBot yTop bbs
 		VBar.m (x + bbd / 2) yBot yTop bbs
-		HBar.t    (x - bbd / 2) (x + bbd / 2) yTop bbs
+		HBar.t (x - bbd / 2) (x + bbd / 2) yTop bbs
 		HBar.b (x - bbd / 2) (x + bbd / 2) yBot bbs
 
 	glyph-block-export BBBarRight
 	define [BBBarRight] : with-params [x yBot yTop [bbs BBS] [bbd BBD]] : union
 		VBar.r x         yBot yTop bbs
 		VBar.r (x - bbd) yBot yTop bbs
-		HBar.t    x (x - bbd) yTop bbs
+		HBar.t x (x - bbd) yTop bbs
 		HBar.b x (x - bbd) yBot bbs
 
 	glyph-block-import Mark-Shared-Metrics : markMiddle
@@ -160,8 +160,7 @@ glyph-block Letter-Shared-Shapes : begin
 			flat (x + hookTurn)  (high - overshoot) [heading Rightward]
 			curl (x + hookDepth + sw * TanSlope) (high - overshoot)
 
-	glyph-block-export DToothlessRise
-	glyph-block-export DMBlend
+	glyph-block-export DToothlessRise DMBlend
 	define DToothlessRise : Hook * 0.25 + Stroke / 16
 	define DMBlend          0.80
 
@@ -169,7 +168,7 @@ glyph-block Letter-Shared-Shapes : begin
 	define CurlyTail : namespace
 		define [normalBlender before _after args] : begin
 			local ltr : args.xOuter > before.x
-			local rInner : 0.5 * ([Math.abs (args.xOuter - before.x)] - (2 * [HSwToV args.fine]))
+			local rInner : 0.5 * [Math.abs : args.xOuter - before.x] - [HSwToV args.fine]
 			local top : fallback args.yLoopTop : args.bottom + 2 * (args.fine + rInner)
 			local yOuter : [if ltr YSmoothMidR YSmoothMidL] top args.bottom
 
@@ -242,7 +241,7 @@ glyph-block Letter-Shared-Shapes : begin
 			local-parameter : adb               -- SmallArchDepthB
 			local-parameter : stroke            -- Stroke
 			local-parameter : fMask             -- false
-			local-parameter : leftY0            -- (top - ada - 2)
+			local-parameter : leftY0            -- (top - ada - TINY)
 
 			return : list
 				flat (left - [HSwToV fine]) leftY0 [widths.rhs fine]
@@ -589,7 +588,7 @@ glyph-block Letter-Shared-Shapes : begin
 	glyph-block-export ArcStartSerifDepth
 	define [ArcStartSerifDepth hook] : hook - 0
 
-	define [ArcStartInwardSerifDepth hook stroke] : Math.max hook (DToothlessRise + stroke)
+	define [ArcStartInwardSerifDepth hook stroke] : Math.max hook : DToothlessRise + stroke
 
 	glyph-block-export : ArcStartSerif
 	define ArcStartSerif : namespace
@@ -641,8 +640,8 @@ glyph-block Letter-Shared-Shapes : begin
 			define dxTurn : [HSwToV : 0.5 * sw] + rIn + 0.5 * sign * TanSlope * fine
 			define dxTailStart : dxTurn + sinAngle * (r * [mix 1 HVContrast sinAngle])
 			define dyTailStart : (rIn + fine) - cosAngle * r
-			define dxDepth : (depth - 0.25 * sw) * +dSinAngle
-			define dyDepth : (depth - 0.25 * sw) * -dCosAngle
+			define dxDepth : (depth - 0.25 * sw) * (+dSinAngle)
+			define dyDepth : (depth - 0.25 * sw) * (-dCosAngle)
 			return : list
 				g4.[if (sign > 0) "right" "left"].mid
 					cx + sign * dxTurn
@@ -688,7 +687,7 @@ glyph-block Letter-Shared-Shapes : begin
 	define [JutIn left right jut swRef hSplit] : begin
 		local ink : HSwToV swRef
 		local gap : (right - left - hSplit * ink) / (hSplit - 1)
-		Math.min jut (0.5 * ink + [Math.max (Stroke * TanSlope) (0.375 * gap)])
+		return : Math.min jut : 0.5 * ink + [Math.max (Stroke * TanSlope) (0.375 * gap)]
 
 	class CSerifFrame
 		public [new top bot left right swRef swSerif div hSplit fForceSymmetric] : begin
@@ -707,7 +706,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 
 			local jutFS   MidJutSide
-			local jut     : mix [HSwToV : 0.5 * swRef] Jut [Math.min 1 : div * 2.25 / hSplit]
+			local jut     : mix [HSwToV : 0.5 * swRef] Jut : Math.min 1 : div * 2.25 / hSplit
 			local sideJut : jut - 0.5 * ink
 
 			local jutIn     : if fForceSymmetric jut : JutIn left right jut swRef hSplit
@@ -817,12 +816,26 @@ glyph-block Letter-Shared-Shapes : begin
 		include : dispiro
 			widths.lhs sw
 			flat left ybegin [heading Downward]
-			curl left [Math.min (ybegin - TINY) adb]
+			curl left [Math.min adb : ybegin - TINY]
 			arcvh
 			g4 [mix left right 0.5] bottom [heading Rightward]
 			archv
 			flat right ada
 			curl right yend [heading Upward]
+
+	glyph-block-export RhoticHookShape
+	define [RhoticHookShape] : with-params [left right y rise [sw [AdviceStroke 5]] [doHook false]] : glyph-proc
+		local mid : mix left right 0.5
+		include : dispiro
+			widths.rhs sw
+			g2 (left - [HSwToV : 0.5 * sw]) (y)
+			g2 (mid  - [HSwToV : 0.5 * sw]) (y + rise)
+		include : dispiro
+			widths.center sw
+			flat mid (y + rise) [heading Downward]
+			curl mid (y + [if doHook 0 (rise - 1)]) [heading Downward]
+			if doHook {[hookend (y - rise) (sw -- sw)]} {[arcvh]}
+			g4 (right - [if doHook sw 0]) (y - [if doHook (rise * 0.5) rise]) [if doHook nothing [heading Rightward]]
 
 	# Generic "connected" vertical hooks
 	glyph-block-export VerticalHook
@@ -910,7 +923,7 @@ glyph-block Letter-Shared-Shapes : begin
 		# Diacritical descender of cyrillics
 		glyph-block-export CyrDescender
 		define CyrDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
-			local extension : 0.25 * Stroke - LongVJut
+			local extension : (-LongVJut) + QuarterStroke
 			include : ExtendBelowBaseAnchors (y + extension)
 			include : union
 				xLinkStroke xLink x yAttach sw
@@ -918,7 +931,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 		glyph-block-export CyrTailDescender
 		define CyrTailDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
-			local extension : 0.25 * Stroke - LongVJut
+			local extension : (-LongVJut) + QuarterStroke
 			include : ExtendBelowBaseAnchors (y + extension)
 			include : union
 				xLinkStroke xLink x yAttach sw
@@ -930,7 +943,7 @@ glyph-block Letter-Shared-Shapes : begin
 		# Palatal Hooks
 		glyph-block-export PalatalHook
 		define PalatalHook : Descenders : function [x y xLink yAttach yOverflow sw maskOut] : glyph-proc
-			local fullDepth : 0 - Descender - 0.5 * sw - O
+			local fullDepth : (-Descender) - 0.5 * sw - O
 			include : ExtendBelowBaseAnchors (y + Descender)
 			include : difference
 				union
@@ -941,13 +954,13 @@ glyph-block Letter-Shared-Shapes : begin
 						xDepth -- (-TailX)
 						yDepth -- TailY
 						sw -- sw
-						yExtension -- [Math.max 0 (yAttach + yOverflow - y + (fullDepth - TailY))]
+						yExtension -- [Math.max 0 : yAttach + yOverflow - y + (fullDepth - TailY)]
 				if maskOut maskOut [no-shape]
 
 		# Retroflex hooks
 		glyph-block-export RetroflexHook
 		define RetroflexHook : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
-			local fullDepth : 0 - Descender - 0.5 * sw - O
+			local fullDepth : (-Descender) - 0.5 * sw - O
 			include : ExtendBelowBaseAnchors (y + Descender)
 			include : union
 				xLinkStroke xLink x yAttach sw
@@ -957,7 +970,7 @@ glyph-block Letter-Shared-Shapes : begin
 					xDepth -- TailX
 					yDepth -- TailY
 					sw -- sw
-					yExtension -- [Math.max 0 (yAttach + yOverflow - y + (fullDepth - TailY))]
+					yExtension -- [Math.max 0 : yAttach + yOverflow - y + (fullDepth - TailY)]
 
 		# Cyrillic "Middle Hook" Characters
 		glyph-block-export MidHook
@@ -983,13 +996,13 @@ glyph-block Letter-Shared-Shapes : begin
 					ada    -- ArchDepthA
 					adb    -- ArchDepthB
 					sw     -- df.mvs
-					xDepth -- (-[Math.max [HSwToV df.mvs] : Math.min HookX (0.5 * (df.rightSB - df.leftSB - [HSwToV : 2 * df.mvs]))])
+					xDepth -- (-[Math.max [HSwToV df.mvs] : Math.min HookX : 0.5 * (df.rightSB - df.leftSB) - [HSwToV df.mvs]])
 
 		# Hook for Eng shape
 		glyph-block-export EngHook
 		define [EngHook] : with-params [x yStart yEnd [sw Stroke]] : begin
 			return : VerticalHook.r x (yEnd + Hook + 0.5 * sw) (-HookX) Hook
-				yExtension -- [Math.max 0 (yStart - (yEnd + Hook + 0.5 * sw))]
+				yExtension -- [Math.max 0 : yStart - (yEnd + Hook + 0.5 * sw)]
 				sw -- sw
 
 		# Upward hook shape
@@ -1069,49 +1082,57 @@ glyph-block Letter-Shared-Shapes : begin
 		set BeltOverlay.at BeltOverlayAt
 
 	do "Letter bar overlays"
-		glyph-block-export LetterBarOverlay
-		define [LetterBarOverlay] : with-params [x y space refSw pXInSw sw] : begin
+		glyph-block-export LetterBarOverlay LetterObliqueBarOverlay
+		define [BarOverlayImpl] : with-params [barFunc x y space refSw pXInSw sw] : begin
 			local {xLeftSpace xRightSpace} space
-			local xLeftEdge  : x - pXInSw * [HSwToV refSw]
+			local xLeftEdge  : x - (0 + pXInSw) * [HSwToV refSw]
 			local xRightEdge : x + (1 - pXInSw) * [HSwToV refSw]
 			local p : (xLeftEdge - xLeftSpace) / ((xRightSpace - xRightEdge) + (xLeftEdge - xLeftSpace))
-			local xC : mix xLeftEdge xRightEdge [mix 0.5 (1 - p) 0.5]
+			local xC : mix xLeftEdge xRightEdge : mix 0.5 (1 - p) 0.5
 			local jut : 0.75 * LongJut
-			return : HOverlayBar
+			return : barFunc
 				Math.min (xLeftEdge - SideJut)
-					Math.max (xC - jut) [mix xLeftSpace xLeftEdge 0.3]
+					Math.max (xC - jut) : mix xLeftSpace xLeftEdge 0.3
 				Math.max (xRightEdge + SideJut)
-					Math.min [mix xRightSpace xRightEdge 0.3] (xC + jut)
+					Math.min (xC + jut) : mix xRightSpace xRightEdge 0.3
 				begin y
 				begin sw
 
-		set LetterBarOverlay.l : function []
-			with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw)
-		set LetterBarOverlay.m : function []
-			with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw)
-		set LetterBarOverlay.r : function []
-			with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw)
-
 		define [calcYAndSw bot top py sw] : begin
 			local y : mix bot top py
-			local sw1 : Math.min sw (1.25 * (top - bot) * py) (1.25 * (top - bot) * (1 - py))
+			local sw1 : Math.min sw
+				1.25 * (top - bot) * (0 + py)
+				1.25 * (top - bot) * (1 - py)
 			return { y sw1 }
 
-		set LetterBarOverlay.l.in : function []
-			with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-			: begin
-				local { y sw1 } : calcYAndSw bot top py sw
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw1)
-		set LetterBarOverlay.m.in : function []
-			with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-			: begin
-				local { y sw1 } : calcYAndSw bot top py sw
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw1)
-		set LetterBarOverlay.r.in : function []
-			with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-			: begin
-				local { y sw1 } : calcYAndSw bot top py sw
-				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw1)
+		define [LetterBarOverlay] : with-params [x y space refSw pXInSw sw]
+			BarOverlayImpl HOverlayBar x y space refSw pXInSw sw
+		define [LetterObliqueBarOverlay] : with-params [x y space refSw pXInSw sw]
+			BarOverlayImpl HOverlayObliqueBar x y space refSw pXInSw sw
+
+		foreach base {LetterBarOverlay LetterObliqueBarOverlay} : let [base] : begin
+			set base.l : function []
+				with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw)
+			set base.m : function []
+				with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw)
+			set base.r : function []
+				with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw)
+
+			set base.l.in : function []
+				with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+				: begin
+					local { y sw1 } : calcYAndSw bot top py sw
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw1)
+			set base.m.in : function []
+				with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+				: begin
+					local { y sw1 } : calcYAndSw bot top py sw
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw1)
+			set base.r.in : function []
+				with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+				: begin
+					local { y sw1 } : calcYAndSw bot top py sw
+					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw1)
