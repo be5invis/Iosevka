@@ -123,64 +123,30 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 						corner midx midy
 
 	do "Resistor"
+		glyph-block-import Shared-Symbol-Shapes : HZigzag VZigzag
 		define amplitude : Geom.Size * 0.8
 		define vWaves 2
 		define hWaves MosaicWidthScalar
 
-		define [HoriWaveSegment left right lefty righty sw] : intersection
-			MaskRight left
-			MaskLeft right
-			ExtLineCenter 1 sw left lefty right righty
-		define [VertWaveSegment bot top botx topx sw] : intersection
-			MaskAbove bot
-			MaskBelow top
-			ExtLineCenter 1 sw botx bot topx top
-
 		create-glyph [MangleName 'resistorHori'] [MangleUnicode 0x1CC09] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
-			local segs : 2 * hWaves - 1
-			local halfPeriod : MosaicWidth / (2 * hWaves)
-			local up : midy + amplitude
-			local down : midy - amplitude
-			include : intersection
-				MaskLeft : left + 0.5 * halfPeriod
-				MaskAbove : midy - 0.5 * boxDrawingStroke
-				ExtLineCenter 1 boxDrawingStroke left midy (left + 0.5 * halfPeriod) up
-			foreach [j : range 0 segs] : begin
-				include : HoriWaveSegment
-					left + (j + 0.5) * halfPeriod
-					left + (j + 1.5) * halfPeriod
-					if (j % 2) down up
-					if (j % 2) up down
-					* boxDrawingStroke
-			include : intersection
-				MaskRight : right - 0.5 * halfPeriod
-				MaskBelow : midy + 0.5 * boxDrawingStroke
-				ExtLineCenter 1 boxDrawingStroke (right - 0.5 * halfPeriod) down right midy
+			local segs : 2 * hWaves
+			local mask : (right - left) / (segs * 2)
+			include : difference
+				HZigzag.fromCenter midy left right amplitude segs 0 boxDrawingStroke 1
+				MaskLeftLine  (left + mask) bottom (left + mask) (midy - boxDrawingStroke / 2)
+				MaskRightLine (right - mask) (midy + boxDrawingStroke / 2) (right - mask) top
 
 		create-glyph [MangleName 'resistorVert'] [MangleUnicode 0x1CC0A] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
-			local segs : 2 * vWaves - 1
-			local halfPeriod : MosaicHeight / (2 * vWaves)
-			local up : midx + amplitude
-			local down : midx - amplitude
-			include : intersection
-				MaskBelow : bottom + 0.5 * halfPeriod
-				MaskRight : midx - [HSwToV : 0.5 * boxDrawingStroke]
-				ExtLineCenter 1 boxDrawingStroke midx bottom up (bottom + 0.5 * halfPeriod)
-			foreach [j : range 0 segs] : begin
-				include : VertWaveSegment
-					bottom + (j + 0.5) * halfPeriod
-					bottom + (j + 1.5) * halfPeriod
-					if (j % 2) down up
-					if (j % 2) up down
-					* boxDrawingStroke
-			include : intersection
-				MaskAbove : top - 0.5 * halfPeriod
-				MaskLeft : midx + [HSwToV : 0.5 * boxDrawingStroke]
-				ExtLineCenter 1 boxDrawingStroke down (top - 0.5 * halfPeriod) midx top
+			local segs : 2 * vWaves
+			local mask : (top - bottom) / (segs * 2)
+			include : difference
+				VZigzag.fromCenter midx bottom top amplitude segs 0 boxDrawingStroke 1
+				MaskBelowLine left (bottom + mask) (midx - [HSwToV : boxDrawingStroke / 2]) (bottom + mask)
+				MaskAboveLine (midx + [HSwToV : boxDrawingStroke / 2]) (top - mask) right (top - mask)
 
 	do "Coil"
 		glyph-block-import Symbol-Mosaic-Split-Graphic : Multicell
@@ -258,7 +224,7 @@ glyph-block Symbol-Pictograph-Schematic : for-width-kinds WideWidth4 : begin
 		local tipDy : tipDx * (-slope)
 		local baseDx : -tipDy / [Math.sqrt 3] * 2
 		local baseDy : baseDx / (-slope)
-		define arrowPos : (1 - [HSwToV boxDrawingStroke] / (MosaicWidth / 2)) * 0.4
+		define arrowPos : (1 - [HSwToV boxDrawingStroke] / MosaicMiddle) * 0.4
 
 		define [VerticalPart] : intersection
 			Rect top bottom left (midx + [HSwToV : 0.5 * boxDrawingStroke])
