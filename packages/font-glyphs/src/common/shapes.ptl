@@ -2,6 +2,7 @@ $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback boole boolePn] from "@iosevka/util"
 import [Transform] from "@iosevka/geometry/transform"
+import [Point] from "@iosevka/geometry/point"
 import [FunctionInterpolator AfCombine] from "@iosevka/geometry/spiro-control"
 import [RadicalGeometry StrokeGeometry RemoveHolesGeometry] from "@iosevka/geometry"
 
@@ -797,3 +798,41 @@ glyph-block CommonShapes : begin
 		foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
 			create-glyph "\(name).\(suffix)" : F DrawAt kDotRadius overshoot
 		select-variant name unicode (follow -- 'punctuationDot')
+
+	# Sharp Corner Interpolator
+	glyph-block-export TangentToNormal VectorDot
+	define [TangentToNormal offset contrast _tanSlope] : begin
+		local r : Math.hypot offset.x offset.y
+		return : new Point Point.Type.Corner
+			contrast * (-offset.y / r)
+			(offset.x + offset.y * [fallback _tanSlope TanSlope]) / r
+	define [VectorDot p1 p2] : p1.x * p2.x + p1.y * p2.y
+
+	define [SharpCornerImpl before after args] : begin
+		if [not (before.af && before.af.l !== undefined)] : throw : new Error "Unable to infer stroke information for previous knot"
+		if [not (after.af  && after.af.l  !== undefined)] : throw : new Error "Unable to infer stroke information for next knot"
+
+		local beforeT : new Point Point.Type.Corner (args.x - before.x) (args.y - before.y)
+		local afterT  : new Point Point.Type.Corner (after.x - args.x)  (after.y - args.y)
+
+		local beforeN : fallback before.af.d : TangentToNormal beforeT args.contrast [if args.upright 0]
+		local afterN  : fallback after.af.d  : TangentToNormal afterT  args.contrast [if args.upright 0]
+
+		local beforeR : beforeN.addScale (-[VectorDot beforeN beforeT] / [VectorDot beforeT beforeT]) beforeT
+		local afterR  : afterN.addScale  (-[VectorDot afterN  afterT ] / [VectorDot afterT  afterT ]) afterT
+
+		local beforeD : afterT.scale  ([VectorDot beforeR beforeR] / [VectorDot beforeR afterT ])
+		local afterD  : beforeT.scale ([VectorDot afterR  afterR ] / [VectorDot afterR  beforeT])
+
+		local lOffset : [beforeD.scale   before.af.l ].addScale   after.af.l  afterD
+		local rOffset : [beforeD.scale (-before.af.r)].addScale (-after.af.r) afterD
+
+		local midPoint : lOffset.mix rOffset 0.5
+		local refPoint : Point.translated midPoint args.x args.y
+
+		return : corner refPoint.x refPoint.y [widths.center.heading 1 { .x (lOffset.x - rOffset.x) .y (lOffset.y - rOffset.y) }]
+
+	glyph-block-export sharp-corner
+	define [sharp-corner] : with-params [x y [contrast HVContrast] [upright 0]] : begin
+		local args : object x y contrast upright
+		return : new FunctionInterpolator SharpCornerImpl args
