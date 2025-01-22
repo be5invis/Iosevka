@@ -1,6 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
+import [Point] from "@iosevka/geometry/point"
 import [MathSansSerif] from "@iosevka/glyph/relation"
 import [DesignParameters] from "../../meta/aesthetics.mjs"
 
@@ -9,7 +10,7 @@ glyph-module
 glyph-block Letter-Greek-Upper-Gamma: begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : CyrDescender MidHook
+	glyph-block-import Letter-Shared-Shapes : CyrDescender MidHook LegShape
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	glyph-block-import Letter-Latin-Upper-F : xMidBarShrink
@@ -23,8 +24,8 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	define GammaBarLeft : SB * 1.5
 	define [GammaShape top bot slabType] : glyph-proc
 		include : LeaningAnchor.Below.VBar.l GammaBarLeft
-		include : VBar.l GammaBarLeft bot top
-		include : HBar.t (GammaBarLeft - O) (RightSB - OX) top
+		include : tagged 'strokeV' : VBar.l GammaBarLeft bot top
+		include : tagged 'strokeH' : HBar.t (GammaBarLeft - O) (RightSB - OX) top
 		match slabType
 			[Just SLAB-ALL] : begin
 				include : HSerif.lt GammaBarLeft top SideJut
@@ -95,13 +96,21 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 			eject-contour 'serifRT'
 			include : VBar.r (RightSB - OX) CAP (CAP + LongVJut - QuarterStroke) VJutStroke
 
-		create-glyph "cyrl/ge.\(suffix)" : glyph-proc
+		create-glyph "cyrl/ge.upright.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : ExtendAboveBaseAnchors (XH + LongVJut - QuarterStroke)
 			include : GammaShape XH 0 slabType
 			eject-contour 'serifRT'
 			include : VBar.r (RightSB - OX) XH (XH + LongVJut - QuarterStroke) VJutStroke
-			if para.isItalic : eject-contour 'serifLB'
+
+		create-glyph "cyrl/ge.italic.\(suffix)" : glyph-proc
+			include [refer-glyph "cyrl/ge.upright.\(suffix)"] AS_BASE ALSO_METRICS
+			eject-contour 'serifLB'
+			eject-contour 'strokeV'
+			include : LegShape
+				ztop -- [Point.fromXY Point.Type.Corner GammaBarLeft XH]
+				zbot -- [Point.fromXY Point.Type.Corner [mix SB 0 : if doST 1 0.75] 0]
+				xb   -- GammaBarLeft
 
 		create-glyph "cyrl/GheMidHook.\(suffix)" : glyph-proc
 			include [refer-glyph "grek/Gamma.\(suffix)"] AS_BASE ALSO_METRICS
@@ -135,9 +144,10 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	select-variant 'cyrl/ghe.upright'
 	select-variant 'cyrl/gheDescender.upright' (follow -- 'cyrl/ghe.upright')
 	select-variant 'cyrl/gheDHook.upright' (follow -- 'cyrl/ghe.upright')
-	select-variant 'grek/smcpGamma' 0x1D26 (shapeFrom -- 'cyrl/ghe.upright') (follow -- 'grek/Gamma')
-	select-variant 'cyrl/ge' 0x491
+	select-variant 'cyrl/ge.upright' (follow -- 'cyrl/ge')
+	select-variant 'cyrl/ge.italic' (follow -- 'cyrl/ge')
 	select-variant 'cyrl/gheMidHook' 0x495 (follow -- 'cyrl/ghe.upright')
+	select-variant 'grek/smcpGamma' 0x1D26 (shapeFrom -- 'cyrl/ghe.upright') (follow -- 'grek/Gamma')
 
 	select-variant 'grek/Digamma' 0x3DC (follow -- 'grek/Gamma')
 
