@@ -86,11 +86,11 @@ export : define [calculateMetrics para] : begin
 		local adjustedFillRate : StrokeWeightControlSigmoid nonAdjustedFillRate
 		local strokeWidthScalar : Math.min 1 : mul * adjustedFillRate / nonAdjustedFillRate
 		return : para.stroke * strokeWidthScalar
-	define [AdviceStroke crowdedness div mul] : begin
-		local spaceH : Width * [fallback div 1] - SB * 2
+	define [AdviceStroke crowdedness advs mul] : begin
+		local spaceH : Width * [fallback advs 1] - SB * 2
 		return : AdviceStrokeInSpace spaceH HVContrast crowdedness [fallback mul 1]
-	define [AdviceStroke2 crwX crwY refH div] : begin
-		local spaceH : Width * [fallback div 1] - SB * 2
+	define [AdviceStroke2 crwX crwY refH advs] : begin
+		local spaceH : Width * [fallback advs 1] - SB * 2
 		local spaceV   refH
 		return : Math.min
 			AdviceStrokeInSpace spaceH HVContrast crwX 1
@@ -119,8 +119,8 @@ export : define [calculateMetrics para] : begin
 
 	define SLAB para.slab
 
-	define [IBalance  df] : df.div * df.div * [fallback para.ibalance (LongJut * 0.04)] # Serifed
-	define [IBalance2 df] : df.div * [fallback para.ibalance2 (LongJut * 0.14)]         # Hooky, Tailed
+	define [IBalance  df] : df.advs * df.advs * [fallback para.ibalance (LongJut * 0.04)] # Serifed
+	define [IBalance2 df] : df.advs * [fallback para.ibalance2 (LongJut * 0.14)]         # Hooky, Tailed
 	define JBalance  : fallback para.jbalance 0
 	define JBalance2 : fallback para.jbalance2 (QuarterStroke + LongJut * 0.04)
 	define TBalance  : fallback para.tbalance JBalance
@@ -416,25 +416,33 @@ export : define DesignParameters : object
 	squareDotScalar            0.95
 
 export : define [GenDivFrame metrics] : begin
+	# Implementation class of a division frame, used to model a letter's core X-direction structure
 	class CDivFrame
-		public [new _div _hPack _sbMul _mvs _ox] : begin
-			local ox : fallback _ox 0
-			local div : fallback _div 1
+		# _advs: scale factor of advance width
+		# _hPack: number of horizontal divisions
+		# _sbMul: scale factor of sidebearings
+		# _mvs: desired stroke width
+		# _ox: overshoot correction
+		public [new _advs _hPack _sbMul _mvs _ox] : begin
+			local ox    : fallback _ox 0
+			local advs  : fallback _advs 1
 			local hPack : Math.max 1 [fallback _hPack 0]
-			local mvs   : fallback _mvs : if _hPack [metrics.AdviceStroke _hPack div] metrics.Stroke
-			local sbMul : fallback _sbMul : Math.min 1 : (metrics.Width * div - hPack * mvs) / (2 * hPack * metrics.SB)
+			local mvs   : fallback _mvs
+				if _hPack [metrics.AdviceStroke _hPack advs] metrics.Stroke
+			local sbMul : fallback _sbMul
+				Math.min 1 : (metrics.Width * advs - hPack * mvs) / (2 * hPack * metrics.SB)
 
-			set this.params       : object div hPack sbMul mvs ox
-			set this.div            div
+			set this.params       : object advs hPack sbMul mvs ox
+			set this.advs           advs
 			set this.hPack          hPack
-			set this.width        : metrics.Width * div
-			set this.middle       : metrics.Middle * div
+			set this.width        : metrics.Width * advs
+			set this.middle       : metrics.Middle * advs
 			set this.sb           : metrics.SB * sbMul
 			set this.leftSB       : metrics.SB * sbMul
-			set this.rightSB      : metrics.Width * div - metrics.SB * sbMul
+			set this.rightSB      : metrics.Width * advs - metrics.SB * sbMul
 			set this.mvs            mvs
 			set this.shoulderFine : metrics.ShoulderFine * (mvs / metrics.Stroke)
-			set this.markSet      : MarksetDiv div sbMul metrics
+			set this.markSet      : MarksetDiv advs sbMul metrics
 
 			# No-overshoot metrics -- used for arch depth calculation
 			set this.ox                 ox
@@ -486,11 +494,12 @@ export : define [GenDivFrame metrics] : begin
 			set g.divFrameParams this.params
 			return this
 
-		public [adviceStroke c] : metrics.AdviceStroke c this.div
-		public [adviceStroke2 c d h] : metrics.AdviceStroke2 c d h this.div
+		public [adviceStroke c] : metrics.AdviceStroke c this.advs
+		public [adviceStroke2 c d h] : metrics.AdviceStroke2 c d h this.advs
 
-	define [F _div _hPack _sbMul _mvs _ox] : begin
-		return : new CDivFrame _div _hPack _sbMul _mvs _ox
+	# Factory function for CDivFrame
+	define [F _advs _hPack _sbMul _mvs _ox] : begin
+		return : new CDivFrame _advs _hPack _sbMul _mvs _ox
 	set F.fromParams : lambda [params] : begin
-		return : new CDivFrame params.div params.hPack params.sbMul params.mvs params.ox
+		return : new CDivFrame params.advs params.hPack params.sbMul params.mvs params.ox
 	return F
