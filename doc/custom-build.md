@@ -3457,6 +3457,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-micro-sign-toothless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-micro-sign-toothless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>micro-sign = 'toothless-rounded-serifed'</code>, <code>VSAT = 13</code></td></tr>
     <tr><td>Micro Sign (<code>µ</code>) with toothless (rounded) shape, and serifs</td></tr>
     </table></details>
+  - Styles for `❮`, `❯` (Decorative angle brackets (U+276C...U+2771))
+    <details><summary>3 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-decorative-angle-brackets-tall.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-decorative-angle-brackets-tall.dark.svg#gh-dark-mode-only" width=64/></td><td><code>decorative-angle-brackets = 'tall'</code>, <code>VSAU = 1</code></td></tr>
+    <tr><td>Tall decorative angle brackets, sharing same height as conventional brackets</td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-decorative-angle-brackets-middle.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-decorative-angle-brackets-middle.dark.svg#gh-dark-mode-only" width=64/></td><td><code>decorative-angle-brackets = 'middle'</code>, <code>VSAU = 2</code></td></tr>
+    <tr><td>Middle-height decorative angle brackets (default)</td></tr>
+    <tr><td rowspan="2" width="92"><img src="../images/cv-decorative-angle-brackets-short.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-decorative-angle-brackets-short.dark.svg#gh-dark-mode-only" width=64/></td><td><code>decorative-angle-brackets = 'short'</code>, <code>VSAU = 3</code></td></tr>
+    <tr><td>Short decorative angle brackets, sharing same height as guillemts</td></tr>
+    </table></details>
   - Styles for `<=`, `>=` (Less-equal and Greater-equal ligations)
     <details><summary>2 variants</summary>
     <table>
