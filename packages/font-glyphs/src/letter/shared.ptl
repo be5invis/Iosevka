@@ -160,10 +160,6 @@ glyph-block Letter-Shared-Shapes : begin
 			flat (x + hookTurn)  (high - overshoot) [heading Rightward]
 			curl (x + hookDepth + sw * TanSlope) (high - overshoot)
 
-	glyph-block-export DToothlessRise DMBlend
-	define DToothlessRise : Hook * 0.25 + Stroke / 16
-	define DMBlend          0.80
-
 	glyph-block-export CurlyTail
 	define CurlyTail : namespace
 		define [normalBlender before _after args] : begin
@@ -477,8 +473,8 @@ glyph-block Letter-Shared-Shapes : begin
 
 	glyph-block-export FlatHookDepth
 	define [FlatHookDepth df s] : object
-		x : [fallback s 1] * [FlatHookDepthImpl [Math.min 1 : Math.sqrt df.div] HVContrast]
-		y : [fallback s 1] * [FlatHookDepthImpl [Math.min 1 : Math.sqrt df.div]          1]
+		x : [fallback s 1] * [FlatHookDepthImpl [Math.min 1 : Math.sqrt df.adws] HVContrast]
+		y : [fallback s 1] * [FlatHookDepthImpl [Math.min 1 : Math.sqrt df.adws]          1]
 	define [FlatHookDepthImpl sHook sStroke] : begin
 		define kFlathook : 15 / 16
 		return : Math.max
@@ -620,7 +616,7 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define DefaultAngle 40
 
 		export : define [StdDepth df sw] : Math.max (0.5 * sw)
-			df.div * para.unitWidthScalar * [Math.hypot HookX Hook] - 0.25 * sw
+			df.adws * para.unitWidthScalar * [Math.hypot HookX Hook] - 0.25 * sw
 
 		export : define [DefaultInnerRadius] : Math.max (XH / 32) (0.5 * [AdviceStroke2 24 32 XH])
 
@@ -690,14 +686,14 @@ glyph-block Letter-Shared-Shapes : begin
 		return : Math.min jut : 0.5 * ink + [Math.max (Stroke * TanSlope) (0.375 * gap)]
 
 	class CSerifFrame
-		public [new top bot left right swRef swSerif div hSplit fForceSymmetric] : begin
+		public [new top bot left right swRef swSerif adws hSplit fForceSymmetric] : begin
 			set this.top             top
 			set this.bot             bot
 			set this.left            left
 			set this.right           right
 			set this.swRef           swRef
 			set this.swSerif         swSerif
-			set this.div             div
+			set this.adws             adws
 			set this.hSplit          hSplit
 			set this.fForceSymmetric fForceSymmetric
 
@@ -706,7 +702,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 
 			local jutFS   MidJutSide
-			local jut     : mix [HSwToV : 0.5 * swRef] Jut : Math.min 1 : div * 2.25 / hSplit
+			local jut     : mix [HSwToV : 0.5 * swRef] Jut : Math.min 1 : adws * 2.25 / hSplit
 			local sideJut : jut - 0.5 * ink
 
 			local jutIn     : if fForceSymmetric jut : JutIn left right jut swRef hSplit
@@ -767,7 +763,7 @@ glyph-block Letter-Shared-Shapes : begin
 			local gap : (this.right - this.left - this.hSplit * ink) / (this.hSplit - 1)
 			local l1 : this.left + (ink + gap) * l
 			local r1 : this.left + (ink + gap) * r + ink
-			return : new CSerifFrame this.top this.bot l1 r1 this.swRef this.swSerif this.div (r - l + 1)
+			return : new CSerifFrame this.top this.bot l1 r1 this.swRef this.swSerif this.adws (r - l + 1)
 
 	glyph-block-export SerifFrame
 	define flex-params [SerifFrame] : begin
@@ -777,15 +773,15 @@ glyph-block Letter-Shared-Shapes : begin
 		local-parameter : right
 		local-parameter : swRef -- Stroke
 		local-parameter : swSerif -- swRef
-		local-parameter : div -- 1
+		local-parameter : adws -- 1
 		local-parameter : hSplit -- 2
 		local-parameter : fForceSymmetric -- false
-		return : new CSerifFrame top bot left right swRef swSerif div hSplit fForceSymmetric
+		return : new CSerifFrame top bot left right swRef swSerif adws hSplit fForceSymmetric
 
 	define SerifFrame.fromDf : function [] : with-params [df top bot [swSerif df.mvs] [fForceSymmetric false]] : begin
 		return : SerifFrame top bot df.leftSB df.rightSB
 			swRef -- df.mvs
-			div -- df.div
+			adws -- df.adws
 			hSplit -- [Math.max 2 df.hPack]
 			swSerif -- swSerif
 			fForceSymmetric -- fForceSymmetric

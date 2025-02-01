@@ -9,7 +9,8 @@ glyph-block Symbol-Geometric-Technical : for-width-kinds WideWidth1
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
-	glyph-block-import Shared-Symbol-Shapes : TriangleShape
+	glyph-block-import Shared-Symbol-Shapes : TriangleShape Polyline
+	glyph-block-import Symbol-Arrow : ArrowShape ArrowHead TrigArrowShape
 
 	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
 	define Size : GeometricSizes Geom
@@ -29,6 +30,25 @@ glyph-block Symbol-Geometric-Technical : for-width-kinds WideWidth1
 			include : HBar.b (Geom.Left + xShrink) (Geom.Right - xShrink) (Geom.MidY + yOffset) GeometryStroke
 			include : HBar.t (Geom.Left + xShrink) (Geom.Right - xShrink) (Geom.MidY - yOffset) GeometryStroke
 
+		create-glyph [MangleName 'totalRunoff'] [MangleUnicode 0x2330] : glyph-proc
+			set-width Geom.Width
+			local headSize : Geom.Size * 0.375 / Math.SQRT1_2
+			local offset : Geom.Size * 0.4
+			local x0   Geom.Left
+			local x1 : Geom.Left + offset
+			local x2 : Geom.Right - offset - headSize * 0.35
+			local x3 : Geom.Right - headSize * 0.35
+			local vsw : HSwToV : 0.5 * GeometryStroke
+			include : dispiro
+				disable-contrast
+				flat ([mix x0 x1 0.75] + vsw) [mix Geom.Bot Geom.Top 0.75] [widths.center GeometryStroke]
+				sharp-corner (x0 + vsw) Geom.Bot (contrast -- 1)
+				corner Geom.MidX Geom.Bot [widths.lhs GeometryStroke]
+				sharp-corner (x2 - vsw) Geom.Bot (contrast -- 1)
+				curl ([mix x2 x3 0.75] - vsw) [mix Geom.Bot Geom.Top 0.75] [widths.center GeometryStroke]
+			include : TrigArrowShape ([mix x0 x1 0.5] + vsw) Geom.MidY (x1 + vsw) Geom.Top headSize (GeometryStroke / 2)
+			include : TrigArrowShape ([mix x2 x3 0.5] - vsw) Geom.MidY (x3 - vsw) Geom.Top headSize (GeometryStroke / 2)
+
 		create-glyph [MangleName 'conicalTaper'] [MangleUnicode 0x2332] : glyph-proc
 			set-width Geom.Width
 			include : TriangleShape Geom.Left (Geom.MidY - Geom.Size * 0.8) Geom.Left (Geom.MidY + Geom.Size * 0.8) Geom.Right Geom.MidY fineGeometryStroke
@@ -37,6 +57,17 @@ glyph-block Symbol-Geometric-Technical : for-width-kinds WideWidth1
 		create-glyph [MangleName 'slope'] [MangleUnicode 0x2333] : glyph-proc
 			set-width Geom.Width
 			include : TriangleShape Geom.Left Geom.Bot Geom.Left Geom.MidY Geom.Right Geom.Bot fineGeometryStroke
+
+	create-glyph [MangleName 'electricArrow'] [MangleUnicode 0x2301] : glyph-proc
+		set-width Geom.Width
+		define amp : Geom.Size / 2
+		define amp2 : Geom.Size / 4
+		include : intersection [MaskRight Geom.Left] [MaskLeft Geom.Right] : dispiro
+			corner (Geom.MidX - Geom.Size * 2) (Geom.MidY + amp2 * 4) [widths.center GeometryStroke]
+			sharp-corner Geom.MidX (Geom.MidY - amp)
+			corner Geom.MidX Geom.MidY [widths.center.heading GeometryStroke Upward]
+			sharp-corner Geom.MidX (Geom.MidY + amp)
+			corner (Geom.MidX + Geom.Size * 2) (Geom.MidY - amp2 * 4) [widths.center GeometryStroke]
 
 	create-glyph [MangleName 'viewdataSquare'] [MangleUnicode 0x2317] : glyph-proc
 		set-width Geom.Width
@@ -83,3 +114,44 @@ glyph-block Symbol-Geometric-Technical : for-width-kinds WideWidth1
 			arcvh 4
 			flat @x2 @y3
 			curl Geom.MidX @y3
+
+	do "Keyboard Symbols"
+		define topLine : Geom.MidY + Geom.Size / 1.5
+		define botLine : Geom.MidY - Geom.Size / 1.5
+		define topLineC : topLine - GeometryStroke / 2
+		define botLineC : botLine + GeometryStroke / 2
+
+		create-glyph [MangleName 'arrowHeadUpBetweenBars'] [MangleUnicode 0x2324] : glyph-proc
+			set-width MosaicWidth
+			include : ArrowHead Geom.MidX Geom.Bot Geom.MidX topLine
+			include : HBar.t Geom.Left (Geom.MidX - Geom.Size / 3) topLine GeometryStroke
+			include : HBar.t (Geom.MidX + Geom.Size / 3) Geom.Right topLine GeometryStroke
+
+		create-glyph [MangleName 'optionKey'] [MangleUnicode 0x2325] : glyph-proc
+			set-width Geom.Width
+			include : dispiro
+				Polyline [widths.center GeometryStroke]
+					points -- {
+						{ Geom.Left  topLineC }
+						{ (Geom.MidX - Geom.Size / 3) topLineC }
+						{ (Geom.MidX + Geom.Size / 3) botLineC }
+						{ Geom.Right botLineC }
+					}
+					startAf -- [widths.center.heading GeometryStroke Rightward]
+					endAf -- [widths.center.heading GeometryStroke Rightward]
+			include : HBar.t (Geom.MidX + Geom.Size / 3) Geom.Right topLine GeometryStroke
+
+		create-glyph [MangleName 'alternateKey'] [MangleUnicode 0x2387] : glyph-proc
+			set-width Geom.Width
+			include : dispiro
+				Polyline [widths.center GeometryStroke]
+					points -- {
+						{ Geom.Left  botLineC }
+						{ (Geom.MidX - Geom.Size / 3) botLineC }
+						{ (Geom.MidX + Geom.Size / 3) topLineC }
+						{ (Geom.Right - Geom.Size / 6) topLineC }
+					}
+					startAf -- [widths.center.heading GeometryStroke Rightward]
+					endAf -- [widths.center.heading GeometryStroke Rightward]
+			include : ArrowShape (Geom.Right - Geom.Size / 6) topLineC (Geom.Right + GeometryStroke / 2) topLineC (GeometryStroke / 2 + Geom.Size / 3)
+			include : HBar.b (Geom.MidX + Geom.Size / 3) Geom.Right botLine GeometryStroke

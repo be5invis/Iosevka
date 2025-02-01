@@ -6,15 +6,24 @@ import { CliProc, Ot } from "ot-builder";
 
 import { readTTF, saveTTF } from "./font-io/index.mjs";
 import { assignFontNames, createNamingDictFromArgv } from "./naming/index.mjs";
+import { getParametersT } from "./param/index.mjs";
+import { postProcessFont } from "./post-processing/index.mjs";
 import { validateFontConfigMono } from "./validate/metrics.mjs";
 
 export default main;
 async function main(argv) {
+	// Set up parameters
+	const paraT = await getParametersT(argv);
+	const para = paraT(argv);
+
+	// Read in font
 	const font = await readTTF(argv.i);
 
+	// Assign font names
 	const naming = createNamingDictFromArgv(argv);
 	assignFontNames(font, naming, false);
 
+	// Derive spacing
 	switch (argv.shape.spacing) {
 		case "term":
 			await deriveTerm(font);
@@ -31,12 +40,15 @@ async function main(argv) {
 			break;
 	}
 
+	// Save no-GC result
 	await saveTTF(argv.oNoGc, font);
 
+	// GC and save
 	switch (argv.shape.spacing) {
 		case "fontconfig-mono":
 		case "fixed":
 			CliProc.gcFont(font, Ot.ListGlyphStoreFactory);
+			postProcessFont(para, font);
 			validateFontConfigMono(font);
 			await saveTTF(argv.o, font);
 			break;

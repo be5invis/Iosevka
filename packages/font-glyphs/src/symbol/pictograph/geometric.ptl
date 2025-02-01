@@ -1,0 +1,118 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback strokeOffset] from "@iosevka/util"
+import [Box] from "@iosevka/geometry/box"
+import [Transform] from "@iosevka/geometry/transform"
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Geometric : for-width-kinds WideWidth4
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim
+	glyph-block-import Symbol-Mosaic-Block : HShade VShade
+
+	define top     fontMetrics.os2.sTypoAscender
+	define bottom  fontMetrics.os2.sTypoDescender
+	define left    0
+	define right   MosaicWidth
+
+	define midX : mix left right 0.5
+	define midY : mix top bottom 0.5
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+	do "Square Spiral"
+		define directions : list
+			* {.dx   1  .dy   0  .heading Rightward}
+			* {.dx   0  .dy   1  .heading Upward}
+			* {.dx (-1) .dy   0  .heading Leftward}
+			* {.dx   0  .dy (-1) .heading Downward}
+
+		define spiralSw : AdviceStroke 4 : Math.sqrt (MosaicWidthScalar / 2)
+		define oneStep : Geom.Size / 4.5
+		define stepsPerTurn { 9 9 9 7 7 5 5 3 3 }
+		define [SquareSpiral startx starty startidx] : glyph-proc
+			local x1 startx
+			local y1 starty
+			foreach [idx : range 0 stepsPerTurn.length] : begin
+				local {.dx dx .dy dy .heading dir} directions.((startidx + idx) % 4)
+				local x2 : x1 + dx * oneStep * stepsPerTurn.(idx)
+				local y2 : y1 + dy * oneStep * stepsPerTurn.(idx)
+				include : dispiro
+					widths.lhs spiralSw
+					disable-contrast
+					flat x1 y1 [heading dir]
+					curl x2 y2 [heading dir]
+				set x1 x2
+				set y1 y2
+
+		create-glyph [MangleName "squareSpiralFromTopLeft"] [MangleUnicode 0x1CC7C] : glyph-proc
+			set-width MosaicWidth
+			include : SquareSpiral Geom.Left Geom.Top 3
+		create-glyph [MangleName "squareSpiralFromTopRight"] [MangleUnicode 0x1CC7D] : glyph-proc
+			set-width MosaicWidth
+			include : SquareSpiral Geom.Right Geom.Top 2
+		create-glyph [MangleName "squareSpiralFromBottomRight"] [MangleUnicode 0x1CC7E] : glyph-proc
+			set-width MosaicWidth
+			include : SquareSpiral Geom.Right Geom.Bot 1
+		create-glyph [MangleName "squareSpiralFromBottomLeft"] [MangleUnicode 0x1CC7F] : glyph-proc
+			set-width MosaicWidth
+			include : SquareSpiral Geom.Left Geom.Bot 0
+
+	do "Ladder"
+		create-glyph [MangleName "vertLadder"] [MangleUnicode 0x1CC84] : glyph-proc
+			set-width MosaicWidth
+			include : HShade 8 top bottom Geom.Left Geom.Right
+			include : VBar.l Geom.Left bottom top GeometryStroke
+			include : VBar.r Geom.Right bottom top GeometryStroke
+
+		create-glyph [MangleName "horiLadder"] [MangleUnicode 0x1CC85] : glyph-proc
+			set-width MosaicWidth
+			include : VShade (4 * MosaicWidthScalar) Geom.Top Geom.Bot left right
+			include : HBar.b left right Geom.Bot GeometryStroke
+			include : HBar.t left right Geom.Top GeometryStroke
+
+
+	do "Striped Triangles"
+		define stripes : 2 + 2 * MosaicWidthScalar
+		define coTop : mix Geom.Top Geom.Bot (0 - 1 / (2 * stripes))
+		define coBot : mix Geom.Top Geom.Bot (1 + 1 / (2 * stripes))
+		define coLeft : mix Geom.Left Geom.Right (0 - 1 / (2 * stripes))
+		define coRight : mix Geom.Left Geom.Right (1 + 1 / (2 * stripes))
+
+		create-glyph [MangleName "stripedTriangleLeft"] [MangleUnicode 0x1CC80] : glyph-proc
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName "blackTriangleLeft"
+				VShade stripes top bottom coLeft coRight
+
+		create-glyph [MangleName "stripedTriangleUp"] [MangleUnicode 0x1CC81] : glyph-proc
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName "blackTriangleUp"
+				HShade stripes coTop coBot left right
+
+		create-glyph [MangleName "stripedTriangleRight"] [MangleUnicode 0x1CC82] : glyph-proc
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName "blackTriangleRight"
+				VShade stripes top bottom coLeft coRight
+
+		create-glyph [MangleName "stripedTriangleDown"] [MangleUnicode 0x1CC83] : glyph-proc
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName "blackTriangleDown"
+				HShade stripes coTop coBot left right
+
+	do "Horizontal Zigzag"
+		glyph-block-import Shared-Symbol-Shapes : HZigzag
+
+		create-glyph [MangleName 'horiZigzag'] [MangleUnicode 0x1CEB0] : glyph-proc
+			set-width Geom.Width
+			define left : SB * MosaicWidthScalar
+			define right : RightSB * MosaicWidthScalar
+			define amp : (OperTop - OperBot) / 8
+			define sgmts : 4 * MosaicWidthScalar + 1
+
+			include : HZigzag.fromSide Geom.MidY left right amp sgmts 1 GeometryStroke
