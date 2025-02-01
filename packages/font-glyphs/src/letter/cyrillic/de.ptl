@@ -11,7 +11,7 @@ glyph-block Letter-Cyrillic-De : begin
 	glyph-block-import Letter-Greek-Lower-Epsilon : CyrZe EpsilonConfig
 
 	glyph-block-export BottomExtension
-	local BottomExtension : QuarterStroke - LongVJut
+	local BottomExtension : (-LongVJut) + QuarterStroke
 
 	glyph-block-export CyrDeBottom
 	define [CyrDeBottom left right _sw _desc] : glyph-proc
@@ -30,7 +30,7 @@ glyph-block Letter-Cyrillic-De : begin
 			VBar.r (right + descenderOverflow) desc 0.1 swOuter
 
 	glyph-block-export CyrDeShape
-	define [CyrDeShape top left right _sw _desc] : glyph-proc
+	define [CyrDeShape top left right _sw _desc fLower] : glyph-proc
 		local descenderOverflow : if SLAB SideJut ((right - left) * 0.075)
 		local xTopLeft : mix left right : StrokeWidthBlend 0.15 0.1
 		local xTopRight : mix left right : StrokeWidthBlend 0.95 0.96
@@ -50,24 +50,26 @@ glyph-block Letter-Cyrillic-De : begin
 		include : if SLAB
 			then : dispiro
 				widths.rhs swOuter
-				flat (xTopLeft  - descenderOverflow) top
-				curl (xTopRight + descenderOverflow) top
+				flat (xTopLeft - descenderOverflow) top
+				if (fLower && para.isItalic)
+					then : list : curl xTopRight top [heading Rightward]
+					else : list : curl (xTopRight + descenderOverflow) top
 			else : HBar.t xTopLeft xTopRight top swOuter
 
 		return : object desc xTopLeft xTopRight
 
-	define [CyrSoftDeShape df top _sw vSlab] : glyph-proc
+	define [CyrSoftDeShape df top _sw _desc fLower vSlab] : glyph-proc
 		local descenderOverflow : if SLAB SideJut ((df.rightSB - df.leftSB) * 0.075)
 		local sw : fallback _sw Stroke
 		local xm : if SLAB
 			[mix df.leftSB df.rightSB 0.625] + [HSwToV : 0.25 * sw]
-			mix df.leftSB df.rightSB : if (df.div > 1) (2 / 3) (3 / 4)
+			mix df.leftSB df.rightSB : if (df.adws > 1) (2 / 3) (3 / 4)
 		local xTopRight : mix df.leftSB xm : StrokeWidthBlend 0.95 0.96
 		local xTopBarRightEnd : mix df.width df.rightSB : if vSlab 0.25 0.375
 
-		include : CyrDeShape top df.leftSB xm sw
+		include : CyrDeShape top df.leftSB xm sw _desc fLower
 
-		include : if SLAB
+		include : if (SLAB && !(fLower && para.isItalic))
 			then : HBar.t (xTopRight + descenderOverflow) xTopBarRightEnd top sw
 			else : HBar.t xTopRight xTopBarRightEnd top sw
 
@@ -85,33 +87,33 @@ glyph-block Letter-Cyrillic-De : begin
 
 	create-glyph 'cyrl/deLongLeg' 0x1C81 : glyph-proc
 		include : MarkSet.p
-		include : CyrDeShape XH SB RightSB Stroke Descender
+		include : CyrDeShape XH SB RightSB nothing Descender true
 
 	create-glyph 'cyrl/DeSoft.serifless' : glyph-proc
-		local df : include : DivFrame para.diversityM 3
+		local df : include : DivFrame para.advanceScaleM 3
 		include : df.markSet.capital
 		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrSoftDeShape df CAP df.mvs false
+		include : CyrSoftDeShape df CAP df.mvs nothing false false
 
 	create-glyph 'cyrl/DeSoft.topRightSerifed' : glyph-proc
-		local df : include : DivFrame para.diversityM 3
+		local df : include : DivFrame para.advanceScaleM 3
 		include : df.markSet.capital
 		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrSoftDeShape df CAP df.mvs true
+		include : CyrSoftDeShape df CAP df.mvs nothing false true
 
 	select-variant 'cyrl/DeSoft' 0xA662 (follow -- 'cyrl/EnGhe/GhePart')
 
 	create-glyph 'cyrl/deSoft.serifless' : glyph-proc
-		local df : include : DivFrame para.diversityM 3
+		local df : include : DivFrame para.advanceScaleM 3
 		include : df.markSet.e
 		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrSoftDeShape df XH df.mvs false
+		include : CyrSoftDeShape df XH df.mvs nothing true false
 
 	create-glyph 'cyrl/deSoft.topRightSerifed' : glyph-proc
-		local df : include : DivFrame para.diversityM 3
+		local df : include : DivFrame para.advanceScaleM 3
 		include : df.markSet.e
 		include : ExtendBelowBaseAnchors BottomExtension
-		include : CyrSoftDeShape df XH df.mvs true
+		include : CyrSoftDeShape df XH df.mvs nothing true true
 
 	select-variant 'cyrl/deSoft' 0xA663 (follow -- 'cyrl/enghe/ghePart')
 
@@ -170,12 +172,13 @@ glyph-block Letter-Cyrillic-De : begin
 			g4 (left + sw * 1.1) Ascender
 
 	create-glyph 'cyrl/de.italic' : glyph-proc
-		include : MarkSet.b
-		include : CyrDeItalicShapeT dispiro [DivFrame 1]
+		local df : include : DivFrame 1
+		include : df.markSet.b
+		include : CyrDeItalicShapeT dispiro df
 
 	foreach { suffix { st sb }} [Object.entries EpsilonConfig] : do
 		create-glyph "cyrl/dzze.italic.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.diversityMM 3
+			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.bp
 
 			local dfLeft : df.slice 3 2 OX
@@ -192,6 +195,6 @@ glyph-block Letter-Cyrillic-De : begin
 				stroke   -- df.mvs
 			include : union [ze.Shape] [ze.AutoEndSerifL]
 
-	select-variant 'cyrl/Dzze' 0xA688 (follow -- 'cyrl/ZeBottomSerifOnly')
+	select-variant 'cyrl/Dzze' 0xA688  (follow -- 'cyrl/ZeBottomSerifOnly')
 	select-variant 'cyrl/dzze.upright' (follow -- 'cyrl/zeBottomSerifOnly')
-	select-variant 'cyrl/dzze.italic' (follow -- 'cyrl/zeBottomSerifOnly')
+	select-variant 'cyrl/dzze.italic'  (follow -- 'cyrl/zeBottomSerifOnly')

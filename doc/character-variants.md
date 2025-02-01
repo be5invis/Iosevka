@@ -3777,6 +3777,19 @@
 <td colspan="11"> </td>
 </tr>
 <tr>
+<td rowspan="2"><code>VSAU</code></td>
+<td colspan="2"><img src="../images/cv-decorative-angle-brackets-tall.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-decorative-angle-brackets-tall.dark.svg#gh-dark-mode-only" width=64/></td>
+<td colspan="2"><img src="../images/cv-decorative-angle-brackets-middle.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-decorative-angle-brackets-middle.dark.svg#gh-dark-mode-only" width=64/></td>
+<td colspan="2"><img src="../images/cv-decorative-angle-brackets-short.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-decorative-angle-brackets-short.dark.svg#gh-dark-mode-only" width=64/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td colspan="2">1</td>
+<td colspan="2">2</td>
+<td colspan="2">3</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
 <td rowspan="2"><code>VLAA</code></td>
 <td colspan="2"><img src="../images/cv-lig-ltgteq-flat.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-lig-ltgteq-flat.dark.svg#gh-dark-mode-only" width=64/></td>
 <td colspan="2"><img src="../images/cv-lig-ltgteq-slanted.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-lig-ltgteq-slanted.dark.svg#gh-dark-mode-only" width=64/></td>

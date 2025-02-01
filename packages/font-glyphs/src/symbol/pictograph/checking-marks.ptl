@@ -68,26 +68,41 @@ glyph-block Symbol-Pictograph-Checking-Marks : begin
 				alsoThru 0.47 0.5
 				g4 ptRSB [mix ptBot ptTop 0.42]
 
-	do "Ext angle brackets"
+	do "Decorative angular brackets"
 		define Geom : GeometricDim Width Width
 		define mediumSw : UnicodeWeightGrade 5    Geom.Scalar
 		define heavySw  : UnicodeWeightGrade 9    Geom.Scalar
 		define xHeavySw : UnicodeWeightGrade 11   Geom.Scalar
 
-		define ExtBracketConfig : list
-			list 0x276C mediumSw 1 SB PictTop
-			list 0x276D mediumSw 0 SB PictTop
-			list 0x276E heavySw  1 [mix SB Middle 0.45] [mix SymbolMid ParenTop 0.5]
-			list 0x276F heavySw  0 [mix SB Middle 0.45] [mix SymbolMid ParenTop 0.5]
-			list 0x2770 xHeavySw 1 SB PictTop
-			list 0x2771 xHeavySw 0 SB PictTop
-		foreach {unicode sw op left top} [items-of ExtBracketConfig] : begin
-			create-glyph [NameUni unicode] unicode : glyph-proc
-				local bot : 2 * SymbolMid - top
-				local right : 2 * Middle - left
-				local cor : DiagCor (top - bot) (2 * (right - left))
-				include : dispiro
-					widths.center (sw * cor)
-					corner [mix (left + sw / 2) (right - sw / 2) op] top [heading Downward]
-					corner [mix (left + sw / 2) (right - sw / 2) (1 - op)] SymbolMid [heading Downward]
-					corner [mix (left + sw / 2) (right - sw / 2) op] bot [heading Downward]
+		define HeightConfig : object
+			# suffix    width scale   height scale
+			tall      { 1.00          1.00         }
+			middle    { 0.80          0.75         }
+			short     { 0.55          0.50         }
+
+		define CharConfig : list
+			#    unicode   sw        side
+			list 0x276C    mediumSw  1
+			list 0x276D    mediumSw  0
+			list 0x276E    heavySw   1
+			list 0x276F    heavySw   0
+			list 0x2770    xHeavySw  1
+			list 0x2771    xHeavySw  0
+
+		foreach { unicode sw side } [items-of CharConfig] : begin
+			foreach { suffix { widthScale heightScale } } [pairs-of HeightConfig] : begin
+				create-glyph "\[NameUni unicode].\(suffix)" : glyph-proc
+					local top : mix SymbolMid ParenTop heightScale
+					local bot : mix SymbolMid ParenBot heightScale
+					local left : mix Middle SB widthScale
+					local right : mix Middle RightSB widthScale
+					local cor : DiagCor (top - bot) (2 * (right - left))
+					local swC : sw * cor
+					local shift : 0.5 * swC + OX
+					include : dispiro
+						widths.center swC
+						corner [mix (left + shift) (right - shift) side] top [heading Downward]
+						corner [mix (left + shift) (right - shift) (1 - side)] SymbolMid [heading Downward]
+						corner [mix (left + shift) (right - shift) side] bot [heading Downward]
+
+			select-variant [NameUni unicode] unicode (follow -- 'decorativeAngleBracket')
