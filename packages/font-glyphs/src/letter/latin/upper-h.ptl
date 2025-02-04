@@ -39,6 +39,42 @@ glyph-block Letter-Latin-Upper-H : begin
 			[Just SLAB-TAILED-CYRILLIC-BGR] : composite-proc sf.lt.outer sf.rt.inner sf.lb.full
 			[Just SLAB-SMALL-HETA] : NeedSlab SLAB : begin sf.lt.outer
 
+	define [LeftHalfSerifs slabType t b l r sw] : begin
+		local sf : SerifFrame t b l r (swRef -- [fallback sw Stroke])
+		return : match slabType
+			[Just SLAB-NONE] : glyph-proc
+			[Just SLAB-TOP-LEFT] : begin sf.lt.outer
+			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : begin sf.lt.outer
+			[Just SLAB-TAILED-CYRILLIC] : composite-proc sf.lt.fullSide sf.lb.fullSide
+			[Just SLAB-ALL] : composite-proc sf.lt.fullSide sf.lb.fullSide
+			[Just SLAB-ALL-BGR] : composite-proc sf.lt.outer sf.lb.fullSide
+			[Just SLAB-TAILED-CYRILLIC-BGR] : composite-proc sf.lt.outer sf.lb.fullSide
+			[Just SLAB-SMALL-HETA] : NeedSlab SLAB : begin sf.lt.outer
+
+	define [RightHalfSerifs slabType t b l r sw] : begin
+		local sf : SerifFrame t b l r (swRef -- [fallback sw Stroke])
+		return : match slabType
+			[Just SLAB-NONE] : glyph-proc
+			[Just SLAB-TOP-LEFT] : glyph-proc
+			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : begin sf.rb.outer
+			[Just SLAB-TAILED-CYRILLIC] : begin sf.rt.fullSide
+			[Just SLAB-ALL] : composite-proc sf.rt.fullSide sf.rb.fullSide
+			[Just SLAB-ALL-BGR] : composite-proc sf.rt.inner sf.rb.fullSide
+			[Just SLAB-TAILED-CYRILLIC-BGR] : begin sf.rt.inner
+			[Just SLAB-SMALL-HETA] : glyph-proc
+
+	define [TurnedSerifs slabType t b l r sw] : begin
+		local sf : SerifFrame t b l r (swRef -- [fallback sw Stroke])
+		return : match slabType
+			[Just SLAB-NONE] : glyph-proc
+			[Just SLAB-TOP-LEFT] : begin sf.lt.outer
+			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : composite-proc sf.lt.outer sf.rb.outer
+			[Just SLAB-TAILED-CYRILLIC] : composite-proc sf.lt.full sf.rt.full
+			[Just SLAB-ALL] : composite-proc sf.lt.full sf.rt.full sf.rb.fullSide
+			[Just SLAB-ALL-BGR] : composite-proc sf.lt.outer sf.rt.inner sf.rb.fullSide
+			[Just SLAB-TAILED-CYRILLIC-BGR] : composite-proc sf.lt.outer sf.rt.inner
+			[Just SLAB-SMALL-HETA] : NeedSlab SLAB : begin sf.lt.outer
+
 	define [HShape l r top _sw] : glyph-proc
 		local sw : fallback _sw Stroke
 		include : tagged 'strokeL' : VBar.l l 0 top sw
@@ -139,8 +175,7 @@ glyph-block Letter-Latin-Upper-H : begin
 		create-glyph "HTurned.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : TurnedBody SB RightSB CAP
-			include : HSerifs slabType CAP 0 SB RightSB
-			eject-contour 'serifLB'
+			include : TurnedSerifs slabType CAP 0 SB RightSB
 
 		create-glyph "smcpH.\(suffix)" : glyph-proc
 			include : MarkSet.e
@@ -151,33 +186,25 @@ glyph-block Letter-Latin-Upper-H : begin
 			local df : include : DivFrame para.advanceScaleF
 			include : df.markSet.capital
 			include : LeftHalfBody df.leftSB df.rightSB CAP
-			include : HSerifs slabType CAP 0 df.leftSB df.rightSB
-			eject-contour 'serifRT'
-			eject-contour 'serifRB'
+			include : LeftHalfSerifs slabType CAP 0 df.leftSB df.rightSB
 
 		create-glyph "rightHalfH.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleF
 			include : df.markSet.capital
 			include : RightHalfBody df.leftSB df.rightSB CAP
-			include : HSerifs slabType CAP 0 df.leftSB df.rightSB
-			eject-contour 'serifLT'
-			eject-contour 'serifLB'
+			include : RightHalfSerifs slabType CAP 0 df.leftSB df.rightSB
 
 		create-glyph "leftHalfSmcpH.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleF
 			include : df.markSet.e
 			include : LeftHalfBody df.leftSB df.rightSB XH
-			include : HSerifs slabType XH 0 df.leftSB df.rightSB
-			eject-contour 'serifRT'
-			eject-contour 'serifRB'
+			include : LeftHalfSerifs slabType XH 0 df.leftSB df.rightSB
 
 		create-glyph "rightHalfSmcpH.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleF
 			include : df.markSet.e
 			include : RightHalfBody df.leftSB df.rightSB XH
-			include : HSerifs slabType XH 0 df.leftSB df.rightSB
-			eject-contour 'serifLT'
-			eject-contour 'serifLB'
+			include : RightHalfSerifs slabType XH 0 df.leftSB df.rightSB
 
 		define enGheDf : DivFrame para.advanceScaleM 3
 
@@ -276,7 +303,7 @@ glyph-block Letter-Latin-Upper-H : begin
 		local df : include : DivFrame para.advanceScaleF
 		include : df.markSet.e
 		include : LeftHalfBody df.leftSB df.rightSB XH
-		include : HSerifs SLAB-SMALL-HETA XH 0 df.leftSB df.rightSB
+		include : LeftHalfSerifs SLAB-SMALL-HETA XH 0 df.leftSB df.rightSB
 
 	derive-composites 'HDescender' 0x2C67 'H/descBase' [CyrDescender.rSideJut RightSB 0]
 
