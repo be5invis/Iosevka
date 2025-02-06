@@ -29,9 +29,10 @@ glyph-block Letter-Cyrillic-Che : begin
 		TOP         5
 		ALL-BGR     6
 		TOP-BGR     7
+		ALL-SYM     8
 
 	glyph-block-export CyrCheShape
-	define [CyrCheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs] [yBarOffset DToothlessRise]] : glyph-proc
+	define [CyrCheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs] [yBarOffset 0]] : glyph-proc
 		local bar : top * [fallback pyBar 0.5] + yBarOffset
 
 		include : tagged 'strokeR' : match bodyType
@@ -42,13 +43,14 @@ glyph-block Letter-Cyrillic-Che : begin
 			left   -- df.leftSB
 			right  -- df.rightSB
 			top    -- top
-			bottom -- (bar - DToothlessRise - 0.5 * sw)
+			bottom -- (bar - 0.5 * sw)
 			sw     -- sw
 
 		local sf : SerifFrame.fromDf df top 0
 		include : tagged 'serifLT' : match slabType
 			[Just SERIFS.ALL]        sf.lt.full
 			[Just SERIFS.TOP]        sf.lt.full
+			[Just SERIFS.ALL-SYM]    sf.lt.full
 			[Just SERIFS.ALL-BGR]    sf.lt.outer
 			[Just SERIFS.TOP-BGR]    sf.lt.outer
 			[Just SERIFS.TL-BR]      sf.lt.outer
@@ -57,20 +59,22 @@ glyph-block Letter-Cyrillic-Che : begin
 		include : tagged 'SerifRT' : match slabType
 			[Just SERIFS.ALL]        sf.rt.full
 			[Just SERIFS.TOP]        sf.rt.full
+			[Just SERIFS.ALL-SYM]    sf.rt.full
 			[Just SERIFS.ALL-BGR]    sf.rt.inner
 			[Just SERIFS.TOP-BGR]    sf.rt.inner
 			__                   : glyph-proc
 		include : tagged 'SerifRB' : match slabType
 			[Just SERIFS.ALL]        sf.rb.fullSide
 			[Just SERIFS.ALL-BGR]    sf.rb.fullSide
+			[Just SERIFS.ALL-SYM]    sf.rb.full
 			[Just SERIFS.TL-BR]      sf.rb.outer
 			[Just SERIFS.BR]         sf.rb.outer
 			__                   : glyph-proc
 
-	define [CyrCcheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs] [yBarOffset DToothlessRise]] : glyph-proc
+	define [CyrCcheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs] [yBarOffset 0]] : glyph-proc
 		local bar : top * [fallback pyBar 0.5] + yBarOffset
 
-		include : EarlessCornerDoubleArchSmallMShape df (top - bar + DToothlessRise + HalfStroke) 0 0 0
+		include : EarlessCornerDoubleArchSmallMShape df (top - bar + HalfStroke) 0 0 0
 		eject-contour 'barL'
 		include : FlipAround df.middle (top / 2)
 
@@ -99,7 +103,7 @@ glyph-block Letter-Cyrillic-Che : begin
 			[Just SERIFS.BR]         sf.rb.outer
 			__                   : glyph-proc
 
-	define [CyrTcheShape] : with-params [df top pyBar bodyType slabType [teSerifs SLAB] [sw : AdviceStroke 2.75] [yBarOffset DToothlessRise]] : glyph-proc
+	define [CyrTcheShape] : with-params [df top pyBar bodyType slabType [teSerifs SLAB] [sw : AdviceStroke 2.75] [yBarOffset 0]] : glyph-proc
 		local bar : top * [fallback pyBar 0.5] + yBarOffset
 
 		local left : [mix df.leftSB df.rightSB : if (df.adws > 1) 0.25 0.2] - [HSwToV : 0.25 * sw] + OX
@@ -113,9 +117,9 @@ glyph-block Letter-Cyrillic-Che : begin
 			left   -- left
 			right  -- right
 			top    -- top
-			bottom -- (bar - DToothlessRise - 0.5 * sw)
+			bottom -- (bar - 0.5 * sw)
 			sw     -- sw
-			fine   -- 0.5 * sw
+			fine   -- (0.5 * sw)
 
 		local xTopBarLeft : df.leftSB - SideJut
 		local xTopBarRight : mix xTopBarLeft (left + [HSwToV : 0.5 * sw]) 2
@@ -231,7 +235,7 @@ glyph-block Letter-Cyrillic-Che : begin
 	CreateSelectorVariants 'cyrl/tche' 0xA693 [Object.keys ItalicConfig] (follow -- 'cyrl/che')
 
 	define [CheVBarBarShape top pyBar] : begin
-		local SwCheVBar : Math.min OverlayStroke : VSwToH : 0.625 * (RightSB - SB - [HSwToV : 2 * Stroke])
+		local SwCheVBar : Math.min OverlayStroke : VSwToH : 0.625 * ((RightSB - SB) - [HSwToV : 2 * Stroke])
 		local yc : top * [fallback pyBar 0.5] + Stroke * 0.1
 		return : VBar.m Middle (yc + LongVJut * 0.8) (yc - LongVJut * 0.8) SwCheVBar
 
@@ -242,14 +246,14 @@ glyph-block Letter-Cyrillic-Che : begin
 		serifless                 SERIFS.NONE
 		topLeftSerifed            SERIFS.BR
 		topLeftBottomRightSerifed SERIFS.TL-BR
-		serifed                   SERIFS.ALL
+		serifed                   SERIFS.ALL-SYM
 
 	foreach { suffix serifs } [pairs-of ShhaConfig] : do
 		create-glyph "cyrl/Shha.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : LeaningAnchor.Above.VBar.l SB
 			include : CyrCheShape [DivFrame 1] CAP (1 - HBarPos) BODY.STRAIGHT serifs
-				yBarOffset -- ([HSwToV : Stroke ** 2] / (RightSB - SB))
+				yBarOffset -- (DToothlessRise * ([HSwToV : 1.2 * Stroke] / (Middle - SB) - 1))
 			include : FlipAround Middle (CAP / 2)
 
 		create-glyph "cyrl/Hwe.\(suffix)" : glyph-proc
