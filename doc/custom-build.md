@@ -3628,6 +3628,7 @@ Subsection `metricOverride` provides ability to override certain metric values, 
 | `essRatioQuestion` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `?`, to the normal stroke width. |
 | `archDepth` | emu | (*varies, 195 for Regular*) | Depth of the curve segment of arches / O rings in capital letters. |
 | `smallArchDepth` | emu | (*varies, 200 for Regular*) | Depth of the curve segment of arches / O rings in small letters. |
+| `advanceScaleSp` | (*ratio*) | (*varies, 1.0 for monospace, 0.58333 for quasi-proportional*) | The advance width ratio of space character, relative to the width of digit `0`. |
 
 The values of each item could be either a number, or a string representing an expression so that it could be different for different instance fonts, or depending on default values. The syntax of valid expressions are:
 
