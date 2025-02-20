@@ -13,11 +13,11 @@ glyph-block Letter-Latin-Thorn : begin
 
 	define xThornLeftStroke : SB * 1.25
 
+	define [yThornBowlSymmetricBot top slab] : top * 0.19 + [if slab (Stroke * 0.375) 0]
+	define [yThornBowlSymmetricTop top slab] : top - [yThornBowlSymmetricBot top slab]
+
 	define [yThornBowlAsymmetricBot top slab] : top * 0.25 + [if slab (Stroke * 0.125) 0]
 	define [yThornBowlAsymmetricTop top slab] : top - 0.7 * [yThornBowlAsymmetricBot top slab] + [if slab (-0.125) 0.25] * Stroke
-
-	define [yThornBowlSymmetricBot top slab] : mix [yThornBowlAsymmetricBot top slab] (top - [yThornBowlAsymmetricTop top slab]) 0.5
-	define [yThornBowlSymmetricTop top slab] : top - [yThornBowlSymmetricBot top slab]
 
 	define [ThornShapeImpl top slabTop slabBot yBowlBot yBowlTop] : glyph-proc
 		local turn : mix yBowlTop yBowlBot (ArchDepthB / (ArchDepthA + ArchDepthB))
@@ -43,13 +43,13 @@ glyph-block Letter-Latin-Thorn : begin
 		include : LeaningAnchor.Above.VBar.l xThornLeftStroke
 		include : LeaningAnchor.Below.VBar.l xThornLeftStroke
 
-	define [ThornAsymmetricShape top slabTop slabBot] : ThornShapeImpl top slabTop slabBot
-		yThornBowlAsymmetricBot top slabBot
-		yThornBowlAsymmetricTop top slabBot
-
 	define [ThornSymmetricShape top slabTop slabBot] : ThornShapeImpl top slabTop slabBot
 		yThornBowlSymmetricBot top slabBot
 		yThornBowlSymmetricTop top slabBot
+
+	define [ThornAsymmetricShape top slabTop slabBot] : ThornShapeImpl top slabTop slabBot
+		yThornBowlAsymmetricBot top slabBot
+		yThornBowlAsymmetricTop top slabBot
 
 	define ThornConfig : SuffixCfg.weave
 		object # symmetry
@@ -81,13 +81,11 @@ glyph-block Letter-Latin-Thorn : begin
 				include [refer-glyph "Thorn.\(suffix)"] AS_BASE ALSO_METRICS
 				include : LetterBarOverlay.l.in
 					x   -- xThornLeftStroke
-					bot -- (0 + [if doSB Stroke 0])
-					top -- (0 + [yThornBowlAsymmetricBot CAP doSB])
+					bot -- [if doSB Stroke 0]
+					top -- [yThornBowlAsymmetricBot CAP doSB]
 
 	select-variant 'Thorn' 0xDE
 	select-variant 'ThornStroke' 0xA764
 	select-variant 'ThornStrokeBottom' 0xA766
 
-	create-glyph 'grek/Sho' 0x3F7 : glyph-proc
-		include : MarkSet.capital
-		include : ThornSymmetricShape CAP SLAB SLAB
+	alias 'grek/Sho' 0x3F7 : if SLAB 'Thorn.serifed' 'Thorn.serifless'
