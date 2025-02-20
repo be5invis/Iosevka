@@ -8,6 +8,7 @@ glyph-module
 glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Common-OShape-Variants : OvalShapeT
 	glyph-block-import Shared-Symbol-Shapes : TriangleShape
 	glyph-block-import Symbol-Pictograph-Stick-Figure : StickFigureKit PointingHandShape
 	glyph-block-import Symbol-Geometric-Shared : GeometricDim
@@ -55,23 +56,44 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 					close
 				OShapeOutline lockHoleTop lockHoleBottom lockHoleLeft lockHoleRight fine (SmallArchDepthA * lockHoleWidth) (SmallArchDepthB * lockHoleWidth)
 
+	define [KeyholeStroke t b l r sw circBot] : glyph-proc
+		local trigTop : mix b t 1.5
+		local trigClip : mix t circBot 0.5
+		local mx : mix l r 0.5
+		local circ : OvalShapeT dispiro t circBot l r sw
+		local circMask : OvalShapeT spiro-outline t circBot l r
+		local trig : intersection [MaskBelow trigClip]
+			TriangleShape mx trigTop r b l b sw
+		local trigMask : intersection [MaskBelow trigClip]
+			spiro-outline [corner mx trigTop] [corner r b] [corner l b]
+
+		include : difference
+			union circMask trigMask
+			union
+				difference circMask circ
+				difference trigMask trig
+
+	create-glyph 'keyhole' 0x1CEB1 : glyph-proc
+		local diameter : RightSB - SB - OX * 2
+		include : KeyholeStroke (PictTop - O) PictBot (SB + OX) (RightSB - OX) GeometryStroke (PictTop - O - diameter)
+
 	do "Progress Bar"
 		define frameLeft  : mix SB RightSB DesignParameters.bracketOutside
 		define frameRight : mix RightSB SB DesignParameters.bracketOutside
 		define progressBarGap : Math.min ((TackTop - TackBot) / 6) (Width / 6) [AdviceStroke 5]
 
 		create-glyph 'powerline/progressBarStartEmpty' 0xEE00 : glyph-proc
-			include : VBar.l   frameLeft TackTop TackBot GeometryStroke
-			include : HBar.t    frameLeft (Width - O) TackTop GeometryStroke
+			include : VBar.l frameLeft TackTop TackBot GeometryStroke
+			include : HBar.t frameLeft (Width - O) TackTop GeometryStroke
 			include : HBar.b frameLeft (Width - O) TackBot GeometryStroke
 
 		create-glyph 'powerline/progressBarMiddleEmpty' 0xEE01 : glyph-proc
-			include : HBar.t    O (Width - O) TackTop GeometryStroke
+			include : HBar.t O (Width - O) TackTop GeometryStroke
 			include : HBar.b O (Width - O) TackBot GeometryStroke
 
 		create-glyph 'powerline/progressBarEndEmpty' 0xEE02 : glyph-proc
-			include : VBar.r  frameRight TackTop TackBot GeometryStroke
-			include : HBar.t    O frameRight TackTop GeometryStroke
+			include : VBar.r frameRight TackTop TackBot GeometryStroke
+			include : HBar.t O frameRight TackTop GeometryStroke
 			include : HBar.b O frameRight TackBot GeometryStroke
 
 		create-glyph 'powerline/progressBarStartFilled' 0xEE03 : glyph-proc
@@ -132,6 +154,11 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 			create-glyph [MangleName "topLeftBlackSmallTriangleLeft"] [MangleUnicode 0x1CE07] : glyph-proc
 				set-width MosaicWidth
 				include : with-transform [ApparentTranslate (-MosaicWidth / 4) ((CAP - Geom.MidY) * 0.3 + AccentStackOffset / 2)] : refer-glyph : MangleName 'blackSmallTriangleLeft'
+
+			if (MosaicWidthScalar == 1) : begin
+				create-glyph "blackRightTriangleCaret" 0x1CEB3 : glyph-proc
+					set-width 0
+					include : HalfRectTriangle MosaicWidth ParenBot 0 [mix 0 ParenBot 0.2]
 
 		do "Split graphics"
 			define [BoxN n] : new Box uiFigTop uiFigBot SB (MosaicWidth * n - SB)
