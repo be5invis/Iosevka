@@ -8,29 +8,31 @@ glyph-block Letter-Latin-Thorn : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
-	glyph-block-import Letter-Shared-Shapes : OBarLeft LetterBarOverlay SerifFrame
-	glyph-block-import Letter-Latin-Lower-P
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay SerifFrame
+	glyph-block-import Letter-Greek-Phi : yCapitalPhiBowlBot yCapitalPhiBowlTop
 
 	define xThornLeftStroke : SB * 1.25
 
-	define [yThornBowlSymmetricBot top slab] : top * 0.19 + [if slab (Stroke * 0.375) 0]
-	define [yThornBowlSymmetricTop top slab] : top - [yThornBowlSymmetricBot top slab]
+	define [yThornBowlBot top slab] : top * 0.19 + [if slab (Stroke * 0.375) 0]
+	define [yThornBowlTop top slab] : top - [yThornBowlBot top slab]
 
 	define [yThornBowlAsymmetricBot top slab] : top * 0.25 + [if slab (Stroke * 0.125) 0]
 	define [yThornBowlAsymmetricTop top slab] : top - 0.7 * [yThornBowlAsymmetricBot top slab] + [if slab (-0.125) 0.25] * Stroke
 
 	define [ThornShapeImpl top slabTop slabBot yBowlBot yBowlTop] : glyph-proc
-		local turn : mix yBowlTop yBowlBot (ArchDepthB / (ArchDepthA + ArchDepthB))
-		local turnRadius : (yBowlTop - yBowlBot) / 2
+		local xTurn : Math.max
+			RightSB - (yBowlTop - yBowlBot) * 0.5
+			mix xThornLeftStroke RightSB 0.25
+			xThornLeftStroke + [HSwToV Stroke]
 
 		include : dispiro
 			widths.rhs
 			flat xThornLeftStroke yBowlTop [heading Rightward]
-			curl [arch.adjust-x.top (RightSB - turnRadius)] yBowlTop
+			curl [arch.adjust-x.top xTurn] yBowlTop
 			archv
-			g4   (RightSB - O) turn
+			g4   (RightSB - O) [mix yBowlTop yBowlBot (ArchDepthB / (ArchDepthA + ArchDepthB))]
 			arcvh
-			flat [arch.adjust-x.bot (RightSB - turnRadius)] yBowlBot
+			flat [arch.adjust-x.bot xTurn] yBowlBot
 			curl xThornLeftStroke yBowlBot [heading Leftward]
 
 		include : VBar.l xThornLeftStroke 0 top
@@ -43,9 +45,9 @@ glyph-block Letter-Latin-Thorn : begin
 		include : LeaningAnchor.Above.VBar.l xThornLeftStroke
 		include : LeaningAnchor.Below.VBar.l xThornLeftStroke
 
-	define [ThornSymmetricShape top slabTop slabBot] : ThornShapeImpl top slabTop slabBot
-		yThornBowlSymmetricBot top slabBot
-		yThornBowlSymmetricTop top slabBot
+	define [ThornShape top slabTop slabBot] : ThornShapeImpl top slabTop slabBot
+		yThornBowlBot top slabBot
+		yThornBowlTop top slabBot
 
 	define [ThornAsymmetricShape top slabTop slabBot] : ThornShapeImpl top slabTop slabBot
 		yThornBowlAsymmetricBot top slabBot
@@ -53,7 +55,7 @@ glyph-block Letter-Latin-Thorn : begin
 
 	define ThornConfig : SuffixCfg.weave
 		object # symmetry
-			""            ThornSymmetricShape
+			""            ThornShape
 			asymmetric    ThornAsymmetricShape
 		object # serifs
 			serifless     { false false }
@@ -88,4 +90,8 @@ glyph-block Letter-Latin-Thorn : begin
 	select-variant 'ThornStroke' 0xA764
 	select-variant 'ThornStrokeBottom' 0xA766
 
-	alias 'grek/Sho' 0x3F7 : if SLAB 'Thorn.serifed' 'Thorn.serifless'
+	create-glyph 'grek/Sho' 0x3F7 : glyph-proc
+		include : MarkSet.capital
+		include : ThornShapeImpl CAP SLAB SLAB
+			yCapitalPhiBowlBot CAP SLAB
+			yCapitalPhiBowlTop CAP SLAB
