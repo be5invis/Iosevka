@@ -15,14 +15,14 @@ glyph-block Letter-Latin-Eth : begin
 	define yMid2 : YSmoothMidR yMid 0 SmallArchDepthA SmallArchDepthB
 	define yMid3 : mix yMid yMid2 0.875
 
-	define [ArcStartKnots] : list
+	define [ArcStartKnots _flatY1 _flatY2] : list
 		widths.lhs fine
 		straight.up.mid (RightSB - OX - [HSwToV : Stroke - fine]) yMid2
 		arch.lhs yMid (swBefore -- fine)
 		g4 (SB + OX) [YSmoothMidL yMid 0 SmallArchDepthA SmallArchDepthB]
 		arch.lhs 0
-		flat (RightSB - OX) yMid2
-		curl (RightSB - OX) yMid3
+		flat (RightSB - OX) [fallback _flatY1 yMid2]
+		curl (RightSB - OX) [fallback _flatY2 yMid3]
 
 	create-glyph 'dInsular.curly-bar' : glyph-proc
 		include : MarkSet.b
@@ -40,6 +40,13 @@ glyph-block Letter-Latin-Eth : begin
 			ArcStartKnots
 			flat [mix Width xTerminal pStraightBarStart] [mix yMockBarStart CAP pStraightBarStart] [widths.lhs]
 			curl [mix Width xTerminal 2]                 [mix yMockBarStart CAP 2]
+
+	create-glyph 'dInsular.closed-contour' : glyph-proc
+		include : MarkSet.b
+		include : dispiro
+			ArcStartKnots SmallArchDepthA (Ascender - SmallArchDepthB)
+			hookend Ascender
+			g4 (SB + OX) (Ascender - Hook)
 
 	select-variant 'dInsular' 0xA77A (follow -- 'eth')
 	select-variant 'partial'  0x2202 (shapeFrom -- 'dInsular')

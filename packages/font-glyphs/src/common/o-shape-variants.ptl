@@ -1,0 +1,89 @@
+$$include '../meta/macros.ptl'
+
+import [mix clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Common-OShape-Variants : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	glyph-block-export OvalShapeT DiamondShapeT RoundRectShapeT
+	define [OvalShapeT sink t b l r _sw _refAda _refAdb] : begin
+		local m : mix l r 0.5
+		local sw : fallback _sw Stroke
+		local refAda : fallback _refAda SmallArchDepthA
+		local refAdb : fallback _refAdb SmallArchDepthB
+
+		return : sink
+			widths.rhs sw
+			arch.rhs.centerAt.ltr.t m t (sw -- sw)
+			archv
+			g4 (r - OX) [YSmoothMidR t b refAda refAdb]
+			arcvh
+			arch.rhs.centerAt.rtl.b m b (sw -- sw)
+			archv
+			g4 (l + OX) [YSmoothMidL t b refAda refAdb]
+			arcvh
+			close
+
+	define diamondFineRatio : [AdviceStroke 3] / [AdviceStroke 2]
+	define [DiamondShapeT sink t b l r sw] : begin
+		local body : fallback sw : AdviceStroke 2
+		local fine : diamondFineRatio * body
+		local sw1    fine
+		local sw2  : mix body fine 0.375
+
+		local mxb : arch.adjust-x.bot [mix (l - OX) (r + OX) 0.5] (sw -- fine)
+		local mxt : arch.adjust-x.top [mix (l - OX) (r + OX) 0.5] (sw -- fine)
+		local myl : YSmoothMidL t b
+		local myr : YSmoothMidR t b
+
+		local p1 : 0.45 + 0.8 * (fine / (r - l))
+		local p2 : 0.15 + 0.5 * (fine / (t - b))
+		local p3 : 0.35 + 0.8 * (body / (t - b))
+		local p4 : 0.15 + 0.0 * (body / (r - l))
+
+		local pcx  0.5
+		local pcy  0.1
+
+		return : sink
+			g2.right.mid       mxb                   (b + O)              [widths.lhs fine]
+			alsoThru.g2        pcx                   pcy
+			flat               [mix mxb r p1]        [mix b myr p2]       [widths.lhs sw1]
+			curl               [mix mxb r (1 - p4)]  [mix b myr (1 - p3)] [widths.lhs sw2]
+			g2.up.mid          (r - OX)              myr                  [widths.lhs body]
+			flat               [mix r mxt p4]        [mix myr t p3]       [widths.lhs sw2]
+			curl               [mix r mxt (1 - p1)]  [mix myr t (1 - p2)] [widths.lhs sw1]
+			alsoThru.g2        (1 - pcx)             (1 - pcy)
+			g2.left.mid        mxt                   (t - O)              [widths.lhs fine]
+			alsoThru.g2        pcx                   pcy
+			flat               [mix mxt l p1]        [mix t myl p2]       [widths.lhs sw1]
+			curl               [mix mxt l (1 - p4)]  [mix t myl (1 - p3)] [widths.lhs sw2]
+			g2.down.mid        (l + OX)              myl                  [widths.lhs body]
+			flat               [mix l mxb p4]        [mix myl b p3]       [widths.lhs sw2]
+			curl               [mix l mxb (1 - p1)]  [mix myl b (1 - p2)] [widths.lhs sw1]
+			alsoThru.g2        (1 - pcx)             (1 - pcy)
+			close
+
+	define [RoundRectShapeT sink u d l r _sw _cr] : begin
+		local sw : fallback _sw Stroke
+		local cr : fallback _cr : clamp ((r - l) / 5) ((r - l) / 2.5) : HSwToV sw
+		local lMid : l + cr
+		local rMid : r - cr
+		local ada : ArchDepthAOf cr (r - l)
+		local adb : ArchDepthBOf cr (r - l)
+
+		return : sink
+			widths.lhs sw
+			arch.lhs.centerAt.rtl.t lMid u (sw -- sw) (knot-ty -- curl)
+			archv
+			flatside.ld l d u ada adb
+			arcvh
+			arch.lhs.centerAt.ltr.b lMid d (sw -- sw) (knot-ty -- flat)
+			arch.lhs.centerAt.ltr.b rMid d (sw -- sw) (knot-ty -- curl)
+			archv
+			flatside.ru r d u ada adb
+			arcvh
+			arch.lhs.centerAt.rtl.t rMid u (sw -- sw) (knot-ty -- flat)
+			close
