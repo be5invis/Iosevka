@@ -1,0 +1,68 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Latin-Script-R : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
+
+	define [xBarRight df] : df.width - df.leftSB * 1.5
+
+	define [ScriptRShape top left right fTailed sw] : glyph-proc
+		include : tagged 'strokeR' : if fTailed
+			RightwardTailedBar right 0 (top - 0.5 * sw) (sw -- sw)
+			VBar.r             right 0 (top - 0.5 * sw) sw
+		include : union
+			VBar.l left (top - VJut) (top - 0.5 * sw) (VJutStroke * (sw / Stroke))
+			dispiro
+				widths.rhs sw
+				g4      left             (top - O) [heading Rightward]
+				g4 [mix left right 0.5]  (top + O)
+				g4           right       (top - O) [heading Rightward]
+		if (SLAB && !fTailed) : include : if para.isItalic [HSerif.rb right 0 SideJut] : composite-proc
+			HSerif.rb (right - [HSwToV : 0.5 * sw]) 0 Jut
+			HSerif.lb (right - [HSwToV : 0.5 * sw]) 0 MidJutSide
+
+	define ScriptRConfig : object
+		standard  false
+		tailed    true
+
+	foreach { suffix doTail } [pairs-of ScriptRConfig] : do
+		create-glyph "rScript.\(suffix)" : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.e
+			include : ScriptRShape XH df.leftSB [xBarRight df] doTail df.mvs
+			include : LeaningAnchor.Below.VBar.r [xBarRight df]
+
+	select-variant 'rScript' 0xAB4B (follow -- 'cyrl/che')
+
+	create-glyph 'rScriptBowl' 0xAB4C : glyph-proc
+		local df : include : DivFrame para.advanceScaleM
+		include : df.markSet.e
+		local subDf : DivFrame (0.75 * para.advanceScaleM) 2
+
+		include : ScriptRShape XH SB [xBarRight subDf] true subDf.mvs
+		eject-contour 'strokeR'
+
+		local swBowl : [AdviceStroke 3] * (subDf.mvs / Stroke)
+		local fineBowl : ShoulderFine * (swBowl / Stroke)
+
+		local yBar : 0.5 * XH + 0.5 * swBowl
+
+		local ada : ArchDepthAOf SmallArchDepth : df.width - ([xBarRight subDf] - subDf.leftSB) + [HSwToV subDf.mvs]
+		local adb : ArchDepthBOf SmallArchDepth : df.width - ([xBarRight subDf] - subDf.leftSB) + [HSwToV subDf.mvs]
+
+		include : dispiro
+			flat ([xBarRight subDf] - [HSwToV subDf.mvs]) (XH - 0.5 * subDf.mvs) [widths.lhs.heading subDf.mvs Downward]
+			curl ([xBarRight subDf] - [HSwToV subDf.mvs]) [YSmoothMidL yBar 0 ada adb]
+			arch.lhs 0 (sw -- subDf.mvs) (swAfter -- swBowl)
+			g4 (df.rightSB - OX) [YSmoothMidR yBar 0 ada adb] [widths.lhs swBowl]
+			arch.lhs yBar (sw -- swBowl) (swAfter -- fineBowl)
+			g4.down.end ([xBarRight subDf] - [HSwToV fineBowl]) [YSmoothMidL yBar 0 ada adb] [widths.lhs.heading fineBowl Downward]
+
+		include : LeaningAnchor.Above.VBar.m subDf.middle
+		include : LeaningAnchor.Below.VBar.m [mix ([xBarRight subDf] - [HSwToV subDf.mvs]) df.rightSB 0.5]

@@ -8,11 +8,31 @@ glyph-module
 glyph-block Letter-Greek-Lower-Theta : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Common-OShape-Variants : OvalShapeT DiamondShapeT
 
-	create-glyph 'grek/theta' 0x3B8 : glyph-proc
-		include : MarkSet.b
-		include : OShape Ascender 0 (SB - O) (RightSB + O) Stroke (SmallArchDepthA * 100) (SmallArchDepthB * 100)
-		include : HBar.m (SB + HalfStroke) (RightSB - HalfStroke) (0.5 * Ascender)
+	define [ThetaShapeBase shapeT] : namespace
+		define [outlineT sink offsetX offsetY top] : shapeT sink (top - offsetY) (offsetY) (SB + offsetX) (RightSB - offsetX)
+		export : define [Shape top] : outlineT dispiro 0 0 top
+		export : define [Mask top] : outlineT spiro-outline 1 1 top
+
+	define Capsule : ThetaShapeBase OShapeT
+	define Oval : ThetaShapeBase OvalShapeT
+	define Diamond : ThetaShapeBase DiamondShapeT
+
+	define ThetaConfig : object
+		'capsule' Capsule
+		'oval'    Oval
+		'diamond' Diamond
+
+	foreach { suffix ShapeBase } [pairs-of ThetaConfig] : begin
+		create-glyph "grek/theta.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : ShapeBase.Shape Ascender
+			include : intersection
+				ShapeBase.Mask Ascender
+				HBar.m SB RightSB (0.5 * Ascender)
+
+	select-variant 'grek/theta' 0x3B8
 
 glyph-block Letter-Greek-Lower-Theta-Var : begin
 	glyph-block-import CommonShapes

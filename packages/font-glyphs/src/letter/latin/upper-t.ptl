@@ -10,7 +10,7 @@ glyph-block Letter-Latin-Upper-T : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Blackboard : BBS BBD
-	glyph-block-import Letter-Latin-Lower-M
+	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateTurnedLetter
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay UpwardHookShape
 	glyph-block-import Letter-Shared-Shapes : CyrDescender SerifFrame FlatHookDepth LeftHook RetroflexHook
@@ -45,15 +45,16 @@ glyph-block Letter-Latin-Upper-T : begin
 			left   -- left
 			right  -- df.rightSB
 			ybegin -- top
-			yend   -- (top / 2)
+			yend   -- (top / 2 + HalfStroke)
 			ada    -- (SmallArchDepthA * 0.6 * df.adws)
 			adb    -- (SmallArchDepthB * 0.6 * df.adws)
 			sw     -- df.mvs
 
 		if doTopSerifs : begin
-			include : tagged 'serifRT' : VSerif.dr xTopBarRight top VJut
-			include : tagged 'serifLT' : VSerif.dl xTopBarLeft  top VJut
-		local sf2 : [SerifFrame.fromDf df (top / 2) 0].slice 1 2
+			local { jutTop jutBot jutMid } : EFVJutLength top 0.5 df.mvs
+			include : tagged 'serifRT' : VSerif.dr xTopBarRight top jutTop
+			include : tagged 'serifLT' : VSerif.dl xTopBarLeft  top jutTop
+		local sf2 : [SerifFrame.fromDf df (top / 2 + HalfStroke) 0].slice 1 2
 		if SLAB : include sf2.rt.full
 
 	define [TweUpperShape df top doTopSerifs] : glyph-proc
@@ -66,8 +67,8 @@ glyph-block Letter-Latin-Upper-T : begin
 		local xRight : df.width - 1.5 * df.leftSB
 		local xLeft : df.leftSB - ox
 
-		include : tagged 'strokeLT' : HBar.t xLeft xRight top
-		include : tagged 'strokeV'  : VBar.r xRight 0 top
+		include : tagged 'strokeLT' : HBar.t xLeft  xRight top
+		include : tagged 'strokeV'  : VBar.r xRight 0      top
 
 		if doTopSerifs : begin
 			include : tagged 'serifLT' : VSerif.dl xLeft top VJut
@@ -82,7 +83,7 @@ glyph-block Letter-Latin-Upper-T : begin
 
 	glyph-block-export TConfig
 	define TConfig : object
-		serifless     { 1               false false }
+		serifless     { 1                  false false }
 		motionSerifed { para.advanceScaleT true  false }
 		serifed       { para.advanceScaleT true  true  }
 
@@ -149,7 +150,7 @@ glyph-block Letter-Latin-Upper-T : begin
 				y   -- 0
 				jut -- [if doSB MidJutCenter Jut]
 
-		create-glyph "TRTailBR.\(suffix)" : glyph-proc
+		create-glyph "TRTail.\(suffix)" : glyph-proc
 			local df : DivFrame adws
 			include [refer-glyph "T.\(suffix)"] AS_BASE ALSO_METRICS
 			include : df.markSet.capital
@@ -186,7 +187,7 @@ glyph-block Letter-Latin-Upper-T : begin
 	alias 'cyrl/te/reduced.upright' null 'smcpT'
 	select-variant 'cyrl/teDescender.upright' (follow -- 'T')
 
-	select-variant 'TRTailBR' 0x1AE (follow -- 'T/rtailBase')
+	select-variant 'TRTail' 0x1AE (follow -- 'T/rtailBase')
 
 	select-variant 'cyrl/TjeKomi' 0x50E (follow -- 'T/rtailBase')
 	select-variant 'cyrl/tjeKomi.upright' null (follow -- 'T/rtailBase')
@@ -215,8 +216,8 @@ glyph-block Letter-Latin-Upper-T : begin
 		if SLAB : begin
 			include : tagged 'serifRT' : VSerif.dr r CAP VJut
 			include : tagged 'serifLT' : VSerif.dl l CAP VJut
-			include : tagged 'serifRB' : VSerif.ur r 0 VJut
-			include : tagged 'serifLB' : VSerif.ul l 0 VJut
+			include : tagged 'serifRB' : VSerif.ur r 0   VJut
+			include : tagged 'serifLB' : VSerif.ul l 0   VJut
 
 	create-glyph 'mathbb/T' 0x1D54B : glyph-proc
 		local df : include : DivFrame 1

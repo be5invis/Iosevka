@@ -97,17 +97,20 @@ glyph-block Letter-Latin-U : begin
 	define UUpper : UShapeGroup ArchDepthA ArchDepthB
 	define ULower : UShapeGroup SmallArchDepthA SmallArchDepthB
 
-	define [UTopLeftSerif df yTop _sw] : tagged 'serifLT'
-		HSerif.lt df.leftSB yTop SideJut _sw
+	define [UTopLeftSerif df yTop _sw] : begin
+		local sf : SerifFrame.fromDf df yTop 0 (swSerif -- _sw)
+		return sf.lt.outer
 
-	define [UTopRightSerif df yTop _sw] : tagged 'serifRT'
-		HSerif.lt (df.rightSB - [HSwToV Stroke]) yTop SideJut _sw
+	define [UTopRightSerif df yTop _sw] : begin
+		local sf : SerifFrame.fromDf df yTop 0 (swSerif -- _sw)
+		return sf.rt.inner
 
 	define [UBottomRightSerif df yTop _sw] : glyph-proc
-		include : tagged 'serifRB' : HSerif.rb df.rightSB 0 SideJut _sw
+		local sf : SerifFrame.fromDf df yTop 0 (swSerif -- _sw)
+		include sf.rb.outer
 		define trAnchor currentGlyph.baseAnchors.trailing
 		if trAnchor : begin
-			set-base-anchor 'trailing' (trAnchor.x + SideJut) trAnchor.y
+			set-base-anchor 'trailing' (trAnchor.x + sf.sideJut) trAnchor.y
 
 	glyph-block-export USerifs
 	define USerifs : namespace
@@ -124,9 +127,9 @@ glyph-block Letter-Latin-U : begin
 			include : UTopLeftSerif df top _sw
 			include : UTopRightSerif df top _sw
 
-		export : define [BilateralMotion df top _sw] : glyph-proc
-			include : HSerif.lt df.leftSB top SideJut _sw
-			include : HSerif.rt df.rightSB top SideJut _sw
+		export : define [BilateralMotion df top _sw] : begin
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- _sw)
+			return : composite-proc sf.lt.outer sf.rt.outer
 
 		export : define [SmallToothless df top _sw] : glyph-proc
 			include : UTopLeftSerif df top _sw
