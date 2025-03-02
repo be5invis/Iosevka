@@ -1,5 +1,12 @@
 ## Modifications since last major version
 
+### 33.0.1
+
+* Make certain characters slightly wider under Quasi-Proportional. Affected characters:
+  - LATIN SMALL LETTER TH WITH STRIKETHROUGH (`U+1D7A`).
+* Allow Latin Alpha (`ɑ`) and Script G (`ɡ`) to use eared/earless variants of `a` (`cv36`) and `g` (`cv42`) respectively.
+
+
 ### 33.0.0
 
 * \[**Breaking**\] Adjusted width of spaces in quasi-porportional
