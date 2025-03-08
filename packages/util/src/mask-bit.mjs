@@ -1,6 +1,10 @@
 export function maskBit(x, y) {
 	return x & (1 << y);
 }
+export function maskOffBit(x, y) {
+	return x & ~(1 << y);
+}
+
 export function maskBits(x, y) {
 	return x & y;
 }
