@@ -18,17 +18,16 @@ glyph-block Letter-Latin-Upper-Q : begin
 	define [QStdBody df top sw] : OShape top 0 df.leftSB df.rightSB sw ArchDepthA ArchDepthB
 	define [QHorizontalTailedBody df top sw] : begin
 		define fine : mix ShoulderFine sw 0.125
+		define tailRB : mix df.rightSB df.width 0.7
 		return : dispiro
 			g4.right.mid [arch.adjust-x.bot df.middle fine] (sw - fine) [widths.lhs fine]
 			archv
-			flat df.rightSB ArchDepthA [widths.lhs sw]
-			curl df.rightSB (top - ArchDepthB)
+			flatside.ru df.rightSB 0 top ArchDepthA ArchDepthB (af -- [widths.lhs sw])
 			arch.lhs top
-			flat df.leftSB (top - ArchDepthA)
-			curl df.leftSB ArchDepthB
+			flatside.ld df.leftSB  0 top ArchDepthA ArchDepthB
 			arcvh
 			flat [arch.adjust-x.bot df.middle] 0
-			curl df.rightSB 0
+			curl tailRB 0
 
 	define [QOpenSwashyBody df top] : glyph-proc
 		define fine : AdviceStroke 3.5
@@ -42,19 +41,23 @@ glyph-block Letter-Latin-Upper-Q : begin
 		define yRingStart : XH / 12
 		define notchOffset : ((-Descender) * 0.625) + Stroke * 0.625 + yRingStart / 2
 		define tailSlope : 0.2 + 0.5 * (1 - fine / Stroke)
-		# Lower part
+
+		# Lower-left OShape cutoff
 		include : difference
 			dispiro
 				flat df.width (yRingStart + O) [widths.rhs.heading fine Leftward]
 				curl [arch.adjust-x.bot df.middle] (yRingStart + O)
 				archv
-				flat (df.leftSB + OX) (yRingStart + ArchDepthB) [widths.rhs Stroke]
-				curl (df.leftSB + OX) [mix yRingStart top 0.5] [heading Upward]
+				flatside.lu df.leftSB yRingStart top ArchDepthA ArchDepthB (af -- [widths.rhs Stroke])
+				arch.rhs top
+				flatside.rd df.rightSB 0 top ArchDepthA ArchDepthB
 			MaskBelowLine
 				mix xMBArc xLB0 4
 				[mix yMBArc yLB 4] + notchOffset
 				mix xLB0 xMBArc 4
 				[mix yLB yMBArc 4] + notchOffset
+			MaskRightLine df.middle 0 df.middle top 2
+		# OShape to Swash stroke
 		include : dispiro
 			flat (df.leftSB + OX) [mix yRingStart top 0.5] [widths.rhs.heading Stroke Upward]
 			curl (df.leftSB + OX) (top - ArchDepthA)
@@ -65,6 +68,7 @@ glyph-block Letter-Latin-Upper-Q : begin
 			g2 xMBArc yMBArc [widths.rhs : 0.8 * [mix Stroke fine 0.5]]
 			alsoThru.g2 0.55 0.35 [widths.rhs : 0.9 * [mix Stroke fine 0.75]]
 			g2 xLB yLB [widths.rhs fine]
+		# Final Swash stroke
 		include : difference
 			dispiro
 				g2 xLB yLB [widths.lhs (fine * CThin)]
@@ -144,7 +148,31 @@ glyph-block Letter-Latin-Upper-Q : begin
 		corner [xBendTailStart df] yBendTailStart    [heading Rightward]
 		corner df.middle           yObliqueTailStart [heading Rightward]
 
-	define [QSwashyTail] : return : glyph-proc
+	define [QSwashyTail df top sw] : glyph-proc
+		define fine : df.adviceStroke 3.5
+		define xLB0 : mix df.leftSB df.rightSB (1 / 16)
+		define xLB : xLB0 + [HSwToV : 0.6 * fine]
+		define yLB : [mix 0 Descender (31 / 32)] + O
+		define xRB0 : mix df.rightSB df.width 0.7
+		define xRB : xRB0 - [HSwToV : 0.75 * Stroke]
+		define tailSlope : 0.2 + 0.5 * (1 - fine / Stroke)
+
+		# Body to Swash stroke
+		include : difference
+			dispiro
+				flat (df.middle + [HSwToV : 0.5 * Stroke]) [mix 0 top 0.1] [widths.rhs Stroke]
+				curl xLB yLB [widths.rhs fine]
+			OShapeOutline top 0 df.leftSB df.rightSB Stroke ArchDepthA ArchDepthB
+		# Final Swash stroke
+		include : difference
+			dispiro
+				g2 xLB yLB [widths.lhs (fine * CThin)]
+				g2.right.mid [mix xLB xRB (1 / 4)] (yLB - Descender / 4 - Stroke * (1 / 16)) [widths.lhs.heading (fine * CThin) {.x (TanSlope + tailSlope) .y 1}]
+				alsoThru.g2 0.5 0.5
+				g2.right.mid ([mix xLB xRB (3 / 4)] + Stroke * tailSlope) (Descender + O) [widths.lhs.heading Stroke {.x (TanSlope - tailSlope) .y 1}]
+				archv
+				g2 xRB0 [mix Descender xLB 0.5] [widths.lhs.heading fine Upward]
+			MaskLeft xLB
 
 	###################################
 
@@ -163,7 +191,8 @@ glyph-block Letter-Latin-Upper-Q : begin
 		horizontalTailed    { QHorizontalTailedBody  [AdviceStroke 3]    no-shape           'capital' 'e' }
 		detachedTailed      { QStdBody                Stroke             QDetachedTail      'capDesc' 'p' }
 		detachedBendTailed  { QStdBody                Stroke             QDetachedBendTail  'capDesc' 'p' }
-		openSwash           { QOpenSwashyBody         Stroke             QSwashyTail        'capDesc' 'p' }
+		openSwash           { QOpenSwashyBody         Stroke             no-shape           'capDesc' 'p' }
+		closedSwash         { QStdBody                Stroke             QSwashyTail        'capDesc' 'p' }
 
 
 	foreach { suffix { body swTailInner tailShape mkCapital mkSmcp } } [Object.entries QConfig] : do
