@@ -732,7 +732,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>J</code> with descending height, flat hook, and serifs</td></tr>
     </table></details>
   - Styles for `K`
-    <details><summary>20 variants</summary>
+    <details><summary>32 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'straight-serifless'</code>, <code>cv21 = 1</code></td></tr>
     <tr><td><code>K</code> with straight shape; without serifs (default for Sans)</td></tr>
@@ -774,6 +774,30 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>K</code> with symmetric legs connected to the vertical bar, and serifs at top left and bottom right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-symmetric-connected-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-symmetric-connected-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'symmetric-connected-serifed'</code>, <code>cv21 = 20</code></td></tr>
     <tr><td><code>K</code> with symmetric legs connected to the vertical bar, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-straight-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-straight-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'straight-top-right-serifed'</code>, <code>cv21 = 21</code></td></tr>
+    <tr><td><code>K</code> with straight shape, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-straight-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-straight-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'straight-tri-serifed'</code>, <code>cv21 = 22</code></td></tr>
+    <tr><td><code>K</code> with straight shape, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-straight-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-straight-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'straight-full-serifed'</code>, <code>cv21 = 23</code></td></tr>
+    <tr><td><code>K</code> with straight shape, and full serifs at legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-curly-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-curly-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'curly-top-right-serifed'</code>, <code>cv21 = 24</code></td></tr>
+    <tr><td><code>K</code> with curly shape, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-curly-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-curly-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'curly-tri-serifed'</code>, <code>cv21 = 25</code></td></tr>
+    <tr><td><code>K</code> with curly shape, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-curly-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-curly-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'curly-full-serifed'</code>, <code>cv21 = 26</code></td></tr>
+    <tr><td><code>K</code> with curly shape, and full serifs at legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-symmetric-touching-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-symmetric-touching-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'symmetric-touching-top-right-serifed'</code>, <code>cv21 = 27</code></td></tr>
+    <tr><td><code>K</code> with symmetric legs touching the vertical bar, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-symmetric-touching-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-symmetric-touching-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'symmetric-touching-tri-serifed'</code>, <code>cv21 = 28</code></td></tr>
+    <tr><td><code>K</code> with symmetric legs touching the vertical bar, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-symmetric-touching-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-symmetric-touching-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'symmetric-touching-full-serifed'</code>, <code>cv21 = 29</code></td></tr>
+    <tr><td><code>K</code> with symmetric legs touching the vertical bar, and full serifs at legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-symmetric-connected-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-symmetric-connected-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'symmetric-connected-top-right-serifed'</code>, <code>cv21 = 30</code></td></tr>
+    <tr><td><code>K</code> with symmetric legs connected to the vertical bar, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-symmetric-connected-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-symmetric-connected-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'symmetric-connected-tri-serifed'</code>, <code>cv21 = 31</code></td></tr>
+    <tr><td><code>K</code> with symmetric legs connected to the vertical bar, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-k-symmetric-connected-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-k-symmetric-connected-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-k = 'symmetric-connected-full-serifed'</code>, <code>cv21 = 32</code></td></tr>
+    <tr><td><code>K</code> with symmetric legs connected to the vertical bar, and full serifs at legs</td></tr>
     </table></details>
   - Styles for `L`
     <details><summary>3 variants</summary>
@@ -846,7 +870,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>P</code> with open shape, and serifs</td></tr>
     </table></details>
   - Styles for `Q`
-    <details><summary>10 variants</summary>
+    <details><summary>11 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-q-curly-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-q-curly-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-q = 'curly-tailed'</code>, <code>cv26 = 1</code></td></tr>
     <tr><td><code>Q</code> with a curly tail (default)</td></tr>
@@ -868,6 +892,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>Q</code> with a bend tail detached</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-q-open-swash.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-q-open-swash.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-q = 'open-swash'</code>, <code>cv26 = 10</code></td></tr>
     <tr><td><code>Q</code> with open contour and swash-y shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-q-closed-swash.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-q-closed-swash.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-q = 'closed-swash'</code>, <code>cv26 = 11</code></td></tr>
+    <tr><td><code>Q</code> with a swashy tail</td></tr>
     </table></details>
   - Styles for `R`
     <details><summary>30 variants</summary>
@@ -1420,7 +1446,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>j</code> with top serif and diagonal tail</td></tr>
     </table></details>
   - Styles for `k`
-    <details><summary>27 variants</summary>
+    <details><summary>40 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-k-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'straight-serifless'</code>, <code>cv46 = 1</code></td></tr>
     <tr><td><code>k</code> with standard shape; without serifs (default for Sans Upright)</td></tr>
@@ -1476,6 +1502,32 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>k</code> with cursive loop plus diagonal tail; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-k-diagonal-tailed-cursive-top-left-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-diagonal-tailed-cursive-top-left-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'diagonal-tailed-cursive-top-left-serifed'</code>, <code>cv46 = 27</code></td></tr>
     <tr><td><code>k</code> with cursive loop plus diagonal tail, and serifs at top left (default for Slab Italic)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-straight-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-straight-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'straight-top-right-serifed'</code>, <code>cv46 = 28</code></td></tr>
+    <tr><td><code>k</code> with standard shape, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-straight-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-straight-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'straight-tri-serifed'</code>, <code>cv46 = 29</code></td></tr>
+    <tr><td><code>k</code> with standard shape, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-straight-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-straight-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'straight-full-serifed'</code>, <code>cv46 = 30</code></td></tr>
+    <tr><td><code>k</code> with standard shape, and full serifs at legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-curly-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-curly-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'curly-top-right-serifed'</code>, <code>cv46 = 31</code></td></tr>
+    <tr><td><code>k</code> with curly shape, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-curly-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-curly-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'curly-tri-serifed'</code>, <code>cv46 = 32</code></td></tr>
+    <tr><td><code>k</code> with curly shape, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-curly-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-curly-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'curly-full-serifed'</code>, <code>cv46 = 33</code></td></tr>
+    <tr><td><code>k</code> with curly shape, and full serifs at legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-symmetric-touching-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-symmetric-touching-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'symmetric-touching-top-right-serifed'</code>, <code>cv46 = 34</code></td></tr>
+    <tr><td><code>k</code> with symmetric legs touching the vertical bar, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-symmetric-touching-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-symmetric-touching-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'symmetric-touching-tri-serifed'</code>, <code>cv46 = 35</code></td></tr>
+    <tr><td><code>k</code> with symmetric legs touching the vertical bar, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-symmetric-touching-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-symmetric-touching-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'symmetric-touching-full-serifed'</code>, <code>cv46 = 36</code></td></tr>
+    <tr><td><code>k</code> with symmetric legs touching the vertical bar, and full serifs at legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-symmetric-connected-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-symmetric-connected-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'symmetric-connected-top-right-serifed'</code>, <code>cv46 = 37</code></td></tr>
+    <tr><td><code>k</code> with symmetric legs connected to the vertical bar, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-symmetric-connected-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-symmetric-connected-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'symmetric-connected-tri-serifed'</code>, <code>cv46 = 38</code></td></tr>
+    <tr><td><code>k</code> with symmetric legs connected to the vertical bar, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-symmetric-connected-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-symmetric-connected-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'symmetric-connected-full-serifed'</code>, <code>cv46 = 39</code></td></tr>
+    <tr><td><code>k</code> with symmetric legs connected to the vertical bar, and full serifs at legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-k-cursive-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-k-cursive-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>k = 'cursive-full-serifed'</code>, <code>cv46 = 40</code></td></tr>
+    <tr><td><code>k</code> with cursive loop, and full serifs at legs</td></tr>
     </table></details>
   - Styles for `l`
     <details><summary>14 variants</summary>
@@ -2329,8 +2381,26 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-delta-flat-top.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-delta-flat-top.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-delta = 'flat-top'</code>, <code>cv72 = 2</code></td></tr>
     <tr><td>Greek lower Delta (<code>δ</code>) with flat top</td></tr>
     </table></details>
+  - Styles for `η` (Greek lower Eta)
+    <details><summary>7 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-eta-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eta-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-eta = 'serifless'</code>, <code>VXAA = 1</code></td></tr>
+    <tr><td>Greek lower Eta (<code>η</code>) without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-eta-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eta-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-eta = 'motion-serifed'</code>, <code>VXAA = 2</code></td></tr>
+    <tr><td>Greek lower Eta (<code>η</code>) with serif at top left (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-eta-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eta-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-eta = 'serifed'</code>, <code>VXAA = 3</code></td></tr>
+    <tr><td>Greek lower Eta (<code>η</code>) with serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-eta-earless-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eta-earless-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-eta = 'earless-corner-serifless'</code>, <code>VXAA = 4</code></td></tr>
+    <tr><td>Greek lower Eta (<code>η</code>) with earless (corner top-left) body shape; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-eta-earless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eta-earless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-eta = 'earless-corner-serifed'</code>, <code>VXAA = 5</code></td></tr>
+    <tr><td>Greek lower Eta (<code>η</code>) with earless (corner top-left) body shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-eta-earless-rounded-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eta-earless-rounded-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-eta = 'earless-rounded-serifless'</code>, <code>VXAA = 6</code></td></tr>
+    <tr><td>Greek lower Eta (<code>η</code>) with earless (rounded top-left) body shape; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-eta-earless-rounded-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eta-earless-rounded-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-eta = 'earless-rounded-serifed'</code>, <code>VXAA = 7</code></td></tr>
+    <tr><td>Greek lower Eta (<code>η</code>) with earless (rounded top-left) body shape, and serifs</td></tr>
+    </table></details>
   - Styles for `θ` (Greek lower Theta)
-    <details><summary>3 variants</summary>
+    <details><summary>4 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-theta-capsule.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-theta-capsule.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-theta = 'capsule'</code>, <code>cv73 = 1</code></td></tr>
     <tr><td>Greek lower Theta (<code>θ</code>) with a capsule (O-like) body shape</td></tr>
@@ -2338,6 +2408,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Theta (<code>θ</code>) with a standard (oval) body shape (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-theta-diamond.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-theta-diamond.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-theta = 'diamond'</code>, <code>cv73 = 3</code></td></tr>
     <tr><td>Greek lower Theta (<code>θ</code>) with a diamond body shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-theta-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-theta-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-theta = 'cursive'</code>, <code>cv73 = 4</code></td></tr>
+    <tr><td>Greek lower Theta (<code>θ</code>) with a cursive body shape</td></tr>
     </table></details>
   - Styles for `ι` (Greek lower Iota)
     <details><summary>12 variants</summary>
@@ -2366,6 +2438,74 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Iota (<code>ι</code>) with a slightly curly tail</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-iota-serifed-semi-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-iota-serifed-semi-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-iota = 'serifed-semi-tailed'</code>, <code>cv74 = 12</code></td></tr>
     <tr><td>Greek lower Iota (<code>ι</code>) with top serif and a slightly curly tail (default for Upright)</td></tr>
+    </table></details>
+  - Styles for `κ` (Greek lower Kappa)
+    <details><summary>32 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'straight-serifless'</code>, <code>VXAB = 1</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with standard shape; without serifs (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-straight-top-left-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-straight-top-left-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'straight-top-left-serifed'</code>, <code>VXAB = 2</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with standard shape, and serifs at top left (default for Slab Italic)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-straight-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-straight-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'straight-bottom-right-serifed'</code>, <code>VXAB = 3</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with standard shape, and serifs at bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-straight-top-left-and-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-straight-top-left-and-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'straight-top-left-and-bottom-right-serifed'</code>, <code>VXAB = 4</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with standard shape, and serifs at top left and bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-straight-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-straight-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'straight-top-right-serifed'</code>, <code>VXAB = 5</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with standard shape, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-straight-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-straight-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'straight-tri-serifed'</code>, <code>VXAB = 6</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with standard shape, and serifs at top left and both legs (default for Slab Upright)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'straight-serifed'</code>, <code>VXAB = 7</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with standard shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-straight-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-straight-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'straight-full-serifed'</code>, <code>VXAB = 8</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with standard shape, and full serifs at legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-curly-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-curly-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'curly-serifless'</code>, <code>VXAB = 9</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with curly shape; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-curly-top-left-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-curly-top-left-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'curly-top-left-serifed'</code>, <code>VXAB = 10</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with curly shape, and serifs at top left</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-curly-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-curly-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'curly-bottom-right-serifed'</code>, <code>VXAB = 11</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with curly shape, and serifs at bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-curly-top-left-and-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-curly-top-left-and-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'curly-top-left-and-bottom-right-serifed'</code>, <code>VXAB = 12</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with curly shape, and serifs at top left and bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-curly-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-curly-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'curly-top-right-serifed'</code>, <code>VXAB = 13</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with curly shape, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-curly-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-curly-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'curly-tri-serifed'</code>, <code>VXAB = 14</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with curly shape, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'curly-serifed'</code>, <code>VXAB = 15</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with curly shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-curly-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-curly-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'curly-full-serifed'</code>, <code>VXAB = 16</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with curly shape, and full serifs at legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-touching-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-touching-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-touching-serifless'</code>, <code>VXAB = 17</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs touching the vertical bar; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-touching-top-left-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-touching-top-left-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-touching-top-left-serifed'</code>, <code>VXAB = 18</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs touching the vertical bar, and serifs at top left</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-touching-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-touching-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-touching-bottom-right-serifed'</code>, <code>VXAB = 19</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs touching the vertical bar, and serifs at bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-touching-top-left-and-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-touching-top-left-and-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-touching-top-left-and-bottom-right-serifed'</code>, <code>VXAB = 20</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs touching the vertical bar, and serifs at top left and bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-touching-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-touching-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-touching-top-right-serifed'</code>, <code>VXAB = 21</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs touching the vertical bar, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-touching-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-touching-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-touching-tri-serifed'</code>, <code>VXAB = 22</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs touching the vertical bar, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-touching-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-touching-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-touching-serifed'</code>, <code>VXAB = 23</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs touching the vertical bar, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-touching-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-touching-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-touching-full-serifed'</code>, <code>VXAB = 24</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs touching the vertical bar, and full serifs at legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-connected-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-connected-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-connected-serifless'</code>, <code>VXAB = 25</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs connected to the vertical bar; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-connected-top-left-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-connected-top-left-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-connected-top-left-serifed'</code>, <code>VXAB = 26</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs connected to the vertical bar, and serifs at top left</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-connected-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-connected-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-connected-bottom-right-serifed'</code>, <code>VXAB = 27</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs connected to the vertical bar, and serifs at bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-connected-top-left-and-bottom-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-connected-top-left-and-bottom-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-connected-top-left-and-bottom-right-serifed'</code>, <code>VXAB = 28</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs connected to the vertical bar, and serifs at top left and bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-connected-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-connected-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-connected-top-right-serifed'</code>, <code>VXAB = 29</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs connected to the vertical bar, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-connected-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-connected-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-connected-tri-serifed'</code>, <code>VXAB = 30</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs connected to the vertical bar, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-connected-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-connected-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-connected-serifed'</code>, <code>VXAB = 31</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs connected to the vertical bar, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-kappa-symmetric-connected-full-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-kappa-symmetric-connected-full-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-kappa = 'symmetric-connected-full-serifed'</code>, <code>VXAB = 32</code></td></tr>
+    <tr><td>Greek lower Kappa (<code>κ</code>) with symmetric legs connected to the vertical bar, and full serifs at legs</td></tr>
     </table></details>
   - Styles for `Λ` (Greek capital Lambda (`Λ`))
     <details><summary>8 variants</summary>
@@ -2545,9 +2685,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <details><summary>3 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'straight-bar'</code>, <code>cv86 = 1</code></td></tr>
-    <tr><td>Partial derivative symbol (<code>∂</code>) with a straight upper bar</td></tr>
+    <tr><td>Partial derivative symbol (<code>∂</code>) with a straight bar</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-curly-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-curly-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'curly-bar'</code>, <code>cv86 = 2</code></td></tr>
-    <tr><td>Partial derivative symbol (<code>∂</code>) with a curly upper bar (default)</td></tr>
+    <tr><td>Partial derivative symbol (<code>∂</code>) with a curly bar (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-closed-contour.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-closed-contour.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'closed-contour'</code>, <code>cv86 = 3</code></td></tr>
     <tr><td>Partial derivative symbol (<code>∂</code>) with a full hook</td></tr>
     </table></details>
@@ -2688,7 +2828,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower Ze (<code>з</code>) with inward serif at both top and bottom</td></tr>
     </table></details>
   - Styles for `К` (Cyrillic Capital Ka)
-    <details><summary>20 variants</summary>
+    <details><summary>28 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'straight-serifless'</code>, <code>cv93 = 1</code></td></tr>
     <tr><td>Cyrillic Capital Ka (<code>К</code>) with straight shape; without serifs</td></tr>
@@ -2730,9 +2870,25 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Capital Ka (<code>К</code>) with symmetric legs connected to the vertical bar, and serifs at top left and bottom right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-symmetric-connected-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-symmetric-connected-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'symmetric-connected-serifed'</code>, <code>cv93 = 20</code></td></tr>
     <tr><td>Cyrillic Capital Ka (<code>К</code>) with symmetric legs connected to the vertical bar, and serifs (default for Slab)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-straight-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-straight-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'straight-top-right-serifed'</code>, <code>cv93 = 21</code></td></tr>
+    <tr><td>Cyrillic Capital Ka (<code>К</code>) with straight shape, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-straight-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-straight-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'straight-tri-serifed'</code>, <code>cv93 = 22</code></td></tr>
+    <tr><td>Cyrillic Capital Ka (<code>К</code>) with straight shape, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-curly-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-curly-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'curly-top-right-serifed'</code>, <code>cv93 = 23</code></td></tr>
+    <tr><td>Cyrillic Capital Ka (<code>К</code>) with curly shape, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-curly-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-curly-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'curly-tri-serifed'</code>, <code>cv93 = 24</code></td></tr>
+    <tr><td>Cyrillic Capital Ka (<code>К</code>) with curly shape, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-symmetric-touching-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-symmetric-touching-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'symmetric-touching-top-right-serifed'</code>, <code>cv93 = 25</code></td></tr>
+    <tr><td>Cyrillic Capital Ka (<code>К</code>) with symmetric legs touching the vertical bar, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-symmetric-touching-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-symmetric-touching-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'symmetric-touching-tri-serifed'</code>, <code>cv93 = 26</code></td></tr>
+    <tr><td>Cyrillic Capital Ka (<code>К</code>) with symmetric legs touching the vertical bar, and serifs at top left and both legs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-symmetric-connected-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-symmetric-connected-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'symmetric-connected-top-right-serifed'</code>, <code>cv93 = 27</code></td></tr>
+    <tr><td>Cyrillic Capital Ka (<code>К</code>) with symmetric legs connected to the vertical bar, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ka-symmetric-connected-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ka-symmetric-connected-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ka = 'symmetric-connected-tri-serifed'</code>, <code>cv93 = 28</code></td></tr>
+    <tr><td>Cyrillic Capital Ka (<code>К</code>) with symmetric legs connected to the vertical bar, and serifs at top left and both legs</td></tr>
     </table></details>
   - Styles for `к` (Cyrillic Lower Ka)
-    <details><summary>20 variants</summary>
+    <details><summary>28 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'straight-serifless'</code>, <code>cv94 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Ka (<code>к</code>) with straight shape; without serifs</td></tr>
@@ -2774,6 +2930,22 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower Ka (<code>к</code>) with symmetric legs connected to the vertical bar, and serifs at top left and bottom right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-symmetric-connected-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-symmetric-connected-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'symmetric-connected-serifed'</code>, <code>cv94 = 20</code></td></tr>
     <tr><td>Cyrillic Lower Ka (<code>к</code>) with symmetric legs connected to the vertical bar, and serifs (default for Slab Upright)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-straight-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-straight-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'straight-top-right-serifed'</code>, <code>cv94 = 21</code></td></tr>
+    <tr><td>Cyrillic Lower Ka (<code>к</code>) with straight shape, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-straight-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-straight-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'straight-tri-serifed'</code>, <code>cv94 = 22</code></td></tr>
+    <tr><td>Cyrillic Lower Ka (<code>к</code>) with straight shape, and serifs at top left and bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-curly-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-curly-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'curly-top-right-serifed'</code>, <code>cv94 = 23</code></td></tr>
+    <tr><td>Cyrillic Lower Ka (<code>к</code>) with curly shape, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-curly-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-curly-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'curly-tri-serifed'</code>, <code>cv94 = 24</code></td></tr>
+    <tr><td>Cyrillic Lower Ka (<code>к</code>) with curly shape, and serifs at top left and bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-symmetric-touching-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-symmetric-touching-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'symmetric-touching-top-right-serifed'</code>, <code>cv94 = 25</code></td></tr>
+    <tr><td>Cyrillic Lower Ka (<code>к</code>) with symmetric legs touching the vertical bar, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-symmetric-touching-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-symmetric-touching-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'symmetric-touching-tri-serifed'</code>, <code>cv94 = 26</code></td></tr>
+    <tr><td>Cyrillic Lower Ka (<code>к</code>) with symmetric legs touching the vertical bar, and serifs at top left and bottom right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-symmetric-connected-top-right-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-symmetric-connected-top-right-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'symmetric-connected-top-right-serifed'</code>, <code>cv94 = 27</code></td></tr>
+    <tr><td>Cyrillic Lower Ka (<code>к</code>) with symmetric legs connected to the vertical bar, and serifs at top right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ka-symmetric-connected-tri-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ka-symmetric-connected-tri-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ka = 'symmetric-connected-tri-serifed'</code>, <code>cv94 = 28</code></td></tr>
+    <tr><td>Cyrillic Lower Ka (<code>к</code>) with symmetric legs connected to the vertical bar, and serifs at top left and bottom right</td></tr>
     </table></details>
   - Styles for `л` (Cyrillic Lower El)
     <details><summary>2 variants</summary>

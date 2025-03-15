@@ -1,5 +1,20 @@
 ## Modifications since last major version
 
+### 33.1.0
+
+* Add `full-serifed` variants for `K` and `k`, and related letters (#2696).
+* Add `top-right-serifed` and `tri-serifed` variants for `K` and `k`, and related letters.
+* Add `cursive` variant for Greek Lower Theta (`θ`).
+* Add `closed-swash' variant for `Q` (#2392).
+* Add IPA localization form for Latin Lower `a` and `g`.
+* Add IPA localization form for Latin Lower G with Stroke (`ǥ`) (#2632).
+* Add variant selectors for Greek Lower Eta (`η`) and Kappa (`κ`).
+* Add Characters:
+  - LATIN SMALL LETTER TURNED T WITH CURL (`U+1DF0D`) (#1931).
+  - LATIN LETTER INVERTED GLOTTAL STOP WITH CURL (`U+1DF0E`) (#1931).
+  - LATIN LETTER STRETCHED C WITH CURL (`U+1DF0F`) (#1931).
+
+
 ### 33.0.1
 
 * Make certain characters slightly wider under Quasi-Proportional. Affected characters:
