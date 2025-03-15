@@ -95,17 +95,18 @@ glyph-block Letter-Latin-C : begin
 		[Just SLAB-INWARD]    : ArcEndSerif.InwardL df.leftSB bot [fallback sw Stroke] [fallback hook Hook]
 		__ : glyph-proc
 
-	define [CCurlyTailShape slabType] : glyph-proc
-		local sw : AdviceStroke2 2 3 XH
-		local fine : AdviceStroke2 3 3 XH
+	define [CCurlyTailShape df slabType top bot] : glyph-proc
+		local sw : df.adviceStroke2 2 3 (top - bot)
+		local fine : df.adviceStroke2 3 3 (top - bot)
+		local loopTop : bot + 0.45 * XH
 
 		include : dispiro
 			match slabType
-				[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs RightSB XH sw Hook
-				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs RightSB XH sw Hook
-				__ : list [g4 RightSB (XH - Hook) [widths.lhs sw]] [hookstart XH (sw -- sw)]
-			flatside.ld SB 0 XH SmallArchDepthA SmallArchDepthB
-			CurlyTail.n fine 0 RightSB 0 0 (yLoopTop -- (XH * 0.45))
+				[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs df.rightSB top sw Hook
+				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs df.rightSB top sw Hook
+				__ : list [g4 df.rightSB (top - Hook) [widths.lhs sw]] [hookstart top (sw -- sw)]
+			flatside.ld df.leftSB bot top SmallArchDepthA SmallArchDepthB
+			CurlyTail.n fine bot df.rightSB 0 bot (yLoopTop -- loopTop)
 
 	glyph-block-export CLetterForm
 	define [CLetterForm] : with-params [df sty styBot top bot [ada ArchDepthA] [adb ArchDepthB] [hook Hook] [sw Stroke] [ob nothing]] : namespace
@@ -230,7 +231,7 @@ glyph-block Letter-Latin-C : begin
 
 		create-glyph "cCurlyTail.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : CCurlyTailShape sty
+			include : CCurlyTailShape [DivFrame 1] sty XH 0
 			include : AutoStartSerifR [DivFrame 1] sty XH
 
 		create-glyph "stretchedC.\(suffix)" : glyph-proc
@@ -239,6 +240,11 @@ glyph-block Letter-Latin-C : begin
 				ada -- SmallArchDepthA
 				adb -- SmallArchDepthB
 			include : lf.full
+
+		create-glyph "stretchedCCurlyTail.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : CCurlyTailShape [DivFrame 1] sty XH Descender
+			include : AutoStartSerifR [DivFrame 1] sty XH
 
 		define [KoppaShapeT styTop styBot top base] : union
 			VBar.r (Middle + [HSwToV Stroke]) Descender HalfStroke
@@ -314,6 +320,7 @@ glyph-block Letter-Latin-C : begin
 	select-variant 'cCurlyTail' 0x255
 	select-variant 'cHookTop' 0x188
 	select-variant 'stretchedC' 0x297 (follow -- 'c')
+	select-variant 'stretchedCCurlyTail' 0x1DF0F (follow -- 'cHookTop')
 
 	select-variant 'cyrl/Koppa' 0x480 (follow -- 'CTopSerifOnly')
 	select-variant 'cyrl/koppa' 0x481 (follow -- 'cTopSerifOnly')
