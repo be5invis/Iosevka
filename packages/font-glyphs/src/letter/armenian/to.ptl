@@ -8,7 +8,7 @@ glyph-module
 glyph-block Letter-Armenian-To : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : nShoulder SerifFrame
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
 
 	# Common Params
 	define barPos : XH / 2
@@ -17,16 +17,15 @@ glyph-block Letter-Armenian-To : begin
 
 	do "T'o"
 		create-glyph 'armn/To' 0x539 : glyph-proc
-			local df : include : DivFrame 1
+			local df : include : DivFrame para.advanceScaleT
 			local fine : df.adviceStroke2 6 3 CAP
 			local barPosT : barPos + df.mvs / 2
 			include : dispiro
 				widths.rhs df.mvs
 				flat df.leftSB 0 [heading Upward]
-				curl df.leftSB (CAP - ArchDepthA)
+				curl df.leftSB [if (df.archDepthA + df.archDepthB < CAP) (CAP - df.archDepthA) : mix CAP 0 (df.archDepthA / (df.archDepthA + df.archDepthB))]
 				arch.rhs CAP (sw -- df.mvs)
-				flat df.rightSB (CAP - ArchDepthB)
-				curl df.rightSB (0 + ArchDepthA)
+				flatside.rd df.rightSB 0 CAP df.archDepthA df.archDepthB 0
 				arch.rhs 0 (sw -- df.mvs) (swAfter -- fine)
 				g4 (df.middle - [HSwToV : 0.5 * fine]) [mix 0 barPosT 0.5] [widths.rhs fine]
 				arcvh
@@ -37,18 +36,16 @@ glyph-block Letter-Armenian-To : begin
 				include sf.lb.full
 
 		create-glyph 'armn/to' 0x569 : glyph-proc
-			local df : include : DivFrame 1
+			local df : include : DivFrame para.advanceScaleT
 			local fine : df.adviceStroke2 6 3 XH
 			include : df.markSet.p
 			include : VBar.l df.leftSB Descender XH df.mvs
 			local barPosT : barPos + df.mvs / 2
 			include : dispiro
-				nShoulder.knots
-					left -- (df.leftSB + [HSwToV df.mvs])
-					right -- df.rightSB
-					top -- XH
-					bottom -- (0 + ArchDepthA)
-					stroke -- df.mvs
+				flat (df.leftSB + [HSwToV : df.mvs - df.shoulderFine]) (XH - df.smallArchDepthA - TINY) [widths.rhs df.shoulderFine]
+				curl (df.leftSB + [HSwToV : df.mvs - df.shoulderFine]) (XH - df.smallArchDepthA)
+				arch.rhs XH (sw -- df.mvs) (swBefore -- df.shoulderFine)
+				flatside.rd df.rightSB 0 XH df.smallArchDepthA df.smallArchDepthB 0 (af -- [widths.rhs df.mvs])
 				arch.rhs 0 (sw -- df.mvs) (swAfter -- fine)
 				g4 (df.middle - [HSwToV : 0.5 * fine]) [mix 0 barPosT 0.5] [widths.rhs fine]
 				arcvh
