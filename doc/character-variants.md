@@ -920,7 +920,7 @@
 <td colspan="6"> </td>
 </tr>
 <tr>
-<td rowspan="4"><code>cv32</code></td>
+<td rowspan="6"><code>cv32</code></td>
 <td><img src="../images/cv-capital-w-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-w-straight-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-capital-w-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -975,6 +975,34 @@
 <td>22</td>
 <td>23</td>
 <td>24</td>
+</tr>
+<tr>
+<td><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-curly-almost-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-almost-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-curly-almost-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-almost-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-curly-almost-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-almost-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-curly-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-curly-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-capital-w-curly-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+</tr>
+<tr>
+<td>25</td>
+<td>26</td>
+<td>27</td>
+<td>28</td>
+<td>29</td>
+<td>30</td>
+<td>31</td>
+<td>32</td>
+<td>33</td>
+<td>34</td>
+<td>35</td>
+<td>36</td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv33</code></td>
@@ -1939,7 +1967,7 @@
 <td colspan="4"> </td>
 </tr>
 <tr>
-<td rowspan="6"><code>cv57</code></td>
+<td rowspan="8"><code>cv57</code></td>
 <td><img src="../images/cv-w-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-w-straight-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-w-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
@@ -1998,11 +2026,39 @@
 <tr>
 <td><img src="../images/cv-w-cursive-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-cursive-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-w-cursive-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-cursive-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
-<td colspan="10"> </td>
+<td><img src="../images/cv-w-straight-vertical-sides-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-vertical-sides-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-straight-vertical-sides-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-vertical-sides-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-straight-vertical-sides-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-vertical-sides-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-rounded-vertical-sides-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-rounded-vertical-sides-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-rounded-vertical-sides-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-curly-almost-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-almost-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-curly-almost-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-almost-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-curly-almost-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-almost-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-curly-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 </tr>
 <tr>
 <td>25</td>
 <td>26</td>
+<td>27</td>
+<td>28</td>
+<td>29</td>
+<td>30</td>
+<td>31</td>
+<td>32</td>
+<td>33</td>
+<td>34</td>
+<td>35</td>
+<td>36</td>
+</tr>
+<tr>
+<td><img src="../images/cv-w-curly-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-w-curly-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>37</td>
+<td>38</td>
 <td colspan="10"> </td>
 </tr>
 <tr>
