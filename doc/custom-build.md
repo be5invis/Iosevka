@@ -1034,7 +1034,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>V</code> with curly shape, and serifs</td></tr>
     </table></details>
   - Styles for `W`
-    <details><summary>24 variants</summary>
+    <details><summary>36 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-serifless'</code>, <code>cv32 = 1</code></td></tr>
     <tr><td><code>W</code> with standard, straight body; without serifs (default for Sans)</td></tr>
@@ -1043,17 +1043,17 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-serifed'</code>, <code>cv32 = 3</code></td></tr>
     <tr><td><code>W</code> with standard, straight body, and serifs (default for Slab)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-almost-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-almost-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-almost-flat-top-serifless'</code>, <code>cv32 = 4</code></td></tr>
-    <tr><td><code>W</code> with straight body shape that the middle is forced to be aligned the top; without serifs</td></tr>
+    <tr><td><code>W</code> with straight body shape that the middle is almost aligned to the top; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-almost-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-almost-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-almost-flat-top-motion-serifed'</code>, <code>cv32 = 5</code></td></tr>
-    <tr><td><code>W</code> with straight body shape that the middle is forced to be aligned the top, and motion serifs</td></tr>
+    <tr><td><code>W</code> with straight body shape that the middle is almost aligned to the top, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-almost-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-almost-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-almost-flat-top-serifed'</code>, <code>cv32 = 6</code></td></tr>
-    <tr><td><code>W</code> with straight body shape that the middle is forced to be aligned the top, and serifs</td></tr>
+    <tr><td><code>W</code> with straight body shape that the middle is almost aligned to the top, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-flat-top-serifless'</code>, <code>cv32 = 7</code></td></tr>
-    <tr><td><code>W</code> with straight body shape that the middle is forced to be aligned the top; without serifs</td></tr>
+    <tr><td><code>W</code> with straight body shape that the middle is forced to be aligned to the top; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-flat-top-motion-serifed'</code>, <code>cv32 = 8</code></td></tr>
-    <tr><td><code>W</code> with straight body shape that the middle is forced to be aligned the top, and motion serifs</td></tr>
+    <tr><td><code>W</code> with straight body shape that the middle is forced to be aligned to the top, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-flat-top-serifed'</code>, <code>cv32 = 9</code></td></tr>
-    <tr><td><code>W</code> with straight body shape that the middle is forced to be aligned the top, and serifs</td></tr>
+    <tr><td><code>W</code> with straight body shape that the middle is forced to be aligned to the top, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-double-v-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-double-v-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-double-v-serifless'</code>, <code>cv32 = 10</code></td></tr>
     <tr><td><code>W</code> with body shape like double V; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-double-v-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-double-v-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-double-v-motion-serifed'</code>, <code>cv32 = 11</code></td></tr>
@@ -1084,6 +1084,30 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>W</code> with curly body, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'curly-serifed'</code>, <code>cv32 = 24</code></td></tr>
     <tr><td><code>W</code> with curly body, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-vertical-sides-flat-top-serifless'</code>, <code>cv32 = 25</code></td></tr>
+    <tr><td><code>W</code> with straight body shape with vertical sides, and a middle stem aligned to the top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-vertical-sides-flat-top-motion-serifed'</code>, <code>cv32 = 26</code></td></tr>
+    <tr><td><code>W</code> with straight body shape with vertical sides, and a middle stem aligned to the top, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-straight-vertical-sides-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'straight-vertical-sides-flat-top-serifed'</code>, <code>cv32 = 27</code></td></tr>
+    <tr><td><code>W</code> with straight body shape with vertical sides, and a middle stem aligned to the top, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'rounded-vertical-sides-flat-top-serifless'</code>, <code>cv32 = 28</code></td></tr>
+    <tr><td><code>W</code> with rounded body shape with vertical sides, and a middle stem aligned to the top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'rounded-vertical-sides-flat-top-motion-serifed'</code>, <code>cv32 = 29</code></td></tr>
+    <tr><td><code>W</code> with rounded body shape with vertical sides, and a middle stem aligned to the top, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-rounded-vertical-sides-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'rounded-vertical-sides-flat-top-serifed'</code>, <code>cv32 = 30</code></td></tr>
+    <tr><td><code>W</code> with rounded body shape with vertical sides, and a middle stem aligned to the top, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-curly-almost-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-almost-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'curly-almost-flat-top-serifless'</code>, <code>cv32 = 31</code></td></tr>
+    <tr><td><code>W</code> with curly body with a middle stem almost aligned to the top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-curly-almost-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-almost-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'curly-almost-flat-top-motion-serifed'</code>, <code>cv32 = 32</code></td></tr>
+    <tr><td><code>W</code> with curly body with a middle stem almost aligned to the top, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-curly-almost-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-almost-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'curly-almost-flat-top-serifed'</code>, <code>cv32 = 33</code></td></tr>
+    <tr><td><code>W</code> with curly body with a middle stem almost aligned to the top, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-curly-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'curly-flat-top-serifless'</code>, <code>cv32 = 34</code></td></tr>
+    <tr><td><code>W</code> with curly body with a middle stem aligned to the top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-curly-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'curly-flat-top-motion-serifed'</code>, <code>cv32 = 35</code></td></tr>
+    <tr><td><code>W</code> with curly body with a middle stem aligned to the top, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-capital-w-curly-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-capital-w-curly-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>capital-w = 'curly-flat-top-serifed'</code>, <code>cv32 = 36</code></td></tr>
+    <tr><td><code>W</code> with curly body with a middle stem aligned to the top, and serifs</td></tr>
     </table></details>
   - Styles for `X`
     <details><summary>8 variants</summary>
@@ -1914,7 +1938,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>v</code> with cursive body, and serifs</td></tr>
     </table></details>
   - Styles for `w`
-    <details><summary>26 variants</summary>
+    <details><summary>38 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-serifless'</code>, <code>cv57 = 1</code></td></tr>
     <tr><td><code>w</code> with standard, straight body; without serifs (default for Sans)</td></tr>
@@ -1923,17 +1947,17 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-serifed'</code>, <code>cv57 = 3</code></td></tr>
     <tr><td><code>w</code> with standard, straight body, and serifs (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-almost-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-almost-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-almost-flat-top-serifless'</code>, <code>cv57 = 4</code></td></tr>
-    <tr><td><code>w</code> with straight body shape that the middle is forced to be aligned the top; without serifs</td></tr>
+    <tr><td><code>w</code> with straight body shape that the middle is almost aligned to the top; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-almost-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-almost-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-almost-flat-top-motion-serifed'</code>, <code>cv57 = 5</code></td></tr>
-    <tr><td><code>w</code> with straight body shape that the middle is forced to be aligned the top, and motion serifs</td></tr>
+    <tr><td><code>w</code> with straight body shape that the middle is almost aligned to the top, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-almost-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-almost-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-almost-flat-top-serifed'</code>, <code>cv57 = 6</code></td></tr>
-    <tr><td><code>w</code> with straight body shape that the middle is forced to be aligned the top, and serifs</td></tr>
+    <tr><td><code>w</code> with straight body shape that the middle is almost aligned to the top, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-flat-top-serifless'</code>, <code>cv57 = 7</code></td></tr>
-    <tr><td><code>w</code> with straight body shape that the middle is forced to be aligned the top; without serifs</td></tr>
+    <tr><td><code>w</code> with straight body shape that the middle is forced to be aligned to the top; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-flat-top-motion-serifed'</code>, <code>cv57 = 8</code></td></tr>
-    <tr><td><code>w</code> with straight body shape that the middle is forced to be aligned the top, and motion serifs</td></tr>
+    <tr><td><code>w</code> with straight body shape that the middle is forced to be aligned to the top, and motion serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-flat-top-serifed'</code>, <code>cv57 = 9</code></td></tr>
-    <tr><td><code>w</code> with straight body shape that the middle is forced to be aligned the top, and serifs</td></tr>
+    <tr><td><code>w</code> with straight body shape that the middle is forced to be aligned to the top, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-double-v-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-double-v-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-double-v-serifless'</code>, <code>cv57 = 10</code></td></tr>
     <tr><td><code>w</code> with body shape like double V; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-double-v-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-double-v-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-double-v-motion-serifed'</code>, <code>cv57 = 11</code></td></tr>
@@ -1968,6 +1992,30 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>w</code> with cursive shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-w-cursive-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-cursive-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'cursive-serifed'</code>, <code>cv57 = 26</code></td></tr>
     <tr><td><code>w</code> with cursive shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-vertical-sides-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-vertical-sides-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-vertical-sides-flat-top-serifless'</code>, <code>cv57 = 27</code></td></tr>
+    <tr><td><code>w</code> with straight body shape with vertical sides, and a middle stem aligned to the top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-vertical-sides-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-vertical-sides-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-vertical-sides-flat-top-motion-serifed'</code>, <code>cv57 = 28</code></td></tr>
+    <tr><td><code>w</code> with straight body shape with vertical sides, and a middle stem aligned to the top, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-straight-vertical-sides-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-straight-vertical-sides-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'straight-vertical-sides-flat-top-serifed'</code>, <code>cv57 = 29</code></td></tr>
+    <tr><td><code>w</code> with straight body shape with vertical sides, and a middle stem aligned to the top, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-rounded-vertical-sides-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'rounded-vertical-sides-flat-top-serifless'</code>, <code>cv57 = 30</code></td></tr>
+    <tr><td><code>w</code> with rounded body shape with vertical sides, and a middle stem aligned to the top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-rounded-vertical-sides-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'rounded-vertical-sides-flat-top-motion-serifed'</code>, <code>cv57 = 31</code></td></tr>
+    <tr><td><code>w</code> with rounded body shape with vertical sides, and a middle stem aligned to the top, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-rounded-vertical-sides-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-rounded-vertical-sides-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'rounded-vertical-sides-flat-top-serifed'</code>, <code>cv57 = 32</code></td></tr>
+    <tr><td><code>w</code> with rounded body shape with vertical sides, and a middle stem aligned to the top, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-curly-almost-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-almost-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'curly-almost-flat-top-serifless'</code>, <code>cv57 = 33</code></td></tr>
+    <tr><td><code>w</code> with curly body with a middle stem almost aligned to the top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-curly-almost-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-almost-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'curly-almost-flat-top-motion-serifed'</code>, <code>cv57 = 34</code></td></tr>
+    <tr><td><code>w</code> with curly body with a middle stem almost aligned to the top, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-curly-almost-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-almost-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'curly-almost-flat-top-serifed'</code>, <code>cv57 = 35</code></td></tr>
+    <tr><td><code>w</code> with curly body with a middle stem almost aligned to the top, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-curly-flat-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-flat-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'curly-flat-top-serifless'</code>, <code>cv57 = 36</code></td></tr>
+    <tr><td><code>w</code> with curly body with a middle stem aligned to the top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-curly-flat-top-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-flat-top-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'curly-flat-top-motion-serifed'</code>, <code>cv57 = 37</code></td></tr>
+    <tr><td><code>w</code> with curly body with a middle stem aligned to the top, and motion serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-w-curly-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-w-curly-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>w = 'curly-flat-top-serifed'</code>, <code>cv57 = 38</code></td></tr>
+    <tr><td><code>w</code> with curly body with a middle stem aligned to the top, and serifs</td></tr>
     </table></details>
   - Styles for `x`
     <details><summary>14 variants</summary>
