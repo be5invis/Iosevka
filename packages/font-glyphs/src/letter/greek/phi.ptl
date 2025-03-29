@@ -14,32 +14,31 @@ glyph-block Letter-Greek-Phi : begin
 	define [VarPhiRing fFlatTB df y2 y3 ada adb] : glyph-proc
 		include : VBar.m df.middle y2 y3 df.mvs
 		include : if fFlatTB
-			OShapeFlatTB y3 y2 df.leftSB df.rightSB df.mvs ada adb
-				Math.max
-					(df.rightSB - df.leftSB) - (y3 - y2)
-					(df.rightSB - df.leftSB) * 0.25
-					HSwToV df.mvs
+			OShapeFlatTB y3 y2 df.leftSB df.rightSB df.mvs ada adb : Math.max
+				(df.rightSB - df.leftSB) - (y3 - y2)
+				(df.rightSB - df.leftSB) * 0.25
+				HSwToV df.mvs
 			OShape y3 y2 df.leftSB df.rightSB df.mvs ada adb
 
 	define [CyrlEfSplitRing fFlatTB df y2 y3 ada adb] : glyph-proc
 		include : VBar.m df.middle y2 y3 df.mvs
-		include : let [subDf : df.slice 3 2 OX] : union
-			OBarRight.shape
-				top       -- y3
-				bot       -- y2
-				left      -- df.leftSB
-				right     -- (df.middle + [HSwToV : 0.5 * df.mvs])
-				sw        -- df.mvs
-				ada       -- subDf.smallArchDepthA
-				adb       -- subDf.smallArchDepthB
-			OBarLeft.shape
-				top       -- y3
-				bot       -- y2
-				left      -- (df.middle - [HSwToV : 0.5 * df.mvs])
-				right     -- df.rightSB
-				sw        -- df.mvs
-				ada       -- subDf.smallArchDepthA
-				adb       -- subDf.smallArchDepthB
+		local subDf : df.slice 3 2 OX
+		include : OBarRight.shape
+			top       -- y3
+			bot       -- y2
+			left      -- df.leftSB
+			right     -- (df.middle + [HSwToV : 0.5 * df.mvs])
+			sw        -- df.mvs
+			ada       -- subDf.smallArchDepthA
+			adb       -- subDf.smallArchDepthB
+		include : OBarLeft.shape
+			top       -- y3
+			bot       -- y2
+			left      -- (df.middle - [HSwToV : 0.5 * df.mvs])
+			right     -- df.rightSB
+			sw        -- df.mvs
+			ada       -- subDf.smallArchDepthA
+			adb       -- subDf.smallArchDepthB
 
 	define [GrekLowerPhiCursiveRing fFlatTB df y2 y3 ada adb] : glyph-proc
 		local l : df.leftSB + OX * 2
@@ -61,10 +60,13 @@ glyph-block Letter-Greek-Phi : begin
 		include : VBar.m df.middle (y3 - HalfStroke) y4 sw
 
 	define [CursiveBar df y1 y2 y3 y4 sw] : glyph-proc
-		local hd : FlatHookDepth df
+		local dfHook : DivFrame para.advanceScaleF
+		local hd : FlatHookDepth dfHook
 
-		local xCrossLeft  : mix 0        df.leftSB  : mix 1 df.adws 2
-		local xCrossRight : mix df.width df.rightSB : mix 1 df.adws 2
+		local m : mix 1 para.advanceScaleF 1.5
+
+		local xCrossLeft  : df.middle - dfHook.middle + dfHook.leftSB * m
+		local xCrossRight : df.middle + dfHook.middle - dfHook.leftSB * m
 
 		local xBarLeft    : df.middle - [HSwToV : 0.5 * sw]
 		local xBarRight   : df.middle + [HSwToV : 0.5 * sw]
@@ -84,9 +86,12 @@ glyph-block Letter-Greek-Phi : begin
 			curl xBarRight (y2 - O)
 
 	define [DiagonalTailCursiveBar df y1 y2 y3 y4 sw] : glyph-proc
-		local hd : FlatHookDepth df
+		local dfHook : DivFrame para.advanceScaleF
+		local hd : FlatHookDepth dfHook
 
-		local xCrossRight : mix df.width df.rightSB : mix 1 df.adws 2
+		local m : mix 1 para.advanceScaleF 1.5
+
+		local xCrossRight : df.middle + dfHook.middle - dfHook.leftSB * m
 		local xBarLeft    : df.middle - [HSwToV : 0.5 * sw]
 
 		include : dispiro
@@ -98,7 +103,7 @@ glyph-block Letter-Greek-Phi : begin
 
 		include : dispiro
 			flat df.middle (y2 - O) [widths.center.heading sw Downward]
-			DiagTail.L df.middle y1 [DiagTail.StdDepth [DivFrame para.advanceScaleF] sw] sw
+			DiagTail.L df.middle y1 [DiagTail.StdDepth dfHook sw] sw
 
 	define [MtSerif df y sw] : tagged 'serifMT' : HSerif.lt df.middle y Jut sw
 	define [MbSerif df y sw] : tagged 'serifMB' : HSerif.mb df.middle y Jut sw
