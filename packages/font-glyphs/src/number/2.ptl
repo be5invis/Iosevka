@@ -12,31 +12,32 @@ glyph-block Digits-Two : begin
 
 	define [TwoStraightNeckArcT sink offset sw top] : begin
 		define archDepth : [AdviceGlottalStopArchDepth top 1] * 0.95
-		define xLeft : SB + offset
-		define xRight : RightSB - offset - OX / 2
+		define xLB : SB + offset
+		define xR : RightSB - OX / 2
 		define yPhRight : top - archDepth * 1.5 - sw / 2 * (top / CAP - TanSlope)
 		define pStraightBarStart 0.75
 		return : sink
 			widths.rhs sw
-			g4 xLeft (top - Hook)
-			hookstart (top - offset) (sw -- sw)
-			g4.down.mid xRight (top - archDepth)
-			flat [mix xLeft xRight pStraightBarStart] [mix sw yPhRight pStraightBarStart]
-			curl xLeft sw [widths.lhs sw]
+			g4 SB (top - Hook)
+			hookstart top (sw -- sw)
+			g4.down.mid xR (top - archDepth)
+			flat [mix xLB xR pStraightBarStart] [mix sw yPhRight pStraightBarStart]
+			curl xLB sw [widths.lhs sw]
 
-	define [TwoArcShapeT sink offset sw top] : begin
+	define [TwoArcShapeT sink offsetU offsetD sw top] : begin
 		define archDepth : [AdviceGlottalStopArchDepth top 1] * 0.95
 		return : sink
 			widths.rhs sw
-			g4 (SB + offset) (top - Hook)
-			hookstart (top - offset) (sw -- sw)
-			g4.down.mid (RightSB - offset - OX / 2) (top - archDepth)
-			alsoThru.g2 0.5 ([StrokeWidthBlend 0.425 0.4 sw] * [linreg 500 1 700 0.95 Width]) [widths.center sw]
-			flat (SB - offset) 1 [widths.heading sw 0 Downward]
-			curl (SB - offset) 0 [heading Downward]
+			g4 (SB - offsetU) (top - Hook)
+			hookstart top (sw -- sw)
+			g4.down.mid (RightSB - offsetU - OX / 2) (top - archDepth)
+			alsoThru.g2.withOffset 0.5 ([StrokeWidthBlend 0.425 0.4 sw] * [linreg 500 1 700 0.95 Width]) 0 (0.25 * (offsetU - offsetD)) [widths.center sw]
+			flat (SB + offsetD) 1 [widths.heading sw 0 Downward]
+			[if (sink == spiro-outline) corner curl] (SB + offsetD) 0 [heading Downward]
+			if (sink == spiro-outline) { [corner (SB - offsetU) 0] } {}
 
 	define [TwoShape top slab] : glyph-proc
-		include : TwoArcShapeT dispiro 0 Stroke top
+		include : TwoArcShapeT dispiro 0 0 Stroke top
 		include : HBar.b  (SB + HalfStroke) RightSB 0
 		if slab : begin
 			include : VSerif.ur RightSB 0 VJut
@@ -90,8 +91,8 @@ glyph-block Digits-Two : begin
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/two' 0x1D7DA : glyph-proc
 		include : MarkSet.capital
-		include : TwoArcShapeT dispiro 0 BBS CAP
+		include : TwoArcShapeT dispiro 0   BBD BBS CAP
 		include : intersection
-			TwoArcShapeT spiro-outline 1 BBS CAP
-			VBar.r (RightSB - OX / 2 - BBD) 0 CAP BBS
+			TwoArcShapeT dispiro       BBD 0   BBS CAP
+			TwoArcShapeT spiro-outline 0   BBD BBS CAP
 		include : HBar.b (SB + [HSwToV : 0.5 * BBS]) RightSB 0 BBS
