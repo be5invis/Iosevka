@@ -1,5 +1,13 @@
 ## Modifications since last major version
 
+### 33.2.1
+
+* Refine shape of the following characters:
+  - ARMENIAN CAPITAL LETTER TO (`U+0539`).
+  - ARMENIAN SMALL LETTER TO (`U+0569`).
+  - MATHEMATICAL DOUBLE-STRUCK DIGIT TWO (`U+1D7DA`) (#2728).
+
+
 ### 33.2.0
 
 * Add `flat-top` variants for `curly`, `straight-vertical-sides`, and `rounded-vertical-sides` forms of `W` and `w` (#2146).
