@@ -314,6 +314,9 @@ export function SetupBuilders(bindings) {
 	alsoThru.g4 = function (rx, ry, raf) {
 		return new SimpleMixInterpolator(g4, rx, ry, 0, 0, raf);
 	};
+	alsoThru.g2.withOffset = function (rx, ry, deltaX, deltaY, raf) {
+		return new SimpleMixInterpolator(g2, rx, ry, deltaX, deltaY, raf);
+	};
 
 	/// Multi-mix interpolator
 	class MultiMixInterpolator extends InterpolatorBase {
