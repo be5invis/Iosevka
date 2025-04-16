@@ -499,7 +499,7 @@ function charHasVariants(atlas: Coverage.Atlas, props: SpecimenCharacterProps) {
 }
 
 function charIsSpecial(lch: number) {
-	return lch < 0x0020 || (lch >= 0xfff0 && lch <= 0xffff) || lch === 0x034f;
+	return lch < 0x0020 || (lch >= 0xfff0 && lch <= 0xffff) || lch === 0x034f || lch === 0xfeff;
 }
 
 function SpecimenCharacterVariantsMarker(props: SpecimenCharacterProps) {
@@ -616,7 +616,8 @@ function SpecimenCharacterImpl(props: SpecimenCharacterImplProps) {
 			gc === "Lowercase_Letter" ||
 			gc === "Titlecase_Letter" ||
 			gc === "Other_Letter" ||
-			props.blockName === "Currency Symbols");
+			props.blockName === "Currency Symbols" ||
+			props.blockName === "Mathematical Alphanumeric Symbols");
 	return (
 		<div
 			className={joinCls(
