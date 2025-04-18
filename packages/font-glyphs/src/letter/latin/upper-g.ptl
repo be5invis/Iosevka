@@ -24,15 +24,14 @@ glyph-block Letter-Latin-Upper-G : begin
 	define SLAB-NONE          0
 	define SLAB-LETTER        1
 	define SLAB-INWARD        2
-	define SLAB-HOOK-TOP     10
 
-	define [GShape toothShape slabShape crossBarShape top ada adb hook yBarOverride] : glyph-proc
-		local yBar : fallback yBarOverride (top * 0.52 + QuarterStroke)
+	define [GShape toothShape slabShape crossBarShape top ada adb _hook _yBar] : glyph-proc
+		local hook : fallback _hook Hook
+		local yBar : fallback _yBar (top * 0.52 + QuarterStroke)
 		local fine ShoulderFine
 
 		local knots : match slabShape
-			([Just SLAB-LETTER] || [Just SLAB-HOOK-TOP]) : begin
-				SerifedArcStart.RtlLhs RightSB top Stroke hook (slabShape === SLAB-HOOK-TOP)
+			[Just SLAB-LETTER] : SerifedArcStart.RtlLhs RightSB top Stroke hook
 			[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs RightSB top Stroke hook
 			__ : list [widths.lhs] [g4 RightSB (top - hook)] [hookstart top]
 
@@ -90,19 +89,19 @@ glyph-block Letter-Latin-Upper-G : begin
 	foreach { suffix { shape slabType crossBarShape } } [Object.entries GConfig] : begin
 		create-glyph "G.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : GShape shape slabType crossBarShape CAP ArchDepthA ArchDepthB Hook
+			include : GShape shape slabType crossBarShape CAP ArchDepthA ArchDepthB
 		create-glyph "GHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : GShape shape SLAB-HOOK-TOP crossBarShape CAP ArchDepthA ArchDepthB Hook
+			include : GShape shape slabType crossBarShape CAP ArchDepthA ArchDepthB
 			include : TopHook.toRight.arcStart RightSB CAP Hook
 			include : ExtendAboveBaseAnchors (CAP + Ascender - XH)
 			include : LeaningAnchor.Above.VBar.r RightSB
 		create-glyph "smcpG.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : GShape shape slabType crossBarShape XH ArchDepthA ArchDepthB Hook
+			include : GShape shape slabType crossBarShape XH ArchDepthA ArchDepthB
 		create-glyph "smcpGHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : GShape shape SLAB-HOOK-TOP crossBarShape XH ArchDepthA ArchDepthB Hook
+			include : GShape shape slabType crossBarShape XH ArchDepthA ArchDepthB
 			include : TopHook.toRight.arcStart RightSB XH Hook
 			include : ExtendAboveBaseAnchors Ascender
 			include : LeaningAnchor.Above.VBar.r RightSB
@@ -121,9 +120,9 @@ glyph-block Letter-Latin-Upper-G : begin
 
 	do "Komi sje"
 		define Config : object
-				serifless               { SLAB-NONE   }
-				unilateralSerifed       { SLAB-LETTER }
-				unilateralInwardSerifed { SLAB-INWARD }
+			serifless               { SLAB-NONE   }
+			unilateralSerifed       { SLAB-LETTER }
+			unilateralInwardSerifed { SLAB-INWARD }
 
 		foreach { suffix { slabType } } [Object.entries Config] : begin
 			create-glyph "cyrl/SjeKomi.\(suffix)" : glyph-proc
