@@ -12,8 +12,8 @@ const SwitchPanelUsageCtx = React.createContext<Ptr<SwitchPanelUsageProps>>({
 export type ToolsPanelsTProps = {
 	usageAvailable: boolean;
 	customizerPageHashT?: () => undefined | string;
-	usagePanel: () => React.ReactChild;
-	mainPanel: () => React.ReactChild;
+	usagePanel: () => React.ReactElement;
+	mainPanel: () => React.ReactElement;
 };
 
 export function ToolsPanelsT(props: ToolsPanelsTProps) {
