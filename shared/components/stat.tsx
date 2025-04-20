@@ -10,7 +10,12 @@ export function DynamicStat(props: DynamicStatProps) {
 	const [fStarted, setFStarted] = useState(false);
 
 	const countUpRef = React.useRef<HTMLDivElement>(null);
-	const countUp = useCountUp({ ref: countUpRef, start: 0, end: 0, duration: 2 });
+	const countUp = useCountUp({
+		ref: countUpRef as React.RefObject<HTMLDivElement>,
+		start: 0,
+		end: 0,
+		duration: 2,
+	});
 	if (inView && !fStarted) {
 		setFStarted(true);
 		countUp.update(props.quantity);
