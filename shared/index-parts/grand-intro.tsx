@@ -81,7 +81,7 @@ function IntroFamily() {
 			<div className="family-item enumeration">
 				<h3 className="family-name">{}</h3>
 				<div className="stat refer">
-					{Gr.DefaultWeightGrades.map((gr, f) => (
+					{Gr.AllWeightGrades.map((gr, f) => (
 						<div className="enumeration-item" key={gr}>
 							{f.display}
 						</div>
@@ -89,7 +89,7 @@ function IntroFamily() {
 				</div>
 				<div className="stat static"></div>
 				<div className="stat refer">
-					{Gr.DefaultSlopeGrade.map((gr, f) => (
+					{Gr.AllSlopeGrades.map((gr, f) => (
 						<div className="enumeration-item" key={gr}>
 							{f.display}
 						</div>
@@ -97,7 +97,7 @@ function IntroFamily() {
 				</div>
 				<div className="stat static"></div>
 				<div className="stat refer ext-4">
-					{Gr.DefaultWidthGrade.map((gr, f) => (
+					{Gr.DefaultWidthGrades.map((gr, f) => (
 						<div className="enumeration-item" key={gr}>
 							{f.display}
 						</div>

@@ -4,7 +4,7 @@ export type FeatureUsageShowerProps = {
 	directives: Gr.FeatureAssignment;
 };
 export function FeatureUsageShower(props: FeatureUsageShowerProps) {
-	const fontFeatureSettingsCss: JSX.Element[] = [];
+	const fontFeatureSettingsCss: React.ReactElement[] = [];
 	for (const [tag, on] of Object.entries(props.directives)) {
 		const space =
 			fontFeatureSettingsCss.length % 5 === 0

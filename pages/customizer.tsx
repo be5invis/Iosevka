@@ -192,7 +192,7 @@ function BasicsPanel2() {
 			<dl>
 				<dt>Weights</dt>
 				<GradeCheckBoxList
-					source={Gr.DefaultWeightGrades.keys()}
+					source={Gr.AllWeightGrades.keys()}
 					fEnabled={x => cc.weightGradesIncluded.has(x)}
 					formatter={WeightGradeFormatter}
 					fInteractive={x => x !== Gr.Weight.Regular}
@@ -208,7 +208,7 @@ function BasicsPanel2() {
 				<dt>Widths</dt>
 				<GradeCheckBoxList
 					dummies={2}
-					source={Gr.CustomizerWidthGrade.keys()}
+					source={Gr.AllWidthGrades.keys()}
 					fEnabled={x => cc.widthGradesIncluded.has(x)}
 					formatter={WidthGradeFormatter}
 					fInteractive={x =>
@@ -225,7 +225,7 @@ function BasicsPanel2() {
 			<dl>
 				<dt>Slopes</dt>
 				<GradeCheckBoxList
-					source={Gr.DefaultSlopeGrade.keys()}
+					source={Gr.AllSlopeGrades.keys()}
 					fEnabled={x => cc.slopeGradesIncluded.has(x)}
 					formatter={SlopeGradeFormatter}
 					fInteractive={x => x !== Gr.Slope.Upright}
@@ -356,7 +356,7 @@ const WeightGradeFormatter: GradesFormatter<Gr.Weight> = {
 	identifier: a => `weight-${a}`,
 	display: a => String(a),
 	titleT: (a, i) => {
-		const d = Gr.DefaultWeightGrades.get(a)!.display;
+		const d = Gr.AllWeightGrades.get(a)!.display;
 		return i
 			? `Click to toggle whether weight ${d} is included.`
 			: `Weight ${d} is always included and cannot be disabled.`;
@@ -368,7 +368,7 @@ const WidthGradeFormatter: GradesFormatter<Gr.Width> = {
 	identifier: a => `width-${a}`,
 	display: a => String(a),
 	titleT: (a, i) => {
-		const d = Gr.CustomizerWidthGrade.get(a)!.display;
+		const d = Gr.AllWidthGrades.get(a)!.display;
 		return i
 			? `Click to toggle whether weight ${d} is included.`
 			: `Weight ${d} is always included and cannot be disabled.`;
@@ -380,7 +380,7 @@ const SlopeGradeFormatter: GradesFormatter<Gr.Slope> = {
 	identifier: a => `slope-${a}`,
 	display: a => Gr.Slope[a],
 	titleT: (a, i) => {
-		const d = Gr.DefaultSlopeGrade.get(a)!.display;
+		const d = Gr.AllSlopeGrades.get(a)!.display;
 		return i
 			? `Click to toggle whether slope ${d} is included.`
 			: `Slope ${d} is always included and cannot be disabled.`;

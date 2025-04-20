@@ -173,13 +173,14 @@ export enum Weight {
 }
 export type WeightFormat = { display: string };
 export const DefaultWeightGrades = new GradeRepository<Weight, WeightFormat>()
+	.add(Weight.Regular, { display: "Regular" })
+	.add(Weight.Bold, { display: "Bold" });
+export const AllWeightGrades = DefaultWeightGrades.clone()
 	.add(Weight.Thin, { display: "Thin" })
 	.add(Weight.ExtraLight, { display: "ExtraLight" })
 	.add(Weight.Light, { display: "Light" })
-	.add(Weight.Regular, { display: "Regular" })
 	.add(Weight.Medium, { display: "Medium" })
 	.add(Weight.SemiBold, { display: "SemiBold" })
-	.add(Weight.Bold, { display: "Bold" })
 	.add(Weight.ExtraBold, { display: "ExtraBold" })
 	.add(Weight.Heavy, { display: "Heavy" });
 
@@ -201,20 +202,16 @@ export type WidthFormat = {
 	menu: number;
 	css: string;
 };
-export const DefaultWidthGrade = new GradeRepository<Width, WidthFormat>()
+export const DefaultWidthGrades = new GradeRepository<Width, WidthFormat>()
 	.add(Width.Normal, { display: "Normal", menu: 5, css: "normal" })
 	.add(Width.Expanded, { display: "Extended", menu: 7, css: "expanded" });
 
-export const CustomizerWidthGrade = DefaultWidthGrade.clone()
+export const AllWidthGrades = DefaultWidthGrades.clone()
 	.add(Width.Condensed, { display: "Condensed", menu: 3, css: "condensed" })
 	.add(Width.SemiCondensed, { display: "SemiCondensed", menu: 4, css: "semi-condensed" })
 	.add(Width.SemiExpanded, { display: "SemiExtended", menu: 6, css: "semi-expanded" })
 	.add(Width.ExtraExpanded, { display: "ExtraExtended", menu: 8, css: "extra-expanded" })
 	.add(Width.UltraExpanded, { display: "UltraExtended", menu: 9, css: "ultra-expanded" });
-
-export const AllWidthGrade = CustomizerWidthGrade.clone()
-	.add(Width.UltraCondensed, { display: "UltraCondensed", menu: 1, css: "ultra-condensed" })
-	.add(Width.ExtraCondensed, { display: "ExtraCondensed", menu: 2, css: "extra-condensed" });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -224,10 +221,15 @@ export enum Slope {
 	Italic = 3,
 }
 export type SlopeFormat = GradeFormat & { angle: number; shape: string; css: string };
-export const DefaultSlopeGrade = new GradeRepository<Slope, SlopeFormat>()
+export const DefaultSlopeGrades = new GradeRepository<Slope, SlopeFormat>()
 	.add(Slope.Upright, { display: "Upright", shape: "upright", angle: 0, css: "normal" })
-	.add(Slope.Oblique, { display: "Oblique", shape: "oblique", angle: 9.4, css: "oblique" })
 	.add(Slope.Italic, { display: "Italic", shape: "italic", angle: 9.4, css: "italic" });
+export const AllSlopeGrades = DefaultSlopeGrades.clone().add(Slope.Oblique, {
+	display: "Oblique",
+	shape: "oblique",
+	angle: 9.4,
+	css: "oblique",
+});
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -28,7 +28,7 @@ export type PickerFrameProps = {
 	styleGrades?: Gr.Style[];
 	onFontSet?: (fontStyle: Gr.FontStyle) => void;
 	onFontStyleChange?: (current: Gr.Style, previous: Gr.Style) => void;
-	content: (props: { fontStyle: Gr.FontStyle }) => JSX.Element;
+	content: (props: { fontStyle: Gr.FontStyle }) => React.ReactElement;
 };
 function rectifyPickedFs(fs: Gr.FontStyle) {
 	const style = fs.style || Gr.Style.Sans;

@@ -20,7 +20,7 @@ export type ItemizedFontStyle = { label: string } & Gr.FontStyle;
 export type ItemPickerFrameProps = {
 	primary: Array<ItemizedFontStyle>;
 	secondary: Array<ItemizedFontStyle>;
-	content: (props: { fontStyle: Gr.FontStyle }) => JSX.Element;
+	content: (props: { fontStyle: Gr.FontStyle }) => React.ReactElement;
 };
 export function ItemPickerFrame(props: ItemPickerFrameProps) {
 	const [groupIndex, setGroupIndex] = useState<number>(0);

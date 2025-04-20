@@ -113,7 +113,7 @@ function SettingsPanel() {
 						<dt>Match Slope</dt>
 						<dd>
 							<EnumSelect
-								options={Gr.DefaultSlopeGrade}
+								options={Gr.AllSlopeGrades}
 								value={pSlope.val}
 								onChange={pSlope.set}
 							/>
@@ -239,7 +239,7 @@ function TargetFontSample(props: TargetFontSampleProps) {
 			className="target-sample"
 			style={{
 				fontFamily: pSm.val.name,
-				fontStyle: Gr.DefaultSlopeGrade.get(pSm.val.matchSlope)!.css,
+				fontStyle: Gr.AllSlopeGrades.get(pSm.val.matchSlope)!.css,
 			}}
 		>
 			{props.text}

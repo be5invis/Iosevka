@@ -12,7 +12,7 @@ export type TokenizedCodeProps = {
 	literature?: boolean;
 };
 export function TokenizedCode(props: TokenizedCodeProps) {
-	const lines: JSX.Element[] = [];
+	const lines: React.ReactElement[] = [];
 	for (let index = 0; index < props.code.length; index++) {
 		lines.push(
 			<CodeLine
@@ -41,7 +41,7 @@ type CodeLineProps = {
 	highlightCharSet?: ReadonlyMap<string, Gr.FeatureAssignment>;
 };
 function CodeLine(props: CodeLineProps) {
-	const runs: JSX.Element[] = [];
+	const runs: React.ReactElement[] = [];
 	for (let index = 0; index < props.codeLine.length; index++) {
 		runs.push(
 			<CodeToken
@@ -83,7 +83,7 @@ function HighlightChars(props: HighlightCharsProps) {
 		"(" + Array.from(props.highlightCharSet.keys()).map(escapeRegExp).join("|") + ")",
 		"g",
 	);
-	const subRuns: JSX.Element[] = [];
+	const subRuns: React.ReactElement[] = [];
 	const subRunStrings = props.text.split(re);
 	for (let j = 0; j < subRunStrings.length; j++) {
 		if (subRunStrings[j].match(re)) {

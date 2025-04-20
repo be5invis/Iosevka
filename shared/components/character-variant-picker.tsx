@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createContext, useContext, useState } from "react";
-import useOnClickOutside from "use-onclickoutside";
+import { useOnClickOutside } from "usehooks-ts";
 
 import * as Cv from "../data-import/cv";
 import * as Gr from "../data-import/grades";
@@ -31,7 +31,7 @@ export function CharacterVariantPicker(props: CvPanelGroupProps) {
 	};
 	const prime = props.prime;
 	const ref = React.useRef<HTMLDivElement>(null);
-	useOnClickOutside(ref, () => dropdownContext.set(false));
+	useOnClickOutside(ref as React.RefObject<HTMLDivElement>, () => dropdownContext.set(false));
 
 	let samplerInTitle = prime.hotChars.map(x => `⟦${x}⟧`).join(", ");
 	if (prime.samplerExplain) samplerInTitle += ` (${prime.samplerExplain})`;

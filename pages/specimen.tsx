@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { createContext, useContext, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import useOnClickOutside from "use-onclickoutside";
+import { useOnClickOutside } from "usehooks-ts";
 
 import { PickerFrame } from "../shared/components/picker-frame";
 import { Section } from "../shared/components/section";
@@ -90,7 +90,7 @@ function NavigatorPanel() {
 	const [currentHoverBlock, setCurrentHoverBlock] = useState<string>("");
 
 	const ref = useRef<HTMLDivElement>(null);
-	useOnClickOutside(ref, () => {
+	useOnClickOutside(ref as React.RefObject<HTMLDivElement>, () => {
 		setDropdownVisible(false);
 		setCurrentHoverBlock("");
 	});
@@ -216,7 +216,7 @@ function NavStripsPanel() {
 
 type StripRow = {
 	start: number;
-	elements: JSX.Element[];
+	elements: React.ReactElement[];
 };
 function createStripRowFromLow(n: number) {
 	return { start: n, elements: [] };
@@ -230,7 +230,7 @@ enum StripMode {
 	InLine,
 }
 interface StripProducer {
-	createStrip(mode: StripMode, low: number, high: number): null | JSX.Element;
+	createStrip(mode: StripMode, low: number, high: number): null | React.ReactElement;
 }
 const BlankProducer: StripProducer = {
 	createStrip(mode, low, high) {
@@ -292,7 +292,7 @@ function FilledStrip(props: { name: string; flex: number; low: number; high: num
 	const onMouseEnter = () => pHoverBlock.set(props.name);
 	const onMouseLeave = () => pHoverBlock.set("");
 
-	const subBlocks: JSX.Element[] = [];
+	const subBlocks: React.ReactElement[] = [];
 	for (let i = props.low; i < props.high; i++) {
 		subBlocks.push(<FilledStripInnerButton key={i} name={props.name} code={i * 16} />);
 	}
@@ -413,7 +413,7 @@ function SpecimenBlock(props: SpecimenBlockProps) {
 				/>
 			));
 
-	const anchors: JSX.Element[] = [];
+	const anchors: React.ReactElement[] = [];
 	const iLow = props.block.characters[0].lch;
 	const iHigh = props.block.characters[props.block.characters.length - 1].lch + 1;
 	for (let i = iLow; i < iHigh; i += 16) {
@@ -442,7 +442,7 @@ type SpecimenCharacterProps = Standout & { fontStyle: Gr.FontStyle };
 function SpecimenCharacter(props: SpecimenCharacterProps) {
 	const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
 	const ref = useRef<HTMLDivElement>(null);
-	useOnClickOutside(ref, () => setDropdownVisible(false));
+	useOnClickOutside(ref as React.RefObject<HTMLDivElement>, () => setDropdownVisible(false));
 	const gc = unicodeGcMap.get(props.char.lch) || "?";
 	return (
 		<div
@@ -522,7 +522,7 @@ function SpecimenCharacterVariants(props: SpecimenCharacterProps) {
 function CharVariantsImpl(props: SpecimenCharacterProps) {
 	const ctx = useContext(SpecimenContext);
 	const [currentSelection, setCurrentSelection] = useState<SimpFeaturePair[]>([]);
-	const variantRows: JSX.Element[] = [];
+	const variantRows: React.ReactElement[] = [];
 
 	const hasCvSs = Gr.styleHasCvSs(props.fontStyle.style || Gr.Style.Sans);
 	const fontSlope = props.fontStyle.slope || Gr.Slope.Upright;
@@ -536,10 +536,10 @@ function CharVariantsImpl(props: SpecimenCharacterProps) {
 	for (let iGroup = 0; iGroup < rows.length; iGroup++) {
 		const fs = queryCvList(ctx.val.atlas, rows[iGroup]);
 		if (fs.size <= 1) continue;
-		const subgroups: JSX.Element[] = [];
+		const subgroups: React.ReactElement[] = [];
 
 		for (let iSubgroup = 0; iSubgroup < fs.groups.length; iSubgroup++) {
-			const columns: JSX.Element[] = [];
+			const columns: React.ReactElement[] = [];
 			for (let iCol = 0; iCol < fs.groups[iSubgroup].length; iCol++) {
 				const variant = fs.groups[iSubgroup][iCol];
 				const fCurrent = currentSelection[iGroup] === variant.css;

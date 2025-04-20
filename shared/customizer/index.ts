@@ -25,8 +25,8 @@ export const defaultCustomizerProps: CustomizerProps = {
 	defaultWidthAtExpanded: false,
 	charVariants: {},
 	weightGradesIncluded: new Set(Gr.DefaultWeightGrades.keys()),
-	widthGradesIncluded: new Set(Gr.DefaultWidthGrade.keys()),
-	slopeGradesIncluded: new Set(Gr.DefaultSlopeGrade.keys()),
+	widthGradesIncluded: new Set(Gr.DefaultWidthGrades.keys()),
+	slopeGradesIncluded: new Set(Gr.DefaultSlopeGrades.keys()),
 	ligationSet: Ligation.AvailableLigationSets[1],
 	fDisplayHighlight: true,
 	fExportCvSs: false,
@@ -78,7 +78,7 @@ function parseWeights(toml: Toml.JsonMap, sink: CustomizerProps) {
 	for (const [_k, v] of Object.entries(toml)) {
 		if (!isJsonMap(v)) continue;
 		if (typeof v.shape !== "number") continue;
-		for (const [gr, _f] of Gr.DefaultWeightGrades) if (gr === v.shape) weights.add(gr);
+		for (const [gr, _f] of Gr.AllWeightGrades) if (gr === v.shape) weights.add(gr);
 	}
 	sink = { ...sink, weightGradesIncluded: weights };
 	return sink;
@@ -94,7 +94,7 @@ function parseWidths(toml: Toml.JsonMap, sink: CustomizerProps) {
 
 		// Find a grade matches the config's shape width.
 		// If the CSS assignment mismatches, then we think defaultWidthAtExpanded switch is set
-		for (const [gr, f] of Gr.CustomizerWidthGrade) {
+		for (const [gr, f] of Gr.AllWidthGrades) {
 			if (gr === v.shape) {
 				widths.add(gr);
 				if (v.css !== f.css) defaultWidthAtExpanded = true;
@@ -116,7 +116,7 @@ function parseSlopes(toml: Toml.JsonMap, sink: CustomizerProps) {
 	for (const [_k, v] of Object.entries(toml)) {
 		if (!isJsonMap(v)) continue;
 		if (typeof v.shape !== "string") continue;
-		for (const [gr, f] of Gr.DefaultSlopeGrade) {
+		for (const [gr, f] of Gr.AllSlopeGrades) {
 			if (f.shape === v.shape) slopes.add(gr);
 		}
 	}
@@ -204,7 +204,7 @@ function formatLigations(cc: CustomizerProps, plan: Toml.JsonMap) {
 function formatWeights(cc: CustomizerProps, plan: Toml.JsonMap) {
 	let trivial = true;
 	const weights: Toml.JsonMap = {};
-	for (const [w, f] of Gr.DefaultWeightGrades) {
+	for (const [w, f] of Gr.AllWeightGrades) {
 		if (!cc.weightGradesIncluded.has(w)) {
 			trivial = false;
 		} else {
@@ -218,16 +218,16 @@ function formatWidths(cc: CustomizerProps, plan: Toml.JsonMap) {
 	let trivial = !cc.defaultWidthAtExpanded;
 	const widths: Toml.JsonMap = {};
 
-	for (const [wd, _f] of Gr.CustomizerWidthGrade) {
-		if (cc.widthGradesIncluded.has(wd) !== Gr.DefaultWidthGrade.has(wd)) {
+	for (const [wd, _f] of Gr.AllWidthGrades) {
+		if (cc.widthGradesIncluded.has(wd) !== Gr.DefaultWidthGrades.has(wd)) {
 			trivial = false;
 		}
 		if (cc.widthGradesIncluded.has(wd)) {
 			const adjustedWidth = wd * (cc.defaultWidthAtExpanded ? 500 / 600 : 1);
 			let matchingWidth = Gr.Width.Normal;
-			let matchingFmt = Gr.AllWidthGrade.get(matchingWidth)!;
+			let matchingFmt = Gr.AllWidthGrades.get(matchingWidth)!;
 
-			for (const [gr, fmt] of Gr.AllWidthGrade) {
+			for (const [gr, fmt] of Gr.AllWidthGrades) {
 				if (Math.abs(gr - adjustedWidth) < Math.abs(matchingWidth - adjustedWidth)) {
 					matchingWidth = gr;
 					matchingFmt = fmt;
@@ -247,7 +247,7 @@ function formatWidths(cc: CustomizerProps, plan: Toml.JsonMap) {
 function formatSlopes(cc: CustomizerProps, plan: Toml.JsonMap) {
 	let trivial = true;
 	const slopes: Toml.JsonMap = {};
-	for (const [w, f] of Gr.DefaultSlopeGrade) {
+	for (const [w, f] of Gr.AllSlopeGrades) {
 		if (!cc.slopeGradesIncluded.has(w)) {
 			trivial = false;
 		} else {
