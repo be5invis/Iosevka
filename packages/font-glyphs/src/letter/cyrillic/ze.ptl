@@ -55,14 +55,14 @@ glyph-block Letter-Cyrillic-Ze : begin
 				match slabTop
 					[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs RightSB top stroke hook
 					[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs RightSB top stroke hook
-					[Just OPEN-VERTICAL] : straight.down.start SB top [widths.lhs.heading stroke Downward]
+					[Just OPEN-VERTICAL] : flat SB top [widths.lhs.heading stroke Downward]
 					([Just CLOSED-CIRCLE] || [Just CLOSED-ROUND]) : list
 						flat (RightSB - [if (slabTop === CLOSED-CIRCLE) OX 0]) midy [widths.lhs stroke]
 						curl (RightSB - [if (slabTop === CLOSED-CIRCLE) OX 0]) (top - adb2)
 						arch.lhs top (sw -- stroke)
 					[Just CLOSED-STEM] : OBarRight.arcStart top SB RightSB stroke stemFine ada2 adb2 midy
 					__ : list [g4 (RightSB + O) (top - hook) [widths.lhs]] [hookstart top (sw -- stroke)]
-				g4 SB [YSmoothMidL top (midy - stroke / 2)]
+				[if (slabTop === OPEN-VERTICAL) curl g4] SB [YSmoothMidL top (midy - stroke / 2)]
 				arcvh
 				flat Middle (midy - (fine - stroke / 2)) [widths.heading fine 0 Rightward]
 				curl midx (midy - (fine - stroke / 2)) [heading Rightward]
@@ -73,11 +73,11 @@ glyph-block Letter-Cyrillic-Ze : begin
 				flat midx (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
 				curl Middle (midy + (fine - stroke / 2)) [heading Leftward]
 				archv
-				g4 (SB + OX * 2) [YSmoothMidL (midy + stroke / 2) bot] [widths.lhs stroke]
+				[if (slabBot === OPEN-VERTICAL) flat g4] (SB + OX * 2) [YSmoothMidL (midy + stroke / 2) bot] [widths.lhs stroke]
 				match slabBot
 					[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs RightSB bot stroke hook
 					[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs RightSB bot stroke hook
-					[Just OPEN-VERTICAL] : straight.down.end (SB + OX * 2) bot [heading Downward]
+					[Just OPEN-VERTICAL] : curl (SB + OX * 2) bot [heading Downward]
 					([Just CLOSED-CIRCLE] || [Just CLOSED-ROUND]) : list
 						arch.lhs bot (sw -- stroke)
 						flat (RightSB - [if (slabBot === CLOSED-CIRCLE) OX 0]) (bot + adb2)
@@ -129,14 +129,14 @@ glyph-block Letter-Cyrillic-Ze : begin
 					[Just FLAT-CONNECTION] : list
 						flat (left - xo) top [widths.rhs.heading stroke Rightward]
 						curl [arch.adjust-x.top middle stroke] top [heading Rightward]
-					[Just OPEN-VERTICAL] : straight.down.start right top [widths.rhs.heading stroke Downward]
+					[Just OPEN-VERTICAL] : flat right top [widths.rhs.heading stroke Downward]
 					([Just CLOSED-CIRCLE] || [Just CLOSED-ROUND]) : list
 						flat (left + [if (slabTop === CLOSED-CIRCLE) xo 0]) midy [widths.rhs stroke]
 						curl (left + [if (slabTop === CLOSED-CIRCLE) xo 0]) (top - ada2)
 						arch.rhs top (sw -- stroke)
 					[Just CLOSED-STEM] : OBarLeft.arcStart top left right stroke stemFine ada2 adb2 midy
-					__ : list [g4 (left - xo) (top - hook) : widths.rhs stroke] [hookstart top (sw -- stroke)]
-				g4 right [YSmoothMidR top (midy - stroke / 2)]
+					__ : list [g4 (left - xo) (top - hook) [widths.rhs stroke]] [hookstart top (sw -- stroke)]
+				[if (slabTop === OPEN-VERTICAL) curl g4] right [YSmoothMidR top (midy - stroke / 2)]
 				arcvh
 				flat middle (midy - (fine - stroke / 2)) [widths.heading 0 fine Leftward]
 				curl midx (midy - (fine - stroke / 2)) [heading Leftward]
@@ -150,12 +150,12 @@ glyph-block Letter-Cyrillic-Ze : begin
 				archv
 				if (slabBot === OPEN-HALF)
 					g4.down.end (right - xo * 2) [YSmoothMidR (midy + stroke / 2) bot] [widths.rhs.heading stroke Downward]
-					g4 (right - xo * 2) [YSmoothMidR (midy + stroke / 2) bot] [widths.rhs stroke]
+					[if (slabBot === OPEN-VERTICAL) flat g4] (right - xo * 2) [YSmoothMidR (midy + stroke / 2) bot] [widths.rhs stroke]
 				match slabBot
 					[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs left bot stroke hook
 					[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs left bot stroke hook
 					[Just OPEN-HALF] : list
-					[Just OPEN-VERTICAL] : straight.down.end (right - xo * 2) bot [heading Downward]
+					[Just OPEN-VERTICAL] : curl (right - xo * 2) bot [heading Downward]
 					([Just CLOSED-CIRCLE] || [Just CLOSED-ROUND]) : list
 						arch.rhs bot (sw -- stroke)
 						flat (left + [if (slabBot === CLOSED-CIRCLE) xo 0]) (bot + adb2)
@@ -280,16 +280,14 @@ glyph-block Letter-Cyrillic-Ze : begin
 
 		create-glyph "cyrl/DzjeKomi.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			local ze : CyrZe slabTop OPEN-VERTICAL CAP 0 (hook -- Hook)
-			include : ze.Shape
-			include : ze.AutoStartSerifL
+			include : let [ze : CyrZe slabTop OPEN-VERTICAL CAP 0 (hook -- Hook)]
+				union [ze.Shape] [ze.AutoStartSerifL]
 			include : CyrDescender.rSideJut (RightSB - OX * 2) 0
 
 		create-glyph "cyrl/dzjeKomi.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			local ze : CyrZe slabTop OPEN-VERTICAL XH 0 (hoоk -- SHook)
-			include : ze.Shape
-			include : ze.AutoStartSerifL
+			include : let [ze : CyrZe slabTop OPEN-VERTICAL XH 0 (hook -- SHook)]
+				union [ze.Shape] [ze.AutoStartSerifL]
 			include : CyrDescender.rSideJut (RightSB - OX * 2) 0
 
 		create-glyph "cyrl/ZjeKomi.\(suffix)" : glyph-proc
