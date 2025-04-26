@@ -3469,7 +3469,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-caret-high.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-high.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'high'</code>, <code>VSAD = 1</code></td></tr>
     <tr><td>Higher circumflex <code>^</code></td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-caret-medium.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-medium.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'medium'</code>, <code>VSAD = 2</code></td></tr>
-    <tr><td>Lower circumflex <code>^</code> (default)</td></tr>
+    <tr><td>Medium circumflex <code>^</code> (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-caret-low.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-caret-low.dark.svg#gh-dark-mode-only" width=32/></td><td><code>caret = 'low'</code>, <code>VSAD = 3</code></td></tr>
     <tr><td>Lower circumflex <code>^</code></td></tr>
     </table></details>
