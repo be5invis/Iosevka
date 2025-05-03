@@ -3,10 +3,10 @@ import { Nwid, Wwid } from "@iosevka/glyph/relation";
 import { gcFont } from "./gc.mjs";
 import { finalizeGlyphs } from "./glyphs.mjs";
 
-export function cleanupGlyphStore(cache, para, glyphStore, excludedCodePoints, restFont) {
+export function cleanupGlyphStore(cache, para, glyphStore, subsetFilter, restFont) {
 	assignGrAndCodeRank(glyphStore, Wwid, Nwid);
 	assignSubRank(glyphStore);
-	glyphStore = gcFont(glyphStore, excludedCodePoints, restFont);
+	glyphStore = gcFont(glyphStore, subsetFilter, restFont);
 	glyphStore = finalizeGlyphs(cache, para, glyphStore);
 	return glyphStore;
 }

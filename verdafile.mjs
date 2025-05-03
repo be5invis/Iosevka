@@ -357,6 +357,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		// Other parameters
 		compatibilityLigatures: bp.compatibilityLigatures || null,
 		metricOverride: bp.metricOverride || null,
+		subset: bp.subset || null,
 		excludedCharRanges: bp.excludeChars?.ranges,
 
 		// Spacing derivation -- creating faster build for spacing variants
@@ -1437,12 +1438,22 @@ function validateBuildPlan(prefix, bp) {
 	failWithLegacyParamName(prefix, bp, `build-texture-feature`, `buildTextureFeature`);
 	failWithLegacyParamName(prefix, bp, `metric-override`, `metricOverride`);
 	failWithLegacyParamName(prefix, bp, `compatibility-ligatures`, `compatibilityLigatures`);
-	failWithLegacyParamName(prefix, bp, `exclude-chars`, `excludeChars`);
+	failWithLegacyParamName(prefix, bp, `exclude-chars`, `subset.exclude`);
+	warnWithLegacyParamName(prefix, bp, `excludeChars`, `subset.exclude`);
 }
 
 function failWithLegacyParamName(prefix, bp, legacy, expected) {
 	if (bp[legacy]) {
 		fail(
+			`Build plan for '${prefix}' contains legacy build parameter '${legacy}'. ` +
+				`Please use '${expected}' instead.`,
+		);
+	}
+}
+
+function warnWithLegacyParamName(prefix, bp, legacy, expected) {
+	if (bp[legacy]) {
+		echo.warn(
 			`Build plan for '${prefix}' contains legacy build parameter '${legacy}'. ` +
 				`Please use '${expected}' instead.`,
 		);

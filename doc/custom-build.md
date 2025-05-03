@@ -91,7 +91,7 @@ Build plan could have 9 optional subsections:
 * `widths`
 * `slopes`
 * `compatibilityLigatures`
-* `excludeChars`
+* `subset`
 * `metricOverride`
 * `namingOverride`
 
@@ -3839,12 +3839,31 @@ featureTag = 'calt'
 sequence = '<*>'
 ```
 
-#### Excluding Characters
+#### Subsettingn the Result 
 
-Use the `excludeChars` configuration to exclude character ranges from the font.
+Use the `subset` configuration to limit the character set in the final font. The `subset` section is an object with either `include` or `exclude` property.
+
+ - When `include` is used, only the characters in the list will be included in the final font.
+ - When `exclude` is used, all characters except those in the list will be included in the final font.
+ - When both `include` and `exclude` are used, the final font will include only the characters in `include`, and without those in `exclude`.
+
+In `include` or `exclude`, we could specify the character set in thre ways:
+
+ - `textFile`: the path to a text file containing the characters to include/exclude. The file should be in UTF-8 encoding.
+ - `text`: a string containing the characters to include/exclude.
+ - `ranges`: a list of ranges of code points to include/exclude. Each range is a list of two integers, representing the start and end code points (inclusive).
+
+Sample of `include`:
 
 ```toml
-[buildPlans.iosevkaCustom.excludeChars]
+[buildPlans.iosevkaCustom.subset.include]
+textFile = "agl.txt"
+```
+
+Sample of `exclude`:
+
+```toml
+[buildPlans.iosevkaCustom.subset.exclude]
 ranges = [[10003, 10008]]
 ```
 

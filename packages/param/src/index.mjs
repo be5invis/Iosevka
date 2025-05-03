@@ -1,5 +1,7 @@
 import { monotonicInterpolate } from "@iosevka/util/monotonic-interpolate";
 
+export { createSubsetFilter, SubsetFilter } from "./subset-filter.mjs";
+
 export function init(data, argv) {
 	let para = {};
 	apply(para, data, ["iosevka"]);
