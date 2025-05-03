@@ -3839,9 +3839,9 @@ featureTag = 'calt'
 sequence = '<*>'
 ```
 
-#### Subsettingn the Result 
+#### Limiting the Character Set
 
-Use the `subset` configuration to limit the character set in the final font. The `subset` section is an object with either `include` or `exclude` property.
+Use the `subset` configuration to limit the character set in the final font. The `subset` subsection is an object with either `include` or `exclude` property.
 
  - When `include` is used, only the characters in the list will be included in the final font.
  - When `exclude` is used, all characters except those in the list will be included in the final font.
