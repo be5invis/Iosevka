@@ -1,0 +1,84 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Arrow-Hook-Loop : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowHeadT MkArrowT
+
+	define dims : ArrowDims MosaicWidth MosaicWidthScalar
+	define MkArrow : MkArrowT dims
+
+	define {
+		.arrowHeight arrowHeight
+		.arrowWidth arrowWidth
+		.arrowTop arrowTop
+		.arrowBot arrowBot
+		.arrowMidX arrowMidX
+		.arrowSB arrowSB
+		.arrowRSB arrowRSB
+		.arrowDiagRSB arrowDiagRSB
+		.arrowDiagSB arrowDiagSB
+		.arrowDiagBot arrowDiagBot
+		.arrowDiagTop arrowDiagTop
+
+		.halfArrowSw halfArrowSw
+	} dims
+
+	define o : O * 2
+
+	# Bar Shapes
+	define [HookArrowBar x1 y1 x2 y2 halfSw s w] : begin
+		return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
+			dispiro
+				widths.center (halfSw * 2)
+				g4 (mag - [Math.abs s] / 2 - TINY) s
+				g4 (mag - [Math.abs s] / 2) s
+				archv
+				g4 (mag - O) (s / 2)
+				arcvh
+				flat (mag - [Math.abs s] / 2) 0
+				curl [mix mag 0 p] 0
+
+	define [LoopArrowBar x1 y1 x2 y2 halfSw s w] : begin
+		return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
+			dispiro
+				widths.center (halfSw * 2)
+				flat (mag - [Math.abs s]) (-s) [heading [if (s > 0) Upward Downward]]
+				curl (mag - [Math.abs s]) (s / 2)
+				g4 (mag - [Math.abs s] / 2) s [heading Rightward]
+				archv
+				g4 (mag - O) (s / 2)
+				arcvh
+				flat (mag - [Math.abs s] / 2) 0
+				curl [mix mag 0 p] 0
+
+	# Arrow Shapes
+	define ArrowHead : ArrowHeadT dims
+
+	define [HookArrowShape mul] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
+		local halfSw : fallback _halfSw halfArrowSw
+		include : ArrowHead.shape x1 y1 x2 y2 size
+		include : HookArrowBar x1 y1 x2 y2 halfSw (size * mul)
+
+	define [LoopArrowShape mul] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
+		local halfSw : fallback _halfSw halfArrowSw
+		include : ArrowHead.shape x1 y1 x2 y2 size
+		include : LoopArrowBar x1 y1 x2 y2 halfSw (size * mul)
+
+	# Glyphs
+	MkArrow.single [HookArrowShape 1]    [MangleName 'hookArrowLeft']       [MangleUnicode 0x21A9] arrowRSB SymbolMid arrowSB SymbolMid
+	MkArrow.single [HookArrowShape (-1)] [MangleName 'hookArrowRight']      [MangleUnicode 0x21AA] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.single [HookArrowShape (-1)] [MangleName 'hookArrowUpLeft']     [MangleUnicode 0x2923] arrowDiagRSB arrowDiagBot arrowDiagSB arrowDiagTop
+	MkArrow.single [HookArrowShape 1]    [MangleName 'hookArrowUpRight']    [MangleUnicode 0x2924] arrowDiagSB arrowDiagBot arrowDiagRSB arrowDiagTop
+	MkArrow.single [HookArrowShape (-1)] [MangleName 'hookArrowDownRight']  [MangleUnicode 0x2925] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
+	MkArrow.single [HookArrowShape 1]    [MangleName 'hookArrowDownLeft']   [MangleUnicode 0x2926] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
+	MkArrow.single [HookArrowShape 1]    [MangleName 'lowerHookArrowRight'] [MangleUnicode 0x1F8B2] arrowSB SymbolMid arrowRSB SymbolMid
+
+	MkArrow.single [LoopArrowShape 1]    [MangleName 'loopArrowLeft']      [MangleUnicode 0x21AB] arrowRSB SymbolMid arrowSB SymbolMid
+	MkArrow.single [LoopArrowShape (-1)] [MangleName 'loopArrowRight']     [MangleUnicode 0x21AC] arrowSB SymbolMid arrowRSB SymbolMid

@@ -1,0 +1,96 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Arrow-Legacy : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowT
+
+	define dims : ArrowDims MosaicWidth MosaicWidthScalar
+	define Arrow : ArrowT dims
+
+	define {
+		.arrowWidth arrowWidth
+		.arrowHeight arrowHeight
+		.arrowTop arrowTop
+		.arrowBot arrowBot
+		.arrowMidX arrowMidX
+		.arrowSB arrowSB
+		.arrowRSB arrowRSB
+		.arrowSw arrowSw
+		.halfArrowSw halfArrowSw
+		.arrowHeadSize arrowHeadSize
+	} dims
+
+	define bodyWidth : Math.min arrowWidth (arrowHeight * 0.6)
+	create-glyph [MangleName 'arrowUpThenNW'] [MangleUnicode 0x1F8B0] : glyph-proc
+		set-width MosaicWidth
+		define x1 : arrowMidX + bodyWidth / 2
+		define y1 : arrowTop - bodyWidth
+		define x2 : arrowMidX - bodyWidth / 2
+		define y2 : arrowTop + 0
+		include : Arrow.Head.shape x1 y1 x2 y2
+		include : intersection
+			Rect arrowTop arrowBot 0 x1
+			Arrow.Bar.shape x1 y1 x2 y2 halfArrowSw
+		include : intersection
+			VBar.r x1 arrowBot arrowTop arrowSw
+			spiro-outline
+				corner x1 y1
+				corner x2 y2
+				corner x2 arrowBot
+				corner x1 arrowBot
+
+	create-glyph [MangleName 'arrowRightThenCurlbSW'] [MangleUnicode 0x1F8B1] : glyph-proc
+		set-width MosaicWidth
+		define x1 : arrowMidX + bodyWidth / 2
+		define y1 : arrowBot + bodyWidth
+		define x2 : arrowMidX - bodyWidth / 2
+		define y2 : arrowBot + 0
+		include : Arrow.Head.shape x1 y1 x2 y2
+		include : intersection
+			Rect [mix y1 y2 (1 / 2)] arrowBot 0 x1
+			Arrow.Bar.shape x1 y1 x2 y2 halfArrowSw
+		include : intersection
+			Rect [mix y1 y2 1] arrowTop x2 x1
+			dispiro
+				widths halfArrowSw halfArrowSw
+				flat x2 y2
+				curl [mix x2 x1 (2/3)] [mix y2 y1 (2/3)]
+				g4.up.mid
+					x1 - [HSwToV halfArrowSw]
+					[mix y2 (arrowTop - halfArrowSw) 0.75] - halfArrowSw * 0.6
+				arcvh
+				flat [mix x2 (x1 - [HSwToV halfArrowSw]) 0.5] (arrowTop - halfArrowSw)
+				curl x2 (arrowTop - halfArrowSw) [heading Leftward]
+
+	define enclosedSize : bodyWidth * 1.2 + arrowSw
+	create-glyph [MangleName 'uni21B8'] [MangleUnicode 0x21B8] : glyph-proc
+		set-width MosaicWidth
+
+		define x1 : arrowMidX + bodyWidth / 2
+		define x2 : arrowMidX - bodyWidth / 2
+
+		include : HBar.t x2 x1(SymbolMid + enclosedSize / 2) arrowSw
+		include : with-transform [ApparentTranslate 0 ((bodyWidth - enclosedSize) / 2)]
+			Arrow.shape x1 (SymbolMid - bodyWidth / 2) x2 (SymbolMid + bodyWidth / 2)
+
+	create-glyph [MangleName 'uni21F1'] [MangleUnicode 0x21F1] : glyph-proc
+		set-width MosaicWidth
+
+		define x1 : arrowMidX + bodyWidth / 2
+		define x2 : arrowMidX - bodyWidth / 2
+		define y1 : SymbolMid - bodyWidth / 2
+		define y2 : SymbolMid + bodyWidth / 2
+
+		include : with-transform [ApparentTranslate ((enclosedSize - bodyWidth) / 2) ((bodyWidth - enclosedSize) / 2)]
+			Arrow.shape x1 y1 x2 y2
+		include : HBar.t  (arrowMidX - enclosedSize / 2) (arrowMidX + enclosedSize / 2) (SymbolMid + enclosedSize / 2) arrowSw
+		include : VBar.l (arrowMidX - enclosedSize / 2) (SymbolMid - enclosedSize / 2) (SymbolMid + enclosedSize / 2) arrowSw
+
+	create-glyph [MangleName 'uni21F2'] [MangleUnicode 0x21F2] : glyph-proc
+		include [refer-glyph : MangleName 'uni21F1'] AS_BASE ALSO_METRICS
+		include : FlipAround arrowMidX SymbolMid

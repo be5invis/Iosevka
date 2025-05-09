@@ -1,0 +1,198 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Arrow-Thick : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowT MkArrowT
+
+	define dims : ArrowDims MosaicWidth MosaicWidthScalar
+	define Arrow : ArrowT dims
+	define MkArrow : MkArrowT dims
+
+	define {
+		.arrowTop arrowTop
+		.arrowBot arrowBot
+		.arrowMidX arrowMidX
+		.arrowSB arrowSB
+		.arrowRSB arrowRSB
+		.arrowDiagRSB arrowDiagRSB
+		.arrowDiagSB arrowDiagSB
+		.arrowDiagBot arrowDiagBot
+		.arrowDiagTop arrowDiagTop
+
+		.arrowSw arrowSw
+		.arrowHeadSize arrowHeadSize
+		.halfTerminal halfTerminal
+	} dims
+
+	define o : O * 2
+
+	define [SemiHookArrowBar x1 y1 x2 y2 halfSw halfFine s w] : begin
+		return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
+			dispiro
+				straight.[if (s > 0) 'down' 'up'].start (mag - O) s [widths.center (halfFine * 2)]
+				arcvh
+				flat (mag - [Math.abs s] / 2) 0 [widths.center (halfSw * 2)]
+				curl [mix mag 0 p] 0
+
+	define [TriangleArrowHeadBar x1 y1 x2 y2 width sw _length] : begin
+		local length : fallback _length width
+		return : new-glyph : PointingTo x1 y1 x2 y2 : lambda [mag] : intersection
+			Arrow.Head.trigShape x1 y1 x2 y2 width sw _length
+			Rect width (-width) (0.6 * length - 0.5 * sw) (0.6 * length + 0.5 * sw)
+
+	define [ThickArrowShape color] : lambda [x1 y1 x2 y2] : begin
+		local headLen : MosaicUnitWidth * [Math.sqrt MosaicWidthScalar] * 0.4
+		local halfBarWidth : headLen / 3
+		local headWidth : halfBarWidth * 2
+		local fine : Math.min [AdviceStroke 5] (halfBarWidth * 0.6)
+
+		local turnWidth : headWidth * 1.5
+		local barLen : headLen * 0.2 + fine * 2
+		local dotGap : barLen - fine * 2
+		local doubleHeadOffset : headLen * 0.4
+		local whiteDoubleHeadOffset : headLen * 0.4 + 0.75 * fine
+
+		local mag : Math.hypot (y2 - y1) (x2 - x1)
+		local p : (mag - fine) / mag
+		local p2 : (mag - fine * [Math.sqrt 13] / 2) / mag
+		local innerHeaderLengthShrink : fine * (1 + [Math.sqrt 13] / 2)
+		local p3 : (mag - doubleHeadOffset) / mag
+		local p4 : (mag - fine * [Math.sqrt 13] / 2 - doubleHeadOffset) / mag
+		local p3WD : (mag - whiteDoubleHeadOffset) / mag
+		local p4WD : (mag - fine * [Math.sqrt 13] / 2 - whiteDoubleHeadOffset) / mag
+
+		local x1a : mix x1 x2 (1 - p)
+		local y1a : mix y1 y2 (1 - p)
+		local x2FlatA : mix x1 x2 p
+		local y2FlatA : mix y1 y2 p
+		local x2a : mix x1 x2 p2
+		local y2a : mix y1 y2 p2
+		local x1CoA : mix x1 x2 (-0.05)
+		local y1CoA : mix y1 y2 (-0.05)
+
+		return : match color
+			[Just 'white'] : difference
+				union
+					Arrow.Head.trigShape x1 y1 x2 y2 headWidth headLen
+					Arrow.Bar.shape x1 y1 x2 y2 (halfBarWidth + fine / 2) 2
+				union
+					Arrow.Head.trigShape x1a y1a x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
+					Arrow.Bar.shape x1a y1a x2a y2a (halfBarWidth - fine / 2) 2
+
+			[Just "white-open"] : difference
+				union
+					Arrow.Head.trigShape x1 y1 x2 y2 headWidth headLen
+					Arrow.Bar.shape x1 y1 x2 y2 (halfBarWidth + fine / 2) 2
+				union
+					Arrow.Head.trigShape x1CoA y1CoA x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
+					Arrow.Bar.shape x1CoA y1CoA x2a y2a (halfBarWidth - fine / 2) 2
+
+			[Just "white-closing"] : difference
+					Arrow.Bar.shape x1 y1 x2 y2 (halfBarWidth + fine / 2) 0 0
+					Arrow.Bar.shape x1CoA y1CoA x2FlatA y2FlatA (halfBarWidth - fine / 2) 0 0
+
+			[Just "whiteDouble"] : difference
+				union
+					difference
+						Arrow.Head.trigShape x1 y1 x2 y2 headWidth headLen
+						Arrow.Head.trigShape x1a y1a x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
+					Arrow.Head.trigShape x1 y1 [mix x1 x2 p3WD] [mix y1 y2 p3WD] headWidth headLen
+					Arrow.Bar.shape x1 y1 [mix x1 x2 p3WD] [mix y1 y2 p3WD] (halfBarWidth + fine / 2) 2
+				union
+					Arrow.Head.trigShape x1a y1a [mix x1 x2 p4WD] [mix y1 y2 p4WD] (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
+					Arrow.Bar.shape x1CoA y1CoA [mix x1 x2 p4WD] [mix y1 y2 p4WD] (halfBarWidth - fine / 2) 2
+
+			[Just "whiteBarred"] : union
+				difference
+					union
+						Arrow.Head.trigShape x1 y1 x2 y2 headWidth headLen
+						Arrow.Bar.shape x1 y1 x2 y2 (halfBarWidth + fine / 2) 2
+					union
+						Arrow.Head.trigShape x1CoA y1CoA x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
+						Arrow.Bar.shape x1CoA y1CoA x2a y2a (halfBarWidth - fine / 2) 2
+				TriangleArrowHeadBar x1 y1 x2 y2 headWidth fine headLen
+
+			[Just "whiteDot"] : difference
+				union
+					Arrow.Head.rectShape x1 y1 x2 y2 (halfBarWidth + fine / 2) barLen
+					Arrow.Bar.shape x1 y1 x2 y2 (halfBarWidth + fine / 2) 0 (barLen + dotGap)
+				union
+					Arrow.Head.rectShape x1a y1a x2FlatA y2FlatA (halfBarWidth - fine / 2) (barLen - fine * 2)
+					Arrow.Bar.shape x1CoA y1CoA x2FlatA y2FlatA (halfBarWidth - fine / 2) 0 (barLen + dotGap)
+
+			[Just "whiteRect"] : difference
+				union
+					Arrow.Head.rectShape x1 y1 x2 y2 headWidth barLen
+					Arrow.Bar.shape x1 y1 x2 y2 (halfBarWidth + fine / 2) 0.5
+				union
+					Arrow.Head.rectShape x1a y1a x2FlatA y2FlatA (headWidth - fine) (barLen - fine * 2)
+					Arrow.Bar.shape x1CoA y1CoA x2FlatA y2FlatA (halfBarWidth - fine / 2) 0.5
+
+			[Just "whiteLeftTurn"] : difference
+				union
+					Arrow.Head.rectShape x1 y1 x2 y2 (halfBarWidth + fine / 2) (halfBarWidth * 2 + fine * 1.5) turnWidth
+					Arrow.Bar.shape x1 y1 x2 y2 (halfBarWidth + fine / 2) 1
+				union
+					Arrow.Head.rectShape x1a y1a x2FlatA y2FlatA (halfBarWidth - fine / 2) (halfBarWidth * 2 - fine / 2) (turnWidth - fine)
+					Arrow.Bar.shape x1CoA y1CoA x2FlatA y2FlatA (halfBarWidth - fine / 2) 1
+
+			[Just "black"] : union
+				Arrow.Head.trigShape x1 y1 x2 y2 headWidth headLen
+				Arrow.Bar.shape x1 y1 x2 y2 halfBarWidth 2
+
+			[Just "blackSemiHookR"] : union
+				Arrow.Head.trigShape x1 y1 x2 y2 headWidth headLen
+				SemiHookArrowBar x1 y1 x2 y2 halfBarWidth halfTerminal headWidth 2
+
+			[Just "blackSemiHookL"] : union
+				Arrow.Head.trigShape x1 y1 x2 y2 headWidth headLen
+				SemiHookArrowBar x1 y1 x2 y2 halfBarWidth halfTerminal (-headWidth) 2
+
+	MkArrow.single [ThickArrowShape 'white'] [MangleName 'uni21E6'] [MangleUnicode 0x21E6] arrowRSB SymbolMid arrowSB SymbolMid
+	MkArrow.single [ThickArrowShape 'white'] [MangleName 'uni21E7'] [MangleUnicode 0x21E7] arrowMidX arrowBot arrowMidX arrowTop
+	MkArrow.single [ThickArrowShape 'white'] [MangleName 'uni21E8'] [MangleUnicode 0x21E8] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.single [ThickArrowShape 'white'] [MangleName 'uni21E9'] [MangleUnicode 0x21E9] arrowMidX arrowTop arrowMidX arrowBot
+	MkArrow.single [ThickArrowShape 'white'] [MangleName 'uni2B00'] [MangleUnicode 0x2B00] arrowDiagSB arrowDiagBot arrowDiagRSB arrowDiagTop
+	MkArrow.single [ThickArrowShape 'white'] [MangleName 'uni2B01'] [MangleUnicode 0x2B01] arrowDiagRSB arrowDiagBot arrowDiagSB arrowDiagTop
+	MkArrow.single [ThickArrowShape 'white'] [MangleName 'uni2B02'] [MangleUnicode 0x2B02] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
+	MkArrow.single [ThickArrowShape 'white'] [MangleName 'uni2B03'] [MangleUnicode 0x2B03] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
+	MkArrow.double [ThickArrowShape 'white-open'] [ThickArrowShape 'white-open'] [MangleName 'uni2B04'] [MangleUnicode 0x2B04] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.double [ThickArrowShape 'white-open'] [ThickArrowShape 'white-open'] [MangleName 'uni21F3'] [MangleUnicode 0x21F3] arrowMidX arrowBot arrowMidX arrowTop
+
+	MkArrow.double [ThickArrowShape 'whiteDot'] [ThickArrowShape 'white-open'] [MangleName 'uni21EA'] [MangleUnicode 0x21EA] arrowMidX arrowBot arrowMidX arrowTop
+	MkArrow.double [ThickArrowShape 'whiteRect'] [ThickArrowShape 'white-open'] [MangleName 'uni21EB'] [MangleUnicode 0x21EB] arrowMidX arrowBot arrowMidX arrowTop
+	MkArrow.double [ThickArrowShape 'whiteRect'] [ThickArrowShape 'whiteBarred'] [MangleName 'uni21EC'] [MangleUnicode 0x21EC] arrowMidX arrowBot arrowMidX arrowTop
+	MkArrow.double [ThickArrowShape 'white-closing'] [ThickArrowShape 'whiteDouble'] [MangleName 'uni21EE'] [MangleUnicode 0x21EE] arrowMidX arrowBot arrowMidX arrowTop
+	MkArrow.double [ThickArrowShape 'whiteRect'] [ThickArrowShape 'whiteDouble'] [MangleName 'uni21EF'] [MangleUnicode 0x21EF] arrowMidX arrowBot arrowMidX arrowTop
+	MkArrow.double [ThickArrowShape 'whiteRect'] [ThickArrowShape 'white-open'] [MangleName 'uni21F0'] [MangleUnicode 0x21F0] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.double [ThickArrowShape 'whiteDot'] [ThickArrowShape 'whiteBarred'] [MangleName 'uni2BB8'] [MangleUnicode 0x2BB8] arrowMidX arrowBot arrowMidX arrowTop
+	MkArrow.double [ThickArrowShape 'whiteLeftTurn'] [ThickArrowShape 'white-open'] [MangleName 'uni23CE'] [MangleUnicode 0x23CE] arrowRSB SymbolMid arrowSB SymbolMid
+
+	MkArrow.single [ThickArrowShape 'black'] [MangleName 'uni2B05'] [MangleUnicode 0x2B05] arrowRSB SymbolMid arrowSB SymbolMid
+	MkArrow.single [ThickArrowShape 'black'] [MangleName 'uni2B06'] [MangleUnicode 0x2B06] arrowMidX arrowBot arrowMidX arrowTop
+	MkArrow.single [ThickArrowShape 'black'] [MangleName 'uni27A1'] [MangleUnicode 0x27A1] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.single [ThickArrowShape 'black'] [MangleName 'uni2B95'] [MangleUnicode 0x2B95] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.single [ThickArrowShape 'black'] [MangleName 'uni2B07'] [MangleUnicode 0x2B07] arrowMidX arrowTop arrowMidX arrowBot
+	MkArrow.single [ThickArrowShape 'black'] [MangleName 'uni2B08'] [MangleUnicode 0x2B08] arrowDiagSB arrowDiagBot arrowDiagRSB arrowDiagTop
+	MkArrow.single [ThickArrowShape 'black'] [MangleName 'uni2B09'] [MangleUnicode 0x2B09] arrowDiagRSB arrowDiagBot arrowDiagSB arrowDiagTop
+	MkArrow.single [ThickArrowShape 'black'] [MangleName 'uni2B0A'] [MangleUnicode 0x2B0A] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
+	MkArrow.single [ThickArrowShape 'black'] [MangleName 'uni2B0B'] [MangleUnicode 0x2B0B] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
+	MkArrow.double [ThickArrowShape 'black'] [ThickArrowShape 'black'] [MangleName 'uni2B0C'] [MangleUnicode 0x2B0C] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.double [ThickArrowShape 'black'] [ThickArrowShape 'black'] [MangleName 'uni2B0D'] [MangleUnicode 0x2B0D] arrowMidX arrowBot arrowMidX arrowTop
+
+	create-glyph [MangleName 'uni21ED'] [MangleUnicode 0x21ED] : composite-proc
+		refer-glyph : MangleName 'uni21EB'
+		intersection
+			refer-glyph : MangleName 'uni2B06'
+			Rect arrowTop arrowBot (arrowMidX - [AdviceStroke 5] / 2) (arrowMidX + [AdviceStroke 5] / 2)
+
+	MkArrow.single [ThickArrowShape 'blackSemiHookL'] [MangleName 'uni27A5'] [MangleUnicode 0x27A5] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.single [ThickArrowShape 'blackSemiHookR'] [MangleName 'uni27A6'] [MangleUnicode 0x27A6] arrowSB SymbolMid arrowRSB SymbolMid
+
+	MkArrow.single [Arrow.toBarShapeT : ThickArrowShape 'black'] [MangleName 'blackArrowBarDown'] [MangleUnicode 0x1F8B3] arrowMidX arrowTop arrowMidX arrowBot

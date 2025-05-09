@@ -1,0 +1,335 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Arrow-Shared : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define o : O * 2
+
+	define [ArrowDims MosaicWidth MosaicWidthScalar] : begin
+		define arrowHeight : para.arrowHeight * (Width - SB / 2) * [Math.cbrt MosaicWidthScalar]
+		define arrowWidth  : Math.min (MosaicWidth - SB / 2) arrowHeight
+		define arrowTop : SymbolMid + arrowHeight / 2
+		define arrowBot : SymbolMid - arrowHeight / 2
+		define arrowMidX : MosaicWidth / 2
+		define arrowSB : (MosaicWidth - arrowWidth) / 2
+		define arrowRSB : MosaicWidth - arrowSB
+		define o : O * 2
+
+		# Diagonal arrow params
+		define diagPropX : 1 / (2 ** (1 / 4))
+		define diagPropY : 1 / (2 ** (1 / 4))
+
+		define arrowDiagRSB : mix arrowMidX arrowRSB diagPropX
+		define arrowDiagSB  : mix arrowMidX arrowSB  diagPropX
+		define arrowDiagBot : mix arrowMidX arrowBot diagPropY
+		define arrowDiagTop : mix arrowMidX arrowTop diagPropY
+
+		#
+		define arrowHeadSize : (Width - SB) * DesignParameters.arrow_size * [Math.sqrt : arrowWidth / Width] - [AdviceStroke 5] / 4
+		define arrowSw        OperatorStroke
+		define halfArrowSw  : arrowSw / 2
+		define fine         : AdviceStroke 3.5
+		define terminal     : AdviceStroke 5
+		define halfTerminal : terminal / 2
+
+		# Special arrow params
+		define compactHeadSize : mix arrowSw arrowHeadSize 0.75
+		define doubleBarSpan : arrowHeadSize * 1.1
+
+		return [object
+			MosaicWidth MosaicWidthScalar
+			arrowHeight arrowWidth arrowTop arrowBot arrowMidX arrowSB arrowRSB
+			diagPropX diagPropY arrowDiagRSB arrowDiagSB arrowDiagBot arrowDiagTop
+			arrowHeadSize arrowSw halfArrowSw fine terminal halfTerminal
+			compactHeadSize doubleBarSpan]
+
+	define [ArrowBarT dims] : namespace
+		local { .arrowSw arrowSw } dims
+
+		export : define [shape x1 y1 x2 y2 halfSw w _offset] : begin
+			return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				local p : (mag - [fallback _offset : o + halfSw * [fallback w 1.1]]) / mag
+				dispiro
+					widths.center (halfSw * 2)
+					flat (mag * (1 - p)) 0
+					curl mag 0
+
+		export : define [dblShape w] : lambda [x1 y1 x2 y2] : begin
+			return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				local fine : Math.min (w / 3) arrowSw
+				local coFine : w / 2 - fine / 2
+				return : union
+					dispiro [widths.center fine] [flat 0 (+coFine)] [curl mag (+coFine)]
+					dispiro [widths.center fine] [flat 0 (-coFine)] [curl mag (-coFine)]
+
+		export : define [tripleShape w] : lambda [x1 y1 x2 y2] : begin
+			return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				local fine : Math.min (w / 4) arrowSw
+				local coFine : w / 2 - fine / 2
+				return : union
+					dispiro [widths.center fine] [flat 0 (+coFine)] [curl mag (+coFine)]
+					dispiro [widths.center fine] [flat 0 0]         [curl mag 0]
+					dispiro [widths.center fine] [flat 0 (-coFine)] [curl mag (-coFine)]
+
+		export : define [quadrupleShape w] : lambda [x1 y1 x2 y2] : begin
+			return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				local fine : Math.min (w / 6.4) arrowSw
+				local coFine : w / 2 - fine / 2
+				return : union
+					dispiro [widths.center fine] [flat 0 (+coFine)] [curl mag (+coFine)]
+					dispiro [widths.center fine] [flat 0 (+coFine / 3)] [curl mag (+coFine / 3)]
+					dispiro [widths.center fine] [flat 0 (-coFine / 3)] [curl mag (-coFine / 3)]
+					dispiro [widths.center fine] [flat 0 (-coFine)] [curl mag (-coFine)]
+
+
+	define [ArrowHeadT dims] : namespace
+		local {
+			.arrowHeadSize arrowHeadSize
+			.fine fine
+			.terminal terminal
+		} dims
+
+		export : define [shape x1 y1 x2 y2 _size] : union
+			shape.lhs x1 y1 x2 y2 0 _size
+			shape.rhs x1 y1 x2 y2 0 _size
+		export : define [ssShape x1 y1 x2 y2 _size] : union
+			ssShape.lhs x1 y1 x2 y2 0 _size
+			ssShape.rhs x1 y1 x2 y2 0 _size
+
+		set shape.lhs : lambda [x1 y1 x2 y2 width _size] : begin
+			local size : fallback _size arrowHeadSize
+			return : new-glyph : PointingTo x1 y1 x2 y2 : lambda [mag] : dispiro
+				widths.lhs fine
+				flat (o) (width / 2) [heading Downward]
+				curl (o + size) (-size) [widths.lhs terminal]
+
+		set shape.rhs : lambda [x1 y1 x2 y2 width _size] : begin
+			local size : fallback _size arrowHeadSize
+			return : new-glyph : PointingTo x1 y1 x2 y2 : lambda [mag] : dispiro
+				widths.rhs fine
+				flat (o) (-width / 2) [heading Upward]
+				curl (o + size) size [widths.rhs terminal]
+
+		set ssShape.lhs : lambda [x1 y1 x2 y2 width _size] : begin
+			local size : fallback _size arrowHeadSize
+			return : new-glyph : PointingTo x1 y1 x2 y2 : lambda [mag] : dispiro
+				widths.lhs fine
+				flat (o) (width / 2) [heading Downward]
+				curl (o + size) (-size)
+
+		set ssShape.rhs : lambda [x1 y1 x2 y2 width _size] : begin
+			local size : fallback _size arrowHeadSize
+			return : new-glyph : PointingTo x1 y1 x2 y2 : lambda [mag] : dispiro
+				widths.rhs fine
+				flat (o) (-width / 2) [heading Upward]
+				curl (o + size) size
+
+		export : define [trigShape x1 y1 x2 y2 width _length] : begin
+			local length : fallback _length width
+			return : new-glyph : PointingTo x1 y1 x2 y2 : lambda [mag] : spiro-outline
+				corner o 0
+				corner length (width - o)
+				corner length (-width + o)
+
+		export : define [barbShape x1 y1 x2 y2 width length thickness] : new-glyph : glyph-proc
+			include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				spiro-outline
+					corner o 0
+					corner length (width - o)
+					corner (length + thickness) (width - o)
+					corner (o + thickness) 0
+					corner (length + thickness) (-width + o)
+					corner length (-width + o)
+
+		export : define [outerMask x1 y1 x2 y2 width _length] : new-glyph : glyph-proc
+			local length : fallback _length width
+			include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				spiro-outline
+					corner o 0
+					corner length (width - o)
+					corner (length - VERY-FAR) (width - o)
+					corner (length - VERY-FAR) (-width + o)
+					corner length (-width + o)
+
+		export : define [barShape x1 y1 x2 y2 size _sw] : begin
+			local sw : fallback _sw fine
+			return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				dispiro
+					widths.rhs sw
+					flat 0 (-size)
+					curl 0   size
+
+		export : define [rectShape x1 y1 x2 y2 width _length _width2] : begin
+			local length : fallback _length width
+			return : new-glyph : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				Rect width (-[fallback _width2 width]) 0 length
+
+	define [ArrowT dims] : namespace
+		local {
+			.fine fine
+			.arrowSw arrowSw
+			.halfArrowSw halfArrowSw
+		} dims
+
+		export : define Head : ArrowHeadT dims
+		export : define Bar  : ArrowBarT  dims
+
+		export : define [shape x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			include : Head.shape x1 y1 x2 y2 size
+			include : Bar.shape x1 y1 x2 y2 halfSw
+
+		export : define [ssShape x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			include : Head.ssShape x1 y1 x2 y2 size
+			include : Bar.shape x1 y1 x2 y2 halfSw
+
+		export : define [trigShape x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			include : Head.trigShape x1 y1 x2 y2 (0.75 * size)
+			include : Bar.shape x1 y1 x2 y2 halfSw
+
+		define [halfShape side] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			include : side x1 y1 x2 y2 arrowSw size
+			include : Bar.shape x1 y1 x2 y2 halfSw 1.75
+
+		export : define lhsShape : halfShape Head.shape.lhs
+		export : define rhsShape : halfShape Head.shape.rhs
+
+		export : define [dblShape x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : 1 - (size - o) / mag
+			local x3 : mix x1 x2 p
+			local y3 : mix y1 y2 p
+
+			include : Head.shape x1 y1 x2 y2 size
+			include : Head.shape x1 y1 x3 y3 size
+			include : Bar.shape x1 y1 x2 y2 halfSw
+
+		export : define [dblTrigShape x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : 1 - (0.75 * size - o) / mag
+			local x3 : mix x1 x2 p
+			local y3 : mix y1 y2 p
+
+			include : Head.trigShape x1 y1 x2 y2 (0.75 * size)
+			include : Head.trigShape x1 y1 x3 y3 (0.75 * size)
+			include : Bar.shape x1 y1 x3 y3 halfSw
+
+		export : define [openShape x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			local fine : Math.min [AdviceStroke 5] (size * 0.75 / 3)
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : (mag - fine) / mag
+			local p2 : (mag - fine * Math.SQRT2) / mag
+			local innerHeaderLengthShrink : fine * (1 + Math.SQRT2)
+
+			local x1a : mix x1 x2 (1 - p)
+			local y1a : mix y1 y2 (1 - p)
+			local x2a : mix x1 x2 p2
+			local y2a : mix y1 y2 p2
+
+			include : difference
+				union
+					Bar.shape x1 y1 x2 y2 halfSw
+					Head.trigShape x1 y1 x2 y2 (0.75 * size)
+				Head.trigShape x1a y1a x2a y2a (0.75 * size - innerHeaderLengthShrink)
+
+		export : define [tailShape x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : 1 - size / mag
+			local x3 : mix x1 x2 p
+			local y3 : mix y1 y2 p
+
+			include : Head.shape x2 y2 x3 y3 size
+			include : intersection
+				Bar.shape x1 y1 x2 y2 halfSw 0 0
+				Head.outerMask x2 y2 x3 y3 size
+
+		export : define [dblTailShape x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : 1 - size / mag
+			local p2 : 1 - (2 * size) / mag
+			local x3 : mix x1 x2 p
+			local y3 : mix y1 y2 p
+			local x4 : mix x1 x2 p2
+			local y4 : mix y1 y2 p2
+
+			include : Head.shape x2 y2 x3 y3 size
+			include : Head.shape x2 y2 x4 y4 size
+			include : intersection
+				Bar.shape x1 y1 x2 y2 halfSw 0 0
+				Head.outerMask x2 y2 x3 y3 size
+
+		export : define [multibarShapeT barFunc] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
+			include : Head.shape x1 y1 x2 y2 size
+			include : difference
+				barFunc x1 y1 x2 y2
+				Head.outerMask x1 y1 x2 y2 size
+
+		export : define [barTailShapeT barFunc] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			local dx : Math.abs (x1 - x2)
+			local dy : Math.abs (y1 - y2)
+			local barShrink : size * [Math.min (dx / dy) (dy / dx)]
+			local p : 1 - barShrink / [Math.hypot dx dy]
+			local x3 : mix x1 x2 p
+			local y3 : mix y1 y2 p
+
+			include : Head.barShape x1 y1 x3 y3 size
+			include : barFunc x1 y1 x3 y3 halfSw 0 0
+
+		export : define [toBarShapeT arrowFunc] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : 1 - fine / mag
+			local p2 : 1 + 0.5 * fine / mag
+
+			include : arrowFunc x1 y1 [mix x1 x2 p] [mix y1 y2 p] size _halfSw
+			include : Head.barShape x1 y1 [mix x1 x2 p2] [mix y1 y2 p2] size fine
+
+	# MkArrow Functions
+	define [MkArrowT dims] : namespace
+		local { .MosaicWidth MosaicWidth .MosaicWidthScalar MosaicWidthScalar .arrowHeadSize arrowHeadSize } dims
+
+		export : define [single shape id unicode x1 y1 x2 y2 width headSize]
+			create-glyph id unicode : glyph-proc
+				set-width [fallback width MosaicWidth]
+				set-base-anchor 'slash' [mix x1 x2 (2/5)] [mix y1 y2 (2/5)]
+				include : shape x1 y1 x2 y2 [fallback headSize arrowHeadSize]
+
+		export : define [double shape1 shape2 id unicode x1 y1 x2 y2]
+			create-glyph id unicode : glyph-proc
+				set-width MosaicWidth
+				set-base-anchor 'slash' [mix x1 x2 (1/2)] [mix y1 y2 (1/2)]
+				local xm : mix x1 x2 0.5
+				local ym : mix y1 y2 0.5
+				include : shape1 xm ym x1 y1 arrowHeadSize
+				include : shape2 xm ym x2 y2 arrowHeadSize
+
+	do "exports"
+		define MosaicWidth       Width
+		define MosaicWidthScalar 1
+
+		define dims : ArrowDims MosaicWidth MosaicWidthScalar
+		define arrow : ArrowT dims
+
+		define ArrowShape        arrow.shape
+		define ArrowHead         arrow.Head.shape
+		define ArrowBar          arrow.Bar.shape
+		define TrigArrowShape    arrow.trigShape
+		define TriangleArrowHead arrow.Head.trigShape
+
+		glyph-block-export ArrowShape ArrowHead ArrowBar TrigArrowShape TriangleArrowHead
+
+		glyph-block-export ArrowDims ArrowBarT ArrowHeadT ArrowT MkArrowT
