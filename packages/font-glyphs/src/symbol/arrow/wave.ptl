@@ -1,0 +1,132 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Arrow-Wave : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowHeadT MkArrowT
+
+	define dims : ArrowDims MosaicWidth MosaicWidthScalar
+	define ArrowHead : ArrowHeadT dims
+
+	define {
+		.arrowWidth arrowWidth
+		.arrowTop arrowTop
+		.arrowBot arrowBot
+		.arrowMidX arrowMidX
+		.arrowSB arrowSB
+		.arrowRSB arrowRSB
+
+		.arrowSw arrowSw
+		.halfArrowSw halfArrowSw
+		.arrowHeadSize arrowHeadSize
+	} dims
+
+	define kLongArrowSB : [DivFrame MosaicWidthScalar 4].leftSB / [DivFrame MosaicWidthScalar 2].leftSB
+	define o : O * 2
+
+	define waveArrowAmplitude : (Width - SB) * DesignParameters.arrow_size * (0.7 + 0.4 * MosaicWidthScalar)
+	do "Wave arrows"
+		glyph-block-import Shared-Symbol-Shapes : CreateWaveShape
+		define WaveSw : AdviceStroke (5.5 - MosaicWidthScalar)
+		define WaveShape : CreateWaveShape
+			waveArrowAmplitude * 0.4 + WaveSw / 4 * MosaicWidthScalar
+			begin WaveSw
+		define rightTBias : (MosaicWidth / MosaicUnitWidth) - 1
+		define freeCoT      : arrowSB / MosaicWidth
+		define connectedCoT : (arrowSB / MosaicWidth) + (9 / 32) * MosaicWidthScalar
+		local mag : arrowRSB - arrowSB
+		local p : (mag - o - halfArrowSw * 1.1) / mag
+		create-glyph [MangleName 'waveArrowLeftRight'] [MangleUnicode 0x21AD] : glyph-proc
+			set-width MosaicWidth
+			include : WaveShape
+				left -- (-connectedCoT)
+				right -- (rightTBias - connectedCoT)
+				xsJoin -- [mix arrowSB arrowRSB (1 - p)]
+				xfJoin -- [mix arrowSB arrowRSB (p)]
+				unitWidth -- MosaicUnitWidth
+				waveCount -- (2 / MosaicWidthScalar)
+			include : ArrowHead.shape arrowSB SymbolMid arrowRSB SymbolMid
+			include : ArrowHead.shape arrowRSB SymbolMid arrowSB SymbolMid
+
+		create-glyph [MangleName 'waveArrowLeft'] [MangleUnicode 0x219C] : glyph-proc
+			set-width MosaicWidth
+			include : WaveShape
+				left -- (-connectedCoT)
+				right -- (rightTBias - freeCoT)
+				xsJoin -- [mix arrowSB arrowRSB (1 - p)]
+				unitWidth -- MosaicUnitWidth
+				waveCount -- (2 / MosaicWidthScalar)
+			include : ArrowHead.shape arrowRSB SymbolMid arrowSB SymbolMid
+
+		create-glyph [MangleName 'waveArrowRight'] [MangleUnicode 0x219D] : glyph-proc
+			set-width MosaicWidth
+			include : WaveShape
+				left -- (-freeCoT)
+				right -- (rightTBias - connectedCoT)
+				xfJoin -- [mix arrowSB arrowRSB (p)]
+				unitWidth -- MosaicUnitWidth
+				waveCount -- (2 / MosaicWidthScalar)
+			include : ArrowHead.shape arrowSB SymbolMid arrowRSB SymbolMid
+
+	do "Squiggle Arrows"
+		glyph-block-import Shared-Symbol-Shapes : CreateWaveShape
+		define WaveSw : AdviceStroke (5.5 - MosaicWidthScalar)
+
+		define [SquiggleArrowBarSide kMag1 kMag2 l r kL kR y0] : begin
+			local mag : r - l
+			local p : (mag - o - halfArrowSw * 1.1) / mag
+			local p2   0.75
+			local p2L : mix 1 p2 [mix 1 kL (1 / 2)]
+			local p2R : mix 1 p2 [mix 1 kR (1 / 2)]
+
+			local innerStops : 3 * MosaicWidthScalar
+			local knots {}
+
+			knots.push : corner [mix l r : mix 0 (1 - p) kL]  y0
+			knots.push : corner [mix l r (1 - p2L)]      y0
+			foreach j [range 0 innerStops] : begin
+				knots.push : corner
+					mix l r : mix (1 - p2L) p2R ((j + 1 / 2) / innerStops)
+					y0 + waveArrowAmplitude * [if (j % 2) kMag1 kMag2]
+			knots.push : corner [mix l r p2R]      y0
+			knots.push : corner [mix l r : mix 1 p kR]  y0
+
+			return knots
+
+		define [SquiggleArrowBar kL kR] : begin
+			return : spiro-outline
+				SquiggleArrowBarSide   0.3 (-0.25) arrowSB arrowRSB kL kR (SymbolMid + halfArrowSw)
+				[SquiggleArrowBarSide  0.25 (-0.3) arrowSB arrowRSB kL kR (SymbolMid - halfArrowSw)].reverse
+
+		create-glyph [MangleName 'squiggleArrowLeft'] [MangleUnicode 0x21DC] : glyph-proc
+			set-width MosaicWidth
+			include : SquiggleArrowBar 1 0
+			include : ArrowHead.shape arrowRSB SymbolMid arrowSB SymbolMid
+
+		create-glyph [MangleName 'squiggleArrowRight'] [MangleUnicode 0x21DD] : glyph-proc
+			set-width MosaicWidth
+			include : SquiggleArrowBar 0 1
+			include : ArrowHead.shape arrowSB SymbolMid arrowRSB SymbolMid
+
+		if (MosaicWidthScalar > 1 && !para.forceMonospace) : do
+			define l : mix 0 arrowSB kLongArrowSB
+			define r : mix MosaicWidth arrowRSB kLongArrowSB
+
+			define [LongSquiggleArrowBar kL kR] : begin
+				return : spiro-outline
+					SquiggleArrowBarSide   0.3 (-0.25) l r kL kR (SymbolMid + halfArrowSw)
+					[SquiggleArrowBarSide  0.25 (-0.3) l r kL kR (SymbolMid - halfArrowSw)].reverse
+
+			create-glyph 'longSquiggleArrowLeft' 0x2B33 : glyph-proc
+				set-width MosaicWidth
+				include : LongSquiggleArrowBar 1 0
+				include : ArrowHead.shape r SymbolMid l SymbolMid
+
+			create-glyph 'longSquiggleArrowRight' 0x27FF : glyph-proc
+				set-width MosaicWidth
+				include : LongSquiggleArrowBar 0 1
+				include : ArrowHead.shape l SymbolMid r SymbolMid
