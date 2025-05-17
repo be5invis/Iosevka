@@ -1,5 +1,19 @@
 ## Modifications since last major version
 
+### 33.2.3
+
+* Refine shape of the following characters:
+  - ARMENIAN SMALL LETTER CHA (`U+0579`).
+  - INFORMATION SOURCE (`U+2139`).
+  - TRIANGLE-HEADED RIGHTWARDS ARROW (`U+279D`).
+  - HEAVY TRIANGLE-HEADED RIGHTWARDS ARROW (`U+279E`).
+  - DASH WITH UPTURN (`U+2E43`).
+  - LATIN SMALL LETTER SCRIPT R WITH RING (`U+AB4C`).
+  - MATHEMATICAL DOUBLE-STRUCK CAPITAL B (`U+1D539`).
+* Add Characters:
+  - LEFTWARDS DOUBLE DASH ARROW (`U+290C`) ... RIGHTWARDS TRIPLE DASH ARROW (`U+290F`).
+
+
 ### 33.2.2
 
 * Refine shape of the following characters:

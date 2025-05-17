@@ -1,0 +1,89 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Arrow-Dashed : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowHeadT MkArrowT
+
+	define dims : ArrowDims MosaicWidth MosaicWidthScalar
+	define MkArrow : MkArrowT dims
+
+	define {
+		.arrowHeight arrowHeight
+		.arrowWidth arrowWidth
+		.arrowTop arrowTop
+		.arrowBot arrowBot
+		.arrowMidX arrowMidX
+		.arrowSB arrowSB
+		.arrowRSB arrowRSB
+
+		.arrowSw arrowSw
+		.halfArrowSw halfArrowSw
+	} dims
+
+	define o : O * 2
+
+	# Bar Shapes
+	define [DashedArrowBar x1 y1 x2 y2 halfSw gap segLen w] : begin
+		return : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-proc
+			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
+			local deltaT : (gap + segLen) / mag
+			for [local t 0] (t < p) [set t : t + deltaT] : include : dispiro
+				widths.center (halfSw * 2)
+				flat [mix (mag * (1 - p)) mag t] 0
+				curl [mix (mag * (1 - p)) mag : Math.min p (t + segLen / mag)] 0
+
+	define [SegmentArrowBar x1 y1 x2 y2 halfSw gap segCnt w] : begin
+		return : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-proc
+			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
+			local deltaT : (1 + gap / mag) / segCnt
+			local segLen : deltaT * mag - gap
+			for [local t 0] (t < p) [set t : t + deltaT] : include : dispiro
+				widths.center (halfSw * 2)
+				flat [mix (mag * (1 - p)) mag t] 0
+				curl [mix (mag * (1 - p)) mag : Math.min p (t + segLen / mag)] 0
+
+	define dashGap : AdviceStroke 6
+	define dashLen : Math.max (Width / 5) (dashGap * 3)
+
+	# Arrow Shapes
+	define ArrowHead : ArrowHeadT dims
+
+	define [DashedArrowShape x1 y1 x2 y2 size _halfSw] : glyph-proc
+		local halfSw : fallback _halfSw halfArrowSw
+		local gap : AdviceStroke 6
+		include : ArrowHead.shape x1 y1 x2 y2 size
+		include : DashedArrowBar x1 y1 x2 y2 halfSw dashGap dashLen
+
+	define [DashedTrigArrowShape x1 y1 x2 y2 size _halfSw] : glyph-proc
+		local halfSw : fallback _halfSw halfArrowSw
+		include : ArrowHead.trigShape x1 y1 x2 y2 (0.75 * size)
+		include : DashedArrowBar x1 y1 x2 y2 halfSw dashGap dashLen
+
+	define [nSegArrowShape n] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
+		local halfSw : fallback _halfSw halfArrowSw
+		include : ArrowHead.shape x1 y1 x2 y2 size
+		include : SegmentArrowBar x1 y1 x2 y2 halfSw dashGap n
+
+	define TwoSegArrowShape : nSegArrowShape 2
+	define ThreeSegArrowShape : nSegArrowShape 3
+
+	# Glyphs
+	MkArrow.single DashedArrowShape [MangleName 'dashArrowLeft']  [MangleUnicode 0x21E0] arrowRSB SymbolMid arrowSB SymbolMid
+	MkArrow.single DashedArrowShape [MangleName 'dashArrowUp']    [MangleUnicode 0x21E1] arrowMidX arrowBot arrowMidX arrowTop
+	MkArrow.single DashedArrowShape [MangleName 'dashArrowRight'] [MangleUnicode 0x21E2] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.single DashedArrowShape [MangleName 'dashArrowDown']  [MangleUnicode 0x21E3] arrowMidX arrowTop arrowMidX arrowBot
+
+	MkArrow.single DashedTrigArrowShape [MangleName 'trigDashArrowLeft']  [MangleUnicode 0x2B6A] arrowRSB SymbolMid arrowSB SymbolMid
+	MkArrow.single DashedTrigArrowShape [MangleName 'trigDashArrowUp']    [MangleUnicode 0x2B6B] arrowMidX arrowBot arrowMidX arrowTop
+	MkArrow.single DashedTrigArrowShape [MangleName 'trigDashArrowRight'] [MangleUnicode 0x2B6C] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.single DashedTrigArrowShape [MangleName 'trigDashArrowDown']  [MangleUnicode 0x2B6D] arrowMidX arrowTop arrowMidX arrowBot
+
+	MkArrow.single TwoSegArrowShape   [MangleName 'twoDashArrowLeft']    [MangleUnicode 0x290C] arrowRSB SymbolMid arrowSB SymbolMid
+	MkArrow.single TwoSegArrowShape   [MangleName 'twoDashArrowRight']   [MangleUnicode 0x290D] arrowSB SymbolMid arrowRSB SymbolMid
+	MkArrow.single ThreeSegArrowShape [MangleName 'threeDashArrowLeft']  [MangleUnicode 0x290E] arrowRSB SymbolMid arrowSB SymbolMid
+	MkArrow.single ThreeSegArrowShape [MangleName 'threeDashArrowRight'] [MangleUnicode 0x290F] arrowSB SymbolMid arrowRSB SymbolMid

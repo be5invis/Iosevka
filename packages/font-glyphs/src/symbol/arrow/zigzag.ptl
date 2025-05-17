@@ -1,0 +1,93 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Arrow-Zigzag : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowHeadT MkArrowT
+
+	define dims : ArrowDims MosaicWidth MosaicWidthScalar
+	define ArrowHead : ArrowHeadT dims
+
+	define {
+		.arrowWidth arrowWidth
+		.arrowTop arrowTop
+		.arrowBot arrowBot
+		.arrowMidX arrowMidX
+		.arrowSB arrowSB
+		.arrowRSB arrowRSB
+		.arrowSw arrowSw
+		.arrowHeadSize arrowHeadSize
+	} dims
+
+	define o : O * 2
+
+	do "Zig zag"
+		define x2 : mix arrowMidX arrowSB  (0.875 / [Math.sqrt MosaicWidthScalar])
+		define x3 : mix arrowMidX arrowRSB (0.875 / [Math.sqrt MosaicWidthScalar])
+		define x1 : mix x2 x3 (1 / 3)
+		define x4 : mix x2 x3 (2 / 3)
+
+		define y1   arrowTop
+		define y4   arrowBot
+		define y2 : mix y1 y4 0.625
+		define y3 : mix y1 y4 0.375
+
+		define magLastSeg : Math.hypot (x3 - x4) (y3 - y4)
+		define pLastSeg : (magLastSeg - o - 0.55 * arrowSw) / magLastSeg
+
+		define [ZigZagArrowBar] : union
+			difference
+				dispiro
+					flat [mix x3 x4 pLastSeg] [mix y3 y4 pLastSeg] [widths.center arrowSw]
+					curl x3 y3 [widths.lhs arrowSw]
+				MaskAboveLine x2 y2 x3 y3
+			difference
+				dispiro
+					flat x3 y3 [widths.lhs arrowSw]
+					curl x2 y2 [widths.rhs arrowSw]
+				MaskRightLine x3 y3 x4 y4
+				MaskLeftLine  x2 y2 x1 y1
+			difference
+				dispiro
+					flat x2 y2 [widths.rhs arrowSw]
+					curl x1 y1 [widths.center arrowSw]
+				MaskBelowLine x2 y2 x3 y3
+
+		define x3ArrowHeadMock : x3 - (x3 - x4) / magLastSeg * [HSwToV arrowSw]
+
+		create-glyph [MangleName 'zigZagArrow'] [MangleUnicode 0x21AF] : glyph-proc
+			set-width MosaicWidth
+			include : union
+				ArrowHead.shape x3ArrowHeadMock y3 x4 y4 arrowHeadSize
+				ZigZagArrowBar
+
+		create-glyph [MangleName 'zigZagTrigArrow'] [MangleUnicode 0x2B4D] : glyph-proc
+			set-width MosaicWidth
+			include : union
+				ArrowHead.trigShape x3ArrowHeadMock y3 x4 y4 (arrowHeadSize * 0.75)
+				ZigZagArrowBar
+
+	do "Lightning"
+		define x1 : mix arrowMidX arrowRSB (0.875 / [Math.sqrt MosaicWidthScalar])
+		define x2 : mix arrowMidX arrowSB  (0.875 / [Math.sqrt MosaicWidthScalar])
+		define x3   x1
+
+		define y1 arrowTop
+		define y3 arrowBot
+		define y2 : mix y1 y3 0.5
+
+		define magLastSeg : Math.hypot (x3 - x2) (y3 - y2)
+		define pLastSeg : (magLastSeg - o - 0.55 * arrowSw) / magLastSeg
+
+		create-glyph [MangleName 'lightning'] [MangleUnicode 0x2607] : glyph-proc
+			set-width MosaicWidth
+			include : dispiro
+				flat x1 y1 [widths.center arrowSw]
+				curl [mix x2 x1 0.2] [mix y2 y1 0.2]
+				flat [mix x2 x3 0.2] [mix y2 y3 0.2]
+				curl [mix x2 x3 pLastSeg] [mix y2 y3 pLastSeg]
+			include : ArrowHead.shape x2 y2 x3 y3 arrowHeadSize
