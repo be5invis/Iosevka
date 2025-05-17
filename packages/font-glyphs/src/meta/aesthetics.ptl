@@ -39,7 +39,7 @@ export : define [calculateMetrics para] : begin
 
 	# Transform constructors
 	define [Italify angle shift] : begin
-		local slope : Math.tan ([fallback angle para.slopeAngle] / 180 * Math.PI)
+		local slope : Math.tan : [fallback angle para.slopeAngle] / 180 * Math.PI
 		return : new Transform 1 slope 0 1 [fallback shift : (-slope) * SymbolMid] 0
 	define [Upright angle shift] [Italify angle shift :.inverse]
 	define [Scale sx sy] : new Transform sx 0 0 [fallback sy sx] 0 0
@@ -49,16 +49,16 @@ export : define [calculateMetrics para] : begin
 
 	define GlobalTransform : Italify para.slopeAngle
 	define TanSlope   GlobalTransform.xy
-	define SinSlope : Math.sin (para.slopeAngle / 180 * Math.PI)
-	define CosSlope : Math.cos (para.slopeAngle / 180 * Math.PI)
+	define SinSlope : Math.sin : para.slopeAngle / 180 * Math.PI
+	define CosSlope : Math.cos : para.slopeAngle / 180 * Math.PI
 	define HVContrast : Contrast * CosSlope + SinSlope * TanSlope
 	define [HSwToV sw] : sw * HVContrast
 	define [VSwToH sw] : sw / HVContrast
 
 	# Orient parameters
 	define Upward    : new Point Point.Type.Corner (-HVContrast)  0
-	define Downward  : new Point Point.Type.Corner   HVContrast   0
-	define Rightward : new Point Point.Type.Corner   0            1
+	define Downward  : new Point Point.Type.Corner (+HVContrast)  0
+	define Rightward : new Point Point.Type.Corner   0          (+1)
 	define Leftward  : new Point Point.Type.Corner   0          (-1)
 
 	# Style parameters
@@ -77,7 +77,7 @@ export : define [calculateMetrics para] : begin
 	define SmallArchDepth para.smallArchDepth
 
 	# Weight Control
-	define BaseFillRate : Math.min 0.95 : 2 * HVContrast * para.stroke / (Width - SB * 2)
+	define BaseFillRate : Math.min 0.95 : [HSwToV : 2 * para.stroke] / (Width - SB * 2)
 	define WeightControlFactor : [Math.atanh BaseFillRate] / BaseFillRate
 	define [StrokeWeightControlSigmoid x] : Math.tanh : WeightControlFactor * x
 
@@ -112,22 +112,22 @@ export : define [calculateMetrics para] : begin
 	define AccentStackOffset para.accentStackOffset
 	define AccentWidth       para.accentWidth
 	define AccentClearance   para.accentClearance
-	define AccentHeight para.accentHeight
+	define AccentHeight      para.accentHeight
 
-	define CThin : fallback para.cthin 0.75
-	define CThinB : fallback para.cthinb 0.5
+	define CThin  : fallback para.cthin  0.75
+	define CThinB : fallback para.cthinb 0.50
 
 	define SLAB para.slab
 
 	define [IBalance  df] : df.adws * df.adws * [fallback para.ibalance (LongJut * 0.04)] # Serifed
-	define [IBalance2 df] : df.adws * [fallback para.ibalance2 (LongJut * 0.14)]         # Hooky, Tailed
-	define JBalance  : fallback para.jbalance 0
-	define JBalance2 : fallback para.jbalance2 (QuarterStroke + LongJut * 0.04)
-	define TBalance  : fallback para.tbalance JBalance
+	define [IBalance2 df] : df.adws * [fallback para.ibalance2 (LongJut * 0.14)]          # Hooky, Tailed
+	define JBalance  : fallback para.jbalance  0
+	define JBalance2 : fallback para.jbalance2 (LongJut * 0.04 + QuarterStroke)
+	define TBalance  : fallback para.tbalance  JBalance
 	define TBalance2 : fallback para.tbalance2 TBalance
 	define RBalance  : fallback para.rbalance (JBalance * 0.3)
 	define RBalance2 : fallback para.rbalance2 0
-	define FBalance  : fallback para.fbalance 0
+	define FBalance  : fallback para.fbalance  0
 	define OneBalance : fallback para.onebalance 0
 
 	# derived metrics
@@ -190,6 +190,14 @@ export : define [calculateMetrics para] : begin
 	define GeometryStroke : AdviceStroke 4
 	define ShoulderFine : Math.min (Stroke * para.shoulderFineMin) : AdviceStroke 24
 
+	define [UnicodeWeightGrade n _scl _swRef] : begin
+		define scl : fallback _scl 1
+		define kw : 10 - scl - n / 200
+		define [mulPow s] : (0.25 + s / 8) * [StrokeWidthBlend 2 1]
+		define kMul : [Math.pow (n / 100) : mulPow scl] / [Math.pow 4 : mulPow 2]
+		define kAdj : [fallback _swRef Stroke] / [AdviceStroke 6]
+		return : kMul * kAdj * [AdviceStroke kw]
+
 	define [AdviceGlottalStopArchDepth y sign] : begin
 		return : ((y - Stroke) * 0.24 + Stroke * 0.625) + sign * TanSlope * SmoothAdjust
 
@@ -208,10 +216,10 @@ export : define [calculateMetrics para] : begin
 		WideWidth2 WideWidth3 WideWidth4 EssUpper EssLower EssQuestion RightSB Middle DotRadius
 		PeriodRadius ArchDepthA ArchDepthB SmallArchDepthA SmallArchDepthB CorrectionOMidX
 		CorrectionOMidS compositeBaseAnchors AdviceStroke AdviceStroke2 AdviceStrokeInSpace
-		OverlayStroke OperatorStroke GeometryStroke ShoulderFine AdviceGlottalStopArchDepth
-		StrokeWidthBlend ArchDepthAOf ArchDepthBOf SmoothAdjust SideJut MidJutSide MidJutCenter
-		YSmoothMidR YSmoothMidL DToothlessRise DMBlend HSwToV VSwToH NarrowUnicodeT WideUnicodeT
-		VERY-FAR TINY]
+		OverlayStroke OperatorStroke GeometryStroke ShoulderFine UnicodeWeightGrade
+		AdviceGlottalStopArchDepth StrokeWidthBlend ArchDepthAOf ArchDepthBOf SmoothAdjust SideJut
+		MidJutSide MidJutCenter YSmoothMidR YSmoothMidL DToothlessRise DMBlend HSwToV VSwToH
+		NarrowUnicodeT WideUnicodeT VERY-FAR TINY]
 
 export : define [setFontMetrics para metrics fm] : begin
 	define [object CAP Descender XH Width SymbolMid] metrics

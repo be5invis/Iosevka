@@ -1,0 +1,121 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Arrow-Circular : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowT
+
+	define dims : ArrowDims MosaicWidth MosaicWidthScalar
+	define Arrow : ArrowT dims
+
+	define {
+		.arrowTop arrowTop
+		.arrowBot arrowBot
+		.arrowMidX arrowMidX
+		.arrowSB arrowSB
+		.arrowRSB arrowRSB
+		.arrowSw arrowSw
+		.arrowHeadSize arrowHeadSize
+		.fine fine
+	} dims
+
+	# Arrow Shapes
+	local arcSW : Math.min arrowSw [AdviceStroke 5 MosaicWidthScalar]
+	local headSize : mix arcSW arrowHeadSize 0.5
+	local headLength : (headSize + fine) * Math.SQRT1_2
+	local l : arrowSB  + 0.5 * headSize
+	local r : arrowRSB - 0.5 * headSize
+	local t : arrowTop - 0.5 * headSize
+	local b : arrowBot + 0.5 * headSize
+	local ada : ArchDepthAOf (SmallArchDepth * (r - l) / (RightSB - SB)) (r - l)
+	local adb : ArchDepthBOf (SmallArchDepth * (r - l) / (RightSB - SB)) (r - l)
+	local gapWidth : Math.max ((t - b) * 0.05) (fine * Math.SQRT1_2)
+
+	define [HalfCircleArrow headFunc fCcw fGapped] : glyph-proc
+		local arrowX : if fCcw (l + [HSwToV : 0.5 * arcSW]) (r - [HSwToV : 0.5 * arcSW])
+		local arrowY SymbolMid
+		local arrowYS : arrowY + 0.5 * headLength
+		local arrowYE : arrowY - 0.5 * headLength
+		set-width MosaicWidth
+		include : union
+			difference
+				OShape.NoOvershoot t b l r arcSW ada adb
+				if fGapped
+					Arrow.Head.barbShape arrowX arrowYS arrowX arrowYE headSize headSize (-gapWidth)
+					MaskBelow arrowY
+			difference
+				dispiro
+					widths.center arcSW
+					flat arrowX arrowY
+					curl arrowX arrowYE [heading Downward]
+				Arrow.Head.outerMask arrowX arrowYS arrowX arrowYE headSize
+		include : headFunc arrowX arrowYS arrowX arrowYE headSize
+
+	define [ShareAlikeArrow headFunc] : glyph-proc
+		local arrowX : l + [HSwToV HalfStroke]
+		local headLength : headSize * Math.SQRT1_2
+		local gapSize : Math.max (2 * headLength) (CAP - 0 - ada - adb)
+		local gapTop : CAP / 2 + 0.5 * gapSize
+		local gapBot : CAP / 2 - 0.5 * gapSize
+		set-width MosaicWidth
+		include : union
+			difference
+				OShape.NoOvershoot CAP 0 l r Stroke ada adb
+				spiro-outline
+					corner arrowSB   gapTop
+					corner arrowMidX gapTop
+					corner arrowMidX gapBot
+					corner arrowSB   gapBot
+		include : headFunc arrowX gapTop arrowX (gapTop - headLength) headSize
+
+	define [OpenCircleArrow headFunc fCcw fClosed] : glyph-proc
+		local arrowX : arch.adjust-x.top arrowMidX arcSW
+		local arrowXS : arrowX + [if fCcw 0.5 (-0.5)] * headLength
+		local arrowXE : arrowX + [if fCcw (-0.5) 0.5] * headLength
+		local arrowY : t - (0.5 * arcSW)
+
+		local circle : OShape.NoOvershoot t b l r arcSW ada adb
+		set-width MosaicWidth
+		if fClosed
+			include circle
+			include : union
+				difference
+					OShape.NoOvershoot t b l r arcSW ada adb
+					intersection [MaskAbove SymbolMid] [[if fCcw MaskLeft MaskRight] arrowX]
+				difference
+					dispiro
+						widths.center arcSW
+						flat arrowX arrowY
+						curl arrowXE arrowY [heading [if fCcw Leftward Rightward]]
+					Arrow.Head.outerMask arrowXS arrowY arrowXE arrowY headSize
+		include : headFunc arrowXS arrowY arrowXE arrowY headSize
+
+	# Glyphs
+	create-glyph [MangleName 'ccwHalfCircleArrow'] [MangleUnicode 0x21B6] : glyph-proc
+		include : HalfCircleArrow Arrow.Head.shape true  false
+	create-glyph [MangleName 'cwHalfCircleArrow'] [MangleUnicode 0x21B7] : glyph-proc
+		include : HalfCircleArrow Arrow.Head.shape false false
+	create-glyph [MangleName 'ccwOpenCircleArrow'] [MangleUnicode 0x21BA] : glyph-proc
+		include : OpenCircleArrow Arrow.Head.shape true  false
+	create-glyph [MangleName 'cwOpenCircleArrow'] [MangleUnicode 0x21BB] : glyph-proc
+		include : OpenCircleArrow Arrow.Head.shape false false
+	create-glyph [MangleName 'ccwGappedCircleArrow'] [MangleUnicode 0x27F2] : glyph-proc
+		include : HalfCircleArrow Arrow.Head.shape true  true
+	create-glyph [MangleName 'cwGappedCircleArrow'] [MangleUnicode 0x27F3] : glyph-proc
+		include : HalfCircleArrow Arrow.Head.shape false true
+	create-glyph [MangleName 'ccwClosedCircleArrow'] [MangleUnicode 0x2940] : glyph-proc
+		include : OpenCircleArrow Arrow.Head.shape true  true
+	create-glyph [MangleName 'cwClosedCircleArrow'] [MangleUnicode 0x2941] : glyph-proc
+		include : OpenCircleArrow Arrow.Head.shape false true
+	create-glyph [MangleName 'cwOpenCircleArrowTriangle'] [MangleUnicode 0x2B6E] : glyph-proc
+		include : OpenCircleArrow Arrow.Head.trigShape false false
+	create-glyph [MangleName 'ccwOpenCircleArrowTriangle'] [MangleUnicode 0x2B6F] : glyph-proc
+		include : OpenCircleArrow Arrow.Head.trigShape true  false
+
+	if (MosaicWidthScalar == 1) : do
+		create-glyph 'ccCcwArrow' : glyph-proc
+			include : ShareAlikeArrow Arrow.Head.trigShape

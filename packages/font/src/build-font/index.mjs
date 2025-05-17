@@ -1,6 +1,7 @@
 import { buildGlyphs } from "@iosevka/font-glyphs";
 import { copyFontMetrics } from "@iosevka/font-glyphs/aesthetics";
 import { buildOtl } from "@iosevka/font-otl";
+import { createSubsetFilter } from "@iosevka/param";
 
 import { cleanupGlyphStore } from "../cleanup/index.mjs";
 import { CreateEmptyFont } from "../font-io/index.mjs";
@@ -23,13 +24,8 @@ export async function buildFont(para, cache) {
 	const otl = buildOtl(para, gs.glyphStore);
 
 	// Regulate (like geometry conversion)
-	const excludeChars = new Set();
-	if (para.excludedCharRanges) {
-		for (const [start, end] of para.excludedCharRanges) {
-			for (let p = start; p <= end; p++) excludeChars.add(p);
-		}
-	}
-	const cleanGs = cleanupGlyphStore(cache, para, gs.glyphStore, excludeChars, otl);
+	const sf = await createSubsetFilter(para.subset, para.excludedCharRanges);
+	const cleanGs = cleanupGlyphStore(cache, para, gs.glyphStore, sf, otl);
 
 	// Convert to TTF
 	const font = await convertOtd(baseFont, otl, cleanGs);

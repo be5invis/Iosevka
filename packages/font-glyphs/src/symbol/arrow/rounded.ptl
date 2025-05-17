@@ -1,0 +1,71 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Symbol-Arrow-Rounded : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Arrow-Shared : ArrowDims MkArrowT
+
+	define dims : ArrowDims MosaicWidth MosaicWidthScalar
+	define MkArrow : MkArrowT dims
+
+	define {
+		.arrowHeight arrowHeight
+		.arrowWidth arrowWidth
+		.arrowTop arrowTop
+		.arrowBot arrowBot
+		.arrowMidX arrowMidX
+		.arrowSB arrowSB
+		.arrowRSB arrowRSB
+	} dims
+
+	# Arrow Shape
+	define RoundArrow : namespace
+		define [Blob x y sw] : Ellipse.Outline.RoundStrokeTerminalAt x y (sw / 2)
+
+		define [Bar x1 y1 x2 y2 sw] : begin
+			return : PointingTo x1 y1 x2 y2 : lambda [mag] : union
+				Blob 0   0 sw
+				Blob mag 0 sw
+				dispiro
+					widths.center  sw
+					flat 0   0
+					curl mag 0
+
+		define [Head x1 y1 x2 y2 sw headLen headWidth] : begin
+			return : PointingTo x1 y1 x2 y2 : lambda [mag] : union
+				Blob headLen headWidth    sw
+				Blob headLen (-headWidth) sw
+				dispiro
+					widths.center  sw
+					flat 0       0
+					curl headLen headWidth
+				dispiro
+					widths.center  sw
+					flat 0       0
+					curl headLen (-headWidth)
+
+		export : define [Shape sw] : function [x1 y1 x2 y2] : begin
+			define headLen   : MosaicUnitWidth * [Math.sqrt MosaicWidthScalar] * 0.5
+			define headWidth : headLen * 1.00
+
+			define mag : Math.hypot (x2 - x1) (y2 - y1)
+			define p : 1 - sw / mag
+			define pHalf : mix 1 p 0.5
+
+			define x1a : mix [mix x1 x2 0.5] x1 p
+			define x2a : mix [mix x1 x2 0.5] x2 p
+
+			define y1a : mix [mix y1 y2 0.5] y1 p
+			define y2a : mix [mix y1 y2 0.5] y2 p
+
+			return : union
+				Bar  x1a y1a x2a y2a  sw
+				Head x1a y1a x2a y2a  sw (pHalf * headLen) (pHalf * headWidth)
+
+	# Glyphs
+	define sw : UnicodeWeightGrade 900 MosaicWidthScalar GeometryStroke
+	MkArrow.single [RoundArrow.Shape sw] [MangleName 'heavyRoundArrowRight'] [MangleUnicode 0x279C] arrowSB SymbolMid arrowRSB SymbolMid
