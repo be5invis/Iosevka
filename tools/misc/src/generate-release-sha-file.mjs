@@ -9,7 +9,7 @@ export default async function main(fromPaths, outPath) {
 
 	for (const filePath of fromPaths) {
 		console.log(`Checking ${filePath}...`);
-		o.write(`${await hashFile(filePath)}\t${path.basename(filePath)}\n`);
+		o.write(`${await hashFile(filePath)}  ${path.basename(filePath)}\n`);
 	}
 
 	o.end();
