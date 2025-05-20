@@ -30,7 +30,6 @@
   * **macOS**
     * Standard distribution in Homebrew:
       ```bash
-      brew tap homebrew/cask
       brew install --cask font-iosevka
       ```
     * Search for other variants using `brew search font-iosevka` and install what you want.
