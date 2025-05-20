@@ -10,6 +10,11 @@ export default async function processLigSetCherryPicking(argv, dirs) {
 	const md = new MdCol("Section-Cherry-Picking-Ligation-Sets");
 	const headerPath = path.resolve(dirs.fragments, "description-cherry-picking-ligation-sets.md");
 	md.log(await fs.promises.readFile(headerPath, "utf-8"));
+	for (const gr in ligData.rawSets) {
+		if (!ligData.rawSets[gr].desc) continue;
+		if (!ligData.rawSets[gr].showAsCherryPicking) continue;
+		md.log(`  - \`${gr}\`: ${ligData.rawSets[gr].desc}.`);
+	}
 	for (const gr in ligData.cherry) {
 		md.log(`  - \`${gr}\`: ${ligData.cherry[gr].desc}.`);
 	}
