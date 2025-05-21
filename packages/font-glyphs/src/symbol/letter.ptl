@@ -66,19 +66,22 @@ glyph-block Symbol-Currency : begin
 		create-glyph "currency/turkishLiraSign.\(suffix)" : glyph-proc
 			set-width Width
 			include : MarkSet.capital
+			local xBarLeft : SB * 1.5
+			local xRight : RightSB - 0.75 * OX
 			include : union
 				dispiro
 					widths.lhs Stroke
-					flat SB 0 [heading Rightward]
-					curl Middle 0
+					flat xBarLeft 0 [heading Rightward]
+					curl [mix xBarLeft xRight 0.5] 0
 					archv
-					straight.up.end RightSB Hook [heading Upward]
-				VBar.l SB 0 CAP
-			include : LetterObliqueBarOverlay.l SB (CAP * 0.37)
-			include : LetterObliqueBarOverlay.l SB (CAP * 0.60 - OverlayStroke * 0.25)
+					straight.up.end (xRight - OX) Hook [heading Upward]
+				VBar.l xBarLeft 0 CAP
+			include : LetterObliqueBarOverlay.l xBarLeft (CAP * 0.37)
+			include : LetterObliqueBarOverlay.l xBarLeft (CAP * 0.60 - OverlayStroke * 0.25)
 			if serifGrade : begin
-				local sf : SerifFrame.fromDf [DivFrame 1] CAP 0
-				include : composite-proc sf.lt.fullSide sf.lb.outer
+				include : HSerif.lb (xBarLeft + [HSwToV HalfStroke]) 0   Jut
+				include : HSerif.lt (xBarLeft + [HSwToV HalfStroke]) CAP Jut
+				include : HSerif.rt (xBarLeft + [HSwToV HalfStroke]) CAP MidJutSide
 
 	select-variant 'currency/turkishLiraSign' 0x20BA
 
@@ -110,27 +113,18 @@ glyph-block Symbol-Currency : begin
 
 	create-glyph 'currency/manatSign' 0x20BC : glyph-proc
 		local df : include : DivFrame para.advanceScaleT 3
-		include : df.markSet.e
 
-		define pY 0.8
-		local archTop : mix 0 XH pY
-
-		local sw : Math.min df.mvs : AdviceStroke2 3 2 archTop df.adws
-
-		local ada : df.archDepthAOf SmallArchDepth sw
-		local adb : df.archDepthBOf SmallArchDepth sw
-
-		include : VBar.m df.middle [if SLAB sw 0] XH sw
+		include : VBar.m df.middle [if SLAB df.mvs 0] (XH + LongVJut - QuarterStroke) df.mvs
 		include : dispiro
-			widths.rhs sw
+			widths.rhs df.mvs
 			flat df.leftSB  0 [heading Upward]
-			curl df.leftSB  [if (ada + adb < archTop) (archTop - ada) : mix archTop 0 (ada / (ada + adb))]
-			arch.rhs archTop (sw -- sw)
-			flat df.rightSB [if (ada + adb < archTop) (archTop - adb) : mix archTop 0 (adb / (ada + adb))]
+			curl df.leftSB  [if (df.smallArchDepthA + df.smallArchDepthB < XH) (XH - df.smallArchDepthA) : mix XH 0 (df.smallArchDepthA / (df.smallArchDepthA + df.smallArchDepthB))]
+			arch.rhs XH (sw -- df.mvs)
+			flat df.rightSB [if (df.smallArchDepthA + df.smallArchDepthB < XH) (XH - df.smallArchDepthB) : mix XH 0 (df.smallArchDepthB / (df.smallArchDepthA + df.smallArchDepthB))]
 			curl df.rightSB 0 [heading Downward]
 
 		if SLAB : begin
-			local sf : SerifFrame.fromDf df XH 0 (swSerif -- sw)
+			local sf : SerifFrame.fromDf df XH 0 (swSerif -- df.mvs)
 			include : composite-proc sf.lb.full sf.rb.full
 
 	create-glyph 'currency/lariSign' 0x20BE : glyph-proc
@@ -412,17 +406,18 @@ glyph-block Symbol-Letter-Phonetic : begin
 			g4.up.end (RightSB - OX) XH [heading Upward]
 
 	create-glyph 'cyrlInvLowKavykaWithKavyka' 0x2E46 : glyph-proc
-		include : MarkSet.e
+		local df : include : DivFrame para.advanceScaleSp
+		include : df.markSet.e
 
 		include : BreveShape
-			xMiddle -- Middle
+			xMiddle -- df.middle
 			width   -- (3 * markExtend)
 			top     -- XH
 			bottom  -- (XH - AccentHeight)
 			hs      -- markHalfStroke
 
 		include : InvBreveShape
-			xMiddle -- Middle
+			xMiddle -- df.middle
 			width   -- (3 * markExtend)
 			top     -- AccentHeight
 			bottom  -- 0
