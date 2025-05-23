@@ -8,7 +8,6 @@ glyph-module
 glyph-block Letter-Latin-O : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Shared-Metrics : markHalfStroke
 	glyph-block-import Mark-Horn-And-Angle : HornBaseAnchor
 	glyph-block-import Mark-Above : RingDims RingShape
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors ExtendBelowBaseAnchors
@@ -54,22 +53,20 @@ glyph-block Letter-Latin-O : begin
 		define df : include : DivFrame para.advanceScaleT 3
 		include : df.markSet.capital
 		local dist : df.rightSB - df.leftSB
-		local gap : Math.min
+		include : OShapeFlatTB CAP 0 df.leftSB df.rightSB df.mvs df.archDepthA df.archDepthB : Math.min
 			Math.max (0.25 * dist) [HSwToV : Math.SQRT2 * rBroadOn]
 			Math.max (dist - [HSwToV : 3 * df.mvs]) [HSwToV df.mvs]
-		include : OShapeFlatTB CAP 0 df.leftSB df.rightSB df.mvs df.archDepthA df.archDepthB gap
-		include : DotAt df.middle (df.mvs / 2 + O) rBroadOn
+		include : DotAt df.middle (0   + df.mvs / 2 + O) rBroadOn
 		include : DotAt df.middle (CAP - df.mvs / 2 - O) rBroadOn
 
 	create-glyph 'cyrl/broadOn' 0x47B : glyph-proc
 		define df : include : DivFrame para.advanceScaleT 3
 		include : df.markSet.e
 		local dist : df.rightSB - df.leftSB
-		local gap : Math.min
+		include : OShapeFlatTB XH 0 df.leftSB df.rightSB df.mvs df.smallArchDepthA df.smallArchDepthB : Math.min
 			Math.max (0.25 * dist) [HSwToV : Math.SQRT2 * rBroadOn]
 			Math.max (dist - [HSwToV : 3 * df.mvs]) [HSwToV df.mvs]
-		include : OShapeFlatTB XH 0 df.leftSB df.rightSB df.mvs df.smallArchDepthA df.smallArchDepthB gap
-		include : DotAt df.middle (df.mvs / 2 + O) rBroadOn
+		include : DotAt df.middle (0  + df.mvs / 2 + O) rBroadOn
 		include : DotAt df.middle (XH - df.mvs / 2 - O) rBroadOn
 
 	derive-multi-part-glyphs 'OHorn' 0x01A0 {'O' 'longHorn'} : function [srcs gr] : glyph-proc
@@ -98,14 +95,16 @@ glyph-block Letter-Latin-O : begin
 		local fine : 0.5 * OverlayStroke
 		include [refer-glyph 'O'] AS_BASE
 		include : dispiro
-			flat (SB + O + fine) [mix CAP 0 1.05] [widths.center : 2 * fine]
+			widths.center (2 * fine)
+			flat (SB + O + fine) [mix CAP 0 1.05]
 			curl (RightSB - O - fine) [mix 0 CAP 1.05]
 
 	create-glyph 'oSlash' 0xF8 : glyph-proc
 		local fine : 0.5 * OverlayStroke
 		include [refer-glyph 'o'] AS_BASE
 		include : dispiro
-			flat (SB + O + fine) [mix XH 0 1.05] [widths.center : 2 * fine]
+			widths.center (2 * fine)
+			flat (SB + O + fine) [mix XH 0 1.05]
 			curl (RightSB - O - fine) [mix 0 XH 1.05]
 
 	create-glyph 'oSideways' 0x1D11 : glyph-proc
@@ -119,7 +118,8 @@ glyph-block Letter-Latin-O : begin
 			local fine : 0.5 * OverlayStroke
 			include : OShape (Width - SB / 2) (SB / 2) (XH * 0.1) (XH * 0.9) nothing nothing nothing
 			include : dispiro
-				flat (SB + O + fine) [mix Width 0 1.05] [widths.center : 2 * fine]
+				widths.center (2 * fine)
+				flat (SB + O + fine) [mix Width 0 1.05]
 				curl (XH - SB - O - fine) [mix 0 Width 1.05]
 
 	create-glyph 'Obar' 0x19F : glyph-proc
@@ -272,8 +272,9 @@ glyph-block Letter-Latin-O : begin
 	CreateAccentedComposition 'oDieresis' 0xF6 'o' 'dieresisAbove'
 
 	create-glyph 'numeroRightHalf' : glyph-proc
-		include : OShape XH [Math.max (CAP * 0.1) (Stroke * 1.5)] SB RightSB Stroke ArchDepthA ArchDepthB
-		include : HBar.b SB RightSB 0
+		local obot : Math.max (CAP * 0.1) (OverlayStroke + HalfStroke)
+		include : OShape XH obot SB RightSB [AdviceStroke2 2 2 (XH - obot)] nothing nothing
+		include : HBar.b SB RightSB 0 OverlayStroke
 
 	CreateAccentedComposition 'oSbRsbUnderlineBelow' null 'o' 'sbRsbUnderlineBelow'
 
@@ -309,7 +310,7 @@ glyph-block Letter-Latin-O : begin
 		include : intersection
 			OShapeOutline.NoOvershoot CAP 0 SB RightSB BBS ArchDepthA ArchDepthB
 			union
-				VBar.l (SB + OX + BBD) 0 CAP BBS
+				VBar.l (SB      + OX + BBD) 0 CAP BBS
 				VBar.r (RightSB - OX - BBD) 0 CAP BBS
 
 	create-glyph 'mathbb/o' 0x1D560 : glyph-proc
@@ -318,5 +319,5 @@ glyph-block Letter-Latin-O : begin
 		include : intersection
 			OShapeOutline.NoOvershoot XH 0 SB RightSB BBS
 			union
-				VBar.l (SB + OX + BBD) 0 XH BBS
+				VBar.l (SB      + OX + BBD) 0 XH BBS
 				VBar.r (RightSB - OX - BBD) 0 XH BBS
