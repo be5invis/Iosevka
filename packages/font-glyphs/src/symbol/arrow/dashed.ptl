@@ -7,9 +7,10 @@ glyph-module
 glyph-block Symbol-Arrow-Dashed : for-width-kinds WideWidth1
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowHeadT MkArrowT
+	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowT MkArrowT
 
 	define dims : ArrowDims MosaicWidth MosaicWidthScalar
+	define Arrow : ArrowT dims
 	define MkArrow : MkArrowT dims
 
 	define {
@@ -22,6 +23,8 @@ glyph-block Symbol-Arrow-Dashed : for-width-kinds WideWidth1
 		.arrowRSB arrowRSB
 
 		.halfArrowSw halfArrowSw
+		.fine fine
+		.doubleHeadGap doubleHeadGap
 	} dims
 
 	define o : O * 2
@@ -30,46 +33,99 @@ glyph-block Symbol-Arrow-Dashed : for-width-kinds WideWidth1
 	define [DashedArrowBar x1 y1 x2 y2 halfSw gap segLen w] : begin
 		return : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-proc
 			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
-			local deltaT : (gap + segLen) / mag
-			for [local t 0] (t < p) [set t : t + deltaT] : include : dispiro
+
+			local fullLen : mag * p
+			local x0  : mag * (1 - p)
+			local dt0 : segLen / fullLen
+			local dt  : (gap + segLen) / fullLen
+			for [local t 0] (t < 1) [set t : t + dt] : include : dispiro
 				widths.center (halfSw * 2)
-				flat [mix (mag * (1 - p)) mag t] 0
-				curl [mix (mag * (1 - p)) mag : Math.min p (t + segLen / mag)] 0
+				flat [mix x0 mag t] 0
+				curl [mix x0 mag : Math.min 1 (t + dt0)] 0
 
 	define [SegmentArrowBar x1 y1 x2 y2 halfSw gap segCnt w] : begin
 		return : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-proc
 			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
-			local deltaT : (1 + gap / mag) / segCnt
-			local segLen : deltaT * mag - gap
-			for [local t 0] (t < p) [set t : t + deltaT] : include : dispiro
+
+			local fullLen : mag * p
+			local x0  : mag * (1 - p)
+			local dt  : (1 + gap / fullLen) / segCnt
+			local dt0 : dt - gap / fullLen
+			for [local t 0] (t < 1) [set t : t + dt] : include : dispiro
 				widths.center (halfSw * 2)
-				flat [mix (mag * (1 - p)) mag t] 0
-				curl [mix (mag * (1 - p)) mag : Math.min p (t + segLen / mag)] 0
+				flat [mix x0 mag t] 0
+				curl [mix x0 mag : Math.min 1 (t + dt0)] 0
+
+	define [DottedArrowBar x1 y1 x2 y2 fDot kDotR oDot halfSw gap w] : begin
+		return : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-proc
+			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
+
+			local fullLen : mag * p
+			local x0  : mag * (1 - p)
+			local dt0 : 2 * halfSw * kDotR / fullLen
+			local dt  : dt0 + gap / fullLen
+
+			local dots : list
+			for [local t 0] (t < 1 + dt0) [set t : t + dt] : dots.push
+				fDot [mix mag x0 : t + dt0 / 2] 0 (halfSw * kDotR)
+			include : intersection
+				MaskRight x0
+				union.apply null dots
 
 	define dashGap : AdviceStroke 6
 	define dashLen : Math.max (Width / 5) (dashGap * 3)
 
 	# Arrow Shapes
-	define ArrowHead : ArrowHeadT dims
 
 	define [DashedArrowShape x1 y1 x2 y2 size _halfSw] : glyph-proc
 		local halfSw : fallback _halfSw halfArrowSw
-		local gap : AdviceStroke 6
-		include : ArrowHead.shape x1 y1 x2 y2 size
+		include : Arrow.Head.shape x1 y1 x2 y2 size
 		include : DashedArrowBar x1 y1 x2 y2 halfSw dashGap dashLen
 
 	define [DashedTrigArrowShape x1 y1 x2 y2 size _halfSw] : glyph-proc
 		local halfSw : fallback _halfSw halfArrowSw
-		include : ArrowHead.trigShape x1 y1 x2 y2 (0.75 * size)
+		include : Arrow.Head.trigShape x1 y1 x2 y2 (0.75 * size)
 		include : DashedArrowBar x1 y1 x2 y2 halfSw dashGap dashLen
 
-	define [nSegArrowShape n] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
+	define [nSegArrowShapeT n] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
 		local halfSw : fallback _halfSw halfArrowSw
-		include : ArrowHead.shape x1 y1 x2 y2 size
+		include : Arrow.Head.shape x1 y1 x2 y2 size
 		include : SegmentArrowBar x1 y1 x2 y2 halfSw dashGap n
 
-	define TwoSegArrowShape : nSegArrowShape 2
-	define ThreeSegArrowShape : nSegArrowShape 3
+	define TwoSegArrowShape : nSegArrowShapeT 2
+	define ThreeSegArrowShape : nSegArrowShapeT 3
+
+	define [DottedArrowShapeT fDot kDotR oDot] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
+		local halfSw : fallback _halfSw halfArrowSw
+		include : Arrow.Head.shape x1 y1 x2 y2 size
+		include : DottedArrowBar x1 y1 x2 y2 fDot kDotR oDot halfSw dashGap
+
+	define [DhtThreeSegArrowShape x1 y1 x2 y2 size _halfSw] : glyph-proc
+		local halfSw : fallback _halfSw halfArrowSw
+		local mag : Math.hypot (y2 - y1) (x2 - x1)
+		local pFine : 0.5 * fine / mag
+		local pHead : 1 - doubleHeadGap / mag
+		local xHead : mix x1 x2 pHead
+		local yHead : mix y1 y2 pHead
+		local xCoHead : mix x1 x2 : pHead - pFine
+		local yCoHead : mix y1 y2 : pHead - pFine
+		local pTail : size / mag
+		local xTail : mix x1 x2 pTail
+		local yTail : mix y1 y2 pTail
+		local xCoTail : mix x1 x2 : pTail - pFine
+		local yCoTail : mix y1 y2 : pTail - pFine
+
+		local gap : AdviceStrokeInSpace (mag - doubleHeadGap - size - fine) HVContrast 6 1
+
+		include : Arrow.shape xCoHead yCoHead x2 y2 size
+		include : Arrow.Head.shape x1 y1 xHead yHead size
+		local bar  : Arrow.Bar.shape xCoTail yCoTail xCoHead yCoHead halfSw
+		local dash : SegmentArrowBar xCoTail yCoTail xCoHead yCoHead halfSw gap 3
+		include dash
+		include : difference
+			Arrow.Head.shape x1 y1 xTail yTail size
+			difference bar dash
+
 
 	# Glyphs
 	MkArrow.single DashedArrowShape [MangleName 'dashArrowLeft']  [MangleUnicode 0x21E0] arrowRSB SymbolMid arrowSB SymbolMid
@@ -86,3 +142,16 @@ glyph-block Symbol-Arrow-Dashed : for-width-kinds WideWidth1
 	MkArrow.single TwoSegArrowShape   [MangleName 'twoDashArrowRight']   [MangleUnicode 0x290D] arrowSB SymbolMid arrowRSB SymbolMid
 	MkArrow.single ThreeSegArrowShape [MangleName 'threeDashArrowLeft']  [MangleUnicode 0x290E] arrowRSB SymbolMid arrowSB SymbolMid
 	MkArrow.single ThreeSegArrowShape [MangleName 'threeDashArrowRight'] [MangleUnicode 0x290F] arrowSB SymbolMid arrowRSB SymbolMid
+
+	MkArrow.single DhtThreeSegArrowShape [MangleName 'dhtThreeDashArrowLeft']  [MangleUnicode 0x2910] arrowRSB SymbolMid arrowSB SymbolMid
+	MkArrow.single DhtThreeSegArrowShape [MangleName 'dhtThreeDashArrowRight'] [MangleUnicode 0x2B37] arrowSB SymbolMid arrowRSB SymbolMid
+
+	# Dotted Arrows
+	foreach { suffix { fDot kDotR oDot } } [Object.entries DotVariants] : do
+		define DottedArrowShape : DottedArrowShapeT fDot kDotR oDot
+
+		MkArrow.single DottedArrowShape "\[MangleName 'dottedArrowLeft'].\(suffix)"  null arrowRSB SymbolMid arrowSB SymbolMid
+		MkArrow.single DottedArrowShape "\[MangleName 'dottedArrowRight'].\(suffix)" null arrowSB SymbolMid arrowRSB SymbolMid
+
+	select-variant [MangleName "dottedArrowLeft"]  [MangleUnicode 0x2911] (follow -- 'punctuationDot')
+	select-variant [MangleName "dottedArrowRight"] [MangleUnicode 0x2B38] (follow -- 'punctuationDot')
