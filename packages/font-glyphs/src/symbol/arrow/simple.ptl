@@ -27,8 +27,19 @@ glyph-block Symbol-Arrow-Simple : for-width-kinds WideWidth1
 		.arrowDiagTop arrowDiagTop
 
 		.doubleBarSpan doubleBarSpan
+		.arrowHeadSize arrowHeadSize
+		.strokeSpan strokeSpan
+		.doubleHeadGap doubleHeadGap
+		.fine fine
 	} dims
 
+	# Determine anchor positions for horizontal multihead/tail arrows
+	define tailP : (arrowHeadSize - fine * 0.5) / arrowWidth
+	define headP : 1 - (strokeSpan + fine) / arrowWidth
+	define gapP : doubleHeadGap / arrowWidth
+	define dhAnchorP  : mix 0     (headP - gapP) 0.6
+	define htAnchorP  : mix tailP  headP         0.6
+	define dhtAnchorP : mix tailP (headP - gapP) 0.6
 	define kLongArrowSB : [DivFrame MosaicWidthScalar 4].leftSB / [DivFrame MosaicWidthScalar 2].leftSB
 
 	MkArrow.single Arrow.shape [MangleName 'arrowLeft']       [MangleUnicode 0x2190] arrowRSB SymbolMid arrowSB SymbolMid
@@ -98,10 +109,10 @@ glyph-block Symbol-Arrow-Simple : for-width-kinds WideWidth1
 	MkArrow.single QuadrupleBarArrowShape [MangleName 'quadrupleArrowRight']   [MangleUnicode 0x2B46] arrowSB SymbolMid arrowRSB SymbolMid
 
 	# Double Head
-	MkArrow.single Arrow.dblShape [MangleName 'dhArrowLeft']  [MangleUnicode 0x219E] arrowRSB SymbolMid arrowSB SymbolMid
-	MkArrow.single Arrow.dblShape [MangleName 'dhArrowRight'] [MangleUnicode 0x21A0] arrowSB SymbolMid arrowRSB SymbolMid
-	MkArrow.single Arrow.dblShape [MangleName 'dhArrowUp']    [MangleUnicode 0x219F] arrowMidX arrowBot arrowMidX arrowTop
-	MkArrow.single Arrow.dblShape [MangleName 'dhArrowDown']  [MangleUnicode 0x21A1] arrowMidX arrowTop arrowMidX arrowBot
+	[MkArrow.singleAnchorAt dhAnchorP] Arrow.dblShape [MangleName 'dhArrowLeft']  [MangleUnicode 0x219E] arrowRSB SymbolMid arrowSB SymbolMid
+	[MkArrow.singleAnchorAt dhAnchorP] Arrow.dblShape [MangleName 'dhArrowRight'] [MangleUnicode 0x21A0] arrowSB SymbolMid arrowRSB SymbolMid
+	[MkArrow.singleAnchorAt dhAnchorP] Arrow.dblShape [MangleName 'dhArrowUp']    [MangleUnicode 0x219F] arrowMidX arrowBot arrowMidX arrowTop
+	[MkArrow.singleAnchorAt dhAnchorP] Arrow.dblShape [MangleName 'dhArrowDown']  [MangleUnicode 0x21A1] arrowMidX arrowTop arrowMidX arrowBot
 
 	MkArrow.single Arrow.dblTrigShape [MangleName 'dblTrigArrowLeft']  [MangleUnicode 0x2BEC] arrowRSB SymbolMid arrowSB SymbolMid
 	MkArrow.single Arrow.dblTrigShape [MangleName 'dblTrigArrowUp']    [MangleUnicode 0x2BED] arrowMidX arrowBot arrowMidX arrowTop
@@ -164,17 +175,24 @@ glyph-block Symbol-Arrow-Simple : for-width-kinds WideWidth1
 	MkArrow.double BarToBarShape Arrow.lhsShape [MangleName 'barArrowUpHL']    [MangleUnicode 0x2960] arrowMidX arrowBot arrowMidX arrowTop
 	MkArrow.double BarToBarShape Arrow.rhsShape [MangleName 'barArrowDownHR']  [MangleUnicode 0x2961] arrowMidX arrowTop arrowMidX arrowBot
 
+	[MkArrow.doubleAnchorAt 0.2] BarToBarShape Arrow.dblShape [MangleName 'barDhArrowLeft']  [MangleUnicode 0x2905] arrowRSB SymbolMid arrowSB SymbolMid
+	[MkArrow.doubleAnchorAt 0.2] BarToBarShape Arrow.dblShape [MangleName 'barDhArrowRight'] [MangleUnicode 0x2B36] arrowSB SymbolMid arrowRSB SymbolMid
+
 	MkArrow.double DoubleBarToBarShape DoubleBarArrowShape [MangleName 'barDblArrowLeft']  [MangleUnicode 0x2906] arrowRSB SymbolMid arrowSB SymbolMid
 	MkArrow.double DoubleBarToBarShape DoubleBarArrowShape [MangleName 'barDblArrowRight'] [MangleUnicode 0x2907] arrowSB SymbolMid arrowRSB SymbolMid
 
-	MkArrow.double Arrow.tailShape Arrow.shape [MangleName 'htArrowLeft'] [MangleUnicode 0x21A2] arrowRSB SymbolMid arrowSB SymbolMid
-	MkArrow.double Arrow.tailShape Arrow.shape [MangleName 'htArrowRight'] [MangleUnicode 0x21A3] arrowSB SymbolMid arrowRSB SymbolMid
+	[MkArrow.doubleAnchorAt htAnchorP 0.5] Arrow.tailShape Arrow.shape [MangleName 'htArrowLeft'] [MangleUnicode 0x21A2] arrowRSB SymbolMid arrowSB SymbolMid
+	[MkArrow.doubleAnchorAt htAnchorP 0.5] Arrow.tailShape Arrow.shape [MangleName 'htArrowRight'] [MangleUnicode 0x21A3] arrowSB SymbolMid arrowRSB SymbolMid
 
-	# Arrow to Bar
+	[MkArrow.doubleAnchorAt dhtAnchorP 0.4] Arrow.tailShape Arrow.dblShape [MangleName 'dhtArrowLeft']  [MangleUnicode 0x2916] arrowRSB SymbolMid arrowSB SymbolMid
+	[MkArrow.doubleAnchorAt dhtAnchorP 0.4] Arrow.tailShape Arrow.dblShape [MangleName 'dhtArrowRight'] [MangleUnicode 0x2B3B] arrowSB SymbolMid arrowRSB SymbolMid
+
+	# Arrow to Bar/Diamond
 	define ArrowToBarShape : Arrow.toBarShapeT Arrow.shape
 	define TrigArrowToBarShape : Arrow.toBarShapeT Arrow.trigShape
 	define LHSArrowToBarShape : Arrow.toBarShapeT Arrow.lhsShape
 	define RHSArrowToBarShape : Arrow.toBarShapeT Arrow.rhsShape
+	define ArrowToDiamondShape : Arrow.toDiamondShapeT Arrow.shape
 
 	MkArrow.single ArrowToBarShape [MangleName 'arrowBarLeft']  [MangleUnicode 0x21E4] arrowRSB SymbolMid arrowSB SymbolMid
 	MkArrow.single ArrowToBarShape [MangleName 'arrowBarRight'] [MangleUnicode 0x21E5] arrowSB SymbolMid arrowRSB SymbolMid
@@ -195,7 +213,13 @@ glyph-block Symbol-Arrow-Simple : for-width-kinds WideWidth1
 	MkArrow.single LHSArrowToBarShape [MangleName 'arrowBarUpHL']    [MangleUnicode 0x2958] arrowMidX arrowBot arrowMidX arrowTop
 	MkArrow.single RHSArrowToBarShape [MangleName 'arrowBarDownHR']  [MangleUnicode 0x2959] arrowMidX arrowTop arrowMidX arrowBot
 
+	MkArrow.single ArrowToDiamondShape [MangleName 'arrowDiamondLeft']  [MangleUnicode 0x291D] arrowRSB SymbolMid arrowSB SymbolMid
+	MkArrow.single ArrowToDiamondShape [MangleName 'arrowDiamondRight'] [MangleUnicode 0x291E] arrowSB SymbolMid arrowRSB SymbolMid
+
 	MkArrow.double Arrow.shape ArrowToBarShape [MangleName 'arrowUpDownBar'] [MangleUnicode 0x21A8] arrowMidX arrowTop arrowMidX arrowBot
+
+	[MkArrow.doubleAnchorAt 0.1] BarToBarShape ArrowToDiamondShape [MangleName 'BarArrowDiamondLeft']  [MangleUnicode 0x291F] arrowRSB SymbolMid arrowSB SymbolMid
+	[MkArrow.doubleAnchorAt 0.1] BarToBarShape ArrowToDiamondShape [MangleName 'BarArrowDiamondRight'] [MangleUnicode 0x2920] arrowSB SymbolMid arrowRSB SymbolMid
 
 	# Arrow Heads
 	create-glyph [MangleName 'arrowHeadUp'] [MangleUnicode 0x2303] : glyph-proc

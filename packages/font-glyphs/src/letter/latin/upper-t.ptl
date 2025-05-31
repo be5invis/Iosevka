@@ -15,13 +15,14 @@ glyph-block Letter-Latin-Upper-T : begin
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay UpwardHookShape
 	glyph-block-import Letter-Shared-Shapes : CyrDescender SerifFrame FlatHookDepth LeftHook RetroflexHook
 
-	define ox : 0.75 * OX
-	define [TLeftX df]  : df.leftSB  + ox
-	define [TRightX df] : df.rightSB - ox
+	define [TLeftX  df] : df.leftSB  + 0.75 * OX
+	define [TRightX df] : df.rightSB - 0.75 * OX
 	define [TShape df top doTopSerifs doBottomSerifs] : glyph-proc
 		include : tagged 'strokeV' : VBar.m df.middle 0 top
-		local l : TLeftX df
+
+		local l : TLeftX  df
 		local r : TRightX df
+
 		include : tagged 'strokeLT' : HBar.t l df.middle top
 		include : tagged 'strokeRT' : HBar.t df.middle r top
 
@@ -39,8 +40,10 @@ glyph-block Letter-Latin-Upper-T : begin
 		local xTopBarLeft : df.leftSB - SideJut
 		local xTopBarRightSym : 2 * left + [HSwToV df.mvs] - xTopBarLeft
 		local xTopBarRight : Math.max xTopBarRightSym : mix left df.rightSB 0.475
+
 		include : tagged 'strokeLT' : HBar.t xTopBarLeft mid          top df.mvs
 		include : tagged 'strokeRT' : HBar.t mid         xTopBarRight top df.mvs
+
 		include : UpwardHookShape
 			left   -- left
 			right  -- df.rightSB
@@ -57,29 +60,29 @@ glyph-block Letter-Latin-Upper-T : begin
 		local sf2 : [SerifFrame.fromDf df (top / 2 + HalfStroke) 0].slice 1 2
 		if SLAB : include sf2.rt.full
 
-	define [TweUpperShape df top doTopSerifs] : glyph-proc
+	define [TweUpperShape df top doTopSerifs doBottomSerifs] : glyph-proc
 		include : TShape df top doTopSerifs false
 		eject-contour 'strokeV'
 
 	define [CyrlTallTeShape df top doTopSerifs doBottomSerifs] : glyph-proc
 		define doFullSerifs : doTopSerifs && doBottomSerifs && !para.isItalic
 
-		local xRight : df.width - 1.5 * df.leftSB
-		local xLeft : df.leftSB - ox
+		local xLeft : df.leftSB + 0.75 * OX
+		local xBarRight : df.width - 1.5 * df.leftSB
 
-		include : tagged 'strokeLT' : HBar.t xLeft  xRight top
-		include : tagged 'strokeV'  : VBar.r xRight 0      top
+		include : tagged 'strokeLT' : HBar.t xLeft xBarRight top
+		include : tagged 'strokeV' : VBar.r xBarRight 0 top
 
 		if doTopSerifs : begin
 			include : tagged 'serifLT' : VSerif.dl xLeft top VJut
 		if doBottomSerifs : begin
-			include : tagged 'serifMB' : if para.isItalic [HSerif.rb xRight 0 SideJut] : composite-proc
-				HSerif.rb (xRight - [HSwToV HalfStroke]) 0 Jut
-				HSerif.lb (xRight - [HSwToV HalfStroke]) 0 MidJutSide
+			include : tagged 'serifMB' : if para.isItalic [HSerif.rb xBarRight 0 SideJut] : composite-proc
+				HSerif.rb (xBarRight - [HSwToV HalfStroke]) 0 Jut
+				HSerif.lb (xBarRight - [HSwToV HalfStroke]) 0 MidJutSide
 		if doFullSerifs : begin
-			include : tagged 'serifRT' : HSerif.rt xRight top SideJut
+			include : tagged 'serifRT' : HSerif.rt xBarRight top SideJut
 
-		include : LeaningAnchor.Below.VBar.r xRight
+		include : LeaningAnchor.Below.VBar.r xBarRight
 
 	glyph-block-export TConfig
 	define TConfig : object
@@ -116,11 +119,36 @@ glyph-block Letter-Latin-Upper-T : begin
 			eject-contour 'strokeLT'
 			include : LeftHook (df.leftSB + LeftHook.extension) CAP df.middle
 
+		create-glyph "TRTail.\(suffix)" : glyph-proc
+			local df : DivFrame adws
+			include [refer-glyph "T.\(suffix)"] AS_BASE ALSO_METRICS
+			include : df.markSet.capital
+			include : RetroflexHook.mExt df.middle 0
+
 		create-glyph "smcpT.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.e
 			set-base-anchor 'bottomRight' (df.middle + [HSwToV HalfStroke]) 0
 			include : TShape df XH doST doSB
+
+		create-glyph "cyrl/teDescender.upright.\(suffix)" : glyph-proc
+			local df : include : DivFrame adws
+			include : df.markSet.e
+			include : TShape df XH doST doSB
+			include : CyrDescender.rSideJut
+				x   -- (df.middle + [HSwToV HalfStroke])
+				y   -- 0
+				jut -- [if doSB MidJutCenter Jut]
+
+		create-glyph "cyrl/TjeKomi.\(suffix)" : glyph-proc
+			local df : include : DivFrame adws 3
+			include : df.markSet.capital
+			include : TjeShape df CAP doST
+
+		create-glyph "cyrl/tjeKomi.upright.\(suffix)" : glyph-proc
+			local df : include : DivFrame adws 3
+			include : df.markSet.e
+			include : TjeShape df XH doST
 
 		create-glyph "cyrl/Twe/upper.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
@@ -137,34 +165,9 @@ glyph-block Letter-Latin-Upper-T : begin
 		create-glyph "currency/tengeSign.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.capital
-			local gap : Math.max (CAP * 0.1) : AdviceStroke2 2 6 CAP
+			local gap : Math.max (CAP * 0.1) HalfStroke
 			include : HBar.t [TLeftX df] [TRightX df] CAP OverlayStroke
-			include : TShape df (CAP - gap - OverlayStroke) doST doSB
-
-		create-glyph "cyrl/teDescender.upright.\(suffix)" : glyph-proc
-			local df : include : DivFrame adws
-			include : df.markSet.e
-			include : TShape df XH doST doSB
-			include : CyrDescender.rSideJut
-				x   -- (df.middle + [HSwToV HalfStroke])
-				y   -- 0
-				jut -- [if doSB MidJutCenter Jut]
-
-		create-glyph "TRTail.\(suffix)" : glyph-proc
-			local df : DivFrame adws
-			include [refer-glyph "T.\(suffix)"] AS_BASE ALSO_METRICS
-			include : df.markSet.capital
-			include : RetroflexHook.mExt df.middle 0
-
-		create-glyph "cyrl/TjeKomi.\(suffix)" : glyph-proc
-			local df : include : DivFrame adws 3
-			include : df.markSet.capital
-			include : TjeShape df CAP doST
-
-		create-glyph "cyrl/tjeKomi.upright.\(suffix)" : glyph-proc
-			local df : include : DivFrame adws 3
-			include : df.markSet.e
-			include : TjeShape df XH doST
+			include : TShape df (CAP - OverlayStroke - gap) doST doSB
 
 		create-glyph "cyrl/teTall.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
@@ -191,6 +194,7 @@ glyph-block Letter-Latin-Upper-T : begin
 
 	select-variant 'cyrl/TjeKomi' 0x50E (follow -- 'T/rtailBase')
 	select-variant 'cyrl/tjeKomi.upright' null (follow -- 'T/rtailBase')
+
 	select-variant 'cyrl/Twe/upper' (follow -- 'T/rtailBase')
 	select-variant 'cyrl/twe/upper' (follow -- 'T/rtailBase')
 	derive-composites 'cyrl/Twe' 0xA68C 'cyrl/Twe/upper' 'cyrl/Twe/middle'
@@ -206,7 +210,8 @@ glyph-block Letter-Latin-Upper-T : begin
 	create-glyph 'capitalSmcpI' 0xA7AE : glyph-proc
 		local df : include : DivFrame : if SLAB para.advanceScaleT 1
 		include : df.markSet.capital
-		local l : TLeftX df
+
+		local l : TLeftX  df
 		local r : TRightX df
 
 		include : VBar.m df.middle 0 CAP
@@ -218,6 +223,30 @@ glyph-block Letter-Latin-Upper-T : begin
 			include : tagged 'serifLT' : VSerif.dl l CAP VJut
 			include : tagged 'serifRB' : VSerif.ur r 0   VJut
 			include : tagged 'serifLB' : VSerif.ul l 0   VJut
+
+	define [SampiShape df top bottom doTopSerifs doBottomSerifs] : glyph-proc
+		define kSampiDepth 0.45
+
+		local l : TLeftX  df
+		local r : TRightX df
+
+		include : VBar.m df.middle top bottom
+		include : HBar.t l r top
+
+		include : VBar.l l top [mix (top - Stroke) bottom kSampiDepth] VJutStroke
+		include : VBar.r r top [mix (top - Stroke) bottom kSampiDepth] VJutStroke
+
+		if doBottomSerifs : include : HSerif.mb df.middle bottom MidJutSide
+
+	create-glyph 'grek/SampiArchaic' 0x372 : glyph-proc
+		local df : include : DivFrame para.advanceScaleT
+		include : df.markSet.capital
+		include : SampiShape df CAP 0 true SLAB
+
+	create-glyph 'grek/sampiArchaic' 0x373 : glyph-proc
+		local df : include : DivFrame para.advanceScaleT
+		include : df.markSet.p
+		include : SampiShape df XH Descender true false
 
 	create-glyph 'mathbb/T' 0x1D54B : glyph-proc
 		local df : include : DivFrame 1
