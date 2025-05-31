@@ -40,9 +40,9 @@ glyph-block Symbol-Arrow-Shared : begin
 		define compactHeadSize : mix arrowSw arrowHeadSize 0.75
 		define doubleBarSpan : arrowHeadSize * 1.1
 		define doubleHeadGap : Math.max
-			1.4 * fine
-			0.15 * Width
-			0.125 * MosaicWidth
+			1.5 * fine
+			0.175 * Width
+			0.15 * MosaicWidth
 
 		# Overlay spacing
 		define overlaySw   : AdviceStroke 6
@@ -171,6 +171,16 @@ glyph-block Symbol-Arrow-Shared : begin
 					corner (length - VERY-FAR) (-width + o)
 					corner length (-width + o)
 
+		export : define [outerMaskWithOffset delta x1 y1 x2 y2 width _length] : new-glyph : glyph-proc
+			local length : fallback _length width
+			include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				spiro-outline
+					corner (o + delta) 0
+					corner length (width - delta - o)
+					corner (length - VERY-FAR) (width - delta - o)
+					corner (length - VERY-FAR) (-width + delta + o)
+					corner length (-width + delta + o)
+
 		export : define [barShape x1 y1 x2 y2 size _sw] : begin
 			local sw : fallback _sw fine
 			return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
@@ -280,7 +290,7 @@ glyph-block Symbol-Arrow-Shared : begin
 			include : Head.shape x2 y2 x3 y3 size
 			include : intersection
 				Bar.shape x1 y1 x2 y2 halfSw 0 0
-				Head.outerMask x2 y2 x3 y3 size
+				Head.outerMaskWithOffset TINY x2 y2 x3 y3 size
 
 		export : define [dblTailShape x1 y1 x2 y2 size _halfSw] : glyph-proc
 			local halfSw : fallback _halfSw halfArrowSw
@@ -296,13 +306,13 @@ glyph-block Symbol-Arrow-Shared : begin
 			include : Head.shape x2 y2 x4 y4 size
 			include : intersection
 				Bar.shape x1 y1 x2 y2 halfSw 0 0
-				Head.outerMask x2 y2 x3 y3 size
+				Head.outerMaskWithOffset TINY x2 y2 x3 y3 size
 
 		export : define [multibarShapeT barFunc] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
 			include : Head.shape x1 y1 x2 y2 size
 			include : difference
 				barFunc x1 y1 x2 y2
-				Head.outerMask x1 y1 x2 y2 size
+				Head.outerMaskWithOffset TINY x1 y1 x2 y2 size
 
 		export : define [barTailShapeT barFunc] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
 			local halfSw : fallback _halfSw halfArrowSw
