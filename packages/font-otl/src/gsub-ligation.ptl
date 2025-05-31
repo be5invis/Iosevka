@@ -415,7 +415,6 @@ define [buildLigationsImpl gsub para $LigGroup$] : begin
 				hyphen ~> [lsx 'cf']
 
 	LigGroup "Arrows" : begin
-		define singular : hyphen.concat anyWave
 		define [CBarSingular k] : begin
 			local hyphenSet : new Set hyphen
 			local fHyphen : arrowBarX k
@@ -427,9 +426,10 @@ define [buildLigationsImpl gsub para $LigGroup$] : begin
 					if [hyphenSet.has x] hyphenResults.(j) waveResults.(j)
 
 		define ArrowFormationConfig : list
-			#    rod      dbl  ltgt  FBarCls
-			list equal    1    1     arrowBarX
-			list singular 0    0     CBarSingular
+			#    rod      dbl  ltgt  FBarCls       groupNameSuffix
+			list equal    1    1     arrowBarX     'equal'
+			list hyphen   0    0     CBarSingular  'hyphen'
+			list anyWave  0    0     CBarSingular  'wave'
 
 		define ArrowExtensionConfig : list
 			#    rod      FBarCls
@@ -437,13 +437,13 @@ define [buildLigationsImpl gsub para $LigGroup$] : begin
 			list hyphen   arrowBarX
 			list anyWave  [lambda [k] [just "wave.lig.\(k)"]]
 
-		foreach [{rodCls dbl ltgt CRod} : items-of ArrowFormationConfig] : do
+		foreach [{rodCls dbl ltgt CRod groupNameSuffix} : items-of ArrowFormationConfig] : do
 			define heads {}
 			define rods  {}
 
-			define doLT    : [not ltgt] || [hasLG 'arrow-l']         && ![hasLG 'lteq'] && ![hasLG 'lteq-separate']
-			define doLTAlt : [not ltgt] || [hasLG 'counter-arrow-l'] && ![hasLG 'eqlt'] && ![hasLG 'eqlt-separate']
-			define doRT    : [not ltgt] || [hasLG 'counter-arrow-r'] && ![hasLG 'gteq'] && ![hasLG 'gteq-separate']
+			define doLT    : [not ltgt] || [hasLG "arrow-l-\(groupNameSuffix)"]         && ![hasLG 'lteq'] && ![hasLG 'lteq-separate']
+			define doLTAlt : [not ltgt] || [hasLG "counter-arrow-l-\(groupNameSuffix)"] && ![hasLG 'eqlt'] && ![hasLG 'eqlt-separate']
+			define doRT    : [not ltgt] || [hasLG "counter-arrow-r-\(groupNameSuffix)"] && ![hasLG 'gteq'] && ![hasLG 'gteq-separate']
 
 			# Disable regular expression lookaheads
 			heads.push : chain-rule
@@ -471,21 +471,21 @@ define [buildLigationsImpl gsub para $LigGroup$] : begin
 			define [CAntiHeadForce]         : if dbl [lsx 'hole']           [lsx 'shift0.anti']
 			define [CAntiHeadForceShiftN1]  : if dbl [lsx 'hole.shiftN1']   [lsx 'shiftN1.anti']
 
-			define [LJoinHeadForce]         : if [hasLG 'arrow-l']          [CJoinHeadForce]        advance
-			define [LJoinHeadForceLR]       : if [hasLG 'arrow-lr']         [CJoinHeadForce]        advance
-			define [LJoinHeadForceShift1]   : if [hasLG 'arrow-l']          [CJoinHeadForceShift1]  advance
-			define [LJoinHeadForceShift1LR] : if [hasLG 'arrow-lr']         [CJoinHeadForce]        advance
-			define [LMiddleHead]            : if [hasLG 'counter-arrow-l']  [CJoinHeadMid] : if [hasLG 'arrow-l'] [LJoinHeadForce] advance
-			define [LAntiHeadForce]         : if [hasLG 'counter-arrow-l']  [CAntiHeadForce]        advance
-			define [LAntiHeadForceShiftN1]  : if [hasLG 'counter-arrow-l']  [CAntiHeadForceShiftN1] advance
+			define [LJoinHeadForce]         : if [hasLG "arrow-l-\(groupNameSuffix)"]          [CJoinHeadForce]        advance
+			define [LJoinHeadForceLR]       : if [hasLG "arrow-lr-\(groupNameSuffix)"]         [CJoinHeadForce]        advance
+			define [LJoinHeadForceShift1]   : if [hasLG "arrow-l-\(groupNameSuffix)"]          [CJoinHeadForceShift1]  advance
+			define [LJoinHeadForceShift1LR] : if [hasLG "arrow-lr-\(groupNameSuffix)"]         [CJoinHeadForce]        advance
+			define [LMiddleHead]            : if [hasLG "counter-arrow-l-\(groupNameSuffix)"]  [CJoinHeadMid] : if [hasLG "arrow-l-\(groupNameSuffix)"] [LJoinHeadForce] advance
+			define [LAntiHeadForce]         : if [hasLG "counter-arrow-l-\(groupNameSuffix)"]  [CAntiHeadForce]        advance
+			define [LAntiHeadForceShiftN1]  : if [hasLG "counter-arrow-l-\(groupNameSuffix)"]  [CAntiHeadForceShiftN1] advance
 
-			define [RJoinHeadForce]         : if [hasLG 'arrow-r']          [CJoinHeadForce]        advance
-			define [RJoinHeadForceLR]       : if [hasLG 'arrow-lr']         [CJoinHeadForce]        advance
-			define [RJoinHeadForceShift1]   : if [hasLG 'arrow-r']          [CJoinHeadForceShift1]  advance
-			define [RJoinHeadForceShift1LR] : if [hasLG 'arrow-lr']         [CJoinHeadForce]        advance
-			define [RMiddleHead]            : if [hasLG 'counter-arrow-r']  [CJoinHeadMid] : if [hasLG 'arrow-r'] [RJoinHeadForce] advance
-			define [RAntiHeadForce]         : if [hasLG 'counter-arrow-r']  [CAntiHeadForce]        advance
-			define [RAntiHeadForceShiftN1]  : if [hasLG 'counter-arrow-r']  [CAntiHeadForceShiftN1] advance
+			define [RJoinHeadForce]         : if [hasLG "arrow-r-\(groupNameSuffix)"]          [CJoinHeadForce]        advance
+			define [RJoinHeadForceLR]       : if [hasLG "arrow-lr-\(groupNameSuffix)"]         [CJoinHeadForce]        advance
+			define [RJoinHeadForceShift1]   : if [hasLG "arrow-r-\(groupNameSuffix)"]          [CJoinHeadForceShift1]  advance
+			define [RJoinHeadForceShift1LR] : if [hasLG "arrow-lr-\(groupNameSuffix)"]         [CJoinHeadForce]        advance
+			define [RMiddleHead]            : if [hasLG "counter-arrow-r-\(groupNameSuffix)"]  [CJoinHeadMid] : if [hasLG "arrow-r-\(groupNameSuffix)"] [RJoinHeadForce] advance
+			define [RAntiHeadForce]         : if [hasLG "counter-arrow-r-\(groupNameSuffix)"]  [CAntiHeadForce]        advance
+			define [RAntiHeadForceShiftN1]  : if [hasLG "counter-arrow-r-\(groupNameSuffix)"]  [CAntiHeadForceShiftN1] advance
 
 			# Ambiguous
 			define [LAntiHeadAmbig] : if doLTAlt [LAntiHeadForce] advance

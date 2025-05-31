@@ -18,7 +18,6 @@ glyph-block Symbol-Arrow-Shared : begin
 		define arrowMidX : MosaicWidth / 2
 		define arrowSB : (MosaicWidth - arrowWidth) / 2
 		define arrowRSB : MosaicWidth - arrowSB
-		define o : O * 2
 
 		# Diagonal arrow params
 		define diagPropX : 1 / (2 ** (1 / 4))
@@ -40,13 +39,28 @@ glyph-block Symbol-Arrow-Shared : begin
 		# Special arrow params
 		define compactHeadSize : mix arrowSw arrowHeadSize 0.75
 		define doubleBarSpan : arrowHeadSize * 1.1
+		define doubleHeadGap : Math.max
+			1.4 * fine
+			0.15 * Width
+			0.125 * MosaicWidth
+
+		# Overlay spacing
+		define overlaySw   : AdviceStroke 6
+		define strokeSpan1 : mix halfArrowSw arrowHeadSize 0.6
+		define strokeSpan2 : mix (0.5 * doubleBarSpan) arrowHeadSize 0.75
+		define strokeSpan  : mix strokeSpan1 strokeSpan2 : clamp 0 1 : MosaicWidthScalar - 1
+		define dblArrSpace : arrowWidth - 2 * strokeSpan - 2 * terminal
+		define dhtArrSpace : Math.max (Width * 0.1) : arrowWidth - strokeSpan - doubleHeadGap - arrowHeadSize - 0.5 * fine
+		define dblArrSw : Math.min overlaySw : AdviceStrokeInSpace dblArrSpace HVContrast 2 1
+		define dhtArrSw : Math.min overlaySw : AdviceStrokeInSpace dhtArrSpace HVContrast 2 1
 
 		return [object
 			MosaicWidth MosaicWidthScalar
 			arrowHeight arrowWidth arrowTop arrowBot arrowMidX arrowSB arrowRSB
 			diagPropX diagPropY arrowDiagRSB arrowDiagSB arrowDiagBot arrowDiagTop
 			arrowHeadSize arrowSw halfArrowSw fine terminal halfTerminal
-			compactHeadSize doubleBarSpan]
+			compactHeadSize doubleBarSpan doubleHeadGap
+			overlaySw strokeSpan strokeSpan2 dblArrSpace dhtArrSpace dblArrSw dhtArrSw]
 
 	define [ArrowBarT dims] : namespace
 		local { .arrowSw arrowSw } dims
@@ -90,6 +104,7 @@ glyph-block Symbol-Arrow-Shared : begin
 	define [ArrowHeadT dims] : namespace
 		local {
 			.arrowHeadSize arrowHeadSize
+			.doubleHeadGap doubleHeadGap
 			.fine fine
 			.terminal terminal
 		} dims
@@ -164,6 +179,14 @@ glyph-block Symbol-Arrow-Shared : begin
 					flat 0 (-size)
 					curl 0   size
 
+		export : define [diamondShape x1 y1 x2 y2 size] : begin
+			return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				spiro-outline
+					corner o 0
+					corner size ( size - o)
+					corner (2 * size - o) 0
+					corner size (-size + o)
+
 		export : define [rectShape x1 y1 x2 y2 width _length _width2] : begin
 			local length : fallback _length width
 			return : new-glyph : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
@@ -171,9 +194,13 @@ glyph-block Symbol-Arrow-Shared : begin
 
 	define [ArrowT dims] : namespace
 		local {
+			.MosaicWidth MosaicWidth
+			.MosaicWidthScalar MosaicWidthScalar
 			.fine fine
 			.arrowSw arrowSw
 			.halfArrowSw halfArrowSw
+			.arrowHeadSize arrowHeadSize
+			.doubleHeadGap doubleHeadGap
 		} dims
 
 		export : define Head : ArrowHeadT dims
@@ -205,7 +232,7 @@ glyph-block Symbol-Arrow-Shared : begin
 		export : define [dblShape x1 y1 x2 y2 size _halfSw] : glyph-proc
 			local halfSw : fallback _halfSw halfArrowSw
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
-			local p : 1 - (size - o) / mag
+			local p : 1 - doubleHeadGap / mag
 			local x3 : mix x1 x2 p
 			local y3 : mix y1 y2 p
 
@@ -259,7 +286,7 @@ glyph-block Symbol-Arrow-Shared : begin
 			local halfSw : fallback _halfSw halfArrowSw
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
 			local p : 1 - size / mag
-			local p2 : 1 - (2 * size) / mag
+			local p2 : 1 - (size + doubleHeadGap) / mag
 			local x3 : mix x1 x2 p
 			local y3 : mix y1 y2 p
 			local x4 : mix x1 x2 p2
@@ -298,24 +325,36 @@ glyph-block Symbol-Arrow-Shared : begin
 			include : arrowFunc x1 y1 [mix x1 x2 p] [mix y1 y2 p] size _halfSw
 			include : Head.barShape x1 y1 [mix x1 x2 p2] [mix y1 y2 p2] size fine
 
+		export : define [toDiamondShapeT arrowFunc] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
+			local halfSw : fallback _halfSw halfArrowSw
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local diaSize : [Math.min 1.5 MosaicWidthScalar] * 0.75 * size
+			local p : 1 - (diaSize - 2 * o) / mag
+
+			include : arrowFunc x1 y1 [mix x1 x2 p] [mix y1 y2 p] size _halfSw
+			include : Head.diamondShape x1 y1 x2 y2 (0.5 * diaSize)
+
 	# MkArrow Functions
 	define [MkArrowT dims] : namespace
 		local { .MosaicWidth MosaicWidth .MosaicWidthScalar MosaicWidthScalar .arrowHeadSize arrowHeadSize } dims
 
-		export : define [single shape id unicode x1 y1 x2 y2 width headSize]
+		export : define [singleAnchorAt p] : lambda [shape id unicode x1 y1 x2 y2 width headSize]
 			create-glyph id unicode : glyph-proc
 				set-width [fallback width MosaicWidth]
-				set-base-anchor 'slash' [mix x1 x2 (2/5)] [mix y1 y2 (2/5)]
+				set-base-anchor 'slash' [mix x1 x2 p] [mix y1 y2 p]
 				include : shape x1 y1 x2 y2 [fallback headSize arrowHeadSize]
+		export : define single : singleAnchorAt : 2 / 5
 
-		export : define [double shape1 shape2 id unicode x1 y1 x2 y2]
+		export : define [doubleAnchorAt pAnchor _pMid] : lambda [shape1 shape2 id unicode x1 y1 x2 y2]
 			create-glyph id unicode : glyph-proc
 				set-width MosaicWidth
-				set-base-anchor 'slash' [mix x1 x2 (1/2)] [mix y1 y2 (1/2)]
-				local xm : mix x1 x2 0.5
-				local ym : mix y1 y2 0.5
+				local pMid : fallback _pMid pAnchor
+				local xm : mix x1 x2 pMid
+				local ym : mix y1 y2 pMid
+				set-base-anchor 'slash' [mix x1 x2 pAnchor] [mix y1 y2 pAnchor]
 				include : shape1 xm ym x1 y1 arrowHeadSize
 				include : shape2 xm ym x2 y2 arrowHeadSize
+		export : define double : doubleAnchorAt : 1 / 2
 
 	do "exports"
 		define MosaicWidth       Width

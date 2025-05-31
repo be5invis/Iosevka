@@ -133,23 +133,32 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
 
 * `disables` and `enables`: Optional, String Array, Cherry-picking ligation groups to be disabled or enabled. Valid values include:
 
-  - `center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`).
-  - `center-op-trigger-plus-minus-l`: Plus (`+`) and Minus (`-`) will trigger other operator characters at left to be centered.
-  - `center-op-trigger-plus-minus-r`: Plus (`+`) and Minus (`-`) will trigger other operator characters at right to be centered.
-  - `center-op-trigger-equal-l`: Equal (`=`) will trigger other operator characters at left to be centered.
-  - `center-op-trigger-equal-r`: Equal (`=`) will trigger other operator characters at right to be centered.
-  - `center-op-trigger-bar-l`: Bars (`|`) will trigger other operator characters at left to be centered.
-  - `center-op-trigger-bar-r`: Bars (`|`) will trigger other operator characters at right to be centered.
-  - `center-op-trigger-angle-inside`: Less (`<`) and Greater (`>`) will trigger other operator characters at inside to be centered.
-  - `center-op-trigger-angle-outside`: Less (`<`) and Greater (`>`) will trigger other operator characters at outside to be centered.
-  - `center-op-influence-dot`: Treat dot (`.`) as operator and perform chained centering.
-  - `center-op-influence-colon`: Treat colon (`:`) as operator and perform chained centering.
-  - `arrow-l`: Enable ligation set that forms left-pointing arrows.
-  - `arrow-r`: Enable ligation set that forms right-pointing arrows.
-  - `arrow-lr`: Enable ligation set that forms dual-pointing arrows.
-  - `counter-arrow-l`: Enable ligation that produces left-pointing counter-arrows.
-  - `counter-arrow-r`: Enable ligation that produces right-pointing counter-arrows.
-  - `trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols.
+  - `arrow-l`: Left-pointing arrows.
+  - `arrow-r`: Right-pointing arrows.
+  - `arrow-lr`: Dual-pointing arrows.
+  - `counter-arrow-l`: Left-pointing counter-arrows.
+  - `counter-arrow-r`: Right-pointing counter-arrows.
+  - `arrow-hyphen`: Arrows using hyphen-minus (`-`) as the rod.
+  - `arrow-equal`: Arrows using equal sign (`=`) as the rod.
+  - `arrow-wave`: Arrows using tilde (`~`) as the rod.
+  - `counter-arrow-hyphen`: Counter-arrows using hyphen-minus (`-`) as the rod.
+  - `counter-arrow-equal`: Counter-arrows using equal sign (`=`) as the rod.
+  - `counter-arrow-wave`: Counter-arrows using tilde (`~`) as the rod.
+  - `arrow-l-hyphen`: Left-pointing arrows with hyphen-minus (`-`) being the rod.
+  - `arrow-r-hyphen`: Right-pointing arrows with hyphen-minus (`-`) being the rod.
+  - `arrow-lr-hyphen`: Dual-pointing arrows with hyphen-minus (`-`) being the rod.
+  - `counter-arrow-l-hyphen`: Left-pointing counter-arrows with hyphen-minus (`-`) being the rod.
+  - `counter-arrow-r-hyphen`: Right-pointing counter-arrows with hyphen-minus (`-`) being the rod.
+  - `arrow-l-equal`: Left-pointing arrows with equal sign (`=`) being the rod.
+  - `arrow-r-equal`: Right-pointing arrows with equal sign (`=`) being the rod.
+  - `arrow-lr-equal`: Dual-pointing arrows with equal sign (`=`) being the rod.
+  - `counter-arrow-l-equal`: Left-pointing counter-arrows with equal sign (`=`) being the rod.
+  - `counter-arrow-r-equal`: Right-pointing counter-arrows with equal sign (`=`) being the rod.
+  - `arrow-l-wave`: Left-pointing arrows with tilde (`~`) being the rod.
+  - `arrow-r-wave`: Right-pointing arrows with tilde (`~`) being the rod.
+  - `arrow-lr-wave`: Dual-pointing arrows with tilde (`~`) being the rod.
+  - `counter-arrow-l-wave`: Left-pointing counter-arrows with tilde (`~`) being the rod.
+  - `counter-arrow-r-wave`: Right-pointing counter-arrows with tilde (`~`) being the rod.
   - `eqeqeq`: Enable special ligation for `===` with triple lines.
   - `eqeq`: Enable ligation for `==` and `===`.
   - `lteq`: Enable ligation for `<=` as less-than-or-equal sign.
@@ -166,6 +175,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `tildeeq`: Enable ligation for `~=` as inequality.
   - `eqslasheq`: Enable special triple-line ligation for `=/=` as inequality.
   - `slasheq`: Enable ligation for `/=` and `=/=` as inequality.
+  - `trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols.
   - `ltgt-ne`: Enable ligation for `<>` as inequality.
   - `ltgt-diamond`: Enable ligation for `<>` as diamond.
   - `ltgt-diamond-tag`: Enable ligation for `<>` as diamond-shaped empty HTML/XML tag.
@@ -174,13 +184,17 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `slash-asterisk`: Shift asterisk in `/*` and `*/`.
   - `kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`.
   - `kern-bars`: Move consecutive bars closer, like for `||`, `|||` and `//`.
-  - `logic`: Enable ligation for `/\` and `\/`.
-  - `llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
-  - `llggeq`: Enable ligation for `<<=`, `>>=` as shift operator.
-  - `html-comment`: Enable ligation for `<!--` and `<!---`.
-  - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow.
-  - `brace-bar`: Enable ligation for `{|` and `|}`.
-  - `brack-bar`: Enable ligation for `[|` and `|]`.
+  - `center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`).
+  - `center-op-trigger-plus-minus-l`: Plus (`+`) and Minus (`-`) will trigger other operator characters at left to be centered.
+  - `center-op-trigger-plus-minus-r`: Plus (`+`) and Minus (`-`) will trigger other operator characters at right to be centered.
+  - `center-op-trigger-equal-l`: Equal (`=`) will trigger other operator characters at left to be centered.
+  - `center-op-trigger-equal-r`: Equal (`=`) will trigger other operator characters at right to be centered.
+  - `center-op-trigger-bar-l`: Bars (`|`) will trigger other operator characters at left to be centered.
+  - `center-op-trigger-bar-r`: Bars (`|`) will trigger other operator characters at right to be centered.
+  - `center-op-trigger-angle-inside`: Less (`<`) and Greater (`>`) will trigger other operator characters at inside to be centered.
+  - `center-op-trigger-angle-outside`: Less (`<`) and Greater (`>`) will trigger other operator characters at outside to be centered.
+  - `center-op-influence-dot`: Treat dot (`.`) as operator and perform chained centering.
+  - `center-op-influence-colon`: Treat colon (`:`) as operator and perform chained centering.
   - `tilde-tilde`: Make 2 or more contiguous ASCII tildes (like `~~`, `~~~` and `~~~~`) connected as a wave line.
   - `tilde-tilde-tilde`: Make 3 or more contiguous ASCII tildes (like `~~~` and `~~~~`) connected as a wave line.
   - `minus-minus`: Make 2 or more contiguous hyphen-minuses (like `--`, `---` and `----`) connected as a straight solid line.
@@ -191,6 +205,13 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `underscore-underscore-underscore`: Make 3 or more contiguous underscores (like `___` and `____`) connected.
   - `hash-hash`: Make 2 or more contiguous hash signs (number signs) (like `##`, `###` and `####`) connected.
   - `hash-hash-hash`: Make 3 or more contiguous hash signs (number signs) (like `##` and `###`) connected.
+  - `logic`: Enable ligation for `/\` and `\/`.
+  - `llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
+  - `llggeq`: Enable ligation for `<<=`, `>>=` as shift operator.
+  - `html-comment`: Enable ligation for `<!--` and `<!---`.
+  - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow.
+  - `brace-bar`: Enable ligation for `{|` and `|}`.
+  - `brack-bar`: Enable ligation for `[|` and `|]`.
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
@@ -2579,9 +2600,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'straight'</code>, <code>cv76 = 1</code></td></tr>
-    <tr><td>More-straight Greek lower Lambda (<code>λ</code>) (default for Sans Upright, Sans Italic, Slab Italic)</td></tr>
+    <tr><td>More-straight Greek lower Lambda (<code>λ</code>) (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-straight-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-straight-turn.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'straight-turn'</code>, <code>cv76 = 2</code></td></tr>
-    <tr><td>Greek lower Lambda (<code>λ</code>) with straight upper and a tail turns leftward (default for Slab Upright)</td></tr>
+    <tr><td>Greek lower Lambda (<code>λ</code>) with straight upper and a tail turns leftward (default for Slab)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-tailed-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-tailed-turn.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'tailed-turn'</code>, <code>cv76 = 3</code></td></tr>
     <tr><td>More curly Greek lower Lambda (<code>λ</code>), with a tail turns leftward at top and a tail turns right at bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-curly.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'curly'</code>, <code>cv76 = 4</code></td></tr>

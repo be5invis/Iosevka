@@ -42,24 +42,26 @@ glyph-block Letter-Latin-Upper-Y : begin
 			HalfXStrand bodyType SLAB RightSB top Middle cross 0.1 0.4 0.28
 		include : tagged 'strokeVMid' : VBar.m Middle bot (cross + HalfStroke)
 		set-base-anchor 'overlay' Middle cross
+		set-base-anchor 'overlayOnExtension' Middle
+			[mix (bot + [if (slabType === SLAB-NONE || slabType === SLAB-BASE) 0 Stroke]) cross 0.5] + (Stroke - OverlayStroke) / 2
 
 	define [YenOverlayShape slabType] : glyph-proc
 		define { ks bot } : match slabType
 			([Just SLAB-ALL] || [Just SLAB-BASE])  { 0.25 Stroke }
 			otherwise                              { 0    0      }
 		include : HOverlayBar SB RightSB ([mix bot [YCrossPos CAP 0] 0.5] - OverlayStroke * ks)
-		include : HOverlayBar SB RightSB [mix bot [YCrossPos CAP 0] 1.0]
+		include : HOverlayBar SB RightSB  [mix bot [YCrossPos CAP 0] 1.0]
 
 	define [YHookLeftHookedStroke top bot cross] : dispiro
 		widths.lhs
-		straight.right.start (SB - TailX / 3) (top - Stroke - O)
+		straight.right.start (SB - TailX / 3) (top - O - Stroke)
 		g4 (SB + TailX / 3) (top - TailY) [widths.lhs : AdviceStroke 2.75]
 		quadControls 0.55 0.7 32 unimportant
 		g4 (Middle - [HSwToV HalfStroke]) cross [widths.lhs : AdviceStroke 3.5]
 
 	define [YHookRightHookedStroke top bot cross] : dispiro
 		widths.rhs
-		straight.left.start (RightSB + TailX / 3) (top - Stroke - O)
+		straight.left.start (RightSB + TailX / 3) (top - O - Stroke)
 		g4 (RightSB - TailX / 3) (top - TailY) [widths.rhs : AdviceStroke 2.75]
 		quadControls 0.55 0.7 32 unimportant
 		g4 (Middle + [HSwToV HalfStroke]) cross [widths.rhs : AdviceStroke 3.5]
@@ -71,7 +73,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 
 	define [UpsilonHookedSymbolShape] : with-params [top bot [cross : YCrossPos top bot]] : glyph-proc
 		include : VBar.m Middle bot (cross + HalfStroke)
-		include : YHookLeftHookedStroke top bot cross
+		include : YHookLeftHookedStroke  top bot cross
 		include : YHookRightHookedStroke top bot cross
 
 	define YConfig : object
@@ -92,8 +94,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 
 		create-glyph "grek/Upsilon.\(suffix)" : glyph-proc
 			include [refer-glyph "Y.\(suffix)"] AS_BASE ALSO_METRICS
-			include : SetGrekUpperTonos
-				if (slabType === SLAB-NONE || slabType === SLAB-BASE) OX (OX - SideJut)
+			include : SetGrekUpperTonos (OX - [if (slabType === SLAB-NONE || slabType === SLAB-BASE) 0 SideJut])
 
 		create-glyph "smcpY.\(suffix)" : glyph-proc
 			include : MarkSet.e
@@ -129,10 +130,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 	link-reduced-variant 'Y/sansSerif' 'Y' MathSansSerif
 	select-variant 'smcpY' 0x28F (follow -- 'Y')
 	select-variant 'YHookTop' 0x1B3 (follow -- 'Y')
-	select-variant 'Y/LambdaBase' (shapeFrom -- 'Y')
-	CreateAccentedComposition 'YBar/LambdaBase' null 'Y/LambdaBase' 'barOver'
-
-	CreateTurnedLetter 'turnY/sansSerif' 0x2144 'Y/sansSerif' HalfAdvance (CAP / 2)
+	CreateAccentedComposition 'YStrokeBottom' null 'Y' 'barOverOnExtension'
 
 	select-variant 'grek/Upsilon' 0x3A5 (follow -- 'Y')
 	link-reduced-variant 'grek/Upsilon/sansSerif' 'grek/Upsilon' MathSansSerif (follow -- 'Y/sansSerif')
@@ -143,18 +141,19 @@ glyph-block Letter-Latin-Upper-Y : begin
 	CreateAccentedComposition 'cyrl/Uo' 0x4B0 'cyrl/Ue' 'barOver'
 	CreateAccentedComposition 'cyrl/uo' 0x4B1 'cyrl/ue' 'barOver'
 
-	create-glyph 'YStroke/Overlay' : HOverlayBar ([mix 0 SB 0.5]) ([mix Width RightSB 0.5]) [mix 0 CAP 0.75]
+	create-glyph 'YStroke/Overlay' : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix 0 CAP 0.75]
 	derive-composites 'YStroke' 0x24E 'Y' 'YStroke/Overlay'
 
-	CreateTurnedLetter 'latn/Lambda'       0xA7DA 'Y/LambdaBase'    HalfAdvance (CAP / 2)
-	CreateTurnedLetter 'latn/LambdaStroke' 0xA7DC 'YBar/LambdaBase' HalfAdvance (CAP / 2)
+	CreateTurnedLetter 'latn/Lambda'       0xA7DA 'Y'             HalfAdvance (CAP / 2)
+	CreateTurnedLetter 'latn/LambdaStroke' 0xA7DC 'YStrokeBottom' HalfAdvance (CAP / 2)
+	CreateTurnedLetter 'turnY/sansSerif'   0x2144 'Y/sansSerif'   HalfAdvance (CAP / 2)
 
 	select-variant 'currency/yenSign' 0xA5 (follow -- 'Y')
 
 	# Blackboard
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/Y' 0x1D550 : glyph-proc
-		local yCross : CAP * 0.4
+		local yCross : YCrossPos CAP 0
 
 		include : MarkSet.capital
 		include : HBar.t SB (SB + BBD) CAP BBS
@@ -162,15 +161,15 @@ glyph-block Letter-Latin-Upper-Y : begin
 			Rect CAP 0 (-Width) (2 * Width)
 			union
 				difference
-					ExtLineCenter 1 BBS  SB         CAP (Middle - BBD / 2) yCross
+					ExtLineCenter 1 BBS  SB        CAP (Middle - BBD / 2) yCross
 					Rect CAP 0 (Middle - BBD / 2 + [HSwToV : 0.5 * BBS]) (Width * 2)
 				difference
-					ExtLineCenter 1 BBS  (SB + BBD) CAP (Middle + BBD / 2) yCross
+					ExtLineCenter 1 BBS (SB + BBD) CAP (Middle + BBD / 2) yCross
 					Rect CAP 0 (Middle + BBD / 2 + [HSwToV : 0.5 * BBS]) (Width * 2)
 
 		include : intersection
 			Rect CAP yCross (-Width) (2 * Width)
-			ExtLineCenter 1 BBS  RightSB CAP (Middle + BBD / 2) yCross
+			ExtLineCenter 1 BBS RightSB CAP (Middle + BBD / 2) yCross
 
 		include : HBar.b (Middle - BBD / 2) (Middle + BBD / 2) 0 BBS
 		include : union
