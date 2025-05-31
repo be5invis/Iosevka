@@ -2600,9 +2600,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'straight'</code>, <code>cv76 = 1</code></td></tr>
-    <tr><td>More-straight Greek lower Lambda (<code>λ</code>) (default for Sans Upright, Sans Italic, Slab Italic)</td></tr>
+    <tr><td>More-straight Greek lower Lambda (<code>λ</code>) (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-straight-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-straight-turn.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'straight-turn'</code>, <code>cv76 = 2</code></td></tr>
-    <tr><td>Greek lower Lambda (<code>λ</code>) with straight upper and a tail turns leftward (default for Slab Upright)</td></tr>
+    <tr><td>Greek lower Lambda (<code>λ</code>) with straight upper and a tail turns leftward (default for Slab)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-tailed-turn.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-tailed-turn.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'tailed-turn'</code>, <code>cv76 = 3</code></td></tr>
     <tr><td>More curly Greek lower Lambda (<code>λ</code>), with a tail turns leftward at top and a tail turns right at bottom-right</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-lambda-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-lambda-curly.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-lambda = 'curly'</code>, <code>cv76 = 4</code></td></tr>
