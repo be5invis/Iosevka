@@ -11,7 +11,7 @@ glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateAccentedComposition
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors
 
-	define [ISeriflessShape df top] : glyph-proc
+	define [IShape df top] : glyph-proc
 		include : VBar.m df.middle 0 top
 
 	define ISerifs : namespace
@@ -28,23 +28,24 @@ glyph-block Letter-Latin-Upper-I : begin
 		'straight'     { para.advanceScaleI  ISerifs.None  }
 		'serifless'    { para.advanceScaleII ISerifs.None  }
 		'serifed'      { para.advanceScaleI  ISerifs.Long  }
-		'shortSerifed' { para.advanceScaleI  ISerifs.Short }
+		'shortSerifed' { para.advanceScaleII ISerifs.Short }
 
 	foreach { suffix { adws Serifs } } [Object.entries UpperIConfig] : do
 		create-glyph "I.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.capital
-			include : ISeriflessShape df CAP
+			include : IShape df CAP
 			include : Serifs df CAP
 
 		create-glyph "grek/Iota.\(suffix)" : glyph-proc
+			local df : DivFrame adws
 			include [refer-glyph "I.\(suffix)"] AS_BASE ALSO_METRICS
-			include : SetGrekUpperTonos 0
+			include : SetGrekUpperTonos [Math.min 0 : df.middle - [if (Serifs != no-shape) Jut : HSwToV HalfStroke] - SB]
 
 		create-glyph "ISideways.\(suffix)" : glyph-proc
 			local df : DivFrame (XH / Width) 2 (XH * 0.1 / SB)
 			include : PointingTo Width XH Width 0 : function [] : glyph-proc
-				include : ISeriflessShape df RightSB
+				include : IShape df RightSB
 				include : Serifs df RightSB
 				include : ApparentTranslate 0 (0.5 * SB)
 
@@ -53,7 +54,7 @@ glyph-block Letter-Latin-Upper-I : begin
 			include : df.markSet.capital
 			local top : CAP + (Ascender - XH)
 			include : ExtendAboveBaseAnchors top
-			include : ISeriflessShape df top
+			include : IShape df top
 			include : Serifs df top
 
 	select-variant 'I' 'I'
@@ -72,7 +73,7 @@ glyph-block Letter-Latin-Upper-I : begin
 	create-glyph 'smcpI' 0x26A : glyph-proc
 		local df : include : DivFrame para.advanceScaleI
 		include : df.markSet.e
-		include : ISeriflessShape df XH
+		include : IShape df XH
 		include : ISerifs.Impl df XH MidJutCenter
 
 	CreateAccentedComposition 'smcpIBarOver' 0x1D7B 'smcpI' 'barOver'
