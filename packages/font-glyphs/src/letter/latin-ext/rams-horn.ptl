@@ -10,79 +10,95 @@ glyph-block Letter-Latin-Rams-Horn : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
 
-	define [LatinGammaShape bottom top] : glyph-proc
+	define [LatinGammaShape df top bottom] : glyph-proc
 		local hf : [AdviceStroke 4] / 2
-		local d : hf * 2 + Width * 0.05
+		local d : hf * 2 + df.width * 0.05
 
 		include : dispiro
 			widths.center
-			g4 (SB + [HSwToV HalfStroke] + O) top [heading Downward]
+			g4 (df.leftSB + [HSwToV HalfStroke] + O) top [heading Downward]
 			quadControls 1 0.7 16
-			g4 (Middle + d - hf) (bottom + d * (1 - TanSlope * 0.5)) [widths.center : 2 * hf]
+			g4 (df.middle + d - hf) (bottom + d * (1 - TanSlope * 0.5)) [widths.center : 2 * hf]
 			arch.rhs bottom (sw -- 2 * hf)
-			g4 (Middle - d + hf) (bottom + d * (1 + TanSlope * 0.5)) [widths.center : 2 * hf]
+			g4 (df.middle - d + hf) (bottom + d * (1 + TanSlope * 0.5)) [widths.center : 2 * hf]
 			quadControls 0 0.3 16
-			g4 (RightSB - [HSwToV HalfStroke] - O) top [widths.heading HalfStroke HalfStroke Upward]
+			g4 (df.rightSB - [HSwToV HalfStroke] - O) top [widths.heading HalfStroke HalfStroke Upward]
 
 	create-glyph 'latn/gamma' 0x263 : glyph-proc
-		include : MarkSet.p
-		include : LatinGammaShape Descender XH
+		local df : include : DivFrame 1
+		include : df.markSet.p
+		include : LatinGammaShape df XH Descender
 		if SLAB : begin
-			local sf : SerifFrame.fromDf [DivFrame 1] XH Descender
-			include : if para.isItalic sf.lt.outer [composite-proc sf.lt.full sf.rt.full]
+			local sf : SerifFrame.fromDf df XH Descender
+			include : if para.isItalic sf.lt.outer : composite-proc sf.lt.full sf.rt.full
 
 	create-glyph 'latn/Gamma' 0x194 : glyph-proc
-		include : MarkSet.capDesc
-		include : LatinGammaShape Descender CAP
+		local df : include : DivFrame 1
+		include : df.markSet.capDesc
+		include : LatinGammaShape df CAP Descender
 		if SLAB : begin
-			local sf : SerifFrame.fromDf [DivFrame 1] CAP Descender
+			local sf : SerifFrame.fromDf df CAP Descender
 			include : composite-proc sf.lt.full sf.rt.full
 
-	define [RamsHornShape fFill bottom top] : glyph-proc
+	define [RamsHornShape df top bottom fFill] : glyph-proc
 		local k1 0.625
 		local k2 0.7
 		local kIntersection 0.15
-		local d : 0.25 * (RightSB - SB) * k1 * TanSlope
+
+		local lExt : df.leftSB  + 0.75 * OX
+		local rExt : df.rightSB - 0.75 * OX
+
+		local dfLoop : DivFrame 1
+
+		local lInner : Math.max (lExt + TINY) : df.middle - (dfLoop.rightSB - dfLoop.leftSB) / 2
+		local rInner : Math.min (rExt - TINY) : df.middle + (dfLoop.rightSB - dfLoop.leftSB) / 2
+
+		local d : 0.25 * (rInner - lInner) * k1 * TanSlope
 
 		local sw   : AdviceStroke : if SLAB 3.50 2.75
 		local fine : AdviceStroke : if SLAB 3.75 3.50
-		local coFine : mix sw fine (kIntersection / k2)
+		local coFine : mix sw fine : kIntersection / k2
 		local fillOffset : sw * 0.25
 
 		include : union
 			dispiro
 				widths.rhs sw
-				straight.right.start SB top [heading Rightward]
-				g4 Middle [mix top bottom kIntersection] [widths.rhs coFine]
-				g4.down.mid [mix Middle RightSB k1] ([mix top bottom k2] - d) [widths.rhs fine]
+				flat lExt   top [heading Rightward]
+				curl lInner top [heading Rightward]
+				g4 df.middle [mix top bottom kIntersection] [widths.rhs coFine]
+				g4.down.mid  [mix df.middle rInner k1] ([mix top bottom k2] - d) [widths.rhs fine]
 				arch.rhs bottom (sw -- fine)
-				g4.up.mid [mix Middle SB k1] ([mix top bottom k2] + d)
-				g4 Middle [mix top bottom kIntersection] [widths.rhs coFine]
-				straight.right.end RightSB top [widths.rhs.heading sw Rightward]
+				g4.up.mid    [mix df.middle lInner k1] ([mix top bottom k2] + d)
+				g4 df.middle [mix top bottom kIntersection] [widths.rhs coFine]
+				flat rInner top [widths.rhs.heading sw Rightward]
+				curl rExt   top [heading Rightward]
 			if fFill
 				then : spiro-outline
-					corner Middle ([mix top bottom kIntersection] - fillOffset)
-					g4.down.mid ([mix Middle RightSB k1] - fillOffset) ([mix top bottom k2] - d)
-					g4.left.mid [arch.adjust-x.bot Middle (sw -- fine)] (bottom + fillOffset)
-					g4.up.mid ([mix Middle SB k1] + fillOffset) ([mix top bottom k2] + d)
+					corner df.middle ([mix top bottom kIntersection] - fillOffset)
+					g4.down.mid ([mix df.middle rInner k1] - fillOffset) ([mix top bottom k2] - d)
+					g4.left.mid [arch.adjust-x.bot df.middle (sw -- fine)] (bottom + fillOffset)
+					g4.up.mid   ([mix df.middle lInner k1] + fillOffset) ([mix top bottom k2] + d)
 					close
 				else : no-shape
 
 		if SLAB : begin
-			local swSlab : AdviceStroke 4.5
-			include : VSerif.dl SB      (top - sw) (VJut * (sw / Stroke) - sw) swSlab
-			include : VSerif.dr RightSB (top - sw) (VJut * (sw / Stroke) - sw) swSlab
+			local swSlab : Math.min VJutStroke : AdviceStroke 4.5 df.adws
+			include : VSerif.dl lExt (top - sw) (VJut * (sw / Stroke) - sw) swSlab
+			include : VSerif.dr rExt (top - sw) (VJut * (sw / Stroke) - sw) swSlab
 
 	create-glyph 'ramshorn' 0x264 : glyph-proc
-		include : MarkSet.e
-		include : RamsHornShape false 0 XH
+		local df : include : DivFrame : if SLAB para.advanceScaleT 1
+		include : df.markSet.e
+		include : RamsHornShape df XH 0 false
 
 	create-glyph 'Ramshorn' 0xA7CB : glyph-proc
-		include : MarkSet.capital
-		include : RamsHornShape false 0 CAP
+		local df : include : DivFrame : if SLAB para.advanceScaleT 1
+		include : df.markSet.capital
+		include : RamsHornShape df CAP 0 false
 
 	### Ayin
 	create-glyph 'latinAyin' 0x1D25 : glyph-proc
-		include : MarkSet.e
-		include : RamsHornShape true 0 XH
-		include : FlipAround Middle (XH / 2)
+		local df : include : DivFrame : if SLAB para.advanceScaleT 1
+		include : df.markSet.e
+		include : RamsHornShape df XH 0 true
+		include : FlipAround df.middle (XH / 2)

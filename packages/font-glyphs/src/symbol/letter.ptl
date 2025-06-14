@@ -20,7 +20,7 @@ glyph-block Symbol-Currency : begin
 		local radius : (RightSB - SB) / 2
 		include : OShape (SymbolMid + radius * 0.9) (SymbolMid - radius * 0.9) (Middle - radius * 0.9) (Middle + radius * 0.9) sw
 		foreach j [range 0 4] : begin
-			local angle : Math.PI * (j / 2 + 1 / 4)
+			local angle : Math.PI * (j / 2 + 0.25)
 			include : dispiro
 				widths.center sw
 				flat (Middle + radius * 0.87 * [Math.cos angle]) (SymbolMid + radius * 0.87 * [Math.sin angle])
@@ -74,7 +74,7 @@ glyph-block Symbol-Currency : begin
 					flat xBarLeft 0 [heading Rightward]
 					curl [mix xBarLeft xRight 0.5] 0
 					archv
-					straight.up.end (xRight - OX) Hook [heading Upward]
+					straight.up.end (xRight - OXHook) Hook [heading Upward]
 				VBar.l xBarLeft 0 CAP
 			include : LetterObliqueBarOverlay.l xBarLeft (CAP * 0.37)
 			include : LetterObliqueBarOverlay.l xBarLeft (CAP * 0.60 - OverlayStroke * 0.25)
@@ -114,14 +114,10 @@ glyph-block Symbol-Currency : begin
 	create-glyph 'currency/manatSign' 0x20BC : glyph-proc
 		local df : include : DivFrame para.advanceScaleT 3
 
-		include : VBar.m df.middle [if SLAB df.mvs 0] (XH + LongVJut - QuarterStroke) df.mvs
-		include : dispiro
-			widths.rhs df.mvs
-			flat df.leftSB  0 [heading Upward]
-			curl df.leftSB  [if (df.smallArchDepthA + df.smallArchDepthB < XH) (XH - df.smallArchDepthA) : mix XH 0 (df.smallArchDepthA / (df.smallArchDepthA + df.smallArchDepthB))]
-			arch.rhs XH (sw -- df.mvs)
-			flat df.rightSB [if (df.smallArchDepthA + df.smallArchDepthB < XH) (XH - df.smallArchDepthB) : mix XH 0 (df.smallArchDepthB / (df.smallArchDepthA + df.smallArchDepthB))]
-			curl df.rightSB 0 [heading Downward]
+		include : UShape df XH 0 df.mvs df.smallArchDepthA df.smallArchDepthB
+		include : FlipAround df.middle (XH / 2)
+
+		include : VBar.m df.middle [if SLAB df.mvs 0] (XH + LongVJut - QuarterStroke) [Math.min VJutStroke df.mvs]
 
 		if SLAB : begin
 			local sf : SerifFrame.fromDf df XH 0 (swSerif -- df.mvs)
@@ -133,9 +129,10 @@ glyph-block Symbol-Currency : begin
 		local fine : Math.min OverlayStroke
 			AdviceStrokeInSpace gap HVContrast 3 1 1
 		local offset : (gap - [HSwToV : 2 * fine]) / 6
+		local barTop : CAP + (Ascender - XH) / 2
 		local barBot : Math.max
 			CAP * 0.5
-			CAP - df.mvs + Descender
+			[mix CAP barTop (-2)] - df.mvs
 
 		include : HBar.b df.leftSB df.rightSB 0 df.mvs
 		include : dispiro
@@ -146,8 +143,8 @@ glyph-block Symbol-Currency : begin
 			arcvh
 			flat df.middle  (df.mvs - df.shoulderFine) [widths.lhs df.shoulderFine]
 			curl df.rightSB (df.mvs - df.shoulderFine) [heading Rightward]
-		include : VBar.r (df.middle - offset) barBot (CAP - Descender / 2) fine
-		include : VBar.l (df.middle + offset) barBot (CAP - Descender / 2) fine
+		include : VBar.r (df.middle - offset) barBot barTop fine
+		include : VBar.l (df.middle + offset) barBot barTop fine
 
 glyph-block Symbol-Currency-Letter-Derived : begin
 	glyph-block-import CommonShapes
@@ -375,14 +372,15 @@ glyph-block Symbol-Letter : begin
 			include : dispiro
 				flat (Middle + [HSwToV HalfStroke]) 0 [widths.lhs : AdviceStroke 3]
 				curl (RightSB - O) [mix 0 CAP 0.375]
+			if SLAB : include : HSerif.mt Middle CAP MidJutCenter
 
 glyph-block Symbol-Cyrl-Thousands : begin
 	glyph-block-import CommonShapes
 	create-glyph 'cyrlThousandsSign' 0x482 : glyph-proc
 		define fine : AdviceStroke 3
 		include : ExtLineCenter (-0.1) fine SB Descender RightSB XH
-		include : ExtLineCenter (-0.1) fine [mix SB RightSB (+0.1)] [mix Descender XH 0.8] [mix SB RightSB 1.1] [mix Descender XH 0.5]
-		include : ExtLineCenter (-0.1) fine [mix SB RightSB (-0.1)] [mix Descender XH 0.5] [mix SB RightSB 0.9] [mix Descender XH 0.2]
+		include : ExtLineCenter (-0.1) fine [mix SB RightSB (+0.1)] [mix Descender XH 0.8] [mix SB RightSB (+1.1)] [mix Descender XH 0.5]
+		include : ExtLineCenter (-0.1) fine [mix SB RightSB (-0.1)] [mix Descender XH 0.5] [mix SB RightSB (+0.9)] [mix Descender XH 0.2]
 
 glyph-block Symbol-Letter-Phonetic : begin
 	glyph-block-import CommonShapes
