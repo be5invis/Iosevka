@@ -1,5 +1,16 @@
 ## Modifications since last major version
 
+### 33.2.6
+
+* Make certain characters slightly wider under Quasi-Proportional. Affected characters:
+  - CYRILLIC CAPITAL LETTER ZHE (`U+0416`).
+  - CYRILLIC CAPITAL LETTER ZHE WITH DESCENDER (`U+0496`).
+  - CYRILLIC CAPITAL LETTER ZHE WITH BREVE (`U+04C1`).
+  - CYRILLIC CAPITAL LETTER ZHE WITH DIAERESIS (`U+04DC`).
+  - CYRILLIC CAPITAL LETTER DZZHE (`U+052A`).
+  - CYRILLIC CAPITAL LETTER ZHWE (`U+A684`).
+
+
 ### 33.2.5
 
 * Refine shape of the following characters:
