@@ -47,7 +47,7 @@ glyph-block Letter-Latin-Lower-A : begin
 			local sw : fallback _stroke [ADoubleStoreyStroke df]
 			return : ADoubleStoreyHookAndBarT spiro-outline df hookStyle y0 sw
 
-		define [ADoubleStoreyArcT df sink kind rise stroke] : glyph-proc
+		define [ADoubleStoreyArcT df sink kind rise stroke exd] : glyph-proc
 			local isMask : sink == spiro-outline
 			local bartop : XH * OverlayPos * 1.02 + stroke * 0.425
 			local bowlArcY1 : YSmoothMidL 0 bartop SmallArchDepthA SmallArchDepthB
@@ -64,8 +64,8 @@ glyph-block Letter-Latin-Lower-A : begin
 				match kind
 					0 : list
 						arch.lhs 0 (sw -- stroke) (swAfter -- ShoulderFine)
-						straight.up.end   (df.rightSB - [HSwToV stroke] + [HSwToV ShoulderFine]) (SmallArchDepthB * 0.9) [widths.lhs ShoulderFine]
-						if [not isMask] {} {[ corner (df.rightSB - [HSwToV stroke] + [HSwToV ShoulderFine]) bartop ]}
+						straight.up.end   (df.rightSB - exd - [HSwToV stroke] + [HSwToV ShoulderFine]) (SmallArchDepthB * 0.9) [widths.lhs ShoulderFine]
+						if [not isMask] {} {[ corner (df.rightSB - exd - [HSwToV stroke] + [HSwToV ShoulderFine]) bartop ]}
 					1 : list
 						arch.lhs 0 (sw -- stroke) (blendPost -- {})
 						g4  df.rightSB rise
@@ -74,10 +74,12 @@ glyph-block Letter-Latin-Lower-A : begin
 						flat df.rightSB bowlArcY2
 						curl df.rightSB ([Math.max bowlArcY2 rise] + stroke * TanSlope + 1) [heading Upward]
 
-		export : define [Arc df kind rise _sw] : ADoubleStoreyArcT df dispiro kind rise
+		export : define [Arc df kind rise _sw _exd] : ADoubleStoreyArcT df dispiro kind rise
 			fallback _sw [ADoubleStoreyStroke df]
-		export : define [ArcMask df kind rise _sw] : ADoubleStoreyArcT df spiro-outline kind rise
+			fallback _exd 0
+		export : define [ArcMask df kind rise _sw _exd] : ADoubleStoreyArcT df spiro-outline kind rise
 			fallback _sw [ADoubleStoreyStroke df]
+			fallback _exd 0
 
 		export : define [Serifless df hookStyle sw] : union
 			HookAndBar df hookStyle 0 sw
@@ -135,9 +137,9 @@ glyph-block Letter-Latin-Lower-A : begin
 			VBar.r (RightSB - BBD) 0 XH BBS
 		include : difference
 			union
-				DoubleStorey.Arc df 0 0 BBS
+				DoubleStorey.Arc df 0 0 BBS BBD
 				intersection
-					DoubleStorey.ArcMask df 0 0 BBS
+					DoubleStorey.ArcMask df 0 0 BBS BBD
 					VBar.l (SB + OX + BBD) 0 XH BBS
 			Rect XH 0 (RightSB - BBD) Width
 		include : HBar.b (RightSB - BBD) RightSB 0 BBS
