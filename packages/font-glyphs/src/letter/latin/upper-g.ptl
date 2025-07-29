@@ -25,7 +25,9 @@ glyph-block Letter-Latin-Upper-G : begin
 	define SLAB-LETTER        1
 	define SLAB-INWARD        2
 
-	define [GShape toothShape slabShape crossBarShape top ada adb _hook _yBar] : glyph-proc
+	define [GShape toothShape slabShape crossBarShape top _ada _adb _hook _yBar] : glyph-proc
+		local ada : fallback _ada ArchDepthA
+		local adb : fallback _adb ArchDepthB
 		local hook : fallback _hook Hook
 		local yBar : fallback _yBar (top * 0.52 + QuarterStroke)
 		local fine ShoulderFine
@@ -35,36 +37,34 @@ glyph-block Letter-Latin-Upper-G : begin
 			[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs RightSB top Stroke hook
 			__ : list [widths.lhs] [g4 RightSB (top - hook)] [hookstart top]
 
-		knots.push
-			flat (SB + OX) (top - ada)
-			curl (SB + OX) adb
+		knots.push [flatside.ld SB 0 top ada adb]
 
 		match toothShape
 			[Just TOOTHED] : knots.push
 				arch.lhs 0 (swAfter -- fine)
-				straight.up.end (RightSB - [HSwToV (Stroke - fine)]) ada [widths.lhs.heading fine Upward]
+				straight.up.end (RightSB - [HSwToV : Stroke - fine]) ada [widths.lhs.heading fine Upward]
 			[Just TOOTHLESS-CORNER] : knots.push
 				arch.lhs 0 (blendPost -- {})
 				g4   RightSB  DToothlessRise
 			[Just TOOTHLESS-ROUNDED] : knots.push
 				arch.lhs 0
-				flat RightSB ada
+				flat RightSB [Math.min ada : yBar - TINY]
 				curl RightSB yBar [heading Upward]
 
 		include : union
 			dispiro.apply null knots
-			if (slabShape === SLAB-LETTER) [ArcStartSerif.R RightSB top Stroke hook] [glyph-proc]
+			if (slabShape === SLAB-LETTER) [ArcStartSerif.R       RightSB top Stroke hook] [glyph-proc]
 			if (slabShape === SLAB-INWARD) [ArcStartSerif.InwardR RightSB top Stroke hook] [glyph-proc]
 			match crossBarShape
-				[Just CROSSBAR-NONE]   : glyph-proc
-				[Just CROSSBAR-HOOKED] : HBar.t Middle RightSB yBar
+				[Just CROSSBAR-HOOKED] : HBar.t Middle      RightSB              yBar
 				[Just CROSSBAR-CAPPED] : HBar.t Middle [mix RightSB Width 0.625] yBar
+				__ : glyph-proc
 			match toothShape
 				[Just TOOTHED] : union
-					VBar.r RightSB (ada + O) yBar
-					VBar.r RightSB ada 0 [Math.max (Stroke - fine / 2) : AdviceStroke 5]
-				[Just TOOTHLESS-CORNER]  : VBar.r RightSB DToothlessRise yBar
-				[Just TOOTHLESS-ROUNDED] : glyph-proc
+					VBar.r RightSB ([Math.min ada : yBar - TINY] + O) yBar
+					VBar.r RightSB ([Math.min ada : yBar - TINY] + 0) 0 [Math.max (Stroke - fine / 2) : AdviceStroke 5]
+				[Just TOOTHLESS-CORNER] : VBar.r RightSB DToothlessRise yBar
+				__ : glyph-proc
 
 	create-glyph 'GBarOverlay' : LetterBarOverlay.r.in
 		x     -- RightSB
@@ -89,19 +89,19 @@ glyph-block Letter-Latin-Upper-G : begin
 	foreach { suffix { shape slabType crossBarShape } } [Object.entries GConfig] : begin
 		create-glyph "G.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : GShape shape slabType crossBarShape CAP ArchDepthA ArchDepthB
+			include : GShape shape slabType crossBarShape CAP
 		create-glyph "GHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : GShape shape slabType crossBarShape CAP ArchDepthA ArchDepthB
+			include : GShape shape slabType crossBarShape CAP
 			include : TopHook.toRight.arcStart RightSB CAP Hook
 			include : ExtendAboveBaseAnchors (CAP + Ascender - XH)
 			include : LeaningAnchor.Above.VBar.r RightSB
 		create-glyph "smcpG.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : GShape shape slabType crossBarShape XH ArchDepthA ArchDepthB
+			include : GShape shape slabType crossBarShape XH
 		create-glyph "smcpGHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : GShape shape slabType crossBarShape XH ArchDepthA ArchDepthB
+			include : GShape shape slabType crossBarShape XH
 			include : TopHook.toRight.arcStart RightSB XH Hook
 			include : ExtendAboveBaseAnchors Ascender
 			include : LeaningAnchor.Above.VBar.r RightSB
@@ -147,10 +147,9 @@ glyph-block Letter-Latin-Upper-G : begin
 		widths.lhs BBS
 		g4 (RightSB - offset) (top - Hook)
 		hookstart (top - offset) (sw -- BBS)
-		flat (SB + OX + offset) (top - ada)
-		curl (SB + OX + offset) adb
+		flatside.ld (SB + offset) 0 top ada adb
 		arch.lhs offset (sw -- BBS)
-		flat (xTerm - offset) ada
+		flat (xTerm - offset) [Math.min ada : yTerm - TINY]
 		curl (xTerm - offset) yTerm [heading Upward]
 
 	create-glyph 'mathbb/G' 0x1D53E : glyph-proc
