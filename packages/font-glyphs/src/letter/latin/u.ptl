@@ -17,63 +17,61 @@ glyph-block Letter-Latin-U : begin
 	define [UShapeGroup ada adb] : namespace
 		export : define [Toothed df top sw fHookLeft fShortLeg] : glyph-proc
 			set-base-anchor 'trailing' df.rightSB 0
+			local yTL : top - [if fHookLeft (TailY + HalfStroke) 0]
+			local yTR : if fShortLeg [mix [Math.min ada : YSmoothMidR top 0 ada adb] top 0.5] top
 			include : uBowl.shape
-				top    -- (top - [if fHookLeft (TailY + HalfStroke) 0])
-				bottom -- 0
-				left   -- df.leftSB
-				right  -- (df.rightSB - [HSwToV sw])
-				stroke -- sw
-				fine   -- ShoulderFine
-				ada    -- ada
-				adb    -- adb
-			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB (adb + TINY) top (sw -- sw)
-			include : tagged 'strokeR' : VBar.r df.rightSB 0 [if fShortLeg [mix ada top 0.5] top] sw
+				top     -- yTL
+				bottom  -- 0
+				left    -- df.leftSB
+				right   -- (df.rightSB - [HSwToV sw])
+				stroke  -- sw
+				fine    -- ShoulderFine
+				ada     -- ada
+				adb     -- adb
+				rightY0 -- [Math.min (ada + TINY) (yTR - 0)]
+			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB [Math.min (adb + TINY) (yTL - 0)] top (sw -- sw)
+			include : tagged 'strokeR' : VBar.r df.rightSB 0 yTR sw
 
 		export : define [Tailed df top sw fHookLeft fShortLeg] : glyph-proc
 			set-base-anchor 'trailing' (df.rightSB + SideJut) 0
+			local yTL : top - [if fHookLeft (TailY + HalfStroke) 0]
+			local yTR : if fShortLeg [mix [Math.min ada : YSmoothMidR top 0 ada adb] top 0.5] top
 			include : uBowl.shape
-				top    -- (top - [if fHookLeft (TailY + HalfStroke) 0])
-				bottom -- 0
-				left   -- df.leftSB
-				right  -- (df.rightSB - [HSwToV sw])
-				stroke -- sw
-				fine   -- ShoulderFine
-				ada    -- ada
-				adb    -- adb
-			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB (adb + TINY) top (sw -- sw)
-			include : tagged 'strokeR' : RightwardTailedBar df.rightSB 0 [if fShortLeg [mix ada top 0.5] top] (sw -- sw)
+				top     -- yTL
+				bottom  -- 0
+				left    -- df.leftSB
+				right   -- (df.rightSB - [HSwToV sw])
+				stroke  -- sw
+				fine    -- ShoulderFine
+				ada     -- ada
+				adb     -- adb
+				rightY0 -- [Math.min (ada + TINY) (yTR - 0)]
+			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB [Math.min (adb + TINY) (yTL - 0)] top (sw -- sw)
+			include : tagged 'strokeR' : RightwardTailedBar df.rightSB 0 yTR (sw -- sw)
 
 		export : define [ToothlessRounded df top sw fHookLeft fShortLeg] : glyph-proc
-			if fHookLeft : begin
-				include : dispiro
-					widths.rhs sw
-					flat df.leftSB [if fShortLeg [mix (top - ada) 0 0.5] 0] [heading Upward]
-					curl df.leftSB (top - ada)
-					arch.rhs top
-					flat df.rightSB (top - adb)
-					curl df.rightSB (TailY + HalfStroke) [heading Downward]
-				include : RetroflexHook.rExt df.rightSB (TailY + HalfStroke) (sw -- sw)
-				include : FlipAround df.middle (top / 2)
-			: else : begin
-				if fShortLeg : include : dispiro
-					widths.lhs sw
-					flat df.leftSB top [heading Downward]
-					curl df.leftSB adb
-					arch.lhs 0 (sw -- sw)
-					flat df.rightSB ada
-					curl df.rightSB [mix ada top 0.5] [heading Upward]
-				: else : include : UShape df top 0 (stroke -- sw) (ada -- ada) (adb -- adb)
+			local yTL : top - [if fHookLeft (TailY + HalfStroke) 0]
+			local yTR : if fShortLeg [mix [Math.min ada : YSmoothMidR top 0 ada adb] top 0.5] top
+			include : dispiro
+				widths.lhs sw
+				flat df.leftSB yTL [heading Downward]
+				curl df.leftSB [Math.min (0 + adb) (yTL - TINY)]
+				arch.lhs 0 (sw -- sw)
+				flat df.rightSB [Math.min (0 + ada) (yTR - TINY)]
+				curl df.rightSB yTR [heading Upward]
+			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB [Math.min (adb + TINY) (yTL - 0)] top (sw -- sw)
 
 		export : define [ToothlessCorner df top sw fHookLeft fShortLeg] : glyph-proc
-			include : VBar.l df.leftSB [if fShortLeg [mix (top - ada) 0 0.5] 0] (top - DToothlessRise) sw
+			local yTL : top - [if fHookLeft (TailY + HalfStroke) 0]
+			local yTR : if fShortLeg [mix [Math.min ada : YSmoothMidR top 0 ada adb] top 0.5] top
 			include : dispiro
 				widths.rhs sw
-				g4 df.leftSB (top - DToothlessRise)
-				arch.rhs top (blendPre -- {})
-				flat df.rightSB (top - adb)
-				curl df.rightSB [if fHookLeft (TailY + HalfStroke) 0] [heading Downward]
-			if fHookLeft : include : RetroflexHook.rExt df.rightSB (TailY + HalfStroke) (sw -- sw)
-			include : FlipAround df.middle (top / 2)
+				g4 df.rightSB DToothlessRise
+				arch.rhs 0 (blendPre -- {})
+				flat df.leftSB [Math.min (0 + adb) (yTL - TINY)]
+				curl df.leftSB yTL [heading Upward]
+			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB [Math.min (adb + TINY) (yTL - 0)] top (sw -- sw)
+			include : VBar.r df.rightSB DToothlessRise yTR sw
 
 	define UUpper : UShapeGroup ArchDepthA ArchDepthB
 	define ULower : UShapeGroup SmallArchDepthA SmallArchDepthB
@@ -356,9 +354,9 @@ glyph-block Letter-Latin-U : begin
 				corner (SB - outStand) (yTurn - outStandY)
 			spiro-outline
 				corner (SB - O) XH
-				curl (SB - O) SmallArchDepthB
+				curl   (SB - O) SmallArchDepthB
 				arch.lhs 0
-				flat (RightSB + O) SmallArchDepthA
+				flat   (RightSB + O) SmallArchDepthA
 				corner (RightSB + O) XH
 		if SLAB : begin
 			include : HSerif.lt SB XH SideJut
