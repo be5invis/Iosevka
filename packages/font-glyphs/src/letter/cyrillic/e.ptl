@@ -9,37 +9,52 @@ glyph-block Letter-Cyrillic-E : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Latin-C : CLetterForm CConfig
 	glyph-block-import Letter-Cyrillic-Iotified-A : Iotified
+	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
 
-	foreach { suffix { sty styBot } } [Object.entries CConfig] : do
+	foreach { suffix { sty styBot fMidSerif } } [Object.entries CConfig] : do
+		define [CyrlEShepe top] : glyph-proc
+			local lf : CLetterForm [DivFrame 1] sty styBot top 0
+			include : lf.revFull
+
+			local xCenterBarLeft : mix SB RightSB 0.35
+			local mbSw : AdviceStroke2 2 3 top
+			include : HBar.m xCenterBarLeft RightSB (top / 2) mbSw
+
+			if fMidSerif : begin
+				local { jutTop jutBot jutMid } : EFVJutLength (top - 2 * DToothlessRise) 0.5 mbSw
+				local vJutSw : VJutStroke * mbSw / Stroke
+				include : VBar.m xCenterBarLeft (top / 2 - jutMid) (top / 2 + jutMid) vJutSw
+
 		create-glyph "cyrl/E.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
-			include : lf.revFull
-			include : HBar.m [mix SB RightSB 0.35] RightSB (CAP / 2) [AdviceStroke2 2 3 CAP]
+			include : CyrlEShepe CAP
 
 		create-glyph "cyrl/e.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			set-base-anchor 'cvDecompose' 0 0
-			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
-				ada -- SmallArchDepthA
-				adb -- SmallArchDepthB
-			include : lf.revFull
-			include : HBar.m [mix SB RightSB 0.35] RightSB (XH / 2) [AdviceStroke2 2 3 XH]
+			include : CyrlEShepe XH
+
+		define [CyrlYeShape top] : glyph-proc
+			local lf : CLetterForm [DivFrame 1] sty styBot top 0
+			include : lf.full
+
+			local xCenterBarRight : mix RightSB SB 0.35
+			local mbSw : AdviceStroke2 2 3 top
+			include : HBar.m SB xCenterBarRight (top / 2) mbSw
+
+			if fMidSerif : begin
+				local { jutTop jutBot jutMid } : EFVJutLength (top - 2 * DToothlessRise) 0.5 mbSw
+				local vJutSw : VJutStroke * mbSw / Stroke
+				include : VBar.m xCenterBarRight (top / 2 - jutMid) (top / 2 + jutMid) vJutSw
 
 		create-glyph "cyrl/Ye.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
-			include : lf.full
-			include : HBar.m SB [mix RightSB SB 0.35] (CAP / 2) [AdviceStroke2 2 3 CAP]
+			include : CyrlYeShape CAP
 
 		create-glyph "cyrl/ye.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			set-base-anchor 'cvDecompose' 0 0
-			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
-				ada -- SmallArchDepthA
-				adb -- SmallArchDepthB
-			include : lf.full
-			include : HBar.m SB [mix RightSB SB 0.35] (XH / 2) [AdviceStroke2 2 3 XH]
+			include : CyrlYeShape XH
 
 		define [IotifiedEShape fCapital df top ada adb] : glyph-proc
 			local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
@@ -52,10 +67,16 @@ glyph-block Letter-Cyrillic-E : begin
 				sw  -- df.mvs
 			include : with-transform [ApparentTranslate (Width * (df.adws - divSub)) 0] : lf.full
 
+			local xCenterBarRight : mix df.leftSB df.rightSB (3 / 4)
 			include : Iotified.full df top
-				hBarRight -- [mix df.leftSB df.rightSB (3 / 4)]
+				hBarRight -- xCenterBarRight
 				hBarY     -- (top / 2)
 				fCapital  -- fCapital
+
+			if fMidSerif : begin
+				local { jutTop jutBot jutMid } : EFVJutLength (top - 2 * DToothlessRise) 0.5 df.mvs
+				local vJutSw : VJutStroke * df.mvs / Stroke
+				include : VBar.m xCenterBarRight (top / 2 - jutMid) (top / 2 + jutMid) vJutSw
 
 		create-glyph "cyrl/EIotified.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleM 3
