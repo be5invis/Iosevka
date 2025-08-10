@@ -18,7 +18,7 @@ glyph-block Letter-Latin-V : begin
 	define VShapeFine : Math.max
 		Stroke * [if SLAB para.vtipfineSlab para.vtipfine]
 		VCornerHalfWidth * 1.2
-	define VShapeFineStraight : Stroke * CThin * 1.15
+	define VShapeFineStraight : 1.15 * Stroke * CThin
 	define pInktrap : 2 / 3
 	define VShapeMiddleWidth : Math.min [mix Stroke VShapeFineStraight pInktrap] [AdviceStroke 3]
 
@@ -27,7 +27,7 @@ glyph-block Letter-Latin-V : begin
 
 	glyph-block-export VShapeOutline
 	define [VShapeOutline] : with-params [df fBarStraight top [sw Stroke]] : glyph-proc
-		define cornerHW : VCornerHalfWidth * sw / Stroke
+		define cornerHW : VCornerHalfWidth * (sw / Stroke)
 		define dgCor : DiagCor top (Width / 2) 0 (sw * 2)
 		define clearance : 0 - OX
 
@@ -57,7 +57,7 @@ glyph-block Letter-Latin-V : begin
 				curl vxStartR top
 
 	define [VBottomCapShape df fBarStraight sw] : begin
-		define cornerHW : VCornerHalfWidth * sw / Stroke
+		define cornerHW : VCornerHalfWidth * (sw / Stroke)
 		return : spiro-outline
 			corner (df.middle + cornerHW) 0
 			corner (df.middle - cornerHW) 0
@@ -76,7 +76,7 @@ glyph-block Letter-Latin-V : begin
 		define vxEndR : df.middle + cornerHW
 
 		if fBarStraight : do
-			define midSW : dgCor * VShapeMiddleWidth / Stroke * sw
+			define midSW : dgCor * VShapeMiddleWidth * (sw / Stroke)
 			include : tagged 'strokeDown' : dispiro
 				widths.lhs (sw * dgCor)
 				flat [mix vxStartL vxEndL 0] [mix top 0 0] [heading Downward]
@@ -138,7 +138,7 @@ glyph-block Letter-Latin-V : begin
 			straight.left.start (df.rightSB + hookWidthOuter) (top - sw - O)
 			g4 (df.rightSB - hookWidthInner) (top - 0.5 * sw - TailY)
 			quadControls 0.4 0.75 64 unimportant
-			g4 (df.middle + VCornerHalfWidth * sw / Stroke) 0 [widths.rhs : VShapeFine * sw / Stroke]
+			g4 (df.middle + VCornerHalfWidth * (sw / Stroke)) 0 [widths.rhs : VShapeFine * (sw / Stroke)]
 
 	define [VLoopShape] : with-params [df fBarStraight top [sw Stroke]] : glyph-proc
 		include : VShape df fBarStraight top (sw -- sw)
@@ -146,7 +146,7 @@ glyph-block Letter-Latin-V : begin
 		include : VBottomCapShape df fBarStraight sw
 
 		define cornerHW : VCornerHalfWidth * (sw / Stroke)
-		define cornerSw : VShapeFine * sw / Stroke
+		define cornerSw : VShapeFine * (sw / Stroke)
 		define sbScale : if fBarStraight StraightSbShrink 1
 		define vxStartL : df.leftSB * sbScale
 		define vxEndL : df.middle - cornerHW
@@ -295,14 +295,14 @@ glyph-block Letter-Latin-V : begin
 		include : dispiro
 			widths.lhs
 			flat df.leftSB top [heading Downward]
-			curl df.leftSB adb
+			curl df.leftSB [Math.min adb : top - TINY]
 			arch.lhs 0
-			flat df.rightSB ada
+			flat df.rightSB [Math.min ada : top - Hook - HalfStroke - TINY]
 			curl df.rightSB (top - Hook - HalfStroke) [heading Upward]
 		include : VerticalHook.r
 			x -- df.rightSB
 			y -- (top - Hook - HalfStroke)
-			xDepth -- ((-RightSB) + Middle + [HSwToV HalfStroke])
+			xDepth -- ((-df.rightSB) + df.middle + [HSwToV HalfStroke])
 			yDepth -- (-Hook)
 
 	create-glyph 'VHookTop.serifless' : glyph-proc

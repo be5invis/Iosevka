@@ -1,5 +1,28 @@
 ## Modifications since last major version
 
+### 33.2.8
+
+* Add mid-serifed variants of Cyrillic E (#2751).
+* Make certain characters slightly wider under Quasi-Proportional. Affected characters:
+  - CYRILLIC CAPITAL LETTER CLOSED LITTLE YUS (`U+A658`).
+  - CYRILLIC CAPITAL LETTER IOTIFIED CLOSED LITTLE YUS (`U+A65C`).
+* Refine shape of the following characters:
+  - CYRILLIC CAPITAL LETTER EF (`U+0424`).
+  - CYRILLIC SMALL LETTER EF (`U+0444`).
+  - CYRILLIC CAPITAL LETTER ROUND OMEGA (`U+047A`).
+  - CYRILLIC SMALL LETTER ROUND OMEGA (`U+047B`).
+  - LATIN SMALL LETTER G WITH PALATAL HOOK (`U+1D83`).
+  - ROMAN NUMERAL ONE THOUSAND C D (`U+2180`).
+  - ROMAN NUMERAL TEN THOUSAND (`U+2182`).
+  - ROMAN NUMERAL ONE HUNDRED THOUSAND (`U+2188`).
+  - COMBINING CYRILLIC LETTER IOTIFIED A (`U+2DFC`).
+  - CYRILLIC SMALL LETTER IOTIFIED A (`U+A657`).
+  - COMBINING CYRILLIC LETTER EF (`U+A69E`).
+  - LATIN SMALL LETTER AA (`U+A733`).
+  - MODIFIER LETTER CYRILLIC SMALL EF (`U+1E042`).
+  - CYRILLIC SUBSCRIPT SMALL LETTER EF (`U+1E060`).
+
+
 ### 33.2.7
 
 * Make certain characters slightly wider under Quasi-Proportional. Affected characters:
