@@ -241,9 +241,9 @@ glyph-block Letter-Shared-Shapes : begin
 
 			return : list
 				flat (left - [HSwToV fine]) leftY0 [widths.rhs fine]
-				curl (left - [HSwToV fine]) (top - ada)
+				curl (left - [HSwToV fine]) [Math.max (top - ada) (leftY0 + TINY)]
 				arch.rhs top (sw -- stroke) (swBefore -- fine)
-				flat right (top - adb) [widths.rhs stroke]
+				flat right [Math.max (top - adb) (bottom + TINY)] [widths.rhs stroke]
 				[if fMask corner curl] right bottom [widths.rhs.heading stroke Downward]
 				if [not fMask] {} {[corner left bottom]}
 
@@ -273,9 +273,9 @@ glyph-block Letter-Shared-Shapes : begin
 
 			return : list
 				flat (right + [HSwToV fine]) rightY0 [widths.rhs fine]
-				curl (right + [HSwToV fine]) (bottom + ada)
+				curl (right + [HSwToV fine]) [Math.min (bottom + ada) (rightY0 - TINY)]
 				arch.rhs bottom (sw -- stroke) (swBefore -- fine)
-				flat left (bottom + adb) [widths.rhs stroke]
+				flat left [Math.min (bottom + adb) (top - TINY)] [widths.rhs stroke]
 				[if fMask corner curl] left top [widths.rhs.heading stroke Upward]
 				if fMask {[corner right top]} {}
 		export : define [shape] : begin
@@ -303,7 +303,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 			return : dispiro
 				flat left top [widths.lhs.heading sw Downward]
-				curl left (bottom + adb)
+				curl left [Math.min (bottom + adb) (top - TINY)]
 				arch.lhs.centerAt.ltr.b (xMid + [HSwToV : 0.2 * sw]) bottom
 				g4 right (bottom + rise + 0.25 * sw) [widths.lhs fine]
 
@@ -318,7 +318,7 @@ glyph-block Letter-Shared-Shapes : begin
 			local xstart : left + [HSwToV : sw - fine]
 			return : list
 				flat xstart ystart [widths.rhs fine]
-				curl xstart (top - ada)
+				curl xstart [Math.max (top - ada) (ystart + TINY)]
 				arch.rhs top (sw -- sw) (swBefore -- fine)
 
 		export : define [arcEnd] : with-params [
@@ -329,7 +329,7 @@ glyph-block Letter-Shared-Shapes : begin
 			local xend : left + [HSwToV : sw - fine]
 			return : list
 				arch.rhs bot (sw -- sw) (swAfter -- fine)
-				flat xend (bot + adb) [widths.rhs fine]
+				flat xend [Math.min (bot + adb) (yend - TINY)] [widths.rhs fine]
 				curl xend yend
 
 		export : define [shape] : with-params [
@@ -364,7 +364,7 @@ glyph-block Letter-Shared-Shapes : begin
 			] : begin
 			return : dispiro
 				flat left yTerminal [widths.lhs.heading sw Downward]
-				curl left [Math.min adb (yTerminal - TINY)]
+				curl left [Math.min (bot + adb) (yTerminal - TINY)]
 				arch.lhs bot (sw -- sw)
 				flatside.ru right bot top ada adb
 				arch.lhs top (sw -- sw) (swAfter -- fine)
@@ -395,7 +395,7 @@ glyph-block Letter-Shared-Shapes : begin
 				arch.lhs bot (sw -- sw) (swBefore -- fine)
 				flatside.ru right bot top ada adb
 				arch.lhs top (sw -- sw)
-				flat left [Math.max (yTerminal + TINY - TanSlope * Stroke) (top - ada)]
+				flat left [Math.max (top - ada) (yTerminal + TINY)]
 				curl left yTerminal [widths.lhs.heading sw Downward]
 
 	glyph-block-export : OBarRight
@@ -409,7 +409,7 @@ glyph-block Letter-Shared-Shapes : begin
 			local xstart : right - [HSwToV : sw - fine]
 			return : list
 				flat xstart ystart [widths.lhs fine]
-				curl xstart (top - adb)
+				curl xstart [Math.max (top - adb) (ystart + TINY)]
 				arch.lhs top (sw -- sw) (swBefore -- fine)
 
 		export : define [arcEnd] : with-params [
@@ -420,7 +420,7 @@ glyph-block Letter-Shared-Shapes : begin
 			local xend : right - [HSwToV : sw - fine]
 			return : list
 				arch.lhs bot (sw -- sw) (swAfter -- fine)
-				flat xend (bot + ada) [widths.lhs fine]
+				flat xend [Math.min (bot + ada) (yend - TINY)] [widths.lhs fine]
 				curl xend yend
 
 		export : define [shape] : with-params [
@@ -460,6 +460,39 @@ glyph-block Letter-Shared-Shapes : begin
 				[yTerminal CAP] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : new-glyph : glyph-proc
 			include : OBarLeft.roundedTop
+				top       -- top
+				bot       -- bot
+				left      -- left
+				right     -- right
+				sw        -- sw
+				fine      -- fine
+				yTerminal -- (top - yTerminal)
+				ada       -- ada
+				adb       -- adb
+			include : FlipAround [mix left right 0.5] [mix bot top 0.5]
+
+		export : define [toothlessTop] : with-params [
+				[top XH] [bot 0] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
+				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
+			] : new-glyph : glyph-proc
+			include : OBarLeft.toothless
+				top    -- top
+				bot    -- bot
+				left   -- left
+				right  -- right
+				rise   -- rise
+				sw     -- sw
+				fine   -- fine
+				mBlend -- mBlend
+				ada    -- ada
+				adb    -- adb
+			include : FlipAround [mix left right 0.5] [mix bot top 0.5]
+
+		export : define [roundedTop] : with-params [
+				[top XH] [bot 0] [left SB] [right RightSB] [yTerminal Descender] [sw Stroke]
+				[fine ShoulderFine] [ada SmallArchDepthA] [adb SmallArchDepthB]
+			] : new-glyph : glyph-proc
+			include : OBarLeft.rounded
 				top       -- top
 				bot       -- bot
 				left      -- left

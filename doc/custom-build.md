@@ -3255,7 +3255,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower Yery (<code>ы</code>) with cursive shape and tail</td></tr>
     </table></details>
   - Styles for `Э` (Cyrillic Capital E (`Э`))
-    <details><summary>7 variants</summary>
+    <details><summary>13 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'serifless'</code>, <code>VAAH = 1</code></td></tr>
     <tr><td>Serifless Cyrillic Capital E (<code>Э</code>) (default for Sans)</td></tr>
@@ -3271,9 +3271,21 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Capital E (<code>Э</code>) with inward serif at bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'bilateral-inward-serifed'</code>, <code>VAAH = 7</code></td></tr>
     <tr><td>Cyrillic Capital E (<code>Э</code>) with inward serif at both top and bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-unilateral-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'unilateral-mid-serifed'</code>, <code>VAAH = 8</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with serif at top and center</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-unilateral-bottom-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-bottom-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'unilateral-bottom-mid-serifed'</code>, <code>VAAH = 9</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with serif at bottom and center</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-bilateral-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-bilateral-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'bilateral-mid-serifed'</code>, <code>VAAH = 10</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with serifs at both top, bottom and center</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-unilateral-inward-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-inward-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'unilateral-inward-mid-serifed'</code>, <code>VAAH = 11</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with inward serif at top and center</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-unilateral-bottom-inward-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-unilateral-bottom-inward-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'unilateral-bottom-inward-mid-serifed'</code>, <code>VAAH = 12</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with inward serif at bottom and center</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-e-bilateral-inward-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-e-bilateral-inward-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-e = 'bilateral-inward-mid-serifed'</code>, <code>VAAH = 13</code></td></tr>
+    <tr><td>Cyrillic Capital E (<code>Э</code>) with inward serif at both top, bottom and center</td></tr>
     </table></details>
   - Styles for `э` (Cyrillic Lower E (`э`))
-    <details><summary>7 variants</summary>
+    <details><summary>13 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'serifless'</code>, <code>VAAI = 1</code></td></tr>
     <tr><td>Serifless Cyrillic Lower E (<code>э</code>) (default for Sans)</td></tr>
@@ -3289,6 +3301,18 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower E (<code>э</code>) with inward serif at bottom (default for Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'bilateral-inward-serifed'</code>, <code>VAAI = 7</code></td></tr>
     <tr><td>Cyrillic Lower E (<code>э</code>) with inward serif at both top and bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-unilateral-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'unilateral-mid-serifed'</code>, <code>VAAI = 8</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with serif at top and center</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-unilateral-bottom-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-bottom-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'unilateral-bottom-mid-serifed'</code>, <code>VAAI = 9</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with serif at bottom and center</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-bilateral-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-bilateral-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'bilateral-mid-serifed'</code>, <code>VAAI = 10</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with serifs at both top, bottom and center</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-unilateral-inward-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-inward-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'unilateral-inward-mid-serifed'</code>, <code>VAAI = 11</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with inward serif at top and center</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-unilateral-bottom-inward-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-unilateral-bottom-inward-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'unilateral-bottom-inward-mid-serifed'</code>, <code>VAAI = 12</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with inward serif at bottom and center</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-e-bilateral-inward-mid-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-e-bilateral-inward-mid-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-e = 'bilateral-inward-mid-serifed'</code>, <code>VAAI = 13</code></td></tr>
+    <tr><td>Cyrillic Lower E (<code>э</code>) with inward serif at both top, bottom and center</td></tr>
     </table></details>
   - Styles for `Я` (Cyrillic Capital Ya)
     <details><summary>18 variants</summary>
