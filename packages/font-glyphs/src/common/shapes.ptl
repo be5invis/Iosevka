@@ -413,12 +413,12 @@ glyph-block CommonShapes : begin
 
 	define nHookSegments 12
 	define [HookShape toStraight toFinish isStart args] : begin
-		local [object yRef sw swTerminal isTail noSwash overshoot] args
+		local [object yRef sw swTerminal isTail suppressSwash overshoot] args
 
 		local atBottom : toStraight.y > yRef
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 		local dtu : if isStart (yRef > toFinish.y) (yRef < toFinish.y)
-		local doSwash : !noSwash && !isStart && atBottom && (para.isItalic || isTail) && [if (para.slopeAngle >= 0) ltr [not ltr]]
+		local doSwash : !suppressSwash && !isStart && atBottom && (isTail || (para.isItalic && (para.slopeAngle != 0) && [if (para.slopeAngle > 0) ltr [not ltr]]))
 		local superness DesignParameters.superness
 
 		local y : yRef + [if (yRef > toFinish.y) (-1) (+1)] * overshoot
@@ -502,9 +502,9 @@ glyph-block CommonShapes : begin
 		local-parameter : sw             -- Stroke
 		local-parameter : swTerminal     -- sw
 		local-parameter : isTail         -- false
-		local-parameter : noSwash        -- false
+		local-parameter : suppressSwash  -- false
 		local-parameter : o              -- O
-		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
+		local args : object [yRef y] sw swTerminal isTail suppressSwash [overshoot o]
 		return : new FunctionInterpolator hookStartBlender args
 
 	glyph-block-export hookend
@@ -513,9 +513,9 @@ glyph-block CommonShapes : begin
 		local-parameter : sw             -- Stroke
 		local-parameter : swTerminal     -- sw
 		local-parameter : isTail         -- false
-		local-parameter : noSwash        -- false
+		local-parameter : suppressSwash  -- false
 		local-parameter : o              -- O
-		local args : object [yRef y] sw swTerminal isTail noSwash [overshoot o]
+		local args : object [yRef y] sw swTerminal isTail suppressSwash [overshoot o]
 		return : new FunctionInterpolator hookEndBlender args
 
 	glyph-block-export flatside

@@ -20,15 +20,15 @@ glyph-block Letter-Latin-Upper-B : begin
 		local bowl : top * barPos + stroke * (1 - barPos)
 		local barleft SB
 		local mockBowlDepth : BowlXDepth top (bowl - stroke) barleft RightSB stroke
-		local curvleft : RightSB - SB * 0.5 - mockBowlDepth + topArcInnerShift
-		local curvleftTop : Math.min curvleft : RightSB - SB * 0.5 - OX - stroke * 1.375 + topArcInnerShift
+		local curvleft : (RightSB - (SB * 0.5)) - mockBowlDepth + topArcInnerShift
+		local curvleftTop : Math.min curvleft : (RightSB - (SB * 0.5)) - OX - stroke * 1.375 + topArcInnerShift
 		local xTopArcRight : [mix SB RightSB BArcMix] - OX * 2 + topArcShift
 		local fine : stroke * CThin
 
-		local ada : ArchDepthAOf (ArchDepth * 0.9) Width
-		local adb : ArchDepthBOf (ArchDepth * 0.9) Width
-		local adaTop : ArchDepthAOf (ArchDepth * 0.9 - (curvleft - curvleftTop)) Width
-		local adbTop : ArchDepthBOf (ArchDepth * 0.9 - (curvleft - curvleftTop)) Width
+		local ada    : ArchDepthAOf : ArchDepth * 0.9
+		local adb    : ArchDepthBOf : ArchDepth * 0.9
+		local adaTop : ArchDepthAOf : ArchDepth * 0.9 - (curvleft - curvleftTop)
+		local adbTop : ArchDepthBOf : ArchDepth * 0.9 - (curvleft - curvleftTop)
 
 		include : sink
 			widths.rhs stroke
@@ -78,7 +78,7 @@ glyph-block Letter-Latin-Upper-B : begin
 
 	define [InterruptShape bp top sw st sb] : begin
 		local bowl : top * bp + sw * (1 - bp)
-		local gap : Math.max ((RightSB - SB - [HSwToV : 2 * sw]) * 0.15) : AdviceStroke 10
+		local gap : Math.max (((RightSB - SB) - [HSwToV : 2 * sw]) * 0.15) : AdviceStroke 10
 		return : VBar.l (SB + [HSwToV sw]) (bowl - 1 * sw + O) (bowl + 0 * sw - O) gap
 
 	define [StdShape top sw st sb] : BShape top (stroke -- sw) (serifTop -- st) (serifBot -- sb)
@@ -192,23 +192,21 @@ glyph-block Letter-Latin-Upper-B : begin
 		local stroke : AdviceStroke2 2 3 top
 		local fine : stroke * CThin
 		local yMiddle : top * HBarPos
-		local adb : top - [mix (yMiddle + stroke / 2) (top - O - stroke) (ArchDepthA / (ArchDepthA + ArchDepthB))] + [HSwToV : TanSlope * stroke]
-		local ada : [mix (stroke + O) (yMiddle - stroke / 2) (ArchDepthA / (ArchDepthA + ArchDepthB))] - [HSwToV : TanSlope * stroke]
 		local xMidLeft : mix (RightSB - [HSwToV stroke]) (SB + [HSwToV stroke]) 0.7
-		local xMidArc : Math.max [mix xMidLeft RightSB 0.1] [mix SB RightSB 0.5]
+		local xMidArc  : Math.max Middle : mix xMidLeft RightSB 0.1
 		include : dispiro
 			widths.lhs fine
-			flat xMidLeft (yMiddle - (fine - stroke / 2)) [heading Rightward]
-			curl xMidArc  (yMiddle - (fine - stroke / 2)) [heading Rightward]
+			flat xMidLeft (yMiddle + (stroke / 2 - fine)) [heading Rightward]
+			curl xMidArc  (yMiddle + (stroke / 2 - fine)) [heading Rightward]
 			archv
-			g4   (RightSB - (OX - O)) (top - adb) [widths.lhs stroke]
+			g4   ((RightSB + O) - OX) ([mix (yMiddle + stroke / 2) (top - O - stroke) (ArchDepthA / (ArchDepthA + ArchDepthB))] - [HSwToV : TanSlope * stroke]) [widths.lhs stroke]
 			arch.lhs top
 			flatside.ld SB 0 top SmallArchDepthA SmallArchDepthB O
 			arch.lhs 0
-			g4   (RightSB - (OX + O)) (0   + ada)
+			g4   ((RightSB - O) - OX) ([mix (O + stroke) (yMiddle - stroke / 2) (ArchDepthA / (ArchDepthA + ArchDepthB))] - [HSwToV : TanSlope * stroke])
 			arcvh
-			flat xMidArc  (yMiddle + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
-			curl xMidLeft (yMiddle + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
+			flat xMidArc  (yMiddle - (stroke / 2 - fine)) [widths.lhs.heading fine Leftward]
+			curl xMidLeft (yMiddle - (stroke / 2 - fine)) [heading Leftward]
 
 	create-glyph 'cyrl/ve.cursive' : glyph-proc
 		include : MarkSet.e
@@ -230,8 +228,8 @@ glyph-block Letter-Latin-Upper-B : begin
 				intersection
 					BShapeMask CAP (stroke -- BBS)
 					union
-						VBar.r (RightSB - BBD - OX * 2) 0 (CAP * BBarPos) BBS
-						VBar.r ([mix SB RightSB BArcMix] - BBD - OX * 2) (CAP * BBarPos) CAP BBS
+						VBar.r ((RightSB - OX * 2) - BBD) 0 (CAP * BBarPos) BBS
+						VBar.r (([mix SB RightSB BArcMix] - OX * 2) - BBD) (CAP * BBarPos) CAP BBS
 						VBar.l (SB + BBD) 0 CAP BBS
 			Rect (CAP - BBS) (0 + BBS) (SB + [HSwToV BBS]) (SB + BBD)
 
@@ -242,28 +240,28 @@ glyph-block Letter-Latin-Upper-B : begin
 		include : LeaningAnchor.Below.VBar.l SB
 		define pBar 0.55
 		define fine : Stroke * CThin
-		define yMiddle : [mix 0 Ascender pBar] - Stroke * 0.7 # Bottom edge
-		define ada : ArchDepthAOf (ArchDepth * 0.75) (0.5 * Width)
-		define adb : ArchDepthBOf (ArchDepth * 0.75) (0.5 * Width)
+		define yMiddle : Ascender * pBar - Stroke * 0.2
+		define ada : ArchDepthAOf (ArchDepth * 0.75) (Width * 0.5)
+		define adb : ArchDepthBOf (ArchDepth * 0.75) (Width * 0.5)
 		define xMidLeft : mix (RightSB - [HSwToV Stroke]) (SB + [HSwToV Stroke]) 0.7
-		define xMidArc  : Math.max [mix xMidLeft RightSB 0.1] [mix SB RightSB 0.5]
+		define xMidArc  : Math.max Middle : mix xMidLeft RightSB 0.1
 		include : dispiro
-			widths.rhs
-			flat SB Descender [heading Upward]
-			curl SB (Ascender - SmallArchDepthA)
-			arch.rhs Ascender
-			g4   (RightSB - OX + O * 3) [YSmoothMidR yMiddle Ascender ada adb]
-			arcvh
-			flat xMidArc  (yMiddle + Stroke - fine) [widths.rhs.heading fine Leftward]
-			curl xMidLeft (yMiddle + Stroke - fine) [heading Leftward]
-		include : dispiro
-			widths.rhs fine
-			flat xMidLeft (yMiddle + fine) [heading Rightward]
-			curl xMidArc  (yMiddle + fine) [heading Rightward]
+			widths.lhs fine
+			flat xMidLeft (yMiddle + (Stroke / 2 - fine)) [heading Rightward]
+			curl xMidArc  (yMiddle + (Stroke / 2 - fine)) [heading Rightward]
 			archv
-			g4   (RightSB - OX)  [YSmoothMidR 0 (yMiddle + Stroke) ada adb] [widths.rhs]
-			arch.rhs 0 (swAfter -- ShoulderFine)
-			g4.up.end (SB + [HSwToV : Stroke - ShoulderFine]) adb [widths.rhs ShoulderFine]
+			g4   ((RightSB + O * 3) - OX) [YSmoothMidR Ascender (yMiddle - Stroke / 2) ada adb] [widths.lhs]
+			arch.lhs Ascender
+			flat SB (Ascender - SmallArchDepthA)
+			curl SB Descender [heading Downward]
+		include : dispiro
+			widths.lhs ShoulderFine
+			g4.down.start (SB + [HSwToV : Stroke - ShoulderFine]) adb
+			arch.lhs 0 (swBefore -- ShoulderFine)
+			g4   (RightSB - OX) [YSmoothMidR (yMiddle + Stroke / 2) 0 ada adb] [widths.lhs]
+			arcvh
+			flat xMidArc  (yMiddle - (Stroke / 2 - fine)) [widths.lhs.heading fine Leftward]
+			curl xMidLeft (yMiddle - (Stroke / 2 - fine)) [heading Leftward]
 
 	alias 'grek/beta.cursive'  null  'cyrl/ve.cursiveTall'
 	select-variant 'grek/beta' 0x3B2
