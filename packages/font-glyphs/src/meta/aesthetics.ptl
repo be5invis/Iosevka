@@ -150,15 +150,17 @@ export : define [calculateMetrics para] : begin
 	define SideJut : Jut - [HSwToV HalfStroke]
 	define VJutStroke : AdviceStroke 3.5
 
-	define DToothlessRise : Hook * 0.25 + Stroke / 16
+	define DToothlessRise : Hook / 4 + Stroke / 16
 	define DMBlend          0.80
 
 	define [StrokeWidthBlend min max sw] : linreg para.canonicalStrokeWidthMin min para.canonicalStrokeWidthMax max [fallback sw Stroke]
 
 	define SmoothAdjust : StrokeWidthBlend 80 144
-	define [ArchDepthAOf archDepth width] : archDepth - TanSlope * SmoothAdjust / Width * width
-	define [ArchDepthBOf archDepth width] : archDepth + TanSlope * SmoothAdjust / Width * width
+	define [ArchDepthAOf archDepth width] : archDepth - TanSlope * SmoothAdjust * ([fallback width Width] / Width)
+	define [ArchDepthBOf archDepth width] : archDepth + TanSlope * SmoothAdjust * ([fallback width Width] / Width)
 	define [YSmoothMidR top bot _ada _adb] : begin
+		if (bot > top) : throw : new Error "YSmoothMidR: bot > top"
+
 		local ada : fallback _ada ArchDepthA
 		local adb : fallback _adb ArchDepthB
 		local delta : (adb - ada) / 2
@@ -168,6 +170,8 @@ export : define [calculateMetrics para] : begin
 		return : yNotAdjusted - delta * [Math.min 1 : (top - bot) / (ada + adb)]
 	set YSmoothMidR.cr : function [c r _ada _adb] : YSmoothMidR (c + r) (c - r) _ada _adb
 	define [YSmoothMidL top bot _ada _adb] : begin
+		if (bot > top) : throw : new Error "YSmoothMidL: bot > top"
+
 		local ada : fallback _ada ArchDepthA
 		local adb : fallback _adb ArchDepthB
 		local delta : (adb - ada) / 2
@@ -410,8 +414,9 @@ export : define DesignParameters : object
 	braceCurlyM2               0.45
 	braceOvershoot             0.02
 	# Bar position
+	aBarPos                    0.5304
 	hBarPos                    0.525
-	eBarPos                    0.5
+	eBarPos                    0.50
 	fiveBarPos                 0.64
 	overlayPos                 0.52
 	fBarPosToXH                0.875
