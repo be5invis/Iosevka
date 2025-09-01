@@ -9,7 +9,7 @@ glyph-block Letter-Latin-C : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors ExtendBelowBaseAnchors LeaningAnchor
-	glyph-block-import Letter-Shared : CreateAccentedComposition CreateDependentComposite CreateTurnedLetter
+	glyph-block-import Letter-Shared : CreateAccentedComposition CreateDependentComposite
 	glyph-block-import Letter-Shared-Shapes : CurlyTail SerifedArcStart SerifedArcEnd
 	glyph-block-import Letter-Shared-Shapes : InwardSlabArcStart InwardSlabArcEnd
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerif ArcEndSerif
@@ -160,6 +160,11 @@ glyph-block Letter-Latin-C : begin
 			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
 			include : lf.revFull
 
+		create-glyph "revSmcpC.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
+			include : lf.revFull
+
 		create-glyph "CHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
@@ -205,15 +210,13 @@ glyph-block Letter-Latin-C : begin
 				adb -- SmallArchDepthB
 			include : lf.revFull
 
-		create-glyph "turncSideways.\(suffix)" : glyph-proc
+		create-glyph "revcSideways.\(suffix)" : glyph-proc
 			local df : DivFrame (XH / Width) 2 (XH * 0.1 / SB)
 			include : df.markSet.e
-			local top : Width - SB
 			local p : mix 1 (Width / UPM) 0.5
 			include : PointingTo Width XH Width 0 : function [] : glyph-proc
-				local lf : CLetterForm df sty styBot top 0 (hook -- (Hook * p))
-				include : lf.full
-				include : FlipAround df.middle (top / 2)
+				local lf : CLetterForm df sty styBot RightSB 0 (hook -- (Hook * p))
+				include : lf.revFull
 				include : Translate 0 (SB / 2)
 
 		create-glyph "cyrl/esWide.\(suffix)" : glyph-proc
@@ -310,7 +313,6 @@ glyph-block Letter-Latin-C : begin
 
 	select-variant 'c' 'c'
 	link-reduced-variant 'c/sansSerif' 'c' MathSansSerif
-	link-reduced-variant 'c/ascBase' 'c' (follow -- 'cHookTop')
 	select-variant 'revc' 0x2184 (follow -- 'c')
 
 	select-variant 'c/centKernelStd' (follow -- 'c')
@@ -319,7 +321,7 @@ glyph-block Letter-Latin-C : begin
 	alias 'cyrl/es' 0x441 'c'
 	alias 'grek/lunateSmallSigma' 0x3F2 'c.serifless'
 
-	select-variant 'turncSideways' 0x1D12 (follow -- 'c')
+	select-variant 'oOpenSideways' 0x1D12 (shapeFrom -- 'revcSideways') (follow -- 'oOpen')
 	select-variant 'cyrl/esWide' 0x1C83 (follow -- 'c')
 
 	select-variant 'cCurlyTail' 0x255
@@ -334,15 +336,15 @@ glyph-block Letter-Latin-C : begin
 	select-variant 'c/descBase'
 	select-variant 'romanSixLateForm' 0x2185 (follow -- 'C/descBase')
 
-	CreateTurnedLetter 'turnC' 0x186 'C' HalfAdvance (CAP / 2)
-	CreateTurnedLetter 'turnc' 0x254 'c' HalfAdvance (XH / 2)
-	CreateTurnedLetter 'turnSmcpC' 0x1D10 'smcpC' HalfAdvance (XH / 2)
+	select-variant 'OOpen' 0x186 (shapeFrom -- 'revC')
+	select-variant 'oOpen' 0x254 (shapeFrom -- 'revc')
+	select-variant 'smcpOOpen' 0x1D10 (shapeFrom -- 'revSmcpC') (follow -- 'OOpen')
 
 	alias 'grek/revLunateSigma' 0x3FD 'revC'
 	alias 'grek/revLunateSmallSigma' 0x37B 'revc.serifless'
 
-	CreateTurnedLetter 'turnc/descBase' null 'c/ascBase' HalfAdvance (XH / 2)
-	derive-composites 'turncRetroflexHook' 0x1D97 'turnc/descBase'
+	select-variant 'oOpen/descBase' (shapeFrom -- 'revc')
+	derive-composites 'oOpenRetroflexHook' 0x1D97 'oOpen/descBase'
 		RetroflexHook.l SB 0 (yAttach -- DToothlessRise)
 
 	derive-composites 'CPalatalHook' 0xA7C4 'C/descBase'
