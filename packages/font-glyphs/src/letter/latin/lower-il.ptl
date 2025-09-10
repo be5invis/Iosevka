@@ -21,18 +21,18 @@ glyph-block Letter-Latin-Lower-I : begin
 	define [TailedDotlessIShift df] : (1 - df.adws) * 0.2
 
 	define XMiddle : namespace
-		define [FlatTailedImpl df addTopSerif] : df.middle - [if addTopSerif 0 : IBalance2 df]
+		define [FlatTailedImpl df addTopSerif isForI] : df.middle - [if (addTopSerif && isForI) 0 : IBalance2 df]
 		define [TailedImpl df addTopSerif] : begin
 			return : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [TailedDotlessIShift df])
-		export : define [Center df] : return df.middle
-		export : define [Hooky df] : df.middle + [IBalance2 df]
-		export : define [HookyBottom df] : df.middle - [IBalance2 df]
-		export : define [Serifed df] : df.middle + [IBalance df]
-		export : define [Tailed df] : TailedImpl df false
-		export : define [TailedSerifed df] : TailedImpl df true
-		export : define [FlatTailed df] : FlatTailedImpl df false
-		export : define [SerifedFlatTailed df] : FlatTailedImpl df true
-		export : define [PhoneticLeft df] : df.leftSB + [HSwToV Stroke]
+		export : define [Center df isForI] : return df.middle
+		export : define [Hooky df isForI] : df.middle + [IBalance2 df]
+		export : define [HookyBottom df isForI] : df.middle - [IBalance2 df]
+		export : define [Serifed df isForI] : df.middle + [IBalance df]
+		export : define [Tailed df isForI] : TailedImpl df false
+		export : define [TailedSerifed df isForI] : TailedImpl df true
+		export : define [FlatTailed df isForI] : FlatTailedImpl df false isForI
+		export : define [SerifedFlatTailed df isForI] : FlatTailedImpl df true isForI
+		export : define [PhoneticLeft df isForI] : df.leftSB + [HSwToV Stroke]
 
 	define Marks : namespace
 		export : define [Serifless df yTop xMiddle] : glyph-proc
@@ -201,7 +201,7 @@ glyph-block Letter-Latin-Lower-I : begin
 		create-glyph "dotlessi.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.e
-			local xMiddle : xMiddleT df
+			local xMiddle : xMiddleT df true
 			include : Body df XH xMiddle
 			include : Marks df XH xMiddle
 			if Serif : include : tagged 'serifLT' : Serif df XH xMiddle
@@ -209,7 +209,7 @@ glyph-block Letter-Latin-Lower-I : begin
 		create-glyph "latn/Iota.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.capital
-			local xMiddle : xMiddleT df
+			local xMiddle : xMiddleT df true
 			include : Body df CAP xMiddle
 			include : Marks df CAP xMiddle
 			if Serif : include : tagged 'serifLT' : Serif df CAP xMiddle
@@ -217,7 +217,7 @@ glyph-block Letter-Latin-Lower-I : begin
 		create-glyph "l.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.b
-			local xMiddle : xMiddleT df
+			local xMiddle : xMiddleT df false
 			include : Body df Ascender xMiddle
 			include : Marks df Ascender xMiddle
 			if Serif : include : tagged 'serifLT' : Serif df Ascender xMiddle
@@ -231,14 +231,14 @@ glyph-block Letter-Latin-Lower-I : begin
 		create-glyph "lRTail.\(suffix)" : glyph-proc
 			local df : DivFrame adws
 			include [refer-glyph "l.\(suffix)"] AS_BASE ALSO_METRICS
-			include : RetroflexHook.mExt [xMiddleT df] 0
+			include : RetroflexHook.mExt [xMiddleT df false] 0
 
 		create-glyph "llWelsh.\(suffix)" : glyph-proc
 			local subDf : DivFrame 0.625 1.5
 
 			define [BodyShape] : union
-				Body subDf Ascender [xMiddleT subDf]
-				if Serif [tagged 'serifLT' : Serif subDf Ascender [xMiddleT subDf]] [no-shape]
+				Body subDf Ascender [xMiddleT subDf false]
+				if Serif [tagged 'serifLT' : Serif subDf Ascender [xMiddleT subDf false]] [no-shape]
 
 			include : BodyShape
 			include : with-transform [ApparentTranslate (Width - subDf.width) 0] [BodyShape]
@@ -268,12 +268,12 @@ glyph-block Letter-Latin-Lower-I : begin
 		create-glyph "lHighBar.\(suffix)" : glyph-proc
 			local df : DivFrame adws
 			include [refer-glyph "l.\(suffix)"] AS_BASE ALSO_METRICS
-			include : LetterBarOverlay.m.in [xMiddleT df] XH (Ascender - [if Serif Stroke 0])
+			include : LetterBarOverlay.m.in [xMiddleT df false] XH (Ascender - [if Serif Stroke 0])
 
 		create-glyph "grek/tau.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.e
-			local xMiddle : xMiddleT df
+			local xMiddle : xMiddleT df true
 			include : Body df XH xMiddle
 			include : Marks df XH xMiddle
 			include : HBar.t df.leftSB df.rightSB XH
@@ -281,15 +281,15 @@ glyph-block Letter-Latin-Lower-I : begin
 
 		create-glyph "cyrl/Twe/middle.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
-			include : Body df CAP [XMiddle.Center df]
-			include : Marks df CAP [XMiddle.Center df]
+			include : Body df CAP [XMiddle.Center df false]
+			include : Marks df CAP [XMiddle.Center df false]
 			currentGlyph.deleteBaseAnchor 'trailing'
 			set-mark-anchor 'cvDecompose' (df.width / 2) CAP
 
 		create-glyph "cyrl/twe/middle.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
-			include : Body df XH [XMiddle.Center df]
-			include : Marks df XH [XMiddle.Center df]
+			include : Body df XH [XMiddle.Center df true]
+			include : Marks df XH [XMiddle.Center df true]
 			currentGlyph.deleteBaseAnchor 'trailing'
 			set-mark-anchor 'cvDecompose' (df.width / 2) XH
 
