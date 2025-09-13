@@ -1,5 +1,18 @@
 ## Modifications since last major version
 
+### 33.3.0
+
+* Refine shape of the following characters:
+  - LATIN SMALL LETTER SCHWA WITH HOOK (`U+025A`).
+  - LATIN SMALL LETTER REVERSED OPEN E WITH HOOK (`U+025D`).
+  - LATIN SMALL LETTER SCHWA WITH RETROFLEX HOOK (`U+1D95`).
+  - LEFT CURLY BRACKET UPPER HOOK (`U+23A7`) ... RIGHT CURLY BRACKET LOWER HOOK (`U+23AD`) (#2835).
+* Add Characters:
+  - LATIN CAPITAL LETTER PHARYNGEAL VOICED FRICATIVE (`U+A7CE`).
+  - LATIN SMALL LETTER PHARYNGEAL VOICED FRICATIVE (`U+A7CF`).
+  - MODIFIER LETTER CAPITAL S (`U+A7F1`).
+
+
 ### 33.2.9
 
 * Refine shape of the following characters:

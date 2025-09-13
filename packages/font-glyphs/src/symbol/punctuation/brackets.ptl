@@ -237,18 +237,20 @@ glyph-block Symbol-Punctuation-Brackets : begin
 			include : FlipAround Middle SymbolMid
 			Joining.set currentGlyph Joining.Classes.Left
 
-	define Brace : namespace
+	define [BraceT _dpOverride] : namespace
+		local dp : Object.assign {.} DesignParameters : fallback _dpOverride {.}
+
 		define [Dim] : begin
-			local parenCenter [mix SB RightSB [mix DesignParameters.braceInside DesignParameters.braceOutside 0.5]]
+			local parenCenter [mix SB RightSB [mix dp.braceInside dp.braceOutside 0.5]]
 			local radius    : Math.min
-				[mix SB RightSB DesignParameters.braceInside] - parenCenter
+				[mix SB RightSB dp.braceInside] - parenCenter
 				(ParenTop - SymbolMid - Stroke * 1.5) / 2
 			return : object parenCenter radius
 
 		export : define [UpperHalfShape top bottom sw ext] : glyph-proc
 			define [object parenCenter radius] : Dim
-			define xIns : mix SB RightSB DesignParameters.braceInside
-			define xTip : mix SB RightSB DesignParameters.braceOutside
+			define xIns : mix SB RightSB dp.braceInside
+			define xTip : mix SB RightSB dp.braceOutside
 			include : dispiro
 				flat (xIns + [fallback ext 0]) top [widths.center.heading sw Leftward]
 				curl (xIns - TINY) top [heading Leftward]
@@ -260,8 +262,8 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 		export : define [LowerHalfShape top bottom sw ext] : glyph-proc
 			define [object parenCenter radius] : Dim
-			define xIns : mix SB RightSB DesignParameters.braceInside
-			define xTip : mix SB RightSB DesignParameters.braceOutside
+			define xIns : mix SB RightSB dp.braceInside
+			define xTip : mix SB RightSB dp.braceOutside
 			include : dispiro
 				flat (xIns + [fallback ext 0]) bottom [widths.center.heading sw Leftward]
 				curl (xIns - TINY) bottom [heading Leftward]
@@ -298,16 +300,16 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 		export : define [CurlyShape sw pFlatIn pFlatOut ext] : glyph-proc
 			local hs : sw / 2
-			local xIns : mix SB RightSB DesignParameters.braceInside
-			local xOus : mix SB RightSB DesignParameters.braceOutside
-			local m1   : mix xIns xOus (DesignParameters.braceCurlyM1 * (1 + 0.5 * pFlatIn))
-			local m2   : mix xIns xOus (DesignParameters.braceCurlyM2 * (1 + 0.5 * pFlatOut))
+			local xIns : mix SB RightSB dp.braceInside
+			local xOus : mix SB RightSB dp.braceOutside
+			local m1   : mix xIns xOus (dp.braceCurlyM1 * (1 + 0.5 * pFlatIn))
+			local m2   : mix xIns xOus (dp.braceCurlyM2 * (1 + 0.5 * pFlatOut))
 			local braceRadiusLowLimit : (ParenTop - SymbolMid - sw) * (1 / 3) + hs
 			local radius1 : (sw / 16) + [mix [Math.min (xIns - m1) braceRadiusLowLimit] sw (0.75 * pFlatIn)]
 			local radius2 : (sw / 16) + [mix [Math.min (m2 - xOus) braceRadiusLowLimit] sw (0.75 * pFlatOut)] - hs
 			local ess : mix sw (EssUpper * sw / Stroke) 0.25
-			local top : mix SymbolMid ParenTop (1 + DesignParameters.braceOvershoot)
-			local bot : mix SymbolMid ParenBot (1 + DesignParameters.braceOvershoot)
+			local top : mix SymbolMid ParenTop (1 + dp.braceOvershoot)
+			local bot : mix SymbolMid ParenBot (1 + dp.braceOvershoot)
 
 			local flatLengthIn  : Math.max 0.1 : pFlatIn * (xIns - xOus)
 			local flatLengthOut : Math.max 0.1 : pFlatOut * (xIns - xOus)
@@ -335,6 +337,11 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				flat (xOus + flatLengthOut) (SymbolMid - (sw - fine) / 2) [widths.center.heading fine Leftward]
 				curl xOus (SymbolMid - (sw - fine) / 2) [heading Leftward]
 
+	define Brace : BraceT
+	define BraceLarge : BraceT {
+		.braceInside  [mix DesignParameters.braceInside  (1 - DesignParameters.braceOutside) 0.5]
+		.braceOutside [mix DesignParameters.braceOutside (1 - DesignParameters.braceInside ) 0.5]
+	}
 
 	do "Brace glyphs"
 		do "Normal"
@@ -357,22 +364,22 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 			create-glyph 'braceLeftUpper' 0x23A7 : glyph-proc
 				include : ForceUpright
-				include : Brace.UpperThirdShape top bot Stroke
+				include : BraceLarge.UpperThirdShape top bot Stroke
 			turned 'braceRightLower' 0x23AD 'braceLeftUpper' Middle SymbolMid
 
 			create-glyph 'braceLeftLower' 0x23A9 : glyph-proc
 				include : ForceUpright
-				include : Brace.LowerThirdShape top bot Stroke
+				include : BraceLarge.LowerThirdShape top bot Stroke
 			turned 'braceRightUpper' 0x23AB 'braceLeftLower' Middle SymbolMid
 
 			create-glyph 'braceLeftMiddle' 0x23A8 : glyph-proc
 				include : ForceUpright
-				include : Brace.CenterThirdShape top bot Stroke
+				include : BraceLarge.CenterThirdShape top bot Stroke
 			turned 'braceRightMiddle' 0x23AC 'braceLeftMiddle' Middle SymbolMid
 
 			create-glyph 'braceExtension' 0x23AA : glyph-proc
 				include : ForceUpright
-				include : Brace.ExtensionShape top bot Stroke
+				include : BraceLarge.ExtensionShape top bot Stroke
 
 			create-glyph 'whiteBraceLeft.straight' : glyph-proc
 				local fine : AdviceStroke 4

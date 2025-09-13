@@ -13,51 +13,44 @@ glyph-block Letter-Latin-Lower-M : begin
 	glyph-block-import Letter-Shared-Shapes : MidHook CyrDescender PalatalHook EngHook
 	glyph-block-import Letter-Shared-Shapes : UpwardHookShape SerifFrame
 
-	define [SmallMSmooth df] : df.adws * (0.5 * SmallArchDepth + 0.375 * Stroke)
-	define [SmallMShoulderSpiro] : with-params [left right top bottom width fine df coBottom] : glyph-proc
-		local fix : TanSlope * [HSwToV Stroke] * width / Stroke
-		local sm : [SmallMSmooth df] + fix / 2
+	define [SmallMSmoothA df] [df.slice 3 2].smallArchDepthA
+	define [SmallMSmoothB df] [df.slice 3 2].smallArchDepthB
+	define [SmallMShoulderSpiro] : with-params [left right fine top bottom ada adb stroke leftY0] : glyph-proc
+		local fix : HSwToV : TanSlope * stroke
 		include : spiro-outline
-			corner (right - [HSwToV width]) [Math.min (top - sm - TINY) bottom]
-			curl   (right - [HSwToV width]) (top - sm + fix)
+			corner (right - [HSwToV stroke]) bottom
+			curl   (right - [HSwToV stroke]) [Math.max (top - adb + fix) (bottom + TINY)]
 			arcvh 8
-			g2     [mix left (right - [HSwToV width]) 0.5] (top - O - width)
+			g2     [mix (right - [HSwToV stroke]) (left + [HSwToV fine]) 0.5] ((top - O) - stroke)
 			archv 8
-			flat   left (top - sm - fix)
-			corner left (top - sm - fix - 1)
-			if (coBottom != nothing)
-				list [corner left coBottom] [corner (left - fine) coBottom]
-				list
-			corner (left - fine) (top - sm - 1)
-			curl   (left - fine) (top - sm)
+			flat   (left + [HSwToV fine]) [Math.max (top - ada - fix) ([if (leftY0 != nothing) leftY0 bottom] + TINY)]
+			corner (left + [HSwToV fine]) [if (leftY0 != nothing) leftY0 [Math.max ((top - ada - fix) - TINY) bottom]]
+			corner left                   [if (leftY0 != nothing) leftY0 [Math.max ((top - ada)       - TINY) bottom]]
+			curl   left                   [Math.max (top - ada)       ([if (leftY0 != nothing) leftY0 bottom] + TINY)]
 			arcvh 8
-			g2     [mix (left - [HSwToV fine]) right 0.5] (top - O)
+			g2     [mix left right 0.5] (top - O)
 			archv 8
-			flat   right (top - sm)
-			corner right [Math.min (top - sm - TINY) bottom]
+			flat   right [Math.max (top - adb) (bottom + TINY)]
+			corner right bottom
 			close
 
-	define [RevSmallMShoulderSpiro] : with-params [left right top bottom width fine df coBottom] : glyph-proc
-		local fix : TanSlope * [HSwToV Stroke] * width / Stroke
-		local sm : [SmallMSmooth df] - fix / 2
+	define [RevSmallMShoulderSpiro] : with-params [left right fine top bottom ada adb stroke rightY0] : glyph-proc
+		local fix : HSwToV : TanSlope * stroke
 		include : spiro-outline
-			corner (left + [HSwToV width]) [Math.min (top - sm - TINY) bottom]
-			curl   (left + [HSwToV width]) (top - sm - fix)
+			corner (left + [HSwToV stroke]) bottom
+			curl   (left + [HSwToV stroke]) [Math.max (top - ada - fix) (bottom + TINY)]
 			arcvh 8
-			g2     [mix right (left + [HSwToV width]) 0.5] (top - O - width)
+			g2     [mix (left + [HSwToV stroke]) (right - [HSwToV fine]) 0.5] ((top - O) - stroke)
 			archv 8
-			flat   right (top - sm - fix)
-			corner right (top - sm - fix - 1)
-			if (coBottom != nothing)
-				list [corner right coBottom] [corner (right + fine) coBottom]
-				list
-			corner (right + fine) (top - sm - 1)
-			curl   (right + fine) (top - sm)
+			flat   (right - [HSwToV fine]) [Math.max (top - adb + fix) ([if (rightY0 != nothing) rightY0 bottom] + TINY)]
+			corner (right - [HSwToV fine]) [if (rightY0 != nothing) rightY0 [Math.max ((top - adb + fix) - TINY) bottom]]
+			corner right                   [if (rightY0 != nothing) rightY0 [Math.max ((top - adb)       - TINY) bottom]]
+			curl   right                   [Math.max (top - adb)       ([if (rightY0 != nothing) rightY0 bottom] + TINY)]
 			arcvh 8
-			g2     [mix (right + [HSwToV fine]) left 0.5] (top - O)
+			g2     [mix right left 0.5] (top - O)
 			archv 8
-			flat   left (top - sm)
-			corner left [Math.min (top - sm - TINY) bottom]
+			flat   left [Math.max (top - ada) (bottom + TINY)]
+			corner left bottom
 			close
 
 	define [SmallMTopLeftSerif df top lbot fFull] : begin
@@ -128,29 +121,32 @@ glyph-block Letter-Latin-Lower-M : begin
 		local fFull : MEnoughSpaceForFullSerifs df : fallback _mid df.middle
 		include : SmallMBottomMotionRightSerif df top rbot fFull
 
+	define [SmallMShortLegHeight top df] : (top - df.mvs) * 0.45
+	define [SmallMSmoothHeight top df] : top - [SmallMSmoothB df] - [HSwToV : TanSlope * df.mvs] - TINY
+
 	glyph-block-export SmallMArches
 	define [SmallMArches df top lbot mbot rbot _mid] : glyph-proc
 		local mid : fallback _mid df.middle
 		include : SmallMShoulderSpiro
-			df        -- df
-			left      -- (df.leftSB + [HSwToV df.mvs])
+			left      -- (df.leftSB + [HSwToV : df.mvs - df.shoulderFine])
 			right     -- (mid + [HSwToV : 0.5 * df.mvs])
+			fine      -- df.shoulderFine
 			top       -- top
 			bottom    -- mbot
-			width     -- df.mvs
-			fine      -- df.shoulderFine
+			ada       -- [SmallMSmoothA df]
+			adb       -- [SmallMSmoothB df]
+			stroke    -- df.mvs
 		include : SmallMShoulderSpiro
-			df        -- df
-			left      -- (mid + [HSwToV : 0.5 * df.mvs])
+			left      -- (mid + [HSwToV : 0.5 * df.mvs - df.shoulderFine])
 			right     -- df.rightSB
+			fine      -- df.shoulderFine
 			top       -- top
 			bottom    -- rbot
-			width     -- df.mvs
-			fine      -- df.shoulderFine
+			ada       -- [SmallMSmoothA df]
+			adb       -- [SmallMSmoothB df]
+			stroke    -- df.mvs
+			leftY0    -- ([SmallMSmoothHeight top df] + O)
 		include : tagged 'barL' : VBar.l df.leftSB lbot top df.mvs
-
-	define [SmallMShortLegHeight top df] : (top - df.mvs) * 0.45
-	define [SmallMSmoothHeight top df] : top - [SmallMSmooth df] - TanSlope * Stroke
 
 	glyph-block-export EarlessCornerDoubleArchSmallMShape
 	define [EarlessCornerDoubleArchSmallMShape df top lbot mbot rbot _mid] : glyph-proc
@@ -162,7 +158,7 @@ glyph-block Letter-Latin-Lower-M : begin
 				widths.rhs df.mvs
 				[if (sink == dispiro) g2 corner] (df.leftSB - offset) (top - DToothlessRise)
 				arch.rhs top (sw -- df.mvs) (blendPre -- {})
-				flat (xMidBarRightSide - offset) (top - [SmallMSmooth df]) [heading Downward]
+				flat (xMidBarRightSide - offset) [Math.max (top - [SmallMSmoothB df]) (mbot + TINY)] [heading Downward]
 				[if (sink == dispiro) curl corner] (xMidBarRightSide - offset) mbot [heading Downward]
 				if (sink == spiro-outline) { [corner (df.leftSB - offset) 0 ] } { }
 
@@ -173,7 +169,7 @@ glyph-block Letter-Latin-Lower-M : begin
 				g2 [mix df.rightSB xMidBarLeftSide 1.5] (top - 2 * DToothlessRise)
 				g2 xMidBarLeftSide (top - DToothlessRise)
 				arch.rhs top (sw -- df.mvs) (blendPre -- {})
-				flat df.rightSB (top - [SmallMSmooth df]) [heading Downward]
+				flat df.rightSB [Math.max (top - [SmallMSmoothB df]) (rbot + TINY)] [heading Downward]
 				curl df.rightSB rbot [heading Downward]
 
 		include : leftKnots dispiro 0
@@ -187,23 +183,25 @@ glyph-block Letter-Latin-Lower-M : begin
 		local mid : fallback _mid df.middle
 		include : union
 			RevSmallMShoulderSpiro
-				df        -- df
 				left      -- df.leftSB
-				right     -- (mid - [HSwToV : 0.5 * df.mvs])
+				right     -- (mid - [HSwToV : (0.5 - CThin) * df.mvs])
+				fine      -- (df.mvs * CThin)
 				top       -- top
 				bottom    -- lbot
-				coBottom  -- mbot
-				width     -- df.mvs
-				fine      -- (df.mvs * CThin)
+				ada       -- [SmallMSmoothA df]
+				adb       -- [SmallMSmoothB df]
+				stroke    -- df.mvs
+				rightY0   -- mbot
 			SmallMShoulderSpiro
-				df        -- df
-				left      -- (mid + [HSwToV : 0.5 * df.mvs])
+				left      -- (mid + [HSwToV : (0.5 - CThin) * df.mvs])
 				right     -- df.rightSB
+				fine      -- (df.mvs * CThin)
 				top       -- top
 				bottom    -- rbot
-				coBottom  -- mbot
-				width     -- df.mvs
-				fine      -- (df.mvs * CThin)
+				ada       -- [SmallMSmoothA df]
+				adb       -- [SmallMSmoothB df]
+				stroke    -- df.mvs
+				leftY0    -- mbot
 
 	define [EarlessSingleArchSmallMShape df top lbot mbot rbot _mid] : glyph-proc
 		local mid : fallback _mid df.middle
@@ -213,14 +211,14 @@ glyph-block Letter-Latin-Lower-M : begin
 			widths.rhs df.mvs
 			g4 df.leftSB (top - DToothlessRise)
 			arch.rhs top (sw -- df.mvs) (blendPre -- {})
-			flat df.rightSB [Math.max (top - [SmallMSmooth df]) (rbot + TINY)]
+			flat df.rightSB [Math.max (top - [SmallMSmoothB df]) (rbot + TINY)]
 			curl df.rightSB rbot [heading Downward]
 
 	glyph-block-export mShapeBodyImpl
-	define [mShapeBodyImpl df height body earless shortLeg tailed serifs] : glyph-proc
-		include : body df height 0 [if shortLeg [SmallMShortLegHeight height df] 0] [if tailed ([SmallMSmoothHeight height df] + O) 0]
-		if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight height df] (sw -- df.mvs)
-		include : serifs df height 0 [if shortLeg [SmallMShortLegHeight height df] 0] 0 tailed earless
+	define [mShapeBodyImpl df top body earless shortLeg tailed serifs] : glyph-proc
+		include : body df top 0 [if shortLeg [SmallMShortLegHeight top df] 0] [if tailed ([SmallMSmoothHeight top df] + O) 0]
+		if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight top df] (sw -- df.mvs)
+		include : serifs df top 0 [if shortLeg [SmallMShortLegHeight top df] 0] 0 tailed earless
 
 	glyph-block-export SmallMConfig
 	define SmallMConfig : SuffixCfg.weave
@@ -243,8 +241,8 @@ glyph-block Letter-Latin-Lower-M : begin
 			"topLeftAndBottomRightSerifed" { LtRbSerifs }
 
 	foreach { suffix { {Body earless} {shortLeg} {tailed} {Serifs} } } [pairs-of SmallMConfig] : do
-		define [mShapeBody df height] : begin
-			return : mShapeBodyImpl df height Body earless shortLeg tailed Serifs
+		define [mShapeBody df top] : begin
+			return : mShapeBodyImpl df top Body earless shortLeg tailed Serifs
 
 		create-glyph "m.\(suffix)" : glyph-proc
 			local df : include : dfM
@@ -351,14 +349,14 @@ glyph-block Letter-Latin-Lower-M : begin
 	select-variant 'meng' 0x271
 	select-variant 'mCrossedTail' 0xAB3A (follow -- 'meng')
 
-	define [turnMShapeBodyImpl df height body toothless tailed serifs] : glyph-proc
-		include : body df height 0 0 0
-		include : serifs df height 0 0 0 0 toothless
-		include : FlipAround df.middle (height / 2)
+	define [turnMShapeBodyImpl df top body toothless tailed serifs] : glyph-proc
+		include : body df top 0 0 0
+		include : serifs df top 0 0 0 0 toothless
+		include : FlipAround df.middle (top / 2)
 		if tailed : begin
 			eject-contour 'barL'
 			eject-contour 'serifLT'
-			include : RightwardTailedBar df.rightSB 0 height (sw -- df.mvs)
+			include : RightwardTailedBar df.rightSB 0 top (sw -- df.mvs)
 
 	define TurnMConfig : SuffixCfg.weave
 		object # body
