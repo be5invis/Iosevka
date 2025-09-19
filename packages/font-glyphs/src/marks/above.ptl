@@ -74,7 +74,7 @@ glyph-block Mark-Above : begin
 
 		create-glyph "tripleDotAbove.\(suffix)" : glyph-proc
 			set-width 0
-			local height : markExtend * [Math.sqrt 3]
+			local height : (2 * markExtend) * [Math.sqrt 0.75]
 			set-mark-anchor 'above' markMiddle XH markMiddle (aboveMarkStack + height)
 			set-base-anchor 'aboveBraceL' (markMiddle - markExtend) (aboveMarkMid + height / 2)
 			set-base-anchor 'aboveBraceR' (markMiddle + markExtend) (aboveMarkMid + height / 2)
@@ -82,6 +82,17 @@ glyph-block Mark-Above : begin
 			include : DrawAt (markMiddle - markExtend) aboveMarkMid (markDotsRadius * kdr)
 			include : DrawAt (markMiddle + markExtend) aboveMarkMid (markDotsRadius * kdr)
 			include : DrawAt markMiddle (aboveMarkMid + height) (markDotsRadius * kdr)
+
+		create-glyph "fallingDotsAbove.\(suffix)" : glyph-proc
+			set-width 0
+			local left  : markMiddle - markExtend * Math.SQRT1_2
+			local right : markMiddle + markExtend * Math.SQRT1_2
+			set-mark-anchor 'above' markMiddle XH markMiddle (aboveMarkStack + (right - left))
+			set-base-anchor 'aboveBraceL' left  (aboveMarkMid + (right - left) / 2)
+			set-base-anchor 'aboveBraceR' right (aboveMarkMid + (right - left) / 2)
+
+			include : DrawAt left (aboveMarkMid + (right - left)) (markDotsRadius * kdr)
+			include : DrawAt right aboveMarkMid                   (markDotsRadius * kdr)
 
 		create-glyph "elipsisAbove.\(suffix)" : glyph-proc
 			set-width 0
@@ -107,6 +118,7 @@ glyph-block Mark-Above : begin
 	select-variant 'dieresisAboveAlwaysUpright' (follow -- 'diacriticDot')
 	select-variant 'dialytikaAbove'             (follow -- 'diacriticDot')
 	select-variant 'tripleDotAbove'      0x1AB4 (follow -- 'diacriticDot')
+	select-variant 'fallingDotsAbove'    0x1ADC (follow -- 'diacriticDot')
 	select-variant 'elipsisAbove'        0x20DB (follow -- 'diacriticDot')
 	select-variant 'fourDotsAbove'       0x20DC (follow -- 'diacriticDot')
 	select-variant 'tittleAbove'       (shapeFrom -- "dotAbove") (follow -- 'tittle')
@@ -146,7 +158,14 @@ glyph-block Mark-Above : begin
 			include : DrawAt (markMiddle + markExtend * 1.7) aboveMarkMid (markDotsRadius * kdr)
 			include : DrawAt (markMiddle - markExtend * 1.7) aboveMarkMid (markDotsRadius * kdr)
 
+		create-glyph "ringDotAbove.\(suffix)" : glyph-proc
+			set-width 0
+			include : StdAnchors.wide
+			include : RingShape (markMiddle - markExtend) aboveMarkMid
+			include : DrawAt    (markMiddle + markExtend) aboveMarkMid (markDotsRadius * kdr)
+
 	select-variant 'dieresisRingAbove' 0x1AB1 (follow -- 'diacriticDot')
+	select-variant 'ringDotAbove' (follow -- 'diacriticDot')
 
 	create-glyph 'graveAbove' 0x300 : glyph-proc
 		set-width 0
@@ -248,7 +267,7 @@ glyph-block Mark-Above : begin
 			width   -- CaretCaronWidth
 			top     -- (aboveMarkTop + markFine * 0.7)
 			pL      -- 0
-			pR      -- 1
+			pR      -- (+1)
 			swMid   -- CaretCaronMidSw
 			swBar   -- (2 * markFine)
 
@@ -311,7 +330,7 @@ glyph-block Mark-Above : begin
 			width   -- CaretCaronWidth
 			bottom  -- aboveMarkBot
 			pL      -- 0
-			pR      -- 1
+			pR      -- (+1)
 			swMid   -- CaretCaronMidSw
 			swBar   -- (2 * markFine)
 
@@ -496,7 +515,7 @@ glyph-block Mark-Above : begin
 		set-width 0
 		include : StdAnchors.impl 'above' 0 1.5
 		include : dispiro
-			flat (SB - Width)      aboveMarkMid [widths.center : 2 * markHalfStroke]
+			flat (SB      - Width) aboveMarkMid [widths.center : 2 * markHalfStroke]
 			curl (RightSB - Width) aboveMarkMid
 
 	create-glyph 'cyrl/ghe.SRB/overlineAbove' : glyph-proc
@@ -776,7 +795,7 @@ glyph-block Mark-Above : begin
 		set-width 0
 		include : StdAnchors.impl 'above' 0 1.5
 
-		include : VBar.m (SB - Width)      aboveMarkBot aboveMarkTop (markFine * 2)
+		include : VBar.m (SB      - Width) aboveMarkBot aboveMarkTop (markFine * 2)
 		include : VBar.m (RightSB - Width) aboveMarkBot aboveMarkTop (markFine * 2)
 		include : HBar.t (SB - Width) (RightSB - Width) aboveMarkTop (markFine * 2)
 
@@ -1176,18 +1195,18 @@ glyph-block Mark-Above : begin
 		local depth : 0 - Descender - markStroke
 		local fullExt : (7 / 16) * depth + 0.125 * markStress
 		local extR : 0.25 * fullExt
-		local extL : 0.5 * fullExt + 0.375 * markStroke + [Math.max (0.125 * markExtend) (1.5 * TanSlope * markStroke)]
+		local extL : 0.5 * fullExt + 0.375 * markStroke + [Math.max (0.125 * markExtend) (TanSlope * 1.5 * markStroke)]
 
 		local turnSlope : 0.5 * ((markStroke - fine) / markStroke - (ArchDepthB - ArchDepth) / ArchDepth)
 
 		include : intersection
 			MaskAbove (XH + O)
 			dispiro
-				g4 (markMiddle + [mix extR (-extL) 0.75]) XH [widths.rhs.heading fine Rightward]
+				g4 (markMiddle + [mix (+extR) (-extL) 0.75]) XH [widths.rhs.heading fine Rightward]
 				alsoThru 0.5 (0.375 - 0.2 * markStroke / depth) [widths.rhs : mix fine markStroke 0.25]
 				g4.up.mid (markMiddle + extR) (XH + 0.75 * depth) [widths.rhs.heading markStroke {.x (-HVContrast) .y (-turnSlope)}]
 				arcvh [widths.rhs markStroke]
-				g4 (markMiddle + [mix extR (-extL) 0.625]) (XH + depth - O) [heading Leftward]
+				g4 (markMiddle + [mix (+extR) (-extL) 0.625]) (XH + depth - O) [heading Leftward]
 				g4 (markMiddle - extL) (XH + depth - 0.5 * O) [heading Leftward]
 
 	create-glyph 'dblBreveAbove' 0x1AC7 : glyph-proc
@@ -1195,7 +1214,7 @@ glyph-block Mark-Above : begin
 		include : StdAnchors.wide
 
 		local sw : [AdviceStroke 3.5] * (markStroke / Stroke)
-		local extend : (aboveMarkTop - aboveMarkBot - 0.5 * markStroke) * 1.25
+		local extend : ((aboveMarkTop - aboveMarkBot) - markHalfStroke) * 1.25
 
 		include : dispiro
 			g4.down.start (markMiddle - extend) aboveMarkTop [widths.center.heading sw Downward]
@@ -1215,7 +1234,7 @@ glyph-block Mark-Above : begin
 		include : StdAnchors.wide
 
 		local sw : [AdviceStroke 3.5] * (markStroke / Stroke)
-		local extend : (aboveMarkTop - aboveMarkBot - 0.5 * markStroke) * 1.25
+		local extend : ((aboveMarkTop - aboveMarkBot) - markHalfStroke) * 1.25
 
 		include : dispiro
 			g4.down.start (markMiddle - extend) aboveMarkTop [widths.center.heading sw Downward]
@@ -1230,7 +1249,7 @@ glyph-block Mark-Above : begin
 		include : StdAnchors.wide
 
 		local sw : [AdviceStroke 3.5] * (markStroke / Stroke)
-		local extend : (aboveMarkTop - aboveMarkBot - 0.5 * markStroke) * 1.25
+		local extend : ((aboveMarkTop - aboveMarkBot) - markHalfStroke) * 1.25
 
 		include : HBar.t (markMiddle - extend - 0.5 * markStress) markMiddle aboveMarkTop sw
 		include : dispiro
