@@ -60,7 +60,7 @@ glyph-block Letter-Latin-Lower-A : begin
 				[if isMask corner flat] (df.rightSB + O) barTop [heading Leftward]
 				curl [mix df.rightSB df.middle 0.9] barTop
 				archv
-				g4 (df.leftSB + OX) (bowlArcY1 - [HSwToV : SmoothAdjust * leftSlopeS]) [heading {.x HVContrast .y leftSlope}]
+				g4 (df.leftSB + OX) (bowlArcY1 - SmoothAdjust * [HSwToV leftSlopeS]) [heading {.x HVContrast .y leftSlope}]
 				match kind
 					0 : list
 						arch.lhs 0 (sw -- stroke) (swAfter -- df.shoulderFine)
@@ -72,7 +72,7 @@ glyph-block Letter-Latin-Lower-A : begin
 					2 : list
 						arch.lhs 0 (sw -- stroke)
 						flat df.rightSB [Math.min bowlArcY2 rise]
-						curl df.rightSB (rise + [HSwToV : stroke * TanSlope] + TINY) [heading Upward]
+						curl df.rightSB (rise + [HSwToV : Math.abs : stroke * TanSlope] + TINY) [heading Upward]
 
 		export : define [Arc df kind rise _sw _exd] : ADoubleStoreyArcT df dispiro kind rise
 			fallback _sw : ADoubleStoreyStroke df
@@ -88,7 +88,7 @@ glyph-block Letter-Latin-Lower-A : begin
 
 		export : define [Serifed df hookStyle sw] : union
 			Serifless  df hookStyle sw
-			begin [SerifFrame.fromDf df XH 0].rb.outer
+			begin [SerifFrame.fromDf df XH 0 (swRef -- [fallback sw : ADoubleStoreyStroke df]) (swSerif -- df.mvs)].rb.outer
 
 		export : define [Tailed df hookStyle sw] : union
 			HookAndBar df hookStyle (XH - [ADoubleStoreySmoothB df] + O) sw
@@ -199,11 +199,11 @@ glyph-block Letter-Latin-Lower-A : begin
 				fine  -- (ShoulderFine * (sw / Stroke))
 				ada   -- ada
 				adb   -- adb
-			include : bar df (top - sw / 2) sw
+			include : bar df (top - HalfStroke) sw
 			include : spiro-outline
 				corner  df.rightSB                 top
-				corner  df.rightSB                (top - sw / 2)
-				corner (df.rightSB - [HSwToV sw]) (top - sw / 2)
+				corner  df.rightSB                (top - HalfStroke)
+				corner (df.rightSB - [HSwToV sw]) (top - HalfStroke)
 		export : define [EarlessCornerBody df top bar _sw] : glyph-proc
 			local sw : fallback _sw df.mvs
 			local ada : df.archDepthAOf SmallArchDepth sw
@@ -239,22 +239,22 @@ glyph-block Letter-Latin-Lower-A : begin
 			include : VBar.r df.rightSB 0 top sw
 		export : define [TopSerifedBar df top sw] : glyph-proc
 			include : SeriflessBar df top sw
-			local sf : SerifFrame.fromDf df top 0 (swSerif -- sw)
+			local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
 			include sf.rt.outer
 		export : define [BottomSerifedBar df top sw] : glyph-proc
 			include : SeriflessBar df top sw
-			local sf : SerifFrame.fromDf df top 0 (swSerif -- sw)
+			local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
 			include sf.rb.outer
 		export : define [DoubleSerifedBar df top sw] : glyph-proc
 			include : SeriflessBar df top sw
-			local sf : SerifFrame.fromDf df top 0 (swSerif -- sw)
+			local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
 			include : composite-proc sf.rt.outer sf.rb.outer
 		export : define [TailedBar df top sw] : glyph-proc
 			set-base-anchor 'trailing' (df.rightSB + SideJut) 0
 			include : RightwardTailedBar df.rightSB 0 top sw
 		export : define [TailedSerifedBar df top sw] : glyph-proc
 			include : TailedBar df top sw
-			local sf : SerifFrame.fromDf df top 0 (swSerif -- sw)
+			local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
 			include sf.rt.outer
 
 	glyph-block-export SingleStoreyConfig
