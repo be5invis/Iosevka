@@ -32,9 +32,8 @@ glyph-block Letter-Latin-Upper-L : begin
 		serifed       { 2 }
 
 	foreach { suffix { serifGrade } } [Object.entries LConfig] : do
-		local df : DivFrame 1
 		create-glyph "L.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame 1
 			include : df.markSet.capital
 			include : LeaningAnchor.Above.VBar.l [LBarLeftX df]
 			include : LShape df CAP serifGrade Stroke
@@ -43,21 +42,21 @@ glyph-block Letter-Latin-Upper-L : begin
 				mix Stroke CAP 0.5
 
 		create-glyph "smcpL.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame 1
 			include : df.markSet.e
 			include : LeaningAnchor.Above.VBar.l [LBarLeftX df]
 			include : LShape df XH serifGrade Stroke
 
 		create-glyph "LLWelsh.\(suffix)" : glyph-proc
-			set-width df.width
+			local df : include : DivFrame 1
 			include : df.markSet.capital
 
 			local sw : AdviceStroke 4
-			local gap : Math.max (Width / 8) [AdviceStroke 8]
+			local gap : Math.max (Width / 8) : AdviceStroke 8
 
 			include : LShape df CAP serifGrade sw
 			include : intersection
-				MaskLeft RightSB
+				MaskLeft df.rightSB
 				MaskAbove sw
 				with-transform [ApparentTranslate ([HSwToV sw] + gap) 0]
 					LShape df CAP serifGrade sw
@@ -75,17 +74,9 @@ glyph-block Letter-Latin-Upper-L : begin
 	CreateTurnedLetter 'turnL' 0xA780 'L' HalfAdvance (CAP / 2)
 	CreateTurnedLetter 'turnL/sansSerif' 0x2142 'L/sansSerif' HalfAdvance (CAP / 2)
 
-	create-glyph 'mathbb/L' 0x1D543 : glyph-proc
-		local df : include : DivFrame 1
-		include : df.markSet.capital
-		include : VBar.l [LBarLeftX df] 0 CAP BBS
-		include : HBar.b ([LBarLeftX df] - O) [LRightX df] 0 BBS
-		include : VBar.l ([LBarLeftX df] + BBD) 0 CAP BBS
-		include : HBar.t [LBarLeftX df] ([LBarLeftX df] + BBD) CAP BBS
-
 	derive-multi-part-glyphs 'Lcaron' 0x13D { 'L' 'commaAbove' } : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
-		include : with-transform [Translate (Width + (RightSB - SB) * 0.375) 0]
+		include : with-transform [Translate ([mix SB RightSB 0.875] - markMiddle) 0]
 			refer-glyph mark
 		include [refer-glyph base] AS_BASE ALSO_METRICS
 
@@ -94,7 +85,7 @@ glyph-block Letter-Latin-Upper-L : begin
 		local middle : mix Stroke top 0.5
 		return : dispiro
 			flat [mix 0 SB 0.5] (middle - LongJut * 0.4) [widths.center : 2 * fine]
-			curl (1.6 * LongJut + [mix 0 SB 0.5]) (middle + LongJut * 0.4)
+			curl ([mix 0 SB 0.5] + 1.6 * LongJut) (middle + LongJut * 0.4)
 
 	derive-glyphs 'LSlash' 0x141 'L' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
@@ -108,7 +99,7 @@ glyph-block Letter-Latin-Upper-L : begin
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : new-glyph : glyph-proc
 			include : refer-glyph "tildeOver"
-			include : ApparentTranslate ([LBarLeftX : DivFrame 1] + [HSwToV Stroke] / 2 - markMiddle) (CAP * 0.525 - XH / 2)
+			include : ApparentTranslate ([LBarLeftX : DivFrame 1] + [HSwToV HalfStroke] - markMiddle) (CAP * 0.525 - XH / 2)
 
 	create-glyph 'LBarOverlay'
 		LetterBarOverlay.l.in [LBarLeftX : DivFrame 1] 0 CAP
@@ -125,4 +116,12 @@ glyph-block Letter-Latin-Upper-L : begin
 	derive-composites 'LDoubleBar' 0x2C60 'L' 'LDoubleBarOverlay'
 	derive-composites 'LBelt' 0xA7AD 'L' 'LBeltOverlay'
 	derive-composites 'smcpLBelt' 0x1DF04 'smcpL' 'smcpLBeltOverlay'
-	derive-composites 'LDot' 0x13F 'L' 'LDotDot'
+	derive-composites 'LDot' 0x13F 'L' 'LDot/dot'
+
+	create-glyph 'mathbb/L' 0x1D543 : glyph-proc
+		local df : include : DivFrame 1
+		include : df.markSet.capital
+		include : VBar.l [LBarLeftX df] 0 CAP BBS
+		include : HBar.b ([LBarLeftX df] - O) [LRightX df] 0 BBS
+		include : VBar.l ([LBarLeftX df] + BBD) 0 CAP BBS
+		include : HBar.t [LBarLeftX df] ([LBarLeftX df] + BBD) CAP BBS
