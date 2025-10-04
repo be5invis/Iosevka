@@ -2,6 +2,7 @@
 $$include '../meta/macros.ptl'
 
 import [mix clamp fallback] from "@iosevka/util"
+import [Box] from "@iosevka/geometry/box"
 import [Joining NeqLigationSlashDotted] from "@iosevka/glyph/relation"
 import [DesignParameters] from "../meta/aesthetics.mjs"
 
@@ -13,6 +14,7 @@ glyph-block Symbol-Ligation : begin
 	glyph-block-import Symbol-Math-Relation-Common : LessSlope EqualHalfSpace EqualHoleWidth
 	glyph-block-import Symbol-Math-Relation-Equal : EqualShape EqualHole IdentShape IdentHole
 	glyph-block-import Symbol-Math-Arith : PlusShape JunctDiamond
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim GeometricSizes ConvexPolygonOutline
 
 	local arrowheadsKern : (2 / 3) * [clamp 0 (Width * 0.4) (Width - OperatorStroke * 3)]
 
@@ -467,3 +469,24 @@ glyph-block Symbol-Ligation : begin
 		create-glyph 'greaterArrow' : composite-proc
 			refer-glyph 'hyphen.lig.jp'
 			refer-glyph 'greater'
+
+	do 'Markdown checkboxes'
+		define borderSw : AdviceStroke 3.5
+		define box : new Box BgTkTop BgTkBot [mix SB RightSB 0.375] [mix SB RightSB 0.625]
+
+		create-glyph 'markdownCheckBox/leftHalfBorder' : glyph-proc
+			include : VBar.l box.left box.bot box.top borderSw
+			include : HBar.t box.left (1.51 * Width) box.top borderSw
+			include : HBar.b box.left (1.51 * Width) box.bot borderSw
+
+		create-glyph 'markdownCheckBox/rightHalfBorder' : glyph-proc
+			include : VBar.r box.right box.bot box.top borderSw
+			include : HBar.t (-0.51 * Width) box.right box.top borderSw
+			include : HBar.b (-0.51 * Width) box.right box.bot borderSw
+
+		create-glyph 'markdownCheckBox/cross' : glyph-proc
+			local gap : Math.max (Width / 12) [AdviceStroke 6]
+			local innerBox : [box.pad : borderSw + gap].withWidth (RightSB - SB)
+			include : intersection [Rect.fromBox innerBox] : union
+				ExtLineCenter 4 Stroke (box.xMid - box.height) (box.yMid - box.height) (box.xMid + box.height) (box.yMid + box.height)
+				ExtLineCenter 4 Stroke (box.xMid - box.height) (box.yMid + box.height) (box.xMid + box.height) (box.yMid - box.height)
