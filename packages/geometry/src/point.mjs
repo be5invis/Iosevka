@@ -6,10 +6,28 @@ export class Vec2 {
 		this.y = y;
 	}
 
+	clone() {
+		return new Vec2(this.x, this.y);
+	}
+	add(v2) {
+		return this.addScale(1, v2);
+	}
+	addScale(scale, v2) {
+		return new Vec2(this.x + scale * v2.x, this.y + scale * v2.y);
+	}
+	scale(t) {
+		return new Vec2(t * this.x, t * this.y);
+	}
+	mix(v2, t) {
+		return new Vec2(mix(this.x, v2.x, t), mix(this.y, v2.y, t));
+	}
+	round(d) {
+		return new Vec2(Math.round(d * this.x) / d, Math.round(d * this.y) / d);
+	}
+
 	static from(z) {
 		return new Vec2(z.x, z.y);
 	}
-
 	static scaleFrom(s, z) {
 		return new Vec2(s * z.x, s * z.y);
 	}
@@ -21,11 +39,9 @@ export class Point {
 		this.x = x;
 		this.y = y;
 	}
-	get on() {
-		throw new Error("Unreachable");
-	}
-	get cubic() {
-		throw new Error("Unreachable");
+
+	clone() {
+		return new Point(this.type, this.x, this.y);
 	}
 	add(z2) {
 		return this.addScale(1, z2);
@@ -42,6 +58,7 @@ export class Point {
 	round(d) {
 		return new Point(this.type, Math.round(d * this.x) / d, Math.round(d * this.y) / d);
 	}
+
 	static from(type, z) {
 		return new Point(type, z.x || 0, z.y || 0);
 	}
