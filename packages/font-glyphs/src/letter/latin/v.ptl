@@ -207,47 +207,54 @@ glyph-block Letter-Latin-V : begin
 			include [refer-glyph "v.\(suffix)"] AS_BASE ALSO_METRICS
 			include : PalatalHook.r
 				xLink -- Middle
-				x -- (Middle + [HSwToV HalfStroke] + [PalatalHook.adviceGap Stroke])
-				y -- 0
+				x     -- (Middle + [HSwToV HalfStroke] + [PalatalHook.adviceGap Stroke])
+				y     -- 0
 
 		create-glyph "VHookRight.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : VHookRightShape [DivFrame 1] fStraightBar CAP
-			include : Serifs [DivFrame 1] fStraightBar CAP
+			include : Serifs          [DivFrame 1] fStraightBar CAP
 			eject-contour 'serifRT'
 
 		create-glyph "vHookRight.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : VHookRightShape [DivFrame 1] fStraightBar XH
-			include : Serifs [DivFrame 1] fStraightBar XH
+			include : Serifs          [DivFrame 1] fStraightBar XH
 			eject-contour 'serifRT'
 
 		create-glyph "vLoop.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : VLoopShape [DivFrame 1] fStraightBar XH
-			include : Serifs [DivFrame 1] fStraightBar XH
+			include : Serifs     [DivFrame 1] fStraightBar XH
 			eject-contour 'serifLT'
 
 		create-glyph "cyrl/Uk.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			local vPartHeight : CAP * 0.45 + HalfStroke
-			include : with-transform [ApparentTranslate 0 (CAP - vPartHeight)] : glyph-proc
-				include : VHookRightShape [DivFrame 1] fStraightBar vPartHeight
-				include : Serifs [DivFrame 1] fStraightBar vPartHeight
-				eject-contour 'serifRT'
+			local yBarPos : CAP * 0.55
 
-			local oHeight : CAP - vPartHeight + Stroke + O
-			include : OShape oHeight 0 SB RightSB [AdviceStroke 2.75]
-			include : VBar.m Middle (0.5 * oHeight) oHeight [AdviceStroke 4]
+			local sw : AdviceStroke 2.75
+			include : OShape ((yBarPos + 0.5 * sw) + O) 0 SB RightSB sw ArchDepthA ArchDepthB
+
+			local fine : Math.min VJutStroke : VSwToH : 0.5 * ((RightSB - SB) - [HSwToV : 2 * sw])
+			include : VBar.m Middle [mix O (yBarPos + 0.5 * sw) 0.5] yBarPos fine
+
+			include : with-transform [ApparentTranslate 0 (yBarPos - 0.5 * sw)] : glyph-proc
+				include : VHookRightShape [DivFrame 1] fStraightBar (CAP - (yBarPos - 0.5 * sw))
+				include : Serifs          [DivFrame 1] fStraightBar (CAP - (yBarPos - 0.5 * sw))
+				eject-contour 'serifRT'
 
 		create-glyph "cyrl/ukUnblended.\(suffix)" : glyph-proc
 			include : MarkSet.b
-			local vPartHeight : Ascender * 0.45 + HalfStroke
-			include : with-transform [ApparentTranslate 0 (Ascender - vPartHeight)] : glyph-proc
-				include : VHookRightShape [DivFrame 1] fStraightBar vPartHeight
-				include : Serifs [DivFrame 1] fStraightBar vPartHeight
+			local yBarPos : Ascender * 0.55
+
+			local subDf : DivFrame (5 / 6) 2
+			include : with-transform [ApparentTranslate (0.5 * (Width - subDf.width)) 0]
+				OShape ((yBarPos + 0.5 * subDf.mvs) + O) 0 subDf.leftSB subDf.rightSB subDf.mvs subDf.smallArchDepthA subDf.smallArchDepthB
+
+			include : with-transform [ApparentTranslate 0 (yBarPos - 0.5 * subDf.mvs)] : glyph-proc
+				include : VHookRightShape [DivFrame 1] fStraightBar (Ascender - (yBarPos - 0.5 * subDf.mvs))
+				include : Serifs          [DivFrame 1] fStraightBar (Ascender - (yBarPos - 0.5 * subDf.mvs))
 				eject-contour 'serifRT'
-			include : OShape (Ascender - vPartHeight + Stroke + O) 0 SB RightSB
 
 	define VCursiveConfig : object
 		cursiveSerifless     { (1/24) false }
@@ -265,8 +272,8 @@ glyph-block Letter-Latin-V : begin
 			include [refer-glyph "v.\(suffix)"] AS_BASE ALSO_METRICS
 			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookAttach
 			include : PalatalHook.r
-				x -- attach.x
-				y -- 0
+				x       -- attach.x
+				y       -- 0
 				yAttach -- attach.y
 
 	select-variant 'V' 'V'
@@ -293,14 +300,14 @@ glyph-block Letter-Latin-V : begin
 	define [VScriptShape df top ada adb] : glyph-proc
 		include : dispiro
 			widths.lhs
-			flat df.leftSB top [heading Downward]
-			curl df.leftSB [Math.min (0 + adb) (top - TINY)]
+			flat df.leftSB  top [heading Downward]
+			curl df.leftSB  [Math.min (0 + adb) (top - TINY)]
 			arch.lhs 0
 			flat df.rightSB [Math.min (0 + ada) (top - Hook - HalfStroke - TINY)]
 			curl df.rightSB (top - Hook - HalfStroke) [heading Upward]
 		include : VerticalHook.r
-			x -- df.rightSB
-			y -- (top - Hook - HalfStroke)
+			x      -- df.rightSB
+			y      -- (top - Hook - HalfStroke)
 			xDepth -- ((df.middle + [HSwToV HalfStroke]) - df.rightSB)
 			yDepth -- (-Hook)
 
