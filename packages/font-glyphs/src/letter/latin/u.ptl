@@ -12,7 +12,8 @@ glyph-block Letter-Latin-U : begin
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared : CreateAccentedComposition SetGrekUpperTonos
 	glyph-block-import Letter-Shared-Shapes : uBowl RightwardTailedBar SerifFrame
-	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender RetroflexHook TopHook
+	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender CyrCurlDescender
+	glyph-block-import Letter-Shared-Shapes : RetroflexHook TopHook
 
 	glyph-block-export UShapeGroup
 	define [UShapeGroup ada adb] : namespace
@@ -50,6 +51,18 @@ glyph-block Letter-Latin-U : begin
 			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB [Math.min (adb + TINY) (yTL - 0)] top (sw -- sw)
 			include : tagged 'strokeR' : RightwardTailedBar df.rightSB 0 yTR (sw -- sw)
 
+		export : define [ToothlessCorner df top sw fHookLeft fShortLeg] : glyph-proc
+			local yTL : top - [if fHookLeft (TailY + HalfStroke) 0]
+			local yTR : if fShortLeg [mix [Math.min ada : YSmoothMidR top 0 ada adb] top 0.5] top
+			include : dispiro
+				widths.lhs sw
+				flat df.leftSB yTL [heading Downward]
+				curl df.leftSB [Math.min (0 + adb) (yTL - TINY)]
+				arch.lhs 0 (sw -- sw) (blendPost -- {})
+				g4 df.rightSB DToothlessRise
+			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB [Math.min (adb + TINY) (yTL - 0)] top (sw -- sw)
+			include : tagged 'strokeR' : VBar.r df.rightSB DToothlessRise yTR sw
+
 		export : define [ToothlessRounded df top sw fHookLeft fShortLeg] : glyph-proc
 			local yTL : top - [if fHookLeft (TailY + HalfStroke) 0]
 			local yTR : if fShortLeg [mix [Math.min ada : YSmoothMidR top 0 ada adb] top 0.5] top
@@ -61,18 +74,6 @@ glyph-block Letter-Latin-U : begin
 				flat df.rightSB [Math.min (0 + ada) (yTR - TINY)]
 				curl df.rightSB yTR [heading Upward]
 			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB [Math.min (adb + TINY) (yTL - 0)] top (sw -- sw)
-
-		export : define [ToothlessCorner df top sw fHookLeft fShortLeg] : glyph-proc
-			local yTL : top - [if fHookLeft (TailY + HalfStroke) 0]
-			local yTR : if fShortLeg [mix [Math.min ada : YSmoothMidR top 0 ada adb] top 0.5] top
-			include : dispiro
-				widths.lhs sw
-				flat df.leftSB yTL [heading Downward]
-				curl df.leftSB [Math.min (0 + adb) (yTL - TINY)]
-				arch.lhs 0 (sw -- sw) (blendPost -- {})
-				g4 df.rightSB DToothlessRise
-			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB [Math.min (adb + TINY) (yTL - 0)] top (sw -- sw)
-			include : VBar.r df.rightSB DToothlessRise yTR sw
 
 	define UUpper : UShapeGroup ArchDepthA ArchDepthB
 	define ULower : UShapeGroup SmallArchDepthA SmallArchDepthB
@@ -209,6 +210,12 @@ glyph-block Letter-Latin-U : begin
 			eject-contour 'serifRB'
 			include : CyrDescender.rSideJut RightSB 0
 
+		create-glyph "cyrl/tswe.italic.\(suffix)" : glyph-proc
+			include [refer-glyph "u.\(suffix)"] AS_BASE
+			include : MarkSet.p
+			eject-contour 'serifRB'
+			include : CyrCurlDescender.rSideJut RightSB 0
+
 		create-glyph "cyrl/tseRev.italic.\(suffix)" : glyph-proc
 			include [refer-glyph "u.\(suffix)"] AS_BASE
 			include : VBar.l SB 0 SmallArchDepthB [AdviceStroke 4]
@@ -224,6 +231,7 @@ glyph-block Letter-Latin-U : begin
 			include : Base  df XH Stroke
 			include : Slabs df XH Stroke
 			eject-contour 'serifRB'
+			eject-contour 'strokeR'
 			include : VBar.r df.rightSB Descender XH Stroke
 			if (Slabs !== no-shape) : begin
 				local sf : SerifFrame.fromDf df XH Descender
@@ -251,6 +259,7 @@ glyph-block Letter-Latin-U : begin
 			include : Slabs df XH Stroke
 			eject-contour 'serifLT'
 			eject-contour 'serifRB'
+			eject-contour 'strokeR'
 			include : VBar.r df.rightSB Descender XH Stroke
 			if (Slabs !== no-shape) : begin
 				local sf : SerifFrame.fromDf df XH Descender
@@ -264,6 +273,7 @@ glyph-block Letter-Latin-U : begin
 			include : Slabs df XH Stroke
 			eject-contour 'serifLT'
 			eject-contour 'serifRB'
+			eject-contour 'strokeR'
 			include : VBar.r df.rightSB 0 XH Stroke
 			include : RetroflexHook.rExt df.rightSB (Descender + TailY + HalfStroke) (yAttach -- 0)
 			include : LeaningAnchor.Below.VBar.r df.rightSB
@@ -288,35 +298,40 @@ glyph-block Letter-Latin-U : begin
 				include : Translate 0 (SB / 2)
 
 	select-variant 'U' 'U'
-	select-variant 'U/withTonos' (follow -- 'U')
 	link-reduced-variant 'U/sansSerif' 'U' MathSansSerif
+	select-variant 'U/withTonos' (follow -- 'U')
 	select-variant 'smcpU' 0x1D1C (follow -- 'U')
 
 	select-variant 'u' 'u'
 	link-reduced-variant 'u/sansSerif' 'u' MathSansSerif
 	select-variant 'u/descBase' (shapeFrom -- 'u')
+
+	select-variant 'turnh' 0x265
+
 	select-variant 'uShortLeg' 0xAB4E
 	select-variant 'uHookLeft' 0xAB52
 
-	select-variant 'grek/mu' 0x3BC
-	link-reduced-variant 'grek/mu/sansSerif' 'grek/mu' MathSansSerif
-	select-variant 'micro'   0xB5  (shapeFrom -- 'grek/mu')
-
-	select-variant 'cyrl/i.italic' (shapeFrom -- 'u')
-	select-variant 'cyrl/i.italic/descBase' (shapeFrom -- 'u')
-	alias 'cyrl/i.BGR' null 'cyrl/i.italic'
-
-	select-variant 'cyrl/tse.italic'
-	alias 'cyrl/tse.BGR' null 'cyrl/tse.italic'
-	select-variant 'cyrl/tseRev.italic'
-	select-variant 'cyrl/dzhe.italic'
-
-	select-variant 'turnh' 0x265
-	select-variant 'turnhHookLeft' 0x2AE
+	select-variant 'turnhHookLeft'      0x2AE
 	select-variant 'turnhHookLeftRTail' 0x2AF
 
 	select-variant 'uSideways' 0x1D1D (follow -- 'u')
 	select-variant 'uDieresisSideways/base' null (follow -- 'u')
+
+	select-variant 'grek/mu' 0x3BC
+	link-reduced-variant 'grek/mu/sansSerif' 'grek/mu' MathSansSerif
+	select-variant 'micro' 0xB5 (shapeFrom -- 'grek/mu')
+
+	select-variant 'cyrl/i.italic' (shapeFrom -- 'u')
+	select-variant 'cyrl/i.italic/descBase' (shapeFrom -- 'u')
+
+	select-variant 'cyrl/tse.italic'
+	select-variant 'cyrl/tseRev.italic'
+	select-variant 'cyrl/tswe.italic' (follow -- 'cyrl/tse.italic')
+
+	select-variant 'cyrl/dzhe.italic'
+
+	alias 'cyrl/i.BGR'   null 'cyrl/i.italic'
+	alias 'cyrl/tse.BGR' null 'cyrl/tse.italic'
 
 	derive-glyphs 'cyrl/ibreve.BGR' null 'cyrl/i.BGR' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
