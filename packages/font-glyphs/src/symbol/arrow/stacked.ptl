@@ -9,7 +9,7 @@ glyph-block Symbol-Arrow-Stacked : for-width-kinds WideWidth1
 	glyph-block-import Common-Derivatives
 	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowT MkArrowT
 
-	define dims : ArrowDims MosaicWidth MosaicWidthScalar
+	define dims : ArrowDims MosaicWidth
 	define Arrow : ArrowT dims
 	define MkArrow : MkArrowT dims
 
@@ -63,6 +63,24 @@ glyph-block Symbol-Arrow-Stacked : for-width-kinds WideWidth1
 	VCombine [MangleName 'uni2B7E'] [MangleUnicode 0x2B7E] [MangleName 'trigArrowBarLeft'] [MangleName 'trigArrowBarRight'] vcDist
 	HCombine [MangleName 'uni2B7F'] [MangleUnicode 0x2B7F] [MangleName 'trigArrowBarDown'] [MangleName 'trigArrowBarUp'] hcDist
 
+	define [VStackCentered newid unicode ids heights widths] : begin
+		local bWidths  : if [Array.isArray widths]  widths  : [Array ids.length].fill widths
+		local bHeights : if [Array.isArray heights] heights : [Array ids.length].fill heights
+
+		local maxWidth : Math.max.apply null bWidths
+		local totalHeight 0
+		foreach [i : range 0 ids.length] : set totalHeight : totalHeight + bHeights.(i)
+
+		local offsetY : totalHeight / 2
+		create-glyph newid unicode : glyph-proc
+			set-width maxWidth
+			foreach [i : range 0 ids.length] : do
+				include : with-transform
+					ApparentTranslate ((maxWidth - bWidths.(i)) / 2) (offsetY - (bHeights.(i) / 2))
+					refer-glyph ids.(i)
+				set offsetY : offsetY - bHeights.(i)
+
+	# Triple Stacked Arrows
 	create-glyph [MangleName 'uni21F6'] [MangleUnicode 0x21F6] : glyph-proc
 		set-width MosaicWidth
 		local distance : compactHeadSize * 2 - arrowSw
@@ -75,3 +93,12 @@ glyph-block Symbol-Arrow-Stacked : for-width-kinds WideWidth1
 		include : with-transform [ApparentTranslate 0 (+distance)] : refer-glyph : MangleName 'arrowLeftCompact'
 		include : refer-glyph : MangleName 'arrowLeftCompact'
 		include : with-transform [ApparentTranslate 0 (-distance)] : refer-glyph : MangleName 'arrowLeftCompact'
+
+	# These arrows are always wide. In force-monospace variants they will be deleted
+	if (MosaicWidthScalar > 1 && !para.forceMonospace) : do
+		VCombine 'uni1F8D0' 0x1F8D0 'longArrowRight' 'longArrowLeft' vcDist
+		VCombine 'uni1F8D1' 0x1F8D1 'longArrowRightHL' 'longArrowLeftHL' vcDist
+		VStackCentered 'uni1F8D2' 0x1F8D2 { 'longArrowRightHL' 'arrowLeftHL.NWID' } vcDist { MosaicWidth MosaicUnitWidth }
+		VStackCentered 'uni1F8D3' 0x1F8D3 { 'arrowRightHL.NWID' 'longArrowLeftHL' } vcDist { MosaicUnitWidth MosaicWidth }
+		VStackCentered 'uni1F8D4' 0x1F8D4 { 'longArrowLeftHR' 'arrowRightHR.NWID' } vcDist { MosaicWidth MosaicUnitWidth }
+		VStackCentered 'uni1F8D5' 0x1F8D5 { 'arrowLeftHR.NWID' 'longArrowRightHR' } vcDist { MosaicUnitWidth MosaicWidth }

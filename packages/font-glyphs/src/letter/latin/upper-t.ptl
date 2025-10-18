@@ -13,11 +13,11 @@ glyph-block Letter-Latin-Upper-T : begin
 	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateTurnedLetter
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay UpwardHookShape
-	glyph-block-import Letter-Shared-Shapes : CyrDescender SerifFrame FlatHookDepth LeftHook RetroflexHook
+	glyph-block-import Letter-Shared-Shapes : CyrDescender SerifFrame FlatHookDepth LeftHook RetroflexHook HalfRingDescender
 
 	define [TLeftX  df] : df.leftSB  + 0.75 * OX
 	define [TRightX df] : df.rightSB - 0.75 * OX
-	define [TShape df top doTopSerifs doBottomSerifs] : glyph-proc
+	define [TShape df top doTopSerifs doBottomSerifs doBottomSerifsRightHalfOnly] : glyph-proc
 		include : tagged 'strokeV' : VBar.m df.middle 0 top
 
 		local l : TLeftX  df
@@ -31,7 +31,8 @@ glyph-block Letter-Latin-Upper-T : begin
 			include : tagged 'serifLT' : VSerif.dl l top VJut
 		if doBottomSerifs : begin
 			include : tagged 'serifMB' : HSerif.rb df.middle 0 MidJutCenter
-			include : tagged 'serifMB' : HSerif.lb df.middle 0 MidJutCenter
+			if [not doBottomSerifsRightHalfOnly]
+				include : tagged 'serifMB' : HSerif.lb df.middle 0 MidJutCenter
 
 	define [TjeShape df top doTopSerifs] : glyph-proc
 		local left : [mix df.leftSB df.rightSB 0.3] + OX
@@ -162,6 +163,18 @@ glyph-block Letter-Latin-Upper-T : begin
 			include : TweUpperShape df XH doST doSB
 			set-base-anchor 'cvDecompose' (df.width / 2) XH
 
+		create-glyph "cyrl/Tsse.\(suffix)" : glyph-proc
+			local df : include : DivFrame adws
+			include : df.markSet.capDesc
+			include : TShape df CAP doST doSB true
+			include : HalfRingDescender (df.middle - [HSwToV : 0.5 * Stroke]) 0
+
+		create-glyph "cyrl/tsse.\(suffix)" : glyph-proc
+			local df : include : DivFrame adws
+			include : df.markSet.p
+			include : TShape df XH doST doSB true
+			include : HalfRingDescender (df.middle - [HSwToV : 0.5 * Stroke]) 0
+
 		create-glyph "currency/tengeSign.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.capital
@@ -199,6 +212,9 @@ glyph-block Letter-Latin-Upper-T : begin
 	select-variant 'cyrl/twe/upper' (follow -- 'T/rtailBase')
 	derive-composites 'cyrl/Twe' 0xA68C 'cyrl/Twe/upper' 'cyrl/Twe/middle'
 	derive-composites 'cyrl/twe' 0xA68D 'cyrl/twe/upper' 'cyrl/twe/middle'
+
+	select-variant 'cyrl/Tsse' 0xA690 (follow -- 'T')
+	select-variant 'cyrl/tsse' 0xA691 (follow -- 'T')
 
 	select-variant 'currency/tengeSign' 0x20B8 (follow -- 'T')
 

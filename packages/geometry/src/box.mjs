@@ -2,12 +2,16 @@ import { mix } from "@iosevka/util";
 
 export class Box {
 	constructor(t, b, l, r) {
-		this.top = t;
-		this.bot = this.bottom = b;
-		this.left = l;
-		this.right = r;
+		this.t = this.top = t;
+		this.b = this.bot = this.bottom = b;
+		this.l = this.left = l;
+		this.r = this.right = r;
+
 		this.xMid = this.xMiddle = mix(l, r, 0.5);
 		this.yMid = this.yMiddle = mix(b, t, 0.5);
+
+		this.height = t - b;
+		this.width = r - l;
 	}
 	withTop(t) {
 		return new Box(t, this.bottom, this.left, this.right);
@@ -28,6 +32,9 @@ export class Box {
 		return new Box(this.top - d, this.bottom + d, this.left, this.right);
 	}
 
+	pad(d) {
+		return new Box(this.top - d, this.bottom + d, this.left - d, this.right + d);
+	}
 	padLeft(d) {
 		return new Box(this.top, this.bottom, this.left + d, this.right);
 	}
@@ -39,6 +46,15 @@ export class Box {
 	}
 	padBottom(d) {
 		return new Box(this.top, this.bottom + d, this.left, this.right);
+	}
+
+	withWidth(w) {
+		const cx = this.xMid;
+		return new Box(this.top, this.bottom, cx - w / 2, cx + w / 2);
+	}
+	withHeight(h) {
+		const cy = this.yMid;
+		return new Box(cy + h / 2, cy - h / 2, this.left, this.right);
 	}
 
 	withXMix(pL, pR) {

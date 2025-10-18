@@ -203,51 +203,58 @@ glyph-block Letter-Latin-V : begin
 			include : VShape [DivFrame 1] fStraightBar XH Stroke
 			include : Serifs [DivFrame 1] fStraightBar XH
 
+		create-glyph "vPalatalHook.\(suffix)" : glyph-proc
+			include [refer-glyph "v.\(suffix)"] AS_BASE ALSO_METRICS
+			include : PalatalHook.r
+				xLink -- Middle
+				x     -- (Middle + [HSwToV HalfStroke] + [PalatalHook.adviceGap Stroke])
+				y     -- 0
+
 		create-glyph "VHookRight.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : VHookRightShape [DivFrame 1] fStraightBar CAP
-			include : Serifs [DivFrame 1] fStraightBar CAP
+			include : Serifs          [DivFrame 1] fStraightBar CAP
 			eject-contour 'serifRT'
 
 		create-glyph "vHookRight.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : VHookRightShape [DivFrame 1] fStraightBar XH
-			include : Serifs [DivFrame 1] fStraightBar XH
+			include : Serifs          [DivFrame 1] fStraightBar XH
 			eject-contour 'serifRT'
 
 		create-glyph "vLoop.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : VLoopShape [DivFrame 1] fStraightBar XH
-			include : Serifs [DivFrame 1] fStraightBar XH
+			include : Serifs     [DivFrame 1] fStraightBar XH
 			eject-contour 'serifLT'
 
 		create-glyph "cyrl/Uk.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			local vPartHeight : CAP * 0.45 + HalfStroke
-			include : with-transform [ApparentTranslate 0 (CAP - vPartHeight)] : glyph-proc
-				include : VHookRightShape [DivFrame 1] fStraightBar vPartHeight
-				include : Serifs [DivFrame 1] fStraightBar vPartHeight
-				eject-contour 'serifRT'
+			local yBarPos : CAP * 0.55
 
-			local oHeight : CAP - vPartHeight + Stroke + O
-			include : OShape oHeight 0 SB RightSB [AdviceStroke 2.75]
-			include : VBar.m Middle (0.5 * oHeight) oHeight [AdviceStroke 4]
+			local sw : AdviceStroke 2.75
+			include : OShape ((yBarPos + 0.5 * sw) + O) 0 SB RightSB sw ArchDepthA ArchDepthB
+
+			local fine : Math.min VJutStroke : VSwToH : 0.5 * ((RightSB - SB) - [HSwToV : 2 * sw])
+			include : VBar.m Middle [mix O (yBarPos + 0.5 * sw) 0.5] yBarPos fine
+
+			include : with-transform [ApparentTranslate 0 (yBarPos - 0.5 * sw)] : glyph-proc
+				include : VHookRightShape [DivFrame 1] fStraightBar (CAP - (yBarPos - 0.5 * sw))
+				include : Serifs          [DivFrame 1] fStraightBar (CAP - (yBarPos - 0.5 * sw))
+				eject-contour 'serifRT'
 
 		create-glyph "cyrl/ukUnblended.\(suffix)" : glyph-proc
 			include : MarkSet.b
-			local vPartHeight : Ascender * 0.45 + HalfStroke
-			include : with-transform [ApparentTranslate 0 (Ascender - vPartHeight)] : glyph-proc
-				include : VHookRightShape [DivFrame 1] fStraightBar vPartHeight
-				include : Serifs [DivFrame 1] fStraightBar vPartHeight
-				eject-contour 'serifRT'
-			include : OShape (Ascender - vPartHeight + Stroke + O) 0 SB RightSB
+			local yBarPos : Ascender * 0.55
 
-		create-glyph "vPalatalHook.\(suffix)" : glyph-proc
-			include [refer-glyph "v.\(suffix)"] AS_BASE ALSO_METRICS
-			include : PalatalHook.r
-				xLink -- Middle
-				x -- (Middle + [HSwToV HalfStroke] + [PalatalHook.adviceGap Stroke])
-				y -- 0
+			local subDf : DivFrame (5 / 6) 2
+			include : with-transform [ApparentTranslate (0.5 * (Width - subDf.width)) 0]
+				OShape ((yBarPos + 0.5 * subDf.mvs) + O) 0 subDf.leftSB subDf.rightSB subDf.mvs subDf.smallArchDepthA subDf.smallArchDepthB
+
+			include : with-transform [ApparentTranslate 0 (yBarPos - 0.5 * subDf.mvs)] : glyph-proc
+				include : VHookRightShape [DivFrame 1] fStraightBar (Ascender - (yBarPos - 0.5 * subDf.mvs))
+				include : Serifs          [DivFrame 1] fStraightBar (Ascender - (yBarPos - 0.5 * subDf.mvs))
+				eject-contour 'serifRT'
 
 	define VCursiveConfig : object
 		cursiveSerifless     { (1/24) false }
@@ -259,14 +266,14 @@ glyph-block Letter-Latin-V : begin
 			include : VCursiveShape pxBar XH Stroke
 			if fDoSerif : begin
 				local xBar : VCursiveShapeBarPos pxBar
-				include : tagged 'serifLT' : HSerif.lt xBar XH (SideJut + xBar - SB)
+				include : tagged 'serifLT' : HSerif.lt xBar XH (SideJut + (xBar - SB))
 
 		create-glyph "vPalatalHook.\(suffix)" : glyph-proc
 			include [refer-glyph "v.\(suffix)"] AS_BASE ALSO_METRICS
 			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookAttach
 			include : PalatalHook.r
-				x -- attach.x
-				y -- 0
+				x       -- attach.x
+				y       -- 0
 				yAttach -- attach.y
 
 	select-variant 'V' 'V'
@@ -274,56 +281,61 @@ glyph-block Letter-Latin-V : begin
 	select-variant 'smcpV' 0x1D20 (shapeFrom -- 'v') (follow -- 'V')
 
 	select-variant 'v' 'v'
-	select-variant 'v/nonCursive' (shapeFrom -- 'v')
 	link-reduced-variant 'v/sansSerif' 'v' MathSansSerif
 
 	select-variant "vPalatalHook" 0x1D8C (follow -- 'v')
 
-	select-variant 'vHookRight' 0x2C71 (follow -- 'v/nonCursive')
-	select-variant 'cyrl/ukUnblended' 0x1C88 (follow -- 'v/nonCursive')
+	select-variant 'vHookRight' 0x2C71
+	select-variant 'vLoop'      0x2C74
 
-	select-variant 'vLoop' 0x2C74
+	select-variant 'cyrl/Izhitsa' 0x474 (shapeFrom -- 'VHookRight')
+	select-variant 'cyrl/izhitsa' 0x475 (shapeFrom -- 'vHookRight')
 
-	select-variant 'cyrl/Izhitsa' 0x474 (follow -- 'VHookRight') (shapeFrom -- 'VHookRight')
-	select-variant 'cyrl/Uk' 0xA64A (follow -- 'VHookRight')
-	alias 'cyrl/izhitsa' 0x475 'vHookRight'
+	select-variant 'cyrl/Uk'          0xA64A (follow -- 'cyrl/Izhitsa')
+	select-variant 'cyrl/ukUnblended' 0x1C88 (follow -- 'cyrl/izhitsa')
 
 	CreateTurnedLetter 'turnV' 0x245 'V' HalfAdvance (CAP / 2)
 	CreateTurnedLetter 'turnv' 0x28C 'v' HalfAdvance (XH / 2)
 
-	define [VHookTopShape df top ada adb] : glyph-proc
+	define [VScriptShape df top ada adb] : glyph-proc
 		include : dispiro
 			widths.lhs
-			flat df.leftSB top [heading Downward]
-			curl df.leftSB [Math.min adb : top - TINY]
+			flat df.leftSB  top [heading Downward]
+			curl df.leftSB  [Math.min (0 + adb) (top - TINY)]
 			arch.lhs 0
-			flat df.rightSB [Math.min ada : top - Hook - HalfStroke - TINY]
+			flat df.rightSB [Math.min (0 + ada) (top - Hook - HalfStroke - TINY)]
 			curl df.rightSB (top - Hook - HalfStroke) [heading Upward]
 		include : VerticalHook.r
-			x -- df.rightSB
-			y -- (top - Hook - HalfStroke)
-			xDepth -- ((-df.rightSB) + df.middle + [HSwToV HalfStroke])
+			x      -- df.rightSB
+			y      -- (top - Hook - HalfStroke)
+			xDepth -- ((df.middle + [HSwToV HalfStroke]) - df.rightSB)
 			yDepth -- (-Hook)
 
-	create-glyph 'VHookTop.serifless' : glyph-proc
+	create-glyph 'VScript.serifless' : glyph-proc
 		include : MarkSet.capital
-		include : VHookTopShape [DivFrame 1] CAP ArchDepthA ArchDepthB
+		include : VScriptShape [DivFrame 1] CAP ArchDepthA ArchDepthB
 
-	create-glyph 'VHookTop.serifed' : glyph-proc
-		include [refer-glyph "VHookTop.serifless"] AS_BASE ALSO_METRICS
-		include : tagged 'serifLT' : HSerif.lt SB CAP SideJut
+		create-forked-glyph 'VScript.motionSerifed' : glyph-proc
+			local sf : SerifFrame.fromDf [DivFrame 1] CAP 0
+			include sf.lt.outer
+		create-forked-glyph 'VScript.serifed' : glyph-proc
+			local sf : SerifFrame.fromDf [DivFrame 1] CAP 0
+			include sf.lt.full
 
-	select-variant 'VHookTop' 0x1B2
+	select-variant 'VScript' 0x1B2
 
-	create-glyph 'vHookTop.serifless' : glyph-proc
+	create-glyph 'vScript.serifless' : glyph-proc
 		include : MarkSet.e
-		include : VHookTopShape [DivFrame 1] XH SmallArchDepthA SmallArchDepthB
+		include : VScriptShape [DivFrame 1] XH SmallArchDepthA SmallArchDepthB
 
-	create-glyph 'vHookTop.serifed' : glyph-proc
-		include [refer-glyph "vHookTop.serifless"] AS_BASE ALSO_METRICS
-		include : tagged 'serifLT' : HSerif.lt SB XH SideJut
+		create-forked-glyph 'vScript.motionSerifed' : glyph-proc
+			local sf : SerifFrame.fromDf [DivFrame 1] XH 0
+			include sf.lt.outer
+		create-forked-glyph 'vScript.serifed' : glyph-proc
+			local sf : SerifFrame.fromDf [DivFrame 1] XH 0
+			include sf.lt.full
 
-	select-variant 'vHookTop' 0x28B
+	select-variant 'vScript' 0x28B
 
 	glyph-block-export BBVShape BBVInnerMaskShape BBVOuterMaskShape
 	define [BBVShape l r kd ks top] : glyph-proc
