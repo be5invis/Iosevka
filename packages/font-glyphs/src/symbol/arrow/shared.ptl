@@ -10,30 +10,36 @@ glyph-block Symbol-Arrow-Shared : begin
 
 	define o : O * 2
 
-	define [ArrowDims MosaicWidth MosaicWidthScalar] : begin
-		define arrowHeight : para.arrowHeight * (Width - SB / 2) * [Math.cbrt MosaicWidthScalar]
-		define arrowWidth  : Math.min (MosaicWidth - SB / 2) arrowHeight
-		define arrowTop : SymbolMid + arrowHeight / 2
-		define arrowBot : SymbolMid - arrowHeight / 2
-		define arrowMidX : MosaicWidth / 2
-		define arrowSB : (MosaicWidth - arrowWidth) / 2
-		define arrowRSB : MosaicWidth - arrowSB
+	define flex-params [ArrowDims] : begin
+		local-parameter : advance     -- Width
+		local-parameter : arrowHeight -- para.arrowHeight * (Width - SB / 2) * [Math.cbrt : advance / Width]
+		local-parameter : arrowWidth  -- [Math.min (advance - SB / 2) arrowHeight]
+		local-parameter : arrowSw     -- OperatorStroke      # Arrow Bar Stroke width
+		local-parameter : fine        -- [AdviceStroke 3.5]  # Arrowhead Tip Stroke width
+		local-parameter : terminal    -- [AdviceStroke 5]    # Arrowhead Barb Stroke width
+		local-parameter : overlaySw   -- [AdviceStroke 6]    # Arrow Overlay strokes width
+		local-parameter : arrowMidX   -- advance / 2
+		local-parameter : arrowMidY   -- SymbolMid
 
-		# Diagonal arrow params
-		define diagPropX : 1 / (2 ** (1 / 4))
-		define diagPropY : 1 / (2 ** (1 / 4))
+		# Diagonal arrow constants
+		define diagPropX : 2 ** (-0.25)
+		define diagPropY : 2 ** (-0.25)
+
+		# Coordinates
+		define arrowTop : arrowMidY + arrowHeight / 2
+		define arrowBot : arrowMidY - arrowHeight / 2
+		define arrowSB  : arrowMidX - arrowWidth / 2
+		define arrowRSB : arrowMidX + arrowWidth / 2
 
 		define arrowDiagRSB : mix arrowMidX arrowRSB diagPropX
 		define arrowDiagSB  : mix arrowMidX arrowSB  diagPropX
 		define arrowDiagBot : mix arrowMidX arrowBot diagPropY
 		define arrowDiagTop : mix arrowMidX arrowTop diagPropY
 
-		#
+		# Derived parameters
+		define advanceScale : advance / Width
 		define arrowHeadSize : (Width - SB) * DesignParameters.arrow_size * [Math.sqrt : arrowWidth / Width] - [AdviceStroke 5] / 4
-		define arrowSw        OperatorStroke
 		define halfArrowSw  : arrowSw / 2
-		define fine         : AdviceStroke 3.5
-		define terminal     : AdviceStroke 5
 		define halfTerminal : terminal / 2
 
 		# Special arrow params
@@ -42,21 +48,20 @@ glyph-block Symbol-Arrow-Shared : begin
 		define doubleHeadGap : Math.max
 			1.5 * fine
 			0.175 * Width
-			0.15 * MosaicWidth
+			0.15 * advance
 
 		# Overlay spacing
-		define overlaySw   : AdviceStroke 6
 		define strokeSpan1 : mix halfArrowSw arrowHeadSize 0.6
 		define strokeSpan2 : mix (0.5 * doubleBarSpan) arrowHeadSize 0.75
-		define strokeSpan  : mix strokeSpan1 strokeSpan2 : clamp 0 1 : MosaicWidthScalar - 1
+		define strokeSpan  : mix strokeSpan1 strokeSpan2 : clamp 0 1 : advanceScale - 1
 		define dblArrSpace : arrowWidth - 2 * strokeSpan - 2 * terminal
 		define dhtArrSpace : Math.max (Width * 0.1) : arrowWidth - strokeSpan - doubleHeadGap - arrowHeadSize - 0.5 * fine
 		define dblArrSw : Math.min overlaySw : AdviceStrokeInSpace dblArrSpace HVContrast 2 1
 		define dhtArrSw : Math.min overlaySw : AdviceStrokeInSpace dhtArrSpace HVContrast 2 1
 
 		return [object
-			MosaicWidth MosaicWidthScalar
-			arrowHeight arrowWidth arrowTop arrowBot arrowMidX arrowSB arrowRSB
+			advance advanceScale
+			arrowHeight arrowWidth arrowMidY arrowTop arrowBot arrowMidX arrowSB arrowRSB
 			diagPropX diagPropY arrowDiagRSB arrowDiagSB arrowDiagBot arrowDiagTop
 			arrowHeadSize arrowSw halfArrowSw fine terminal halfTerminal
 			compactHeadSize doubleBarSpan doubleHeadGap
@@ -204,8 +209,8 @@ glyph-block Symbol-Arrow-Shared : begin
 
 	define [ArrowT dims] : namespace
 		local {
-			.MosaicWidth MosaicWidth
-			.MosaicWidthScalar MosaicWidthScalar
+			.advance advance
+			.advanceScale advanceScale
 			.fine fine
 			.arrowSw arrowSw
 			.halfArrowSw halfArrowSw
@@ -263,7 +268,7 @@ glyph-block Symbol-Arrow-Shared : begin
 
 		export : define [openShape x1 y1 x2 y2 size _halfSw] : glyph-proc
 			local halfSw : fallback _halfSw halfArrowSw
-			local fine : Math.min [AdviceStroke 5] (size * 0.75 / 3)
+			local fine : Math.min [AdviceStroke 5] ((0.75 * size) / 3)
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
 			local p : (mag - fine) / mag
 			local p2 : (mag - fine * Math.SQRT2) / mag
@@ -338,7 +343,7 @@ glyph-block Symbol-Arrow-Shared : begin
 		export : define [toDiamondShapeT arrowFunc] : lambda [x1 y1 x2 y2 size _halfSw] : glyph-proc
 			local halfSw : fallback _halfSw halfArrowSw
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
-			local diaSize : [Math.min 1.5 MosaicWidthScalar] * 0.75 * size
+			local diaSize : [Math.min 1.5 advanceScale] * 0.75 * size
 			local p : 1 - (diaSize - 2 * o) / mag
 
 			include : arrowFunc x1 y1 [mix x1 x2 p] [mix y1 y2 p] size _halfSw
@@ -346,18 +351,18 @@ glyph-block Symbol-Arrow-Shared : begin
 
 	# MkArrow Functions
 	define [MkArrowT dims] : namespace
-		local { .MosaicWidth MosaicWidth .MosaicWidthScalar MosaicWidthScalar .arrowHeadSize arrowHeadSize } dims
+		local { .advance advance .advanceScale advanceScale .arrowHeadSize arrowHeadSize } dims
 
 		export : define [singleAnchorAt p] : lambda [shape id unicode x1 y1 x2 y2 width headSize]
 			create-glyph id unicode : glyph-proc
-				set-width [fallback width MosaicWidth]
+				set-width [fallback width advance]
 				set-base-anchor 'slash' [mix x1 x2 p] [mix y1 y2 p]
 				include : shape x1 y1 x2 y2 [fallback headSize arrowHeadSize]
 		export : define single : singleAnchorAt : 2 / 5
 
 		export : define [doubleAnchorAt pAnchor _pMid] : lambda [shape1 shape2 id unicode x1 y1 x2 y2]
 			create-glyph id unicode : glyph-proc
-				set-width MosaicWidth
+				set-width advance
 				local pMid : fallback _pMid pAnchor
 				local xm : mix x1 x2 pMid
 				local ym : mix y1 y2 pMid
@@ -367,10 +372,7 @@ glyph-block Symbol-Arrow-Shared : begin
 		export : define double : doubleAnchorAt : 1 / 2
 
 	do "exports"
-		define MosaicWidth       Width
-		define MosaicWidthScalar 1
-
-		define dims : ArrowDims MosaicWidth MosaicWidthScalar
+		define dims : ArrowDims
 		define arrow : ArrowT dims
 
 		define ArrowShape        arrow.shape

@@ -72,6 +72,15 @@ Inside the plan, top-level properties include:
         - `U+27FE` LONG RIGHTWARDS DOUBLE ARROW FROM BAR
         - `U+27FF` LONG RIGHTWARDS SQUIGGLE ARROW
         - `U+2B33` LONG LEFTWARDS SQUIGGLE ARROW
+        - `U+1F8D0` LONG RIGHTWARDS ARROW OVER LONG LEFTWARDS ARROW
+        - `U+1F8D1` LONG RIGHTWARDS HARPOON OVER LONG LEFTWARDS HARPOON
+        - `U+1F8D2` LONG RIGHTWARDS HARPOON ABOVE SHORT LEFTWARDS HARPOON
+        - `U+1F8D3` SHORT RIGHTWARDS HARPOON ABOVE LONG LEFTWARDS HARPOON
+        - `U+1F8D4` LONG LEFTWARDS HARPOON ABOVE SHORT RIGHTWARDS HARPOON
+        - `U+1F8D5` SHORT LEFTWARDS HARPOON ABOVE LONG RIGHTWARDS HARPOON
+        - `U+1F8D6` LONG RIGHTWARDS ARROW THROUGH X
+        - `U+1F8D7` LONG RIGHTWARDS ARROW WITH DOUBLE SLASH
+        - `U+1F8D8` LONG LEFT RIGHT ARROW WITH DEPENDENT LOBE
     - Remove `NWID` and `WWID` features typographic features
   - `fixed`: Apply `fontconfig-mono` changes and further remove ligations.
   - `wide-mosaic`: Similar to `normal`, but all mosaic (box-drawing characters and block elements) will be wide.
@@ -212,6 +221,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow.
   - `brace-bar`: Enable ligation for `{|` and `|}`.
   - `brack-bar`: Enable ligation for `[|` and `|]`.
+  - `markdown-checkboxes`: Enable ligation for Markdown checkboxes like `- [ ]` and `- [x]`.
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 

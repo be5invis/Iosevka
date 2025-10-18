@@ -963,6 +963,7 @@ glyph-block Letter-Shared-Shapes : begin
 				xLinkStroke xLink x yAttach sw
 				VBar.m x yAttach (y + extension) sw
 
+		# Diagonal tail descender for cyrillic letters
 		glyph-block-export CyrTailDescender
 		define CyrTailDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
 			local extension : (-LongVJut) + QuarterStroke
@@ -973,6 +974,28 @@ glyph-block Letter-Shared-Shapes : begin
 					MaskBelow (yAttach + Stroke)
 					MaskAbove (y + extension)
 					ExtLineCenter 16 sw (x + 0.24 * Descender) (y + 0.5 * sw + Descender) x y
+
+		# Cyrillic long curl descender, used by old Abkazian letters
+		glyph-block-export CyrCurlDescender
+		define CyrCurlDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
+			local thinStroke : Math.min (-Descender / 4) [AdviceStroke 4]
+			local r : -Descender / 2
+			local sr : 0.5 * (r + thinStroke)
+			local xr : Math.max (x + [HSwToV : sw - thinStroke]) (x + [HSwToV : 0.5 * sw])
+			local xl : SB + OX
+			include : union
+				xLinkStroke xLink x yAttach sw
+				dispiro
+					straight.down.start xr y [widths.rhs.heading thinStroke Downward]
+					straight.down.mid   xr (y - r) [heading Downward]
+					arcvh
+					flat (xr - r) (y - 2 * r) [heading Leftward]
+					curl (xl + sr) (y - 2 * r) [heading Leftward]
+					archv
+					g2.up.mid xl (y - 2 * r + sr) [heading Upward]
+					arcvh
+					flat (xl + sr) (y - 2 * r + 2 * sr) [heading Rightward]
+					curl (xr - r) (y - 2 * r + 2 * sr) [heading Rightward]
 
 		# Palatal Hooks
 		glyph-block-export PalatalHook
@@ -1005,6 +1028,20 @@ glyph-block Letter-Shared-Shapes : begin
 					yDepth -- TailY
 					sw     -- sw
 					yExtension -- [Math.max 0 : yAttach + yOverflow - y + (fullDepth - TailY)]
+
+		# Half-circle hook, used by Tsse
+		glyph-block-export HalfRingDescender
+		define [HalfRingDescender x y] : glyph-proc
+			local sw : Math.min [AdviceStroke 3] (-Descender / 2)
+			local r : 0.5 * (sw - Descender)
+			include : lift-@ : dispiro
+				widths.lhs sw
+				g4.left.start x (@yT = y + sw) [heading Leftward]
+				archv
+				g4.down.mid (x - r) [mix @yT @yB 0.5] [heading Downward]
+				arcvh
+				flat x (@yB = y + sw - 2 * r) [heading Rightward]
+				curl (x + [HSwToV Stroke]) @yB
 
 		# Cyrillic "Middle Hook" Characters
 		glyph-block-export MidHook

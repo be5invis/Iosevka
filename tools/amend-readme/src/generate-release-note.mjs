@@ -39,11 +39,30 @@ export default async function main(argv) {
 	const baseUrl = `https://github.com/be5invis/Iosevka/blob/v${argv.version}/doc`;
 	const releaseUrl = `https://github.com/be5invis/Iosevka/releases/download/v${argv.version}`;
 
+	out.log(`## Quick picker`);
+
+	out.log(`| Font Style | Code Editor | Terminal | Quasi-Proportional |`);
+	out.log(`|------------|-------------|----------|--------------------|`);
+	out.log(
+		`| Sans-Serif | [📦 Iosevka](${releaseUrl}/PkgTTC-SGr-Iosevka-${argv.version}.zip) |` +
+			`[📦 Iosevka Term](${releaseUrl}/PkgTTC-SGr-IosevkaTerm-${argv.version}.zip) |` +
+			`[📦 Iosevka Aile](${releaseUrl}/PkgTTC-IosevkaAile-${argv.version}.zip) |`,
+	);
+	out.log(
+		`| Serif | [📦 Iosevka Slab](${releaseUrl}/PkgTTC-SGr-IosevkaSlab-${argv.version}.zip) |` +
+			`[📦 Iosevka Term Slab](${releaseUrl}/PkgTTC-SGr-IosevkaTermSlab-${argv.version}.zip) |` +
+			`[📦 Iosevka Etoile](${releaseUrl}/PkgTTC-IosevkaEtoile-${argv.version}.zip) |`,
+	);
+
+	out.log("");
+	out.log("------");
+	out.log("");
+
 	out.log(
 		`<table>\n` +
-			`<tr><td align="center"><h1>` +
+			`<tr><td align="center"><h2>` +
 			`<a href="${baseUrl}/PACKAGE-LIST.md">View package list</a>` +
-			`</h1></td></tr>\n` +
+			`</h2></td></tr>\n` +
 			`<tr><td align="center">` +
 			`<a href="${releaseUrl}/SHA-256.txt">SHA-256 hashes</a>` +
 			`</td></tr>\n` +

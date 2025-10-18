@@ -1,4 +1,4 @@
-import UnicodeDataIndex from "@unicode/unicode-16.0.0";
+import UnicodeDataIndex from "@unicode/unicode-17.0.0";
 
 export async function collectBlockData() {
 	const BlockData = [
@@ -9,7 +9,7 @@ export async function collectBlockData() {
 
 	for (const id of UnicodeDataIndex.Block) {
 		if (!id || /Private_Use_Area/.test(id) || /undefined/.test(id)) continue;
-		const rangesModule = await import(`@unicode/unicode-16.0.0/Block/${id}/ranges.js`);
+		const rangesModule = await import(`@unicode/unicode-17.0.0/Block/${id}/ranges.js`);
 		const rg = rangesModule.default;
 		BlockData.push([[rg[0].begin, rg[0].end - 1], id.replace(/_/g, " ")]);
 	}

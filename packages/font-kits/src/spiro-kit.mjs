@@ -462,10 +462,14 @@ export function SetupBuilders(bindings) {
 		return 1 - Math.pow(1 - Math.pow(px, s), 1 / s);
 	};
 	archv.sCos = function (angle, _s) {
-		return Math.pow(Math.cos((angle / 180) * Math.PI), 2 / fallback(_s, Superness));
+		const c = Math.cos((angle / 180) * Math.PI);
+		if (c < 0) return -Math.pow(-c, 2 / fallback(_s, Superness));
+		else return Math.pow(c, 2 / fallback(_s, Superness));
 	};
 	archv.sSin = function (angle, _s) {
-		return Math.pow(Math.sin((angle / 180) * Math.PI), 2 / fallback(_s, Superness));
+		const s = Math.sin((angle / 180) * Math.PI);
+		if (s < 0) return -Math.pow(-s, 2 / fallback(_s, Superness));
+		else return Math.pow(s, 2 / fallback(_s, Superness));
 	};
 
 	function dispiro(...controls) {
