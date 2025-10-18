@@ -54,7 +54,9 @@ export default async function main(argv) {
 			`[📦 Iosevka Etoile](${releaseUrl}/PkgTTC-IosevkaEtoile-${argv.version}.zip) |`,
 	);
 
+	out.log("");
 	out.log("------");
+	out.log("");
 
 	out.log(
 		`<table>\n` +

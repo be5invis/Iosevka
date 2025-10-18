@@ -221,6 +221,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow.
   - `brace-bar`: Enable ligation for `{|` and `|}`.
   - `brack-bar`: Enable ligation for `[|` and `|]`.
+  - `markdown-checkboxes`: Enable ligation for Markdown checkboxes like `- [ ]` and `- [x]`.
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
