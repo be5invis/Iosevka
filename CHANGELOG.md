@@ -1,5 +1,10 @@
 ## Modifications since last major version
 
+### 33.3.3
+
+* Add italic form for Cyrillic Lower Tswe (`U+A68F`).
+
+
 ### 33.3.2
 
 * Add Characters:
