@@ -675,7 +675,7 @@ function SpecimenCharacterImpl(props: SpecimenCharacterImplProps) {
 }
 
 function charIsMark(ch: Coverage.Character, gc: string) {
-	return ch.inFont && (gc === "Nonspacing_Mark" || ch.lch === 0x55f);
+	return ch.inFont && (gc === "Nonspacing_Mark" || gc === "Enclosing_Mark" || ch.lch === 0x55f);
 }
 
 function formatUnicode(lch: number) {
