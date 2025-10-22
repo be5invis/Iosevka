@@ -686,7 +686,10 @@ function formatCharInfo(ch: Coverage.Character, titleOverride?: string, variantO
 	const charName = unicodeNameMap.get(ch.lch) || "?";
 	const gc = unicodeGcMap.get(ch.lch) || "?";
 	const charSamp =
-		"\u200b" + ((gc === "Nonspacing_Mark" || gc === "Enclosing_Mark") ? "◌" : "") + String.fromCodePoint(ch.lch) + "\u200b";
+		"\u200b" +
+		(gc === "Nonspacing_Mark" || gc === "Enclosing_Mark" ? "◌" : "") +
+		String.fromCodePoint(ch.lch) +
+		"\u200b";
 	return (
 		`U+${formatUnicode(ch.lch)} ⟦${charSamp}⟧\n${charName || ""}\n(${gc})` +
 		(titleOverride ? "\n" + titleOverride : "") +
