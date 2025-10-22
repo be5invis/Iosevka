@@ -675,7 +675,7 @@ function SpecimenCharacterImpl(props: SpecimenCharacterImplProps) {
 }
 
 function charIsMark(ch: Coverage.Character, gc: string) {
-	return ch.inFont && (gc === "Nonspacing_Mark" || ch.lch === 0x55f);
+	return ch.inFont && (gc === "Nonspacing_Mark" || gc === "Enclosing_Mark" || ch.lch === 0x55f);
 }
 
 function formatUnicode(lch: number) {
@@ -686,7 +686,7 @@ function formatCharInfo(ch: Coverage.Character, titleOverride?: string, variantO
 	const charName = unicodeNameMap.get(ch.lch) || "?";
 	const gc = unicodeGcMap.get(ch.lch) || "?";
 	const charSamp =
-		"\u200b" + (gc === "Nonspacing_Mark" ? "◌" : "") + String.fromCodePoint(ch.lch) + "\u200b";
+		"\u200b" + ((gc === "Nonspacing_Mark" || gc === "Enclosing_Mark") ? "◌" : "") + String.fromCodePoint(ch.lch) + "\u200b";
 	return (
 		`U+${formatUnicode(ch.lch)} ⟦${charSamp}⟧\n${charName || ""}\n(${gc})` +
 		(titleOverride ? "\n" + titleOverride : "") +
