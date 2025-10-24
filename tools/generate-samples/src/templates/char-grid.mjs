@@ -81,7 +81,7 @@ function CharGrid(args) {
 			contents: [
 				...fontSettings,
 				{ color: char.inFont ? theme.body : theme.dimmed },
-				char.inFont ? (isMark ? "\uE00E" : "") + String.fromCodePoint(char.lch) : "\uF00F",
+				char.inFont ? (isMark ? "\uEF0E" : "") + String.fromCodePoint(char.lch) : "\uF00F",
 			],
 		});
 	}
