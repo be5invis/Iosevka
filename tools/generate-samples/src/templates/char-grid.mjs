@@ -55,7 +55,7 @@ function CharGrid(args) {
 			});
 		}
 
-		const isMark = char.inFont && gcMap.get(char.lch) === "Nonspacing_Mark";
+		const isMark = char.inFont && (gcMap.get(char.lch) === "Nonspacing_Mark" || gcMap.get(char.lch) === "Enclosing_Mark");
 		const dimensions = {
 			"horizontal-align": "center",
 			"vertical-align": "center",
