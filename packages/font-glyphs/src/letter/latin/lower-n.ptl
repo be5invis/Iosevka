@@ -19,36 +19,36 @@ glyph-block Letter-Latin-Lower-N : begin
 		if trAnchor : set-base-anchor 'trailing' (trAnchor.x + SideJut) trAnchor.y
 
 	define [NHTB df top] : VBar.l df.leftSB 0 top
-	define [NTopLeftSerif df top] : begin
-		local sf : SerifFrame.fromDf df top 0
+	define [NTopLeftSerif df top _sw] : begin
+		local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
 		return sf.lt.outer
-	define [NBottomLeftSerif df y] : begin
-		local sf : SerifFrame.fromDf df Ascender y
+	define [NBottomLeftSerif df y _sw] : begin
+		local sf : SerifFrame.fromDf df Ascender y (swRef -- _sw)
 		return sf.lb.full
-	define [NBottomLeftOuterSerif df y] : begin
-		local sf : SerifFrame.fromDf df Ascender y
+	define [NBottomLeftOuterSerif df y _sw] : begin
+		local sf : SerifFrame.fromDf df Ascender y (swRef -- _sw)
 		return sf.lb.outer
-	define [NBottomLeftSerifAsymmetric df y] : begin
-		local sf : SerifFrame.fromDf df Ascender y
+	define [NBottomLeftSerifAsymmetric df y _sw] : begin
+		local sf : SerifFrame.fromDf df Ascender y (swRef -- _sw)
 		return sf.lb.fullSide
-	define [NBottomLeftYatSerif df y] : begin
-		local sf : SerifFrame.fromDf df Ascender y
+	define [NBottomLeftYatSerif df y _sw] : begin
+		local sf : SerifFrame.fromDf df Ascender y (swRef -- _sw)
 		return : if sf.enoughSpaceForFullSerifs sf.lb.full sf.lb.outer
 
-	define [NBottomRightSerifUpright df y] : glyph-proc
-		local sf : SerifFrame.fromDf df Ascender y
+	define [NBottomRightSerifUpright df y _sw] : glyph-proc
+		local sf : SerifFrame.fromDf df Ascender y (swRef -- _sw)
 		include sf.rb.full
 		include : AdjustTrailingAnchor
-	define [NBottomRightSerifItalic df y] : glyph-proc
-		local sf : SerifFrame.fromDf df Ascender y
+	define [NBottomRightSerifItalic df y _sw] : glyph-proc
+		local sf : SerifFrame.fromDf df Ascender y (swRef -- _sw)
 		include sf.rb.outer
 		include : AdjustTrailingAnchor
-	define [NBottomRightSerifAsymmetric df y] : glyph-proc
-		local sf : SerifFrame.fromDf df Ascender y
+	define [NBottomRightSerifAsymmetric df y _sw] : glyph-proc
+		local sf : SerifFrame.fromDf df Ascender y (swRef -- _sw)
 		include sf.rb.fullSide
 		include : AdjustTrailingAnchor
-	define [NBottomRightYatSerif df y] : begin
-		local sf : SerifFrame.fromDf df Ascender y
+	define [NBottomRightYatSerif df y _sw] : begin
+		local sf : SerifFrame.fromDf df Ascender y (swRef -- _sw)
 		return : if sf.enoughSpaceForFullSerifs sf.rb.full [no-shape]
 
 	define [EaredBody top left right yBR sw _ada _adb] : glyph-proc
@@ -69,23 +69,28 @@ glyph-block Letter-Latin-Lower-N : begin
 		include : VBar.l left 0 (top - DToothlessRise) sw
 		local ada : fallback _ada SmallArchDepthA
 		local adb : fallback _adb SmallArchDepthB
-		include : dispiro
-			widths.rhs sw
-			g4 left (top - DToothlessRise)
-			arch.rhs top (sw -- sw) (blendPre -- {})
-			flat right [Math.max (top - adb) (yBR + TINY)]
-			curl right yBR [heading Downward]
+		include : nShoulder.earless
+			left   -- left
+			right  -- right
+			top    -- top
+			bottom -- yBR
+			ada    -- ada
+			adb    -- adb
+			stroke -- sw
+			rise   -- DToothlessRise
 
 	define [EarlessRoundedBody top left right yBR sw _ada _adb] : glyph-proc
 		local ada : fallback _ada SmallArchDepthA
 		local adb : fallback _adb SmallArchDepthB
-		include : dispiro
-			widths.rhs sw
-			flat left 0 [heading Upward]
-			curl left [Math.max (top - ada) (0 + TINY)]
-			arch.rhs top (sw -- sw)
-			flat right [Math.max (top - adb) (yBR + TINY)]
-			curl right yBR [heading Downward]
+		include : nShoulder.rounded
+			left   -- left
+			right  -- right
+			top    -- top
+			bottom -- yBR
+			ada    -- ada
+			adb    -- adb
+			stroke -- sw
+			leftY0 -- 0
 
 	define [EndingTail right yBot yBR sw] : glyph-proc
 		include : RightwardTailedBar right yBot yBR sw
@@ -184,8 +189,8 @@ glyph-block Letter-Latin-Lower-N : begin
 					x2 -- ([mix SB m1 0.5] - [HSwToV : 0.5 * fine])
 					y2 -- 0
 					swBefore -- sw
-			if sLT : include : sLT [DivFrame 1] XH
-			if sLB : include : sLB [DivFrame 1] 0
+			if sLT : include : sLT [DivFrame 1] XH sw
+			if sLB : include : sLB [DivFrame 1] 0  sw
 
 		create-glyph "latn/Eta.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
@@ -225,8 +230,8 @@ glyph-block Letter-Latin-Lower-N : begin
 			include : dispiro
 				straight.down.start RightSB y2 [widths.rhs.heading sw Downward]
 				CurlyTail.f fine 0 m2 x2 (swBefore -- sw)
-			if sLT : include : sLT [DivFrame 1] XH
-			if sLB : include : sLB [DivFrame 1] 0
+			if sLT : include : sLT [DivFrame 1] XH sw
+			if sLB : include : sLB [DivFrame 1] 0  sw
 
 		if (!tailed) : create-glyph "engCrossedTail.\(suffix)" : glyph-proc
 			include : MarkSet.p
