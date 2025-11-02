@@ -80,7 +80,7 @@ function parseWeights(toml: Toml.JsonMap, sink: CustomizerProps) {
 		if (typeof v.shape !== "number") continue;
 		for (const [gr, _f] of Gr.AllWeightGrades) if (gr === v.shape) weights.add(gr);
 	}
-	sink = { ...sink, weightGradesIncluded: weights };
+	if (weights.size != 0) sink = { ...sink, weightGradesIncluded: weights };
 	return sink;
 }
 
@@ -107,8 +107,8 @@ function parseWidths(toml: Toml.JsonMap, sink: CustomizerProps) {
 	} else {
 		widths.add(Gr.Width.Normal);
 	}
-
-	return { ...sink, defaultWidthAtExpanded, widthGradesIncluded: widths };
+	if (widths.size != 0) sink = { ...sink, defaultWidthAtExpanded, widthGradesIncluded: widths };
+	return sink;
 }
 
 function parseSlopes(toml: Toml.JsonMap, sink: CustomizerProps) {
@@ -120,7 +120,7 @@ function parseSlopes(toml: Toml.JsonMap, sink: CustomizerProps) {
 			if (f.shape === v.shape) slopes.add(gr);
 		}
 	}
-	sink = { ...sink, slopeGradesIncluded: slopes };
+	if (slopes.size != 0) sink = { ...sink, slopeGradesIncluded: slopes };
 	return sink;
 }
 
