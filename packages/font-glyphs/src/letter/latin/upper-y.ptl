@@ -32,7 +32,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 			[Just SLAB-MOTION] : include sf.lt.outer
 			[Just SLAB-BASE] : include : HSerif.mb Middle bot MidJutCenter
 
-	define [YShape] : with-params [bodyType slabType top bot [cross : YCrossPos top bot]] : glyph-proc
+	define [YShape] : with-params [bodyType slabType top bot [cross [YCrossPos top bot]]] : glyph-proc
 		local maskLT : slabType == SLAB-ALL || slabType == SLAB-MOTION
 		local maskRT : slabType == SLAB-ALL
 
@@ -54,24 +54,24 @@ glyph-block Letter-Latin-Upper-Y : begin
 
 	define [YHookLeftHookedStroke top bot cross] : dispiro
 		widths.lhs
-		straight.right.start (SB - TailX / 3) (top - O - Stroke)
+		straight.right.start (SB - TailX / 3) ((top - O) - Stroke)
 		g4 (SB + TailX / 3) (top - TailY) [widths.lhs : AdviceStroke 2.75]
 		quadControls 0.55 0.7 32 unimportant
 		g4 (Middle - [HSwToV HalfStroke]) cross [widths.lhs : AdviceStroke 3.5]
 
 	define [YHookRightHookedStroke top bot cross] : dispiro
 		widths.rhs
-		straight.left.start (RightSB + TailX / 3) (top - O - Stroke)
+		straight.left.start (RightSB + TailX / 3) ((top - O) - Stroke)
 		g4 (RightSB - TailX / 3) (top - TailY) [widths.rhs : AdviceStroke 2.75]
 		quadControls 0.55 0.7 32 unimportant
 		g4 (Middle + [HSwToV HalfStroke]) cross [widths.rhs : AdviceStroke 3.5]
 
-	define [YHookTopShape] : with-params [bodyType slabType top bot [cross : YCrossPos top bot]] : glyph-proc
+	define [YHookRightShape] : with-params [bodyType slabType top bot [cross [YCrossPos top bot]]] : glyph-proc
 		include : YShape bodyType slabType top bot cross
 		eject-contour 'strokeRT'
 		include : YHookRightHookedStroke top bot cross
 
-	define [UpsilonHookedSymbolShape] : with-params [top bot [cross : YCrossPos top bot]] : glyph-proc
+	define [YHookLeftRightShape] : with-params [bodyType slabType top bot [cross [YCrossPos top bot]]] : glyph-proc
 		include : VBar.m Middle bot (cross + HalfStroke)
 		include : YHookLeftHookedStroke  top bot cross
 		include : YHookRightHookedStroke top bot cross
@@ -90,7 +90,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 		create-glyph "Y.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : YShape bodyType slabType CAP 0
-			include : YSlabs slabType CAP 0
+			include : YSlabs          slabType CAP 0
 
 		create-glyph "grek/Upsilon.\(suffix)" : glyph-proc
 			include [refer-glyph "Y.\(suffix)"] AS_BASE ALSO_METRICS
@@ -99,25 +99,25 @@ glyph-block Letter-Latin-Upper-Y : begin
 		create-glyph "smcpY.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : YShape bodyType slabType XH 0
-			include : YSlabs slabType XH 0
+			include : YSlabs          slabType XH 0
 
-		create-glyph "YHookTop.\(suffix)" : glyph-proc
+		create-glyph "YHookRight.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : YHookTopShape bodyType slabType CAP 0
-			include : YSlabs slabType CAP 0
+			include : YHookRightShape bodyType slabType CAP 0
+			include : YSlabs                   slabType CAP 0
 			eject-contour 'serifRT'
 
 		if (slabType !== SLAB-BASE) : begin
 			create-glyph "cyrl/ue.\(suffix)" : glyph-proc
 				include : MarkSet.p
 				include : YShape bodyType slabType XH Descender (cross -- 0)
-				include : YSlabs slabType XH Descender
+				include : YSlabs          slabType XH Descender
 
 		if ((slabType === SLAB-NONE || slabType === SLAB-BASE) && bodyType === BODY-STRAIGHT) : begin
-			create-glyph "grek/UpsilonHookTop.\(suffix)" : glyph-proc
+			create-glyph "grek/UpsilonHookSymbol.\(suffix)" : glyph-proc
 				include : MarkSet.capital
-				include : UpsilonHookedSymbolShape CAP 0
-				include : YSlabs slabType CAP 0
+				include : YHookLeftRightShape bodyType slabType CAP 0
+				include : YSlabs                       slabType CAP 0
 				eject-contour 'serifLT'
 				eject-contour 'serifRT'
 				include : SetGrekUpperTonos (OX - TailX / 3)
@@ -129,20 +129,20 @@ glyph-block Letter-Latin-Upper-Y : begin
 	select-variant 'Y' 'Y'
 	link-reduced-variant 'Y/sansSerif' 'Y' MathSansSerif
 	select-variant 'smcpY' 0x28F (follow -- 'Y')
-	select-variant 'YHookTop' 0x1B3 (follow -- 'Y')
+	select-variant 'YHookRight' 0x1B3 (follow -- 'Y')
 	CreateAccentedComposition 'YStrokeBottom' null 'Y' 'barOverOnExtension'
 
 	select-variant 'grek/Upsilon' 0x3A5 (follow -- 'Y')
 	link-reduced-variant 'grek/Upsilon/sansSerif' 'grek/Upsilon' MathSansSerif (follow -- 'Y/sansSerif')
-	select-variant 'grek/UpsilonHookTop' 0x3D2
+	select-variant 'grek/UpsilonHookSymbol' 0x3D2
 
 	select-variant 'cyrl/Ue' 0x4AE (shapeFrom -- 'Y')
 	select-variant 'cyrl/ue' 0x4AF
 	CreateAccentedComposition 'cyrl/Uo' 0x4B0 'cyrl/Ue' 'barOver'
 	CreateAccentedComposition 'cyrl/uo' 0x4B1 'cyrl/ue' 'barOver'
 
-	create-glyph 'YStroke/Overlay' : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix 0 CAP 0.75]
-	derive-composites 'YStroke' 0x24E 'Y' 'YStroke/Overlay'
+	create-glyph 'YStroke/overlay' : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix 0 CAP 0.75]
+	derive-composites 'YStroke' 0x24E 'Y' 'YStroke/overlay'
 
 	CreateTurnedLetter 'latn/Lambda'       0xA7DA 'Y'             HalfAdvance (CAP / 2)
 	CreateTurnedLetter 'latn/LambdaStroke' 0xA7DC 'YStrokeBottom' HalfAdvance (CAP / 2)
