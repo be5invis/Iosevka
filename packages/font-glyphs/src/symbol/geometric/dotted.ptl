@@ -13,18 +13,22 @@ glyph-block Symbol-Geometric-Dice : for-width-kinds WideWidth1
 	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
 
 	define diceCombinations : list
-		list 0x2680 'whiteSquare' 7   { { 1 1 } }
-		list 0x2681 'whiteSquare' 7   { { 0 0 } { 2 2 } }
-		list 0x2682 'whiteSquare' 7   { { 0 0 } { 1 1 } { 2 2 } }
-		list 0x2683 'whiteSquare' 7   { { 0 0 } { 2 0 } { 0 2 } { 2 2 } }
-		list 0x2684 'whiteSquare' 7   { { 0 0 } { 2 0 } { 1 1 } { 0 2 } { 2 2 } }
-		list 0x2685 'whiteSquare' 7   { { 0 0 } { 0 1 } { 0 2 } { 2 0 } { 2 1 } { 2 2 } }
-		list 0x2686 'whiteCircle' 4.5 { { (5 / 3) 1 } }
-		list 0x2687 'whiteCircle' 4.5 { { (1 / 3) 1 } { (5 / 3) 1 } }
+		list 0x2680 'whiteSquare' union      7   { { 1 1 } }
+		list 0x2681 'whiteSquare' union      7   { { 0 0 } { 2 2 } }
+		list 0x2682 'whiteSquare' union      7   { { 0 0 } { 1 1 } { 2 2 } }
+		list 0x2683 'whiteSquare' union      7   { { 0 0 } { 2 0 } { 0 2 } { 2 2 } }
+		list 0x2684 'whiteSquare' union      7   { { 0 0 } { 2 0 } { 1 1 } { 0 2 } { 2 2 } }
+		list 0x2685 'whiteSquare' union      7   { { 0 0 } { 0 1 } { 0 2 } { 2 0 } { 2 1 } { 2 2 } }
+		list 0x2609 'whiteCircle' union      4.5 { { 1 1 } }
+		list 0x2686 'whiteCircle' union      4.5 { { (5 / 3) 1 } }
+		list 0x2687 'whiteCircle' union      4.5 { { (1 / 3) 1 } { (5 / 3) 1 } }
+		list 0x2688 'blackCircle' difference 4.5 { { (5 / 3) 1 } }
+		list 0x2689 'blackCircle' difference 4.5 { { (1 / 3) 1 } { (5 / 3) 1 } }
 
-	foreach { u frame dotSizeFactor dots } [items-of diceCombinations] : begin
+	foreach { u frame fnCombine dotSizeFactor dots } [items-of diceCombinations] : begin
 		create-glyph [MangleName : NameUni u] [MangleUnicode u] : glyph-proc
-			include [refer-glyph : MangleName frame] AS_BASE ALSO_METRICS
+			set-width Geom.Width
+
 			define dr : DotRadius / Stroke * [Math.min [AdviceStroke dotSizeFactor Geom.Scalar] [AdviceStroke 7 2]]
 			define xLeftEx   : Geom.MidX - Geom.Size + GeometryStroke
 			define xRightEx  : Geom.MidX + Geom.Size - GeometryStroke
@@ -34,11 +38,14 @@ glyph-block Symbol-Geometric-Dice : for-width-kinds WideWidth1
 			define xRight    : mix xLeftEx xRightEx (4 / 5)
 			define yBottom   : mix yBottomEx yTopEx (1 / 5)
 			define yTop      : mix yBottomEx yTopEx (4 / 5)
-			foreach { px py } [items-of dots] : begin
-				include : Circle.Outline.DotAt
-					mix xLeft xRight (px / 2)
-					mix yBottom yTop (py / 2)
-					begin dr
+
+			include : fnCombine
+				refer-glyph [MangleName frame]
+				new-glyph : glyph-proc : foreach { px py } [items-of dots] : begin
+					include : Circle.Outline.DotAt
+						mix xLeft xRight (px / 2)
+						mix yBottom yTop (py / 2)
+						begin dr
 
 	create-glyph [MangleName 'dottedWhiteTriangle'] [MangleUnicode 0x25EC] : glyph-proc
 		set-width Geom.Width
