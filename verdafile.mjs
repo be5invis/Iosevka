@@ -1474,6 +1474,13 @@ function resolveWws(bpName, buildPlans, defaultConfig) {
 	bp.weights = resolveWwsAspect("weights", bpName, buildPlans, defaultConfig, []);
 	bp.widths = resolveWwsAspect("widths", bpName, buildPlans, defaultConfig, []);
 	bp.slopes = resolveWwsAspect("slopes", bpName, buildPlans, defaultConfig, []);
+
+	if (Object.keys(bp.weights).length === 0)
+		fail(`Build plan for '${bpName}' has zero weights in its configuration.`);
+	if (Object.keys(bp.slopes).length === 0)
+		fail(`Build plan for '${bpName}' has zero slopes in its configuration.`);
+	if (Object.keys(bp.widths).length === 0)
+		fail(`Build plan for '${bpName}' has zero widths in its configuration.`);
 }
 
 function resolveWwsAspect(aspectName, bpName, buildPlans, defaultConfig, deps) {

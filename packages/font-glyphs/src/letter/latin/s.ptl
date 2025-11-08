@@ -21,7 +21,9 @@ glyph-block Letter-Latin-S : begin
 	define SLAB-CLASSICAL 1
 	define SLAB-INWARD    2
 	define CURLY-TAIL     10
+	define PHONETIC-RIGHT 11
 
+	define SOTop  0
 	define SOBot  OX
 
 	glyph-block-export AdviceSArchDepth
@@ -33,12 +35,6 @@ glyph-block Letter-Latin-S : begin
 		local ss : y * 0.22 + 0.12 * strokeFactor + 0.05 * widthFactor
 		return : ss + sign * TanSlope * SmoothAdjust
 
-	define [SCurlyTail df sw] : begin
-		local fine : df.adviceStroke2 3 4 XH
-		return : CurlyTail.n fine 0 (df.leftSB + SOBot) df.width (0.5 * fine)
-			yLoopTop -- 0.333 * XH + 0.125 * fine
-			swBefore -- sw
-
 	define [SNeck df height stroke ess] : begin
 		local adjustFactor : 0.1 * (df.rightSB - df.leftSB) / height
 		return : list
@@ -47,70 +43,100 @@ glyph-block Letter-Latin-S : begin
 			~~~ [alsoThru 0.5 (0.3 - adjustFactor)]
 
 	define [SStrokeImpl df top bot st sb stroke refSwEss] : begin
-		local ess : refSwEss * stroke / Stroke
-		define archDepth : AdviceSArchDepth (top - bot) (-1) stroke
-
+		local ess : refSwEss * (stroke / Stroke)
+		local archDepth : AdviceSArchDepth (top - bot) (-1) stroke
 		return : dispiro
 			match st
 				[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs df.rightSB top stroke Hook
 				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs df.rightSB top stroke Hook
 				__ : list
-					g4 df.rightSB (top - Hook) [widths.lhs stroke]
+					g4 ((df.rightSB + 0) - SOTop) (top - Hook) [widths.lhs stroke]
 					hookstart top (sw -- stroke)
 
-			g4   df.leftSB (top - archDepth)
+			g4   ((df.leftSB  - 0) + SOTop) (top - archDepth)
 			~~~ [SNeck df (top - bot) stroke ess]
-			g4   (df.rightSB - SOBot) (bot + archDepth) [widths.rhs stroke]
+			g4   ((df.rightSB + 0) - SOBot) (bot + archDepth) [widths.rhs stroke]
 
 			match sb
 				[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs df.leftSB bot stroke Hook
 				[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs df.leftSB bot stroke Hook
 				__ : list
 					hookend bot (sw -- stroke)
-					g4   (df.leftSB + SOBot) (bot + Hook)
+					g4 ((df.leftSB - 0) + SOBot) (bot + Hook)
 
-	define [RevSStroke df st sb stroke ess] : begin
-		local archDepth : AdviceSArchDepth CAP 0.5 stroke
+	define [RevSStrokeImpl df top bot st sb stroke refSwEss] : begin
+		local ess : refSwEss * (stroke / Stroke)
+		local archDepth : AdviceSArchDepth (top - bot) (+1) stroke
 		return : dispiro
 			match st
-				[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs df.leftSB CAP stroke Hook
-				[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs df.leftSB CAP stroke Hook
+				[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs df.leftSB top stroke Hook
+				[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs df.leftSB top stroke Hook
 				__ : list
-					g4   df.leftSB (CAP - Hook) [widths.rhs stroke]
-					hookstart CAP (sw -- stroke)
-			g4   df.rightSB (CAP - archDepth)
-			~~~ [SNeck df CAP stroke ess]
-			g4   (df.leftSB + SOBot) archDepth [widths.lhs stroke]
+					g4   ((df.leftSB - 0) + SOTop) (top - Hook) [widths.rhs stroke]
+					hookstart top (sw -- stroke)
+			g4   ((df.rightSB + 0) - SOTop) (top - archDepth)
+			~~~ [SNeck df (top - bot) stroke ess]
+			g4   ((df.leftSB  - 0) + SOBot) (bot + archDepth) [widths.lhs stroke]
 			match sb
-				[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs df.rightSB 0 stroke Hook
-				[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs df.rightSB 0 stroke Hook
+				[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs df.rightSB bot stroke Hook
+				[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs df.rightSB bot stroke Hook
 				__ : list
 					hookend 0 (sw -- stroke)
-					g4   (df.rightSB + OX - SOBot) Hook
+					g4   ((df.rightSB + 0) - SOBot) (bot + Hook)
 
-	define [SmallSStrokeImpl df st sb stroke refSwEss] : begin
-		define ess : refSwEss * stroke / Stroke
-		define archDepth : AdviceSArchDepth XH (-1) stroke
-
+	define [SmallSStrokeImpl df top bot st sb stroke refSwEss] : begin
+		local ess : refSwEss * (stroke / Stroke)
+		local archDepth : AdviceSArchDepth (top - bot) (-1) stroke
 		return : dispiro
 			match st
-				[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs df.rightSB XH stroke SHook
-				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs df.rightSB XH stroke SHook
+				[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs df.rightSB top stroke SHook
+				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs df.rightSB top stroke SHook
 				__ : list
-						g4   (df.rightSB + OX) (XH - SHook) [widths.lhs stroke]
-						hookstart XH (sw -- stroke)
+					g4   ((df.rightSB + OX) - SOTop) (top - SHook) [widths.lhs stroke]
+					hookstart top (sw -- stroke)
 
-			g4   (df.leftSB - OX) (XH - archDepth)
-			~~~ [SNeck df XH stroke ess]
-			g4   (df.rightSB + OX - SOBot) (archDepth) [widths.rhs stroke]
+			g4   ((df.leftSB  - OX) + SOTop) (top - archDepth)
+			~~~ [SNeck df (top - bot) stroke ess]
+			g4   ((df.rightSB + OX) - SOBot) (bot + archDepth) [widths.rhs stroke]
 
 			match sb
-				[Just CURLY-TAIL] : SCurlyTail df stroke
-				[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs df.leftSB 0 stroke SHook
-				[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs df.leftSB 0 stroke SHook
+				[Just CURLY-TAIL] : let [fine : AdviceStroke2 3 4 XH df.adws] : CurlyTail.n
+					fine     -- fine
+					bottom   -- bot
+					xOuter   -- (df.leftSB + SOBot)
+					x2       -- df.width
+					y2       -- (bot + 0.5 * fine)
+					yLoopTop -- (bot + 0.333 * XH + 0.125 * fine)
+					swBefore -- stroke
+				[Just PHONETIC-RIGHT] : list
+					arcvh
+					flat [arch.adjust-x.top df.middle] bot [widths.rhs Stroke]
+					curl                    df.leftSB  bot
+				[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs df.leftSB bot stroke SHook
+				[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs df.leftSB bot stroke SHook
 				__ : list
-					hookend 0 (sw -- stroke)
-					g4   (df.leftSB - OX + SOBot) SHook
+					hookend bot (sw -- stroke)
+					g4   ((df.leftSB - OX) + SOBot) (bot + SHook)
+
+	define [RevSmallSStrokeImpl df top bot st sb stroke refSwEss] : begin
+		local ess : refSwEss * (stroke / Stroke)
+		local archDepth : AdviceSArchDepth (top - bot) (+1) stroke
+		return : dispiro
+			match st
+				[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs df.leftSB top stroke SHook
+				[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs df.leftSB top stroke SHook
+				__ : list
+					g4   ((df.leftSB - OX) + SOTop) (top - SHook) [widths.rhs stroke]
+					hookstart top (sw -- stroke)
+			g4   ((df.rightSB + OX) - SOTop) (top - archDepth)
+			~~~ [SNeck df (top - bot) stroke ess]
+			g4   ((df.leftSB  - OX) + SOBot) (bot + archDepth) [widths.lhs stroke]
+			match sb
+				[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs df.rightSB bot stroke SHook
+				[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs df.rightSB bot stroke SHook
+				__ : list
+					hookend bot (sw -- stroke)
+					g4   ((df.rightSB + OX) - SOBot) (bot + SHook)
 
 	define [SStrokeAlt] : with-params [df top hook swStart swEnd oXLeftTop offsetLT offsetRB offsetC] : begin
 		define stroke : Math.max swStart swEnd
@@ -130,64 +156,27 @@ glyph-block Letter-Latin-S : begin
 			hookend soEnd (sw -- fine)
 			g4   (df.leftSB + SOBot + [HSwToV soEnd]) (hook) [widths.rhs fine]
 
-	define [SmallSStrokePhoneticRight df st top] : begin
-		define stroke : AdviceStroke2 2 3 top
-		define ess : AdviceStroke2 2.2 3.2 top
-		define archDepth : AdviceSArchDepth top (-1) stroke
-		return : dispiro
-			match st
-				[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs df.rightSB top stroke Hook
-				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs df.rightSB top stroke Hook
-				__ : list
-					g4 df.rightSB (top - Hook) [widths.lhs stroke]
-					hookstart top (sw -- stroke)
-			g4   df.leftSB (top - archDepth)
-			~~~ [SNeck df top stroke ess]
-			g4   (df.rightSB - SOBot) (archDepth) [widths.rhs stroke]
-			arcvh
-			flat [arch.adjust-x.top df.middle] 0 [widths.rhs Stroke]
-			curl df.leftSB 0
-
-	define [RevSmallSStroke df st sb stroke ess] : begin
-		define archDepth : AdviceSArchDepth XH 0.75 stroke
-		return : dispiro
-			match st
-				[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs df.leftSB XH stroke SHook
-				[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs df.leftSB XH stroke SHook
-				__ : list
-					g4   (df.leftSB - OX) (XH - SHook) [widths.rhs stroke]
-					hookstart XH (sw -- stroke)
-			g4   (df.rightSB + OX) (XH - archDepth)
-			~~~ [SNeck df XH stroke ess]
-			g4   (df.leftSB - OX + SOBot) (archDepth) [widths.lhs stroke]
-			match sb
-				[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs df.rightSB 0 stroke SHook
-				[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs df.rightSB 0 stroke SHook
-				__ : list
-					hookend 0 (sw -- stroke)
-					g4   (df.rightSB + OX - SOBot) SHook
-
 	glyph-block-export SAutoSlabStart
 	define [SAutoSlabStart df st top sw hook] : match st
-		[Just SLAB-CLASSICAL] : ArcStartSerif.R df.rightSB top sw hook
-		[Just SLAB-INWARD] : ArcStartSerif.InwardR df.rightSB top sw hook
-		__ : glyph-proc
+		[Just SLAB-CLASSICAL] : ArcStartSerif.R       df.rightSB top sw hook
+		[Just SLAB-INWARD]    : ArcStartSerif.InwardR df.rightSB top sw hook
+		__                    : glyph-proc
 
 	glyph-block-export SAutoSlabEnd
 	define [SAutoSlabEnd df st bot sw hook] : match st
-		[Just SLAB-CLASSICAL] : ArcEndSerif.L df.leftSB bot  sw hook
-		[Just SLAB-INWARD] : ArcEndSerif.InwardL df.leftSB bot  sw hook
-		__ : glyph-proc
+		[Just SLAB-CLASSICAL] : ArcEndSerif.L       df.leftSB bot sw hook
+		[Just SLAB-INWARD]    : ArcEndSerif.InwardL df.leftSB bot sw hook
+		__                    : glyph-proc
 
 	define [RevSAutoSlabStart df st top sw hook] : match st
-		[Just SLAB-CLASSICAL] : ArcStartSerif.L df.leftSB top sw hook
-		[Just SLAB-INWARD] : ArcStartSerif.InwardL df.leftSB top sw hook
-		__ : glyph-proc
+		[Just SLAB-CLASSICAL] : ArcStartSerif.L       df.leftSB top sw hook
+		[Just SLAB-INWARD]    : ArcStartSerif.InwardL df.leftSB top sw hook
+		__                    : glyph-proc
 
 	define [RevSAutoSlabEnd df st bot sw hook] : match st
-		[Just SLAB-CLASSICAL] : ArcEndSerif.R df.rightSB bot  sw hook
-		[Just SLAB-INWARD] : ArcEndSerif.InwardR df.rightSB bot  sw hook
-		__ : glyph-proc
+		[Just SLAB-CLASSICAL] : ArcEndSerif.R       df.rightSB bot sw hook
+		[Just SLAB-INWARD]    : ArcEndSerif.InwardR df.rightSB bot sw hook
+		__                    : glyph-proc
 
 	define SConfig : object
 		serifless               { SLAB-NONE      SLAB-NONE      }
@@ -206,16 +195,16 @@ glyph-block Letter-Latin-S : begin
 		create-glyph "S.\(suffix)" : glyph-proc
 			local df : include DfCapital
 			include : df.markSet.capital
-			local sw : AdviceStroke2 2 3 CAP
-			include : SStrokeImpl    df CAP 0 doTS doBS sw EssUpper
+			local sw : AdviceStroke2 2 3 CAP df.adws
+			include : SStrokeImpl df CAP 0 doTS doBS sw EssUpper
 			include : SAutoSlabStart df doTS CAP sw Hook
 			include : SAutoSlabEnd   df doBS 0   sw Hook
 
 		create-glyph "smcpS.\(suffix)" : glyph-proc
 			local df : include DfCapital
 			include : df.markSet.e
-			local sw : AdviceStroke2 2 3 CAP
-			include : SStrokeImpl    df XH 0 doTS doBS sw EssUpper
+			local sw : AdviceStroke2 2 3 CAP df.adws
+			include : SStrokeImpl df XH 0 doTS doBS sw EssUpper
 			include : SAutoSlabStart df doTS XH sw Hook
 			include : SAutoSlabEnd   df doBS 0  sw Hook
 
@@ -226,8 +215,8 @@ glyph-block Letter-Latin-S : begin
 
 			define top : CAP * 0.95
 			define bot : CAP * 0.05
-			local sw : AdviceStroke2 2 3 (top - bot)
-			include : SStrokeImpl    df top bot doTS doBS sw EssUpper
+			local sw : AdviceStroke2 2 3 (top - bot) df.adws
+			include : SStrokeImpl df top bot doTS doBS sw EssUpper
 			include : SAutoSlabStart df doTS top sw Hook
 			include : SAutoSlabEnd   df doBS bot sw Hook
 
@@ -238,114 +227,109 @@ glyph-block Letter-Latin-S : begin
 
 			define top : CAP * 0.88
 			define bot : CAP * 0.12
-			local sw : AdviceStroke2 2 3 (top - bot)
-			include : SStrokeImpl    df top bot doTS doBS sw EssUpper
+			local sw : AdviceStroke2 2 3 (top - bot) df.adws
+			include : SStrokeImpl df top bot doTS doBS sw EssUpper
 			include : SAutoSlabStart df doTS top sw Hook
 			include : SAutoSlabEnd   df doBS bot sw Hook
 
 		create-glyph "s.\(suffix)" : glyph-proc
 			local df : include DfLower
 			include : df.markSet.e
-			local sw : AdviceStroke2 2 3 XH df.adws
-			include : SmallSStrokeImpl df doTS doBS sw EssLower
-			include : SAutoSlabStart   df doTS XH sw Hook
-			include : SAutoSlabEnd     df doBS 0  sw Hook
+			local sw : AdviceStroke2 2 3 XH df.adws df.adws
+			include : SmallSStrokeImpl df XH 0 doTS doBS sw EssLower
+			include : SAutoSlabStart df doTS XH sw Hook
+			include : SAutoSlabEnd   df doBS 0  sw Hook
 
 		create-glyph "s/phoneticRight.\(suffix)" : glyph-proc
 			local df : include DfLower
 			include : df.markSet.e
-			local sw : AdviceStroke2 2 3 XH
-			include : SmallSStrokePhoneticRight df doTS XH
+			local sw : AdviceStroke2 2 3 XH df.adws
+			include : SmallSStrokeImpl df XH 0 doTS PHONETIC-RIGHT sw EssLower
 			include : SAutoSlabStart df doTS XH sw Hook
 
 		create-glyph "revS.\(suffix)" : glyph-proc
 			local df : include DfCapital
 			include : df.markSet.capital
-			local sw : AdviceStroke2 2 3 CAP
-			include : RevSStroke        df doTS doBS sw EssUpper
-			include : RevSAutoSlabStart df doTS CAP  sw Hook
-			include : RevSAutoSlabEnd   df doBS 0    sw Hook
+			local sw : AdviceStroke2 2 3 CAP df.adws
+			include : RevSStrokeImpl df CAP 0 doTS doBS sw EssUpper
+			include : RevSAutoSlabStart df doTS CAP sw Hook
+			include : RevSAutoSlabEnd   df doBS 0   sw Hook
 
 		create-glyph "revs.\(suffix)" : glyph-proc
 			local df : include DfLower
 			include : df.markSet.e
-			local sw : AdviceStroke2 2 3 XH
-			include : RevSmallSStroke   df doTS doBS sw EssLower
-			include : RevSAutoSlabStart df doTS XH   sw Hook
-			include : RevSAutoSlabEnd   df doBS 0    sw Hook
+			local sw : AdviceStroke2 2 3 XH df.adws
+			include : RevSmallSStrokeImpl df XH 0 doTS doBS sw EssLower
+			include : RevSAutoSlabStart df doTS XH sw Hook
+			include : RevSAutoSlabEnd   df doBS 0  sw Hook
 
-		define [UpperSBaseWithAttach df] : glyph-proc
-			include : SAutoSlabStart df doTS CAP Stroke Hook
-			local stroke : include : SStrokeImpl df CAP 0 doTS doBS [AdviceStroke2 2 3 CAP] EssUpper
+		define [UpperSBaseWithAttach df sw] : glyph-proc
+			include : SAutoSlabStart df doTS CAP sw Hook
+			local stroke : include : SStrokeImpl df CAP 0 doTS doBS sw EssUpper
 			return stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
-		define [LowerSBaseWithAttach df] : glyph-proc
-			include : SAutoSlabStart df doTS XH [AdviceStroke2 2 3 XH] Hook
-			local stroke : include : SmallSStrokeImpl df doTS doBS [AdviceStroke2 2 3 XH] EssLower
+		define [LowerSBaseWithAttach df sw] : glyph-proc
+			include : SAutoSlabStart df doTS XH sw Hook
+			local stroke : include : SmallSStrokeImpl df XH 0 doTS doBS sw EssLower
 			return stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
 		if [not doBS] : create-glyph "SSwash.\(suffix)" : glyph-proc
 			local df : include DfCapital
 			include : df.markSet.capDesc
 
-			local start : include : UpperSBaseWithAttach df
-			local sw : AdviceStroke2 2 3 CAP
+			local sw : AdviceStroke2 2 3 CAP df.adws
+			local start : include : UpperSBaseWithAttach df sw
 			include : dispiro
 				widths.lhs [AdviceStroke 4.5]
-				g4 start.x start.y
+				g4    start.x         start.y
 				alsoThru 0.15 0.6 important
 				flat (df.rightSB - 1) Descender [widths.lhs sw]
-				curl df.rightSB Descender
+				curl  df.rightSB      Descender
 
 		if [not doBS] : create-glyph "sSwash.\(suffix)" : glyph-proc
 			local df : include DfLower
 			include : df.markSet.p
 
-			local start : include : LowerSBaseWithAttach df
-			local sw : AdviceStroke2 2 3 XH
+			local sw : AdviceStroke2 2 3 XH df.adws
+			local start : include : LowerSBaseWithAttach df sw
 			include : dispiro
 				widths.lhs [AdviceStroke 4.5]
-				g4 start.x start.y
+				g4    start.x         start.y
 				alsoThru 0.15 0.6 important
 				flat (df.rightSB - 1) Descender [widths.lhs sw]
-				curl df.rightSB Descender
+				curl  df.rightSB      Descender
 
 		if [not doBS] : create-glyph "sCurlyTail.\(suffix)" : glyph-proc
 			local df : include DfLower
 			include : df.markSet.e
 			local sw : AdviceStroke2 2 3 XH df.adws
-			include : SmallSStrokeImpl df doTS CURLY-TAIL sw EssLower
+			include : SmallSStrokeImpl df XH 0 doTS CURLY-TAIL sw EssLower
 			include : SAutoSlabStart df doTS XH sw Hook
 
 		create-glyph "cyrl/Dzwe.\(suffix)" : glyph-proc
 			local df : include DfCapital
 			include : df.markSet.capDesc
-			local sw : AdviceStroke2 2 3 (CAP - Descender)
-			include : SStrokeImpl    df CAP  Descender doTS doBS sw EssUpper
-			include : SAutoSlabStart df doTS CAP       sw   Hook
-			include : SAutoSlabEnd   df doBS Descender sw   Hook
+			local sw : AdviceStroke2 2 3 (CAP - Descender) df.adws
+			include : SStrokeImpl df CAP Descender doTS doBS sw EssUpper
+			include : SAutoSlabStart df doTS CAP       sw Hook
+			include : SAutoSlabEnd   df doBS Descender sw Hook
 
 		create-glyph "cyrl/dzwe.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleF 2
 			include : df.markSet.bp
 			local subDf : DivFrame (5 / 6) 2
 			local sw : AdviceStroke2 2 3 (Ascender - Descender) subDf.adws
-			local shift : 0.5 * (df.width - subDf.width)
-			include : with-transform [ApparentTranslate shift 0]
-				SStrokeImpl subDf Ascender Descender doTS doBS sw EssLower
-			include : with-transform [ApparentTranslate shift 0]
-				SAutoSlabStart subDf doTS Ascender sw Hook
-			include : with-transform [ApparentTranslate shift 0]
-				SAutoSlabEnd subDf doBS Descender sw Hook
+			include : with-transform [ApparentTranslate (0.5 * (df.width - subDf.width)) 0] : glyph-proc
+				include : SStrokeImpl subDf Ascender Descender doTS doBS sw EssLower
+				include : SAutoSlabStart subDf doTS Ascender  sw Hook
+				include : SAutoSlabEnd   subDf doBS Descender sw Hook
 
 	select-variant 'S' 'S'
 	link-reduced-variant 'S/sansSerif' 'S' MathSansSerif
+	select-variant 'smcpS' 0xA731 (follow -- 'S')
 
 	select-variant 's' 's'
 	link-reduced-variant 's/sansSerif' 's' MathSansSerif
-
-	select-variant 'smcpS' 0xA731 (follow -- 'S')
-
 	select-variant 's/phoneticRight'
 
 	select-variant 'revS' 0x1A7 (follow -- 'S')
@@ -431,7 +415,7 @@ glyph-block Letter-Latin-S : begin
 		local df : include DfCapital
 		include : df.markSet.capital
 		define theta : Math.PI / 4
-		foreach sign [items-of { 1 (-1) }] : begin
+		foreach sign [items-of { (+1) (-1) }] : begin
 			include : SStrokeAlt
 				df -- df
 				top -- CAP
@@ -457,7 +441,7 @@ glyph-block Letter-Latin-S : begin
 		local df : include DfLower
 		include : df.markSet.e
 		define theta : Math.PI / 5
-		foreach sign [items-of { 1 (-1) }] : begin
+		foreach sign [items-of { (+1) (-1) }] : begin
 			include : SStrokeAlt
 				df -- df
 				top -- XH

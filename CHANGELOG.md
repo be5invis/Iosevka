@@ -1,5 +1,24 @@
 ## Modifications since last major version
 
+### 33.3.4
+
+* Add Characters:
+  - COMBINING OPEN MARK BELOW (`U+1AB7`).
+  - COMBINING DOUBLE OPEN MARK BELOW (`U+1AB8`).
+  - SUN (`U+2609`) (#2935).
+  - CAUTION SIGN (`U+2621`) (#2935).
+  - PERMANENT PAPER SIGN (`U+267E`) (#2935).
+  - BLACK CIRCLE WITH WHITE DOT RIGHT (`U+2688`) (#2935).
+  - BLACK CIRCLE WITH TWO WHITE DOTS (`U+2689`) (#2935).
+  - WARNING SIGN (`U+26A0`) (#2935).
+* Refine shape of the following characters:
+  - MODIFIER LETTER UNASPIRATED (`U+02ED`).
+  - MODIFIER LETTER LEFT TACK (`U+AB6A`).
+  - MODIFIER LETTER RIGHT TACK (`U+AB6B`).
+* Refine serifs of Cyrillic Lower Dwe (`U+A681`) under italics.
+* Fix character mapping for: `U+2916`, `U+2B3B`, `U+2905` and `U+2B36`.
+
+
 ### 33.3.3
 
 * Add italic form for Cyrillic Lower Tswe (`U+A68F`).

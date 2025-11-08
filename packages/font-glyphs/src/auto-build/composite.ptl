@@ -48,6 +48,14 @@ glyph-block Autobuild-Enclosure-Shared : begin
 			: else : return : CAP / 2 - [mix g.baseAnchors.above.y g.baseAnchors.below.y 0.5]
 		return 0
 
+	define [MapPartNameWithWidthSuffix parts suffix] : begin
+		local results {}
+		foreach part [items-of parts] : begin
+			local partNameWithSuffix : if suffix (part + "." + suffix) part
+			if [query-glyph partNameWithSuffix] : results.push partNameWithSuffix
+			: else : results.push part
+		return results
+
 	glyph-block-export CollectJobs
 	define [CollectJobs globallyDecomposable centered allowProportional prefix suffix demands] : begin
 		local nonDecomposable       { }
@@ -55,13 +63,14 @@ glyph-block Autobuild-Enclosure-Shared : begin
 		local relApplications       { }
 		local decomposableRelGlyphs : new Set
 		foreach demand [items-of demands] : do
-			local unicode    demand.0
-			local parts      demand.1
-			local restInfo : demand.slice 2
-			local origJobGlyphGn : CircName unicode prefix parts suffix
+			local unicode       demand.0
+			local origParts     demand.1
+			local mappedParts : MapPartNameWithWidthSuffix origParts suffix
+			local restInfo    : demand.slice 2
+			local origJobGlyphGn : CircName unicode prefix origParts suffix
 
 			local demandDecomposable : para.enableCvSs && globallyDecomposable
-			foreach part [items-of parts] : if [query-glyph part] : begin
+			foreach part [items-of mappedParts] : if [query-glyph part] : begin
 				local g : query-glyph part
 				local relatedGlyphs : AnyCvOrCherryPicking.query g
 				foreach gr [items-of relatedGlyphs] : if [query-glyph : gr.get g] : begin
@@ -73,15 +82,15 @@ glyph-block Autobuild-Enclosure-Shared : begin
 						set demandDecomposable false
 
 			local jobsOrig : if demandDecomposable decomposableJobs nonDecomposable
-			jobsOrig.push { origJobGlyphGn unicode parts :: restInfo }
+			jobsOrig.push { origJobGlyphGn unicode mappedParts :: restInfo }
 
 			if demandDecomposable
-			: then : foreach part [items-of parts] : begin
+			: then : foreach part [items-of mappedParts] : begin
 				local mesh : getGrMesh { part } AnyCvOrCherryPicking query-glyph
 				foreach {gr fromParts toParts} [items-of mesh] : foreach gn [items-of toParts]
 					decomposableRelGlyphs.add gn
 			: else : begin
-				local mesh : getGrMesh parts AnyCvOrCherryPicking query-glyph
+				local mesh : getGrMesh mappedParts AnyCvOrCherryPicking query-glyph
 				foreach {gr fromParts toParts} [items-of mesh] : do
 					local fromGn : CircNameNoCheck unicode prefix fromParts suffix
 					local toGn   : CircName        unicode prefix toParts   suffix
@@ -300,6 +309,14 @@ glyph-block AutoBuild-Enclosure : begin
 				set a.shape.slope 'italic'
 				set a.shape.slopeAngle : mix (para.slopeAngle || 0) 15 (95 / 150)
 			return : StandardInners.getPara pp1 digits rows width
+
+	define TriangleInners : object
+		gniPrefix 'tr'
+		getShift        : function [] : return (-CAP / 4)
+		buildInnerShape StandardInners.buildInnerShape
+		addAnchors      StandardInners.addAnchors
+		getXScalar      StandardInners.getXScalar
+		getPara         StandardInners.getPara
 
 	define [EnclosureT prefix builder inners digits rows demands fnEnclosure] : begin
 		foreach {suffix ww gap} [items-of circleWidthClasses] : do
@@ -601,6 +618,18 @@ glyph-block AutoBuild-Enclosure : begin
 			close
 		include : AddEnclosureMark digits : CircleDimens digits ww
 
+	define [createInsetTriangleGlyphs digits demands]
+		EnclosureT 'inset-triangle' InsetBuilder TriangleInners digits 1 demands InsetTriangleEnclosureShape
+	define [InsetTriangleEnclosureShape digits ww gap] : glyph-proc
+		define [object width top bot left right] : CircleDimens digits ww
+		set-width width
+		include : spiro-outline
+			corner (left + O)  bot
+			corner [mix left right 0.5] (top - O)
+			corner (right - O) bot
+			close
+		include : AddEnclosureMark digits : CircleDimens digits ww
+
 	define [createInsetMosaicGlyphs digits demands]
 		EnclosureT 'inset-mosaic' InsetBuilder StandardInners digits 1 demands InsetMosaicEnclosureShape
 	define [InsetMosaicEnclosureShape digits ww gap] : glyph-proc
@@ -807,7 +836,7 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0xA9    {'C'}                       WideWidth2
 			list 0x1F12F {'revC'}                    WideWidth2
 			list 0x2117  {'P'}                       WideWidth2
-			# list 0x267E  {'infty'}                   WideWidth1
+			list 0x267E  {'infty'}                   WideWidth1
 			list 0x1F10E {'ccCcwArrow'}              WideWidth2
 			list 0x1F16F {'ccHumanFigure'}           WideWidth2
 			list 0x1F1AD {'M'}                       WideWidth2
@@ -1012,6 +1041,10 @@ glyph-block AutoBuild-Enclosure : begin
 	do "Single-digit inset diamond"
 		createInsetDiamondGlyphs 1 : list
 			list 0xFFFD { "question" } WideWidth2
+
+	do "Single-digit inset triangle"
+		createInsetTriangleGlyphs 1 : list
+			list 0x26A0 { "exclam" } WideWidth2
 
 	do "Double-digit inset boxed"
 		createDecomposableInsetBoxedGlyphs 2 : list
@@ -1332,7 +1365,7 @@ glyph-block AutoBuild-Accented-Equal : begin
 	createAccentedOp 'equal' 8 0.3 0 aboveMarkBot : list
 		list 0x225d {"d" "e" "f"}
 	createAccentedOp 'markDemoBaseSpace' 6 0.40 0 (aboveMarkBot - (CAP * 0.40 - XH * 0.40)) : list
-		list 0xAE    {"R" "combRingCapDiv1"}
+		list 0xAE    {"R" "combRingCap/adwsN"}
 	createAccentedOp 'markDemoBaseSpace' 6 0.45 0 (aboveMarkBot - (CAP * 0.45 - XH * 0.45)) : list
 		list 0x2122  {"T" "M"}
 		list 0x2120  {"S" "M"}
@@ -1464,7 +1497,7 @@ glyph-block Autobuild-Ligatures : begin
 		list 0x1F2 { 'D' 'z' }
 		list 0x1F3 { 'd' 'z' }
 		list 0x478 { 'cyrl/O' 'cyrl/uk/u' }
-		list 0x479 { 'cyrl/uk/o' 'cyrl/uk/u' }
+		list 0x479 { 'cyrl/oNarrow' 'cyrl/uk/u' }
 		list 0x20A7 { 'P' 't' }
 		list 0x20A8 { 'R' 's' }
 		list 0x20AF { 'D' 'grek/rho' }
