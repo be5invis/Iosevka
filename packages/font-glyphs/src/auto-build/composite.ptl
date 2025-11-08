@@ -310,6 +310,14 @@ glyph-block AutoBuild-Enclosure : begin
 				set a.shape.slopeAngle : mix (para.slopeAngle || 0) 15 (95 / 150)
 			return : StandardInners.getPara pp1 digits rows width
 
+	define TriangleInners : object
+		gniPrefix 'tr'
+		getShift        : function [] : return (-CAP / 4)
+		buildInnerShape StandardInners.buildInnerShape
+		addAnchors      StandardInners.addAnchors
+		getXScalar      StandardInners.getXScalar
+		getPara         StandardInners.getPara
+
 	define [EnclosureT prefix builder inners digits rows demands fnEnclosure] : begin
 		foreach {suffix ww gap} [items-of circleWidthClasses] : do
 			define allowProportional : if (digits > 1) MONOSPACE-ONLY ALLOW-PROPORTIONAL
@@ -607,6 +615,18 @@ glyph-block AutoBuild-Enclosure : begin
 			corner [mix left right 0.5] (bot + O)
 			corner (right - O) [mix bot top 0.5]
 			corner [mix left right 0.5] (top - O)
+			close
+		include : AddEnclosureMark digits : CircleDimens digits ww
+
+	define [createInsetTriangleGlyphs digits demands]
+		EnclosureT 'inset-triangle' InsetBuilder TriangleInners digits 1 demands InsetTriangleEnclosureShape
+	define [InsetTriangleEnclosureShape digits ww gap] : glyph-proc
+		define [object width top bot left right] : CircleDimens digits ww
+		set-width width
+		include : spiro-outline
+			corner (left + O)  bot
+			corner [mix left right 0.5] (top - O)
+			corner (right - O) bot
 			close
 		include : AddEnclosureMark digits : CircleDimens digits ww
 
@@ -1021,6 +1041,10 @@ glyph-block AutoBuild-Enclosure : begin
 	do "Single-digit inset diamond"
 		createInsetDiamondGlyphs 1 : list
 			list 0xFFFD { "question" } WideWidth2
+
+	do "Single-digit inset triangle"
+		createInsetTriangleGlyphs 1 : list
+			list 0x26A0 { "exclam" } WideWidth2
 
 	do "Double-digit inset boxed"
 		createDecomposableInsetBoxedGlyphs 2 : list

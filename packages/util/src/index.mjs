@@ -51,6 +51,10 @@ export function slX(x0, y0, y1, slope) {
 	return x0 + (y1 - y0) / slope;
 }
 
+export function distP(x0, y0, x1, y1, dist) {
+	return dist / Math.hypot(x1 - x0, y1 - y0);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 export function joinCamel(a, b) {
