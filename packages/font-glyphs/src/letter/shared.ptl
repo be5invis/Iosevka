@@ -217,7 +217,7 @@ glyph-block Letter-Shared-Shapes : begin
 		include : dispiro
 			widths.rhs wide
 			flat left wide [heading Rightward]
-			curl m1 wide [heading Rightward]
+			curl m1   wide [heading Rightward]
 			archv 8
 			g4   right (wide + rinner - O / 2) [widths.heading 0 fine {.x (-HVContrast) .y ((wide - fine) / (wide + rinner * 2 - O))}]
 			arcvh 8
@@ -237,7 +237,7 @@ glyph-block Letter-Shared-Shapes : begin
 			local-parameter : adb               -- SmallArchDepthB
 			local-parameter : stroke            -- Stroke
 			local-parameter : fMask             -- false
-			local-parameter : leftY0            -- (top - ada - TINY)
+			local-parameter : leftY0            -- ((top - ada) - TINY)
 
 			return : list
 				flat (left - [HSwToV fine]) leftY0 [widths.rhs fine]
@@ -257,6 +257,39 @@ glyph-block Letter-Shared-Shapes : begin
 			glyph-proc
 				include : spiro-outline : knots.apply null [a.concat { (fMask -- true) }]
 
+		export : define flex-params [earless] : begin
+			local-parameter : left
+			local-parameter : right
+			local-parameter : top               -- XH
+			local-parameter : bottom            -- 0
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+			local-parameter : stroke            -- Stroke
+			local-parameter : rise              -- DToothlessRise
+
+			return : dispiro
+				g4   left  (top - rise) [widths.rhs stroke]
+				arch.rhs top (sw -- stroke) (blendPre -- {})
+				flat right [Math.max (top - adb) (bottom + TINY)]
+				curl right bottom [heading Downward]
+
+		export : define flex-params [rounded] : begin
+			local-parameter : left
+			local-parameter : right
+			local-parameter : top               -- XH
+			local-parameter : bottom            -- 0
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+			local-parameter : stroke            -- Stroke
+			local-parameter : leftY0            -- bottom
+
+			return : dispiro
+				flat left  leftY0 [widths.rhs.heading stroke Upward]
+				curl left  [Math.max (top - ada) (leftY0 + TINY)]
+				arch.rhs top (sw -- stroke)
+				flat right [Math.max (top - adb) (bottom + TINY)]
+				curl right bottom [heading Downward]
+
 	glyph-block-export uBowl
 	define uBowl : namespace
 		export : define flex-params [knots] : begin
@@ -269,7 +302,7 @@ glyph-block Letter-Shared-Shapes : begin
 			local-parameter : adb               -- SmallArchDepthB
 			local-parameter : stroke            -- Stroke
 			local-parameter : fMask             -- false
-			local-parameter : rightY0           -- (bottom + ada + TINY)
+			local-parameter : rightY0           -- ((bottom + ada) + TINY)
 
 			return : list
 				flat (right + [HSwToV fine]) rightY0 [widths.rhs fine]
@@ -286,6 +319,39 @@ glyph-block Letter-Shared-Shapes : begin
 			local a : Array.prototype.slice.call arguments 0
 			glyph-proc
 				include : spiro-outline : knots.apply null [a.concat { (fMask -- true) }]
+
+		export : define flex-params [toothless] : begin
+			local-parameter : left
+			local-parameter : right
+			local-parameter : top               -- XH
+			local-parameter : bottom            -- 0
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+			local-parameter : stroke            -- Stroke
+			local-parameter : rise              -- DToothlessRise
+
+			return : dispiro
+				flat left  top [widths.lhs.heading stroke Downward]
+				curl left  [Math.min (bottom + adb) (top - TINY)]
+				arch.lhs bottom (sw -- stroke) (blendPost -- {})
+				g4   right (bottom + rise)
+
+		export : define flex-params [rounded] : begin
+			local-parameter : left
+			local-parameter : right
+			local-parameter : top               -- XH
+			local-parameter : bottom            -- 0
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+			local-parameter : stroke            -- Stroke
+			local-parameter : rightY0           -- top
+
+			return : dispiro
+				flat left  top [widths.lhs.heading stroke Downward]
+				curl left  [Math.min (bottom + adb) (top     - TINY)]
+				arch.lhs bottom (sw -- stroke)
+				flat right [Math.min (bottom + ada) (rightY0 - TINY)]
+				curl right rightY0 [heading Upward]
 
 	glyph-block-export cheBowl
 	define cheBowl : namespace
@@ -313,7 +379,7 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [arcStart] : with-params [
 				[top XH] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[ystart (top - ada - TINY)]
+				[ystart ((top - ada) - TINY)]
 			] : begin
 			local xstart : left + [HSwToV : sw - fine]
 			return : list
@@ -324,7 +390,7 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [arcEnd] : with-params [
 				[bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[yend (bot + ada + TINY)]
+				[yend ((bot + ada) + TINY)]
 			] : begin
 			local xend : left + [HSwToV : sw - fine]
 			return : list
@@ -356,7 +422,7 @@ glyph-block Letter-Shared-Shapes : begin
 				flatside.ru right bot top ada adb
 				arch.lhs top (sw -- sw) (swAfter -- fine)
 				flat (left + [HSwToV : sw - fine]) (top - ada) [widths.lhs fine]
-				curl (left + [HSwToV : sw - fine]) (top - ada - TINY) [widths.lhs fine]
+				curl (left + [HSwToV : sw - fine]) ((top - ada) - TINY) [widths.lhs fine]
 
 		export : define [rounded] : with-params [
 				[top XH] [bot 0] [left SB] [right RightSB] [yTerminal CAP] [sw Stroke] [fine ShoulderFine]
@@ -368,7 +434,7 @@ glyph-block Letter-Shared-Shapes : begin
 				arch.lhs bot (sw -- sw)
 				flatside.ru right bot top ada adb
 				arch.lhs top (sw -- sw) (swAfter -- fine)
-				flat (left + [HSwToV : sw - fine]) (top - ada + TINY) [widths.lhs fine]
+				flat (left + [HSwToV : sw - fine]) ((top - ada) + TINY) [widths.lhs fine]
 				curl (left + [HSwToV : sw - fine]) (top - ada) [widths.lhs fine]
 
 		export : define [toothlessTop] : with-params [
@@ -376,7 +442,7 @@ glyph-block Letter-Shared-Shapes : begin
 				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : begin
 			return : dispiro
-				flat (left + [HSwToV : sw - fine]) (bot + adb + TINY) [widths.lhs fine]
+				flat (left + [HSwToV : sw - fine]) ((bot + adb) + TINY) [widths.lhs fine]
 				curl (left + [HSwToV : sw - fine]) (bot + adb) [widths.lhs fine]
 				arch.lhs bot (sw -- sw) (swBefore -- fine)
 				flatside.ru right bot top ada adb
@@ -390,7 +456,7 @@ glyph-block Letter-Shared-Shapes : begin
 				[fine ShoulderFine] [ada SmallArchDepthA] [adb SmallArchDepthB]
 			] : begin
 			return : dispiro
-				flat (left + [HSwToV : sw - fine]) (bot + adb + TINY) [widths.lhs fine]
+				flat (left + [HSwToV : sw - fine]) ((bot + adb) + TINY) [widths.lhs fine]
 				curl (left + [HSwToV : sw - fine]) (bot + adb) [widths.lhs fine]
 				arch.lhs bot (sw -- sw) (swBefore -- fine)
 				flatside.ru right bot top ada adb
@@ -404,7 +470,7 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [arcStart] : with-params [
 				[top XH] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[ystart (top - ada - TINY)]
+				[ystart ((top - ada) - TINY)]
 			] : begin
 			local xstart : right - [HSwToV : sw - fine]
 			return : list
@@ -415,7 +481,7 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [arcEnd] : with-params [
 				[bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
 				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[yend (bot + ada + TINY)]
+				[yend ((bot + ada) + TINY)]
 			] : begin
 			local xend : right - [HSwToV : sw - fine]
 			return : list
@@ -651,8 +717,6 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [StdDepth df sw] : Math.max (0.5 * sw)
 			df.adws * para.unitWidthScalar * [Math.hypot HookX Hook] - 0.25 * sw
 
-		export : define [DefaultInnerRadius] : Math.max (XH / 32) (0.5 * [AdviceStroke2 24 32 XH])
-
 		define [FineSw sw] : begin
 			define mocFine : [AdviceStroke 3] * (sw / Stroke)
 			return : mocFine / [mix 1 HVContrast 0.375]
@@ -700,14 +764,14 @@ glyph-block Letter-Shared-Shapes : begin
 			return results
 
 		export : define [R cx cy depth sw] : begin
-			define rInY : DefaultInnerRadius
+			define rInY : 1 * DefaultTightBendInnerRadius
 			return : list
 				curl cx (cy + [FineSw sw] + rInY)
 				arcvh 8 DiagTailSuperness
 				F (+1) cx cy rInY DefaultAngle depth sw
 
 		export : define [L cx cy depth sw] : begin
-			define rInY : DefaultInnerRadius
+			define rInY : 1 * DefaultTightBendInnerRadius
 			return : list
 				curl cx (cy + [FineSw sw] + rInY)
 				arcvh 8 DiagTailSuperness

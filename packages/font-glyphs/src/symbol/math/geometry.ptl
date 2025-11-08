@@ -139,7 +139,7 @@ glyph-block Symbol-Math-Geometry : begin
 	create-glyph 'wigglyLine' 0x2E3E : glyph-proc
 		define N 4
 		local knots {}
-		local stroke : AdviceStroke2 4 11 (ParenTop - ParenBot)
+		local stroke : AdviceStroke2 4 12 (ParenTop - ParenBot)
 		local halfSw : 0.5 * stroke
 		local halfVSw : HSwToV halfSw
 
@@ -148,18 +148,19 @@ glyph-block Symbol-Math-Geometry : begin
 		local left  : Middle - [Math.max (radiusBox / 4) (halfVSw * 1.1)] - halfVSw
 		local right : Middle + [Math.max (radiusBox / 4) (halfVSw * 1.1)] + halfVSw
 
-		foreach t [range 0 N] : begin
-			knots.push : list
-				g4 [mix right left 0.5] [mix bot top (t / N)]
-				g4.up.mid (right - halfVSw) [mix bot top ((t + 0.25) / N)]
-				g4 [mix right left 0.5] [mix bot top ((t + 0.5) / N)]
-				g4.up.mid (left + halfVSw) [mix bot top ((t + 0.75) / N)]
+		foreach t [range 0 till N] : begin
+			local cl : left + halfVSw
+			local cr : right - halfVSw
+			local pm   0.875
+			knots.push : g2.right.mid [mix cl cr 0.5] [mix bot top ((t + 0/8) / N)] [heading Rightward]
+			knots.push : g2.up.mid    cr              [mix bot top ((t + 2/8) / N)] [heading Upward]
+			knots.push : g2.left.mid  [mix cl cr 0.5] [mix bot top ((t + 4/8) / N)] [heading Leftward]
+			knots.push : g2.up.mid    cl              [mix bot top ((t + 6/8) / N)] [heading Upward]
 
 		include : dispiro
 			widths.center stroke
 			straight.right.start left bot
-			* knots
-			g4 [mix right left 0.5] top
+			knots.slice 0 (-3)
 			straight.right.end right top
 
 	do 'Zigzags'
