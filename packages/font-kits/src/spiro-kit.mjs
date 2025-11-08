@@ -9,7 +9,7 @@ import {
 	VirtualControlKnot,
 	DecorInterpolator,
 } from "@iosevka/geometry/spiro-control";
-import { bez3, fallback, mix } from "@iosevka/util";
+import { bez3, clamp, fallback, mix } from "@iosevka/util";
 
 import { BiKnotCollector } from "../../geometry/src/spiro-expand.mjs";
 
@@ -288,7 +288,7 @@ export function SetupBuilders(bindings) {
 			super();
 			this.ty = ty;
 			this.rx = rx;
-			this.ry = ry;
+			this.ry = fallback(ry, rx);
 			this.deltaX = deltaX;
 			this.deltaY = deltaY;
 			this.raf = fallback(raf, unimportant);
@@ -302,21 +302,73 @@ export function SetupBuilders(bindings) {
 		}
 	}
 
-	function alsoThru(rx, ry, raf) {
-		return new SimpleMixInterpolator(g4, rx, ry, 0, 0, raf);
+	class DistanceFromStartInterpolator extends InterpolatorBase {
+		constructor(ty, distFromStart, deltaX, deltaY, raf) {
+			super();
+			this.ty = ty;
+			this.distFromStart = distFromStart;
+			this.deltaX = deltaX;
+			this.deltaY = deltaY;
+			this.raf = fallback(raf, unimportant);
+		}
+		resolveInterpolation(before, after) {
+			const totalDist = Math.hypot(after.x - before.x, after.y - before.y);
+			const r = clamp(0, 1, this.distFromStart / totalDist);
+			return this.ty(
+				mix(before.x, after.x, r) + this.deltaX,
+				mix(before.y, after.y, r) + this.deltaY,
+				this.raf,
+			);
+		}
 	}
-	alsoThru.withOffset = function (rx, ry, deltaX, deltaY, raf) {
-		return new SimpleMixInterpolator(g4, rx, ry, deltaX, deltaY, raf);
-	};
-	alsoThru.g2 = function (rx, ry, raf) {
-		return new SimpleMixInterpolator(g2, rx, ry, 0, 0, raf);
-	};
-	alsoThru.g4 = function (rx, ry, raf) {
-		return new SimpleMixInterpolator(g4, rx, ry, 0, 0, raf);
-	};
-	alsoThru.g2.withOffset = function (rx, ry, deltaX, deltaY, raf) {
-		return new SimpleMixInterpolator(g2, rx, ry, deltaX, deltaY, raf);
-	};
+
+	class DistTillEndInterpolator extends InterpolatorBase {
+		constructor(ty, distTillEnd, deltaX, deltaY, raf) {
+			super();
+			this.ty = ty;
+			this.distTillEnd = distTillEnd;
+			this.deltaX = deltaX;
+			this.deltaY = deltaY;
+			this.raf = fallback(raf, unimportant);
+		}
+		resolveInterpolation(before, after) {
+			const totalDist = Math.hypot(after.x - before.x, after.y - before.y);
+			const r = clamp(0, 1, 1 - this.distTillEnd / totalDist);
+			return this.ty(
+				mix(before.x, after.x, r) + this.deltaX,
+				mix(before.y, after.y, r) + this.deltaY,
+				this.raf,
+			);
+		}
+	}
+
+	function AlsoThruSeries(ty) {
+		const fn = function (rx, ry, raf) {
+			return new SimpleMixInterpolator(ty, rx, ry, 0, 0, raf);
+		};
+		fn.withOffset = function (rx, ry, deltaX, deltaY, raf) {
+			return new SimpleMixInterpolator(ty, rx, ry, deltaX, deltaY, raf);
+		};
+		fn.distFromStart = function (dist, raf) {
+			return new DistanceFromStartInterpolator(ty, dist, 0, 0, raf);
+		};
+		fn.distTillEnd = function (dist, raf) {
+			return new DistTillEndInterpolator(ty, dist, 0, 0, raf);
+		};
+		fn.distFromStart.withOffset = function (dist, deltaX, deltaY, raf) {
+			return new DistanceFromStartInterpolator(ty, dist, deltaX, deltaY, raf);
+		};
+		fn.distTillEnd.withOffset = function (dist, deltaX, deltaY, raf) {
+			return new DistTillEndInterpolator(ty, dist, deltaX, deltaY, raf);
+		};
+		return fn;
+	}
+
+	const alsoThru = AlsoThruSeries(g4);
+	alsoThru.g2 = AlsoThruSeries(g2);
+	alsoThru.g4 = AlsoThruSeries(g2);
+	alsoThru.flat = AlsoThruSeries(flat);
+	alsoThru.curl = AlsoThruSeries(curl);
 
 	/// Multi-mix interpolator
 	class MultiMixInterpolator extends InterpolatorBase {
