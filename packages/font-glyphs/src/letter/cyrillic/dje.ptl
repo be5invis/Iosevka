@@ -7,7 +7,7 @@ glyph-module
 glyph-block Letter-Cyrillic-Dje : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : MidHook
+	glyph-block-import Letter-Shared-Shapes : nShoulder SerifFrame VerticalHook
 
 	create-glyph 'cyrl/Dje' 0x402 : glyph-proc
 		local df : include : DivFrame para.advanceScaleT
@@ -18,23 +18,31 @@ glyph-block Letter-Cyrillic-Dje : begin
 		local right : df.rightSB - OX
 
 		local xTopBarLeft : df.leftSB - SideJut
-		local xTopBarRightSym : 2 * left + [HSwToV sw] - xTopBarLeft
-		local xTopBarRight : Math.max xTopBarRightSym : mix left df.rightSB 0.475
+		local xTopBarRightSym : mix xTopBarLeft (left + [HSwToV : 0.5 * sw]) 2
+		local xTopBarRight : Math.max xTopBarRightSym : mix left right 0.475
 
 		include : VBar.l left 0 CAP sw
 		include : HBar.t xTopBarLeft xTopBarRight CAP sw
-		include : MidHook.general
+		include : nShoulder.shape
 			left   -- (left + [HSwToV sw])
 			right  -- right
-			top    -- [Math.min XH : if SLAB (CAP - VJut - sw / 4) XH]
-			bottom -- (Hook + sw / 2 + O)
-			ada    -- ArchDepthA
-			adb    -- ArchDepthB
+			fine   -- (ShoulderFine * (sw / Stroke))
+			top    -- [Math.min XH : CAP - [if SLAB VJut sw] - 0.25 * sw]
+			bottom -- (O + Hook + 0.5 * sw)
+			ada    -- [ArchDepthAOf (ArchDepth * (((right - left) + 2 * SB) / Width)) ((right - left) + 2 * SB)]
+			adb    -- [ArchDepthBOf (ArchDepth * (((right - left) + 2 * SB) / Width)) ((right - left) + 2 * SB)]
+			stroke -- sw
+		include : VerticalHook.r
+			x      -- right
+			y      -- (O + Hook + 0.5 * sw)
+			xDepth -- [Math.max (([mix left right 0.5] + [HSwToV : 0.5 * sw]) - right) ((-1.2) * HookX)]
+			yDepth -- Hook
 			sw     -- sw
-			xDepth -- [Math.max ((left - right) / 2 + sw / 2) (HookX * (-1.2))]
 
 		if SLAB : begin
-			local swVJut : Math.min (0.625 * (left - xTopBarLeft)) : AdviceStroke 4.5
-			include : HSerif.lb left 0 SideJut
+			local sf : SerifFrame CAP 0 left right (swRef -- sw)
+			include sf.lb.outer
+
+			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (left - xTopBarLeft)
 			include : VSerif.dl xTopBarLeft  CAP VJut swVJut
 			include : VSerif.dr xTopBarRight CAP VJut swVJut

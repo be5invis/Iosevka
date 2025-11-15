@@ -19,7 +19,9 @@ glyph-block Letter-Cyrillic-Yat : begin
 		Just ([mix df.leftSB df.rightSB 0.35] - [HSwToV : 0.5 * df.mvs])
 		Just  [mix df.leftSB df.rightSB 0.2]
 
-	define [YatShape] : with-params [df Yeri top [pBar YeriBarPos] [fLowerCase false] [fIotifiedBase false] [sw df.mvs] [xCrossbarLeftOverride nothing] [yCrossbarOverride nothing]] : glyph-proc
+	define [yYatDefaultCrossbarPos top pBar sw] : [mix (top * pBar + sw / 2) [if SLAB (top - HalfStroke) top] [if SLAB 0.625 0.5]] + 0.25 * OverlayStroke
+
+	define [YatShape] : with-params [df Yeri top [pBar YeriBarPos] [fLowerCase false] [sw df.mvs] [xCrossbarLeftExt nothing] [yCrossbar [yYatDefaultCrossbarPos top pBar sw]]] : glyph-proc
 		local xYeriLeft : xBarLeft df
 
 		include : Yeri top
@@ -28,27 +30,24 @@ glyph-block Letter-Cyrillic-Yat : begin
 			pBar   -- pBar
 			stroke -- sw
 
-		local cTop : if SLAB (top - HalfStroke) top
-
-		local _xCrossbarLeft : mix 0 df.leftSB : if SLAB 0.25 0.375
-		local xCrossbarLeft : fallback xCrossbarLeftOverride _xCrossbarLeft
-		local xCrossbarRight : mix _xCrossbarLeft (xYeriLeft + [HSwToV : 0.5 * sw]) 2
-		local yCrossbar : fallback yCrossbarOverride : [mix (top * pBar + sw / 2) cTop : if SLAB 0.625 0.5] + 0.25 * OverlayStroke
+		local xCrossbarPseudoLeft : mix 0 df.leftSB : if SLAB 0.25 0.375
+		local xCrossbarLeft : fallback xCrossbarLeftExt xCrossbarPseudoLeft
+		local xCrossbarRight : mix xCrossbarPseudoLeft (xYeriLeft + [HSwToV : 0.5 * sw]) 2
 		include : HBar.t xCrossbarLeft xCrossbarRight yCrossbar OverlayStroke
 
 		if SLAB : begin
-			local swSerif : Math.min (VJutStroke * sw / Stroke) (0.625 * (xYeriLeft - _xCrossbarLeft))
-			local vJut : Math.min VJut (OverlayStroke + 0.5 * (yCrossbar - OverlayStroke - (top * pBar)))
-			include : tagged 'serifDL' : VSerif.dl xCrossbarLeft  yCrossbar vJut swSerif
-			include : tagged 'serifDR' : VSerif.dr xCrossbarRight yCrossbar vJut swSerif
+			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (xYeriLeft - xCrossbarPseudoLeft)
+			local vJut : Math.min VJut : OverlayStroke + 0.5 * (yCrossbar - OverlayStroke - (top * pBar))
+			include : tagged 'serifDL' : VSerif.dl xCrossbarLeft  yCrossbar vJut swVJut
+			include : tagged 'serifDR' : VSerif.dr xCrossbarRight yCrossbar vJut swVJut
 
 			if fLowerCase : begin
 				eject-contour 'serifYeriLT'
-				include : tagged 'serifLT' : if (fIotifiedBase && para.isItalic) [glyph-proc] [HSerif.lt xYeriLeft top SideJut sw]
+				include : tagged 'serifLT' : HSerif.lt xYeriLeft top SideJut sw
 
 	define [IotifiedYatShape] : with-params [df Yeri top [pBar YeriBarPos] [fLowerCase false] [sw df.mvs]] : glyph-proc
 		local gap : 0.25 * (df.width - 2 * df.leftSB - [if SLAB 2.5 4.5] * sw)
-		define divSub : (df.width - gap - sw) / Width
+		define divSub : Math.min (df.adws * (7 / 9)) ((df.width - gap - sw) / Width)
 		define dfSub : DivFrame divSub 2
 
 		local shift : Width * (df.adws - divSub)
@@ -56,9 +55,8 @@ glyph-block Letter-Cyrillic-Yat : begin
 			YatShape dfSub Yeri top
 				pBar          -- pBar
 				fLowerCase    -- fLowerCase
-				fIotifiedBase -- true
 				sw            -- sw
-				xCrossbarLeftOverride -- (df.leftSB - shift)
+				xCrossbarLeftExt -- (df.leftSB - shift)
 		eject-contour 'serifDL'
 
 		include : Iotified.[if fLowerCase 'ascender' 'full'] df top 0 (fCapital -- (!fLowerCase))
@@ -74,7 +72,7 @@ glyph-block Letter-Cyrillic-Yat : begin
 			local df : include : DivFrame para.advanceScaleT
 			include : df.markSet.b
 			include : YatShape df Lc Ascender
-				pBar -- (YeriBarPos * XH / Ascender)
+				pBar -- ((YeriBarPos * XH) / Ascender)
 				fLowerCase -- true
 
 		create-glyph "cyrl/yatTall.\(suffix)" : glyph-proc
@@ -83,9 +81,9 @@ glyph-block Letter-Cyrillic-Yat : begin
 			local asc : Ascender + [Math.max (LongVJut - QuarterStroke) : if SLAB (1.375 * df.mvs) 0]
 			include : ExtendAboveBaseAnchors asc
 			include : YatShape df Lc asc
-				pBar -- (YeriBarPos * XH / asc)
+				pBar -- ((YeriBarPos * XH) / asc)
 				fLowerCase -- true
-				yCrossbarOverride -- Ascender
+				yCrossbar -- Ascender
 
 		create-glyph "cyrl/YatIotified.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
@@ -97,7 +95,7 @@ glyph-block Letter-Cyrillic-Yat : begin
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.b
 			include : IotifiedYatShape df Lc Ascender
-				pBar -- (YeriBarPos * XH / Ascender)
+				pBar -- ((YeriBarPos * XH) / Ascender)
 				fLowerCase -- true
 
 		# Italic Yat
