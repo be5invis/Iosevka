@@ -10,8 +10,7 @@ glyph-block Letter-Cyrillic-Che : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
-	glyph-block-import Letter-Shared-Shapes : cheBowl SerifFrame RightwardTailedBar
-	glyph-block-import Letter-Shared-Shapes : TopHook CyrDescender
+	glyph-block-import Letter-Shared-Shapes : cheBowl SerifFrame RightwardTailedBar CyrDescender
 
 	glyph-block-export BODY
 	define BODY : object
@@ -237,59 +236,3 @@ glyph-block Letter-Cyrillic-Che : begin
 
 	derive-composites 'cyrl/CheVBar' 0x4B8 'cyrl/Che' [CheVBarBarShape CAP : if SLAB 0.45 0.35]
 	derive-composites 'cyrl/cheVBar' 0x4B9 'cyrl/che' [CheVBarBarShape XH  : if SLAB 0.45 0.4]
-
-	define [CyrShhaShape] : with-params [df top pyBar bodyType slabType [sw df.mvs]] : glyph-proc
-		local xMid : df.middle - [HSwToV : 0.2 * sw]
-		local rise : DToothlessRise + 0.25 * sw
-		local yBar : [mix 0 top : fallback pyBar 0.5] + [mix O rise : clamp 0 1 : (xMid - (df.leftSB + [HSwToV sw])) / (xMid - df.leftSB)]
-
-		include : tagged 'strokeL' : VBar.l df.leftSB 0 top sw
-		include : new-glyph : composite-proc
-			cheBowl.shape
-				left   -- df.leftSB
-				right  -- df.rightSB
-				top    -- top
-				bottom -- (top - (yBar + 0.5 * sw))
-				stroke -- sw
-			FlipAround df.middle (top / 2)
-
-		local sf : SerifFrame.fromDf df top 0
-		include : tagged 'SerifLT' : match slabType
-			[Just SERIFS.ALL]      sf.lt.full
-			[Just SERIFS.TL-BR]    sf.lt.outer
-			[Just SERIFS.TL]       sf.lt.outer
-			__                   : glyph-proc
-		include : tagged 'SerifLB' : match slabType
-			[Just SERIFS.ALL]      sf.lb.full
-			__                   : glyph-proc
-		include : tagged 'serifRB' : match slabType
-			[Just SERIFS.ALL]      sf.rb.full
-			[Just SERIFS.TL-BR]    sf.rb.outer
-			[Just SERIFS.BR]       sf.rb.outer
-			__                   : glyph-proc
-
-	define ShhaConfig : object
-		serifless                 SERIFS.NONE
-		topLeftSerifed            SERIFS.TL
-		topLeftBottomRightSerifed SERIFS.TL-BR
-		serifed                   SERIFS.ALL
-
-	foreach { suffix serifs } [pairs-of ShhaConfig] : do
-		create-glyph "cyrl/Shha.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : LeaningAnchor.Above.VBar.l SB
-			include : CyrShhaShape [DivFrame 1] CAP HBarPos BODY.STRAIGHT serifs
-
-		create-glyph "cyrl/Hwe.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : LeaningAnchor.Above.VBar.l SB
-			include : CyrShhaShape [DivFrame 1] CAP HBarPos BODY.STRAIGHT serifs
-			eject-contour 'strokeL'
-			eject-contour 'serifLT'
-			include : TopHook.toRight.lBarInner SB 0 CAP
-
-	select-variant 'cyrl/Shha' 0x4BA (follow -- 'H')
-	select-variant 'cyrl/Shha/descBase' (shapeFrom -- 'cyrl/Shha') (follow -- 'H/descBase')
-	select-variant 'cyrl/Hwe' 0xA694 (follow -- 'HHookTop')
-
-	derive-composites 'cyrl/ShhaDescender' 0x526 'cyrl/Shha/descBase' [CyrDescender.rSideJut RightSB 0]
