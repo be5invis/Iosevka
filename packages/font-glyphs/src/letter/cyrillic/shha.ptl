@@ -1,0 +1,68 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Shha : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
+	glyph-block-import Letter-Shared-Shapes : nShoulder SerifFrame TopHook CyrDescender
+	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos
+
+	define SLAB-NONE                   0
+	define SLAB-TOP-LEFT               1
+	define SLAB-TOP-LEFT-BOTTOM-RIGHT  2
+	define SLAB-ALL                    4
+
+	define [CyrShhaShape slabType] : glyph-proc
+		include : tagged 'strokeL' : VBar.l SB 0 CAP
+		include : nShoulder.earlessCorner
+			left   -- SB
+			right  -- RightSB
+			top    -- ([mix 0 CAP YeriBarPos] + HalfStroke)
+			bottom -- 0
+			ada    -- ArchDepthA
+			adb    -- ArchDepthB
+			rise   -- DToothlessRise
+
+		local sf : SerifFrame.fromDf [DivFrame 1] CAP 0
+		include : tagged 'SerifLT' : match slabType
+			[Just SLAB-ALL]                   sf.lt.full
+			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] sf.lt.outer
+			[Just SLAB-TOP-LEFT]              sf.lt.outer
+			__                              : glyph-proc
+		include : tagged 'SerifLB' : match slabType
+			[Just SLAB-ALL]                   sf.lb.full
+			__                              : glyph-proc
+		include : tagged 'serifRB' : match slabType
+			[Just SLAB-ALL]                   sf.rb.full
+			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] sf.rb.outer
+			__                              : glyph-proc
+
+	define ShhaConfig : object
+		serifless                 SLAB-NONE
+		topLeftSerifed            SLAB-TOP-LEFT
+		topLeftBottomRightSerifed SLAB-TOP-LEFT-BOTTOM-RIGHT
+		serifed                   SLAB-ALL
+
+	foreach { suffix slabType } [pairs-of ShhaConfig] : do
+		create-glyph "cyrl/Shha.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : LeaningAnchor.Above.VBar.l SB
+			include : CyrShhaShape slabType
+
+		create-glyph "cyrl/Hwe.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : LeaningAnchor.Above.VBar.l SB
+			include : CyrShhaShape slabType
+			eject-contour 'strokeL'
+			eject-contour 'serifLT'
+			include : TopHook.toRight.lBarInner SB 0 CAP
+
+	select-variant 'cyrl/Shha' 0x4BA (follow -- 'H')
+	select-variant 'cyrl/Shha/descBase' (shapeFrom -- 'cyrl/Shha') (follow -- 'H/descBase')
+	select-variant 'cyrl/Hwe' 0xA694 (follow -- 'HHookTop')
+
+	derive-composites 'cyrl/ShhaDescender' 0x526 'cyrl/Shha/descBase' [CyrDescender.rSideJut RightSB 0]
