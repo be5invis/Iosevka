@@ -1,0 +1,384 @@
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
+
+glyph-module
+
+glyph-block Letter-Arc-Hook : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+
+	define [ArcStartSerifWidth stroke] : clamp (stroke * 0.875) stroke VJutStroke
+	define [ArcStartInwardSerifDepth hook stroke] : Math.max hook (DToothlessRise + stroke)
+
+	define flex-params [Toothed] : namespace
+		local-parameter : left
+		local-parameter : right
+		local-parameter : top      -- XH
+		local-parameter : bottom   -- 0
+		local-parameter : ada      -- SmallArchDepthA
+		local-parameter : adb      -- SmallArchDepthB
+		local-parameter : stroke   -- Stroke
+
+		local-parameter : fine     -- ShoulderFine
+		local-parameter : barSw    -- [ArcStartSerifWidth stroke]
+		local-parameter : hook     -- Hook
+
+		export : define yLT top
+		export : define yRT top
+		export : define yLB bottom
+		export : define yRB bottom
+
+		export : define [arcStartL] : begin
+			local xStart : left + [HSwToV : stroke - fine]
+			return : list
+				g4.up.start xStart (top - ada) [widths.rhs.heading fine Upward]
+				arch.rhs top (sw -- stroke) (swBefore -- fine)
+		export : define [arcStartR] : begin
+			local xStart : right - [HSwToV : stroke - fine]
+			return : list
+				g4.up.start xStart (top - adb) [widths.lhs.heading fine Upward]
+				arch.lhs top (sw -- stroke) (swBefore -- fine)
+		export : define [arcEndL] : begin
+			local xEnd : left + [HSwToV : stroke - fine]
+			return : list
+				arch.rhs bottom (sw -- stroke) (swAfter -- fine)
+				g4.up.end xEnd (bottom + adb) [widths.rhs.heading fine Upward]
+		export : define [arcEndR] : begin
+			local xEnd : right - [HSwToV : stroke - fine]
+			return : list
+				arch.lhs bottom (sw -- stroke) (swAfter -- fine)
+				g4.up.end xEnd (bottom + ada) [widths.lhs.heading fine Upward]
+
+		export : define [hookStartL] : begin
+			local xStart : left + [HSwToV : barSw - fine]
+			return : list
+				g4.up.start xStart (top - hook) [widths.rhs.heading fine Upward]
+				arch.rhs top (sw -- stroke) (swBefore -- fine)
+		export : define [hookStartR] : begin
+			local xStart : right - [HSwToV : barSw - fine]
+			return : list
+				g4.up.start xStart (top - hook) [widths.lhs.heading fine Upward]
+				arch.lhs top (sw -- stroke) (swBefore -- fine)
+		export : define [hookEndL] : begin
+			local xEnd : left + [HSwToV : barSw - fine]
+			return : list
+				arch.rhs bottom (sw -- stroke) (swAfter -- fine)
+				g4.up.end xEnd (bottom + hook) [widths.rhs.heading fine Upward]
+		export : define [hookEndR] : begin
+			local xEnd : right - [HSwToV : barSw - fine]
+			return : list
+				arch.lhs bottom (sw -- stroke) (swAfter -- fine)
+				g4.up.end xEnd (bottom + hook) [widths.lhs.heading fine Upward]
+
+		export : define [serifStartL] : begin
+			return : tagged 'arcStartSerifL' : VBar.l left (top - hook) top barSw
+		export : define [serifStartR] : begin
+			return : tagged 'arcStartSerifR' : VBar.r right (top - hook) top barSw
+		export : define [serifEndL] : begin
+			return : tagged 'arcEndSerifL' : VBar.l left (bottom + hook) bottom barSw
+		export : define [serifEndR] : begin
+			return : tagged 'arcEndSerifR' : VBar.r right (bottom + hook) bottom barSw
+
+	define flex-params [Toothless] : namespace
+		local-parameter : left
+		local-parameter : right
+		local-parameter : top      -- XH
+		local-parameter : bottom   -- 0
+		local-parameter : ada      -- SmallArchDepthA
+		local-parameter : adb      -- SmallArchDepthB
+		local-parameter : stroke   -- Stroke
+
+		local-parameter : rise     -- DToothlessRise
+		local-parameter : barSw    -- [ArcStartSerifWidth stroke]
+		local-parameter : hook     -- Hook
+
+		local serifDepth : Math.max hook (rise + stroke)
+
+		export : define yLT : top - rise
+		export : define yRT : top - rise
+		export : define yLB : bottom + rise
+		export : define yRB : bottom + rise
+
+		export : define [arcStartL] : begin
+			return : list
+				g4 left (top - rise) [widths.rhs stroke]
+				arch.rhs top (sw -- stroke) (blendPre -- {})
+		export : define [arcStartR] : begin
+			return : list
+				g4 right (top - rise) [widths.lhs stroke]
+				arch.lhs top (sw -- stroke) (blendPre -- {})
+		export : define [arcEndL] : begin
+			return : list
+				arch.rhs bottom (sw -- stroke) (blendPost -- {})
+				g4 left (bottom + rise)
+		export : define [arcEndR] : begin
+			return : list
+				arch.lhs bottom (sw -- stroke) (blendPost -- {})
+				g4 right (bottom + rise)
+
+		export : define [hookStartL] : begin
+			return : list
+				g2 left (top - rise) [widths.rhs stroke]
+				arch.rhs top (sw -- stroke) (blendPre -- {})
+		export : define [hookStartR] : begin
+			return : list
+				g2 right (top - rise) [widths.lhs stroke]
+				arch.lhs top (sw -- stroke) (blendPre -- {})
+		export : define [hookEndL] : begin
+			return : list
+				arch.rhs bottom (sw -- stroke) (blendPost -- {})
+				g4 left (bottom + rise)
+		export : define [hookEndR] : begin
+			return : list
+				arch.lhs bottom (sw -- stroke) (blendPost -- {})
+				g4 right (bottom + rise)
+
+		export : define [serifStartL] : begin
+			return : tagged 'arcStartSerifL' : VBar.l left (top - serifDepth) (top - rise) barSw
+		export : define [serifStartR] : begin
+			return : tagged 'arcStartSerifR' : VBar.r right (top - serifDepth) (top - rise) barSw
+		export : define [serifEndL] : begin
+			return : tagged 'arcEndSerifL' : VBar.l left (bottom + serifDepth) (bottom + rise) barSw
+		export : define [serifEndR] : begin
+			return : tagged 'arcEndSerifR' : VBar.r right (bottom + serifDepth) (bottom + rise) barSw
+
+	define flex-params [Rounded] : namespace
+		local-parameter : left
+		local-parameter : right
+		local-parameter : top      -- XH
+		local-parameter : bottom   -- 0
+		local-parameter : ada      -- SmallArchDepthA
+		local-parameter : adb      -- SmallArchDepthB
+		local-parameter : stroke   -- Stroke
+
+		local-parameter : barSw    -- [ArcStartSerifWidth stroke]
+		local-parameter : hook     -- Hook
+
+		export : define yLT : top - ada
+		export : define yRT : top - adb
+		export : define yLB : bottom + adb
+		export : define yRB : bottom + ada
+
+		export : define [arcStartL] : begin
+			return : list
+				g4.up.start left (top - ada) [widths.rhs.heading stroke Upward]
+				arch.rhs top (sw -- stroke)
+		export : define [arcStartR] : begin
+			return : list
+				g4.up.start right (top - adb) [widths.lhs.heading stroke Upward]
+				arch.lhs top (sw -- stroke)
+		export : define [arcEndL] : begin
+			return : list
+				arch.rhs bottom (sw -- stroke)
+				g4.up.end left (bottom + adb) [heading Upward]
+		export : define [arcEndR] : begin
+			return : list
+				arch.lhs bottom (sw -- stroke) (blendPost -- {})
+				g4.up.end right (bottom + ada) [heading Upward]
+
+		export : define [hookStartL] : begin
+			return : list
+				g4 left (top - hook) [widths.rhs.heading stroke Upward]
+				hookstart top (sw -- stroke)
+		export : define [hookStartR] : begin
+			return : list
+				g4 right (top - hook) [widths.lhs.heading stroke Upward]
+				hookstart top (sw -- stroke)
+		export : define [hookEndL] : begin
+			return : list
+				hookend bottom (sw -- stroke)
+				g4 left (bottom + hook) [heading Upward]
+		export : define [hookEndR] : begin
+			return : list
+				hookend bottom (sw -- stroke)
+				g4 right (bottom + hook) [heading Upward]
+
+		export : define [serifStartL] : return : glyph-proc
+		export : define [serifStartR] : return : glyph-proc
+		export : define [serifEndL] : return : glyph-proc
+		export : define [serifEndR] : return : glyph-proc
+
+	define flex-params [Flat] : namespace
+		local-parameter : left
+		local-parameter : right
+		local-parameter : top      -- XH
+		local-parameter : bottom   -- 0
+		local-parameter : ada      -- SmallArchDepthA
+		local-parameter : adb      -- SmallArchDepthB
+		local-parameter : stroke   -- Stroke
+
+		local-parameter : slab     -- 0
+		local-parameter : barSw    -- [ArcStartSerifWidth stroke]
+		local-parameter : hook     -- Hook
+		local-parameter : midShift -- (right - left) * (-0.05)
+		local-parameter : xShrink  -- [HSwToV : 0.25 * barSw]
+
+		local serifShrink : Math.max 0 (xShrink - [HSwToV : 0.5 * barSw])
+		local midX : mix left right 0.5
+
+		export : define yLT top
+		export : define yRT top
+		export : define yLB bottom
+		export : define yRB bottom
+
+		export : define [arcStartL] : begin
+			return : list
+				flat left top [widths.rhs.heading stroke Rightward]
+				curl [arch.adjust-x.top (midX + midShift) stroke] top
+				archv
+		export : define [arcStartR] : begin
+			return : list
+				flat right top [widths.lhs.heading stroke Leftward]
+				curl [arch.adjust-x.top (midX - midShift) stroke] top
+				archv
+		export : define [arcEndL] : begin
+			return : list
+				arcvh
+				flat [arch.adjust-x.bot (midX + midShift) stroke] bottom [widths.rhs stroke]
+				curl left bottom [heading Leftward]
+		export : define [arcEndR] : begin
+			return : list
+				arcvh
+				flat [arch.adjust-x.bot (midX - midShift) stroke] bottom [widths.lhs stroke]
+				curl right bottom [heading Rightward]
+		export : define [hookStartL] : begin
+			return : list
+				flat (left + xShrink) top [widths.rhs.heading stroke Rightward]
+				curl [arch.adjust-x.top (midX + midShift) stroke] top
+				archv.superness DesignParameters.tightHookSuperness
+		export : define [hookStartR] : begin
+			return : list
+				flat (right - xShrink) top [widths.lhs.heading stroke Leftward]
+				curl [arch.adjust-x.top (midX - midShift) stroke] top
+				archv.superness DesignParameters.tightHookSuperness
+		export : define [hookEndL] : begin
+			return : list
+				arcvh.superness DesignParameters.tightHookSuperness
+				flat [arch.adjust-x.bot (midX + midShift) stroke] bottom [widths.rhs stroke]
+				curl (left + xShrink) bottom [heading Leftward]
+		export : define [hookEndR] : begin
+			return : list
+				arcvh.superness DesignParameters.tightHookSuperness
+				flat [arch.adjust-x.bot (midX - midShift) stroke] bottom [widths.lhs stroke]
+				curl (right - xShrink) bottom [heading Rightward]
+
+		export : define [serifStartL] : begin
+			return : if slab
+				tagged 'arcStartSerifL' : VBar.l (left + serifShrink) (top - hook) top barSw
+				glyph-proc
+		export : define [serifStartR] : begin
+			return : if slab
+				tagged 'arcStartSerifR' : VBar.r (right - serifShrink) (top - hook) top barSw
+				glyph-proc
+		export : define [serifEndL] : begin
+			return : if slab
+				tagged 'arcEndSerifL' : VBar.l (left + serifShrink) (bottom + hook) bottom barSw
+				glyph-proc
+		export : define [serifEndR] : begin
+			return : if slab
+				tagged 'arcEndSerifR' : VBar.r (right - serifShrink) (bottom + hook) bottom barSw
+				glyph-proc
+
+	do "tests"
+		# Simplified impl of double storey a
+		define [afunc ac1 ac2 code name] : begin
+			create-glyph name code : glyph-proc
+				local df : DivFrame 1
+				local ArcC1 : ac1 df.leftSB df.rightSB XH 0 (stroke -- df.mvs) (hook -- AHook)
+				local barTop : XH * OverlayPos * 1.02 + df.mvs * 0.425
+				local miniAdb : YSmoothMidL barTop 0 SmallArchDepthA SmallArchDepthB
+				local miniAda : YSmoothMidR barTop 0 SmallArchDepthA SmallArchDepthB
+				local ArcCM : Flat df.leftSB df.rightSB barTop 0 miniAda miniAdb (stroke -- df.mvs)
+				local ArcC2 : ac2 df.leftSB df.rightSB barTop 0 miniAda miniAdb (stroke -- df.mvs)
+				include : dispiro
+					ArcC1.hookStartL
+					flat df.rightSB (XH - SmallArchDepthB)
+					curl df.rightSB ArcC2.yRB [heading Downward]
+				include : dispiro
+					ArcCM.arcStartR
+					flatside.ld df.leftSB 0 barTop # Simplified
+					ArcC2.arcEndR
+				include : ArcC1.serifStartL
+
+		# Simplified impl of b
+		define [bfunc ac1 ac2 code name] : begin
+			create-glyph name code : glyph-proc
+				local df : DivFrame 1
+				local ArcC1 : ac1 df.leftSB df.rightSB XH 0 (stroke -- df.mvs)
+				local ArcC2 : ac2 df.leftSB df.rightSB XH 0 (stroke -- df.mvs)
+				include : dispiro
+					ArcC1.arcStartL
+					flatside.rd df.rightSB 0 XH SmallArchDepthA SmallArchDepthB 0
+					ArcC2.arcEndL
+				include : VBar.l df.leftSB ArcC2.yLB Ascender df.mvs
+
+		# Simplified impl of c
+		define [cfunc ac1 ac2 code name] : begin
+			create-glyph name code : glyph-proc
+				local df : DivFrame 1
+				local ArcC1 : ac1 df.leftSB df.rightSB XH 0 (stroke -- df.mvs)
+				local ArcC2 : ac2 df.leftSB df.rightSB XH 0 (stroke -- df.mvs)
+				include : dispiro
+					ArcC1.hookStartR
+					flatside.ld df.leftSB 0 XH SmallArchDepthA SmallArchDepthB 0
+					ArcC2.hookEndR
+				include : ArcC1.serifStartR
+				include : ArcC2.serifEndR
+
+		# Simplified impl of single storey a
+		define [aafunc ac1 ac2 code name] : begin
+			create-glyph name code : glyph-proc
+				local df : DivFrame 1
+				local ArcC1 : ac1 df.leftSB df.rightSB XH 0 (stroke -- df.mvs)
+				local ArcC2 : ac2 df.leftSB df.rightSB XH 0 (stroke -- df.mvs)
+				include : dispiro
+					ArcC1.arcStartR
+					flatside.ld df.leftSB 0 XH SmallArchDepthA SmallArchDepthB 0
+					ArcC2.arcEndR
+				include : VBar.r df.rightSB ArcC2.yRB ArcC1.yRT df.mvs
+
+		# Simplified impl of e
+		define [efunc ac1 ac2 code name] : begin
+			create-glyph name code : glyph-proc
+				local df : DivFrame 1
+				# local ArcC1 : ac1 (df.leftSB + OX) (df.rightSB - OX) XH 0 (stroke -- df.mvs)
+				local ArcC2 : ac2 (df.leftSB + OX) (df.rightSB - OX) XH 0 (stroke -- df.mvs) (hook -- SHook)
+
+				local barBottom : XH * DesignParameters.eBarPos - (df.mvs / 2)
+				include : HBar.b
+					df.leftSB + [HSwToV : 0.5 * df.mvs] + OX
+					df.rightSB - [HSwToV : 0.5 * df.mvs] - OX
+					* barBottom
+					* df.mvs
+				local path : include : dispiro
+					widths.lhs df.mvs
+					flat (df.rightSB - OX) barBottom [heading Upward]
+					curl (df.rightSB - OX) (XH - SmallArchDepthB)
+					arch.lhs XH (sw -- df.mvs)
+					flatside.ld df.leftSB 0 XH SmallArchDepthA SmallArchDepthB 0
+					ArcC2.hookEndR
+				# include : ArcC1.serifStartR
+				include : ArcC2.serifEndR
+
+		define mat : SuffixCfg.weave
+			object
+				"tht" { Toothed   0 }
+				"thl" { Toothless 4 }
+				"rnd" { Rounded   8 }
+				"flt" { Flat      12 }
+			object
+				"tht" { Toothed   0 }
+				"thl" { Toothless 1 }
+				"rnd" { Rounded   2 }
+				"flt" { Flat      3 }
+
+		foreach { suffix { { ac1 di1 } { ac2 di2 } } } [Object.entries mat] : do
+			afunc ac1 ac2 (0xE100 + di1 + di2) "aaaa-\(suffix)"
+			bfunc ac1 ac2 (0xE110 + di1 + di2) "bbbb-\(suffix)"
+			cfunc ac1 ac2 (0xE120 + di1 + di2) "cccc-\(suffix)"
+			aafunc ac1 ac2 (0xE130 + di1 + di2) "dddd-\(suffix)"
+			efunc ac1 ac2 (0xE140 + di1 + di2) "eeee-\(suffix)"
