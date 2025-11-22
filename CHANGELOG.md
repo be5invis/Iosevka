@@ -1,5 +1,25 @@
 ## Modifications since last major version
 
+### 33.3.5
+
+* Refine shape of the following characters:
+  - CYRILLIC CAPITAL LETTER DJE (`U+0402`).
+  - CYRILLIC CAPITAL LETTER TSHE (`U+040B`).
+  - CYRILLIC CAPITAL LETTER YAT (`U+0462`).
+  - CYRILLIC SMALL LETTER YAT (`U+0463`).
+  - CYRILLIC CAPITAL LETTER SHHA (`U+04BA`).
+  - CYRILLIC CAPITAL LETTER SHHA WITH DESCENDER (`U+0526`).
+  - CYRILLIC SMALL LETTER TALL YAT (`U+1C87`).
+  - COMBINING CYRILLIC LETTER YAT (`U+2DFA`).
+  - CYRILLIC CAPITAL LETTER IOTIFIED YAT (`U+A652`).
+  - CYRILLIC SMALL LETTER IOTIFIED YAT (`U+A653`).
+  - CYRILLIC CAPITAL LETTER HWE (`U+A694`).
+* Refine spacing of diagonal-tailed `i` and `j`.
+* Add Characters:
+  - LATIN CAPITAL LETTER VY (`U+A760`).
+  - LATIN SMALL LETTER VY (`U+A761`).
+
+
 ### 33.3.4
 
 * Add Characters:
