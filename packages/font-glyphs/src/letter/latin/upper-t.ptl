@@ -8,12 +8,9 @@ glyph-module
 glyph-block Letter-Latin-Upper-T : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Adjustment : LeaningAnchor
-	glyph-block-import Letter-Blackboard : BBS BBD
-	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateTurnedLetter
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay UpwardHookShape
-	glyph-block-import Letter-Shared-Shapes : CyrDescender SerifFrame FlatHookDepth LeftHook RetroflexHook HalfRingDescender
+	glyph-block-import Letter-Shared-Shapes : CyrDescender SerifFrame LeftHook RetroflexHook HalfRingDescender
 
 	define [TLeftX  df] : df.leftSB  + 0.75 * OX
 	define [TRightX df] : df.rightSB - 0.75 * OX
@@ -27,49 +24,54 @@ glyph-block Letter-Latin-Upper-T : begin
 		include : tagged 'strokeRT' : HBar.t df.middle r top
 
 		if doTopSerifs : begin
-			include : tagged 'serifRT' : VSerif.dr r top VJut
-			include : tagged 'serifLT' : VSerif.dl l top VJut
+			local swVJut : Math.min VJutStroke : VSwToH : 0.625 * ((df.middle - [HSwToV HalfStroke]) - l)
+			include : tagged 'serifRT' : VSerif.dr r top VJut swVJut
+			include : tagged 'serifLT' : VSerif.dl l top VJut swVJut
 		if doBottomSerifs : begin
 			include : tagged 'serifMB' : HSerif.rb df.middle 0 MidJutCenter
 			if [not doBottomSerifsRightHalfOnly]
 				include : tagged 'serifMB' : HSerif.lb df.middle 0 MidJutCenter
 
+	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
 	define [TjeShape df top doTopSerifs] : glyph-proc
+		local sw : Math.min df.mvs : AdviceStroke 2.75
 		local left : [mix df.leftSB df.rightSB 0.3] + OX
-		local mid : left + [HSwToV : df.mvs / 2]
+		local right : df.rightSB - OX
 
 		local xTopBarLeft : df.leftSB - SideJut
-		local xTopBarRightSym : 2 * left + [HSwToV df.mvs] - xTopBarLeft
-		local xTopBarRight : Math.max xTopBarRightSym : mix left df.rightSB 0.475
+		local xTopBarRight : Math.max
+			mix xTopBarLeft (left + [HSwToV : 0.5 * sw]) 2
+			mix left right 0.475
 
-		include : tagged 'strokeLT' : HBar.t xTopBarLeft mid          top df.mvs
-		include : tagged 'strokeRT' : HBar.t mid         xTopBarRight top df.mvs
+		include : tagged 'strokeLT' : HBar.t xTopBarLeft (left + [HSwToV : 0.5 * sw]) top sw
+		include : tagged 'strokeRT' : HBar.t (left + [HSwToV : 0.5 * sw]) xTopBarRight top sw
 
-		include : UpwardHookShape
+		include : tagged 'strokeV' : UpwardHookShape
 			left   -- left
-			right  -- df.rightSB
+			right  -- right
 			ybegin -- top
 			yend   -- (top / 2 + HalfStroke)
 			ada    -- (SmallArchDepthA * 0.6 * df.adws)
 			adb    -- (SmallArchDepthB * 0.6 * df.adws)
-			sw     -- df.mvs
+			sw     -- sw
 
 		if doTopSerifs : begin
-			local { jutTop jutBot jutMid } : EFVJutLength top 0.5 df.mvs
-			include : tagged 'serifRT' : VSerif.dr xTopBarRight top jutTop
-			include : tagged 'serifLT' : VSerif.dl xTopBarLeft  top jutTop
-		local sf2 : [SerifFrame.fromDf df (top / 2 + HalfStroke) 0].slice 1 2
-		if SLAB : include sf2.rt.full
+			local { jutTop jutBot jutMid } : EFVJutLength top 0.5 sw
+			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (left - xTopBarLeft)
+			include : tagged 'serifRT' : VSerif.dr xTopBarRight top jutTop swVJut
+			include : tagged 'serifLT' : VSerif.dl xTopBarLeft  top jutTop swVJut
+		if SLAB : include [SerifFrame (top / 2 + HalfStroke) 0 left right (swRef -- sw)].rt.full
 
 	define [TweUpperShape df top doTopSerifs doBottomSerifs] : glyph-proc
 		include : TShape df top doTopSerifs false
 		eject-contour 'strokeV'
 
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 	define [CyrlTallTeShape df top doTopSerifs doBottomSerifs] : glyph-proc
 		define doFullSerifs : doTopSerifs && doBottomSerifs && !para.isItalic
 
 		local xLeft : df.leftSB + 0.75 * OX
-		local xBarRight : df.width - 1.5 * df.leftSB
+		local xBarRight : mix df.width df.rightSB 1.5
 
 		include : tagged 'strokeLT' : HBar.t xLeft xBarRight top
 		include : tagged 'strokeV' : VBar.r xBarRight 0 top
@@ -223,7 +225,7 @@ glyph-block Letter-Latin-Upper-T : begin
 	CreateAccentedComposition 'TCedilla' 0x0162 'T' 'cedillaBelow'
 	CreateAccentedComposition 'TComma'   0x021A 'T' 'commaBelow'
 
-	create-glyph 'capitalSmcpI' 0xA7AE : glyph-proc
+	create-glyph 'smcpICap' 0xA7AE : glyph-proc
 		local df : include : DivFrame : if SLAB para.advanceScaleT 1
 		include : df.markSet.capital
 
@@ -235,10 +237,11 @@ glyph-block Letter-Latin-Upper-T : begin
 		include : HBar.b l r 0
 
 		if SLAB : begin
-			include : tagged 'serifRT' : VSerif.dr r CAP VJut
-			include : tagged 'serifLT' : VSerif.dl l CAP VJut
-			include : tagged 'serifRB' : VSerif.ur r 0   VJut
-			include : tagged 'serifLB' : VSerif.ul l 0   VJut
+			local swVJut : Math.min VJutStroke : VSwToH : 0.625 * ((df.middle - [HSwToV HalfStroke]) - l)
+			include : tagged 'serifRT' : VSerif.dr r CAP VJut swVJut
+			include : tagged 'serifLT' : VSerif.dl l CAP VJut swVJut
+			include : tagged 'serifRB' : VSerif.ur r 0   VJut swVJut
+			include : tagged 'serifLB' : VSerif.ul l 0   VJut swVJut
 
 	define [SampiShape df top bottom doTopSerifs doBottomSerifs] : glyph-proc
 		define kSampiDepth 0.45
@@ -249,8 +252,9 @@ glyph-block Letter-Latin-Upper-T : begin
 		include : VBar.m df.middle top bottom
 		include : HBar.t l r top
 
-		include : VBar.l l top [mix (top - Stroke) bottom kSampiDepth] VJutStroke
-		include : VBar.r r top [mix (top - Stroke) bottom kSampiDepth] VJutStroke
+		local swVJut : Math.min VJutStroke : VSwToH : 0.625 * ((df.middle - [HSwToV HalfStroke]) - l)
+		include : VBar.l l top [mix (top - Stroke) bottom kSampiDepth] swVJut
+		include : VBar.r r top [mix (top - Stroke) bottom kSampiDepth] swVJut
 
 		if doBottomSerifs : include : HSerif.mb df.middle bottom MidJutCenter
 
@@ -264,6 +268,7 @@ glyph-block Letter-Latin-Upper-T : begin
 		include : df.markSet.p
 		include : SampiShape df XH Descender true false
 
+	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/T' 0x1D54B : glyph-proc
 		local df : include : DivFrame 1
 		include : df.markSet.capital
