@@ -36,8 +36,6 @@ const ARCHIVE_DIR = "release-archives";
 
 const PATEL_C = ["node", "node_modules/patel/bin/patel-c"];
 const MAKE_TTC = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
-const SEVEN_ZIP = process.env.SEVEN_ZIP_PATH || "7z";
-const TTFAUTOHINT = process.env.TTFAUTOHINT_PATH || "ttfautohint";
 
 const defaultWebFontFormats = ["WOFF2", "TTF"];
 const webfontFormatsFast = ["TTF"];
@@ -66,11 +64,33 @@ const Version = computed(`env::version`, async target => {
 	return pj.version;
 });
 
-const CheckTtfAutoHintExists = oracle(`oracle:check-ttfautohint-exists`, async target => {
+const TtfAutoHintApp = oracle(`oracle:check-ttfautohint-exists`, async target => {
 	try {
-		return await which(TTFAUTOHINT);
+		return await which(process.env.TTFAUTOHINT_PATH || "ttfautohint");
 	} catch (e) {
 		fail("External dependency <ttfautohint>, needed for building hinted font, does not exist.");
+	}
+});
+
+const Woff2CompressApp = oracle(`oracle:check-woff2-compress-app`, async target => {
+	const [rp] = await target.need(RawPlans);
+	if (rp.buildOptions && rp.buildOptions.woff2CompressApp) {
+		return rp.buildOptions.woff2CompressApp;
+	} else {
+		try {
+			return await which("woff2_compress");
+		} catch (e) {
+			// No woff2_compress found, use fallback
+			return null;
+		}
+	}
+});
+
+const SevenZipApp = oracle(`oracle:check-7zip-exists`, async target => {
+	try {
+		return await which(process.env.SEVEN_ZIP_PATH || "7z");
+	} catch (e) {
+		fail("External dependency <7z>, needed for building archives, does not exist.");
 	}
 });
 
@@ -556,11 +576,7 @@ const BuildNoGcTtfImpl = file.make(
 const DistHintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/TTF/${fn}.ttf`,
 	async (target, out, gr, fn) => {
-		const [fi, hint] = await target.need(
-			FontInfoOf(fn),
-			CheckTtfAutoHintExists,
-			de`${out.dir}`,
-		);
+		const [fi, ttfAutoHint] = await target.need(FontInfoOf(fn), TtfAutoHintApp, de`${out.dir}`);
 		if (fi.spacingDerive) {
 			// The font is a spacing variant, and is derivable form an existing
 			// normally-spaced variant.
@@ -587,7 +603,14 @@ const DistHintedTTF = file.make(
 				BuildTtfaControls(gr, fn),
 			);
 			echo.action(echo.hl.command(`Hint TTF`), out.full, echo.hl.operator("<-"), from.full);
-			await silently.run(hint, fi.hintParams, "-m", ttfaControls.full, from.full, out.full);
+			await silently.run(
+				ttfAutoHint,
+				fi.hintParams,
+				"-m",
+				ttfaControls.full,
+				from.full,
+				out.full,
+			);
 		}
 	},
 );
@@ -612,15 +635,15 @@ function formatSuffix(fmt, unhinted) {
 const DistWoff2 = file.make(
 	(gr, fn, unhinted) => `${DIST}/${gr}/${formatSuffix("WOFF2", unhinted)}/${fn}.woff2`,
 	async (target, out, group, f, unhinted) => {
-		const [rp] = await target.need(RawPlans);
+		const woff2_compress = await target.need(Woff2CompressApp);
 		const Ctor = unhinted ? DistUnhintedTTF : DistHintedTTF;
 		const [from] = await target.need(Ctor(group, f), de`${out.dir}`);
 
 		echo.action(echo.hl.command("Create WOFF2"), out.full, echo.hl.operator("<-"), from.full);
-		if (rp.buildOptions && rp.buildOptions.woff2CompressApp) {
+		if (woff2_compress) {
 			// woff2_compress does not support specifying output file name.
 			// Thus we need to move it after compression.
-			await absolutelySilently.run(rp.buildOptions.woff2CompressApp, from.full);
+			await absolutelySilently.run(woff2_compress, from.full);
 			await mv(`${from.dir}/${from.name}.woff2`, out.full);
 		} else {
 			await silently.node(`tools/misc/src/ttf-to-woff2.mjs`, from.full, out.full);
@@ -928,33 +951,37 @@ async function foldWithTempFileRetryImpl(inputPaths, fn) {
 const TtcZip = file.make(
 	(cgr, version) => `${ARCHIVE_DIR}/PkgTTC-${cgr}-${version}.zip`,
 	async (target, out, cgr) => {
+		const sevenZip = await target.need(SevenZipApp);
 		const [cPlan] = await target.need(CollectPlans, de`${out.dir}`);
 		const ttcFiles = Array.from(Object.keys(cPlan[cgr].ttcComposition));
 		await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
-		await CreateGroupArchiveFile(`${DIST_TTC}/${cgr}`, out, `*.ttc`);
+		await CreateGroupArchiveFile(sevenZip, `${DIST_TTC}/${cgr}`, out, `*.ttc`);
 	},
 );
 const SuperTtcZip = file.make(
 	(cgr, version) => `${ARCHIVE_DIR}/SuperTTC-${cgr}-${version}.zip`,
 	async (target, out, cgr) => {
+		const sevenZip = await target.need(SevenZipApp);
 		await target.need(de`${out.dir}`, CollectedSuperTtcFile(cgr));
-		await CreateGroupArchiveFile(DIST_SUPER_TTC, out, `${cgr}.ttc`);
+		await CreateGroupArchiveFile(sevenZip, DIST_SUPER_TTC, out, `${cgr}.ttc`);
 	},
 );
 const SgrTtcZip = file.make(
 	(cgr, sgr, version) => `${ARCHIVE_DIR}/PkgTTC-${sgr}-${version}.zip`,
 	async (target, out, cgr, sgr) => {
+		const sevenZip = await target.need(SevenZipApp);
 		const [cPlan] = await target.need(CollectPlans, de`${out.dir}`);
 		const ttcFiles = Array.from(Object.keys(cPlan[cgr].singleGroupTtcInfos[sgr].comp));
 		await target.need(ttcFiles.map(pt => SGrTtcFile(cgr, sgr, pt)));
-		await CreateGroupArchiveFile(`${DIST_TTC}/${sgr}`, out, `*.ttc`);
+		await CreateGroupArchiveFile(sevenZip, `${DIST_TTC}/${sgr}`, out, `*.ttc`);
 	},
 );
 const SgrSuperTtcZip = file.make(
 	(cgr, sgr, version) => `${ARCHIVE_DIR}/SuperTTC-${sgr}-${version}.zip`,
 	async (target, out, cgr, sgr) => {
+		const sevenZip = await target.need(SevenZipApp);
 		await target.need(de`${out.dir}`, SGrSuperTtcFile(cgr, sgr));
-		await CreateGroupArchiveFile(DIST_SUPER_TTC, out, `${sgr}.ttc`);
+		await CreateGroupArchiveFile(sevenZip, DIST_SUPER_TTC, out, `${sgr}.ttc`);
 	},
 );
 
@@ -963,9 +990,11 @@ const GroupTtfZip = file.make(
 	(gr, version, unhinted) =>
 		`${ARCHIVE_DIR}/${formatSuffix("PkgTTF", unhinted)}-${gr}-${version}.zip`,
 	async (target, out, gr, _version_, unhinted) => {
+		const sevenZip = await target.need(SevenZipApp);
 		await target.need(de`${out.dir}`);
 		await target.need(GroupTtfsImpl(gr, unhinted));
 		await CreateGroupArchiveFile(
+			sevenZip,
 			`${DIST}/${gr}/${formatSuffix("TTF", unhinted)}`,
 			out,
 			"*.ttf",
@@ -976,10 +1005,12 @@ const GroupWebZip = file.make(
 	(gr, version, unhinted) =>
 		`${ARCHIVE_DIR}/${formatSuffix("PkgWebFont", unhinted)}-${gr}-${version}.zip`,
 	async (target, out, gr, _version_, unhinted) => {
+		const sevenZip = await target.need(SevenZipApp);
 		const [plan] = await target.need(BuildPlanOf(gr));
 		await target.need(de`${out.dir}`);
 		await target.need(GroupWebFontsImpl(gr, unhinted));
 		await CreateGroupArchiveFile(
+			sevenZip,
 			`${DIST}/${gr}`,
 			out,
 			`${formatSuffix(gr, unhinted)}.css`,
@@ -988,12 +1019,12 @@ const GroupWebZip = file.make(
 	},
 );
 
-async function CreateGroupArchiveFile(dir, out, ...files) {
+async function CreateGroupArchiveFile(sevenZip, dir, out, ...files) {
 	const relOut = Path.relative(dir, out.full);
 	await rm(out.full);
 	echo.action(echo.hl.command("Create Archive"), out.full);
 	await cd(dir).silently.run(
-		[SEVEN_ZIP, "a"],
+		[sevenZip, "a"],
 		["-tzip", "-r", "-mx=9", "-mmt1"],
 		relOut,
 		...files,

@@ -13,29 +13,33 @@ glyph-block Letter-Cyrillic-Tje : begin
 	glyph-block-import Letter-Latin-Upper-T : TConfig
 	glyph-block-import Letter-Cyrillic-Yeri : YeriConfig YeriBarPos
 
-	define [xBarMid df] : [mix df.leftSB df.rightSB 0.3] + OX
+	define [xMidBarLeft df] : [mix df.leftSB df.rightSB 0.3] + OX
+	define [xBowlRight df] : df.rightSB - OX
+
+	define [CyrTjeStroke df] : Math.min df.mvs : AdviceStroke 2.75 df.adws
 
 	define [LeftHalf df top sw slabTop slabBot] : glyph-proc
-		local left : xBarMid df
+		local left : xMidBarLeft df
+		local right : xBowlRight df
 
 		local xTopBarLeft : df.leftSB - SideJut
-		local xTopBarRightSym : 2 * left + [HSwToV sw] - xTopBarLeft
-		local xTopBarRight : Math.max xTopBarRightSym : mix left df.rightSB 0.475
-
+		local xTopBarRight : Math.max
+			mix xTopBarLeft (left + [HSwToV : 0.5 * sw]) 2
+			mix left right 0.475
 		include : HBar.t xTopBarLeft xTopBarRight top sw
 
 		if slabTop : begin
 			local { jutTop jutBot jutMid } : EFVJutLength top YeriBarPos sw
-			include : VSerif.dl xTopBarLeft  top jutTop
-			include : VSerif.dr xTopBarRight top jutTop
+			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (left - xTopBarLeft)
+			include : VSerif.dl xTopBarLeft  top jutTop swVJut
+			include : VSerif.dr xTopBarRight top jutTop swVJut
 
-		if slabBot : begin
-			include : HSerif.lb left 0 ([Math.max Jut : MidJutCenter * [Math.min 1 : df.adws * 0.875]] - [HSwToV HalfStroke])
+		if slabBot : include : HSerif.lb left 0 ([Math.max Jut : MidJutCenter * (6 / 7) * df.adws] - [HSwToV HalfStroke]) sw
 
 	define [RightHalf Yeri df top sw] : glyph-proc
 		include : Yeri top
-			left   -- [xBarMid df]
-			right  -- df.rightSB
+			left   -- [xMidBarLeft df]
+			right  -- [xBowlRight df]
 			stroke -- sw
 		eject-contour 'serifYeriLT'
 		eject-contour 'serifYeriLB'
@@ -45,29 +49,27 @@ glyph-block Letter-Cyrillic-Tje : begin
 			local df : include : DivFrame para.advanceScaleT 3
 			include : df.markSet.capital
 			local subDf : DivFrame adws 3
-			local shift : [xBarMid df] - [xBarMid subDf]
-			include : with-transform [ApparentTranslate shift 0]
-				LeftHalf subDf CAP df.mvs doST doSB
+			include : with-transform [ApparentTranslate ([xMidBarLeft df] - [xMidBarLeft subDf]) 0]
+				LeftHalf subDf CAP [CyrTjeStroke df] doST doSB
 
 		create-glyph "cyrl/tje.upright/leftHalf.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleT 3
 			include : df.markSet.e
 			local subDf : DivFrame adws 3
-			local shift : [xBarMid df] - [xBarMid subDf]
-			include : with-transform [ApparentTranslate shift 0]
-				LeftHalf subDf XH df.mvs doST doSB
+			include : with-transform [ApparentTranslate ([xMidBarLeft df] - [xMidBarLeft subDf]) 0]
+				LeftHalf subDf XH [CyrTjeStroke df] doST doSB
 
 	foreach { suffix { Uc Lc } } [Object.entries YeriConfig] : do
 		create-glyph "cyrl/Tje/rightHalf.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleT 3
 			include : df.markSet.capital
-			include : RightHalf Uc df CAP df.mvs
+			include : RightHalf Uc df CAP [CyrTjeStroke df]
 			DependentSelector.set currentGlyph : if (suffix === "corner") 'full' 'reduced'
 
 		create-glyph "cyrl/tje.upright/rightHalf.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleT 3
 			include : df.markSet.e
-			include : RightHalf Lc df XH df.mvs
+			include : RightHalf Lc df XH [CyrTjeStroke df]
 			DependentSelector.set currentGlyph : if (suffix === "corner") 'full' 'reduced'
 
 	select-variant 'cyrl/Tje/leftHalf/full'

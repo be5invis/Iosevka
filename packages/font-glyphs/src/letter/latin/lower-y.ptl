@@ -30,8 +30,16 @@ glyph-block Letter-Latin-Lower-Y : begin
 	define BS-TURN     1
 	define BS-LOOP     2
 
-	define [GenNonCursiveShape straightBar bottomShape slabKind] : namespace
+	glyph-block-export NonCursiveYShapeT NonCursiveYConfig
+	define [NonCursiveYShapeT straightBar bottomShape slabKind _l _r _sb _sw] : namespace
 		local { doSlabTop doSlabBottom doSlabMotion } slabKind
+
+		local l : fallback _l 0
+		local r : fallback _r Width
+		local m : mix l r 0.5
+		local sb : fallback _sb SB
+		local rsb : r + l - sb
+		local sw : fallback _sw Stroke
 
 		local useStraightBottom : straightBar && !bottomShape
 		local slabCurly : doSlabTop && !straightBar
@@ -40,7 +48,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 		local bottomIsNotVertical : doSlabBottom || useStraightBottom || bottomShape
 
 		define yBottomJut : Jut * 1.25
-		define slabysize : yBottomJut * (Width / UPM) + Stroke
+		define slabysize : 0.5 * yBottomJut * (Width / HalfUPM) + sw
 
 		define [CalcDS top bottom] : begin
 			local pds     0.1
@@ -53,7 +61,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 			return {ds ds2}
 
 		define [Metrics ts kShrink] : namespace
-			define pxHookRightOffset : [StrokeWidthBlend (0.5 * TailX) (0.375 * TailX)] / (RightSB - SB)
+			define pxHookRightOffset : [StrokeWidthBlend (0.5 * TailX) (0.375 * TailX)] / (rsb - sb)
 			export : define px1 : 0.84 - [if (ts == TS-HOOK-RIGHT) pxHookRightOffset 0]
 			export : define py1 : [StrokeWidthBlend 0.8 0.76] * [if slabCurly [StrokeWidthBlend 1 0.9] 1]
 			export : define px2 : if slabCurlyNoTurnB px1 0.95
@@ -62,9 +70,9 @@ glyph-block Letter-Latin-Lower-Y : begin
 			export : define dpy1 : (1 - [linreg (1 - px2) (1 - py2) px1 py1 1]) / (1 - py1)
 			export : define dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 
-			define yrstrokel0 : mix Middle 0 0.2
-			export : define yrstrokel : yrstrokel0 + [HSwToV : Stroke * [if bottomIsNotVertical (2 / 3) (1 / 3)] * [if slabCurly [StrokeWidthBlend 0.95 0.97] 1]]
-			export : define yrstroker : mix Width RightSB : if straightBar DesignParameters.straightSmallYShapeSbShrink 1
+			define yrstrokel0 : mix l r 0.4
+			export : define yrstrokel : yrstrokel0 + [HSwToV : sw * [if bottomIsNotVertical (2 / 3) (1 / 3)] * [if slabCurly [StrokeWidthBlend 0.95 0.97] 1]]
+			export : define yrstroker : mix r rsb : if straightBar DesignParameters.straightSmallYShapeSbShrink 1
 
 			export : define yshrink : mix 1 ([StrokeWidthBlend 1 0.85] * [if straightBar ([AdviceStroke 3.25] / Stroke) 1]) kShrink
 
@@ -79,35 +87,35 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 			export : define [yJoinHeight top bottom] : begin
 				local {ds ds2} : CalcDS top bottom
-				return : mix (bottom + ds2) (top - ds) [yJoinProportion Middle]
+				return : mix (bottom + ds2) (top - ds) [yJoinProportion m]
 
 			export : define [createSplitMask top bottom dir elev] : begin
 				local {ds ds2} : CalcDS top bottom
-				local jp0 : yJoinProportion : mix Middle 0     dir
-				local jp1 : yJoinProportion : mix Middle Width dir
-				local hs : 0.75 * Stroke
+				local jp0 : yJoinProportion : mix m l dir
+				local jp1 : yJoinProportion : mix m r dir
+				local hs : 0.75 * sw
 				local yLeft  : [mix (bottom + ds2) (top - ds) jp1] + hs - [fallback elev 0]
 				local yRight : [mix (bottom + ds2) (top - ds) jp0] + hs - [fallback elev 0]
 				local yMin : Math.min bottom yLeft yRight
 				return : spiro-outline
-					corner Width yMin
-					corner Width yRight
-					corner 0     yLeft
-					corner 0     yMin
+					corner r yMin
+					corner r yRight
+					corner l yLeft
+					corner l yMin
 
-		define [RightHalf ts kShrink] : namespace
+		export : define [RightHalf ts kShrink] : namespace
 			local me : Metrics ts kShrink
 
 			export : define [topKnots top bottom] : begin
 				local {ds} : CalcDS top bottom
 				return : piecewise
 					(ts == TS-HOOK-RIGHT) : list
-						straight.left.start ([mix me.yrstrokel me.yrstroker me.px1] - HalfStroke + 0.875 * TailX) (top - Stroke - O) [widths.rhs]
+						straight.left.start ([mix me.yrstrokel me.yrstroker me.px1] - (sw / 2) + 0.875 * TailX) (top - sw - O) [widths.rhs sw]
 						alsoThruThem {{[StrokeWidthBlend 0.58 0.65] 0.2} {[StrokeWidthBlend 0.78 0.85] 0.5}} important
 					straightBar : list
-						flat me.yrstroker top [widths.rhs.heading ([me.diagCor (top - bottom)] * Stroke) Downward]
+						flat me.yrstroker top [widths.rhs.heading ([me.diagCor (top - bottom)] * sw) Downward]
 					true : list
-						flat me.yrstroker top [widths.rhs.heading Stroke Downward]
+						flat me.yrstroker top [widths.rhs.heading sw Downward]
 						curl me.yrstroker (top - ds) [heading Downward]
 						quadControls 0 me.dpy1 16
 
@@ -118,7 +126,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 				define coJoinY : mix (bottom + ds2) (top - ds) me.py1
 				define joinX : mix me.yrstrokel me.yrstroker (1 - me.px2)
 				define joinY : mix (bottom + ds2) (top - ds) (1 - me.py2)
-				define [ConnectZ shrink] [curl joinX joinY [widths.rhs : Stroke * shrink]]
+				define [ConnectZ shrink] [curl joinX joinY [widths.rhs : sw * shrink]]
 
 				return : list
 					if (straightBar && ts != TS-HOOK-RIGHT)
@@ -128,32 +136,32 @@ glyph-block Letter-Latin-Lower-Y : begin
 					piecewise
 						useStraightBottom : list
 							ConnectZ me.yshrink
-							curl [mix me.yrstroker joinX ((top - bottom) / (top - joinY))] bottom [widths.rhs.heading ([me.diagCor (top - bottom)] * Stroke) Downward]
+							curl [mix me.yrstroker joinX ((top - bottom) / (top - joinY))] bottom [widths.rhs.heading ([me.diagCor (top - bottom)] * sw) Downward]
 						(bottomShape == BS-LOOP) : begin
 							local joinHeight1 : me.yJoinHeight top bottom
-							local k : Math.abs : 1 / [Math.sin : Math.atan2 (joinX - Middle) (joinY - joinHeight1)] - 0.25
-							local joinHeight3 : k * Stroke + joinHeight1
-							local deltaX : Math.max yBottomJut : HSwToV : 1.2 * Stroke
-							local fine : AdviceStroke 3
+							local k : Math.abs : 1 / [Math.sin : Math.atan2 (joinX - m) (joinY - joinHeight1)] - 0.25
+							local joinHeight3 : k * sw + joinHeight1
+							local deltaX : Math.max yBottomJut : HSwToV : 1.2 * sw
+							local fine : [AdviceStroke 3] / Stroke * sw
 							local xLoopLeft : Math.min (joinX - [HSwToV : 1.5 * fine]) : Math.max ((-0.25) * SB) : mix joinX (me.yrstrokel - deltaX) 2
 							local xCenter : mix xLoopLeft joinX 0.5
 							list
 								ConnectZ me.yshrink
-								g2.left.mid [arch.adjust-x.bot xCenter fine] bottom [widths.rhs]
+								g2.left.mid [arch.adjust-x.bot xCenter fine] bottom [widths.rhs sw]
 								archv
 								g2.up.mid xLoopLeft [mix bottom joinHeight3 0.5] [widths.rhs.heading fine Upward]
 								arcvh
 								flat xCenter joinHeight3 [heading Rightward]
-								curl Middle joinHeight3 [heading Rightward]
+								curl m joinHeight3 [heading Rightward]
 						(bottomShape == BS-TURN) : list
 							ConnectZ me.yshrink
-							flat (me.yrstrokel - slabysize) bottom [widths.rhs]
+							flat (me.yrstrokel - slabysize) bottom [widths.rhs sw]
 							curl [Math.min (me.yrstrokel - slabysize - TINY) (me.yrstrokel - Stroke - yBottomJut)] bottom
 						true : list
 							ConnectZ 1
 							quadControls 1 (1 - me.dpy2) 16
-							flat me.yrstrokel (bottom + ds2) [widths.heading 0 Stroke Downward]
-							curl me.yrstrokel bottom [widths.heading 0 Stroke Downward]
+							flat me.yrstrokel (bottom + ds2) [widths.rhs.heading sw Downward]
+							curl me.yrstrokel bottom [widths.rhs.heading sw Downward]
 
 			export : define [baseSerif top bottom] : glyph-proc
 				local {ds ds2} : CalcDS top bottom
@@ -163,9 +171,9 @@ glyph-block Letter-Latin-Lower-Y : begin
 				if bottomShape : return nothing
 				if (useStraightBottom) : begin
 					local xBaseKnot : mix me.yrstroker joinX ((top - bottom) / (top - joinY))
-					include : HSerif.lb (xBaseKnot - [HSwToV HalfStroke]) bottom yBottomJut
+					include : HSerif.lb (xBaseKnot - [HSwToV : sw / 2]) bottom yBottomJut
 				: else : begin
-					include : HSerif.lb (me.yrstrokel - [HSwToV HalfStroke]) bottom yBottomJut
+					include : HSerif.lb (me.yrstrokel - [HSwToV : sw / 2]) bottom yBottomJut
 
 			export : define [ogonekAttach top bottom] : glyph-proc
 				define {ds ds2} : CalcDS top bottom
@@ -180,17 +188,17 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 			export : define [splitMask top bottom elev] : me.createSplitMask top bottom (-1) elev
 
-		define [LeftHalf ts kShrink] : namespace
+		export : define [LeftHalf ts kShrink] : namespace
 			local me : Metrics ts kShrink
 
 			export : define [topKnots top bottom] : begin
 				local {ds} : CalcDS top bottom
 				if straightBar
 				: then : return : list
-					flat (Width - me.yrstroker) top [widths.lhs.heading ([me.diagCor (top - bottom)] * Stroke) Downward]
+					flat (l + r - me.yrstroker) top [widths.lhs.heading ([me.diagCor (top - bottom)] * sw) Downward]
 				: else : return : list
-					flat (Width - me.yrstroker) top [widths.lhs.heading Stroke Downward]
-					curl (Width - me.yrstroker) (top - ds) [heading Downward]
+					flat (l + r - me.yrstroker) top [widths.lhs.heading sw Downward]
+					curl (l + r - me.yrstroker) (top - ds) [heading Downward]
 					quadControls 0 me.dpy1 16
 
 			export : define [joinKnots top bottom] : begin
@@ -199,85 +207,81 @@ glyph-block Letter-Latin-Lower-Y : begin
 					if straightBar : then : list
 					: else : list
 						flat
-							mix (Width - me.yrstrokel) (Width - me.yrstroker) me.px1
+							mix (l + r - me.yrstrokel) (l + r - me.yrstroker) me.px1
 							mix (bottom + ds2) (top - ds) me.py1
 					curl Middle
 						me.yJoinHeight top bottom
-						widths.lhs (Stroke * me.yshrink)
+						widths.lhs (sw * me.yshrink)
 
 			export : define [splitMask top bottom elev] : me.createSplitMask top bottom (+1) elev
 
-		export : define [SmallYShape top bottom] : glyph-proc
+		export : define [SmallYShape top bottom yShCutoff] : glyph-proc
 			local right   : RightHalf TS-NONE SHRINK-NONE
 			local rightSh : RightHalf TS-NONE SHRINK-INNER
 			local left    : LeftHalf  TS-NONE SHRINK-INNER
 
+			local leftSplitMask : if (yShCutoff !== nothing)
+				union [MaskBelow yShCutoff] : left.splitMask top bottom
+				left.splitMask top bottom
+
 			include : right.ogonekAttach top bottom
-			include : union
+			include : tagged 'rightHalf' : union
 				intersection
 					dispiro
 						right.topKnots top bottom
 						right.baseKnots top bottom
-					left.splitMask top bottom
+					* leftSplitMask
 
 				difference
 					dispiro
 						right.topKnots top bottom
 						rightSh.baseKnots top bottom
-					left.splitMask top bottom
+					* leftSplitMask
 
-				difference
-					dispiro
-						left.topKnots top bottom
-						left.joinKnots top bottom
-					right.splitMask top bottom
-					Rect (bottom + HalfStroke) (bottom - top) 0 Width
+			include : tagged 'leftHalf' : difference
+				dispiro
+					left.topKnots top bottom
+					left.joinKnots top bottom
+				right.splitMask top bottom
+				Rect (bottom + sw / 2) (bottom - top) l r
 
-				if doSlabTop
-					let [sf : SerifFrame.fromDf [DivFrame 1] top bottom] : composite-proc sf.lt.full sf.rt.full
-					no-shape
-				if doSlabBottom
-					right.baseSerif top bottom
-					no-shape
-				if doSlabMotion
-					HSerif.lt SB top SideJut
-					no-shape
+			if doSlabTop : include : let [sf : SerifFrame.fromDf [DivFrame 1] top bottom] : composite-proc sf.lt.full sf.rt.full
+			if doSlabBottom : include : right.baseSerif top bottom
+			if doSlabMotion : include : HSerif.lt sb top SideJut
 
-		export : define [SmallYHookRightShape top bottom] : glyph-proc
+		export : define [SmallYHookRightShape top bottom yShCutoff] : glyph-proc
 			local right   : RightHalf TS-HOOK-RIGHT SHRINK-NONE
 			local rightSh : RightHalf TS-HOOK-RIGHT SHRINK-INNER
 			local left    : LeftHalf  TS-NONE       SHRINK-INNER
 
+			local leftSplitMask : if (yShCutoff !== nothing)
+				intersection [MaskAbove yShCutoff] : left.splitMask top bottom
+				left.splitMask top bottom
+
 			include : right.ogonekAttach top bottom
-			include : union
+			include : tagged 'rightHalf' : union
 				intersection
 					dispiro
 						right.topKnots top bottom
 						right.baseKnots top bottom
-					left.splitMask top bottom
+					* leftSplitMask
 
 				difference
 					dispiro
 						right.topKnots top bottom
 						rightSh.baseKnots top bottom
-					left.splitMask top bottom
+					* leftSplitMask
 
-				difference
-					dispiro
-						left.topKnots top bottom
-						left.joinKnots top bottom
-					right.splitMask top bottom
-					Rect (bottom + HalfStroke) (bottom - top) 0 Width
+			include : tagged 'leftHalf' : difference
+				dispiro
+					left.topKnots top bottom
+					left.joinKnots top bottom
+				right.splitMask top bottom
+				Rect (bottom + sw / 2) (bottom - top) l r
 
-				if doSlabTop
-					let [sf : SerifFrame.fromDf [DivFrame 1] top bottom] sf.lt.full
-					no-shape
-				if doSlabBottom
-					right.baseSerif top bottom
-					no-shape
-				if doSlabMotion
-					HSerif.lt SB top SideJut
-					no-shape
+			if doSlabTop : include : let [sf : SerifFrame.fromDf [DivFrame 1] top bottom] sf.lt.full
+			if doSlabBottom : include : right.baseSerif top bottom
+			if doSlabMotion : include : HSerif.lt sb top SideJut
 
 		export : define [SmallLambdaShape top bottom] : union : glyph-proc
 			set currentGlyph.gizmo : Italify (-para.slopeAngle)
@@ -295,7 +299,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 			include : Scale (+1) (-1)
 			include : Translate 0 (+[mix bottom top 0.5])
 
-	define NonCursiveConfig : SuffixCfg.weave
+	define NonCursiveYConfig : SuffixCfg.weave
 		object # body
 			straight      true
 			curly         false
@@ -309,8 +313,8 @@ glyph-block Letter-Latin-Lower-Y : begin
 			serifed       SLAB-ALL
 			motionSerifed SLAB-MOTION
 
-	foreach { suffix { straightBar bottomShape slabKind } } [Object.entries NonCursiveConfig] : do
-		define Shapes : GenNonCursiveShape straightBar bottomShape slabKind
+	foreach { suffix { straightBar bottomShape slabKind } } [Object.entries NonCursiveYConfig] : do
+		define Shapes : NonCursiveYShapeT straightBar bottomShape slabKind
 		create-glyph "y.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			set-base-anchor 'strike' Middle (XH / 2)
@@ -357,7 +361,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 	alias 'grek/lambda.curlyTailedTurnSerifless'       null 'grek/lambdaTailed.curlyTurnSerifless'
 	alias 'latn/lambdaStroke.curlyTailedTurnSerifless' null 'latn/lambdaStrokeTailed.curlyTurnSerifless'
 
-	define Cursive : namespace
+	define CursiveYShape : namespace
 		export : define [Arc top bottom] : uBowl.shape
 			top    -- top
 			bottom -- bottom
@@ -389,37 +393,37 @@ glyph-block Letter-Latin-Lower-Y : begin
 				include sf.lt.outer
 				if [not doSlabMotion] : include sf.rt.inner
 
-	define CursiveConfig : SuffixCfg.weave
+	define CursiveYConfig : SuffixCfg.weave
 		object # body
-			cursive          Cursive.Hook
-			cursiveFlatHook  Cursive.FlatHook
+			cursive          CursiveYShape.Hook
+			cursiveFlatHook  CursiveYShape.FlatHook
 		object # serifs
 			serifless        SLAB-NONE
 			serifed          SLAB-ALL
 			motionSerifed    SLAB-CURSIVE-MOTION
 
-	foreach { suffix { hookShape slabKind } } [Object.entries CursiveConfig] : do
+	foreach { suffix { hookShape slabKind } } [Object.entries CursiveYConfig] : do
 		create-glyph "y.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			set-base-anchor 'strike' Middle (XH / 2)
 			set-base-anchor 'yBelowDot' Middle Descender
-			include : Cursive.Arc XH 0
+			include : CursiveYShape.Arc XH 0
 			include : hookShape XH Descender
-			include : Cursive.Serifs XH slabKind
+			include : CursiveYShape.Serifs XH slabKind
 
 		if (slabKind !== SLAB-ALL) : create-glyph "yHookRight.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			include : Cursive.Arc XH 0
+			include : CursiveYShape.Arc XH 0
 			include : hookShape (XH - TailY - HalfStroke) Descender
 			include : TopHook.toRight.rBarInner RightSB 0 XH
-			include : Cursive.Serifs XH slabKind
+			include : CursiveYShape.Serifs XH slabKind
 			eject-contour 'serifRT'
 
 		create-glyph "yCap.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : Cursive.Arc CAP (CAP - XH)
+			include : CursiveYShape.Arc CAP (CAP - XH)
 			include : hookShape CAP 0
-			include : Cursive.Serifs CAP slabKind
+			include : CursiveYShape.Serifs CAP slabKind
 
 	select-variant 'y' 'y'
 	link-reduced-variant 'y/sansSerif' 'y' MathSansSerif

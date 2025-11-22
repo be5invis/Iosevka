@@ -10,7 +10,6 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared : CreateTurnedLetter
-	glyph-block-import Letter-Shared-Shapes : OBarLeft
 
 	glyph-block-export SubDfAndShift
 	define [SubDfAndShift pShift df _o] : begin
@@ -252,6 +251,8 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 					left  -- subDf.leftSB
 					right -- (subDf.rightSB + OX)
 					sw    -- df.mvs
+					ada   -- subDf.smallArchDepthA
+					adb   -- subDf.smallArchDepthB
 				include : Serifs subDf XH df.mvs
 				include : LeaningAnchor.Below.VBar.l SB
 
@@ -266,8 +267,8 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				if serifShape : begin
 					local sf : SerifFrame.fromDf df top bot
 					include : match serifShape
-						[Just XSerifs.Full] : composite-proc sf.rt.full sf.rb.full
-						[Just XSerifs.SemiChancery] : composite-proc sf.rt.full
+						[Just XSerifs.Full]            : composite-proc sf.rt.full sf.rb.full
+						[Just XSerifs.SemiChancery]    : composite-proc sf.rt.full
 						[Just XSerifs.BilateralMotion] : composite-proc sf.rb.outer
 						__ : glyph-proc
 
@@ -282,8 +283,8 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				if serifShape : begin
 					local sf : SerifFrame.fromDf df top bot
 					include : match serifShape
-						[Just XSerifs.Full] : composite-proc sf.rt.full sf.lb.full sf.rb.full
-						[Just XSerifs.SemiChancery] : composite-proc sf.rt.full sf.lb.full
+						[Just XSerifs.Full]            : composite-proc sf.rt.full sf.lb.full sf.rb.full
+						[Just XSerifs.SemiChancery]    : composite-proc sf.rt.full sf.lb.full
 						[Just XSerifs.BilateralMotion] : composite-proc sf.rb.outer
 						__ : glyph-proc
 
@@ -299,7 +300,8 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				set-mark-anchor 'cvDecompose' 0 0
 
 				local { subDf shift } : SubDfAndShiftEx 6 4 1 df
-				include : with-transform [ApparentTranslate shift 0] : LhaRightLetterShape subDf XH 0 0.1 0.20
+				include : with-transform [ApparentTranslate shift 0]
+					LhaRightLetterShape subDf XH 0 0.1 0.20
 
 			create-glyph "cyrl/Lha/right.\(suffix)" : glyph-proc
 				local df : DivFrame para.advanceScaleM 3.2
@@ -307,7 +309,8 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				set-mark-anchor 'cvDecompose' 0 0
 
 				local { subDf shift } : SubDfAndShiftEx 6 4 1 df
-				include : with-transform [ApparentTranslate shift 0] : LhaRightLetterShape subDf CAP 0 0.1 0.28
+				include : with-transform [ApparentTranslate shift 0]
+					LhaRightLetterShape subDf CAP 0 0.1 0.28
 
 	do "Te (upright) subglyphs"
 		define [EsTeRightShape subDf doTopSerifs doBottomSerifs] : new-glyph : glyph-proc
@@ -466,14 +469,11 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		local df : include : DivFrame para.advanceScaleM 3
 		include : df.markSet.p
 
-		local {ra ha} srcs
-		include : union
-			refer-glyph ra
-			difference
-				refer-glyph ha
-				with-transform [ApparentTranslate ((-0.25) * df.mvs) 0] [refer-glyph ra]
-				with-transform [ApparentTranslate ((-0.50) * df.mvs) 0] [refer-glyph ra]
-				with-transform [ApparentTranslate ((-0.75) * df.mvs) 0] [refer-glyph ra]
-				with-transform [ApparentTranslate ((-1.00) * df.mvs) 0] [refer-glyph ra]
+		local {er kha} srcs
+		include : union [refer-glyph er] : difference [refer-glyph kha]
+			with-transform [ApparentTranslate ((-0.25) * df.mvs) 0] [refer-glyph er]
+			with-transform [ApparentTranslate ((-0.50) * df.mvs) 0] [refer-glyph er]
+			with-transform [ApparentTranslate ((-0.75) * df.mvs) 0] [refer-glyph er]
+			with-transform [ApparentTranslate ((-1.00) * df.mvs) 0] [refer-glyph er]
 
 	derive-multi-part-glyphs 'cyrl/rha' 0x517 { 'cyrl/rha/left' 'cyrl/rha/right' } BuildRha

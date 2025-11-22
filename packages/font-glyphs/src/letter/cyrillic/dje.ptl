@@ -7,7 +7,9 @@ glyph-module
 glyph-block Letter-Cyrillic-Dje : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : MidHook
+	glyph-block-import Letter-Shared-Shapes : nShoulder SerifFrame VerticalHook
+	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
+	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos
 
 	create-glyph 'cyrl/Dje' 0x402 : glyph-proc
 		local df : include : DivFrame para.advanceScaleT
@@ -18,23 +20,31 @@ glyph-block Letter-Cyrillic-Dje : begin
 		local right : df.rightSB - OX
 
 		local xTopBarLeft : df.leftSB - SideJut
-		local xTopBarRightSym : 2 * left + [HSwToV sw] - xTopBarLeft
-		local xTopBarRight : Math.max xTopBarRightSym : mix left df.rightSB 0.475
+		local xTopBarRight : Math.max
+			mix xTopBarLeft (left + [HSwToV : 0.5 * sw]) 2
+			mix left right 0.475
+		include : HBar.t xTopBarLeft xTopBarRight CAP sw
 
 		include : VBar.l left 0 CAP sw
-		include : HBar.t xTopBarLeft xTopBarRight CAP sw
-		include : MidHook.general
-			left   -- (left + [HSwToV sw])
+		include : nShoulder.earlessCorner
+			left   -- left
 			right  -- right
-			top    -- [Math.min XH : if SLAB (CAP - VJut - sw / 4) XH]
-			bottom -- (Hook + sw / 2 + O)
-			ada    -- ArchDepthA
-			adb    -- ArchDepthB
+			top    -- ([mix 0 CAP YeriBarPos] + 0.5 * sw)
+			bottom -- (O + Hook + 0.5 * sw)
+			ada    -- [ArchDepthAOf (ArchDepth * (((right - left) + SB * 2) / Width)) ((right - left) + SB * 2)]
+			adb    -- [ArchDepthBOf (ArchDepth * (((right - left) + SB * 2) / Width)) ((right - left) + SB * 2)]
+			stroke -- sw
+			rise   -- DToothlessRise
+		include : VerticalHook.r
+			x      -- right
+			y      -- (O + Hook + 0.5 * sw)
+			xDepth -- [Math.max (([mix left right 0.5] + [HSwToV : 0.5 * sw]) - right) ((-1.2) * HookX)]
+			yDepth -- Hook
 			sw     -- sw
-			xDepth -- [Math.max ((left - right) / 2 + sw / 2) (HookX * (-1.2))]
 
 		if SLAB : begin
-			local swVJut : Math.min (0.625 * (left - xTopBarLeft)) : AdviceStroke 4.5
-			include : HSerif.lb left 0 SideJut
-			include : VSerif.dl xTopBarLeft  CAP VJut swVJut
-			include : VSerif.dr xTopBarRight CAP VJut swVJut
+			local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos sw
+			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (left - xTopBarLeft)
+			include : VSerif.dl xTopBarLeft  CAP jutTop swVJut
+			include : VSerif.dr xTopBarRight CAP jutTop swVJut
+			include [SerifFrame CAP 0 left right (swRef -- sw)].lb.outer

@@ -9,10 +9,8 @@ glyph-block Letter-Cyrillic-Che : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
-	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph CreateTurnedLetter
-	glyph-block-import Letter-Shared-Shapes : cheBowl SerifFrame RightwardTailedBar
-	glyph-block-import Letter-Shared-Shapes : TopHook CyrDescender BottomExtension
-	glyph-block-import Letter-Latin-Lower-M : EarlessCornerDoubleArchSmallMShape
+	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
+	glyph-block-import Letter-Shared-Shapes : cheBowl SerifFrame RightwardTailedBar CyrDescender
 
 	glyph-block-export BODY
 	define BODY : object
@@ -29,28 +27,26 @@ glyph-block Letter-Cyrillic-Che : begin
 		TOP         5
 		ALL-BGR     6
 		TOP-BGR     7
-		ALL-SYM     8
 
 	glyph-block-export CyrCheShape
-	define [CyrCheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs] [yBarOffset 0]] : glyph-proc
-		local bar : top * [fallback pyBar 0.5] + yBarOffset
+	define [CyrCheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs]] : glyph-proc
+		local yBar : mix 0 top : fallback pyBar 0.5
 
 		include : tagged 'strokeR' : match bodyType
-			[Just BODY.TAILED] : RightwardTailedBar df.rightSB 0 top (sw -- sw)
-			__                 : VBar.r df.rightSB 0 top sw
+			[Just BODY.TAILED] : RightwardTailedBar df.rightSB 0 top sw
+			__                 : VBar.r             df.rightSB 0 top sw
 
 		include : cheBowl.shape
 			left   -- df.leftSB
 			right  -- df.rightSB
 			top    -- top
-			bottom -- (bar - 0.5 * sw)
-			sw     -- sw
+			bottom -- (yBar - 0.5 * sw)
+			stroke -- sw
 
 		local sf : SerifFrame.fromDf df top 0
 		include : tagged 'serifLT' : match slabType
 			[Just SERIFS.ALL]        sf.lt.full
 			[Just SERIFS.TOP]        sf.lt.full
-			[Just SERIFS.ALL-SYM]    sf.lt.full
 			[Just SERIFS.ALL-BGR]    sf.lt.outer
 			[Just SERIFS.TOP-BGR]    sf.lt.outer
 			[Just SERIFS.TL-BR]      sf.lt.outer
@@ -59,28 +55,28 @@ glyph-block Letter-Cyrillic-Che : begin
 		include : tagged 'SerifRT' : match slabType
 			[Just SERIFS.ALL]        sf.rt.full
 			[Just SERIFS.TOP]        sf.rt.full
-			[Just SERIFS.ALL-SYM]    sf.rt.full
 			[Just SERIFS.ALL-BGR]    sf.rt.inner
 			[Just SERIFS.TOP-BGR]    sf.rt.inner
 			__                   : glyph-proc
 		include : tagged 'SerifRB' : match slabType
 			[Just SERIFS.ALL]        sf.rb.fullSide
 			[Just SERIFS.ALL-BGR]    sf.rb.fullSide
-			[Just SERIFS.ALL-SYM]    sf.rb.full
 			[Just SERIFS.TL-BR]      sf.rb.outer
 			[Just SERIFS.BR]         sf.rb.outer
 			__                   : glyph-proc
 
-	define [CyrCcheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs] [yBarOffset 0]] : glyph-proc
-		local bar : top * [fallback pyBar 0.5] + yBarOffset
-
-		include : EarlessCornerDoubleArchSmallMShape df (top - (bar - 0.5 * sw)) 0 0 0
-		eject-contour 'barL'
-		include : FlipAround df.middle (top / 2)
+	glyph-block-import Letter-Latin-Lower-M : EarlessCornerDoubleArchSmallMShape
+	define [CyrCcheShape] : with-params [df top pyBar bodyType slabType [sw df.mvs]] : glyph-proc
+		local yBar : mix 0 top : fallback pyBar 0.5
 
 		include : tagged 'strokeR' : match bodyType
-			[Just BODY.TAILED] : RightwardTailedBar df.rightSB 0 top (sw -- sw)
-			__                 : VBar.r df.rightSB 0 top sw
+			[Just BODY.TAILED] : RightwardTailedBar df.rightSB 0 top sw
+			__                 : VBar.r             df.rightSB 0 top sw
+
+		include : new-glyph : glyph-proc
+			include : EarlessCornerDoubleArchSmallMShape df (top - (yBar - 0.5 * sw)) 0 0 0
+			eject-contour 'barL'
+			include : FlipAround df.middle (top / 2)
 
 		local sf : SerifFrame.fromDf df top 0
 		include : tagged 'serifLT' : match slabType
@@ -103,23 +99,22 @@ glyph-block Letter-Cyrillic-Che : begin
 			[Just SERIFS.BR]         sf.rb.outer
 			__                   : glyph-proc
 
-	define [CyrTcheShape] : with-params [df top pyBar bodyType slabType [teSerifs SLAB] [sw : AdviceStroke 2.75] [yBarOffset 0]] : glyph-proc
-		local bar : top * [fallback pyBar 0.5] + yBarOffset
+	define [CyrTcheShape] : with-params [df top pyBar bodyType slabType [sw [AdviceStroke 2.75]] [teSerifs SLAB]] : glyph-proc
+		local yBar : mix 0 top : fallback pyBar 0.5
 
 		local left : [mix df.leftSB df.rightSB : if (df.adws > 1) 0.25 0.2] - [HSwToV : 0.25 * sw] + OX
 		local right : df.rightSB - OX
 
 		include : tagged 'strokeR' : match bodyType
-			[Just BODY.TAILED] : RightwardTailedBar right 0 top (sw -- sw)
-			__                 : VBar.r right 0 top sw
+			[Just BODY.TAILED] : RightwardTailedBar right 0 top sw
+			__                 : VBar.r             right 0 top sw
 
 		include : cheBowl.shape
 			left   -- left
 			right  -- right
 			top    -- top
-			bottom -- (bar - 0.5 * sw)
-			sw     -- sw
-			fine   -- (0.5 * sw)
+			bottom -- (yBar - 0.5 * sw)
+			stroke -- sw
 
 		local xTopBarLeft : df.leftSB - SideJut
 		local xTopBarRight : mix xTopBarLeft (left + [HSwToV : 0.5 * sw]) 2
@@ -141,7 +136,7 @@ glyph-block Letter-Cyrillic-Che : begin
 			__                   : glyph-proc
 
 		if teSerifs : begin
-			local swVJut : Math.min (0.625 * (left - xTopBarLeft)) : AdviceStroke 4.5
+			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (left - xTopBarLeft)
 			include : VSerif.dl xTopBarLeft  top VJut swVJut
 			include : VSerif.dr xTopBarRight top VJut swVJut
 
@@ -241,30 +236,3 @@ glyph-block Letter-Cyrillic-Che : begin
 
 	derive-composites 'cyrl/CheVBar' 0x4B8 'cyrl/Che' [CheVBarBarShape CAP : if SLAB 0.45 0.35]
 	derive-composites 'cyrl/cheVBar' 0x4B9 'cyrl/che' [CheVBarBarShape XH  : if SLAB 0.45 0.4]
-
-	define ShhaConfig : object
-		serifless                 SERIFS.NONE
-		topLeftSerifed            SERIFS.BR
-		topLeftBottomRightSerifed SERIFS.TL-BR
-		serifed                   SERIFS.ALL-SYM
-
-	foreach { suffix serifs } [pairs-of ShhaConfig] : do
-		create-glyph "cyrl/Shha.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : LeaningAnchor.Above.VBar.l SB
-			include : CyrCheShape [DivFrame 1] CAP (1 - HBarPos) BODY.STRAIGHT serifs
-				yBarOffset -- (DToothlessRise * ([HSwToV : 1.2 * Stroke] / (Middle - SB) - 1))
-			include : FlipAround Middle (CAP / 2)
-
-		create-glyph "cyrl/Hwe.\(suffix)" : glyph-proc
-			include [refer-glyph "cyrl/Shha.\(suffix)"] AS_BASE ALSO_METRICS
-			eject-contour 'strokeR'
-			eject-contour 'serifRB'
-			include : TopHook.toRight.lBarInner SB 0 CAP
-			include : LeaningAnchor.Above.VBar.l SB
-
-	select-variant 'cyrl/Shha' 0x4BA (follow -- 'H')
-	select-variant 'cyrl/Shha/descBase' (shapeFrom -- 'cyrl/Shha') (follow -- 'H/descBase')
-	select-variant 'cyrl/Hwe' 0xA694 (follow -- 'HHookTop')
-
-	derive-composites 'cyrl/ShhaDescender' 0x526 'cyrl/Shha/descBase' [CyrDescender.rSideJut RightSB 0]

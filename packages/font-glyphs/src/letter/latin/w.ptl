@@ -12,6 +12,7 @@ glyph-block Letter-Latin-W : begin
 	glyph-block-import Letter-Shared-Shapes : SerifFrame VerticalHook
 	glyph-block-import Letter-Latin-Lower-M : EarlessRoundedDoubleArchSmallMShape
 	glyph-block-import Letter-Latin-Upper-M : MShape
+	glyph-block-import Letter-Latin-Lower-Y : NonCursiveYShapeT NonCursiveYConfig
 
 	define FORM-CURLY             0
 	define FORM-STRAIGHT          1
@@ -257,6 +258,28 @@ glyph-block Letter-Latin-W : begin
 			yDepth -- (-TailY)
 			sw     -- dim.strokeOuter
 
+	define [VYShape df top straightBar bottomShape slabKind] : glyph-proc
+		# Y -> W configs
+		local wBodyType : if straightBar FORM-STRAIGHT FORM-CURLY
+		local { doSlabTop doSlabBottom doSlabMotion } slabKind
+		local wSlabType : if doSlabTop SERIFS-ALL-OUTER : if doSlabMotion SERIFS-MOTION SERIFS-NONE
+		local dim : WDim df top wBodyType wSlabType MIDH-TOP
+
+		local r df.width
+		local l : mix r dim.xBot2 2
+
+		local YShape : NonCursiveYShapeT straightBar bottomShape { false doSlabBottom false } l r (l + df.leftSB) df.mvs
+		local YShapeRight : YShape.RightHalf 0 1 # = TS-NONE SHRINK-INNER
+		include : YShape.SmallYShape top Descender df.mvs
+
+		eject-contour 'leftHalf'
+
+		include : difference
+			WShapeImpl df top wBodyType wSlabType MIDH-TOP
+			intersection [MaskBelow : top / 2] [MaskAbove : Descender + df.mvs] : YShapeRight.splitMask top Descender
+
+		eject-contour 'strokeUp2'
+
 	define [WVertSides df top bodyType slabType midHClass] : glyph-proc
 		local wMidHeight : WMidHeight df top bodyType midHClass
 		local wMidHeightExt : WMidHeightExt wMidHeight top bodyType midHClass
@@ -429,6 +452,21 @@ glyph-block Letter-Latin-W : begin
 			include [refer-glyph "W.\(suffix)"] AS_BASE ALSO_METRICS
 			include : HOverlayBar [mix df.leftSB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.60)
 			include : HOverlayBar [mix df.leftSB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.35)
+
+	# VY
+	foreach { suffix { straightBar bottomShape slabKind } } [Object.entries NonCursiveYConfig] : do
+		create-glyph "VY.\(suffix)" : glyph-proc
+			local df : include : DivFrame adwsLower 3
+			include : df.markSet.p
+			include : VYShape df CAP straightBar bottomShape slabKind
+
+		create-glyph "vy.\(suffix)" : glyph-proc
+			local df : include : DivFrame adwsLower 3
+			include : df.markSet.p
+			include : VYShape df XH straightBar bottomShape slabKind
+
+	select-variant 'VY' 0xA760 (follow -- 'y/nonCursive')
+	select-variant 'vy' 0xA761 (follow -- 'y/nonCursive')
 
 	select-variant 'W' 'W'
 	link-reduced-variant 'W/sansSerif' 'W' MathSansSerif
