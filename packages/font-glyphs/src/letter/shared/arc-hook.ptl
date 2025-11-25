@@ -1,4 +1,4 @@
-$$include '../meta/macros.ptl'
+$$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 import [DependentSelector] from "@iosevka/glyph/relation"
@@ -10,6 +10,8 @@ glyph-block Letter-Arc-Hook : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
+
+	glyph-block-export Toothed Toothless Rounded Flat
 
 	define [ArcStartSerifWidth stroke] : clamp (stroke * 0.875) stroke VJutStroke
 	define [ArcStartInwardSerifDepth hook stroke] : Math.max hook (DToothlessRise + stroke)
@@ -364,6 +366,22 @@ glyph-block Letter-Arc-Hook : begin
 				# include : ArcC1.serifStartR
 				include : ArcC2.serifEndR
 
+		# Simplified impl of ь (?)
+		define [bbfunc ac1 ac2 code name] : begin
+			create-glyph name code : glyph-proc
+				local df : DivFrame 1
+				define YeriBarPos 0.55
+				local yArcTop : XH * YeriBarPos + df.mvs / 2
+
+				local ArcC1 : ac1 df.leftSB df.rightSB yArcTop 0 (stroke -- df.mvs)
+				local ArcC2 : ac2 df.leftSB df.rightSB yArcTop 0 (stroke -- df.mvs)
+				include : dispiro
+					ArcC1.arcStartL
+					flatside.rd df.rightSB 0 yArcTop SmallArchDepthA SmallArchDepthB 0
+					ArcC2.arcEndL
+				include : VBar.l df.leftSB ArcC2.yLB XH df.mvs
+
+
 		define mat : SuffixCfg.weave
 			object
 				"tht" { Toothed   0 }
@@ -382,3 +400,4 @@ glyph-block Letter-Arc-Hook : begin
 			cfunc ac1 ac2 (0xE120 + di1 + di2) "cccc-\(suffix)"
 			aafunc ac1 ac2 (0xE130 + di1 + di2) "dddd-\(suffix)"
 			efunc ac1 ac2 (0xE140 + di1 + di2) "eeee-\(suffix)"
+			bbfunc ac1 ac2 (0xE150 + di1 + di2) "iiii-\(suffix)"
