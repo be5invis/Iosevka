@@ -9,9 +9,9 @@ glyph-block Letter-Shoulder-Bowl : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define flex-params [Bowl] : namespace
-		local-parameter : arcClassStart
-		local-parameter : arcClassEnd
+	define flex-params [BowlT] : namespace
+		local-parameter : arcCStart
+		local-parameter : arcCEnd
 
 		local-parameter : left
 		local-parameter : right
@@ -26,31 +26,39 @@ glyph-block Letter-Shoulder-Bowl : begin
 
 		define realAda : ArchDepthAClamped top bottom ada adb
 		define realAdb : ArchDepthBClamped top bottom ada adb
-		export : define ArcInstStart : arcClassStart left right top bottom (ada -- realAda) (adb -- realAdb) (stroke -- stroke)
-		export : define ArcInstEnd   : arcClassEnd   left right top bottom (ada -- realAda) (adb -- realAdb) (stroke -- stroke)
+		export : define ArcStart : arcCStart left right top bottom (ada -- realAda) (adb -- realAdb) (stroke -- stroke)
+		export : define ArcEnd   : arcCEnd   left right top bottom (ada -- realAda) (adb -- realAdb) (stroke -- stroke)
 
 		export : define shape : namespace
-			export : define [lhs] : dispiro
-				ArcInstStart.arcStartR
+			export : define [arcL] : dispiro
+				ArcStart.arcStartR
 				flatside.ld left  bottom top ada adb ox
-				ArcInstEnd.arcEndR
-			export : define [rhs] : dispiro
-				ArcInstStart.arcStartL
+				ArcEnd.arcEndR
+			export : define [arcR] : dispiro
+				ArcStart.arcStartL
 				flatside.rd right bottom top ada adb ox
-				ArcInstEnd.arcEndL
+				ArcEnd.arcEndL
+			export : define [hookL] : dispiro
+				ArcStart.hookStartR
+				flatside.ld left  bottom top ada adb ox
+				ArcEnd.hookEndR
+			export : define [hookR] : dispiro
+				ArcStart.hookStartL
+				flatside.rd right bottom top ada adb ox
+				ArcEnd.hookEndL
 
 		export : define mask : namespace
-			export : define [lhs] : spiro-outline
-				ArcInstStart.arcStartR
+			export : define [arcL] : spiro-outline
+				ArcStart.arcStartR
 				flatside.ld left  bottom top ada adb ox
-				ArcInstEnd.arcEndR
-			export : define [rhs] : spiro-outline
-				ArcInstStart.arcStartL
+				ArcEnd.arcEndR
+			export : define [arcR] : spiro-outline
+				ArcStart.arcStartL
 				flatside.rd right bottom top ada adb ox
-				ArcInstEnd.arcEndL
+				ArcEnd.arcEndL
 
-	define flex-params [Shoulder] : namespace
-		local-parameter : arcClass
+	define flex-params [ShoulderT] : namespace
+		local-parameter : arcC
 
 		local-parameter : left
 		local-parameter : right
@@ -60,47 +68,47 @@ glyph-block Letter-Shoulder-Bowl : begin
 		local-parameter : adb      -- SmallArchDepthB
 		local-parameter : stroke   -- Stroke
 
-		export : define ArcInst : arcClass left right top bottom (ada -- ada) (adb -- adb) (stroke -- stroke)
+		export : define Arc : arcC left right top bottom (ada -- ada) (adb -- adb) (stroke -- stroke)
 
 		export : define shape : namespace
 			export : define [arcLT] : dispiro
-				ArcInst.arcStartL
+				Arc.arcStartL
 				flat right (top - adb)
 				curl right  bottom
 			export : define [arcRB] : dispiro
 				flat left   top
 				curl left  (bottom + adb)
-				ArcInst.arcEndR
+				Arc.arcEndR
 			export : define [hookLT] : dispiro
-				ArcInst.hookStartL
+				Arc.hookStartL
 				flat right (top - adb)
 				curl right  bottom
 			export : define [hookRB] : dispiro
 				flat left   top
 				curl left  (bottom + adb)
-				ArcInst.hookEndR
+				Arc.hookEndR
 
 		export : define mask : namespace
 			export : define [arcLT] : spiro-outline
-				corner ArcInst.xLStroke bottom
-				ArcInst.arcStartL
+				Arc.arcStartL
 				flat   right (top - adb)
 				corner right  bottom
+				corner Arc.xLStroke bottom
 			export : define [arcRB] : spiro-outline
+				corner Arc.xRStroke top
 				corner left   top
 				curl   left  (bottom + adb)
-				ArcInst.arcEndR
-				corner ArcInst.xRStroke top
+				Arc.arcEndR
 			export : define [hookLT] : spiro-outline
-				corner ArcInst.xLStroke bottom
-				ArcInst.hookStartL
+				Arc.hookStartL
 				flat   right (top - adb)
 				corner right  bottom
+				corner Arc.xLStroke bottom
 			export : define [hookRB] : spiro-outline
+				corner Arc.xRStroke top
 				corner left   top
 				curl   left  (bottom + adb)
-				ArcInst.hookEndR
-				corner ArcInst.xRStroke top
+				Arc.hookEndR
 
 
 	do "tests"
@@ -111,44 +119,41 @@ glyph-block Letter-Shoulder-Bowl : begin
 				local df : DivFrame 1
 				local ArcC1 : ac1 df.leftSB df.rightSB XH 0 (stroke -- df.mvs) (hook -- AHook)
 				local barTop : XH * OverlayPos * 1.02 + df.mvs * 0.425
-				local BowlInst : Bowl Flat ac2 df.leftSB df.rightSB barTop 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
+				local Bowl : BowlT Flat ac2 df.leftSB df.rightSB barTop 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
 				include : dispiro
 					ArcC1.hookStartL
 					flat df.rightSB (XH - SmallArchDepthB)
-					curl df.rightSB BowlInst.ArcInstEnd.yRB [heading Downward]
-				include : BowlInst.shape.lhs
+					curl df.rightSB Bowl.ArcEnd.yRB [heading Downward]
+				include : Bowl.shape.arcL
 				include : ArcC1.serifStartL
 
 		# Simplified impl of b
 		define [bfunc ac1 ac2 code name] : begin
 			create-glyph name code : glyph-proc
 				local df : DivFrame 1
-				local BowlInst : Bowl ac1 ac2 df.leftSB df.rightSB XH 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
+				local Bowl : BowlT ac1 ac2 df.leftSB df.rightSB XH 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
 
-				include : BowlInst.shape.rhs
-				include : VBar.l df.leftSB BowlInst.ArcInstEnd.yLB Ascender df.mvs
+				include : Bowl.shape.arcR
+				include : VBar.l df.leftSB Bowl.ArcEnd.yLB Ascender df.mvs
 
 		# Simplified impl of c
 		define [cfunc ac1 ac2 code name] : begin
 			create-glyph name code : glyph-proc
 				local df : DivFrame 1
-				local ArcC1 : ac1 df.leftSB df.rightSB XH 0 (stroke -- df.mvs)
-				local ArcC2 : ac2 df.leftSB df.rightSB XH 0 (stroke -- df.mvs)
-				include : dispiro
-					ArcC1.hookStartR
-					flatside.ld df.leftSB 0 XH SmallArchDepthA SmallArchDepthB 0
-					ArcC2.hookEndR
-				include : ArcC1.serifStartR
-				include : ArcC2.serifEndR
+				local Bowl : BowlT ac1 ac2 df.leftSB df.rightSB XH 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
+
+				include : Bowl.shape.hookL
+				include : Bowl.ArcStart.serifStartR
+				include : Bowl.ArcEnd.serifEndR
 
 		# Simplified impl of single storey a
 		define [aafunc ac1 ac2 code name] : begin
 			create-glyph name code : glyph-proc
 				local df : DivFrame 1
-				local BowlInst : Bowl ac1 ac2 df.leftSB df.rightSB XH 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
+				local Bowl : BowlT ac1 ac2 df.leftSB df.rightSB XH 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
 
-				include : BowlInst.shape.lhs
-				include : VBar.r df.rightSB BowlInst.ArcInstEnd.yRB BowlInst.ArcInstStart.yRT df.mvs
+				include : Bowl.shape.arcL
+				include : VBar.r df.rightSB Bowl.ArcEnd.yRB Bowl.ArcStart.yRT df.mvs
 
 		# Simplified impl of e
 		define [efunc ac1 ac2 code name] : begin
@@ -180,23 +185,33 @@ glyph-block Letter-Shoulder-Bowl : begin
 				define YeriBarPos 0.55
 				local yArcTop : XH * YeriBarPos + df.mvs / 2
 
-				local BowlInst : Bowl ac1 ac2 df.leftSB df.rightSB yArcTop 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
+				local Bowl : BowlT ac1 ac2 df.leftSB df.rightSB yArcTop 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
 
-				include : BowlInst.shape.rhs
-				include : VBar.l df.leftSB BowlInst.ArcInstEnd.yLB XH df.mvs
+				include : Bowl.shape.arcR
+				include : VBar.l df.leftSB Bowl.ArcEnd.yLB XH df.mvs
 
 		# mask test based on double storey a shape
 		define [amaskfunc ac1 ac2 code name] : begin
 			create-glyph name code : glyph-proc
 				local df : DivFrame 1
-				local ShoulderInst : Shoulder ac1 df.leftSB df.rightSB XH 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
+				local Shoulder : ShoulderT ac1 df.leftSB df.rightSB XH 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
 				local barTop : XH * OverlayPos * 1.02 + df.mvs * 0.425
-				local BowlInst : Bowl ac1 ac2 df.leftSB df.rightSB barTop 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
+				local Bowl : BowlT ac1 ac2 df.leftSB df.rightSB barTop 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
 				include : difference
 					union
-						ShoulderInst.ArcInst.serifStartL
-						ShoulderInst.mask.hookLT         # Ignore connection with bowl
-					BowlInst.mask.lhs
+						Shoulder.Arc.serifStartL
+						Shoulder.mask.hookLT         # Ignore connection with bowl
+					Bowl.mask.arcL
+
+		# Simplified? impl of տ
+		define [tiwnfunc ac1 ac2 code name] : begin
+			create-glyph name code : glyph-proc
+				local df : DivFrame 1 3
+				local UShoulder : ShoulderT ac2 df.leftSB (df.middle + [HSwToV : 0.5 * df.mvs])  XH 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
+				local NShoulder : ShoulderT ac1 (df.middle - [HSwToV : 0.5 * df.mvs]) df.rightSB XH 0 SmallArchDepthA SmallArchDepthB (stroke -- df.mvs)
+				include : UShoulder.shape.arcRB
+				include : VBar.m df.middle 0 XH df.mvs
+				include : NShoulder.shape.arcLT
 
 		define mat : SuffixCfg.weave
 			object
@@ -218,3 +233,4 @@ glyph-block Letter-Shoulder-Bowl : begin
 			efunc ac1 ac2 (0xE140 + di1 + di2) "eeee-\(suffix)"
 			bbfunc ac1 ac2 (0xE150 + di1 + di2) "iiii-\(suffix)"
 			amaskfunc ac1 ac2 (0xE160 + di1 + di2) "jjjj-\(suffix)"
+			tiwnfunc ac1 ac2 (0xE170 + di1 + di2) "nnnn-\(suffix)"
