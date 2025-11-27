@@ -1,0 +1,283 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
+import [Box] from "@iosevka/geometry/box"
+
+glyph-module
+
+glyph-block Letter-Arc-Hook : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth
+
+	glyph-block-export Toothed Toothless Rounded Flat
+
+	glyph-block-export ArcStartSerifWidth
+	define [ArcStartSerifWidth sw] : clamp (sw * 0.875) sw VJutStroke
+	define [ArcStartInwardSerifDepth hook sw] : Math.max hook (DToothlessRise + sw)
+
+	define flex-params [Toothed] : namespace
+		local-parameter : box
+		local-parameter : ada   -- SmallArchDepthA
+		local-parameter : adb   -- SmallArchDepthB
+		local-parameter : sw    -- Stroke
+
+		local-parameter : fine  -- ShoulderFine
+		local-parameter : barSw -- [ArcStartSerifWidth sw]
+		local-parameter : hook  -- Hook
+
+		export : define yLT box.t
+		export : define yRT box.t
+		export : define yLB box.b
+		export : define yRB box.b
+		export : define xLArc  : box.l + [HSwToV : sw - fine]
+		export : define xRArc  : box.r - [HSwToV : sw - fine]
+		export : define xLHook : box.l + [HSwToV : barSw - fine]
+		export : define xRHook : box.r - [HSwToV : barSw - fine]
+
+		export : define [arcStartL] : begin
+			return : list
+				g4.up.start xLArc (box.t - ada) [widths.rhs.heading fine Upward]
+				arch.rhs box.t (sw -- sw) (swBefore -- fine)
+		export : define [arcStartR] : begin
+			return : list
+				g4.up.start xRArc (box.t - adb) [widths.lhs.heading fine Upward]
+				arch.lhs box.t (sw -- sw) (swBefore -- fine)
+		export : define [arcEndL] : begin
+			return : list
+				arch.rhs box.b (sw -- sw) (swAfter -- fine)
+				g4.up.end xLArc (box.b + adb) [widths.rhs.heading fine Upward]
+		export : define [arcEndR] : begin
+			return : list
+				arch.lhs box.b (sw -- sw) (swAfter -- fine)
+				g4.up.end xRArc (box.b + ada) [widths.lhs.heading fine Upward]
+
+		export : define [hookStartL] : begin
+			return : list
+				g4.up.start xLHook (box.t - hook) [widths.rhs.heading fine Upward]
+				arch.rhs box.t (sw -- sw) (swBefore -- fine)
+		export : define [hookStartR] : begin
+			return : list
+				g4.up.start xRHook (box.t - hook) [widths.lhs.heading fine Upward]
+				arch.lhs box.t (sw -- sw) (swBefore -- fine)
+		export : define [hookEndL] : begin
+			return : list
+				arch.rhs box.b (sw -- sw) (swAfter -- fine)
+				g4.up.end xLHook (box.b + hook) [widths.rhs.heading fine Upward]
+		export : define [hookEndR] : begin
+			return : list
+				arch.lhs box.b (sw -- sw) (swAfter -- fine)
+				g4.up.end xRHook (box.b + hook) [widths.lhs.heading fine Upward]
+
+		export : define [serifStartL] : begin
+			return : tagged 'arcStartSerifL' : VBar.l box.l (box.t - hook) box.t barSw
+		export : define [serifStartR] : begin
+			return : tagged 'arcStartSerifR' : VBar.r box.r (box.t - hook) box.t barSw
+		export : define [serifEndL] : begin
+			return : tagged 'arcEndSerifL' : VBar.l box.l (box.b + hook) box.b barSw
+		export : define [serifEndR] : begin
+			return : tagged 'arcEndSerifR' : VBar.r box.r (box.b + hook) box.b barSw
+
+	define flex-params [Toothless] : namespace
+		local-parameter : box
+		local-parameter : ada   -- SmallArchDepthA
+		local-parameter : adb   -- SmallArchDepthB
+		local-parameter : sw    -- Stroke
+
+		local-parameter : rise  -- DToothlessRise
+		local-parameter : barSw -- [ArcStartSerifWidth sw]
+		local-parameter : hook  -- Hook
+
+		local serifDepth : Math.max hook (rise + sw)
+
+		export : define yLT : box.t - rise
+		export : define yRT : box.t - rise
+		export : define yLB : box.b + rise
+		export : define yRB : box.b + rise
+		export : define xLArc  box.l
+		export : define xRArc  box.r
+		export : define xLHook box.l
+		export : define xRHook box.r
+
+		export : define [arcStartL] : begin
+			return : list
+				g4 xLArc (box.t - rise) [widths.rhs sw]
+				arch.rhs box.t (sw -- sw) (blendPre -- {})
+		export : define [arcStartR] : begin
+			return : list
+				g4 xRArc (box.t - rise) [widths.lhs sw]
+				arch.lhs box.t (sw -- sw) (blendPre -- {})
+		export : define [arcEndL] : begin
+			return : list
+				arch.rhs box.b (sw -- sw) (blendPost -- {})
+				g4 xLArc (box.b + rise)
+		export : define [arcEndR] : begin
+			return : list
+				arch.lhs box.b (sw -- sw) (blendPost -- {})
+				g4 xRArc (box.b + rise)
+
+		export : define [hookStartL] : begin
+			return : list
+				g2 xLHook (box.t - rise) [widths.rhs sw]
+				arch.rhs box.t (sw -- sw) (blendPre -- {})
+		export : define [hookStartR] : begin
+			return : list
+				g2 xRHook (box.t - rise) [widths.lhs sw]
+				arch.lhs box.t (sw -- sw) (blendPre -- {})
+		export : define [hookEndL] : begin
+			return : list
+				arch.rhs box.b (sw -- sw) (blendPost -- {})
+				g4 xLHook (box.b + rise)
+		export : define [hookEndR] : begin
+			return : list
+				arch.lhs box.b (sw -- sw) (blendPost -- {})
+				g4 xRHook (box.b + rise)
+
+		export : define [serifStartL] : begin
+			return : tagged 'arcStartSerifL' : VBar.l box.l (box.t - serifDepth) (box.t - rise) barSw
+		export : define [serifStartR] : begin
+			return : tagged 'arcStartSerifR' : VBar.r box.r (box.t - serifDepth) (box.t - rise) barSw
+		export : define [serifEndL] : begin
+			return : tagged 'arcEndSerifL' : VBar.l box.l (box.b + serifDepth) (box.b + rise) barSw
+		export : define [serifEndR] : begin
+			return : tagged 'arcEndSerifR' : VBar.r box.r (box.b + serifDepth) (box.b + rise) barSw
+
+	define flex-params [Rounded] : namespace
+		local-parameter : box
+		local-parameter : ada   -- SmallArchDepthA
+		local-parameter : adb   -- SmallArchDepthB
+		local-parameter : sw    -- Stroke
+
+		local-parameter : barSw -- [ArcStartSerifWidth sw]
+		local-parameter : hook  -- Hook
+
+		export : define yLT : box.t - ada
+		export : define yRT : box.t - adb
+		export : define yLB : box.b + adb
+		export : define yRB : box.b + ada
+		export : define xLArc  box.l
+		export : define xRArc  box.r
+		export : define xLHook box.l
+		export : define xRHook box.r
+
+		export : define [arcStartL] : begin
+			return : list
+				g4.up.start box.l (box.t - ada) [widths.rhs.heading sw Upward]
+				arch.rhs box.t (sw -- sw)
+		export : define [arcStartR] : begin
+			return : list
+				g4.up.start box.r (box.t - adb) [widths.lhs.heading sw Upward]
+				arch.lhs box.t (sw -- sw)
+		export : define [arcEndL] : begin
+			return : list
+				arch.rhs box.b (sw -- sw)
+				g4.up.end box.l (box.b + adb) [heading Upward]
+		export : define [arcEndR] : begin
+			return : list
+				arch.lhs box.b (sw -- sw) (blendPost -- {})
+				g4.up.end box.r (box.b + ada) [heading Upward]
+
+		export : define [hookStartL] : begin
+			return : list
+				g4 box.l (box.t - hook) [widths.rhs.heading sw Upward]
+				hookstart box.t (sw -- sw)
+		export : define [hookStartR] : begin
+			return : list
+				g4 box.r (box.t - hook) [widths.lhs.heading sw Upward]
+				hookstart box.t (sw -- sw)
+		export : define [hookEndL] : begin
+			return : list
+				hookend box.b (sw -- sw)
+				g4 box.l (box.b + hook) [heading Upward]
+		export : define [hookEndR] : begin
+			return : list
+				hookend box.b (sw -- sw)
+				g4 box.r (box.b + hook) [heading Upward]
+
+		export : define [serifStartL] : return : glyph-proc
+		export : define [serifStartR] : return : glyph-proc
+		export : define [serifEndL] : return : glyph-proc
+		export : define [serifEndR] : return : glyph-proc
+
+	define flex-params [Flat] : namespace
+		local-parameter : box
+		local-parameter : ada      -- SmallArchDepthA
+		local-parameter : adb      -- SmallArchDepthB
+		local-parameter : sw       -- Stroke
+
+		local-parameter : slab     -- 0
+		local-parameter : barSw    -- [ArcStartSerifWidth sw]
+		local-parameter : hook     -- Hook
+		local-parameter : midShift -- (box.r - box.l) * (-0.05)
+		local-parameter : xShrink  -- [HSwToV : 0.25 * barSw]
+
+		local serifShrink : Math.max 0 (xShrink - [HSwToV : 0.5 * barSw])
+		local midX : mix box.l box.r 0.5
+
+		export : define yLT box.t
+		export : define yRT box.t
+		export : define yLB box.b
+		export : define yRB box.b
+		export : define xLArc    box.l
+		export : define xRArc    box.r
+		export : define xLHook : box.l + xShrink
+		export : define xRHook : box.r - xShrink
+
+		export : define [arcStartL] : begin
+			return : list
+				corner xLArc box.t [widths.rhs.heading sw Rightward]
+				curl [arch.adjust-x.top (midX + midShift) sw] box.t
+				archv
+		export : define [arcStartR] : begin
+			return : list
+				corner xRArc box.t [widths.lhs.heading sw Leftward]
+				curl [arch.adjust-x.top (midX - midShift) sw] box.t
+				archv
+		export : define [arcEndL] : begin
+			return : list
+				arcvh
+				flat [arch.adjust-x.bot (midX + midShift) sw] box.b [widths.rhs sw]
+				corner xLArc box.b [heading Leftward]
+		export : define [arcEndR] : begin
+			return : list
+				arcvh
+				flat [arch.adjust-x.bot (midX - midShift) sw] box.b [widths.lhs sw]
+				corner xRArc box.b [heading Rightward]
+		export : define [hookStartL] : begin
+			return : list
+				corner xLHook box.t [widths.rhs sw]
+				curl [arch.adjust-x.top (midX + midShift) sw] box.t
+				archv.superness DesignParameters.tightHookSuperness
+		export : define [hookStartR] : begin
+			return : list
+				corner xRHook box.t [widths.lhs sw]
+				curl [arch.adjust-x.top (midX - midShift) sw] box.t
+				archv.superness DesignParameters.tightHookSuperness
+		export : define [hookEndL] : begin
+			return : list
+				arcvh.superness DesignParameters.tightHookSuperness
+				flat [arch.adjust-x.bot (midX + midShift) sw] box.b [widths.rhs sw]
+				corner xLHook box.b
+		export : define [hookEndR] : begin
+			return : list
+				arcvh.superness DesignParameters.tightHookSuperness
+				flat [arch.adjust-x.bot (midX - midShift) sw] box.b [widths.lhs sw]
+				corner xRHook box.b
+
+		export : define [serifStartL] : begin
+			return : if slab
+				tagged 'arcStartSerifL' : VBar.l (box.l + serifShrink) (box.t - hook) box.t barSw
+				glyph-proc
+		export : define [serifStartR] : begin
+			return : if slab
+				tagged 'arcStartSerifR' : VBar.r (box.r - serifShrink) (box.t - hook) box.t barSw
+				glyph-proc
+		export : define [serifEndL] : begin
+			return : if slab
+				tagged 'arcEndSerifL' : VBar.l (box.l + serifShrink) (box.b + hook) box.b barSw
+				glyph-proc
+		export : define [serifEndR] : begin
+			return : if slab
+				tagged 'arcEndSerifR' : VBar.r (box.r - serifShrink) (box.b + hook) box.b barSw
+				glyph-proc
