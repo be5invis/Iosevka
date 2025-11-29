@@ -635,7 +635,7 @@ function formatSuffix(fmt, unhinted) {
 const DistWoff2 = file.make(
 	(gr, fn, unhinted) => `${DIST}/${gr}/${formatSuffix("WOFF2", unhinted)}/${fn}.woff2`,
 	async (target, out, group, f, unhinted) => {
-		const woff2_compress = await target.need(Woff2CompressApp);
+		const [woff2_compress] = await target.need(Woff2CompressApp);
 		const Ctor = unhinted ? DistUnhintedTTF : DistHintedTTF;
 		const [from] = await target.need(Ctor(group, f), de`${out.dir}`);
 
