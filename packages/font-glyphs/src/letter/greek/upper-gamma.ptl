@@ -21,7 +21,8 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	define SLAB-BOTTOM 2
 	define SLAB-ALL    3
 
-	define GammaBarLeftX : SB * 1.5
+	define kSB 1.5
+	define GammaBarLeftX : mix 0 SB kSB
 	define GammaRightX : RightSB - 0.75 * OX
 	define [GammaShape top bot slabType] : glyph-proc
 		include : LeaningAnchor.Below.VBar.l GammaBarLeftX
@@ -29,13 +30,15 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		include : tagged 'strokeH' : HBar.t (GammaBarLeftX - O) GammaRightX top
 		match slabType
 			[Just SLAB-ALL] : begin
-				include : HSerif.lt GammaBarLeftX top SideJut
-				include : tagged 'serifLB' : HSerif.lb (GammaBarLeftX + [HSwToV HalfStroke]) bot Jut
-				include : tagged 'serifLB' : HSerif.rb (GammaBarLeftX + [HSwToV HalfStroke]) bot MidJutSide
+				include : tagged 'serifLT' : HSerif.lt GammaBarLeftX top SideJut
 				include : tagged 'serifRT' : VSerif.dr GammaRightX top VJut
+				include : tagged 'serifLB' : union
+					HSerif.lb (GammaBarLeftX + [HSwToV HalfStroke]) bot Jut
+					HSerif.rb (GammaBarLeftX + [HSwToV HalfStroke]) bot MidJutSide
 			[Just SLAB-BOTTOM] : begin
-				include : tagged 'serifLB' : HSerif.lb (GammaBarLeftX + [HSwToV HalfStroke]) bot Jut
-				include : tagged 'serifLB' : HSerif.rb (GammaBarLeftX + [HSwToV HalfStroke]) bot MidJutSide
+				include : tagged 'serifLB' : union
+					HSerif.lb (GammaBarLeftX + [HSwToV HalfStroke]) bot Jut
+					HSerif.rb (GammaBarLeftX + [HSwToV HalfStroke]) bot MidJutSide
 			[Just SLAB-TR] : begin
 				include : tagged 'serifRT' : VSerif.dr GammaRightX top VJut
 
@@ -53,10 +56,12 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		create-glyph "grek/Digamma.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : GammaShape CAP 0 slabType
-			local yBar : CAP * DesignParameters.upperEBarPos
-			include : HBar.m GammaBarLeftX (RightSB - [xMidBarShrink doST]) yBar
-			if doST : include : tagged 'serifRM'
-				VSerif.dr (RightSB - [xMidBarShrink doST]) (yBar + HalfStroke) [mix Stroke VJut 0.5]
+			local yBar : mix 0 CAP DesignParameters.upperEBarPos
+			local xMidRight : RightSB - [xMidBarShrink doST]
+			include : HBar.m GammaBarLeftX xMidRight yBar
+			if doST : begin
+				local fine : Math.min VJutStroke : VSwToH : 0.8 * (xMidRight - (GammaBarLeftX + [HSwToV Stroke]))
+				include : tagged 'serifRM' : VSerif.dr xMidRight (yBar + HalfStroke) [mix Stroke VJut 0.5] fine
 
 		create-glyph "cyrl/GheDescender.\(suffix)" : glyph-proc
 			include [refer-glyph "grek/Gamma.\(suffix)"] AS_BASE ALSO_METRICS
@@ -156,9 +161,11 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		include : MarkSet.p
 		include : GammaShape XH Descender SLAB-NONE
 		local yBar : mix 0 XH DesignParameters.upperEBarPos
-		include : HBar.m GammaBarLeftX (RightSB - [xMidBarShrink SLAB]) yBar
-		if SLAB : include : tagged 'serifRM'
-			VSerif.dr (RightSB - [xMidBarShrink SLAB]) (yBar + HalfStroke) [mix Stroke VJut 0.5]
+		local xMidRight : RightSB - [xMidBarShrink SLAB]
+		include : HBar.m GammaBarLeftX xMidRight yBar
+		if SLAB : begin
+			local fine : Math.min VJutStroke : VSwToH : 0.8 * (xMidRight - (GammaBarLeftX + [HSwToV Stroke]))
+			include : tagged 'serifRM' : VSerif.dr xMidRight (yBar + HalfStroke) [mix Stroke VJut 0.5] fine
 
 	define [GhaynOverlayBar top] : LetterBarOverlay.l GammaBarLeftX (top * (1 - OverlayPos))
 
