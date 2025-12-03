@@ -13,19 +13,20 @@ glyph-block Letter-Cyrillic-E : begin
 
 	foreach { suffix { sty styBot fMidSerif } } [Object.entries CConfig] : do
 		define [CyrlEShepe df top ada adb] : glyph-proc
+			local sw : Math.min df.mvs : AdviceStroke2 2 3 top df.adws
 			local lf : CLetterForm df sty styBot top 0
 				ada -- ada
 				adb -- adb
+				sw  -- sw
 			include : lf.revFull
 
-			local xCenterBarLeft : mix df.leftSB df.rightSB 0.35
-			local mbSw : AdviceStroke2 2 3 top
-			include : HBar.m xCenterBarLeft df.rightSB (top / 2) mbSw
+			local xMidBarLeft : if fMidSerif df.middle : mix df.leftSB df.rightSB 0.35
+			include : HBar.m xMidBarLeft ((df.rightSB - OX) + O) (top / 2) sw
 
 			if fMidSerif : begin
-				local { jutTop jutBot jutMid } : EFVJutLength (top - 2 * DToothlessRise) 0.5 mbSw
-				local vJutSw : VJutStroke * mbSw / Stroke
-				include : VBar.m xCenterBarLeft (top / 2 - jutMid) (top / 2 + jutMid) vJutSw
+				local { jutTop jutBot jutMid } : EFVJutLength top 0.5 sw
+				local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.8 * ((df.rightSB - df.leftSB) - [HSwToV : 2 * sw])
+				include : VBar.m xMidBarLeft (top / 2 - jutMid) (top / 2 + jutMid) swVJut
 
 		create-glyph "cyrl/E.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -37,19 +38,20 @@ glyph-block Letter-Cyrillic-E : begin
 			include : CyrlEShepe [DivFrame 1] XH SmallArchDepthA SmallArchDepthB
 
 		define [CyrlYeShape df top ada adb] : glyph-proc
+			local sw : Math.min df.mvs : AdviceStroke2 2 3 top df.adws
 			local lf : CLetterForm df sty styBot top 0
 				ada -- ada
 				adb -- adb
+				sw  -- sw
 			include : lf.full
 
-			local xCenterBarRight : mix df.rightSB df.leftSB 0.35
-			local mbSw : AdviceStroke2 2 3 top
-			include : HBar.m df.leftSB xCenterBarRight (top / 2) mbSw
+			local xMidBarRight : if fMidSerif df.middle : mix df.rightSB df.leftSB 0.35
+			include : HBar.m ((df.leftSB + OX) - O) xMidBarRight (top / 2) sw
 
 			if fMidSerif : begin
-				local { jutTop jutBot jutMid } : EFVJutLength (top - 2 * DToothlessRise) 0.5 mbSw
-				local vJutSw : VJutStroke * mbSw / Stroke
-				include : VBar.m xCenterBarRight (top / 2 - jutMid) (top / 2 + jutMid) vJutSw
+				local { jutTop jutBot jutMid } : EFVJutLength top 0.5 sw
+				local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.8 * ((df.rightSB - df.leftSB) - [HSwToV : 2 * sw])
+				include : VBar.m xMidBarRight (top / 2 - jutMid) (top / 2 + jutMid) swVJut
 
 		create-glyph "cyrl/Ye.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -61,26 +63,30 @@ glyph-block Letter-Cyrillic-E : begin
 			include : CyrlYeShape [DivFrame 1] XH SmallArchDepthA SmallArchDepthB
 
 		define [IotifiedEShape fCapital df top ada adb] : glyph-proc
-			local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
-			define divSub : (df.width - gap - df.mvs) / Width
-			define dfSub : DivFrame divSub 2
+			local sw : Math.min df.mvs : AdviceStroke2 2 3 top : 0.75 * df.adws
+			local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * sw) - [HSwToV : 0.25 * sw]
+			define divSub : (df.width - gap - sw) / Width
+			define subDf : DivFrame divSub 2
 
-			local lf : CLetterForm dfSub sty styBot top 0
-				ada -- (ada * 0.7 * df.adws)
-				adb -- (adb * 0.7 * df.adws)
-				sw  -- df.mvs
-			include : with-transform [ApparentTranslate (Width * (df.adws - divSub)) 0] : lf.full
+			local lf : CLetterForm subDf sty styBot top 0
+				ada -- (ada * 0.75 * df.adws)
+				adb -- (adb * 0.75 * df.adws)
+				sw  -- sw
 
-			local xCenterBarRight : mix df.leftSB df.rightSB (3 / 4)
+			local shift : Width * (df.adws - divSub)
+			include : with-transform [ApparentTranslate shift 0] : lf.full
+
+			local xMidBarRight : [if fMidSerif subDf.middle : mix subDf.rightSB subDf.leftSB 0.35] + shift
 			include : Iotified.full df top
-				hBarRight -- xCenterBarRight
+				hBarRight -- xMidBarRight
 				hBarY     -- (top / 2)
 				fCapital  -- fCapital
+				swRef     -- sw
 
 			if fMidSerif : begin
-				local { jutTop jutBot jutMid } : EFVJutLength (top - 2 * DToothlessRise) 0.5 df.mvs
-				local vJutSw : VJutStroke * df.mvs / Stroke
-				include : VBar.m xCenterBarRight (top / 2 - jutMid) (top / 2 + jutMid) vJutSw
+				local { jutTop jutBot jutMid } : EFVJutLength top 0.5 sw
+				local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.8 * ((subDf.rightSB - subDf.leftSB) - [HSwToV : 2 * sw])
+				include : VBar.m xMidBarRight (top / 2 - jutMid) (top / 2 + jutMid) swVJut
 
 		create-glyph "cyrl/EIotified.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleM 3
