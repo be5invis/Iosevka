@@ -1323,6 +1323,14 @@ const CleanDist = task(`clean-dist`, async () => {
 	await rm(ARCHIVE_DIR);
 });
 
+const RegenerateCode = task(`regenerate-code`, async target => {
+	target.is.volatile();
+	echo.action(echo.hl.command("Codegen"), "Generating TTFA ranges...");
+	await silently.node(`tools/misc/src/generate-ttfa-ranges.mjs`, {
+		out: `packages/font/src/generated/ttfa-ranges.mjs`,
+	});
+});
+
 const Release = task(`release`, async target => {
 	await target.need(ReleaseAncillary);
 	await target.need(ReleaseArchives, ReleaseSha256Text);
