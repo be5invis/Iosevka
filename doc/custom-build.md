@@ -4008,7 +4008,9 @@ The properties in the `namingOverride` section could be uase to override menu na
  - `urlDesigner`: Name ID 12, URL of typeface designer.
  - `license` (or alternatively `licence`): Name ID 13, license description.
  - `licenseURL` (or alternatively `licenceURL`): Name ID 14, license Info URL.
+ - `sampleText`: Name ID 19, sample text for the font.
  - `version`: Override font version. The version number should follow [SemVer](https://semver.org/), like being `1.0.0`.
+ - `vendorIdTag`: Four-character vendor ID tag in OS/2 table.
 
 Additionally, the `namingOverride` section now supports a `menuNameMap` configuration property. This property allows for the customization of menu names based on specific attributes related to the font's style and characteristics. The `menuNameMap` configuration is structured as follows:
 
