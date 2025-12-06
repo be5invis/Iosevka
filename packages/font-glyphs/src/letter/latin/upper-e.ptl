@@ -13,47 +13,48 @@ glyph-block Letter-Latin-Upper-E : begin
 	glyph-block-import Letter-Latin-Upper-F : xMidBarShrink yMidBar EFVJutLength
 
 	define kSB 1
-	define xEBarLeft     : SB * kSB - O
-	define xRevEBarRight : Width - SB * kSB + O
+	define xEBarLeft     : [mix 0     SB      kSB] - O
+	define xRevEBarRight : [mix Width RightSB kSB] + O
 
-	define [EShape] : with-params [top pyBar serifLT serifLB serifV serifM [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+	define [EShape] : with-params [top pyBar serifLT serifLB serifV serifM [stroke [AdviceStroke2 2 3 top]]] : glyph-proc
 		local xMidRight : RightSB - [xMidBarShrink serifV]
 		local yBar : yMidBar top pyBar
 		local { jutTop jutBot jutMid } : EFVJutLength top pyBar stroke
+		local swVJut : VJutStroke * (stroke / Stroke)
 
-		include : VBar.l (xEBarLeft) 0 top stroke
-		include : HBar.t (xEBarLeft - O) RightSB top stroke
+		include : VBar.l xEBarLeft 0 top stroke
+		include : HBar.t (xEBarLeft - O) RightSB   top  stroke
 		include : HBar.m (xEBarLeft - O) xMidRight yBar stroke
-		include : HBar.b (xEBarLeft - O) RightSB 0 stroke
+		include : HBar.b (xEBarLeft - O) RightSB   0    stroke
 
-		if serifLT : include : HSerif.lt xEBarLeft top SideJut
-		if serifLB : include : HSerif.lb xEBarLeft 0 SideJut
+		if serifLT : include : HSerif.lt xEBarLeft top SideJut stroke
+		if serifLB : include : HSerif.lb xEBarLeft 0   SideJut stroke
 		if serifV : begin
-			include : VSerif.dr RightSB top jutTop
-			include : VSerif.ur RightSB 0 jutBot
+			include : VSerif.dr RightSB top jutTop swVJut
+			include : VSerif.ur RightSB 0   jutBot swVJut
 		if serifM : begin
-			local fine : VJutStroke * stroke / Stroke
+			local fine : Math.min swVJut : VSwToH : 0.8 * (xMidRight - (xEBarLeft + [HSwToV stroke]))
 			include : VBar.r xMidRight (yBar - jutMid) (yBar + jutMid) fine
 
-	glyph-block-export RevEShape
-	define [RevEShape] : with-params [top pyBar serifRT serifRB serifV serifM [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+	define [RevEShape] : with-params [top pyBar serifRT serifRB serifV serifM [stroke [AdviceStroke2 2 3 top]]] : glyph-proc
 		local xMidLeft : SB + [xMidBarShrink serifV]
 		local yBar : yMidBar top pyBar
-		local { jutTop jutBot } : EFVJutLength top pyBar stroke
+		local { jutTop jutBot jutMid } : EFVJutLength top pyBar stroke
+		local swVJut : VJutStroke * (stroke / Stroke)
 
-		include : VBar.r (xRevEBarRight) 0 top stroke
-		include : HBar.t SB (xRevEBarRight + O) top stroke
+		include : VBar.r xRevEBarRight 0 top stroke
+		include : HBar.t SB       (xRevEBarRight + O) top  stroke
 		include : HBar.m xMidLeft (xRevEBarRight + O) yBar stroke
-		include : HBar.b SB (xRevEBarRight + O) 0 stroke
+		include : HBar.b SB       (xRevEBarRight + O) 0    stroke
 
-		if serifRT : include : HSerif.rt xRevEBarRight top SideJut
-		if serifRB : include : HSerif.rb xRevEBarRight 0 SideJut
+		if serifRT : include : HSerif.rt xRevEBarRight top SideJut stroke
+		if serifRB : include : HSerif.rb xRevEBarRight 0   SideJut stroke
 		if serifV : begin
-			include : VSerif.dl SB top jutTop
-			include : VSerif.ul SB 0 jutBot
+			include : VSerif.dl SB top jutTop swVJut
+			include : VSerif.ul SB 0   jutBot swVJut
 		if serifM : begin
-			local fine : VJutStroke * stroke / Stroke
-			include : VBar.l xMidLeft (yBar - 0.5 * jutBot) (yBar + 0.5 * jutBot) fine
+			local fine : Math.min swVJut : VSwToH : 0.8 * ((xRevEBarRight - [HSwToV stroke]) - xMidLeft)
+			include : VBar.l xMidLeft (yBar - jutMid) (yBar + jutMid) fine
 
 	define EConfig : object
 		serifless      { false false false false }

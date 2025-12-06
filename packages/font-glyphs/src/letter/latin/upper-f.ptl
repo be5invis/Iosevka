@@ -13,41 +13,41 @@ glyph-block Letter-Latin-Upper-F : begin
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
 
 	glyph-block-export xMidBarShrink
-	define [xMidBarShrink serifV] : [Math.max HalfStroke ((RightSB - SB) * 0.15)] + [if serifV QuarterStroke 0]
-
-	define [yMidBarImpl y] : fallback y DesignParameters.upperEBarPos
+	define [xMidBarShrink serifV] : [Math.max HalfStroke : (RightSB - SB) * 0.15] + [if serifV QuarterStroke 0]
 
 	glyph-block-export yMidBar
-	define [yMidBar top y] : top * [yMidBarImpl y]
+	define [yMidBar top _pyBar] : mix 0 top : fallback _pyBar DesignParameters.upperEBarPos
 
 	glyph-block-export EFVJutLength
-	define [EFVJutLength top pyBar stroke] : begin
-		local jutTop : Math.min VJut
-			top - [mix (top - stroke) ([yMidBar top pyBar] + stroke / 2) 0.5]
-		local jutBot : Math.min VJut
-			mix stroke ([yMidBar top pyBar] - stroke / 2) 0.5
-		local jutMid : 0.5 * [mix jutBot jutTop : yMidBarImpl pyBar]
+	define [EFVJutLength top _pyBar _stroke] : begin
+		local pyBar  : fallback _pyBar  DesignParameters.upperEBarPos
+		local stroke : fallback _stroke Stroke
+		local jutTop : Math.min VJut : top - [mix (top - stroke) ([yMidBar top pyBar] + stroke / 2) 0.5]
+		local jutBot : Math.min VJut : 0   + [mix (0   + stroke) ([yMidBar top pyBar] - stroke / 2) 0.5]
+		local jutMid : mix (stroke / 2) ([Math.min jutBot jutTop] - stroke / 2) 0.5
 		return { jutTop jutBot jutMid }
 
-	define xFBarLeft : SB * 1.5
-	define xFBarRight : Width - SB * 1.5
+	define kSB 1.5
+	define xFBarLeft     : [mix 0     SB      kSB] - 0
+	define xRevFBarRight : [mix Width RightSB kSB] + 0
 
-	define [FShape] : with-params [top pyBar serifLT serifLB serifV serifM [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+	define [FShape] : with-params [top pyBar serifLT serifLB serifV serifM [stroke [AdviceStroke2 2 3 top]]] : glyph-proc
 		local xMidRight : RightSB - [xMidBarShrink serifV]
 		local yBar : yMidBar top pyBar
 		local { jutTop jutBot jutMid } : EFVJutLength top pyBar stroke
+		local swVJut : VJutStroke * (stroke / Stroke)
 
-		include : VBar.l (xFBarLeft) 0 top stroke
+		include : VBar.l xFBarLeft 0 top stroke
 		include : HBar.t (xFBarLeft - O) RightSB top stroke
 		include : tagged 'crossBar' : HBar.m (xFBarLeft - O) xMidRight yBar stroke
 
-		if serifLT : include : HSerif.lt xFBarLeft top SideJut
-		if serifLB : begin
-			include : tagged 'serifBottom' : HSerif.lb xFBarLeft 0 SideJut
-			include : tagged 'serifBottom' : HSerif.rb (xFBarLeft + [HSwToV HalfStroke]) 0 MidJutSide
-		if serifV : include : VSerif.dr RightSB top jutTop
+		if serifLT : include : HSerif.lt xFBarLeft top SideJut stroke
+		if serifLB : include : tagged 'serifBottom' : union
+			HSerif.lb (xFBarLeft + [HSwToV : 0.5 * stroke]) 0 (Jut        - [HSwToV : 0.5 * (Stroke - stroke)]) stroke
+			HSerif.rb (xFBarLeft + [HSwToV : 0.5 * stroke]) 0 (MidJutSide - [HSwToV : 0.5 * (Stroke - stroke)]) stroke
+		if serifV : include : VSerif.dr RightSB top jutTop swVJut
 		if serifM : begin
-			local fine : VJutStroke * stroke / Stroke
+			local fine : Math.min swVJut : VSwToH : 0.8 * (xMidRight - (xFBarLeft + [HSwToV stroke]))
 			include : VBar.r xMidRight (yBar - jutMid) (yBar + jutMid) fine
 
 	define FConfig : object
@@ -80,9 +80,9 @@ glyph-block Letter-Latin-Upper-F : begin
 		create-glyph "FBar.\(suffix)" : glyph-proc
 			include [refer-glyph "F.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.l.in
-				x   -- xFBarLeft
-				bot -- [yMidBar CAP] + HalfStroke
-				top -- CAP - Stroke
+				x     -- xFBarLeft
+				bot   -- ([yMidBar CAP] + HalfStroke)
+				top   -- (CAP - Stroke)
 				space -- { 0 (RightSB - [if v [HSwToV VJutStroke] 0]) }
 
 		create-glyph "smcpF.\(suffix)" : glyph-proc
@@ -93,11 +93,19 @@ glyph-block Letter-Latin-Upper-F : begin
 	select-variant 'F' 'F'
 	link-reduced-variant 'F/sansSerif' 'F' MathSansSerif
 	select-variant 'smcpF' 0xA730 (follow -- 'F')
-	select-variant 'FBar' 0xA798 (follow -- 'F')
+	select-variant 'FBar'  0xA798 (follow -- 'F')
 	select-variant 'currency/frenchFrancSign' 0x20A3
 
 	alias 'cyrl/Ghayn.BSH' null 'F'
 	alias 'cyrl/ghayn.BSH' null 'smcpF'
+
+	CreateTurnedLetter 'turnF'     0x2132 'F'     HalfAdvance (CAP / 2)
+	CreateTurnedLetter 'turnSmcpF' 0x214E 'smcpF' HalfAdvance (XH  / 2)
+
+	derive-glyphs 'FLTail' 0x191 'F' : lambda [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		eject-contour 'serifBottom'
+		include : PalatalHook.lExt xFBarLeft 0
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/F' 0x1D53D : glyph-proc
@@ -108,11 +116,3 @@ glyph-block Letter-Latin-Upper-F : begin
 			difference
 				FShape CAP (stroke -- BBS)
 				Rect (CAP - BBS) BBS (xFBarLeft + [HSwToV BBS]) (xFBarLeft + BBD)
-
-	CreateTurnedLetter 'turnF'     0x2132 'F'     HalfAdvance (CAP / 2)
-	CreateTurnedLetter 'turnSmcpF' 0x214E 'smcpF' HalfAdvance (XH  / 2)
-
-	derive-glyphs 'Fltail' 0x191 'F' : lambda [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		eject-contour 'serifBottom'
-		include : PalatalHook.lExt xFBarLeft 0
