@@ -10,34 +10,36 @@ glyph-module
 glyph-block Letter-Greek-Upper-Gamma: begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors LeaningAnchor
 	glyph-block-import Letter-Shared-Shapes : CyrDescender MidHook LegShape
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
-	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	glyph-block-import Letter-Latin-Upper-F : xMidBarShrink
-	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors LeaningAnchor
 
 	define SLAB-NONE   0
 	define SLAB-TR     1
 	define SLAB-BOTTOM 2
 	define SLAB-ALL    3
 
-	define GammaBarLeftX : SB * 1.5
-	define GammaRightX : RightSB - 0.75 * OX
+	define kSB 1.5
+	define xGammaBarLeft : mix 0 SB kSB
+	define xGammaTopRight : RightSB - 0.75 * OX
 	define [GammaShape top bot slabType] : glyph-proc
-		include : LeaningAnchor.Below.VBar.l GammaBarLeftX
-		include : tagged 'strokeV' : VBar.l GammaBarLeftX bot top
-		include : tagged 'strokeH' : HBar.t (GammaBarLeftX - O) GammaRightX top
+		include : LeaningAnchor.Below.VBar.l xGammaBarLeft
+		include : tagged 'strokeV' : VBar.l xGammaBarLeft bot top
+		include : tagged 'strokeH' : HBar.t (xGammaBarLeft - O) xGammaTopRight top
 		match slabType
 			[Just SLAB-ALL] : begin
-				include : HSerif.lt GammaBarLeftX top SideJut
-				include : tagged 'serifLB' : HSerif.lb (GammaBarLeftX + [HSwToV HalfStroke]) bot Jut
-				include : tagged 'serifLB' : HSerif.rb (GammaBarLeftX + [HSwToV HalfStroke]) bot MidJutSide
-				include : tagged 'serifRT' : VSerif.dr GammaRightX top VJut
+				include : tagged 'serifLT' : HSerif.lt xGammaBarLeft  top SideJut
+				include : tagged 'serifRT' : VSerif.dr xGammaTopRight top VJut
+				include : tagged 'serifLB' : union
+					HSerif.lb (xGammaBarLeft + [HSwToV HalfStroke]) bot Jut
+					HSerif.rb (xGammaBarLeft + [HSwToV HalfStroke]) bot MidJutSide
 			[Just SLAB-BOTTOM] : begin
-				include : tagged 'serifLB' : HSerif.lb (GammaBarLeftX + [HSwToV HalfStroke]) bot Jut
-				include : tagged 'serifLB' : HSerif.rb (GammaBarLeftX + [HSwToV HalfStroke]) bot MidJutSide
+				include : tagged 'serifLB' : union
+					HSerif.lb (xGammaBarLeft + [HSwToV HalfStroke]) bot Jut
+					HSerif.rb (xGammaBarLeft + [HSwToV HalfStroke]) bot MidJutSide
 			[Just SLAB-TR] : begin
-				include : tagged 'serifRT' : VSerif.dr GammaRightX top VJut
+				include : tagged 'serifRT' : VSerif.dr xGammaTopRight top VJut
 
 	define GammaConfig : object
 		serifless       { SLAB-NONE   false }
@@ -53,22 +55,24 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		create-glyph "grek/Digamma.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : GammaShape CAP 0 slabType
-			local yBar : CAP * DesignParameters.upperEBarPos
-			include : HBar.m GammaBarLeftX (RightSB - [xMidBarShrink doST]) yBar
-			if doST : include : tagged 'serifRM'
-				VSerif.dr (RightSB - [xMidBarShrink doST]) (yBar + HalfStroke) [mix Stroke VJut 0.5]
+			local yBar : mix 0 CAP DesignParameters.upperEBarPos
+			local xMidRight : RightSB - [xMidBarShrink doST]
+			include : HBar.m xGammaBarLeft xMidRight yBar
+			if doST : begin
+				local fine : Math.min VJutStroke : VSwToH : 0.8 * (xMidRight - (xGammaBarLeft + [HSwToV Stroke]))
+				include : tagged 'serifRM' : VSerif.dr xMidRight (yBar + HalfStroke) [mix Stroke VJut 0.5] fine
 
 		create-glyph "cyrl/GheDescender.\(suffix)" : glyph-proc
 			include [refer-glyph "grek/Gamma.\(suffix)"] AS_BASE ALSO_METRICS
 			include : CyrDescender.rSideJut
-				x   -- (GammaBarLeftX + [HSwToV Stroke])
+				x   -- (xGammaBarLeft + [HSwToV Stroke])
 				y   -- 0
 				jut -- MidJutSide
 
 		create-glyph "cyrl/GheDHook.\(suffix)" : glyph-proc
 			include [refer-glyph "grek/Gamma.\(suffix)"] AS_BASE ALSO_METRICS
 			include : PalatalHook.rSideJut
-				x   -- (GammaBarLeftX + [HSwToV Stroke])
+				x   -- (xGammaBarLeft + [HSwToV Stroke])
 				y   -- 0
 				jut -- MidJutSide
 
@@ -79,14 +83,14 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		create-glyph "cyrl/gheDescender.upright.\(suffix)" : glyph-proc
 			include [refer-glyph "cyrl/ghe.upright.\(suffix)"] AS_BASE ALSO_METRICS
 			include : CyrDescender.rSideJut
-				x   -- (GammaBarLeftX + [HSwToV Stroke])
+				x   -- (xGammaBarLeft + [HSwToV Stroke])
 				y   -- 0
 				jut -- MidJutSide
 
 		create-glyph "cyrl/gheDHook.upright.\(suffix)" : glyph-proc
 			include [refer-glyph "cyrl/ghe.upright.\(suffix)"] AS_BASE ALSO_METRICS
 			include : PalatalHook.rSideJut
-				x   -- (GammaBarLeftX + [HSwToV Stroke])
+				x   -- (xGammaBarLeft + [HSwToV Stroke])
 				y   -- 0
 				jut -- MidJutSide
 
@@ -95,29 +99,29 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 			include : ExtendAboveBaseAnchors (CAP + LongVJut - QuarterStroke)
 			include : GammaShape CAP 0 slabType
 			eject-contour 'serifRT'
-			include : VBar.r GammaRightX CAP (CAP + LongVJut - QuarterStroke) VJutStroke
+			include : VBar.r xGammaTopRight CAP (CAP + LongVJut - QuarterStroke) VJutStroke
 
 		create-glyph "cyrl/ge.upright.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : ExtendAboveBaseAnchors (XH + LongVJut - QuarterStroke)
 			include : GammaShape XH 0 slabType
 			eject-contour 'serifRT'
-			include : VBar.r GammaRightX XH (XH + LongVJut - QuarterStroke) VJutStroke
+			include : VBar.r xGammaTopRight XH (XH + LongVJut - QuarterStroke) VJutStroke
 
 		create-glyph "cyrl/ge.italic.\(suffix)" : glyph-proc
 			include [refer-glyph "cyrl/ge.upright.\(suffix)"] AS_BASE ALSO_METRICS
 			eject-contour 'serifLB'
 			eject-contour 'strokeV'
 			include : LegShape
-				ztop -- [Point.fromXY Point.Type.Corner GammaBarLeftX XH]
+				ztop -- [Point.fromXY Point.Type.Corner xGammaBarLeft XH]
 				zbot -- [Point.fromXY Point.Type.Corner [mix SB 0 : if doST 1 0.75] 0]
-				xb   -- GammaBarLeftX
+				xb   -- xGammaBarLeft
 
 		create-glyph "cyrl/GheMidHook.\(suffix)" : glyph-proc
 			include [refer-glyph "grek/Gamma.\(suffix)"] AS_BASE ALSO_METRICS
 			include : MarkSet.capDesc
 			include : MidHook.general
-				left   -- (GammaBarLeftX + [HSwToV Stroke])
+				left   -- (xGammaBarLeft + [HSwToV Stroke])
 				right  -- RightSB
 				top    -- (CAP * HBarPos + QuarterStroke)
 				ada    -- ArchDepthA
@@ -127,7 +131,7 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 			include [refer-glyph "cyrl/ghe.upright.\(suffix)"] AS_BASE ALSO_METRICS
 			include : MarkSet.p
 			include : MidHook.general
-				left   -- (GammaBarLeftX + [HSwToV Stroke])
+				left   -- (xGammaBarLeft + [HSwToV Stroke])
 				right  -- RightSB
 				top    -- (XH * HBarPos + QuarterStroke)
 				ada    -- (ArchDepthA * (HBarPos ** 0.3))
@@ -156,11 +160,13 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		include : MarkSet.p
 		include : GammaShape XH Descender SLAB-NONE
 		local yBar : mix 0 XH DesignParameters.upperEBarPos
-		include : HBar.m GammaBarLeftX (RightSB - [xMidBarShrink SLAB]) yBar
-		if SLAB : include : tagged 'serifRM'
-			VSerif.dr (RightSB - [xMidBarShrink SLAB]) (yBar + HalfStroke) [mix Stroke VJut 0.5]
+		local xMidRight : RightSB - [xMidBarShrink SLAB]
+		include : HBar.m xGammaBarLeft xMidRight yBar
+		if SLAB : begin
+			local fine : Math.min VJutStroke : VSwToH : 0.8 * (xMidRight - (xGammaBarLeft + [HSwToV Stroke]))
+			include : tagged 'serifRM' : VSerif.dr xMidRight (yBar + HalfStroke) [mix Stroke VJut 0.5] fine
 
-	define [GhaynOverlayBar top] : LetterBarOverlay.l GammaBarLeftX (top * (1 - OverlayPos))
+	define [GhaynOverlayBar top] : LetterBarOverlay.l xGammaBarLeft (top * (1 - OverlayPos))
 
 	derive-composites 'cyrl/Ghayn' 0x492 'cyrl/Ghe' [GhaynOverlayBar CAP]
 	derive-composites 'cyrl/ghayn.upright' null 'cyrl/ghe.upright' [GhaynOverlayBar XH]
@@ -168,7 +174,8 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	derive-composites 'cyrl/GheStrokeHook' 0x4FA 'cyrl/GheDHook' [GhaynOverlayBar CAP]
 	derive-composites 'cyrl/gheStrokeHook.upright' null 'cyrl/gheDHook.upright' [GhaynOverlayBar XH]
 
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/grek/Gamma' 0x213E : glyph-proc
 		include : MarkSet.capital
-		include : BBBarLeft GammaBarLeftX 0 CAP
-		include : HBar.t GammaBarLeftX GammaRightX CAP BBS
+		include : BBBarLeft xGammaBarLeft 0 CAP
+		include : HBar.t xGammaBarLeft xGammaTopRight CAP BBS

@@ -635,7 +635,7 @@ function formatSuffix(fmt, unhinted) {
 const DistWoff2 = file.make(
 	(gr, fn, unhinted) => `${DIST}/${gr}/${formatSuffix("WOFF2", unhinted)}/${fn}.woff2`,
 	async (target, out, group, f, unhinted) => {
-		const woff2_compress = await target.need(Woff2CompressApp);
+		const [woff2_compress] = await target.need(Woff2CompressApp);
 		const Ctor = unhinted ? DistUnhintedTTF : DistHintedTTF;
 		const [from] = await target.need(Ctor(group, f), de`${out.dir}`);
 
@@ -1321,6 +1321,14 @@ const Clean = task(`clean`, async () => {
 const CleanDist = task(`clean-dist`, async () => {
 	await rm(DIST);
 	await rm(ARCHIVE_DIR);
+});
+
+const RegenerateCode = task(`regenerate-code`, async target => {
+	target.is.volatile();
+	echo.action(echo.hl.command("Codegen"), "Generating TTFA ranges...");
+	await silently.node(`tools/misc/src/generate-ttfa-ranges.mjs`, {
+		out: `packages/font/src/generated/ttfa-ranges.mjs`,
+	});
 });
 
 const Release = task(`release`, async target => {

@@ -144,6 +144,12 @@ function setInformaticNames(font, naming) {
 	if (naming.licenseURL) {
 		nameFont(font, Ot.Name.NameID.LicenseInfoUrl, ancNameEntry(naming.licenseURL));
 	}
+	if (naming.sampleText) {
+		nameFont(font, Ot.Name.NameID.SampleText, ancNameEntry(naming.sampleText));
+	}
+	if (naming.vendorIdTag) {
+		font.os2.achVendID = naming.vendorIdTag;
+	}
 }
 
 function setVersion(font, naming) {

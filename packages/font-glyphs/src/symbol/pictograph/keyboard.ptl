@@ -1,6 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
+import [Box] from "@iosevka/geometry/box"
 
 glyph-module
 
@@ -108,3 +109,43 @@ glyph-block Symbol-Pictograph-Keyboard : begin
 				set-width Geom.Width
 				local sw : AdviceStroke 8 : Math.sqrt MosaicWidthScalar
 				include : KeyboardShape (Geom.MidY + Geom.Size / 1.5) (Geom.MidY - Geom.Size / 1.5) Geom.Left Geom.Right sw
+
+	create-glyph 'insertSignBase' : glyph-proc
+		local box : new Box XH 0 SB RightSB
+		local sw : AdviceStroke 4
+		include : intersection
+			spiro-outline
+				corner box.l [box.yp 0.5]
+				corner [box.xp 0.5] box.t
+				corner box.r [box.yp 0.5]
+				corner [box.xp 0.5] box.b
+				close
+			union
+				ExtLineLhs 8 sw box.l [box.yp 0.5] [box.xp 0.5] box.b
+				ExtLineRhs 8 sw box.r [box.yp 0.5] [box.xp 0.5] box.b
+
+	create-glyph 'underscoreSignBase' : glyph-proc
+		local sb : 0.5 * SB
+		local sw : AdviceStroke 4
+		local yc : SymbolMid - (XH / 2)
+		include : HBar.b sb (Width - sb) yc sw
+	create-glyph 'BrokenUnderscoreSignBase' : glyph-proc
+		local sb : 0.5 * SB
+		local sw : AdviceStroke 4
+		local yc : SymbolMid - (XH / 2)
+		local gap : Math.max (Width / 12) [AdviceStroke 4]
+		include : HBar.b sb (Middle - gap / 2) yc sw
+		include : HBar.b (Middle + gap / 2) (Width - sb) yc sw
+	create-glyph 'correctionSignBase' : glyph-proc
+		local sb : 0.5 * SB
+		local box : new Box (SymbolMid + XH / 4) (SymbolMid - XH / 4) sb (Width - sb)
+		local sw : AdviceStroke 5
+		# Left half
+		include : ExtLineCenter 0 sw box.l box.t [box.xp 0.2] [box.yp 0.9]
+		include : ExtLineCenter 0 sw (box.l + OX) [box.yp 0.5] [box.xp 0.2] [box.yp 0.5]
+		include : ExtLineCenter 0 sw box.l box.b [box.xp 0.2] [box.yp 0.1]
+		# Right half
+		include : ExtLineCenter 0 sw box.r box.t [box.xp 0.8] [box.yp 0.9]
+		include : ExtLineCenter 0 sw (box.r - OX) [box.yp 0.5] [box.xp 0.8] [box.yp 0.5]
+		include : ExtLineCenter 0 sw box.r box.b [box.xp 0.8] [box.yp 0.1]
+

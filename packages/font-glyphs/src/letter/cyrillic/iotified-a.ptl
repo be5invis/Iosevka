@@ -54,7 +54,7 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 		# "Default" version
 		export : define [full] : with-params [df top hBarRight hBarY [fCapital false] [swRef df.mvs] [swSerif swRef]] : begin
 			local useItalicShape : [not fCapital] && para.isItalic
-			Shape
+			return : Shape
 				df         -- df
 				top        -- top
 				hBarRight  -- hBarRight
@@ -67,7 +67,7 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 		# Outwards only
 		export : define [outer] : with-params [df top hBarRight hBarY [fCapital false] [swRef df.mvs] [swSerif swRef]] : begin
 			local useItalicShape : [not fCapital] && para.isItalic
-			Shape
+			return : Shape
 				df         -- df
 				top        -- top
 				hBarRight  -- hBarRight
@@ -80,7 +80,7 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 		# Iotified A-shaped glyphs
 		export : define [A] : with-params [df top hBarRight hBarY [fCapital false] [swRef df.mvs] [swSerif swRef]] : begin
 			local useItalicShape : [not fCapital] && para.isItalic
-			Shape
+			return : Shape
 				df         -- df
 				top        -- top
 				hBarRight  -- hBarRight
@@ -93,7 +93,7 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 		# Used for Bulgarian Lower Yu
 		export : define [ascender] : with-params [df top hBarRight hBarY [fCapital false] [swRef df.mvs] [swSerif swRef]] : begin
 			local useItalicShape : [not fCapital] && para.isItalic
-			Shape
+			return : Shape
 				df         -- df
 				top        -- top
 				hBarRight  -- hBarRight
@@ -137,33 +137,35 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 				define df : include : DivFrame para.advanceScaleM 3
 				include : df.markSet.e
 
-				local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
-				local divSub : (df.width - gap - df.mvs) / Width
+				local sw : Math.min df.mvs : AdviceStroke2 2 3 XH : 0.75 * df.adws
+				local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * sw) - [HSwToV : 0.25 * sw]
+				local divSub : (df.width - gap - sw) / Width
 				local subDf : DivFrame divSub 2
 
 				local shift : Width * (df.adws - divSub)
 				include : with-transform [ApparentTranslate shift 0]
-					body subDf hookStyle df.mvs
+					body subDf hookStyle sw
 
 				include : difference
-					Iotified.full df XH [mix df.leftSB df.rightSB (3 / 4)] (XH / 2)
+					Iotified.full df XH [mix df.leftSB df.rightSB (3 / 4)] (XH / 2) (swRef -- sw) (swSerif -- subDf.mvs)
 					with-transform [ApparentTranslate shift 0]
-						DoubleStorey.GetMask body df df.mvs
+						DoubleStorey.GetMask body df sw
 
 		foreach { suffix { body bar } } [Object.entries SingleStoreyConfig] : do
 			create-glyph "cyrl/aIotified.\(suffix)" : glyph-proc
 				define df : include : DivFrame para.advanceScaleM 3
 				include : df.markSet.e
 
-				local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
-				local divSub : (df.width - gap - df.mvs) / Width
+				local sw : Math.min df.mvs : AdviceStroke 2 : 0.75 * df.adws
+				local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * sw) - [HSwToV : 0.25 * sw]
+				local divSub : (df.width - gap - sw) / Width
 				local subDf : DivFrame divSub 2
 
 				local shift : Width * (df.adws - divSub)
 				include : with-transform [ApparentTranslate shift 0]
-					body subDf XH bar df.mvs
+					body subDf XH bar sw
 
-				include : Iotified.full df XH (shift + subDf.leftSB + [HSwToV : 0.5 * df.mvs]) (XH / 2)
+				include : Iotified.full df XH (shift + subDf.leftSB + [HSwToV : 0.5 * sw]) (XH / 2) (swRef -- sw) (swSerif -- subDf.mvs)
 
 	do "iotified e"
 		glyph-block-import Letter-Latin-Lower-E : SmallEConfig
@@ -173,19 +175,20 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 				define df : include : DivFrame para.advanceScaleM 3
 				include : df.markSet.e
 
-				local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * df.mvs) - [HSwToV : 0.25 * df.mvs]
-				local divSub : (df.width - gap - df.mvs) / Width
+				local sw : Math.min df.mvs : AdviceStroke2 2 3 XH : 0.75 * df.adws
+				local gap : 0.375 * (df.width - 2 * df.leftSB - 2.5 * sw) - [HSwToV : 0.25 * sw]
+				local divSub : (df.width - gap - sw) / Width
 				local subDf : DivFrame divSub 2
 
 				local shift : Width * (df.adws - divSub)
 				include : with-transform [ApparentTranslate shift 0]
 					body subDf XH
-						stroke -- df.mvs
+						stroke -- sw
 						hook   -- AHook
-						ada    -- (SmallArchDepthA * 0.7 * df.adws)
-						adb    -- (SmallArchDepthB * 0.7 * df.adws)
+						ada    -- (SmallArchDepthA * 0.75 * df.adws)
+						adb    -- (SmallArchDepthB * 0.75 * df.adws)
 
-				include : Iotified.full df XH (shift + subDf.leftSB + [HSwToV : 0.5 * df.mvs]) (XH / 2)
+				include : Iotified.full df XH (shift + subDf.leftSB + [HSwToV : 0.5 * sw]) (XH / 2) (swRef -- sw)
 
 	select-variant 'cyrl/AIotified' 0xA656 (follow -- 'A')
 	select-variant 'cyrl/aIotified' 0xA657 (follow -- 'cyrl/a')
