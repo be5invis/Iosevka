@@ -18,18 +18,17 @@ glyph-block Letter-Cyrillic-Yat : begin
 
 	define [YatShape] : with-params [df Yeri top [pBar YeriBarPos] [fCapital false] [stroke [Math.min df.mvs : AdviceStroke 2.75 df.adws]] [yCrossbarPos [yYatDefaultCrossbarPos top pBar stroke]] [xCrossbarLeftExt nothing]] : glyph-proc
 		local xYeriLeft : Math.max (df.rightSB - (RightSB - SB)) : if SLAB
-			Just ([mix df.leftSB df.rightSB 0.35] - [HSwToV : 0.5 * stroke])
-			Just  [mix df.leftSB df.rightSB 0.20]
-		local xYeriRight : df.rightSB - O * 2
+			[mix df.leftSB df.rightSB 0.35] - [HSwToV : 0.50 * stroke]
+			[mix df.leftSB df.rightSB 0.20] - [HSwToV : 0.25 * stroke]
 
 		include : Yeri top
 			left   -- xYeriLeft
-			right  -- xYeriRight
+			right  -- df.rightSB
 			pBar   -- pBar
 			stroke -- stroke
 			jut    -- (Jut - [HSwToV : 0.5 * (Stroke - stroke)])
 
-		local xCrossbarLeftSym : mix 0 df.leftSB : if SLAB 0.25 0.375
+		local xCrossbarLeftSym : mix 0 df.leftSB : if SLAB 0.250 0.375
 		local xCrossbarLeft : fallback xCrossbarLeftExt xCrossbarLeftSym
 		local xCrossbarRight : mix xCrossbarLeftSym (xYeriLeft + [HSwToV : 0.5 * stroke]) 2
 		include : HBar.t xCrossbarLeft xCrossbarRight yCrossbarPos (OverlayStroke * (stroke / Stroke))
@@ -44,14 +43,13 @@ glyph-block Letter-Cyrillic-Yat : begin
 				eject-contour 'serifYeriLT'
 				include : tagged 'serifLT' : HSerif.lt xYeriLeft top SideJut stroke
 
-	define [IotifiedYatShape] : with-params [df Yeri top [pBar YeriBarPos] [fCapital false] [stroke [Math.min df.mvs : AdviceStroke 2.75 : df.adws * (7 / 9)]] [yCrossbarPos [yYatDefaultCrossbarPos top pBar stroke]]] : glyph-proc
-		local gap : 0.25 * (df.width - 2 * df.leftSB - [if SLAB 2.5 4.5] * stroke)
-		define divSub : Math.min (7 / 6) ((df.width - gap - stroke) / Width)
-		define dfSub : DivFrame divSub 2
+	define [IotifiedYatShape] : with-params [df Yeri top [pBar YeriBarPos] [fCapital false] [stroke [Math.min df.mvs : AdviceStroke 2.75 (df.adws * (7 / 9))]] [yCrossbarPos [yYatDefaultCrossbarPos top pBar stroke]]] : glyph-proc
+		local gap : 0.25 * (df.rightSB - df.leftSB) + [if SLAB 0.375 0.125] * stroke
+		local subDf : DivFrame [Math.min ((df.width - gap) / Width) (df.adws * (7 / 9))] 2
 
-		local shift : Width * (df.adws - divSub)
+		local shift : df.width - subDf.width
 		include : with-transform [ApparentTranslate shift 0] : new-glyph : glyph-proc
-			include : YatShape dfSub Yeri top
+			include : YatShape subDf Yeri top
 				pBar          -- pBar
 				fCapital      -- fCapital
 				stroke        -- stroke
