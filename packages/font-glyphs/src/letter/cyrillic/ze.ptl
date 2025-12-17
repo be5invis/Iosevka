@@ -251,7 +251,7 @@ glyph-block Letter-Cyrillic-Ze : begin
 		create-glyph "cyrl/ze.BGR.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			local ze : CyrZe slabTop slabBot XH Descender
-				hook -- Hook
+				hook -- SHook
 				ada  -- SmallArchDepthA
 				adb  -- SmallArchDepthB
 			include : union [ze.Shape] [ze.AutoStartSerifL] [ze.AutoEndSerifL]
@@ -400,6 +400,80 @@ glyph-block Letter-Cyrillic-Ze : begin
 				ada  -- SmallArchDepthA
 				adb  -- SmallArchDepthB
 			include : union [ze.KsiBaseShape] [ze.AutoStartSerifL]
+
+	select-variant 'cyrl/Ze' 0x417
+	select-variant 'cyrl/ze' 0x437
+	select-variant 'cyrl/ze.BGR' (follow -- 'cyrl/ze')
+
+	select-variant 'cyrl/Dhe' 0x498 (follow -- 'cyrl/Ze')
+	select-variant 'cyrl/dhe' 0x499 (follow -- 'cyrl/ze')
+
+	select-variant 'latn/Epsilon' 0x190
+	select-variant 'latn/epsilon' 0x25B
+	alias 'grek/epsilon' 0x3B5 'latn/epsilon.serifless'
+
+	CreateTurnedLetter 'turnepsilon' 0x1D08 'latn/epsilon' HalfAdvance (XH / 2)
+
+	alias 'cyrl/ZeRev' 0x510 'latn/Epsilon'
+	alias 'cyrl/zeRev' 0x511 'latn/epsilon'
+
+	alias 'latn/revEpsilon' 0xA7AB 'cyrl/Ze'
+	alias 'latn/revepsilon' 0x25C  'cyrl/ze'
+	select-variant 'latn/revepsilonRhoticHook' 0x25D (shapeFrom -- 'cyrl/zeRhoticHook') (follow -- 'cyrl/ze')
+
+	select-variant 'cyrl/ZjeKomi'  0x504 (follow -- 'cyrl/ZeTopSerifOnly')
+	select-variant 'cyrl/zjeKomi'  0x505 (follow -- 'cyrl/zeTopSerifOnly')
+	select-variant 'cyrl/DzjeKomi' 0x506 (follow -- 'cyrl/ZeTopSerifOnly')
+	select-variant 'cyrl/dzjeKomi' 0x507 (follow -- 'cyrl/zeTopSerifOnly')
+
+	select-variant 'cyrl/Ksi/base' (follow -- 'cyrl/ZeTopSerifOnly')
+	select-variant 'cyrl/ksi/base' (follow -- 'cyrl/zeTopSerifOnly')
+
+	derive-multi-part-glyphs 'cyrl/Dhe.BSH' null { 'cyrl/Ze' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
+		local { base mark } srcs
+		include : refer-glyph mark
+		include : Translate Width AccentClearance
+		include [refer-glyph base] AS_BASE ALSO_METRICS
+		include : ExtendBelowBaseAnchors (-AccentHeight)
+
+	derive-multi-part-glyphs 'cyrl/dhe.BSH' null { 'cyrl/ze' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
+		local { base mark } srcs
+		include : refer-glyph mark
+		include : Translate Width AccentClearance
+		include [refer-glyph base] AS_BASE ALSO_METRICS
+		include : ExtendBelowBaseAnchors (-AccentHeight)
+
+	select-variant 'latn/epsilon/descBase' (shapeFrom -- 'latn/epsilon')
+	derive-composites 'latn/epsilonRetroflexHook' 0x1D93 'latn/epsilon/descBase'
+		RetroflexHook.r RightSB 0 (refSw -- [AdviceStroke2 2 3 XH])
+
+	select-variant 'latn/revepsilon/descBase' (shapeFrom -- 'cyrl/ze') (follow -- 'cyrl/ze/descBase')
+	derive-composites 'latn/revepsilonRetroflexHook' 0x1D94 'latn/revepsilon/descBase'
+		RetroflexHook.l SB 0 (refSw -- [AdviceStroke2 2 3 XH])
+
+	create-glyph 'voicedLaryngealSpirant' 0x1D24 : glyph-proc
+		include : MarkSet.b
+		local blend 0.505
+		local midGap : Math.max [AdviceStroke2 3 12 Ascender] (Ascender / 8 - [AdviceStroke2 3 6 XH])
+		local strokeV : AdviceStroke 4
+		local ze : CyrZe SLAB-NONE SLAB-NONE Ascender midGap
+			blend -- blend
+			hook  -- Hook
+			ada   -- ArchDepthA
+			adb   -- ArchDepthB
+		local dimUpper : ze.Dim
+
+		local epsilon : SmallEpsilon SLAB-NONE SLAB-NONE (Ascender - midGap) 0
+			blend -- blend
+			hook  -- Hook
+			ada   -- ArchDepthA
+			adb   -- ArchDepthB
+		local dimLower : epsilon.Dim
+		include : union [epsilon.LowerShape] [ze.UpperShape] : Rect
+			dimUpper.midy + dimUpper.stroke / 2
+			dimLower.midy - dimLower.stroke / 2
+			Middle - [HSwToV : 0.5 * strokeV]
+			Middle + [HSwToV : 0.5 * strokeV]
 
 	do "Closed Epsilon Shapes"
 		create-glyph 'latn/epsilonClosed' 0x29A : glyph-proc
@@ -609,74 +683,3 @@ glyph-block Letter-Cyrillic-Ze : begin
 
 		select-variant 'UeVolapuk' 0xA79E (follow -- 'u')
 		select-variant 'ueVolapuk' 0xA79F (follow -- 'u')
-
-	select-variant 'cyrl/Ze' 0x417
-	select-variant 'cyrl/ze' 0x437
-	select-variant 'cyrl/ze.BGR' (follow -- 'cyrl/ze')
-
-	select-variant 'cyrl/Dhe' 0x498 (follow -- 'cyrl/Ze')
-	select-variant 'cyrl/dhe' 0x499 (follow -- 'cyrl/ze')
-
-	select-variant 'latn/Epsilon' 0x190
-	select-variant 'latn/epsilon' 0x25B
-	alias 'grek/epsilon' 0x3B5 'latn/epsilon.serifless'
-
-	CreateTurnedLetter 'turnepsilon' 0x1D08 'latn/epsilon' HalfAdvance (XH / 2)
-
-	alias 'cyrl/ZeRev' 0x510 'latn/Epsilon'
-	alias 'cyrl/zeRev' 0x511 'latn/epsilon'
-
-	alias 'latn/revEpsilon' 0xA7AB 'cyrl/Ze'
-	alias 'latn/revepsilon' 0x25C  'cyrl/ze'
-	select-variant 'latn/revepsilonRhoticHook' 0x25D (shapeFrom -- 'cyrl/zeRhoticHook') (follow -- 'cyrl/ze')
-
-	select-variant 'cyrl/ZjeKomi'  0x504 (follow -- 'cyrl/ZeTopSerifOnly')
-	select-variant 'cyrl/zjeKomi'  0x505 (follow -- 'cyrl/zeTopSerifOnly')
-	select-variant 'cyrl/DzjeKomi' 0x506 (follow -- 'cyrl/ZeTopSerifOnly')
-	select-variant 'cyrl/dzjeKomi' 0x507 (follow -- 'cyrl/zeTopSerifOnly')
-
-	select-variant 'cyrl/Ksi/base' (follow -- 'cyrl/ZeTopSerifOnly')
-	select-variant 'cyrl/ksi/base' (follow -- 'cyrl/zeTopSerifOnly')
-
-	derive-multi-part-glyphs 'cyrl/Dhe.BSH' null { 'cyrl/Ze' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
-		local { base mark } srcs
-		include : refer-glyph mark
-		include : Translate Width AccentClearance
-		include [refer-glyph base] AS_BASE ALSO_METRICS
-		include : ExtendBelowBaseAnchors (-AccentHeight)
-
-	derive-multi-part-glyphs 'cyrl/dhe.BSH' null { 'cyrl/ze' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
-		local { base mark } srcs
-		include : refer-glyph mark
-		include : Translate Width AccentClearance
-		include [refer-glyph base] AS_BASE ALSO_METRICS
-		include : ExtendBelowBaseAnchors (-AccentHeight)
-
-	select-variant 'latn/epsilon/descBase' (shapeFrom -- 'latn/epsilon')
-	derive-composites 'latn/epsilonRetroflexHook' 0x1D93 'latn/epsilon/descBase'
-		RetroflexHook.r RightSB 0 (refSw -- [AdviceStroke2 2 3 XH])
-
-	select-variant 'latn/revepsilon/descBase' (shapeFrom -- 'cyrl/ze') (follow -- 'cyrl/ze/descBase')
-	derive-composites 'latn/revepsilonRetroflexHook' 0x1D94 'latn/revepsilon/descBase'
-		RetroflexHook.l SB 0 (refSw -- [AdviceStroke2 2 3 XH])
-
-	create-glyph 'voicedLaryngealSpirant' 0x1D24 : glyph-proc
-		include : MarkSet.b
-		local blend 0.505
-		local midGap : Math.max [AdviceStroke2 3 12 Ascender] (Ascender / 8 - [AdviceStroke2 3 6 XH])
-		local strokeV : AdviceStroke 4
-		local ze : CyrZe SLAB-NONE SLAB-NONE Ascender midGap
-			blend -- blend
-			hook  -- Hook
-			ada   -- ArchDepthA
-			adb   -- ArchDepthB
-		local dimUpper : ze.Dim
-
-		local epsilon : SmallEpsilon SLAB-NONE SLAB-NONE (Ascender - midGap) 0
-			blend -- blend
-			hook  -- Hook
-			ada   -- ArchDepthA
-			adb   -- ArchDepthB
-		local dimLower : epsilon.Dim
-		include : union [epsilon.LowerShape] [ze.UpperShape]
-			Rect (dimUpper.midy + dimUpper.stroke / 2) (dimLower.midy - dimLower.stroke / 2) (Middle - [HSwToV : 0.5 * strokeV]) (Middle + [HSwToV : 0.5 * strokeV])

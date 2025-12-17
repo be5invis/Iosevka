@@ -13,17 +13,16 @@ glyph-block Letter-Latin-Upper-F : begin
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
 
 	glyph-block-export xMidBarShrink
-	define [xMidBarShrink serifV] : [Math.max HalfStroke : (RightSB - SB) * 0.15] + [if serifV QuarterStroke 0]
+	define [xMidBarShrink serifRT] : [Math.max (0.15 * (RightSB - SB)) HalfStroke] + [if serifRT QuarterStroke 0]
 
 	glyph-block-export yMidBar
 	define [yMidBar top _pyBar] : mix 0 top : fallback _pyBar DesignParameters.upperEBarPos
 
 	glyph-block-export EFVJutLength
 	define [EFVJutLength top _pyBar _stroke] : begin
-		local pyBar  : fallback _pyBar  DesignParameters.upperEBarPos
 		local stroke : fallback _stroke Stroke
-		local jutTop : Math.min VJut : top - [mix (top - stroke) ([yMidBar top pyBar] + stroke / 2) 0.5]
-		local jutBot : Math.min VJut : 0   + [mix (0   + stroke) ([yMidBar top pyBar] - stroke / 2) 0.5]
+		local jutTop : Math.min VJut : top - [mix (top - stroke) ([yMidBar top _pyBar] + stroke / 2) 0.5]
+		local jutBot : Math.min VJut : 0   + [mix (0   + stroke) ([yMidBar top _pyBar] - stroke / 2) 0.5]
 		local jutMid : mix (stroke / 2) ([Math.min jutBot jutTop] - stroke / 2) 0.5
 		return { jutTop jutBot jutMid }
 
@@ -31,8 +30,8 @@ glyph-block Letter-Latin-Upper-F : begin
 	define xFBarLeft     : [mix 0     SB      kSB] - 0
 	define xRevFBarRight : [mix Width RightSB kSB] + 0
 
-	define [FShape] : with-params [top pyBar serifLT serifLB serifV serifM [stroke [AdviceStroke2 2 3 top]]] : glyph-proc
-		local xMidRight : RightSB - [xMidBarShrink serifV]
+	define [FShape] : with-params [top pyBar serifLT serifLB serifRT serifRM [stroke [AdviceStroke2 2 3 top]]] : glyph-proc
+		local xMidRight : RightSB - [xMidBarShrink serifRT]
 		local yBar : yMidBar top pyBar
 		local { jutTop jutBot jutMid } : EFVJutLength top pyBar stroke
 		local swVJut : VJutStroke * (stroke / Stroke)
@@ -42,11 +41,11 @@ glyph-block Letter-Latin-Upper-F : begin
 		include : tagged 'crossBar' : HBar.m (xFBarLeft - O) xMidRight yBar stroke
 
 		if serifLT : include : HSerif.lt xFBarLeft top SideJut stroke
-		if serifLB : include : tagged 'serifBottom' : union
+		if serifLB : include : tagged 'serifLB' : union
 			HSerif.lb (xFBarLeft + [HSwToV : 0.5 * stroke]) 0 (Jut        - [HSwToV : 0.5 * (Stroke - stroke)]) stroke
 			HSerif.rb (xFBarLeft + [HSwToV : 0.5 * stroke]) 0 (MidJutSide - [HSwToV : 0.5 * (Stroke - stroke)]) stroke
-		if serifV : include : VSerif.dr RightSB top jutTop swVJut
-		if serifM : begin
+		if serifRT : include : VSerif.dr RightSB top jutTop swVJut
+		if serifRM : begin
 			local fine : Math.min swVJut : VSwToH : 0.8 * (xMidRight - (xFBarLeft + [HSwToV stroke]))
 			include : VBar.r xMidRight (yBar - jutMid) (yBar + jutMid) fine
 
@@ -56,13 +55,13 @@ glyph-block Letter-Latin-Upper-F : begin
 		serifed        { true  true  true  false }
 		serifedCapped  { true  true  true  true  }
 
-	foreach { suffix { lt lb v m } } [Object.entries FConfig] : do
+	foreach { suffix { lt lb rt rm } } [Object.entries FConfig] : do
 		create-glyph "F.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : LeaningAnchor.Below.VBar.l xFBarLeft [AdviceStroke2 2 3 CAP]
-			include : FShape CAP (serifLT -- lt) (serifLB -- lb) (serifV -- v) (serifM -- m)
+			include : FShape CAP (serifLT -- lt) (serifLB -- lb) (serifRT -- rt) (serifRM -- rm)
 
-		if [not m] : create-glyph "currency/frenchFrancSign.\(suffix)" : glyph-proc
+		if [not rm] : create-glyph "currency/frenchFrancSign.\(suffix)" : glyph-proc
 			include [refer-glyph "F.\(suffix)"] AS_BASE ALSO_METRICS
 
 			eject-contour 'crossBar'
@@ -83,12 +82,12 @@ glyph-block Letter-Latin-Upper-F : begin
 				x     -- xFBarLeft
 				bot   -- ([yMidBar CAP] + HalfStroke)
 				top   -- (CAP - Stroke)
-				space -- { 0 (RightSB - [if v [HSwToV VJutStroke] 0]) }
+				space -- { 0 (RightSB - [if rt [HSwToV VJutStroke] 0]) }
 
 		create-glyph "smcpF.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : LeaningAnchor.Below.VBar.l xFBarLeft [AdviceStroke2 2 3 XH]
-			include : FShape XH (serifLT -- lt) (serifLB -- lb) (serifV -- v) (serifM -- m)
+			include : FShape XH (serifLT -- lt) (serifLB -- lb) (serifRT -- rt) (serifRM -- rm)
 
 	select-variant 'F' 'F'
 	link-reduced-variant 'F/sansSerif' 'F' MathSansSerif
@@ -104,7 +103,7 @@ glyph-block Letter-Latin-Upper-F : begin
 
 	derive-glyphs 'FLTail' 0x191 'F' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		eject-contour 'serifBottom'
+		eject-contour 'serifLB'
 		include : PalatalHook.lExt xFBarLeft 0
 
 	glyph-block-import Letter-Blackboard : BBS BBD
