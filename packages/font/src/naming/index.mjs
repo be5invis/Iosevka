@@ -177,6 +177,7 @@ function applyMiscProps(font) {
 		[Ot.Head.Flags.ForcePpemToBeInteger, true],
 		[Ot.Head.Flags.InstructionMayAlterAdvanceWidth, true],
 	);
+	font.maxp.maxZones = 2; // Make OTS happy
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
