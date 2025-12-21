@@ -23,10 +23,10 @@ glyph-block Letter-Latin-Lower-M : begin
 			arcvh 8
 			g2     [mix (right - [HSwToV stroke]) (left + [HSwToV fine]) 0.5] ((top - O) - stroke)
 			archv 8
-			flat   (left + [HSwToV fine]) [Math.max (top - ada - fix) ([if (leftY0 != nothing) leftY0 bottom] + TINY)]
-			corner (left + [HSwToV fine]) [if (leftY0 != nothing) leftY0 [Math.max ((top - ada - fix) - TINY) bottom]]
-			corner left                   [if (leftY0 != nothing) leftY0 [Math.max ((top - ada)       - TINY) bottom]]
-			curl   left                   [Math.max (top - ada)       ([if (leftY0 != nothing) leftY0 bottom] + TINY)]
+			flat   (left + [HSwToV fine]) [Math.max ([fallback leftY0            bottom] + TINY) (top - ada - fix)]
+			corner (left + [HSwToV fine])            [fallback leftY0 : Math.max bottom        : (top - ada - fix) - TINY]
+			corner  left                             [fallback leftY0 : Math.max bottom        : (top - ada)       - TINY]
+			curl    left                  [Math.max ([fallback leftY0            bottom] + TINY) (top - ada)]
 			arcvh 8
 			g2     [mix left right 0.5] (top - O)
 			archv 8
@@ -42,10 +42,10 @@ glyph-block Letter-Latin-Lower-M : begin
 			arcvh 8
 			g2     [mix (left + [HSwToV stroke]) (right - [HSwToV fine]) 0.5] ((top - O) - stroke)
 			archv 8
-			flat   (right - [HSwToV fine]) [Math.max (top - adb + fix) ([if (rightY0 != nothing) rightY0 bottom] + TINY)]
-			corner (right - [HSwToV fine]) [if (rightY0 != nothing) rightY0 [Math.max ((top - adb + fix) - TINY) bottom]]
-			corner right                   [if (rightY0 != nothing) rightY0 [Math.max ((top - adb)       - TINY) bottom]]
-			curl   right                   [Math.max (top - adb)       ([if (rightY0 != nothing) rightY0 bottom] + TINY)]
+			flat   (right - [HSwToV fine]) [Math.max ([fallback rightY0            bottom] + TINY) (top - adb + fix)]
+			corner (right - [HSwToV fine])            [fallback rightY0 : Math.max bottom        : (top - adb + fix) - TINY]
+			corner  right                             [fallback rightY0 : Math.max bottom        : (top - adb)       - TINY]
+			curl    right                  [Math.max ([fallback rightY0            bottom] + TINY) (top - adb)]
 			arcvh 8
 			g2     [mix right left 0.5] (top - O)
 			archv 8
@@ -121,20 +121,20 @@ glyph-block Letter-Latin-Lower-M : begin
 		local fFull : MEnoughSpaceForFullSerifs df : fallback _mid df.middle
 		include : SmallMBottomMotionRightSerif df top rbot fFull
 
-	define [SmallMShortLegHeight top df] : (top - df.mvs) * 0.45
-	define [SmallMSmoothHeight top df] : top - [SmallMSmoothB df] - [HSwToV : Math.abs : TanSlope * df.mvs] - TINY
-
 	glyph-block-export SmallMArches
-	define [SmallMArches df top lbot mbot rbot _mid] : glyph-proc
+	define [SmallMArches df top lbot mbot rbot _mid _ada _adb] : glyph-proc
 		local mid : fallback _mid df.middle
+		local ada : fallback _ada : SmallMSmoothA df
+		local adb : fallback _adb : SmallMSmoothB df
+		include : tagged 'barL' : VBar.l df.leftSB lbot top df.mvs
 		include : SmallMShoulderSpiro
 			left      -- (df.leftSB + [HSwToV : df.mvs - df.shoulderFine])
 			right     -- (mid + [HSwToV : 0.5 * df.mvs])
 			fine      -- df.shoulderFine
 			top       -- top
 			bottom    -- mbot
-			ada       -- [SmallMSmoothA df]
-			adb       -- [SmallMSmoothB df]
+			ada       -- ada
+			adb       -- adb
 			stroke    -- df.mvs
 		include : SmallMShoulderSpiro
 			left      -- (mid + [HSwToV : 0.5 * df.mvs - df.shoulderFine])
@@ -142,26 +142,25 @@ glyph-block Letter-Latin-Lower-M : begin
 			fine      -- df.shoulderFine
 			top       -- top
 			bottom    -- rbot
-			ada       -- [SmallMSmoothA df]
-			adb       -- [SmallMSmoothB df]
+			ada       -- ada
+			adb       -- adb
 			stroke    -- df.mvs
-			leftY0    -- ([SmallMSmoothHeight top df] + O)
-		include : tagged 'barL' : VBar.l df.leftSB lbot top df.mvs
+			leftY0    -- mbot
 
 	glyph-block-export EarlessCornerDoubleArchSmallMShape
-	define [EarlessCornerDoubleArchSmallMShape df top lbot mbot rbot _mid] : glyph-proc
+	define [EarlessCornerDoubleArchSmallMShape df top lbot mbot rbot _mid _ada _adb] : glyph-proc
 		local mid : fallback _mid df.middle
-
+		local ada : fallback _ada : SmallMSmoothA df
+		local adb : fallback _adb : SmallMSmoothB df
 		define [leftKnots sink offset] : begin
 			local xMidBarRightSide : mid + [HSwToV : 0.5 * df.mvs]
 			return : sink
 				widths.rhs df.mvs
 				[if (sink == dispiro) g2 corner] (df.leftSB - offset) (top - DToothlessRise)
 				arch.rhs top (sw -- df.mvs) (blendPre -- {})
-				flat (xMidBarRightSide - offset) [Math.max (top - [SmallMSmoothB df]) (mbot + TINY)] [heading Downward]
+				flat (xMidBarRightSide - offset) [Math.max (top - adb) (mbot + TINY)] [heading Downward]
 				[if (sink == dispiro) curl corner] (xMidBarRightSide - offset) mbot [heading Downward]
 				if (sink == spiro-outline) { [corner (df.leftSB - offset) 0 ] } { }
-
 		define [rightKnots sink] : begin
 			local xMidBarLeftSide : mid - [HSwToV : 0.5 * df.mvs]
 			return : sink
@@ -169,18 +168,18 @@ glyph-block Letter-Latin-Lower-M : begin
 				g2 [mix df.rightSB xMidBarLeftSide 1.5] (top - 2 * DToothlessRise)
 				g2 xMidBarLeftSide (top - DToothlessRise)
 				arch.rhs top (sw -- df.mvs) (blendPre -- {})
-				flat df.rightSB [Math.max (top - [SmallMSmoothB df]) (rbot + TINY)] [heading Downward]
+				flat df.rightSB [Math.max (top - adb) (rbot + TINY)] [heading Downward]
 				curl df.rightSB rbot [heading Downward]
-
+		include : tagged 'barL' : VBar.l df.leftSB lbot (top - DToothlessRise) df.mvs
+		# include : tagged 'barM' : VBar.m mid mbot (top - DToothlessRise) df.mvs
 		include : leftKnots dispiro 0
 		include : difference [rightKnots dispiro] [leftKnots spiro-outline 0.1]
 
-		include : tagged 'barL' : VBar.l df.leftSB lbot (top - DToothlessRise) df.mvs
-		# include : tagged 'barM' : VBar.m mid mbot (top - DToothlessRise) df.mvs
-
 	glyph-block-export EarlessRoundedDoubleArchSmallMShape
-	define [EarlessRoundedDoubleArchSmallMShape df top lbot mbot rbot _mid] : glyph-proc
+	define [EarlessRoundedDoubleArchSmallMShape df top lbot mbot rbot _mid _ada _adb] : glyph-proc
 		local mid : fallback _mid df.middle
+		local ada : fallback _ada : SmallMSmoothA df
+		local adb : fallback _adb : SmallMSmoothB df
 		include : union
 			RevSmallMShoulderSpiro
 				left      -- df.leftSB
@@ -188,8 +187,8 @@ glyph-block Letter-Latin-Lower-M : begin
 				fine      -- (df.mvs * CThin)
 				top       -- top
 				bottom    -- lbot
-				ada       -- [SmallMSmoothA df]
-				adb       -- [SmallMSmoothB df]
+				ada       -- ada
+				adb       -- adb
 				stroke    -- df.mvs
 				rightY0   -- mbot
 			SmallMShoulderSpiro
@@ -198,21 +197,26 @@ glyph-block Letter-Latin-Lower-M : begin
 				fine      -- (df.mvs * CThin)
 				top       -- top
 				bottom    -- rbot
-				ada       -- [SmallMSmoothA df]
-				adb       -- [SmallMSmoothB df]
+				ada       -- ada
+				adb       -- adb
 				stroke    -- df.mvs
 				leftY0    -- mbot
 
-	define [EarlessSingleArchSmallMShape df top lbot mbot rbot _mid] : glyph-proc
+	define [EarlessSingleArchSmallMShape df top lbot mbot rbot _mid _ada _adb] : glyph-proc
 		local mid : fallback _mid df.middle
+		local ada : fallback _ada : SmallMSmoothA df
+		local adb : fallback _adb : SmallMSmoothB df
 		include : tagged 'barL' : VBar.l df.leftSB lbot (top - DToothlessRise) df.mvs
 		include : tagged 'barM' : VBar.m mid mbot (top - 0.25 * df.mvs) df.mvs
 		include : dispiro
 			widths.rhs df.mvs
 			g4 df.leftSB (top - DToothlessRise)
 			arch.rhs top (sw -- df.mvs) (blendPre -- {})
-			flat df.rightSB [Math.max (top - [SmallMSmoothB df]) (rbot + TINY)]
+			flat df.rightSB [Math.max (top - adb) (rbot + TINY)]
 			curl df.rightSB rbot [heading Downward]
+
+	define [SmallMShortLegHeight top df] : mix 0 (top - df.mvs) 0.45
+	define [SmallMSmoothHeight   top df] : top - [SmallMSmoothB df] - TINY - [HSwToV : Math.abs : TanSlope * df.mvs]
 
 	glyph-block-export mShapeBodyImpl
 	define [mShapeBodyImpl df top body earless shortLeg tailed serifs] : glyph-proc
@@ -287,8 +291,8 @@ glyph-block Letter-Latin-Lower-M : begin
 						right  -- df.rightSB
 						ybegin -- (XH / 2)
 						yend   -- (XH / 2 + HalfStroke)
-						ada    -- (SmallArchDepthA * 0.5 * df.adws)
-						adb    -- (SmallArchDepthB * 0.5 * df.adws)
+						ada    -- (ArchDepthA * (2 / df.hPack) * df.adws)
+						adb    -- (ArchDepthB * (2 / df.hPack) * df.adws)
 						sw     -- subDf.mvs
 					include : Serifs subDf XH 0 0 (XH / 2) true false
 					if SLAB : begin
@@ -336,15 +340,16 @@ glyph-block Letter-Latin-Lower-M : begin
 	alias 'cyrl/te/reduced.BGR' null 'cyrl/te.italic'
 	alias 'cyrl/teThreeLeg.italic' null 'cyrl/te.italic'
 
-	derive-composites 'cyrl/teDescender.italic' null 'cyrl/te.italic/descBase' : let [df : dfM]
-		CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
+	derive-composites 'cyrl/teDescender.italic' null 'cyrl/te.italic/descBase' : let [df : dfM] : CyrDescender.rSideJut
+		x     -- df.rightSB
+		y     -- 0
+		refSw -- df.mvs
 
-	derive-composites 'mPalatalHook' 0x1D86 'm/descBase' : let [df : dfM]
-		PalatalHook.r
-			xLink -- df.rightSB
-			x     -- (df.rightSB + SideJut)
-			y     -- 0
-			refSw -- df.mvs
+	derive-composites 'mPalatalHook' 0x1D86 'm/descBase' : let [df : dfM] : PalatalHook.r
+		xLink -- df.rightSB
+		x     -- (df.rightSB + SideJut)
+		y     -- 0
+		refSw -- df.mvs
 
 	select-variant 'meng' 0x271
 	select-variant 'mCrossedTail' 0xAB3A (follow -- 'meng')
