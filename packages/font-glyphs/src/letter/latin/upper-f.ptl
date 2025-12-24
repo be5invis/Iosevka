@@ -12,18 +12,22 @@ glyph-block Letter-Latin-Upper-F : begin
 	glyph-block-import Letter-Shared : CreateTurnedLetter
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
 
-	glyph-block-export xMidBarShrink
-	define [xMidBarShrink serifRT] : [Math.max (0.15 * (RightSB - SB)) HalfStroke] + [if serifRT QuarterStroke 0]
+	glyph-block-export kEFMidBarShrink
+	define [kEFMidBarShrink serifRT] : (SB + [Math.max (0.15 * (RightSB - SB)) HalfStroke] + [if serifRT QuarterStroke 0]) / SB
 
-	glyph-block-export yMidBar
-	define [yMidBar top _pyBar] : mix 0 top : fallback _pyBar DesignParameters.upperEBarPos
+	glyph-block-export yEFMidBarPos
+	define [yEFMidBarPos top _pyBar] : mix 0 top : fallback _pyBar DesignParameters.upperEBarPos
 
 	glyph-block-export EFVJutLength
-	define [EFVJutLength top _pyBar _stroke] : begin
+	define [EFVJutLength top _pyBar _stroke _hook] : begin
+		local barPos : yEFMidBarPos top _pyBar
 		local stroke : fallback _stroke Stroke
-		local jutTop : Math.min VJut : top - [mix (top - stroke) ([yMidBar top _pyBar] + stroke / 2) 0.5]
-		local jutBot : Math.min VJut : 0   + [mix (0   + stroke) ([yMidBar top _pyBar] - stroke / 2) 0.5]
-		local jutMid : mix (stroke / 2) ([Math.min jutBot jutTop] - stroke / 2) 0.5
+		local jutTop : fallback _hook : Math.min VJut : mix stroke (top - (barPos + stroke / 2)) 0.5
+		local jutBot : fallback _hook : Math.min VJut : mix stroke (0   + (barPos - stroke / 2)) 0.5
+		# Remaining space
+		local coJutTop : (top - (barPos - stroke / 2)) - jutTop
+		local coJutBot : (0   + (barPos + stroke / 2)) - jutBot
+		local jutMid : mix (stroke / 2) ([Math.min VJut coJutTop coJutBot] - stroke / 2) 0.5
 		return { jutTop jutBot jutMid }
 
 	define kSB 1.5
@@ -31,23 +35,22 @@ glyph-block Letter-Latin-Upper-F : begin
 	define xRevFBarRight : [mix Width RightSB kSB] + 0
 
 	define [FShape] : with-params [top pyBar serifLT serifLB serifRT serifRM [stroke [AdviceStroke2 2 3 top]]] : glyph-proc
-		local xMidRight : RightSB - [xMidBarShrink serifRT]
-		local yBar : yMidBar top pyBar
-		local { jutTop jutBot jutMid } : EFVJutLength top pyBar stroke
-		local swVJut : VJutStroke * (stroke / Stroke)
+		local xMidBarRight : mix Width RightSB : kEFMidBarShrink serifRT
+		local barPos : yEFMidBarPos top pyBar
 
 		include : VBar.l xFBarLeft 0 top stroke
 		include : HBar.t (xFBarLeft - O) RightSB top stroke
-		include : tagged 'crossBar' : HBar.m (xFBarLeft - O) xMidRight yBar stroke
+		include : tagged 'crossBar' : HBar.m (xFBarLeft - O) xMidBarRight barPos stroke
 
 		if serifLT : include : HSerif.lt xFBarLeft top SideJut stroke
 		if serifLB : include : tagged 'serifLB' : union
 			HSerif.lb (xFBarLeft + [HSwToV : 0.5 * stroke]) 0 (Jut        - [HSwToV : 0.5 * (Stroke - stroke)]) stroke
 			HSerif.rb (xFBarLeft + [HSwToV : 0.5 * stroke]) 0 (MidJutSide - [HSwToV : 0.5 * (Stroke - stroke)]) stroke
-		if serifRT : include : VSerif.dr RightSB top jutTop swVJut
-		if serifRM : begin
-			local fine : Math.min swVJut : VSwToH : 0.8 * (xMidRight - (xFBarLeft + [HSwToV stroke]))
-			include : VBar.r xMidRight (yBar - jutMid) (yBar + jutMid) fine
+
+		local { jutTop jutBot jutMid } : EFVJutLength top pyBar stroke
+		local swVJut : VJutStroke * (stroke / Stroke)
+		if serifRT : include : VSerif.dr RightSB      top    jutTop swVJut
+		if serifRM : include : VSerif.mr xMidBarRight barPos jutMid swVJut
 
 	define FConfig : object
 		serifless      { false false false false }
@@ -80,7 +83,7 @@ glyph-block Letter-Latin-Upper-F : begin
 			include [refer-glyph "F.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.l.in
 				x     -- xFBarLeft
-				bot   -- ([yMidBar CAP] + HalfStroke)
+				bot   -- ([yEFMidBarPos CAP] + HalfStroke)
 				top   -- (CAP - Stroke)
 				space -- { 0 (RightSB - [if rt [HSwToV VJutStroke] 0]) }
 
