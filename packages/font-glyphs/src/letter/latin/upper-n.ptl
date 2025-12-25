@@ -29,7 +29,7 @@ glyph-block Letter-Latin-Upper-N : begin
 		local stroke : AdviceStroke crowd
 		local yEnd : match bodyType
 			[Just BODY-SYMMETRIC]    0
-			[Just BODY-ASYMMETRIC] : top * 0.375
+			[Just BODY-ASYMMETRIC] : mix 0 top 0.375
 		local swEnd : match bodyType
 			[Just BODY-SYMMETRIC]    swDiag
 			[Just BODY-ASYMMETRIC]   stroke
@@ -37,15 +37,15 @@ glyph-block Letter-Latin-Upper-N : begin
 		include : union
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
-					flat left 0 [widths.heading 0 stroke Upward]
-					curl left (top * 0.4) [heading Upward]
-					straight.up.end left top [widths.heading 0 swEnd Upward]
+					flat left 0 [widths.rhs.heading stroke Upward]
+					curl left [mix 0 top 0.4] [heading Upward]
+					straight.up.end left top [widths.rhs.heading swEnd Upward]
 				[Just BODY-ASYMMETRIC] : VBar.l left 0 top swEnd
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
-					flat right top [widths.heading 0 stroke Downward]
-					curl right (top * 0.6) [heading Downward]
-					straight.down.end right 0 [widths.heading 0 swEnd Downward]
+					flat right top [widths.rhs.heading stroke Downward]
+					curl right [mix top 0 0.4] [heading Downward]
+					straight.down.end right 0 [widths.rhs.heading swEnd Downward]
 				[Just BODY-ASYMMETRIC] : VBar.r right 0 top swEnd
 			intersection [Rect top 0 left right]
 				ExtLineCenter 2 swDiag (left + swDiag) top (right - swDiag) yEnd
@@ -59,12 +59,12 @@ glyph-block Letter-Latin-Upper-N : begin
 
 		return : object swEnd
 
-	define [NRevShape] : with-params [bodyType slabType top left right [crowd 2] [crDiag 4]] : glyph-proc
+	define [RevNShape] : with-params [bodyType slabType top left right [crowd 2] [crDiag 4]] : glyph-proc
 		local swDiag : AdviceStroke crDiag
 		local stroke : AdviceStroke crowd
 		local yEnd : match bodyType
 			[Just BODY-SYMMETRIC]    0
-			[Just BODY-ASYMMETRIC] : top * 0.375
+			[Just BODY-ASYMMETRIC] : mix 0 top 0.375
 			[Just BODY-COMPRESSED] : if SLAB (swDiag * 1.5) 0
 		local yStart : match bodyType
 			[Just BODY-COMPRESSED] : top - yEnd
@@ -77,13 +77,13 @@ glyph-block Letter-Latin-Upper-N : begin
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
 					flat left top [widths.lhs.heading stroke Downward]
-					curl left (top * 0.6) [heading Downward]
+					curl left [mix top 0 0.4] [heading Downward]
 					straight.down.end left 0 [widths.lhs.heading swEnd Downward]
 				__                    : VBar.l left 0 top swEnd
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
 					flat right 0 [widths.lhs.heading stroke Upward]
-					curl right (top * 0.4) [heading Upward]
+					curl right [mix 0 top 0.4] [heading Upward]
 					straight.up.end right top [widths.lhs.heading swEnd Upward]
 				__                    : VBar.r right 0 top swEnd
 			intersection [Rect top 0 left right]
@@ -114,14 +114,14 @@ glyph-block Letter-Latin-Upper-N : begin
 			include : NShape bodyType slabType CAP SB RightSB (crDiag -- crD)
 			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
-		create-glyph "NRev.\(suffix)" : glyph-proc
+		create-glyph "revN.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : NRevShape bodyType slabType CAP SB RightSB (crDiag -- crD)
+			include : RevNShape bodyType slabType CAP SB RightSB (crDiag -- crD)
 
 		create-glyph "Eng.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
 			local [object swEnd] : include : NShape bodyType slabType CAP SB RightSB (crDiag -- crD)
-			include : EngHook RightSB 0 Descender (sw -- [Math.min Stroke (swEnd * 4/3)])
+			include : EngHook RightSB 0 Descender (sw -- [Math.min Stroke : swEnd * (4/3)])
 
 		create-glyph "NHookLeft.\(suffix)" : glyph-proc
 			include [refer-glyph "N.\(suffix)"] AS_BASE ALSO_METRICS
@@ -133,16 +133,16 @@ glyph-block Letter-Latin-Upper-N : begin
 			include : NShape bodyType slabType XH SB RightSB (crDiag -- crD)
 			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
-		create-glyph "smcpNRev.\(suffix)" : glyph-proc
+		create-glyph "revSmcpN.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : NRevShape bodyType slabType XH SB RightSB (crDiag -- crD)
+			include : RevNShape bodyType slabType XH SB RightSB (crDiag -- crD)
 
 		create-glyph "currency/nairaSignBase.\(suffix)" : glyph-proc
-			include : NShape bodyType slabType CAP (SB * 1.25) (Width - SB * 1.25) (crowd -- 3.5) (crDiag -- 4)
+			include : NShape bodyType slabType CAP [mix 0 SB 1.25] [mix Width RightSB 1.25] (crowd -- 3.5) (crDiag -- 4)
 
 	select-variant 'N' 'N'
 	link-reduced-variant 'N/sansSerif' 'N' MathSansSerif
-	select-variant 'NRev' (follow -- 'N')
+	select-variant 'revN' (follow -- 'N')
 
 	alias 'grek/Nu' 0x39D 'N'
 	alias-reduced-variant 'grek/Nu/sansSerif' 'grek/Nu' 'N/sansSerif' MathSansSerif
@@ -156,13 +156,13 @@ glyph-block Letter-Latin-Upper-N : begin
 	select-variant 'NHookLeft' 0x19D (follow -- 'N')
 
 	select-variant 'smcpN'    0x274  (follow -- 'N')
-	select-variant 'smcpNRev' 0x1D0E (follow -- 'N')
+	select-variant 'revSmcpN' 0x1D0E (follow -- 'N')
 
 	select-variant 'currency/nairaSignBase' (follow -- 'N')
 
 	create-glyph 'cyrl/I' 0x418 : glyph-proc
 		include : MarkSet.capital
-		include : NRevShape BODY-CYRL-I SLAB-CYRL-I CAP SB RightSB (crDiag -- 4)
+		include : RevNShape BODY-CYRL-I SLAB-CYRL-I CAP SB RightSB (crDiag -- 4)
 	derive-composites 'cyrl/ITail' null 'cyrl/I' [CyrTailDescender.rSideJut RightSB 0]
 
 	CreateAccentedComposition 'cyrl/IBreve' 0x419 'cyrl/I' 'breveAbove'
@@ -172,34 +172,32 @@ glyph-block Letter-Latin-Upper-N : begin
 
 	create-glyph 'cyrl/I.BGR' : glyph-proc
 		include : MarkSet.capital
-		include : NRevShape BODY-SYMMETRIC SLAB-CYRL-I CAP SB RightSB (crDiag -- 4)
+		include : RevNShape BODY-SYMMETRIC SLAB-CYRL-I CAP SB RightSB (crDiag -- 4)
 
 	CreateAccentedComposition 'cyrl/IBreve.BGR' null 'cyrl/I.BGR' 'breveAbove'
 	CreateAccentedComposition 'cyrl/IGrave.BGR' null 'cyrl/I.BGR' 'graveAbove'
 
 	create-glyph 'cyrl/i.upright' : glyph-proc
 		include : MarkSet.e
-		include : NRevShape BODY-CYRL-I SLAB-CYRL-I XH SB RightSB (crDiag -- 4)
-	derive-composites 'cyrl/iTail.upright'  null 'cyrl/i.upright' [CyrTailDescender.rSideJut RightSB 0]
+		include : RevNShape BODY-CYRL-I SLAB-CYRL-I XH SB RightSB (crDiag -- 4)
+	derive-composites 'cyrl/iTail.upright' null 'cyrl/i.upright' [CyrTailDescender.rSideJut RightSB 0]
 
 	create-glyph 'grek/DigammaPamphylian' 0x376 : glyph-proc
 		include : MarkSet.capital
-		include : NRevShape BODY-SYMMETRIC SLAB-DIGAMMA CAP SB RightSB (crDiag -- 4)
-	alias 'grek/digammaPamphylian' 0x377 'smcpNRev.standardSerifless'
+		include : RevNShape BODY-SYMMETRIC SLAB-DIGAMMA CAP SB RightSB (crDiag -- 4)
+	alias 'grek/digammaPamphylian' 0x377 'revSmcpN.standardSerifless'
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/N' 0x2115 : glyph-proc
 		include : MarkSet.capital
-		include : VBar.l SB 0 CAP BBS
+		include : VBar.l SB      0 CAP BBS
 		include : VBar.r RightSB 0 CAP BBS
-		include : intersection
-			Rect CAP 0 SB RightSB
-			union
-				dispiro
-					widths.center BBS
-					corner (SB + [HSwToV BBS]) CAP
-					corner (RightSB - [HSwToV BBS] / 2) (CAP / 5)
-				dispiro
-					widths.center BBS
-					corner (SB + [HSwToV BBS] / 2) (CAP - (CAP / 5))
-					corner (RightSB - [HSwToV BBS]) 0
+		include : intersection [Rect CAP 0 SB RightSB] : union
+			dispiro
+				widths.center BBS
+				corner (SB      + [HSwToV : 1.0 * BBS])      CAP
+				corner (RightSB - [HSwToV : 0.5 * BBS]) [mix CAP 0 0.8]
+			dispiro
+				widths.center BBS
+				corner (SB      + [HSwToV : 0.5 * BBS]) [mix CAP 0 0.2]
+				corner (RightSB - [HSwToV : 1.0 * BBS])          0

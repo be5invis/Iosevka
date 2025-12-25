@@ -263,28 +263,32 @@ glyph-block CommonShapes : begin
 			local sw : fallback _sw Stroke
 			local swRef : fallback _swRef sw
 			include : dispiro
-				flat (x + [HSwToV : 0.5 * swRef]) y [widths.heading sw 0 Leftward]
+				widths.lhs sw
+				flat (x + [HSwToV : 0.5 * swRef]) y [heading Leftward]
 				curl (x - length - TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 		export : define [lb x y length _sw _swRef] : glyph-proc
 			local sw : fallback _sw Stroke
 			local swRef : fallback _swRef sw
 			include : dispiro
-				flat (x + [HSwToV : 0.5 * swRef]) y [widths.heading 0 sw Leftward]
+				widths.rhs sw
+				flat (x + [HSwToV : 0.5 * swRef]) y [heading Leftward]
 				curl (x - length + TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 		export : define [rt x y length _sw _swRef] : glyph-proc
 			local sw : fallback _sw Stroke
 			local swRef : fallback _swRef sw
 			include : dispiro
-				flat (x - [HSwToV : 0.5 * swRef]) y [widths.heading 0 sw Rightward]
+				widths.rhs sw
+				flat (x - [HSwToV : 0.5 * swRef]) y [heading Rightward]
 				curl (x + length - TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 		export : define [rb x y length _sw _swRef] : glyph-proc
 			local sw : fallback _sw Stroke
 			local swRef : fallback _swRef sw
 			include : dispiro
-				flat (x - [HSwToV : 0.5 * swRef]) y [widths.heading sw 0 Rightward]
+				widths.lhs sw
+				flat (x - [HSwToV : 0.5 * swRef]) y [heading Rightward]
 				curl (x + length + TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 		export : define [mt x y length _sw] : mtAsymmetric x y length length _sw
@@ -292,14 +296,16 @@ glyph-block CommonShapes : begin
 		export : define [mtAsymmetric x y l r _sw] : begin
 			local sw : fallback _sw Stroke
 			return : dispiro
-				flat (x + r - TanSlope * (sw * DesignParameters.serifShiftX)) y [widths.lhs sw]
+				widths.lhs sw
+				flat (x + r - TanSlope * (sw * DesignParameters.serifShiftX)) y
 				curl (x - l - TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 		export : define [mb x y length _sw] : mbAsymmetric x y length length _sw
 		export : define [mbAsymmetric x y l r _sw] : begin
 			local sw : fallback _sw Stroke
 			return : dispiro
-				flat (x + r + TanSlope * (sw * DesignParameters.serifShiftX)) y [widths.rhs sw]
+				widths.rhs sw
+				flat (x + r + TanSlope * (sw * DesignParameters.serifShiftX)) y
 				curl (x - l + TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 	glyph-block-export VSerif
@@ -316,6 +322,12 @@ glyph-block CommonShapes : begin
 				flat x y [heading Upward]
 				curl x (y + length) [heading Upward]
 
+		export : define [mr x y length sw] : glyph-proc
+			include : dispiro
+				widths.lhs [fallback sw VJutStroke]
+				flat x (y - length) [heading Upward]
+				curl x (y + length) [heading Upward]
+
 		export : define [dl x y length sw] : glyph-proc
 			include : dispiro
 				widths.lhs [fallback sw VJutStroke]
@@ -326,6 +338,12 @@ glyph-block CommonShapes : begin
 			include : dispiro
 				widths.rhs [fallback sw VJutStroke]
 				flat x y [heading Upward]
+				curl x (y + length) [heading Upward]
+
+		export : define [ml x y length sw] : glyph-proc
+			include : dispiro
+				widths.rhs [fallback sw VJutStroke]
+				flat x (y - length) [heading Upward]
 				curl x (y + length) [heading Upward]
 
 	glyph-block-export NeedSlab
@@ -454,12 +472,12 @@ glyph-block CommonShapes : begin
 			local skew0 : [clamp 0 w (w - v)] / rad + ([clamp 1 1.5 (mixRatio * u / w)] - 1) * 0.5
 			local depth : v + skew0 * sw - sw
 			local shallowLimit : sw / 2
-			local skew : clamp 0 (1 / 2) : skew0 + [clamp 0 shallowLimit (shallowLimit - depth)] / rad
+			local skew : clamp 0 0.5 : skew0 + [clamp 0 shallowLimit (shallowLimit - depth)] / rad
 
 			local headDirection : if doSwash
 				object
 					x (Contrast / [Math.hypot 1 skew] * [if dtu (-1) (+1)])
-					y (skew / [Math.hypot 1 skew] * [if ltr (+1) (-1)])
+					y (skew     / [Math.hypot 1 skew] * [if ltr (+1) (-1)])
 				object
 					x (Contrast * [if dtu (-1) (+1)])
 					y 0
@@ -468,19 +486,17 @@ glyph-block CommonShapes : begin
 
 		# Create the arc knots
 		local segBefore {}
-		local segAfter {}
+		local segAfter  {}
 		foreach [j : range 1 nHookSegments] : begin
 			local fraction : j / nHookSegments
-			local mixRatioAdjust : Math.max (1 / 2) : (1 / 2) + [if doSwash 1 (1 / 8)] * (mixRatio - (1 / 2))
-			local fractionAfter : fraction * (1 - mixRatioAdjust) / mixRatioAdjust
-			local myfinal : 1 - [archv.yFromX ((1 - mixRatioAdjust) / mixRatioAdjust) superness]
+			local mixRatioAdjust : Math.max 0.5 : mix 0.5 mixRatio : if doSwash 1 0.125
 			segBefore.push : g4
 				mix mx toStraight.x fraction
 				mix y toStraight.y [archv.yFromX fraction superness]
 				begin unimportant
 			segAfter.push : g4
 				mix mx toFinish.x fraction
-				mix y toFinish.y ([archv.yFromX fractionAfter superness] / (1 - myfinal))
+				mix y toFinish.y ([archv.yFromX (fraction * (1 / mixRatioAdjust - 1)) superness] / [archv.yFromX (1 / mixRatioAdjust - 1) superness])
 				begin unimportant
 
 		if isStart
@@ -656,7 +672,7 @@ glyph-block CommonShapes : begin
 			set args.atBot : args.y < before.y && args.y < after.y
 
 			return : list
-				begin (args.blendPre || {})
+				begin (args.blendPre  || {})
 				impl args
 				begin (args.blendPost || {})
 
@@ -825,9 +841,10 @@ glyph-block CommonShapes : begin
 	glyph-block-export TangentToNormal VectorDot
 	define [TangentToNormal offset contrast _tanSlope] : begin
 		local r : Math.hypot offset.x offset.y
+		local tanSlope : fallback _tanSlope TanSlope
 		return : new Point Point.Type.Corner
-			(0 - offset.y * contrast) / r
-			(offset.x + offset.y * [fallback _tanSlope TanSlope]) / r
+			(0        - offset.y * contrast) / r
+			(offset.x + offset.y * tanSlope) / r
 	define [VectorDot p1 p2] : p1.x * p2.x + p1.y * p2.y
 
 	define [SharpCornerImpl before after args] : begin

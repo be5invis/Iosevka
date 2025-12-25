@@ -25,13 +25,21 @@ async function GenerateChangeList(argv, out) {
 	const sortedFragments = Array.from(fragments).sort((a, b) => SemVer.compare(b[0], a[0]));
 	const latestMajor = SemVer.major(sortedFragments[0][0]);
 	const latestMinor = SemVer.minor(sortedFragments[0][0]);
+	const latestPatch = SemVer.patch(sortedFragments[0][0]);
 	for (const [version, notes] of sortedFragments) {
 		const currentMajor = SemVer.major(version);
 		const currentMinor = SemVer.minor(version);
-		if (latestMajor !== currentMajor || latestMinor !== currentMinor) continue;
-		out.log(``);
-		out.log(`## Changes of version ${version}`);
-		out.log(notes.trimEnd() + "\n");
+		const currentPatch = SemVer.patch(version);
+		// Check version match
+		if (
+			currentMajor === latestMajor &&
+			currentMinor === latestMinor &&
+			currentPatch === latestPatch
+		) {
+			out.log(``);
+			out.log(`## Changes of version ${version}`);
+			out.log(notes.trimEnd() + "\n");
+		}
 	}
 }
 export default async function main(argv) {

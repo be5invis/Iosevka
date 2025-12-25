@@ -64,11 +64,9 @@ glyph-block Letter-Latin-Lower-D : begin
 			ada   -- df.smallArchDepthA
 			adb   -- df.smallArchDepthB
 
-	define [TopSerif df yTop] : tagged 'serifRT'
-		HSerif.lt (df.rightSB - [HSwToV Stroke]) yTop SideJut
+	define [TopSerif df yTop] : tagged 'serifRT' : HSerif.lt (df.rightSB - [HSwToV df.mvs]) yTop SideJut
 
-	define [BaseSerif df yTop] : tagged 'serifRB'
-		HSerif.rb df.rightSB 0 SideJut
+	define [BaseSerif df yTop] : tagged 'serifRB' : HSerif.rb df.rightSB 0 SideJut
 
 	define DConfig : SuffixCfg.weave
 		object # body
@@ -88,15 +86,16 @@ glyph-block Letter-Latin-Lower-D : begin
 		local yOverlay : mix XH (Ascender - [if topSerif Stroke 0]) 0.5
 
 		do
-			create-glyph "d.\(suffix)" : make [DivFrame 1]
+			create-glyph "d.\(suffix)"           : make [DivFrame 1]
 			create-glyph "dCaron/base.\(suffix)" : make [DivFrame 0.95]
 		: where : [make df] : glyph-proc
+			include : DivFrame 1
 			include : df.markSet.b
 			include : Body df Ascender
-			if topSerif    : include : topSerif df Ascender
+			if topSerif    : include : topSerif    df Ascender
 			if bottomSerif : include : bottomSerif df Ascender
-			include : LeaningAnchor.Above.VBar.r df.rightSB
-			set-base-anchor 'overlayOnExtension' (df.rightSB - [HSwToV HalfStroke]) yOverlay
+			include : LeaningAnchor.Above.VBar.r df.rightSB df.mvs
+			set-base-anchor 'overlayOnExtension' (df.rightSB - [HSwToV : 0.5 * df.mvs]) yOverlay
 
 		create-glyph "dStroke.\(suffix)" : glyph-proc
 			local df : DivFrame 1
@@ -104,7 +103,7 @@ glyph-block Letter-Latin-Lower-D : begin
 			include : LetterBarOverlay.r.in df.rightSB XH (Ascender - [if topSerif Stroke 0])
 
 		create-glyph "latn/de.\(suffix)" : glyph-proc
-			local df : DivFrame 1
+			local df : include : DivFrame 1
 			include : df.markSet.b
 			include : Body df Ascender
 			local xLeft : mix df.rightSB df.leftSB 0.9
@@ -117,7 +116,7 @@ glyph-block Letter-Latin-Lower-D : begin
 			include : LeaningAnchor.Above.VBar.m [mix xLeft xRight 0.5]
 
 		if [not topSerif] : create-glyph "dHookTop.\(suffix)" : glyph-proc
-			local df : DivFrame 1
+			local df : include : DivFrame 1
 			include : df.markSet.b
 			include : Body df (Ascender - Hook - HalfStroke)
 			include : TopHook.toRight.rBarInner df.rightSB (XH / 2) Ascender
@@ -137,8 +136,8 @@ glyph-block Letter-Latin-Lower-D : begin
 				right  -- dfHalf.rightSB
 				ybegin -- Ascender
 				yend   -- (XH / 2 + HalfStroke)
-				ada    -- (SmallArchDepthA * 0.6 * df.adws)
-				adb    -- (SmallArchDepthB * 0.6 * df.adws)
+				ada    -- (ArchDepthA * (2 / df.hPack) * df.adws)
+				adb    -- (ArchDepthB * (2 / df.hPack) * df.adws)
 				sw     -- df.mvs
 
 			if topSerif : include : topSerif dfHalf Ascender

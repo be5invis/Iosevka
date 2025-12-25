@@ -33,7 +33,7 @@ export class Box {
 	}
 
 	pad(d) {
-		return new Box(this.top - d, this.bottom + d, this.left - d, this.right + d);
+		return new Box(this.top - d, this.bottom + d, this.left + d, this.right - d);
 	}
 	padLeft(d) {
 		return new Box(this.top, this.bottom, this.left + d, this.right);

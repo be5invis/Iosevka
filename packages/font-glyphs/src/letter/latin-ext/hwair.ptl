@@ -1,7 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
-
+import [DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -9,44 +9,56 @@ glyph-block Letter-Latin-Hwair : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
+	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
 	glyph-block-import Letter-Shared-Shapes : nShoulder uBowl SerifFrame
 
-	define Variants : object
-		straightSerifless      { false false }
-		straightTopLeftSerifed { true  false }
-		straightSerifed        { true  true  }
+	define HConfig : object
+		straightSerifless                { false false }
+		straightTopLeftSerifed           { true  false }
+		straightSerifedExceptBottomRight { true  true  }
 
-	foreach { suffix { serifLT serifLB } } [pairs-of Variants] : do
-		create-glyph "hwair.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleMM 3
-			include : df.markSet.b
-			include : LeaningAnchor.Above.VBar.l df.leftSB
-			local ada : SmallArchDepthA * 0.6 * df.adws
-			local adb : SmallArchDepthB * 0.6 * df.adws
-			include : VBar.l df.leftSB 0 Ascender df.mvs
-			include : nShoulder.shape
-				top     -- XH
-				bottom  -- (XH / 2 - TINY)
-				left    -- (df.leftSB + [HSwToV df.mvs])
-				right   -- (df.middle + [HSwToV : 0.5 * df.mvs])
-				stroke  -- df.mvs
-				fine    -- df.shoulderFine
-				ada     -- ada
-				adb     -- adb
-			include : uBowl.toothlessRounded
-				top     -- (XH / 2 + TINY)
-				bottom  -- 0
-				left    -- (df.middle - [HSwToV : 0.5 * df.mvs])
-				right   -- df.rightSB
-				stroke  -- df.mvs
-				ada     -- ada
-				adb     -- adb
-				rightY0 -- XH
-			local sf : SerifFrame.fromDf df Ascender 0
-			if serifLT : include : tagged 'serifLT' sf.lt.outer
-			if serifLB : include : tagged 'serifLB' sf.lb.full
-			if SLAB : begin
-				local sf2 : SerifFrame.fromDf df XH 0
-				include : tagged 'serifRT' sf2.rt.full
+	define VConfig : object
+		roundedSerifless false
+		roundedSerifed   true
 
-	select-variant 'hwair' 0x195 (follow -- 'heng')
+	foreach { suffix { serifLT serifLB } } [pairs-of HConfig] : do
+		local df : DivFrame para.advanceScaleMM 3
+		DefineSelectorGlyph "hwair" suffix df 'b'
+
+		foreach { suffixV serifRT } [Object.entries VConfig] : do
+			create-glyph "hwair.\(suffix).\(suffixV)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : LeaningAnchor.Above.VBar.l df.leftSB df.mvs
+				local ada : SmallArchDepthA * (2 / df.hPack) * df.adws
+				local adb : SmallArchDepthB * (2 / df.hPack) * df.adws
+				include : VBar.l df.leftSB 0 Ascender df.mvs
+				include : let [yJoin : mix 0 XH 0.5] : union
+					nShoulder.shape
+						top     -- XH
+						bottom  -- (yJoin - TINY)
+						left    -- (df.leftSB + [HSwToV df.mvs])
+						right   -- (df.middle + [HSwToV : 0.5 * df.mvs])
+						stroke  -- df.mvs
+						fine    -- df.shoulderFine
+						ada     -- ada
+						adb     -- adb
+					uBowl.toothlessRounded
+						top     -- (yJoin + TINY)
+						bottom  -- 0
+						left    -- (df.middle - [HSwToV : 0.5 * df.mvs])
+						right   -- df.rightSB
+						stroke  -- df.mvs
+						ada     -- ada
+						adb     -- adb
+						rightY0 -- XH
+				local sf : SerifFrame.fromDf df Ascender 0
+				if serifLT : include : tagged 'serifLT' sf.lt.outer
+				if serifLB : include : tagged 'serifLB' sf.lb.full
+				if serifRT : begin
+					local sf2 : SerifFrame.fromDf df XH 0
+					include : tagged 'serifRT' sf2.rt.full
+
+		select-variant "hwair.\(suffix)" (follow -- 'hv/v')
+
+	CreateSelectorVariants 'hwair' 0x195 [Object.keys HConfig] (follow -- 'hv/h')
