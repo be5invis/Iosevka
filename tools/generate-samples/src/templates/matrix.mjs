@@ -59,7 +59,7 @@ export default (function (args) {
 				"font-size": 3 * EM,
 				color: theme.sigil,
 			},
-			"\uEF10",
+			"\uf881",
 		],
 	});
 
