@@ -370,8 +370,8 @@ glyph-block CommonShapes : begin
 			widths.center [fallback _fine Stroke]
 			flat xleft  y [heading Rightward]
 			curl xright y [heading Rightward]
-		export : define [t xl xr y _fine] : m xl xr (y - [fallback _fine Stroke] * 0.5) _fine
-		export : define [b xl xr y _fine] : m xl xr (y + [fallback _fine Stroke] * 0.5) _fine
+		export : define [t xl xr y _fine] : m xl xr (y - [fallback _fine Stroke] / 2) _fine
+		export : define [b xl xr y _fine] : m xl xr (y + [fallback _fine Stroke] / 2) _fine
 
 	glyph-block-export VBar
 	define VBar : namespace
@@ -379,10 +379,10 @@ glyph-block CommonShapes : begin
 			local sw : fallback _sw Stroke
 			return : dispiro
 				widths.center sw
-				flat x ydown [heading : if (ydown < yup) Upward Downward]
-				curl x yup   [heading : if (ydown < yup) Upward Downward]
-		export : define [l x yd yu _sw] : m (x + [HSwToV : [fallback _sw Stroke] * 0.5]) yd yu _sw
-		export : define [r x yd yu _sw] : m (x - [HSwToV : [fallback _sw Stroke] * 0.5]) yd yu _sw
+				flat x ydown [heading [if (ydown < yup) Upward Downward]]
+				curl x yup   [heading [if (ydown < yup) Upward Downward]]
+		export : define [l x yd yu _sw] : m (x + [HSwToV : 0.5 * [fallback _sw Stroke]]) yd yu _sw
+		export : define [r x yd yu _sw] : m (x - [HSwToV : 0.5 * [fallback _sw Stroke]]) yd yu _sw
 
 	glyph-block-export HOverlayBar
 	define [HOverlayBar xleft xright y s] : dispiro
@@ -411,7 +411,8 @@ glyph-block CommonShapes : begin
 	glyph-block-export FlatSlashShape
 	define [FlatSlashShape middlex middle fine kx ky] : glyph-proc
 		include : dispiro
-			flat (middlex - LongJut * [fallback kx 0.8]) (middle - LongJut * [fallback ky 0.4]) [widths.center : 2 * fine]
+			widths.center (2 * fine)
+			flat (middlex - LongJut * [fallback kx 0.8]) (middle - LongJut * [fallback ky 0.4])
 			curl (middlex + LongJut * [fallback kx 0.8]) (middle + LongJut * [fallback ky 0.4])
 
 	# Spiro shapes
@@ -469,7 +470,7 @@ glyph-block CommonShapes : begin
 		# Adjust terminal's direction
 		do "Adjust terminal's direction"
 			local rad : Math.min w (mixRatio * u)
-			local skew0 : [clamp 0 w (w - v)] / rad + ([clamp 1 1.5 (mixRatio * u / w)] - 1) * 0.5
+			local skew0 : [clamp 0 w (w - v)] / rad + ([clamp 1 1.5 (mixRatio * (u / w))] - 1) * 0.5
 			local depth : v + skew0 * sw - sw
 			local shallowLimit : sw / 2
 			local skew : clamp 0 0.5 : skew0 + [clamp 0 shallowLimit (shallowLimit - depth)] / rad
@@ -552,7 +553,7 @@ glyph-block CommonShapes : begin
 				list
 					flat (x + ox) (u - ada) af
 					curl (x + ox) (d + adb)
-				g4 (x + ox) [mix d u (adb / (ada + adb))] af
+				g4 (x + ox) [YSmoothMidL u d ada adb] af
 
 		export : define flex-params [lu]: begin
 			local-parameter : x              # X-position of the stroke, without overshoot
@@ -567,7 +568,7 @@ glyph-block CommonShapes : begin
 				list
 					flat (x + ox) (d + adb) af
 					curl (x + ox) (u - ada)
-				g4 (x + ox) [mix d u (adb / (ada + adb))] af
+				g4 (x + ox) [YSmoothMidL u d ada adb] af
 
 		export : define flex-params [rd]: begin
 			local-parameter : x              # X-position of the stroke, without overshoot
@@ -582,7 +583,7 @@ glyph-block CommonShapes : begin
 				list
 					flat (x - ox) (u - adb) af
 					curl (x - ox) (d + ada)
-				g4 (x - ox) [mix d u (ada / (ada + adb))] af
+				g4 (x - ox) [YSmoothMidR u d ada adb] af
 
 		export : define flex-params [ru]: begin
 			local-parameter : x              # X-position of the stroke, without overshoot
@@ -597,7 +598,7 @@ glyph-block CommonShapes : begin
 				list
 					flat (x - ox) (d + ada) af
 					curl (x - ox) (u - adb)
-				g4 (x - ox) [mix d u (ada / (ada + adb))] af
+				g4 (x - ox) [YSmoothMidR u d ada adb] af
 
 	glyph-block-export arch
 	define arch : namespace
