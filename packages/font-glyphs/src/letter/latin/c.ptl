@@ -263,11 +263,11 @@ glyph-block Letter-Latin-C : begin
 			include : CCurlyTailShape [DivFrame 1] sty XH Descender
 			include : AutoStartSerifR [DivFrame 1] sty XH
 
-		define [KoppaShapeT styTop styBot top base] : union
+		define [KoppaShapeT base styTop styBot top] : union
 			VBar.r (Middle + [HSwToV Stroke]) Descender HalfStroke
 			difference base
-				Rect (top / 2) Descender (Middle + [HSwToV Stroke]) (Width * 4)
-				Rect (XH / 2) [mix Stroke Hook 0.5] Middle (Width * 4)
+				Rect (top / 2) Descender (Middle + [HSwToV Stroke]) VERY-FAR
+				Rect (XH / 2) [mix Stroke Hook 0.5] Middle VERY-FAR
 			if (styTop && [not para.isItalic])
 				HSerif.mb (Middle + [HSwToV HalfStroke]) Descender MidJutCenter
 				no-shape
@@ -275,20 +275,20 @@ glyph-block Letter-Latin-C : begin
 		if [not styBot] : create-glyph "cyrl/Koppa.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
 			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
-			include : KoppaShapeT sty styBot CAP : union [lf.baseTopOnly] [lf.topSerif]
+			include : KoppaShapeT [union [lf.baseTopOnly] [lf.topSerif]] sty styBot CAP
 
 		if [not styBot] : create-glyph "cyrl/koppa.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
 				ada -- SmallArchDepthA
 				adb -- SmallArchDepthB
-			include : KoppaShapeT sty styBot XH : union [lf.baseTopOnly] [lf.topSerif]
+			include : KoppaShapeT [union [lf.baseTopOnly] [lf.topSerif]] sty styBot XH
 
 		create-glyph "C/descBase.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
 			include : union [lf.descBase] [lf.topSerif]
-			include : VBar.r RightSB 0 [ArcStartSerifDepth Hook] [ArcStartSerifWidth Stroke]
+				VBar.r RightSB 0 [ArcStartSerifDepth Hook] [ArcStartSerifWidth Stroke]
 
 		create-glyph "c/descBase.\(suffix)" : glyph-proc
 			include : MarkSet.e
@@ -296,16 +296,19 @@ glyph-block Letter-Latin-C : begin
 				ada -- SmallArchDepthA
 				adb -- SmallArchDepthB
 			include : union [lf.descBase] [lf.topSerif]
-			include : VBar.r RightSB 0 [ArcStartSerifDepth Hook] [ArcStartSerifWidth Stroke]
+				VBar.r RightSB 0 [ArcStartSerifDepth Hook] [ArcStartSerifWidth Stroke]
 
 		create-glyph "romanSixLateForm.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
 			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
 			include : union [lf.descBase] [lf.topSerif]
-			include : VBar.r RightSB Descender [ArcStartSerifDepth Hook] [ArcStartSerifWidth Stroke]
+				VBar.r RightSB Descender [ArcStartSerifDepth Hook] [ArcStartSerifWidth Stroke]
 			if styBot : begin
-				include : HSerif.rb (RightSB - [HSwToV : 0.5 * [ArcStartSerifWidth Stroke]]) Descender Jut
-				include : HSerif.lb (RightSB - [HSwToV : 0.5 * [ArcStartSerifWidth Stroke]]) Descender MidJutSide
+				local ink : HSwToV : ArcStartSerifWidth Stroke
+				local coInk : HSwToV : Stroke - [ArcStartSerifWidth Stroke]
+				include : union
+					HSerif.rb (RightSB - 0.5 * ink) Descender (Jut        - 0.5 * coInk)
+					HSerif.lb (RightSB - 0.5 * ink) Descender (MidJutSide - 0.5 * coInk)
 
 	select-variant 'C' 'C'
 	link-reduced-variant 'C/sansSerif' 'C' MathSansSerif

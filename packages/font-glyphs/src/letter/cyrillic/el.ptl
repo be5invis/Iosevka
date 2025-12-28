@@ -26,13 +26,12 @@ glyph-block Letter-Cyrillic-El : begin
 	glyph-block-export CyrElShape
 	define [CyrElShape left right top bodyType slabType _sw] : glyph-proc
 		local sw : fallback _sw Stroke
-		local halfSw : sw * 0.5
 		local xCutLeft : mix left right 0.075
 		include : match bodyType
 			[Just BODY-TAILED]   : RightwardTailedBar right 0 top sw
-			[Just BODY-STRAIGHT] : VBar.r right 0 top sw
+			[Just BODY-STRAIGHT] : VBar.r             right 0 top sw
 			__                   : glyph-proc
-		include : HBar.m xCutLeft right (top - halfSw) sw
+		include : HBar.t xCutLeft right top sw
 		include : LegShape
 			ztop -- [Point.fromXY Point.Type.Corner xCutLeft top]
 			zbot -- [Point.fromXY Point.Type.Corner [mix SB 0 : if SLAB 1 0.75] 0]
@@ -51,7 +50,7 @@ glyph-block Letter-Cyrillic-El : begin
 			__                   : glyph-proc
 		if (bodyType !== BODY-NONE)
 			include : tagged 'SerifRB' : match slabType
-				[Just SLAB-ALL]    : HSerif.mb (right - [HSwToV halfSw]) 0 Jut sw
+				[Just SLAB-ALL]    : HSerif.mb (right - [HSwToV : 0.5 * sw]) 0 (Jut - [HSwToV : 0.5 * (Stroke - sw)]) sw
 				[Just SLAB-LOWER]  : HSerif.rb right 0 SideJut sw
 				__                 : glyph-proc
 
@@ -80,12 +79,9 @@ glyph-block Letter-Cyrillic-El : begin
 		local df : include : DivFrame para.advanceScaleMM 3
 		include : df.markSet.capDesc
 
-		local xm : df.middle + [HSwToV : 0.5 * df.mvs]
-		include : difference
+		include : let [xm : df.middle + [HSwToV : 0.5 * df.mvs]] : difference
 			CyrElShape df.leftSB xm CAP BODY-STRAIGHT [if SLAB SLAB-ALL SLAB-NONE] df.mvs
-			intersection
-				MaskBelow Stroke
-				MaskRight [mix xm (df.rightSB - [HSwToV df.mvs]) 0.625]
+			intersection [MaskBelow Stroke] [MaskRight : mix xm (df.rightSB - [HSwToV df.mvs]) 0.625]
 		include : MidHook.m df CAP
 
 	create-glyph 'cyrl/ElSoft.serifless' : glyph-proc
@@ -117,12 +113,9 @@ glyph-block Letter-Cyrillic-El : begin
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.p
 
-			local xm : df.middle + [HSwToV : 0.5 * df.mvs]
-			include : difference
+			include : let [xm : df.middle + [HSwToV : 0.5 * df.mvs]] : difference
 				CyrElShape df.leftSB xm XH body [if SLAB [if para.isItalic slabItalic slabUpright] SLAB-NONE] df.mvs
-				intersection
-					MaskBelow Stroke
-					MaskRight [mix xm (df.rightSB - [HSwToV df.mvs]) 0.625]
+				intersection [MaskBelow Stroke] [MaskRight : mix xm (df.rightSB - [HSwToV df.mvs]) 0.625]
 			include : MidHook.m df XH
 
 		define cyrSoftElDf : DivFrame para.advanceScaleM 3
@@ -155,8 +148,7 @@ glyph-block Letter-Cyrillic-El : begin
 		local df : include : DivFrame para.advanceScaleMM 3
 		include : df.markSet.capital
 
-		local xm : df.middle + [HSwToV : 0.5 * df.mvs]
-		include : CyrElShape df.leftSB xm CAP BODY-NONE [if SLAB SLAB-ALL SLAB-NONE] df.mvs
+		include : CyrElShape df.leftSB (df.middle + [HSwToV : 0.5 * df.mvs]) CAP BODY-NONE [if SLAB SLAB-ALL SLAB-NONE] df.mvs
 		include : UpwardHookShape
 			left   -- (df.middle - [HSwToV : 0.5 * df.mvs])
 			right  -- df.rightSB
@@ -165,15 +157,15 @@ glyph-block Letter-Cyrillic-El : begin
 			ada    -- (ArchDepthA * (2 / df.hPack) * df.adws)
 			adb    -- (ArchDepthB * (2 / df.hPack) * df.adws)
 			sw     -- df.mvs
-		local sf2 : [SerifFrame.fromDf df (CAP / 2 + HalfStroke) 0].slice 1 2
-		if SLAB : include sf2.rt.full
+		if SLAB : begin
+			local sf2 : [SerifFrame.fromDf df (CAP / 2 + HalfStroke) 0].slice 1 2
+			include sf2.rt.full
 
 	create-glyph 'cyrl/ljeKomi' 0x509 : glyph-proc
 		local df : include : DivFrame para.advanceScaleMM 3
 		include : df.markSet.e
 
-		local xm : df.middle + [HSwToV : 0.5 * df.mvs]
-		include : CyrElShape df.leftSB xm XH BODY-NONE [if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL] SLAB-NONE] df.mvs
+		include : CyrElShape df.leftSB (df.middle + [HSwToV : 0.5 * df.mvs]) XH BODY-NONE [if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL] SLAB-NONE] df.mvs
 		include : UpwardHookShape
 			left   -- (df.middle - [HSwToV : 0.5 * df.mvs])
 			right  -- df.rightSB
@@ -182,5 +174,6 @@ glyph-block Letter-Cyrillic-El : begin
 			ada    -- (ArchDepthA * (2 / df.hPack) * df.adws)
 			adb    -- (ArchDepthB * (2 / df.hPack) * df.adws)
 			sw     -- df.mvs
-		local sf2 : [SerifFrame.fromDf df (XH / 2 + HalfStroke) 0].slice 1 2
-		if SLAB : include sf2.rt.full
+		if SLAB : begin
+			local sf2 : [SerifFrame.fromDf df (XH / 2 + HalfStroke) 0].slice 1 2
+			include sf2.rt.full

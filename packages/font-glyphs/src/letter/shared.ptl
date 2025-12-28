@@ -779,11 +779,12 @@ glyph-block Letter-Shared-Shapes : begin
 			set this.fForceSymmetric fForceSymmetric
 
 			local ink : HSwToV swRef
+			local coInk : HSwToV : Stroke - swRef
 			local gap : (right - left - hSplit * ink) / (hSplit - 1)
 
-			local jutFS   MidJutSide
-			local jutFC   MidJutCenter
-			local jut     : mix [HSwToV : 0.5 * swRef] Jut : Math.min 1 : adws * 2.25 / hSplit
+			local jutFS   : MidJutSide   - 0.5 * coInk
+			local jutFC   : MidJutCenter - 0.5 * coInk
+			local jut     : Math.min (Jut - 0.5 * coInk) : mix (0.5 * ink) Jut : Math.min 1 : adws * 2.25 / hSplit
 			local sideJut : jut - 0.5 * ink
 
 			local jutIn     : if fForceSymmetric jut : JutIn left right jut swRef hSplit
@@ -887,20 +888,18 @@ glyph-block Letter-Shared-Shapes : begin
 		include : dispiro
 			widths.lhs fine
 			flat ztop.x ztop.y [heading Downward]
-			curl xb [mix (zbot.y + LongJut) ztop.y 0.25]
+			curl xb [mix ztop.y (zbot.y + LongJut) 0.75]
 			alsoThruThem {{0.2 0.76} {0.3 0.85} {0.5 0.94}}
 			straight.left.end zbot.x (zbot.y + fine) [heading Leftward]
 
 	glyph-block-export UpwardHookShape
-	define [UpwardHookShape] : with-params [left right ybegin yend [bottom O] ada adb [sw Stroke]] : glyph-proc
+	define [UpwardHookShape] : with-params [left right ybegin yend [bottom 0] [ada ArchDepthA] [adb ArchDepthB] [sw Stroke]] : glyph-proc
 		include : dispiro
 			widths.lhs sw
 			flat left ybegin [heading Downward]
-			curl left [Math.min adb : ybegin - TINY]
-			arcvh
-			g4 [mix left right 0.5] bottom [heading Rightward]
-			archv
-			flat right ada
+			curl left [Math.min (bottom + adb) (ybegin - TINY)]
+			arch.lhs bottom (sw -- sw)
+			flat right [Math.min (bottom + ada) (yend - TINY)]
 			curl right yend [heading Upward]
 
 	glyph-block-export RhoticHookShape
@@ -933,15 +932,16 @@ glyph-block Letter-Shared-Shapes : begin
 				Math.min (x + xDepth - TINY) (x + hd.x - [HSwToV : 0.25 * sw])
 				Math.max (x + xDepth + TINY) (x - hd.x + [HSwToV : 0.25 * sw])
 
-			dispiro [widths.center sw]
-				flat x (y + yExtension) [heading : if (yDepth > 0) Downward Upward]
-				curl x  y2              [heading : if (yDepth > 0) Downward Upward]
+			return : dispiro
+				widths.center sw
+				flat x (y + yExtension) [heading [if (yDepth > 0) Downward Upward]]
+				curl x  y2              [heading [if (yDepth > 0) Downward Upward]]
 				arcvh
 				flat x3           (y - yDepth)
 				curl (x + xDepth) (y - yDepth)
 
-		export : define [l] : with-params [x y xDepth yDepth [sw Stroke] [yExtension 0]]
-			m
+		export : define [l] : with-params [x y xDepth yDepth [sw Stroke] [yExtension 0]] : begin
+			return : m
 				x      -- (x + [HSwToV : 0.5 * sw])
 				y      -- y
 				xDepth -- xDepth
@@ -949,8 +949,8 @@ glyph-block Letter-Shared-Shapes : begin
 				sw     -- sw
 				yExtension -- yExtension
 
-		export : define [r] : with-params [x y xDepth yDepth [sw Stroke] [yExtension 0]]
-			m
+		export : define [r] : with-params [x y xDepth yDepth [sw Stroke] [yExtension 0]] : begin
+			return : m
 				x      -- (x - [HSwToV : 0.5 * sw])
 				y      -- y
 				xDepth -- xDepth
@@ -1030,16 +1030,17 @@ glyph-block Letter-Shared-Shapes : begin
 			include : union
 				xLinkStroke xLink x yAttach sw
 				dispiro
-					straight.down.start xr y [widths.rhs.heading thinStroke Downward]
+					widths.rhs thinStroke
+					straight.down.start xr (y - 0) [heading Downward]
 					straight.down.mid   xr (y - r) [heading Downward]
 					arcvh
-					flat (xr - r) (y - 2 * r) [heading Leftward]
+					flat (xr - r)  (y - 2 * r) [heading Leftward]
 					curl (xl + sr) (y - 2 * r) [heading Leftward]
 					archv
 					g2.up.mid xl (y - 2 * r + sr) [heading Upward]
 					arcvh
 					flat (xl + sr) (y - 2 * r + 2 * sr) [heading Rightward]
-					curl (xr - r) (y - 2 * r + 2 * sr) [heading Rightward]
+					curl (xr - r)  (y - 2 * r + 2 * sr) [heading Rightward]
 
 		# Palatal Hooks
 		glyph-block-export PalatalHook
@@ -1090,7 +1091,7 @@ glyph-block Letter-Shared-Shapes : begin
 		# Cyrillic "Middle Hook" Characters
 		glyph-block-export MidHook
 		define MidHook : namespace
-			export : define [general] : with-params [left right top [bottom 0] ada adb [sw Stroke] [xDepth (-HookX)]] : composite-proc
+			export : define [general] : with-params [left right top [bottom 0] [ada ArchDepthA] [adb ArchDepthB] [sw Stroke] [xDepth (-HookX)]] : composite-proc
 				nShoulder.shape
 					left   -- left
 					right  -- right
@@ -1103,15 +1104,14 @@ glyph-block Letter-Shared-Shapes : begin
 
 			# "Standard" version for El, Pe, En with MidHook
 			export : define [m df top] : begin
-				local xm : df.middle + [HSwToV : 0.5 * df.mvs]
-				general
-					left   -- xm
+				return : general
+					left   -- (df.middle + [HSwToV : 0.5 * df.mvs])
 					right  -- df.rightSB
 					top    -- (top * 0.625 + df.mvs / 4)
 					ada    -- ArchDepthA
 					adb    -- ArchDepthB
 					sw     -- df.mvs
-					xDepth -- (0 - [Math.max [HSwToV df.mvs] : Math.min HookX : 0.5 * (df.rightSB - df.leftSB) - [HSwToV df.mvs]])
+					xDepth -- (0 - [Math.max [HSwToV df.mvs] : Math.min HookX : 0.5 * ((df.rightSB - df.leftSB) - [HSwToV : 2 * df.mvs])])
 
 		# Hook for Eng shape
 		glyph-block-export EngHook
@@ -1163,7 +1163,7 @@ glyph-block Letter-Shared-Shapes : begin
 						VBar.r cx (cy - hookY + O * 2) yHookStart sw
 						VerticalHook.r cx yHookStart (sign * TailX) (-TailY) sw
 
-			export : define toLeft : ward (-1)
+			export : define toLeft  : ward (-1)
 			export : define toRight : ward (+1)
 
 		# Leftward hook
@@ -1206,10 +1206,8 @@ glyph-block Letter-Shared-Shapes : begin
 			local xC : mix xLeftEdge xRightEdge : mix 0.5 (1 - p) 0.5
 			local jut : 0.75 * LongJut
 			return : barFunc
-				Math.min (xLeftEdge - SideJut)
-					Math.max (xC - jut) : mix xLeftSpace xLeftEdge 0.3
-				Math.max (xRightEdge + SideJut)
-					Math.min (xC + jut) : mix xRightSpace xRightEdge 0.3
+				Math.min (xLeftEdge  - SideJut) : Math.max (xC - jut) : mix xLeftSpace  xLeftEdge  0.3
+				Math.max (xRightEdge + SideJut) : Math.min (xC + jut) : mix xRightSpace xRightEdge 0.3
 				begin y
 				begin sw
 
@@ -1220,34 +1218,25 @@ glyph-block Letter-Shared-Shapes : begin
 				1.25 * (top - bot) * (1 - py)
 			return { y sw1 }
 
-		define [LetterBarOverlay] : with-params [x y space refSw pXInSw sw]
-			BarOverlayImpl HOverlayBar x y space refSw pXInSw sw
-		define [LetterObliqueBarOverlay] : with-params [x y space refSw pXInSw sw]
-			BarOverlayImpl HOverlayObliqueBar x y space refSw pXInSw sw
+		define [LetterBarOverlay] : with-params [x y space refSw pXInSw sw] : begin
+			return : BarOverlayImpl HOverlayBar x y space refSw pXInSw sw
+		define [LetterObliqueBarOverlay] : with-params [x y space refSw pXInSw sw] : begin
+			return : BarOverlayImpl HOverlayObliqueBar x y space refSw pXInSw sw
 
 		foreach base {LetterBarOverlay LetterObliqueBarOverlay} : let [base] : begin
-			set base.l : function []
-				with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw)
-			set base.m : function []
-				with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw)
-			set base.r : function []
-				with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw)
+			set base.l : function [] : with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+				return : (base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw)
+			set base.m : function [] : with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+				return : (base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw)
+			set base.r : function [] : with-params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+				return : (base) x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw)
 
-			set base.l.in : function []
-				with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-				: begin
-					local { y sw1 } : calcYAndSw bot top py sw
-					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw1)
-			set base.m.in : function []
-				with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-				: begin
-					local { y sw1 } : calcYAndSw bot top py sw
-					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw1)
-			set base.r.in : function []
-				with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-				: begin
-					local { y sw1 } : calcYAndSw bot top py sw
-					(base) x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw1)
+			set base.l.in : function [] : with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+				local { y sw1 } : calcYAndSw bot top py sw
+				return : (base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw1)
+			set base.m.in : function [] : with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+				local { y sw1 } : calcYAndSw bot top py sw
+				return : (base) x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw1)
+			set base.r.in : function [] : with-params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+				local { y sw1 } : calcYAndSw bot top py sw
+				return : (base) x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw1)
