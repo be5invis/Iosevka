@@ -15,15 +15,15 @@ glyph-block Letter-Latin-Upper-P : begin
 	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-export PConfig PShape PShapeOutline RevPShape PBarPosY PRotundaShape BBPShape
 
-	define [PBarPosY top sw bp] : (top - sw) * bp - sw * PShape.SwBelowBar
+	define [PBarPosY top sw bp] : [mix 0 (top - sw) bp] - sw * PShape.SwBelowBar
 
 	define [PRotundaOutlineKnots top df mul bp overshoot sw offset endX hook] : begin
-		local bowlTop (top * 1 - offset)
+		local bowlTop : top - offset
 		local bowlBottom : [PBarPosY top sw bp] + offset
 		local turnRadius : BowlXDepth bowlTop bowlBottom df.leftSB df.rightSB sw
 		local ada : ArchDepthAOf (ArchDepth * 0.9) df.width
 		local adb : ArchDepthBOf (ArchDepth * 0.9) df.width
-		local left : df.leftSB * mul
+		local left : mix 0 df.leftSB mul
 		local right : df.rightSB - offset
 		local turn : YSmoothMidR bowlTop bowlBottom ada adb
 		return : list
@@ -31,16 +31,16 @@ glyph-block Letter-Latin-Upper-P : begin
 			hookstart bowlTop
 			g4 (right - overshoot) turn
 			arcvh
-			flat [arch.adjust-x.bot [Math.max (endX + TINY + sw / 2 * TanSlope) df.middle] (sw -- sw * 0.5)] bowlBottom
+			flat [arch.adjust-x.bot [Math.max (endX + TINY + [Math.abs : 0.5 * sw * TanSlope]) df.middle] (sw -- (0.5 * sw))] bowlBottom
 			curl endX bowlBottom [heading Leftward]
 
 	define [PShapeOutlineKnots top df mul bp overshoot sw offset] : begin
-		local bowlTop (top * 1 - offset)
+		local bowlTop : top - offset
 		local bowlBottom : [PBarPosY top sw bp] + offset
 		local turnRadius : BowlXDepth bowlTop bowlBottom df.leftSB df.rightSB sw
 		local ada : ArchDepthAOf (ArchDepth * 0.9) df.width
 		local adb : ArchDepthBOf (ArchDepth * 0.9) df.width
-		local left : df.leftSB * mul
+		local left : mix 0 df.leftSB mul
 		local right : df.rightSB - offset
 		local turn : YSmoothMidR bowlTop bowlBottom ada adb
 		return : list
@@ -53,13 +53,13 @@ glyph-block Letter-Latin-Upper-P : begin
 			curl (left - O) bowlBottom [heading Leftward]
 
 	define [RevPshapeOutlineKnots top df mul bp overshoot sw offset] : begin
-		local bowlTop (top * 1 - offset)
+		local bowlTop : top - offset
 		local bowlBottom : [PBarPosY top sw bp] + offset
 		local turnRadius : BowlXDepth bowlTop bowlBottom df.leftSB df.rightSB sw
 		local ada : ArchDepthAOf (ArchDepth * 0.9) df.width
 		local adb : ArchDepthBOf (ArchDepth * 0.9) df.width
 		local left : df.leftSB + offset
-		local right : df.width - df.leftSB * mul
+		local right : mix df.width df.rightSB mul
 		local turn : YSmoothMidL bowlTop bowlBottom ada adb
 		return : list
 			flat (right + O) bowlTop [heading Leftward]
@@ -72,82 +72,78 @@ glyph-block Letter-Latin-Upper-P : begin
 
 
 	define [PShapeOutline] : with-params [
-				top [df [DivFrame 1]]
-				[mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw df.mvs]
-				[offset 0]
-			] : glyph-proc
+			top [df [DivFrame 1]] [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw df.mvs]
+			[offset 0]
+		] : glyph-proc
 		include : spiro-outline
 			PShapeOutlineKnots top df mul bp overshoot sw offset
 
 	define [PShape] : with-params [
-				top [df [DivFrame 1]]
-				[mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw df.mvs]
-				[slab null] [withBar true] [setMark false]
-			] : glyph-proc
+			top [df [DivFrame 1]] [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw df.mvs]
+			[slab null] [withBar true] [setMark false]
+		] : glyph-proc
 		include : dispiro [widths.rhs sw] [PShapeOutlineKnots top df mul bp overshoot sw 0]
-		if withBar : include : tagged 'strokeL' : VBar.l (df.leftSB * mul) 0 top sw
+		if withBar : include : tagged 'strokeL' : VBar.l [mix 0 df.leftSB mul] 0 top sw
 		if slab : include : slab top df sw mul
 
 	define [PRotundaShape] : with-params [
-				top [df [DivFrame 1]]
-				[mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw df.mvs]
-				[slab null] [endX SB] [hook Hook]
-			] : glyph-proc
+			top [df [DivFrame 1]] [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw df.mvs]
+			[slab null] [endX SB] [hook Hook]
+		] : glyph-proc
 		include : dispiro
 			widths.rhs sw
 			PRotundaOutlineKnots top df mul bp overshoot sw 0 endX hook
 
 	define [RevPShape] : with-params [
-				top [df [DivFrame 1]]
-				[mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw df.mvs]
-				[slab null]
-			] : glyph-proc
+			top [df [DivFrame 1]] [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw df.mvs]
+			[slab null]
+		] : glyph-proc
 		include : tagged 'bowl' : dispiro
 			widths.lhs sw
 			RevPshapeOutlineKnots top df mul bp overshoot sw 0
-		include : tagged 'strokeR' : VBar.r (df.width - df.leftSB * mul) 0 top sw
+		include : tagged 'strokeR' : VBar.r [mix df.width df.rightSB mul] 0 top sw
 		if slab : include : slab top df sw mul
 
 	set PShape.defaultMul 1.25
-	set PShape.defaultOvershoot (OX * 2)
-	set PShape.BarPos (1 - HBarPos)
+	set PShape.defaultOvershoot : OX * 2
+	set PShape.BarPos : 1 - HBarPos
 	set PShape.SwBelowBar 0.25
 
 	set PShape.SlabMotion : function [top df sw mul] : glyph-proc
-		include : tagged 'serifLT' : HSerif.lt (df.leftSB * mul) top SideJut sw
+		include : tagged 'serifLT' : HSerif.lt [mix 0 df.leftSB mul] top SideJut sw
 	set PShape.SlabFullSymmetric : function [top df sw mul] : glyph-proc
 		include : tagged 'serifLT' : union
-			HSerif.lt (df.leftSB * mul) top SideJut sw
-			HSerif.rt (df.leftSB * mul + [HSwToV : 0.5 * sw]) top MidJutSide sw
-		include : tagged 'serifLB' : HSerif.mb (df.leftSB * mul + [HSwToV : 0.5 * sw]) 0 Jut sw
+			HSerif.lt [mix 0 df.leftSB mul] top SideJut sw
+			HSerif.rt ([mix 0 df.leftSB mul] + [HSwToV : 0.5 * sw]) top MidJutSide sw
+		include : tagged 'serifLB' : HSerif.mb ([mix 0 df.leftSB mul] + [HSwToV : 0.5 * sw]) 0 Jut sw
 	set PShape.SlabSymmetric : function [top df sw mul] : glyph-proc
 		include : PShape.SlabMotion top df sw mul
-		include : tagged 'serifLB' : HSerif.mb (df.leftSB * mul + [HSwToV : 0.5 * sw]) 0 Jut sw
+		include : tagged 'serifLB' : HSerif.mb ([mix 0 df.leftSB mul] + [HSwToV : 0.5 * sw]) 0 Jut sw
 	set PShape.SlabAsymmetric : function [top df sw mul] : glyph-proc
 		include : PShape.SlabMotion top df sw mul
 		include : tagged 'serifLB' : union
-			HSerif.lb (df.leftSB * mul) 0 SideJut sw
-			HSerif.rb (df.leftSB * mul + [HSwToV : 0.5 * sw]) 0 MidJutSide sw
+			HSerif.lb [mix 0 df.leftSB mul] 0 SideJut sw
+			HSerif.rb ([mix 0 df.leftSB mul] + [HSwToV : 0.5 * sw]) 0 MidJutSide sw
 	set PShape.OpenGap : function [] : with-params [top [df [DivFrame 1]] [bot 0] [mul PShape.defaultMul] [bp PShape.BarPos] [sw df.mvs]] : VBar.l
-		df.leftSB * mul + [HSwToV sw]
+		[mix 0 df.leftSB mul] + [HSwToV sw]
 		Math.min ([PBarPosY top sw bp] - 0.5 * sw - TINY) bot
 		Math.max ([PBarPosY top sw bp] + 0.5 * sw + TINY) [mix top [PBarPosY top sw bp] 0.5]
 		0.2 * (df.rightSB - df.leftSB) * ([AdviceStroke 5] / Stroke)
 
 	set RevPShape.SlabMotion : function [top df sw mul] : glyph-proc
-		include : tagged 'serifRT' : HSerif.rt (df.width - df.leftSB * mul) top SideJut sw
+		include : tagged 'serifRT' : HSerif.rt [mix df.width df.rightSB mul] top SideJut sw
 	set RevPShape.SlabSymmetric : function [top df sw mul] : glyph-proc
 		include : RevPShape.SlabMotion top df sw mul
-		include : tagged 'serifRB' : HSerif.mb (df.width - df.leftSB * mul - [HSwToV HalfStroke]) 0 Jut sw
+		include : tagged 'serifRB' : HSerif.mb ([mix df.width df.rightSB mul] - [HSwToV HalfStroke]) 0 Jut sw
 	set RevPShape.SlabCyrlItalic : function [top df sw mul] : glyph-proc
-		include : tagged 'serifRB' : HSerif.rb (df.width - df.leftSB * mul) 0 SideJut sw
+		include : tagged 'serifRB' : HSerif.rb [mix df.width df.rightSB mul] 0 SideJut sw
 	set RevPShape.SlabAsymmetric : function [top df sw mul] : glyph-proc
 		include : RevPShape.SlabMotion top df sw mul
 		include : tagged 'serifRB' : union
-			HSerif.rb (df.width - df.leftSB * mul) 0 SideJut sw
-			HSerif.lb (df.width - df.leftSB * mul - [HSwToV : 0.5 * sw]) 0 MidJutSide sw
+			HSerif.rb [mix df.width df.rightSB mul] 0 SideJut sw
+			HSerif.lb ([mix df.width df.rightSB mul] - [HSwToV : 0.5 * sw]) 0 MidJutSide sw
 	set RevPShape.OpenGap : function [] : with-params [top [df [DivFrame 1]] [bot 0] [mul PShape.defaultMul] [bp PShape.BarPos] [sw df.mvs]] : VBar.r
-		df.width - df.leftSB * mul - [HSwToV sw]
+		[mix df.width df.rightSB mul] - [HSwToV sw]
 		Math.min ([PBarPosY top sw bp] - 0.5 * sw - TINY) bot
 		Math.max ([PBarPosY top sw bp] + 0.5 * sw + TINY) [mix top [PBarPosY top sw bp] 0.5]
 		0.2 * (df.rightSB - df.leftSB) * ([AdviceStroke 5] / Stroke)
@@ -161,15 +157,15 @@ glyph-block Letter-Latin-Upper-P : begin
 		openSerifed           { true   PShape.SlabAsymmetric           RevPShape.SlabAsymmetric           }
 
 	foreach { suffix { fGap slabs revSlabs } } [Object.entries PConfig] : do
-		local fMotion : slabs === PShape.SlabMotion
-		local fSlabBot : slabs && slabs !== PShape.SlabMotion
+		define fMotion : slabs === PShape.SlabMotion
+		define fSlabBot : slabs && slabs !== PShape.SlabMotion
 
 		create-glyph "P.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : LeaningAnchor.Below.VBar.l (SB * PShape.defaultMul)
+			include : LeaningAnchor.Below.VBar.l [mix 0 SB PShape.defaultMul]
 			include : difference
 				PShape CAP (slab -- slabs)
-				if fGap [PShape.OpenGap (top -- CAP) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
+				if fGap [PShape.OpenGap (top -- CAP) (bot -- [if fSlabBot Stroke 0])] [no-shape]
 
 		create-glyph "grek/Rho.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
@@ -178,19 +174,19 @@ glyph-block Letter-Latin-Upper-P : begin
 		if (!fMotion) : create-glyph "PHookLeft.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE
 			eject-contour "serifLT"
-			include : LeftHook (SB * 1.25) CAP
+			include : LeftHook [mix 0 SB PShape.defaultMul] CAP
 
 		create-glyph "smcpP.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : LeaningAnchor.Below.VBar.l (SB * PShape.defaultMul)
+			include : LeaningAnchor.Below.VBar.l [mix 0 SB PShape.defaultMul]
 			include : difference
 				PShape XH (slab -- slabs)
-				if fGap [PShape.OpenGap (top -- XH) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
+				if fGap [PShape.OpenGap (top -- XH) (bot -- [if fSlabBot Stroke 0])] [no-shape]
 
 		create-glyph "PStrokeBottom.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.l.in
-				x   -- (SB * PShape.defaultMul)
+				x   -- [mix 0 SB PShape.defaultMul]
 				bot -- [if fSlabBot Stroke 0]
 				top -- [PBarPosY CAP Stroke PShape.BarPos]
 
@@ -199,7 +195,7 @@ glyph-block Letter-Latin-Upper-P : begin
 			define bar1pos : [PBarPosY CAP Stroke PShape.BarPos] + HalfStroke
 
 			define xCrossBarLeft : SB - SideJut
-			define xPLeft : SB * PShape.defaultMul + [HSwToV HalfStroke]
+			define xPLeft : [mix 0 SB PShape.defaultMul] + [HSwToV HalfStroke]
 			define xCrossBarRight : mix SB RightSB 0.8
 			define yBase : if fSlabBot Stroke 0
 			define yCrossbar : Math.max
@@ -212,7 +208,7 @@ glyph-block Letter-Latin-Upper-P : begin
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
 			define bar1pos : PBarPosY CAP Stroke PShape.BarPos
 			define sw : AdviceStroke 7
-			define gap : sw + [Math.max sw (CAP * 0.06)]
+			define gap : sw + [Math.max sw : CAP * 0.06]
 			include : HOverlayBar [mix 0 SB 0.5] ([mix Width RightSB 0.5] - O) ([mix bar1pos CAP 0.5] + 0.5 * gap) sw
 			include : HOverlayBar [mix 0 SB 0.5] ([mix Width RightSB 0.5] - O) ([mix bar1pos CAP 0.5] - 0.5 * gap) sw
 
@@ -237,11 +233,11 @@ glyph-block Letter-Latin-Upper-P : begin
 		local yBowl : [PBarPosY CAP Stroke PShape.BarPos] + 0.75 * Stroke
 		include : dispiro
 			widths.center [AdviceStroke 4]
-			flat [mix SB RightSB 0.5]   (yBowl + XH * 0.25)
+			flat [mix SB RightSB 0.500] (yBowl + XH * 0.25)
 			curl [mix SB RightSB 0.875] (yBowl - XH * 0.25)
 
 	create-glyph 'PStroke/overlay' : LetterBarOverlay.l.in
-		x     -- (SB * PShape.defaultMul)
+		x     -- [mix 0 SB PShape.defaultMul]
 		bot   -- ([PBarPosY CAP Stroke PShape.BarPos] + Stroke)
 		top   -- (CAP - Stroke)
 		space -- { 0 (RightSB - [HSwToV Stroke]) }
@@ -250,7 +246,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	select-variant 'PStrokeBottom' 0xA750 (follow -- 'P')
 
 	define [BBPShape] : with-params [[mul PShape.defaultMul] [overshoot PShape.defaultOvershoot]] : glyph-proc
-		define sb : SB * mul
+		define sb : mix 0 SB mul
 		include : difference
 			PShape CAP (sw -- BBS) (mul -- mul) (overshoot -- overshoot) (slab -- false)
 			Rect (CAP - BBS) 0 (sb + [HSwToV BBS] / 2) (sb + BBD)
