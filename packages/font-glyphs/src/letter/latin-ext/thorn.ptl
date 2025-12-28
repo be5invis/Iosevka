@@ -8,42 +8,41 @@ glyph-block Letter-Latin-Thorn : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
+	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay SerifFrame
-	glyph-block-import Letter-Greek-Phi : yCapitalPhiBowlBot yCapitalPhiBowlTop
 
-	define xThornLeftStroke : SB * 1.25
+	define xThornBarLeft : mix 0 SB 1.25
 
-	define [yThornBowlBot top slab] : top * 0.19 + [if slab (Stroke * 0.375) 0]
+	define [yThornBowlBot top slab] : [mix 0 top 0.19] + [if slab 0.375 0] * Stroke
 	define [yThornBowlTop top slab] : top - [yThornBowlBot top slab]
 
-	define [yThornBowlAsymmetricBot top slab] : top * 0.25 + [if slab (Stroke * 0.125) 0]
-	define [yThornBowlAsymmetricTop top slab] : top - 0.7 * [yThornBowlAsymmetricBot top slab] + [if slab (-0.125) 0.25] * Stroke
+	define [yThornBowlAsymmetricBot top slab] : [mix 0 top 0.25] + [if slab 0.125 0] * Stroke
+	define [yThornBowlAsymmetricTop top slab] : top - [mix 0 [yThornBowlAsymmetricBot top slab] 0.7] + [if slab (-0.125) (+0.250)] * Stroke
 
 	define [ThornShapeImpl top slabTop slabBot yBowlBot yBowlTop] : glyph-proc
 		local xTurn : Math.max
-			RightSB - (yBowlTop - yBowlBot) * 0.5
-			mix xThornLeftStroke RightSB 0.25
-			xThornLeftStroke + [HSwToV Stroke]
+			RightSB - [BowlXDepth yBowlTop yBowlBot xThornBarLeft RightSB Stroke]
+			xThornBarLeft + [HSwToV Stroke]
 
 		include : dispiro
 			widths.rhs
-			flat xThornLeftStroke yBowlTop [heading Rightward]
+			flat xThornBarLeft yBowlTop [heading Rightward]
 			curl [arch.adjust-x.top xTurn] yBowlTop
 			archv
-			g4   (RightSB - O) [mix yBowlTop yBowlBot (ArchDepthB / (ArchDepthA + ArchDepthB))]
+			g4   (RightSB - OX) [mix yBowlTop yBowlBot (ArchDepthB / (ArchDepthA + ArchDepthB))]
 			arcvh
 			flat [arch.adjust-x.bot xTurn] yBowlBot
-			curl xThornLeftStroke yBowlBot [heading Leftward]
+			curl xThornBarLeft yBowlBot [heading Leftward]
 
-		include : VBar.l xThornLeftStroke 0 top
+		include : VBar.l xThornBarLeft 0 top
 		if slabTop : begin
-			local sf : SerifFrame top 0 xThornLeftStroke RightSB
+			local sf : SerifFrame top 0 xThornBarLeft RightSB
 			if slabBot
 				then : include : composite-proc sf.lt.fullSide sf.lb.fullSide
 				else : include   sf.lt.outer
 
-		include : LeaningAnchor.Above.VBar.l xThornLeftStroke
-		include : LeaningAnchor.Below.VBar.l xThornLeftStroke
+		include : LeaningAnchor.Above.VBar.l xThornBarLeft
+		include : LeaningAnchor.Below.VBar.l xThornBarLeft
 
 	define [ThornShape top slabTop slabBot] : ThornShapeImpl top slabTop slabBot
 		yThornBowlBot top slabBot
@@ -74,7 +73,7 @@ glyph-block Letter-Latin-Thorn : begin
 					CAP - [yThornBowlAsymmetricTop CAP doSB]
 					CAP - [yThornBowlAsymmetricBot CAP doST]
 				include : LetterBarOverlay.l.in
-					x   -- xThornLeftStroke
+					x   -- xThornBarLeft
 					top -- (CAP - [if doST Stroke 0])
 					bot -- (CAP - [yThornBowlAsymmetricBot CAP doST])
 
@@ -82,7 +81,7 @@ glyph-block Letter-Latin-Thorn : begin
 			create-glyph "ThornStrokeBottom.\(suffix)" : glyph-proc
 				include [refer-glyph "Thorn.\(suffix)"] AS_BASE ALSO_METRICS
 				include : LetterBarOverlay.l.in
-					x   -- xThornLeftStroke
+					x   -- xThornBarLeft
 					bot -- [if doSB Stroke 0]
 					top -- [yThornBowlAsymmetricBot CAP doSB]
 
@@ -90,6 +89,7 @@ glyph-block Letter-Latin-Thorn : begin
 	select-variant 'ThornStroke' 0xA764
 	select-variant 'ThornStrokeBottom' 0xA766
 
+	glyph-block-import Letter-Greek-Phi : yCapitalPhiBowlBot yCapitalPhiBowlTop
 	create-glyph 'grek/Sho' 0x3F7 : glyph-proc
 		include : MarkSet.capital
 		include : ThornShapeImpl CAP SLAB SLAB
