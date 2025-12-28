@@ -30,84 +30,64 @@ glyph-block Letter-Latin-Upper-A : begin
 	define AShape : namespace
 		export : define [BarPos bodyShape slabKind top] : begin
 			local fBaseSlabs : maskBits slabKind : bitOr SLAB-LEFT SLAB-RIGHT
-			return : mix [if fBaseSlabs Stroke 0] top : match bodyShape
-				[Just BODY-ROUND-TOP] : Math.min 0.5 (XH * 0.75 / CAP)
-				__ : XH / 2 / CAP
+			return : mix [if fBaseSlabs Stroke 0] top : Math.min 0.5 : match bodyShape
+				[Just BODY-ROUND-TOP] : (XH * 0.75) / CAP
+				__                    : (XH * 0.50) / CAP
 
-		export : define [Mask df bodyShape top sw] : match bodyShape
-			([Just BODY-CURLY] || [Just BODY-STRAIGHT]) : new-glyph : glyph-proc
-				include : VShapeOutline df bodyShape top sw
-				include : FlipAround df.middle (top / 2)
-			[Just BODY-ROUND-TOP] : spiro-outline
-				corner   df.leftSB   0
-				curl     df.leftSB  (top - df.archDepthA)
-				arch.rhs (sw -- sw)  top
-				flat     df.rightSB (top - df.archDepthB)
-				corner   df.rightSB  0
+		export : define [Mask df bodyShape top sw] : new-glyph : glyph-proc
+			include : match bodyShape
+				([Just BODY-CURLY] || [Just BODY-STRAIGHT]) : VShapeOutline df bodyShape top sw
+				[Just BODY-ROUND-TOP] : UShapeOutline top 0 df.leftSB df.rightSB sw df.archDepthA df.archDepthB
+			include : FlipAround df.middle (top / 2)
 
-		export : define [Outer df bodyShape top sw] : match bodyShape
-			([Just BODY-CURLY] || [Just BODY-STRAIGHT]) : new-glyph : glyph-proc
-				include : VShape df bodyShape top sw
-				include : FlipAround df.middle (top / 2)
-			[Just BODY-ROUND-TOP] : dispiro
-				widths.rhs sw
-				flat     df.leftSB   0 [heading Upward]
-				curl     df.leftSB  (top - df.archDepthA)
-				arch.rhs (sw -- sw)  top
-				flat     df.rightSB (top - df.archDepthB)
-				curl     df.rightSB  0 [heading Downward]
+		export : define [Outer df bodyShape top sw] : new-glyph : glyph-proc
+			include : match bodyShape
+				([Just BODY-CURLY] || [Just BODY-STRAIGHT]) : VShape df bodyShape top sw
+				[Just BODY-ROUND-TOP] : UShape top 0 df.leftSB df.rightSB sw df.archDepthA df.archDepthB
+			include : FlipAround df.middle (top / 2)
 
 		define [CrossBar df bodyShape top sw] : begin
-			define yBar : BarPos bodyShape slabKind top
-			return : tagged 'crossBar'
-				intersection [HBar.t 0 df.width yBar sw] [Mask df bodyShape top sw]
+			local yBar : BarPos bodyShape slabKind top
+			return : tagged 'crossBar' : intersection [HBar.t 0 df.width yBar sw] [Mask df bodyShape top sw]
+
 		export : define [Letter df bodyShape slabKind top sw] : new-glyph : glyph-proc
 			include : Outer df bodyShape top sw
 			include : CrossBar df bodyShape top sw
 			include : ASerifs df top sw slabKind
 
 		define [CuspBottomRightRemovedImpl df bodyShape slabKind top sw] : new-glyph : glyph-proc
-			define yBar : BarPos bodyShape slabKind top
+			local yBar : BarPos bodyShape slabKind top
 			include : VShape df bodyShape top sw
 			eject-contour 'strokeDown'
 			include : FlipAround df.middle (top / 2)
 
-			local rightStrokeKnots : begin
-				local s : Seg (df.middle + VCornerHalfWidth * sw / Stroke) top df.rightSB (yBar - sw)
-				list
-					s.z (-1) flat
-					s.z 0    flat
-					s.zz 0.55 [StrokeWidthBlend 0.48 0.45] [if bodyShape curl g4]
-					s.z 1 straight.down.end
+			local cornerHW : VCornerHalfWidth * (sw / Stroke)
+			define [rightStrokeKnots] : let [s : Seg (df.middle + cornerHW) top df.rightSB (yBar - sw)] : list
+				s.z (-1)  flat
+				s.z  0    flat
+				s.zz 0.55 [StrokeWidthBlend 0.48 0.45] [if bodyShape curl g4]
+				s.z (+1)  straight.down.end
 
-			include : intersection
-				MaskBelow top
-				MaskAbove (yBar - sw)
-				dispiro [widths.rhs sw] rightStrokeKnots
+			include : intersection [MaskBelow top] [MaskAbove (yBar - sw)] : dispiro
+				widths.rhs sw
+				rightStrokeKnots
 
-			include : tagged 'crossBar'
-				intersection
-					HBar.t 0 df.width yBar sw
-					union
-						AShape.Mask df bodyShape top sw
-						intersection
-							MaskRight df.middle
-							MaskAbove (yBar - sw)
-							spiro-outline rightStrokeKnots
-								corner df.rightSB 0
-								corner 0 0
-								corner 0 top
+			include : tagged 'crossBar' : intersection [HBar.t 0 df.width yBar sw] : union
+				AShape.Mask df bodyShape top sw
+				intersection [MaskRight df.middle] [MaskAbove (yBar - sw)] : spiro-outline
+					rightStrokeKnots
+					corner df.rightSB 0
+					corner 0          0
+					corner 0          top
 
 			include : ASerifs df top sw slabKind
 			eject-contour 'serifRB'
 
 		define [RoundTopBottomRightRemovedImpl df slabKind top sw] : new-glyph : glyph-proc
-			define yBar : BarPos BODY-ROUND-TOP slabKind top
+			local yBar : BarPos BODY-ROUND-TOP slabKind top
 			include : difference
 				Outer df BODY-ROUND-TOP top sw
-				intersection
-					MaskRight df.middle
-					MaskBelow (yBar - sw)
+				intersection [MaskRight df.middle] [MaskBelow (yBar - sw)]
 			include : CrossBar df BODY-ROUND-TOP top sw
 			include : ASerifs df top sw slabKind
 			eject-contour 'serifRB'
@@ -144,9 +124,9 @@ glyph-block Letter-Latin-Upper-A : begin
 			triSerifed   [bitOr SLAB-TOP SLAB-LEFT SLAB-RIGHT]
 
 	foreach { suffix { bodyShape slabKind } } [Object.entries AConfig] : do
-		define [AShapeImpl mak top fGrek fOverlays] : glyph-proc
-			local df : DivFrame 1
-			include : df.markSet.(mak)
+		define [AShapeImpl mk top fGrek fOverlays] : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.(mk)
 			set-base-anchor 'trailing' df.rightSB 0
 			if fGrek : include : SetGrekUpperTonos : match bodyShape
 				[Just BODY-ROUND-TOP] 0
@@ -155,14 +135,14 @@ glyph-block Letter-Latin-Upper-A : begin
 			include : AShape.Letter df bodyShape slabKind top Stroke
 
 			if fOverlays : begin
-				define yBar : AShape.BarPos bodyShape slabKind top
+				local yBar : AShape.BarPos bodyShape slabKind top
 				eject-contour 'crossBar'
-				include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] (yBar - HalfStroke + 0.5 * OverlayStroke)
+				include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] (yBar - (Stroke - OverlayStroke) / 2)
 				include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix yBar top 0.25]
 
-		create-glyph "A.\(suffix)" : AShapeImpl "capital" CAP
+		create-glyph "A.\(suffix)"          : AShapeImpl "capital" CAP
 		create-glyph "grek/Alpha.\(suffix)" : AShapeImpl "capital" CAP true
-		create-glyph "smcpA.\(suffix)" : AShapeImpl "e" XH
+		create-glyph "smcpA.\(suffix)"      : AShapeImpl "e"       XH
 
 		create-glyph "currency/australSign.\(suffix)" : AShapeImpl "capital" CAP false true
 
