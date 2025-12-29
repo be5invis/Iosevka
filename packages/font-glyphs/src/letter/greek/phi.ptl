@@ -20,7 +20,9 @@ glyph-block Letter-Greek-Phi : begin
 			local l : mix 0        df.leftSB  mul
 			local r : mix df.width df.rightSB mul
 			local turnRadius : BowlXDepth y3 y2 l (df.middle + [HSwToV HalfStroke]) df.mvs
-			include : OShapeFlatTB y3 y2 l r df.mvs ada adb [Math.max ((r - l) - 2 * turnRadius) : HSwToV Stroke]
+			include : OShapeFlatTB y3 y2 l r df.mvs ada adb : Math.max
+				(r - l) - 2 * turnRadius
+				HSwToV : clamp df.mvs Stroke : VSwToH : (r - l) - [HSwToV : 2.5 * df.mvs]
 		: else : begin
 			include : OShape y3 y2 df.leftSB df.rightSB df.mvs ada adb
 		define swBar Stroke
@@ -119,22 +121,22 @@ glyph-block Letter-Greek-Phi : begin
 			flat df.middle (y2 - O) [heading Downward]
 			DiagTail.L df.middle y1 [DiagTail.StdDepth dfHook sw] sw
 
-	define [MtSerif df y sw] : tagged 'serifMT' : HSerif.lt df.middle y (Jut          - [HSwToV : 0.5 * (Stroke - sw)]) sw
-	define [MbSerif df y sw] : tagged 'serifMB' : HSerif.mb df.middle y (MidJutCenter - [HSwToV : 0.5 * (Stroke - sw)]) sw
+	define [MtSerif df y4 sw] : tagged 'serifMT' : HSerif.lt df.middle y4 (Jut          - [HSwToV : 0.5 * (Stroke - sw)]) sw
+	define [MbSerif df y1 sw] : tagged 'serifMB' : HSerif.mb df.middle y1 (MidJutCenter - [HSwToV : 0.5 * (Stroke - sw)]) sw
 
 	glyph-block-export yCapitalPhiBowlBot yCapitalPhiBowlTop
-	define [yCapitalPhiBowlBot top slab] : mix (0 + [if slab Stroke 0]) (top - [if slab Stroke 0]) 0.125
-	define [yCapitalPhiBowlTop top slab] : mix (0 + [if slab Stroke 0]) (top - [if slab Stroke 0]) 0.875
+	define [yCapitalPhiBowlBot y1 y4 slab] : mix (y1 + [if slab Stroke 0]) (y4 - [if slab Stroke 0]) 0.125
+	define [yCapitalPhiBowlTop y1 y4 slab] : mix (y1 + [if slab Stroke 0]) (y4 - [if slab Stroke 0]) 0.875
 
 	define [GrekCapitalPhiImpl fFlatTB df] : glyph-proc
-		local y2 : yCapitalPhiBowlBot CAP SLAB
-		local y3 : yCapitalPhiBowlTop CAP SLAB
-		define [object swBar] : include : VarPhiRing fFlatTB df y2 y3 df.archDepthA df.archDepthB
-		include : StraightBar df 0 y2 y3 CAP swBar
+		local y2 : yCapitalPhiBowlBot 0 CAP SLAB
+		local y3 : yCapitalPhiBowlTop 0 CAP SLAB
+		local dim : include : VarPhiRing fFlatTB df y2 y3 df.archDepthA df.archDepthB
+		include : StraightBar df 0 y2 y3 CAP dim.swBar
 
 		if SLAB : begin
-			include : tagged 'serifMT' : HSerif.mt df.middle CAP MidJutCenter
-			include : tagged 'serifMB' : HSerif.mb df.middle 0   MidJutCenter
+			include : tagged 'serifMT' : HSerif.mt df.middle CAP MidJutCenter dim.swBar
+			include : tagged 'serifMB' : HSerif.mb df.middle 0   MidJutCenter dim.swBar
 
 	create-glyph 'grek/Phi' 0x3A6 : glyph-proc
 		local df : include : DivFrame para.advanceScaleM 3
@@ -150,20 +152,29 @@ glyph-block Letter-Greek-Phi : begin
 		local df : include : DivFrame para.advanceScaleMM 3
 		include : df.markSet.capital
 
-		local yExt : Math.max (LongVJut - QuarterStroke) : if SLAB (1.5 * Stroke) 0
+		local y1 : 0   - (LongVJut - QuarterStroke)
+		local y4 : CAP + (LongVJut - QuarterStroke)
 
-		local top : CAP + yExt
-		local bot : 0   - yExt
+		include : ExtendBelowBaseAnchors y1
+		include : ExtendAboveBaseAnchors y4
 
-		include : ExtendAboveBaseAnchors top
-		include : ExtendBelowBaseAnchors bot
+		local pseudoY2 : yCapitalPhiBowlBot 0 CAP SLAB
+		local pseudoY3 : yCapitalPhiBowlTop 0 CAP SLAB
 
-		define [object swBar] : include : VarPhiRing true df 0 CAP df.archDepthA df.archDepthB
-		include : StraightBar df bot 0 CAP top swBar
+		local y2 : Math.max 0   : y1 + (pseudoY2 - 0)
+		local y3 : Math.min CAP : y4 - (CAP - pseudoY3)
+
+		local pArchDepth : mix 1 ((y3 - y2) / (pseudoY3 - pseudoY2)) (2 * (df.adws - 1))
+
+		local ada : df.archDepthAOf : ArchDepth * pArchDepth
+		local adb : df.archDepthBOf : ArchDepth * pArchDepth
+
+		local dim : include : VarPhiRing true df y2 y3 ada adb
+		include : StraightBar df y1 y2 y3 y4 dim.swBar
 
 		if SLAB : begin
-			include : tagged 'serifMT' : HSerif.mt df.middle top MidJutCenter
-			include : tagged 'serifMB' : HSerif.mb df.middle bot MidJutCenter
+			include : tagged 'serifMT' : HSerif.mt df.middle y4 MidJutCenter dim.swBar
+			include : tagged 'serifMB' : HSerif.mb df.middle y1 MidJutCenter dim.swBar
 
 	create-glyph 'taillessphi' 0x2C77 : glyph-proc
 		local df : include : DivFrame para.advanceScaleM 3
@@ -173,20 +184,20 @@ glyph-block Letter-Greek-Phi : begin
 	create-glyph 'grek/phi.cursive' : glyph-proc
 		local df : include : DivFrame para.advanceScaleM 3
 		include : df.markSet.p
-		define [object swBar] : include : GrekLowerPhiCursiveRing false df 0 XH df.smallArchDepthA df.smallArchDepthB
-		include : VBar.m df.middle Descender (0.2 * df.mvs) swBar
+		local dim : include : GrekLowerPhiCursiveRing false df 0 XH df.smallArchDepthA df.smallArchDepthB
+		include : VBar.m df.middle Descender (0.2 * df.mvs) dim.swBar
 
 	create-glyph 'grek/phi.straight' : glyph-proc
 		local df : include : DivFrame para.advanceScaleM 3
 		include : df.markSet.bp
-		define [object swBar] : include : VarPhiRing false df 0 XH df.smallArchDepthA df.smallArchDepthB
-		include : StraightBar df Descender 0 XH Ascender swBar
+		local dim : include : VarPhiRing false df 0 XH df.smallArchDepthA df.smallArchDepthB
+		include : StraightBar df Descender 0 XH Ascender dim.swBar
 
 	create-glyph 'grek/phi.neohellenic' : glyph-proc
 		local df : include : DivFrame para.advanceScaleM 3
 		include : df.markSet.p
-		define [object swBar] : include : VarPhiRing false df 0 XH df.smallArchDepthA df.smallArchDepthB
-		include : VBar.m df.middle Descender (0.2 * df.mvs) swBar
+		local dim : include : VarPhiRing false df 0 XH df.smallArchDepthA df.smallArchDepthB
+		include : VBar.m df.middle Descender (0.2 * df.mvs) dim.swBar
 
 	select-variant 'grek/phi' 0x3C6
 	alias 'grek/varphi' 0x3D5 'grek/phi.straight'
@@ -214,10 +225,10 @@ glyph-block Letter-Greek-Phi : begin
 		create-glyph "cyrl/ef.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws 3
 			include : df.markSet.bp
-			define [object swBar] : include : Bowl true df 0 XH df.smallArchDepthA df.smallArchDepthB
-			include : Bar df Descender 0 XH Ascender swBar
-			if sMT : include : sMT df Ascender  swBar
-			if sMB : include : sMB df Descender swBar
+			local dim : include : Bowl true df 0 XH df.smallArchDepthA df.smallArchDepthB
+			include : Bar df Descender 0 XH Ascender dim.swBar
+			if sMT : include : sMT df Ascender  dim.swBar
+			if sMB : include : sMB df Descender dim.swBar
 
 	select-variant 'cyrl/ef' 0x444
 	select-variant 'cyrl/ef.BGR' (shapeFrom -- 'cyrl/ef')
