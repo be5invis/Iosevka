@@ -1,40 +1,46 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
 
 glyph-block Letter-Greek-Lower-Nu : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
 
-	alias 'grek/nu.straight' null 'v.straightSerifless'
-	alias 'grek/nu.curly'    null 'v.curlySerifless'
+	alias 'grek/nu.straightSerifless' null 'v.straightSerifless'
+	alias 'grek/nu.straightSerifed'   null 'v.straightMotionSerifed'
 
-	define [NuCoreShape df k ltOvershoot] : glyph-proc
+	alias 'grek/nu.curlySerifless' null 'v.curlySerifless'
+	alias 'grek/nu.curlySerifed'   null 'v.curlyMotionSerifed'
+
+	define [NuBaseShape df k ltOvershoot] : glyph-proc
 		local xmid : df.middle + 0.375 * Stroke
 		include : dispiro
-			g4 (df.leftSB + [HSwToV : k * Stroke]) (XH - ltOvershoot) [widths.rhs]
+			widths.rhs
+			g4 (df.leftSB + [HSwToV : k * Stroke]) (XH - ltOvershoot)
 			bezControls 0.33 0.2 1 0.76 6 important
 			g4.down.end xmid 0 [heading Downward]
 		include : dispiro
 			widths.rhs
-			flat df.rightSB XH [heading Downward]
-			curl df.rightSB (XH * 0.9) [heading Downward]
+			flat df.rightSB      XH        [heading Downward]
+			curl df.rightSB [mix XH 0 0.1] [heading Downward]
 			quadControls 0 0.35 6
 			g4   xmid 0
 
-	create-glyph 'grek/nu.casual' : glyph-proc
+	create-glyph 'grek/nu.casualSerifless' : glyph-proc
 		local df : include : DivFrame 1
 		include : df.markSet.e
-		include : NuCoreShape df 0.4 O
+		include : NuBaseShape df 0.4 O
 
 	create-glyph 'grek/nu.casualSerifed' : glyph-proc
 		local df : include : DivFrame 1
 		include : df.markSet.e
 		include : difference
-			NuCoreShape df 0.75 0
-			Rect XH (XH - Stroke) 0 (df.leftSB + [HSwToV : 0.5 * Stroke])
-		include : HSerif.lt (df.leftSB + [HSwToV : 0.25 * Stroke]) XH (SideJut + [HSwToV : 0.25 * Stroke])
+			NuBaseShape df 0.75 0
+			Rect XH (XH - Stroke) 0 (df.leftSB + [HSwToV HalfStroke])
+		include : HSerif.lt (df.leftSB + [HSwToV QuarterStroke]) XH (SideJut + [HSwToV QuarterStroke])
+
 	select-variant 'grek/nu' 0x3BD
+	link-reduced-variant 'grek/nu/sansSerif' 'grek/nu' MathSansSerif
