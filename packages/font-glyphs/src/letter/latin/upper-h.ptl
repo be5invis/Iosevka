@@ -120,7 +120,7 @@ glyph-block Letter-Latin-Upper-H : begin
 			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (xTopBarRightEnd - xm)
 			include : VSerif.dr xTopBarRightEnd top VJut swVJut
 
-	define [HwairShape df top yend slabType serifMR] : glyph-proc
+	define [HwairShape df top yend slabType serifTR] : glyph-proc
 		local xm : df.middle + [HSwToV : 0.5 * df.mvs]
 		include : tagged 'strokeL' : VBar.l df.leftSB 0 top df.mvs
 		include : tagged 'strokeR' : UpwardHookShape
@@ -135,7 +135,7 @@ glyph-block Letter-Latin-Upper-H : begin
 
 		include : HSerifs slabType df.leftSB xm top df.mvs
 		eject-contour 'serifRB'
-		if serifMR : begin
+		if serifTR : begin
 			local sf2 : [SerifFrame.fromDf df yend 0].slice 1 2
 			include sf2.rt.full
 
@@ -247,11 +247,11 @@ glyph-block Letter-Latin-Upper-H : begin
 
 		DefineSelectorGlyph "Hwair" suffix hwairDf 'capital'
 
-		foreach { suffixV serifMR } [Object.entries HwairVConfig] : do
+		foreach { suffixV serifTR } [Object.entries HwairVConfig] : do
 			create-glyph "Hwair.\(suffix).\(suffixV)" : glyph-proc
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
-				include : HwairShape hwairDf CAP XH slabType serifMR
+				include : HwairShape hwairDf CAP XH slabType serifTR
 
 		select-variant "Hwair.\(suffix)" (follow -- 'Hv/v')
 
@@ -289,6 +289,17 @@ glyph-block Letter-Latin-Upper-H : begin
 		create-glyph "smcpHStroke.\(suffix)" : glyph-proc
 			include [refer-glyph "smcpH.\(suffix)"] AS_BASE ALSO_METRICS
 			include : OverlayStrokeShape XH slabType
+
+		create-glyph "smcpHFaucal.\(suffix)" : glyph-proc
+			include [refer-glyph "smcpH.\(suffix)"] AS_BASE ALSO_METRICS
+			eject-contour 'crossbar'
+			local bp1 : mix 0 XH : HBarPos + 0.05
+			local bp2 : mix 0 XH : HBarPos - 0.05
+			local barSw : Math.min OverlayStroke
+				0.625 * ((XH - [if (slabType === SLAB-ALL) Stroke 0]) - bp1)
+				0.625 * (bp2 - [if (slabType === SLAB-ALL) Stroke 0])
+			include : HBar.b (SB - O) (RightSB + O) bp1 barSw
+			include : HBar.t (SB - O) (RightSB + O) bp2 barSw
 
 		create-glyph "cyrl/EnMidHook.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
@@ -347,6 +358,7 @@ glyph-block Letter-Latin-Upper-H : begin
 
 	select-variant 'HStroke' 0x126 (follow -- 'H')
 	select-variant 'smcpHStroke' (follow -- 'H')
+	select-variant 'smcpHFaucal' (follow -- 'H')
 
 	select-variant 'cyrl/EnHook' 0x4C7 (shapeFrom -- 'Heng') (follow -- 'cyrl/En/descBase')
 	select-variant 'cyrl/enHook' 0x4C8 (shapeFrom -- 'smcpHeng') (follow -- 'cyrl/en/descBase')
