@@ -655,7 +655,7 @@ function SpecimenCharacterImpl(props: SpecimenCharacterImplProps) {
 			/>
 			<span className="character-sample-inner">
 				<span className="pre">
-					{(isMark ? "\uEF0E" : "") + String.fromCodePoint(props.char.lch)}
+					{(isMark ? "\uf89E" : "") + String.fromCodePoint(props.char.lch)}
 				</span>
 				<SpecimenCharacterUnderBg
 					char={props.char}
