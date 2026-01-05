@@ -39,15 +39,14 @@ glyph-block Symbol-Punctuation-Small : begin
 		local {.x mx1 .y my1} : GlobalTransform.apply {.x cx .y cy}
 		include : Translate (mx1) (my1)
 
-	create-glyph 'comma.round' : glyph-proc
-		local df : include : DivFrame para.advanceScaleI
-		include : CommaShapeT df.middle 0 : glyph-proc
-			local r  : PeriodRadius + 0
-			local ro : PeriodRadius - O
-			local sw : Math.min [AdviceStroke 4] (PeriodSize * 0.4)
-			local swEnd : Math.min Stroke (PeriodSize * 0.5)
-			local commaOverflow : PeriodRadius - swEnd * 0.5
-			local rFill : ro - sw / 4
+	define [CommaShape kdr o] : namespace
+		define r : PeriodRadius * kdr
+		define ro : r - o
+		define sw    : Math.min [AdviceStroke 4] (r * 0.8)
+		define swEnd : Math.min [AdviceStroke 2] (r * 1.0)
+		define commaOverflow : r - swEnd / 2
+		define rFill : ro - sw / 4
+		export : define [round cx cy] : CommaShapeT cx cy : glyph-proc
 			include : union
 				spiro-outline
 					g4 rFill rFill
@@ -62,24 +61,17 @@ glyph-block Symbol-Punctuation-Small : begin
 				dispiro
 					g4 r r [widths.rhs (sw / 4)]
 					arcvh
-					g4 0 O [widths.rhs (sw / 2)]
+					g4 0 o [widths.rhs (sw / 2)]
 					archv
 					g4 (-ro) r
 					arcvh
 					g4 0 (r + ro)
 					archv
-					g4 ro r [widths.rhs sw]
+					g4 (+ro) r [widths.rhs sw]
 					quadControls (0 + TanSlope / 2) (0.5 - TanSlope * (r / Descender)) 12
 					g4 ([mix 0 Descender TanSlope] - commaOverflow) Descender [widths.rhs swEnd]
 
-	create-glyph 'comma.square' : glyph-proc
-		local df : include : DivFrame para.advanceScaleI
-		include : with-transform [Translate df.middle 0] : glyph-proc
-			local r : PeriodRadius * DesignParameters.squareDotScalar + 0
-			local sw : Math.min [AdviceStroke 4] (PeriodSize * DesignParameters.squareDotScalar * 0.4)
-			local swEnd : Math.min Stroke (PeriodSize * DesignParameters.squareDotScalar * 0.5)
-			local commaOverflow : r - swEnd * 0.5
-
+		export : define [square cx cy] : with-transform [Translate cx cy] : glyph-proc
 			include : union
 				SquareAt 0 r r
 				dispiro
@@ -88,16 +80,14 @@ glyph-block Symbol-Punctuation-Small : begin
 					quadControls (0 + TanSlope / 2) (0.5 - TanSlope * (r / Descender)) 12
 					g4 ([mix 0 Descender TanSlope] - commaOverflow) Descender [widths.rhs swEnd]
 
-
-	create-glyph 'revComma.round' : glyph-proc
-		local df : include : DivFrame para.advanceScaleI
-		include : CommaShapeT df.middle 0 : glyph-proc
-			local r  : PeriodRadius + 0
-			local ro : PeriodRadius - O
-			local sw : Math.min [AdviceStroke 4] (PeriodSize * 0.4)
-			local swEnd : Math.min Stroke (PeriodSize * 0.5)
-			local commaOverflow : PeriodRadius - swEnd * 0.5
-			local rFill : ro - sw / 4
+	define [RevCommaShape kdr o] : namespace
+		define r : PeriodRadius * kdr
+		define ro : r - o
+		define sw    : Math.min [AdviceStroke 4] (r * 0.8)
+		define swEnd : Math.min [AdviceStroke 2] (r * 1.0)
+		define commaOverflow : r - swEnd / 2
+		define rFill : ro - sw / 4
+		export : define [round cx cy] : CommaShapeT cx cy : glyph-proc
 			include : union
 				spiro-outline
 					g4 rFill rFill
@@ -112,9 +102,9 @@ glyph-block Symbol-Punctuation-Small : begin
 				dispiro
 					g4 (-r) r [widths.lhs (sw / 4)]
 					arcvh
-					g4 0 O [widths.lhs (sw / 2)]
+					g4 0 o [widths.lhs (sw / 2)]
 					archv
-					g4 (ro) r
+					g4 (+ro) r
 					arcvh
 					g4 0 (r + ro)
 					archv
@@ -122,14 +112,7 @@ glyph-block Symbol-Punctuation-Small : begin
 					quadControls (0 - TanSlope / 2) (0.5 - TanSlope * (r / Descender)) 12
 					g4 ([mix 0 Descender TanSlope] + commaOverflow) Descender [widths.lhs swEnd]
 
-	create-glyph 'revComma.square' : glyph-proc
-		local df : include : DivFrame para.advanceScaleI
-		include : with-transform [Translate df.middle 0] : glyph-proc
-			local r : PeriodRadius * DesignParameters.squareDotScalar + 0
-			local sw : Math.min [AdviceStroke 4] (PeriodSize * DesignParameters.squareDotScalar * 0.4)
-			local swEnd : Math.min Stroke (PeriodSize * DesignParameters.squareDotScalar * 0.5)
-			local commaOverflow : r - swEnd * 0.5
-
+		export : define [square cx cy] : with-transform [Translate cx cy] : glyph-proc
 			include : union
 				SquareAt 0 r r
 				dispiro
@@ -138,9 +121,25 @@ glyph-block Symbol-Punctuation-Small : begin
 					quadControls (0 - TanSlope / 2) (0.5 - TanSlope * (r / Descender)) 12
 					g4 ([mix 0 Descender TanSlope] + commaOverflow) Descender [widths.lhs swEnd]
 
+	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+		create-glyph "comma.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleI
+			include : [CommaShape kDotRadius overshoot].(suffix) df.middle 0
+		create-glyph "revComma.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleI
+			include : [RevCommaShape kDotRadius overshoot].(suffix) df.middle 0
+		create-glyph "comma/asDiacritic.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleSp
+			include : [CommaShape kDotRadius overshoot].(suffix) df.middle 0
+		create-glyph "revComma/asDiacritic.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleSp
+			include : [RevCommaShape kDotRadius overshoot].(suffix) df.middle 0
 
 	select-variant 'comma' ',' (follow -- 'punctuationDot')
 	select-variant 'revComma' 0x2E41 (follow -- 'punctuationDot')
+
+	select-variant 'comma/asDiacritic' (follow -- 'diacriticDot')
+	select-variant 'revComma/asDiacritic' (follow -- 'diacriticDot')
 
 	turned "turnComma.round"  null "comma.round"  [DivFrame para.advanceScaleI].middle PeriodRadius
 	turned "turnComma.square" null "comma.square" [DivFrame para.advanceScaleI].middle (PeriodRadius * DesignParameters.squareDotScalar)
