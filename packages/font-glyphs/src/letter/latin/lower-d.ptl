@@ -10,7 +10,7 @@ glyph-block Letter-Latin-Lower-D : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Shared-Metrics : markExtend
 	glyph-block-import Mark-Adjustment : LeaningAnchor
-	glyph-block-import Letter-Shared : CreateCommaCaronComposition
+	glyph-block-import Letter-Shared : CreateAccentedComposition CreateCommaCaronComposition
 	glyph-block-import Letter-Shared-Shapes : OBarRight RightwardTailedBar CurlyTail
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay SerifFrame UpwardHookShape
 	glyph-block-import Letter-Shared-Shapes : PalatalHook RetroflexHook TopHook
@@ -45,7 +45,7 @@ glyph-block Letter-Latin-Lower-D : begin
 			adb   -- df.smallArchDepthB
 		tagged 'rightBar' : VBar.r df.rightSB DToothlessRise yTop df.mvs
 
-	define [ToothlessCornerHBBBody df yTop] : union
+	define [ToothlessCornerRTBBody df yTop] : union
 		OBarRight.toothlessCorner (rise -- DToothlessRise) (mBlend -- DMBlend)
 			left  -- df.leftSB
 			right -- df.rightSB
@@ -64,15 +64,15 @@ glyph-block Letter-Latin-Lower-D : begin
 			ada   -- df.smallArchDepthA
 			adb   -- df.smallArchDepthB
 
-	define [TopSerif df yTop] : tagged 'serifRT' : HSerif.lt (df.rightSB - [HSwToV df.mvs]) yTop SideJut
+	define [TopSerif df yTop] : tagged 'serifRT' : HSerif.lt (df.rightSB - [HSwToV df.mvs]) yTop SideJut df.mvs
 
-	define [BaseSerif df yTop] : tagged 'serifRB' : HSerif.rb df.rightSB 0 SideJut
+	define [BaseSerif df yTop] : tagged 'serifRB' : HSerif.rb df.rightSB 0 SideJut df.mvs
 
 	define DConfig : SuffixCfg.weave
 		object # body
 			toothed                   ToothedBody
 			toothlessCorner           ToothlessCornerBody
-			toothlessCornerHBB        ToothlessCornerHBBBody
+			toothlessCornerRTB        ToothlessCornerRTBBody
 			toothlessRounded          ToothlessRoundedBody
 			tailed                    TailedBody
 
@@ -160,22 +160,23 @@ glyph-block Letter-Latin-Lower-D : begin
 	link-reduced-variant 'd/descBase' 'd'
 	derive-composites 'dPalatalHook' 0x1D81 'd/descBase' : PalatalHook.r
 		xLink -- RightSB
-		x -- (RightSB + SideJut)
-		y -- 0
+		x     -- (RightSB + SideJut)
+		y     -- 0
 
-	link-reduced-variant 'd/hookBottomBase' 'd'
-	derive-glyphs 'dHookBottom' 0x256 "d/hookBottomBase" : function [src gr] : glyph-proc
+	link-reduced-variant 'd/rTailBase' 'd'
+	derive-glyphs 'dRTail' 0x256 "d/rTailBase" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : RetroflexHook.rExt RightSB 0
 		include : LeaningAnchor.Below.VBar.r RightSB
 
-	link-reduced-variant 'dHookTop/hookBottomBase' 'dHookTop'
-	derive-glyphs 'dHookTopBottom' 0x1D91 "dHookTop/hookBottomBase" : function [src gr] : glyph-proc
+	link-reduced-variant 'dHookTop/rTailBase' 'dHookTop'
+	derive-glyphs 'dHookTopRTail' 0x1D91 "dHookTop/rTailBase" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : RetroflexHook.rExt RightSB 0
 		include : LeaningAnchor.Below.VBar.r RightSB
 
 	CreateCommaCaronComposition 'dCaron' 0x10F 'dCaron/base' (Width - [HSwToV QuarterStroke])
+	CreateAccentedComposition 'dWedge' null 'd' 'caronAbove'
 
 	derive-multi-part-glyphs 'dDot' 0x1E0B {'d' 'dotAbove'} : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
@@ -184,8 +185,7 @@ glyph-block Letter-Latin-Lower-D : begin
 		include [refer-glyph base] AS_BASE
 		include : LeaningAnchor.Above.VBar.r Middle
 
-	derive-composites 'tauGallicum' 0xA7C8 'd'
-		HBar.m (SB - OX) (RightSB + OX) (XH * 0.5) OverlayStroke
+	derive-composites 'tauGallicum' 0xA7C8 'd' : HBar.m (SB - OX) (RightSB + OX) (XH * 0.5) OverlayStroke
 
 	define DCurlyTailConfig : object
 		toothedSerifless  { false }
@@ -211,7 +211,7 @@ glyph-block Letter-Latin-Lower-D : begin
 					y2 -- (0.37 * Descender)
 					swBefore -- sw
 					terminalSlopeAdj -- 0.25
-			if fSerif : include : HSerif.lt (m - [HSwToV sw]) Ascender SideJut
+			if fSerif : include : HSerif.lt (m - [HSwToV sw]) Ascender SideJut sw
 
 	select-variant 'dCurlyTail' 0x221
 

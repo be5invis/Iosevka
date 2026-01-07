@@ -24,14 +24,16 @@ glyph-block Letter-Latin-Lower-I : begin
 	define MODE-L  1 # 'l'-like letters
 
 	define [XMiddle mode] : namespace
-		define [FlatTailedImpl df doST] : begin
-			return : df.middle - [if (doST && (mode !== MODE-L)) 0 : IBalance2 df]
-		define [TailedImpl df doST] : begin
-			return : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [TailedDotlessIShift df])
+		define [HookyImpl df doST doSB] : begin
+			local sign : clamp (-1) (+1) ([if doST 1 0] - [if doSB 1 0])
+			return : df.middle + sign * [IBalance2 df]
+		define [FlatTailedImpl df doST] : HookyImpl df (doST && (mode !== MODE-L)) true
+		define [TailedImpl df doST] : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [TailedDotlessIShift df])
 		export : define [Center df] : df.middle + 0
-		export : define [Hooky df] : df.middle + [IBalance2 df]
-		export : define [HookyBottom df] : df.middle - [IBalance2 df]
 		export : define [Serifed df] : df.middle + [IBalance df]
+		export : define [Hooky df] : HookyImpl df true false
+		export : define [HookyBottom df] : HookyImpl df false true
+		export : define [ZShaped df] : HookyImpl df true true
 		export : define [Tailed df] : TailedImpl df false
 		export : define [TailedSerifed df] : TailedImpl df true
 		export : define [FlatTailed df] : FlatTailedImpl df false
@@ -60,8 +62,7 @@ glyph-block Letter-Latin-Lower-I : begin
 
 		export : define [Serifed df top xMiddle] : glyph-proc
 			include : VBar.m xMiddle 0 top df.mvs
-			include : tagged 'serifB'
-				HSerif.mb df.middle 0 (LongJut * df.adws)
+			include : tagged 'serifMB' : HSerif.mb df.middle 0 (LongJut * df.adws)
 			set-base-anchor 'trailing' (df.middle + LongJut * df.adws) 0
 
 		export : define [Tailed df top xMiddle] : glyph-proc
@@ -162,8 +163,8 @@ glyph-block Letter-Latin-Lower-I : begin
 		'serifless'             { Body.Serifless     Serifs.None          Marks.Serifless  [XMiddle mode].Center             para.advanceScaleII  0      }
 		'hooky'                 { Body.Serifless     Serifs.Hooky         Marks.Serifed    [XMiddle mode].Hooky              para.advanceScaleI   0      }
 		'hookyBottom'           { Body.HookyBottom   Serifs.None          Marks.Serifless  [XMiddle mode].HookyBottom        para.advanceScaleI   Stroke }
-		'zshaped'               { Body.HookyBottom   Serifs.Hooky         Marks.Serifed    [XMiddle mode].Center             para.advanceScaleI   Stroke }
-		'zshapedAsymmetric'     { Body.HookyBottom   Serifs.HookyShort    Marks.Serifed    [XMiddle mode].Center             para.advanceScaleI   Stroke }
+		'zshaped'               { Body.HookyBottom   Serifs.Hooky         Marks.Serifed    [XMiddle mode].ZShaped            para.advanceScaleI   Stroke }
+		'zshapedAsymmetric'     { Body.HookyBottom   Serifs.HookyShort    Marks.Serifed    [XMiddle mode].ZShaped            para.advanceScaleI   Stroke }
 		'serifed'               { Body.Serifed       Serifs.Serifed       Marks.Serifed    [XMiddle mode].Serifed            para.advanceScaleI   Stroke }
 		'serifedAsymmetric'     { Body.Serifed       Serifs.SerifedShort  Marks.Serifed    [XMiddle mode].Serifed            para.advanceScaleI   Stroke }
 		'tailed'                { Body.Tailed        Serifs.None          Marks.Serifless  [XMiddle mode].Tailed             para.advanceScaleI   Stroke }
@@ -212,7 +213,7 @@ glyph-block Letter-Latin-Lower-I : begin
 			include : Marks df XH xMiddle
 			include : Serif df XH xMiddle
 
-		create-glyph "latn/Iota.\(suffix)" : glyph-proc
+		create-glyph "dotlessiCap.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.capital
 			local xMiddle : xMiddleT df
@@ -333,7 +334,7 @@ glyph-block Letter-Latin-Lower-I : begin
 		select-variant 'latn/iota' 0x269 (shapeFrom -- 'dotlessi')
 		alias 'cyrl/iota' 0xA647 'latn/iota'
 
-		select-variant 'latn/Iota' 0x196 (follow -- 'latn/iota')
+		select-variant 'latn/Iota' 0x196 (shapeFrom -- 'dotlessiCap') (follow -- 'latn/iota')
 		alias 'cyrl/Iota' 0xA646 'latn/Iota'
 
 		select-variant 'cyrl/ghe.SRB/base' (shapeFrom -- 'dotlessi') (follow -- 'cyrl/ghe.SRB')
@@ -341,7 +342,7 @@ glyph-block Letter-Latin-Lower-I : begin
 		CreateMultiAccentedComposition 'cyrl/gje.SRB' null 'cyrl/ghe.SRB/base' { 'cyrl/ghe.SRB/overlineAbove' 'acuteAbove' }
 
 		CreateTurnedLetter 'turni'    0x1D09 'i'         HalfAdvance (XH / 2)
-		CreateTurnedLetter 'turniota' 0x2129 'latn/iota' HalfAdvance (XH / 2)
+		CreateTurnedLetter 'turniota' 0x2129 'grek/iota' HalfAdvance (XH / 2)
 
 		CreateAccentedComposition 'dotlessiBar' null 'dotlessi' 'barOver'
 		CreateAccentedComposition 'iBar' 0x268 'dotlessiBar' 'tittleAbove'
@@ -381,26 +382,23 @@ glyph-block Letter-Latin-Lower-I : begin
 
 		derive-composites 'lDot' 0x140 'lDot/base' 'LDot/dot'
 
-		CreateCommaCaronComposition 'lcaron' 0x13E 'l'
+		CreateCommaCaronComposition 'lCaron' 0x13E 'l'
+		CreateAccentedComposition 'lWedge' null 'l' 'caronAbove'
+
 		derive-glyphs 'lSlash' 0x142 'l' : lambda [src gr] : glyph-proc
 			include [refer-glyph src] AS_BASE ALSO_METRICS
-			local anchor    currentGlyph.baseAnchors.overlay
+			local anchor currentGlyph.baseAnchors.overlay
 			local stretch : Math.sqrt : currentGlyph.advanceWidth / HalfUPM
 			include : FlatSlashShape anchor.x anchor.y (0.5 * OverlayStroke) (0.8 * stretch) (0.4 * stretch)
 
 		# Curly-tail shape
 		define [CurlyTailShape df fSerif] : glyph-proc
-			local fine : AdviceStroke 3.5
-			# local rinner : LongJut / 2 - fine / 2
-			local m : df.middle + [HSwToV HalfStroke]
-			# local x2 : mix SB m 0.25
-			# local y2 : - fine
 			if fSerif : include : HSerif.lt df.middle Ascender LongJut
 			include : dispiro
 				widths.lhs
-				flat (m - [HSwToV Stroke]) Ascender [heading Downward]
-				curl (m - [HSwToV Stroke]) LongJut
-				CurlyTail.n fine 0 (m + LongJut) SB 0
+				flat (df.middle - [HSwToV HalfStroke]) Ascender [heading Downward]
+				curl (df.middle - [HSwToV HalfStroke]) LongJut
+				CurlyTail.n [AdviceStroke 3.5] 0 (df.middle + [HSwToV HalfStroke] + LongJut) SB 0
 
 		create-glyph 'lCurlyTail.serifless' : glyph-proc
 			local df : include : DivFrame para.advanceScaleI
@@ -414,7 +412,7 @@ glyph-block Letter-Latin-Lower-I : begin
 
 		select-variant 'lCurlyTail' 0x234
 
-		create-glyph 'looprevesh' 0x1AA : glyph-proc
+		create-glyph 'reveshLoop' 0x1AA : glyph-proc
 			local df : include : DivFrame para.advanceScaleI
 			include : df.markSet.bp
 			local fine : AdviceStroke 4
