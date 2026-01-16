@@ -201,7 +201,7 @@ glyph-block Mark-Above : begin
 	alias 'graveToneAbove' 0x340 'graveAbove'
 
 	create-glyph 'asciiGrave/body/straight' : glyph-proc
-		local df : include : DivFrame para.advanceScaleF
+		local df : include : DivFrame para.advanceScaleSp
 		include : dispiro
 			flat (df.middle + HalfStroke * 1.1 * asciiMarkZoomX * [Math.sqrt df.adws]) [mix aboveMarkMid aboveMarkBot asciiMarkZoomY] [widths.center : Stroke * 0.9]
 			curl (df.middle - markExtend * 1.0 * asciiMarkZoomX * [Math.sqrt df.adws]) [mix aboveMarkMid aboveMarkTop asciiMarkZoomY] [widths.center : Stroke * 1.1]
@@ -229,7 +229,7 @@ glyph-block Mark-Above : begin
 	alias 'acuteToneAbove' 0x341 'acuteAbove'
 
 	create-glyph 'latin1acute' 0xB4 : glyph-proc
-		local df : include : DivFrame para.advanceScaleF
+		local df : include : DivFrame para.advanceScaleSp
 		include : dispiro
 			flat (df.middle - HalfStroke * 1.1 * asciiMarkZoomX * [Math.sqrt df.adws]) [mix aboveMarkMid aboveMarkBot asciiMarkZoomY] [widths.center : Stroke * 0.9]
 			curl (df.middle + markExtend * 1.0 * asciiMarkZoomX * [Math.sqrt df.adws]) [mix aboveMarkMid aboveMarkTop asciiMarkZoomY] [widths.center : Stroke * 1.1]
@@ -474,14 +474,6 @@ glyph-block Mark-Above : begin
 			rightEnd -- RightSB
 			hs       -- (OperatorStroke / 2)
 
-	create-glyph 'asciiTilde/sMid' : glyph-proc
-		include : TildeShape
-			ttop     -- (SymbolMid + ((aboveMarkTop - (aboveMarkBot + markFine / 2)) / 2) * asciiMarkZoomY)
-			tbot     -- (SymbolMid - ((aboveMarkTop - (aboveMarkBot + markFine / 2)) / 2) * asciiMarkZoomY)
-			leftEnd  -- SB
-			rightEnd -- RightSB
-			hs       -- (OperatorStroke / 2)
-
 	for-width-kinds WideWidth1
 		define emDashWidth : if (para.isQuasiProportional && MosaicWidthScalar > 1) UPM MosaicWidth
 		create-glyph [MangleName 'swungDash.high'] : glyph-proc
@@ -493,26 +485,29 @@ glyph-block Mark-Above : begin
 				rightEnd -- (emDashWidth - SB)
 				hs       -- (OperatorStroke / 2)
 
-	define [OverlayTildeT sink] : begin
+	define [OverlayTildeT sink kSB sw] : begin
 		local t : mix aboveMarkMid aboveMarkTop asciiMarkZoomY
 		local b : mix aboveMarkMid (aboveMarkBot + markFine / 2) asciiMarkZoomY
 		local offset : SymbolMid - [mix t b 0.5]
 		return : sink
 			ttop     -- (t + offset)
 			tbot     -- (b + offset)
-			leftEnd  -- [mix 0 SB (1/3)]
-			rightEnd -- [mix Width RightSB (1/3)]
-			hs       -- ([AdviceStroke 4] / 2)
+			leftEnd  -- [mix 0     SB      kSB]
+			rightEnd -- [mix Width RightSB kSB]
+			hs       -- (sw / 2)
+
+	create-glyph 'asciiTilde/sMid' : glyph-proc
+		include : OverlayTildeT TildeShape 1 OperatorStroke
 
 	create-glyph 'overlayTildeOperator' : glyph-proc
-		include : OverlayTildeT TildeShape
+		include : OverlayTildeT TildeShape (1/3) [AdviceStroke 4]
 
 	create-glyph 'overlayTildeOperatorAboveMask' : glyph-proc
 		define FarRight : Width * (+4)
 		define FarLeft  : Width * (-3)
 		define FarAbove : CAP   * (+4)
 
-		define { z1 z2 z3 z4 } : include : OverlayTildeT TildeKnots
+		define { z1 z2 z3 z4 } : include : OverlayTildeT TildeKnots (1/3) [AdviceStroke 4]
 		define arcs : list : list
 			new Arcs.Bez3 z1 z2 z3 z4
 			new Arcs.StraightSegment z4 [Point.withX z4 FarRight]
