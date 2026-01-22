@@ -4,7 +4,7 @@
 
 To make the font, first you need to have the files that contain the repository’s source code. Here are two ways:
 
- * Download [the archive of Iosevka’s source code](https://github.com/be5invis/Iosevka/archive/refs/heads/main.zip), then extract its contents into somewhere on your computer.
+ * Download [the archive of Iosevka’s source code](https://github.com/be5invis/Iosevka/archive/refs/heads/main.zip), then extract its contents somewhere on your computer.
  * [Cloning](https://git-scm.com/docs/git-clone) this repository using [Git](https://git-scm.com/): 
     ```
     git clone --depth 1 https://github.com/be5invis/Iosevka.git 
@@ -21,7 +21,7 @@ To build Iosevka you should:
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
 
-To using Docker build, read [docker/README.md](../docker/README.md).
+To use Docker build, read [docker/README.md](../docker/README.md).
 
 ## Customized Build
 
@@ -41,11 +41,11 @@ To create a custom build, you need:
    5. `woff2::<plan>` : WOFF2 only.
    5. `woff2-unhinted::<plan>` : Unhinted WOFF2 only.
 
-⚠️ **Important**: By default, the build system will schedule a number of concurrently running jobs equal to the number of threads available on the CPU, which *will* push CPU usage and also likely RAM usage, if you do not have very much to work with, to the ceiling (each job consumes more than 1 GB of RAM at its peak). If this is an issue for you, pass an additional argument `--jCmd=<number of concurrent jobs>`.
+⚠️ **Important**: By default, the build system will schedule several concurrently running jobs equal to the number of threads available on the CPU, which *will* push CPU usage and also likely RAM usage, if you do not have very much to work with, to the ceiling (each job consumes more than 1 GB of RAM at its peak). If this is an issue for you, pass an additional argument `--jCmd=<number of concurrent jobs>`.
 
 ### Configuring Custom Build
 
-Configuration of build plans are organized under `[buildPlans.<plan name>]` sections in the `private-build-plans.toml`. You can use [the Customizer](https://be5invis.github.io/Iosevka/customizer) to create the build plan, and/or manually edit them, following the instructions below. It is recommended to use PascalCase in the plan names.
+The configuration of build plans is organized under `[buildPlans.<plan name>]` sections in the `private-build-plans.toml`. You can use [the Customizer](https://be5invis.github.io/Iosevka/customizer) to create the build plan, and/or manually edit it, following the instructions below. It is recommended to use PascalCase in the plan names.
 
 Inside the plan, top-level properties include:
 
@@ -56,7 +56,7 @@ Inside the plan, top-level properties include:
   - `quasi-proportional-extension-only`: The font will become quasi-proportional, but will not shrink narrow letters (like `i`). Only wide letters (like `M`) will get expanded.
   - `term`: Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
   - `fontconfig-mono`: Apply `term` spacing changes and further apply changes to be compatible with FontConfig's Mono spacing, which recognizes a font as monospace if and only if its every non-combining characters having the same width. The changes include:
-    - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
+    - Completely remove wide glyphs. All non-combining glyphs will be the same width.
       - As a consequence, the following characters will be **removed**:
         - `U+27DD` LONG RIGHT TACK
         - `U+27DE` LONG LEFT TACK
@@ -81,19 +81,19 @@ Inside the plan, top-level properties include:
         - `U+1F8D6` LONG RIGHTWARDS ARROW THROUGH X
         - `U+1F8D7` LONG RIGHTWARDS ARROW WITH DOUBLE SLASH
         - `U+1F8D8` LONG LEFT RIGHT ARROW WITH DEPENDENT LOBE
-    - Remove `NWID` and `WWID` features typographic features
+    - Remove `NWID` and `WWID` typographic features
   - `fixed`: Apply `fontconfig-mono` changes and further remove ligations.
   - `wide-mosaic`: Similar to `normal`, but all mosaic (box-drawing characters and block elements) will be wide.
-* `serifs`: Optional, String, configures style of serifs.
+* `serifs`: Optional, String, configures the style of serifs.
   - When set to `slab`, the font will be converted into slab-serif.
-  - Otherwise the font will be sans-serif.
+  - Otherwise, the font will be sans-serif.
 * `noCvSs`: Optional, Boolean, disables `cv##` and `ss##` OpenType features.
 * `noLigation`: Optional, Boolean, disables ligations.
-* `exportGlyphNames`: Optional, Boolean, whether to export glyph names into the fonts. Setting this to `true` will increase file footprint, however this is necessary for ligature support in [Kitty](https://sw.kovidgoyal.net/kitty/).
+* `exportGlyphNames`: Optional, Boolean, whether to export glyph names into the fonts. Setting this to `true` will increase file footprint; this is necessary for ligature support in [Kitty](https://sw.kovidgoyal.net/kitty/).
 * `webfontFormats`: Optional, Array of String. Controls the formats needed to be exported into the webfont CSS. Valid options are `'TTF'` and `'WOFF2'`, or including both.
 * `buildTextureFeature`: Optional, Boolean, whether to build the `TXTR` feature for cross-letter texture adjustments. Defaults to false.
 
-Build plan could have 9 optional subsections:
+The build plan could have 9 optional subsections:
 * `ligations`
 * `variants`
 * `weights`
@@ -113,27 +113,27 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
 
 * `inherits`: Optional, String, defines the inherited ligation set. When absent, the ligation set will not inherit any other sets. Valid values are:
 
-  - `default-calt`: Inherit default ligation set.
-  - `dlig`: Default ligation set would be assigned to Discretionary ligatures.
-  - `clike`: Default ligation set would be assigned to C-Like.
-  - `javascript`: Default ligation set would be assigned to JavaScript.
-  - `php`: Default ligation set would be assigned to PHP.
-  - `julia`: Default ligation set would be assigned to Julia.
-  - `raku`: Default ligation set would be assigned to Raku.
-  - `ml`: Default ligation set would be assigned to ML.
-  - `fsharp`: Default ligation set would be assigned to F#.
-  - `fstar`: Default ligation set would be assigned to F*.
-  - `haskell`: Default ligation set would be assigned to Haskell.
-  - `idris`: Default ligation set would be assigned to Idris.
-  - `elm`: Default ligation set would be assigned to Elm.
-  - `purescript`: Default ligation set would be assigned to PureScript.
-  - `swift`: Default ligation set would be assigned to Swift.
-  - `dafny`: Default ligation set would be assigned to Dafny.
-  - `coq`: Default ligation set would be assigned to Coq.
-  - `matlab`: Default ligation set would be assigned to Matlab.
-  - `verilog`: Default ligation set would be assigned to Verilog.
-  - `wolfram`: Default ligation set would be assigned to Wolfram Language (Mathematica).
-  - `erlang`: Default ligation set would be assigned to Erlang Language.
+  - `default-calt`: Uses the default ligation set.
+  - `dlig`: The default ligation set is in alignment with discretionary ligatures.
+  - `clike`: The default ligation set is in alignment with C-Like.
+  - `javascript`: The default ligation set is in alignment with JavaScript.
+  - `php`: The default ligation set is in alignment with PHP.
+  - `julia`: The default ligation set is in alignment with Julia.
+  - `raku`: The default ligation set is in alignment with Raku.
+  - `ml`: The default ligation set is in alignment with ML.
+  - `fsharp`: The default ligation set is in alignment with F#.
+  - `fstar`: The default ligation set is in alignment with F*.
+  - `haskell`: The default ligation set is in alignment with Haskell.
+  - `idris`: The default ligation set is in alignment with Idris.
+  - `elm`: The default ligation set is in alignment with Elm.
+  - `purescript`: The default ligation set is in alignment with PureScript.
+  - `swift`: The default ligation set is in alignment with Swift.
+  - `dafny`: The default ligation set is in alignment with Dafny.
+  - `coq`: The default ligation set is in alignment with Coq.
+  - `matlab`: The default ligation set is in alignment with MATLAB.
+  - `verilog`: The default ligation set is in alignment with Verilog.
+  - `wolfram`: The default ligation set is in alignment with Wolfram Language (Mathematica).
+  - `erlang`: The default ligation set is in alignment with the Erlang Language.
 
 <!-- END Section-Predefined-Ligation-Sets -->
 
@@ -148,7 +148,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `counter-arrow-l`: Left-pointing counter-arrows.
   - `counter-arrow-r`: Right-pointing counter-arrows.
   - `arrow-hyphen`: Arrows using hyphen-minus (`-`) as the rod.
-  - `arrow-equal`: Arrows using equal sign (`=`) as the rod.
+  - `arrow-equal`: Arrows using the equal sign (`=`) as the rod.
   - `arrow-wave`: Arrows using tilde (`~`) as the rod.
   - `counter-arrow-hyphen`: Counter-arrows using hyphen-minus (`-`) as the rod.
   - `counter-arrow-equal`: Counter-arrows using equal sign (`=`) as the rod.
@@ -173,9 +173,9 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `lteq`: Enable ligation for `<=` as less-than-or-equal sign.
   - `eqlt`: Enable ligation for `=<` as less-than-or-equal sign.
   - `gteq`: Enable ligation for `>=` as greater-than-or-equal sign.
-  - `lteq-separate`: Display `<=` as separate shape.
-  - `eqlt-separate`: Display `=<` as separate shape.
-  - `gteq-separate`: Display `>=` as separate shape.
+  - `lteq-separate`: Display `<=` as a separate shape.
+  - `eqlt-separate`: Display `=<` as a separate shape.
+  - `gteq-separate`: Display `>=` as a separate shape.
   - `exeqeqeq`: Enable special ligation for `!===` with triple lines.
   - `exeqeq`: Enable special ligation for `!==` with triple lines.
   - `eqexeq`: Enable special ligation for `=!=` with triple lines.
@@ -201,18 +201,18 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `center-op-trigger-bar-l`: Bars (`|`) will trigger other operator characters at left to be centered.
   - `center-op-trigger-bar-r`: Bars (`|`) will trigger other operator characters at right to be centered.
   - `center-op-trigger-angle-inside`: Less (`<`) and Greater (`>`) will trigger other operator characters at inside to be centered.
-  - `center-op-trigger-angle-outside`: Less (`<`) and Greater (`>`) will trigger other operator characters at outside to be centered.
+  - `center-op-trigger-angle-outside`: Less (`<`) and Greater (`>`) will trigger other operator characters at the outside to be centered.
   - `center-op-influence-dot`: Treat dot (`.`) as operator and perform chained centering.
   - `center-op-influence-colon`: Treat colon (`:`) as operator and perform chained centering.
-  - `tilde-tilde`: Make 2 or more contiguous ASCII tildes (like `~~`, `~~~` and `~~~~`) connected as a wave line.
-  - `tilde-tilde-tilde`: Make 3 or more contiguous ASCII tildes (like `~~~` and `~~~~`) connected as a wave line.
-  - `minus-minus`: Make 2 or more contiguous hyphen-minuses (like `--`, `---` and `----`) connected as a straight solid line.
+  - `tilde-tilde`: Make 2 or more contiguous ASCII tildes (like `~~`, `~~~`, and `~~~~`) connected as a wave line.
+  - `tilde-tilde-tilde`: Make 3 or more contiguous ASCII tildes (like `~~~`, and `~~~~`) connected as a wave line.
+  - `minus-minus`: Make 2 or more contiguous hyphen-minuses (like `--`, `---,` and `----`) connected as a straight solid line.
   - `minus-minus-minus`: Make 3 or more contiguous hyphen-minuses (like `---` and `----`) connected as a straight solid line.
-  - `plus-plus`: Make 2 or more contiguous plus signs (like `++`, `+++` and `++++`) connected..
-  - `plus-plus-plus`: Make 3 or more contiguous plus signs (like `+++` and `++++`) connected..
-  - `underscore-underscore`: Make 2 or more contiguous underscores (like `__`, `___` and `____`) connected.
-  - `underscore-underscore-underscore`: Make 3 or more contiguous underscores (like `___` and `____`) connected.
-  - `hash-hash`: Make 2 or more contiguous hash signs (number signs) (like `##`, `###` and `####`) connected.
+  - `plus-plus`: Make 2 or more contiguous plus signs (like `++`, `+++`, and `++++`) connected.
+  - `plus-plus-plus`: Make 3 or more contiguous plus signs (like `+++` and `++++`) connected.
+  - `underscore-underscore`: Make 2 or more contiguous underscores (like `__`, `___`, and `____`) connected.
+  - `underscore-underscore-underscore`: Make 3 or more contiguous underscores (like `___`, and `____`) connected.
+  - `hash-hash`: Make 2 or more contiguous hash signs (number signs) (like `##`, `###,` and `####`) connected.
   - `hash-hash-hash`: Make 3 or more contiguous hash signs (number signs) (like `##` and `###`) connected.
   - `logic`: Enable ligation for `/\` and `\/`.
   - `llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
@@ -260,9 +260,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
 <!-- BEGIN Section-Cherry-Picking-Styles -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-* `design`, `upright`, `italic`, and `oblique`: Optional, Dictionary, defines styles for individual characters. The choices are organized in key-value pairs, assigning a variant to a character group. Alternatively, you could assign numbers to `cv##` tags, like what you did when using OpenType in CSS. Assignments under `design` will be applied to all the slopes, and `upright`, `italic`, and `oblique` will apply to corresponded slopes. 
+* `design`, `upright`, `italic`, and `oblique`: Optional, Dictionary defines styles for individual characters. The choices are organized in key-value pairs, assigning a variant to a character group. Alternatively, you could assign numbers to `cv##` tags, like what you did when using OpenType in CSS. Assignments under `design` will be applied to all the slopes, and `upright`, `italic`, and `oblique` will apply to corresponding slopes. 
 
-  In addition, style selector for default digit form also uses these dictionaries.
+  In addition, the style selector for the default digit form also uses these dictionaries.
   
   The valid combinations include:
 
@@ -3758,7 +3758,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <details><summary>2 variants</summary>
     <table>
     <tr><td rowspan="2" width="156"><img src="../images/cv-bar-natural-slope.light.svg#gh-light-mode-only" width=128/><img src="../images/cv-bar-natural-slope.dark.svg#gh-dark-mode-only" width=128/></td><td><code>bar = 'natural-slope'</code>, <code>VSAP = 1</code></td></tr>
-    <tr><td>Bar punctuations (<code>|</code>) has a natural slope under italics and oblique (default)</td></tr>
+    <tr><td>Bar punctuations (<code>|</code>) have a natural slope under italics and oblique (default)</td></tr>
     <tr><td rowspan="2" width="156"><img src="../images/cv-bar-force-upright.light.svg#gh-light-mode-only" width=128/><img src="../images/cv-bar-force-upright.dark.svg#gh-dark-mode-only" width=128/></td><td><code>bar = 'force-upright'</code>, <code>VSAP = 2</code></td></tr>
     <tr><td>Bar punctuations (<code>|</code>) is forced upright under italics and oblique</td></tr>
     </table></details>
@@ -3840,11 +3840,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-neq-more-slanted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-more-slanted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-neq = 'more-slanted'</code>, <code>VLAB = 3</code></td></tr>
     <tr><td>The bar in inequality (<code>!=</code>, etc.) ligation is more slanted</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-neq-vertical-dotted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-vertical-dotted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-neq = 'vertical-dotted'</code>, <code>VLAB = 4</code></td></tr>
-    <tr><td>The bar in inequality (<code>!=</code>, etc.) ligation is vertical, and with a dot at bottom for ligations built from exclamation sign (<code>!</code>)</td></tr>
+    <tr><td>The bar in inequality (<code>!=</code>, etc.) ligations is vertical, and with a dot at the bottom for ligations built from the exclamation sign (<code>!</code>)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-neq-slightly-slanted-dotted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-slightly-slanted-dotted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-neq = 'slightly-slanted-dotted'</code>, <code>VLAB = 5</code></td></tr>
-    <tr><td>The bar in inequality (<code>!=</code>, etc.) ligation is slightly slanted, and with a dot at bottom for ligations built from exclamation sign (<code>!</code>)</td></tr>
+    <tr><td>The bar in inequality (<code>!=</code>, etc.) ligations is slightly slanted, and with a dot at the bottom for ligations built from the exclamation sign (<code>!</code>)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lig-neq-more-slanted-dotted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-more-slanted-dotted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lig-neq = 'more-slanted-dotted'</code>, <code>VLAB = 6</code></td></tr>
-    <tr><td>The bar in inequality (<code>!=</code>, etc.) ligation is more slanted, and with a dot at bottom for ligations built from exclamation sign (<code>!</code>)</td></tr>
+    <tr><td>The bar in inequality (<code>!=</code>, etc.) ligations is more slanted, and with a dot at the bottom for ligations built from the exclamation sign (<code>!</code>)</td></tr>
     </table></details>
   - Styles for `==` (Equality ligations)
     <details><summary>2 variants</summary>
@@ -3974,7 +3974,7 @@ ranges = [[10003, 10008]]
 
 #### Metric Override
 
-Subsection `metricOverride` provides ability to override certain metric values, if you *reallly* want to. Adding this section is **strongly discouraged** as it may introduce broken geometry or broken shapes.
+Subsection `metricOverride` provides the ability to override certain metric values, if you *really* want to. Adding this section is **strongly discouraged** as it may introduce broken geometry or broken shapes.
 
 | Property | Unit | Default Value | Meaning |
 |----------|------|---------|----------|
@@ -3996,7 +3996,7 @@ Subsection `metricOverride` provides ability to override certain metric values, 
 | `powerlineScaleX`, `powerlineScaleY` | (*ratio*) | 1 | X and Y scale of Powerline glyphs. |
 | `powerlineShiftX`, `powerlineShiftY` | emu | 0 | X and Y shift of Powerline glyphs. |
 | `onumZeroHeightRatio` | (*ratio*) | 1.145 | Ratio of height of `0` under `onum` feature, to the height of `x`. |
-| `essRatio` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `S`/`s`/`?`, to the normal stroke width. `essRatioUpper`, `essRatioLower` and `rssRatioQuestion` will override this value for corresponded glyph categories when set. |
+| `essRatio` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `S`/`s`/`?`, to the normal stroke width. `essRatioUpper`, `essRatioLower`, and `rssRatioQuestion` will override this value for corresponding glyph categories when set. |
 | `essRatioUpper` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `S`, to the normal stroke width. |
 | `essRatioLower` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `s`, to the normal stroke width. |
 | `essRatioQuestion` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `?`, to the normal stroke width. |
@@ -4004,7 +4004,7 @@ Subsection `metricOverride` provides ability to override certain metric values, 
 | `smallArchDepth` | emu | (*varies, 200 for Regular*) | Depth of the curve segment of arches / O rings in small letters. |
 | `advanceScaleSp` | (*ratio*) | (*varies, 1.0 for monospace, 0.58333 for quasi-proportional*) | The advance width ratio of space character, relative to the width of digit `0`. |
 
-The values of each item could be either a number, or a string representing an expression so that it could be different for different instance fonts, or depending on default values. The syntax of valid expressions are:
+The values of each item could be either a number or a string representing an expression, so that it could be different for different instance fonts, or depending on default values. The syntax of valid expressions is:
 
 ```
 Expression -> Term (('+' | '-') Term)*
@@ -4026,7 +4026,7 @@ Valid identifiers include:
  * `weight`: being the weight grade;
  * `width`: being the characters' unit width, measured in em-units;
  * `slopeAngle`: being the slope angle in degrees;
- * Default value of all overridable metrics, prefixed with `default_`, i.e., default `cap` value will be accessable thorugh `default_cap`.
+ * Default value of all overridable metrics, prefixed with `default_`, i.e., default `cap` value will be accessible through `default_cap`.
 
 Valid functions include:
  * `blend`(_x_, \[_x1_, _y1_\], \[_x2_, _y2_\], ...): Perform a smooth interpolation through data pairs \[_x1_, _y1_\], \[_x2_, _y2_\], ..., against parameter _x_.
@@ -4043,12 +4043,12 @@ dotSize = 'blend(weight, [100, 50], [400, 125], [900, 180])'
 will:
 
  * Override line height to `1500` em-unit;
- * Override the sidebearing value by its value multiplied by `1.0625` then added with `15`.
- * Override the dot size by a interpolation against weight: at thin (`100`) being `50`, at regular (`400`) being `125`, and at heavy (`900`) being `180`.
+ * Override the sidebearing value by its value multiplied by `1.0625`, then added with `15`.
+ * Override the dot size by an interpolation against weight: at thin (`100`) being `50`, at regular (`400`) being `125`, and at heavy (`900`) being `180`.
 
 #### Naming Override
 
-The properties in the `namingOverride` section could be uase to override menu names of the produced font. The following properties will be applied to the font directly:
+The properties in the `namingOverride` section could be used to override menu names of the produced font. The following properties will be applied to the font directly:
 
  - `copyright`: Name ID 0, copyright notice.
  - `manufacturer`: Name ID 8, manufacturer name.
@@ -4056,8 +4056,8 @@ The properties in the `namingOverride` section could be uase to override menu na
  - `description`: Name ID 10, description of the typeface.
  - `urlVendor`: Name ID 11, URL of font vendor.
  - `urlDesigner`: Name ID 12, URL of typeface designer.
- - `license` (or alternatively `licence`): Name ID 13, license description.
- - `licenseURL` (or alternatively `licenceURL`): Name ID 14, license Info URL.
+ - `license` (or `licence`): Name ID 13, license description.
+ - `licenseURL` (or `licenceURL`): Name ID 14, license Info URL.
  - `sampleText`: Name ID 19, sample text for the font.
  - `version`: Override font version. The version number should follow [SemVer](https://semver.org/), like being `1.0.0`.
  - `vendorIdTag`: Four-character vendor ID tag in OS/2 table.
@@ -4097,15 +4097,29 @@ It is possible to create a customized TTC build by using the following method:
    [collectPlans.IosevkaCustom]
    from = ["IosevkaCustom1", "IosevkaCustom2"]
    ```
+
+ To do that, you can copy the entire list of names into the clipboard like that:
+
+   ```bash
+   ls | awk 'BEGIN{printf "["} {printf "%s\"%s\"", (NR>1?", ":""), $0} END{printf "]\n"}' | wl-copy
+   ```
+ Alternatively, you can also do it with the `fish` shell a bit more elegantly, and without awk:
+
+   ```fish
+   printf '["%s"]' "$(ls | paste -sd '", "' -)" | wl-copy
+   ```
+
+ Change `wl-copy` to `pbcopy` on MacOS, and to `xclip -selection clipboard` on X11.
+
  2. Run build with the following command:
   - `npm run build -- ttc::IosevkaCustom`: Create TTCs from collection `IosevkaCustom`; The file will be saved into `dist/.ttc`.
   - `npm run build -- super-ttc::IosevkaCustom`: Create a single-file TTC from collection `IosevkaCustom`; The file will be saved into `dist/.super-ttc`.
 
 ### Baking other OpenType features
 
-There are tools tha could be used to bake other OpenType that are not configurable with TOML files (like baking localized forms). The tools include:
+Some tools could be used to bake other OpenType fonts that are not configurable with TOML files (like baking localized forms). The tools include:
 
  * https://mutsuntsai.github.io/fontfreeze/
  * https://github.com/twardoch/fonttools-opentype-feature-freezer
 
-These tools could be used in post-processing fonts. Please refer their documents for instructions.
+These tools could be used in post-processing fonts. Please refer to their documents for instructions.
