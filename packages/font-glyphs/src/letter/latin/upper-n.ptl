@@ -24,9 +24,17 @@ glyph-block Letter-Latin-Upper-N : begin
 	define SLAB-CYRL-I  4
 	define SLAB-DIGAMMA 5
 
+	define pInkTrap 0.4
+
 	define [NShape] : with-params [bodyType slabType top left right [crowd 2] [crDiag 4]] : glyph-proc
 		local swDiag : AdviceStroke crDiag
 		local stroke : AdviceStroke crowd
+		local swEnd : match bodyType
+			[Just BODY-SYMMETRIC]    swDiag
+			__                       stroke
+		local swStart : match bodyType
+			[Just BODY-SYMMETRIC]    swDiag
+			__                       stroke
 		local xEnd   : right - swDiag
 		local xStart : left  + swDiag
 		local yEnd : match bodyType
@@ -35,24 +43,18 @@ glyph-block Letter-Latin-Upper-N : begin
 		local yStart : match bodyType
 			[Just BODY-ASYMMETRIC]   top
 			__                     : top - yEnd
-		local swEnd : match bodyType
-			[Just BODY-SYMMETRIC]    swDiag
-			__                       stroke
-		local swStart : match bodyType
-			[Just BODY-SYMMETRIC]    swDiag
-			__                       stroke
 
 		include : union
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
 					flat left 0 [widths.rhs.heading stroke Upward]
-					curl left [mix 0 top 0.4] [heading Upward]
+					curl left [mix 0 top pInkTrap] [heading Upward]
 					straight.up.end left top [widths.rhs.heading swStart Upward]
 				__ : VBar.l left 0 top swStart
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
 					flat right top [widths.rhs.heading stroke Downward]
-					curl right [mix top 0 0.4] [heading Downward]
+					curl right [mix top 0 pInkTrap] [heading Downward]
 					straight.down.end right 0 [widths.rhs.heading swEnd Downward]
 				__ : VBar.r right 0 top swEnd
 			intersection [Rect top 0 left right]
@@ -70,11 +72,17 @@ glyph-block Letter-Latin-Upper-N : begin
 	define [RevNShape] : with-params [bodyType slabType top left right [crowd 2] [crDiag 4]] : glyph-proc
 		local swDiag : AdviceStroke crDiag
 		local stroke : AdviceStroke crowd
+		local swEnd : match bodyType
+			[Just BODY-SYMMETRIC]    swDiag
+			__                       stroke
+		local swStart : match bodyType
+			[Just BODY-SYMMETRIC]    swDiag
+			__                       stroke
 		local xEnd : match bodyType
-			[Just BODY-COMPRESSED] : left + [HSwToV stroke]
+			[Just BODY-COMPRESSED] : left + [HSwToV swEnd]
 			__                     : left + swDiag
 		local xStart : match bodyType
-			[Just BODY-COMPRESSED] : right - [HSwToV stroke]
+			[Just BODY-COMPRESSED] : right - [HSwToV swStart]
 			__                     : right - swDiag
 		local yEnd : match bodyType
 			[Just BODY-COMPRESSED] : if SLAB stroke 0
@@ -83,26 +91,20 @@ glyph-block Letter-Latin-Upper-N : begin
 		local yStart : match bodyType
 			[Just BODY-ASYMMETRIC]   top
 			__                     : top - yEnd
-		local swEnd : match bodyType
-			[Just BODY-SYMMETRIC]    swDiag
-			__                       stroke
-		local swStart : match bodyType
-			[Just BODY-SYMMETRIC]    swDiag
-			__                       stroke
 
 		include : union
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
-					flat left top [widths.lhs.heading stroke Downward]
-					curl left [mix top 0 0.4] [heading Downward]
-					straight.down.end left 0 [widths.lhs.heading swEnd Downward]
-				__ : VBar.l left 0 top swEnd
-			match bodyType
-				[Just BODY-SYMMETRIC] : dispiro
 					flat right 0 [widths.lhs.heading stroke Upward]
-					curl right [mix 0 top 0.4] [heading Upward]
+					curl right [mix 0 top pInkTrap] [heading Upward]
 					straight.up.end right top [widths.lhs.heading swStart Upward]
 				__ : VBar.r right 0 top swStart
+			match bodyType
+				[Just BODY-SYMMETRIC] : dispiro
+					flat left top [widths.lhs.heading stroke Downward]
+					curl left [mix top 0 pInkTrap] [heading Downward]
+					straight.down.end left 0 [widths.lhs.heading swEnd Downward]
+				__ : VBar.l left 0 top swEnd
 			intersection [Rect top 0 left right] : match bodyType
 				[Just BODY-COMPRESSED] : dispiro
 					corner xStart yStart [widths.lhs swDiag]
