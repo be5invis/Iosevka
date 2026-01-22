@@ -24,81 +24,103 @@ glyph-block Letter-Latin-Upper-N : begin
 	define SLAB-CYRL-I  4
 	define SLAB-DIGAMMA 5
 
+	define pInkTrap 0.4
+
 	define [NShape] : with-params [bodyType slabType top left right [crowd 2] [crDiag 4]] : glyph-proc
 		local swDiag : AdviceStroke crDiag
 		local stroke : AdviceStroke crowd
-		local yEnd : match bodyType
-			[Just BODY-SYMMETRIC]    0
-			[Just BODY-ASYMMETRIC] : mix 0 top 0.375
 		local swEnd : match bodyType
 			[Just BODY-SYMMETRIC]    swDiag
-			[Just BODY-ASYMMETRIC]   stroke
+			__                       stroke
+		local swStart : match bodyType
+			[Just BODY-SYMMETRIC]    swDiag
+			__                       stroke
+		local xEnd   : right - swDiag
+		local xStart : left  + swDiag
+		local yEnd : match bodyType
+			[Just BODY-ASYMMETRIC] : mix 0 top 0.375
+			__                       0
+		local yStart : match bodyType
+			[Just BODY-ASYMMETRIC]   top
+			__                     : top - yEnd
 
 		include : union
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
 					flat left 0 [widths.rhs.heading stroke Upward]
-					curl left [mix 0 top 0.4] [heading Upward]
-					straight.up.end left top [widths.rhs.heading swEnd Upward]
-				[Just BODY-ASYMMETRIC] : VBar.l left 0 top swEnd
+					curl left [mix 0 top pInkTrap] [heading Upward]
+					straight.up.end left top [widths.rhs.heading swStart Upward]
+				__ : VBar.l left 0 top swStart
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
 					flat right top [widths.rhs.heading stroke Downward]
-					curl right [mix top 0 0.4] [heading Downward]
+					curl right [mix top 0 pInkTrap] [heading Downward]
 					straight.down.end right 0 [widths.rhs.heading swEnd Downward]
-				[Just BODY-ASYMMETRIC] : VBar.r right 0 top swEnd
+				__ : VBar.r right 0 top swEnd
 			intersection [Rect top 0 left right]
-				ExtLineCenter 2 swDiag (left + swDiag) top (right - swDiag) yEnd
+				ExtLineCenter 2 swDiag xStart yStart xEnd yEnd
 
 		local sf : SerifFrame top 0 left right (swRef -- stroke)
 		include : match slabType
 			[Just SLAB-ALL]    : composite-proc sf.lt.outer sf.lb.full sf.rt.full
 			[Just SLAB-AUTO]   : NeedSlab SLAB : composite-proc sf.lt.outer sf.lb.full sf.rt.full
 			[Just SLAB-MOTION] : composite-proc sf.lt.outer
-			[Just SLAB-NONE]   : no-shape
+			__                 : no-shape
 
-		return : object swEnd
+		return : object xStart yStart xEnd yEnd swStart swEnd
 
 	define [RevNShape] : with-params [bodyType slabType top left right [crowd 2] [crDiag 4]] : glyph-proc
 		local swDiag : AdviceStroke crDiag
 		local stroke : AdviceStroke crowd
-		local yEnd : match bodyType
-			[Just BODY-SYMMETRIC]    0
-			[Just BODY-ASYMMETRIC] : mix 0 top 0.375
-			[Just BODY-COMPRESSED] : if SLAB (swDiag * 1.5) 0
-		local yStart : match bodyType
-			[Just BODY-COMPRESSED] : top - yEnd
-			__                       top
 		local swEnd : match bodyType
 			[Just BODY-SYMMETRIC]    swDiag
 			__                       stroke
+		local swStart : match bodyType
+			[Just BODY-SYMMETRIC]    swDiag
+			__                       stroke
+		local xEnd : match bodyType
+			[Just BODY-COMPRESSED] : left + [HSwToV swEnd]
+			__                     : left + swDiag
+		local xStart : match bodyType
+			[Just BODY-COMPRESSED] : right - [HSwToV swStart]
+			__                     : right - swDiag
+		local yEnd : match bodyType
+			[Just BODY-COMPRESSED] : if SLAB stroke 0
+			[Just BODY-ASYMMETRIC] : mix 0 top 0.375
+			__                       0
+		local yStart : match bodyType
+			[Just BODY-ASYMMETRIC]   top
+			__                     : top - yEnd
 
 		include : union
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
-					flat left top [widths.lhs.heading stroke Downward]
-					curl left [mix top 0 0.4] [heading Downward]
-					straight.down.end left 0 [widths.lhs.heading swEnd Downward]
-				__                    : VBar.l left 0 top swEnd
+					flat right 0 [widths.lhs.heading stroke Upward]
+					curl right [mix 0 top pInkTrap] [heading Upward]
+					straight.up.end right top [widths.lhs.heading swStart Upward]
+				__ : VBar.r right 0 top swStart
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
-					flat right 0 [widths.lhs.heading stroke Upward]
-					curl right [mix 0 top 0.4] [heading Upward]
-					straight.up.end right top [widths.lhs.heading swEnd Upward]
-				__                    : VBar.r right 0 top swEnd
-			intersection [Rect top 0 left right]
-				ExtLineCenter 2 swDiag (left + swDiag) yEnd (right - swDiag) yStart
+					flat left top [widths.lhs.heading stroke Downward]
+					curl left [mix top 0 pInkTrap] [heading Downward]
+					straight.down.end left 0 [widths.lhs.heading swEnd Downward]
+				__ : VBar.l left 0 top swEnd
+			intersection [Rect top 0 left right] : match bodyType
+				[Just BODY-COMPRESSED] : dispiro
+					corner xStart yStart [widths.lhs swDiag]
+					corner xEnd   yEnd   [widths.rhs swDiag]
+				__ : ExtLineCenter 2 swDiag xStart yStart xEnd yEnd
 
 		local sf : SerifFrame top 0 left right (swRef -- stroke)
 		include : match slabType
 			[Just SLAB-ALL]     : composite-proc sf.lt.full sf.rt.outer sf.rb.full
 			[Just SLAB-AUTO]    : NeedSlab SLAB : composite-proc sf.lt.full sf.rt.outer sf.rb.full
 			[Just SLAB-MOTION]  : composite-proc sf.rt.outer
-			[Just SLAB-NONE]    : no-shape
 			[Just SLAB-CYRL-I]  : NeedSlab SLAB : match bodyType
 				[Just BODY-COMPRESSED] : composite-proc sf.lt.full sf.lb.full  sf.rt.full  sf.rb.full
 				[Just BODY-SYMMETRIC]  : composite-proc sf.lt.full sf.lb.outer sf.rt.outer sf.rb.full
 			[Just SLAB-DIGAMMA] : NeedSlab SLAB : composite-proc sf.lt.full sf.rb.full
+			__                  : no-shape
 
 	define NConfig : object
 		standardSerifless       { BODY-SYMMETRIC  4 SLAB-NONE   }
@@ -120,8 +142,10 @@ glyph-block Letter-Latin-Upper-N : begin
 
 		create-glyph "Eng.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
-			local [object swEnd] : include : NShape bodyType slabType CAP SB RightSB (crDiag -- crD)
-			include : EngHook RightSB 0 Descender (sw -- [Math.min Stroke : swEnd * (4/3)])
+			local dim : include : NShape bodyType slabType CAP SB RightSB (crDiag -- crD)
+			local cor : HSwToV : DiagCor (dim.yEnd - dim.yStart) (dim.xEnd - dim.xStart)
+			include : EngHook RightSB 0 Descender
+				sw -- [clamp dim.swEnd Stroke : VSwToH : dim.swEnd * (1 + 0.5 * cor)]
 
 		create-glyph "NHookLeft.\(suffix)" : glyph-proc
 			include [refer-glyph "N.\(suffix)"] AS_BASE ALSO_METRICS
