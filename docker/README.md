@@ -1,48 +1,77 @@
-## Make docker image
+# Building with Docker
+
+## 1. Building Docker Image
+
+Before building the font files, we'll first need to build a Docker image. This has to be done only once for a given repo version.
+
+### 1.1. Clone the repo (if you haven't already)
+
 ```
-git clone --depth=1 https://github.com/be5invis/Iosevka.git $HOME/mkdkimg
-cd $HOME/mkdkimg/docker
-docker build -t=fontcc .
-docker images | grep fontcc  # Confirm that the docker image is generated successfully
-fontcc                     latest      c847d5e08886   About a minute ago   491MB
-cd ../..
-rm -rf mkdkimg/
+git clone --depth 1 https://github.com/be5invis/Iosevka.git
+cd Iosevka
 ```
-Note: Make docker image need execute only one time.
 
-## Usage
-`docker run -it --rm -v $PWD:/work fontcc <BUILD_ARGS>`
-Please refer to the `<BUILD_ARGS>` parameters to [Customized Build](../../dev/doc/custom-build.md#customized-build)
-### Optional parameters (put them before `fontcc`):
-1. `-e "VERSION_TAG=<tag>"`
-
-`<tag>` can be the following values
--  `main`    git main branch
--  `dev`     git dev branch
--  `v28.0.5`  git [release version tags](../../../tags)
-
-When this variable is omitted, the tag of the latest release will be selected
-
-2. `-e "NPM_REG=<npm repository mirror url>"`
-
-change `npm install` download repository to mirror site.
-
-eg. change npm repos to huawei mirror
- `docker run -it --rm -v $PWD:/work -e "NPM_REG=https://mirrors.huaweicloud.com/repository/npm" fontcc contents::Iosevka`
-
-## Example
-### Partially Build dev branch
+If you want to use a particular version, checkout the appropriate [version tag]((../../../tags)) or branch, for example:
 ```
-mkdir -p $HOME/build_fonts
-cd $HOME/build_fonts
-docker run -it --rm -v $PWD:/work -e "VERSION_TAG=dev" fontcc contents::IosevkaSS06 ttf::IosevkaSS12 webfont::IosevkaSS15
-ls -lR dist/
+git checkout v34.0.0
 ```
-### Customized Build
+
+### 1.2. Build the Docker Image
+
+We're going to use image name `iosevka-builder` here, but you can set it to whatever you want. To build an image, run the following from the repo root directory:
+
 ```
-cd $HOME/mycustomfonts
+docker build -f docker/Dockerfile -t iosevka-builder .
+```
+
+To confirm that the docker image now exists, you can run:
+```
+docker images | grep iosevka-builder
+```
+The output should be something like this:
+```
+iosevka-builder            latest      c847d5e08886   About a minute ago   491MB
+```
+
+#### Optional Build Arg
+`--build-arg NPM_REG=<npm repository mirror url>`
+
+Specify `NPM_REG` to use an NPM registry mirror.
+
+Example:
+```
+docker build -f docker/Dockerfile --build-arg NPM_REG=https://mirrors.huaweicloud.com/repository/npm -t iosevka-builder .
+```
+
+## 2. Building Font Files
+
+Once we have a docker image, we can build (and rebuild) font files like so:
+
+```
+docker run -it --rm -v $PWD:/work iosevka-builder <BUILD_ARGS>
+```
+
+For supported `<BUILD_ARGS>`, please refer to [Customized Build](../doc/custom-build.md).
+
+## Examples
+### Custom Build
+
+This will build Iosevka `ss06` in all formats, `ss12` TTF and `ss15` webfont:
+
+```
+docker run -it --rm -v $PWD:/work iosevka-builder contents::IosevkaSS06 ttf::IosevkaSS12 webfont::IosevkaSS15
+ls -lR dist/ # Recursively list build result directories
+```
+
+### Custom Build Plans
+
+This example will:
+- Gather build plans from `myfont1.toml`, `myfont2.toml` and `myfont3.toml` to a single `private-build-plans.toml` file.
+- Build `myfont1`, `myfont2` TTF, and `myfont3` in all formats.
+```
 cat myfont1.toml myfont2.toml myfont3.toml > private-build-plans.toml
-docker run -it --rm -v $PWD:/work fontcc ttf::myfont1 ttf::myfont2 contents::myfont3
-ls -lR dist/
+docker run -it --rm -v $PWD:/work iosevka-builder ttf::myfont1 ttf::myfont2 contents::myfont3
+ls -lR dist/ # Recursively list build result directories
 ```
-Note: You need prepare myfont1.toml myfont2.toml myfont3.toml youself, The [Customizer](https://be5invis.github.io/Iosevka/customizer) can help you easily generate font configuration file `.toml`.
+
+To prepare the custom build plans, please refer to [Configuring Custom Build](https://github.com/be5invis/Iosevka/blob/main/doc/custom-build.md#configuring-custom-build) or use the [Customizer](https://be5invis.github.io/Iosevka/customizer).
