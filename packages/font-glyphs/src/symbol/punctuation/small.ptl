@@ -13,25 +13,27 @@ glyph-block Symbol-Punctuation-Small : begin
 
 	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
 		create-glyph "period.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleF
+			local df : include : DivFrame para.advanceScaleI
 			include : DrawAt df.middle (PeriodRadius * kDotRadius) (PeriodRadius * kDotRadius - overshoot)
 		create-glyph "halfXhPeriod.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleF
+			local df : include : DivFrame para.advanceScaleI
 			include : DrawAt df.middle (XH / 2) (PeriodRadius * kDotRadius - overshoot)
 		create-glyph "xhPeriod.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleF
+			local df : include : DivFrame para.advanceScaleI
 			include : DrawAt df.middle (XH - PeriodRadius * kDotRadius) (PeriodRadius * kDotRadius - overshoot)
+			create-forked-glyph "sinologicalDot.\(suffix)" : df.markSet.e
 		create-glyph "capPeriod.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleF
+			local df : include : DivFrame para.advanceScaleI
 			include : DrawAt df.middle (CAP - PeriodRadius * kDotRadius) (PeriodRadius * kDotRadius - overshoot)
 
-		create-glyph "smallPeriod.\(suffix)"        : DrawAt Middle (DotRadius * kDotRadius)       (DotRadius * kDotRadius - overshoot)
+		create-glyph "smallPeriod.\(suffix)"        : DrawAt Middle (0   + DotRadius * kDotRadius) (DotRadius * kDotRadius - overshoot)
 		create-glyph "halfXhSmallPeriod.\(suffix)"  : DrawAt Middle (XH  / 2)                      (DotRadius * kDotRadius - overshoot)
 		create-glyph "halfCapSmallPeriod.\(suffix)" : DrawAt Middle (CAP / 2)                      (DotRadius * kDotRadius - overshoot)
 		create-glyph "xhSmallPeriod.\(suffix)"      : DrawAt Middle (XH  - DotRadius * kDotRadius) (DotRadius * kDotRadius - overshoot)
 		create-glyph "capSmallPeriod.\(suffix)"     : DrawAt Middle (CAP - DotRadius * kDotRadius) (DotRadius * kDotRadius - overshoot)
 
 	select-variant 'period' '.' (follow -- 'punctuationDot')
+	select-variant 'sinologicalDot' 0xA78F (follow -- 'diacriticDot')
 
 	define [CommaShapeT cx cy gp] : new-glyph : glyph-proc
 		set currentGlyph.gizmo [Translate 0 0]
@@ -39,15 +41,14 @@ glyph-block Symbol-Punctuation-Small : begin
 		local {.x mx1 .y my1} : GlobalTransform.apply {.x cx .y cy}
 		include : Translate (mx1) (my1)
 
-	create-glyph 'comma.round' : glyph-proc
-		local df : include : DivFrame para.advanceScaleF
-		include : CommaShapeT df.middle 0 : glyph-proc
-			local r : PeriodRadius + 0
-			local ro : PeriodRadius - O
-			local sw : Math.min [AdviceStroke 4] (PeriodSize * 0.4)
-			local swEnd : Math.min Stroke (PeriodSize * 0.5)
-			local commaOverflow : PeriodRadius - swEnd * 0.5
-			local rFill : ro - sw / 4
+	define [CommaShape kdr o] : namespace
+		define r : PeriodRadius * kdr
+		define ro : r - o
+		define sw    : Math.min [AdviceStroke 4] (r * 0.8)
+		define swEnd : Math.min [AdviceStroke 2] (r * 1.0)
+		define commaOverflow : r - swEnd / 2
+		define rFill : ro - sw / 4
+		export : define [round cx cy] : CommaShapeT cx cy : glyph-proc
 			include : union
 				spiro-outline
 					g4 rFill rFill
@@ -62,42 +63,33 @@ glyph-block Symbol-Punctuation-Small : begin
 				dispiro
 					g4 r r [widths.rhs (sw / 4)]
 					arcvh
-					g4 0 O [widths.rhs (sw / 2)]
+					g4 0 o [widths.rhs (sw / 2)]
 					archv
 					g4 (-ro) r
 					arcvh
 					g4 0 (r + ro)
 					archv
-					g4 ro r [widths.rhs sw]
-					quadControls (0 + TanSlope / 2) (0.5 - TanSlope * r / Descender) 12
-					g4 (-commaOverflow + Descender * TanSlope) Descender [widths.rhs swEnd]
+					g4 (+ro) r [widths.rhs sw]
+					quadControls (0 + TanSlope / 2) (0.5 - TanSlope * (r / Descender)) 12
+					g4 ([mix 0 Descender TanSlope] - commaOverflow) Descender [widths.rhs swEnd]
 
-	create-glyph 'comma.square' : glyph-proc
-		local df : include : DivFrame para.advanceScaleF
-		include : with-transform [Translate df.middle 0] : glyph-proc
-			local r : PeriodRadius * DesignParameters.squareDotScalar + 0
-			local sw : Math.min [AdviceStroke 4] (PeriodSize * DesignParameters.squareDotScalar * 0.4)
-			local swEnd : Math.min Stroke (PeriodSize * DesignParameters.squareDotScalar * 0.5)
-			local commaOverflow : r - swEnd * 0.5
-
+		export : define [square cx cy] : with-transform [Translate cx cy] : glyph-proc
 			include : union
 				SquareAt 0 r r
 				dispiro
 					flat r r [widths.rhs sw]
 					curl r 0 [widths.rhs sw]
-					quadControls (0 + TanSlope / 2) (0.5 - TanSlope * r / Descender) 12
-					g4 (-commaOverflow + Descender * TanSlope) Descender [widths.rhs swEnd]
+					quadControls (0 + TanSlope / 2) (0.5 - TanSlope * (r / Descender)) 12
+					g4 ([mix 0 Descender TanSlope] - commaOverflow) Descender [widths.rhs swEnd]
 
-
-	create-glyph 'revComma.round' : glyph-proc
-		local df : include : DivFrame para.advanceScaleF
-		include : CommaShapeT df.middle 0 : glyph-proc
-			local r : PeriodRadius + 0
-			local ro : PeriodRadius - O
-			local sw : Math.min [AdviceStroke 4] (PeriodSize * 0.4)
-			local swEnd : Math.min Stroke (PeriodSize * 0.5)
-			local commaOverflow : PeriodRadius - swEnd * 0.5
-			local rFill : ro - sw / 4
+	define [RevCommaShape kdr o] : namespace
+		define r : PeriodRadius * kdr
+		define ro : r - o
+		define sw    : Math.min [AdviceStroke 4] (r * 0.8)
+		define swEnd : Math.min [AdviceStroke 2] (r * 1.0)
+		define commaOverflow : r - swEnd / 2
+		define rFill : ro - sw / 4
+		export : define [round cx cy] : CommaShapeT cx cy : glyph-proc
 			include : union
 				spiro-outline
 					g4 rFill rFill
@@ -112,44 +104,53 @@ glyph-block Symbol-Punctuation-Small : begin
 				dispiro
 					g4 (-r) r [widths.lhs (sw / 4)]
 					arcvh
-					g4 0 O [widths.lhs (sw / 2)]
+					g4 0 o [widths.lhs (sw / 2)]
 					archv
-					g4 (ro) r
+					g4 (+ro) r
 					arcvh
 					g4 0 (r + ro)
 					archv
 					g4 (-ro) r [widths.lhs sw]
-					quadControls (0 - TanSlope / 2) (0.5 - TanSlope * r / Descender) 12
-					g4 (commaOverflow + Descender * TanSlope) Descender [widths.lhs swEnd]
+					quadControls (0 - TanSlope / 2) (0.5 - TanSlope * (r / Descender)) 12
+					g4 ([mix 0 Descender TanSlope] + commaOverflow) Descender [widths.lhs swEnd]
 
-	create-glyph 'revComma.square' : glyph-proc
-		local df : include : DivFrame para.advanceScaleF
-		include : with-transform [Translate df.middle 0] : glyph-proc
-			local r : PeriodRadius * DesignParameters.squareDotScalar + 0
-			local sw : Math.min [AdviceStroke 4] (PeriodSize * DesignParameters.squareDotScalar * 0.4)
-			local swEnd : Math.min Stroke (PeriodSize * DesignParameters.squareDotScalar * 0.5)
-			local commaOverflow : r - swEnd * 0.5
-
+		export : define [square cx cy] : with-transform [Translate cx cy] : glyph-proc
 			include : union
 				SquareAt 0 r r
 				dispiro
 					flat (-r) r [widths.lhs sw]
 					curl (-r) 0
-					quadControls (0 - TanSlope / 2) (0.5 - TanSlope * r / Descender) 12
-					g4 (commaOverflow + Descender * TanSlope) Descender [widths.lhs swEnd]
+					quadControls (0 - TanSlope / 2) (0.5 - TanSlope * (r / Descender)) 12
+					g4 ([mix 0 Descender TanSlope] + commaOverflow) Descender [widths.lhs swEnd]
 
+	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+		create-glyph "comma.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleI
+			include : [CommaShape kDotRadius overshoot].(suffix) df.middle 0
+		create-glyph "revComma.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleI
+			include : [RevCommaShape kDotRadius overshoot].(suffix) df.middle 0
+		create-glyph "comma/asDiacritic.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleSp
+			include : [CommaShape kDotRadius overshoot].(suffix) df.middle 0
+		create-glyph "revComma/asDiacritic.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleSp
+			include : [RevCommaShape kDotRadius overshoot].(suffix) df.middle 0
 
 	select-variant 'comma' ',' (follow -- 'punctuationDot')
 	select-variant 'revComma' 0x2E41 (follow -- 'punctuationDot')
 
-	turned "turnComma.round"  null "comma.round"  [DivFrame para.advanceScaleF].middle PeriodRadius
-	turned "turnComma.square" null "comma.square" [DivFrame para.advanceScaleF].middle (PeriodRadius * DesignParameters.squareDotScalar)
+	select-variant 'comma/asDiacritic' (follow -- 'diacriticDot')
+	select-variant 'revComma/asDiacritic' (follow -- 'diacriticDot')
+
+	turned "turnComma.round"  null "comma.round"  [DivFrame para.advanceScaleI].middle PeriodRadius
+	turned "turnComma.square" null "comma.square" [DivFrame para.advanceScaleI].middle (PeriodRadius * DesignParameters.squareDotScalar)
 	select-variant 'turnComma' 0x2E32 (follow -- 'punctuationDot')
 
 	derive-composites 'raisedPeriod.round'  null 'period.round'  [ApparentTranslate 0 (XH / 2 - PeriodRadius)]
 	derive-composites 'raisedPeriod.square' null 'period.square' [ApparentTranslate 0 (XH / 2 - PeriodRadius * DesignParameters.squareDotScalar)]
-	derive-composites 'raisedComma.round'  null 'comma.round'  [ApparentTranslate 0 (XH / 2 - PeriodRadius)]
-	derive-composites 'raisedComma.square' null 'comma.square' [ApparentTranslate 0 (XH / 2 - PeriodRadius * DesignParameters.squareDotScalar)]
+	derive-composites 'raisedComma.round'   null 'comma.round'   [ApparentTranslate 0 (XH / 2 - PeriodRadius)]
+	derive-composites 'raisedComma.square'  null 'comma.square'  [ApparentTranslate 0 (XH / 2 - PeriodRadius * DesignParameters.squareDotScalar)]
 	select-variant 'raisedPeriod' 0x2E33 (follow -- 'punctuationDot')
 	select-variant 'raisedComma'  0x2E34 (follow -- 'punctuationDot')
 
@@ -165,25 +166,25 @@ glyph-block Symbol-Punctuation-Small : begin
 			include [refer-glyph "period.\(suffix)"] AS_BASE ALSO_METRICS
 			include [refer-glyph "capPeriod.\(suffix)"]
 
-		create-glyph "modifierLetterColon.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleII
+		create-glyph "mdfColon.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleSp
 			local k 0.9
 			local dr : DotRadius * kDotRadius
-			include : DrawAt df.middle [mix dr (XH - dr) k] (dr - overshoot)
+			include : DrawAt df.middle [mix dr (XH - dr) (0 + k)] (dr - overshoot)
 			include : DrawAt df.middle [mix dr (XH - dr) (1 - k)] (dr - overshoot)
 
-		create-glyph "modifierLetterRaisedColon.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleII
+		create-glyph "mdfRaisedColon.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleSp
 			local k 0.9
 			local dr : DotRadius * kDotRadius
-			include : DrawAt df.middle (CAP - [mix dr (XH - dr) k]) (dr - overshoot)
+			include : DrawAt df.middle (CAP - [mix dr (XH - dr) (0 + k)]) (dr - overshoot)
 			include : DrawAt df.middle (CAP - [mix dr (XH - dr) (1 - k)]) (dr - overshoot)
 
 		create-glyph "semicolon.\(suffix)" : glyph-proc
 			include [refer-glyph "comma.\(suffix)"] AS_BASE ALSO_METRICS
 			include [refer-glyph "xhPeriod.\(suffix)"]
 
-		create-glyph "invertSemicolon.\(suffix)" : glyph-proc
+		create-glyph "revSemicolon.\(suffix)" : glyph-proc
 			include [refer-glyph "revComma.\(suffix)"] AS_BASE ALSO_METRICS
 			include [refer-glyph "xhPeriod.\(suffix)"]
 
@@ -271,12 +272,12 @@ glyph-block Symbol-Punctuation-Small : begin
 			include : DrawAt (RightSB - radius) (XH * 0.75) (kDotRadius * radius - overshoot)
 			include : DrawAt (RightSB - radius) (XH * 0.25) (kDotRadius * radius - overshoot)
 
-	select-variant 'colon' ':'  (follow -- 'punctuationDot')
+	select-variant 'colon' ':' (follow -- 'punctuationDot')
 	select-variant 'colon/mid' (follow -- 'punctuationDot')
-	select-variant 'modifierLetterColon' 0xA789 (follow -- 'punctuationDot')
-	select-variant 'modifierLetterRaisedColon' 0x2F8 (follow -- 'punctuationDot')
+	select-variant 'mdfColon' 0xA789 (follow -- 'diacriticDot')
+	select-variant 'mdfRaisedColon' 0x2F8 (follow -- 'diacriticDot')
 	select-variant 'semicolon' ';' (follow -- 'punctuationDot')
-	select-variant 'invertSemicolon' 0x204F (follow -- 'punctuationDot')
+	select-variant 'revSemicolon' 0x204F (follow -- 'punctuationDot')
 	select-variant 'doubleStackedComma' 0x2E49 (follow -- 'punctuationDot')
 
 	select-variant 'threeDotPunct' 0x2056 (follow -- 'punctuationDot')
@@ -297,7 +298,7 @@ glyph-block Symbol-Punctuation-Small : begin
 	alias 'grek/question' 0x37E 'semicolon'
 	alias 'armn/fullstop' 0x589 'colon'
 
-	turned 'turnSemiColon' 0x2E35 'semicolon' [DivFrame para.advanceScaleF].middle (XH / 2)
+	turned 'turnSemicolon' 0x2E35 'semicolon' [DivFrame para.advanceScaleI].middle (XH / 2)
 
 	# Hollow (no CV)
 
@@ -324,14 +325,14 @@ glyph-block Symbol-Punctuation-Small : begin
 			curl (mx - rad * k2x) (d - rad * k2y)
 
 	create-glyph 'hollowColon' 0x2982 : glyph-proc
-		local df : include : DivFrame para.advanceScaleF
+		local df : include : DivFrame para.advanceScaleI
 		define sw : AdviceStroke 5
 		define dotRadius : Math.max PeriodRadius (XH / 8)
 		include : RingStrokeAt df.middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
 		include : RingStrokeAt df.middle dotRadius (dotRadius + sw / 2 - O) sw
 
 	create-glyph 'zNotationSchemaComposition' 0x2A1F : glyph-proc
-		local df : include : DivFrame para.advanceScaleF
+		local df : include : DivFrame para.advanceScaleI
 		define sw : AdviceStroke 5
 		define dotRadius : Math.max PeriodRadius (XH / 8)
 		include : RingStrokeAt df.middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
@@ -340,7 +341,7 @@ glyph-block Symbol-Punctuation-Small : begin
 			RingCommaStroke df.middle dotRadius (dotRadius + sw / 2 - O) sw 0.75 0 1 3
 
 	create-glyph 'zNotationRelationalComposition' 0x2A3E : glyph-proc
-		local df : include : DivFrame para.advanceScaleF
+		local df : include : DivFrame para.advanceScaleI
 		define sw : AdviceStroke 6.5
 		define dotRadius : 0.625 * [Math.max PeriodRadius (XH / 8)]
 		include : RingStrokeAt df.middle (0.625 * XH - dotRadius) (dotRadius + sw / 2 - O) sw

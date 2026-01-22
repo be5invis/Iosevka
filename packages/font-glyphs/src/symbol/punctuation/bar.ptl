@@ -10,13 +10,19 @@ glyph-module
 glyph-block Symbol-Punctuation-Bar : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors ExtendBelowBaseAnchors
 
 	glyph-block-export BarShape
-	define [BarShape x top bot fine] : glyph-proc
-		set-base-anchor 'above' x top
-		set-base-anchor 'below' x bot
-		local sw : fallback fine Stroke
-		include : VBar.m x bot top sw
+	define [BarShape x top bot _sw markSet] : glyph-proc
+		if markSet
+		: then : begin
+			include markSet
+			include : ExtendAboveBaseAnchors top
+			include : ExtendBelowBaseAnchors bot
+		: else : begin
+			set-base-anchor 'above' x top
+			set-base-anchor 'below' x bot
+		include : VBar.m x bot top _sw
 
 	create-glyph 'bar.upright'              : BarShape Middle ParenTop ParenBot
 	create-glyph 'bar.slanted.naturalSlope' : BarShape Middle ParenTop ParenBot
@@ -40,12 +46,11 @@ glyph-block Symbol-Punctuation-Bar : begin
 			ParenTop - gap
 			ParenBot + gap
 
-	define [BrokenBarShape x top bot fine] : glyph-proc
+	define [BrokenBarShape x top bot _sw] : glyph-proc
 		local breakDist : Math.max Stroke (CAP / 8)
 		local yMid : mix top bot 0.5
-		local sw : fallback fine Stroke
-		include : VBar.m x (yMid + breakDist / 2) top sw
-		include : VBar.m x bot (yMid - breakDist / 2) sw
+		include : VBar.m x (yMid + breakDist / 2) top _sw
+		include : VBar.m x bot (yMid - breakDist / 2) _sw
 
 	create-glyph 'brokenBar.upright'              : BrokenBarShape Middle ParenTop ParenBot
 	create-glyph 'brokenBar.slanted.naturalSlope' : BrokenBarShape Middle ParenTop ParenBot
@@ -54,12 +59,18 @@ glyph-block Symbol-Punctuation-Bar : begin
 		include : BrokenBarShape Middle ParenTop ParenBot
 
 	glyph-block-export DoubleBarShape
-	define [DoubleBarShape x top bot fine] : glyph-proc
-		set-base-anchor 'above' x top
-		set-base-anchor 'below' x bot
-		local sw : ([fallback fine Stroke] / Stroke) * [AdviceStroke 3.5]
-		include : VBar.m (x - Width * 0.175) bot top sw
-		include : VBar.m (x + Width * 0.175) bot top sw
+	define [DoubleBarShape x top bot _sw markSet] : glyph-proc
+		if markSet
+		: then : begin
+			include markSet
+			include : ExtendAboveBaseAnchors top
+			include : ExtendBelowBaseAnchors bot
+		: else : begin
+			set-base-anchor 'above' x top
+			set-base-anchor 'below' x bot
+		local fine : [AdviceStroke 3.5] * ([fallback _sw Stroke] / Stroke)
+		include : VBar.m (x - Width / 6) bot top fine
+		include : VBar.m (x + Width / 6) bot top fine
 
 	create-glyph 'doubleBar.upright'              : DoubleBarShape Middle ParenTop ParenBot
 	create-glyph 'doubleBar.slanted.naturalSlope' : DoubleBarShape Middle ParenTop ParenBot
@@ -68,13 +79,19 @@ glyph-block Symbol-Punctuation-Bar : begin
 		include : DoubleBarShape Middle ParenTop ParenBot
 
 	glyph-block-export TripleBarShape
-	define [TripleBarShape x top bot fine] : glyph-proc
-		set-base-anchor 'above' x top
-		set-base-anchor 'below' x bot
-		local sw : ([fallback fine Stroke] / Stroke) * [AdviceStroke 4.25]
-		include : VBar.m (x - Width * 0.2625) bot top sw
-		include : VBar.m  x                   bot top sw
-		include : VBar.m (x + Width * 0.2625) bot top sw
+	define [TripleBarShape x top bot _sw markSet] : glyph-proc
+		if markSet
+		: then : begin
+			include markSet
+			include : ExtendAboveBaseAnchors top
+			include : ExtendBelowBaseAnchors bot
+		: else : begin
+			set-base-anchor 'above' x top
+			set-base-anchor 'below' x bot
+		local fine : [AdviceStroke 5.25] * ([fallback _sw Stroke] / Stroke)
+		include : VBar.m (x - Width / 4) bot top fine
+		include : VBar.m  x              bot top fine
+		include : VBar.m (x + Width / 4) bot top fine
 
 	create-glyph 'tripleBar.upright'              : TripleBarShape Middle ParenTop ParenBot
 	create-glyph 'tripleBar.slanted.naturalSlope' : TripleBarShape Middle ParenTop ParenBot
@@ -94,9 +111,17 @@ glyph-block Symbol-Punctuation-Bar : begin
 	select-variant 'tripleBar.slanted' (follow -- 'bar.slanted')
 	orthographic-slanted 'tripleBar' 0x2980
 
-	create-glyph  'dentalClick' 0x1C0 :       BarShape Middle ParenTop ParenBot
-	create-glyph 'lateralClick' 0x1C1 : DoubleBarShape Middle ParenTop ParenBot
+	create-glyph 'dentalClick'  0x1C0 : glyph-proc
+		local df : include : DivFrame para.advanceScaleI
+		include : BarShape df.middle Ascender Descender df.mvs [df.markSet.bp]
+	create-glyph 'lateralClick' 0x1C1 : glyph-proc
+		local df : include : DivFrame 1
+		include : DoubleBarShape df.middle Ascender Descender df.mvs [df.markSet.bp]
+	create-glyph 'retroflexClick' : glyph-proc
+		local df : include : DivFrame 1
+		include : TripleBarShape df.middle Ascender Descender df.mvs [df.markSet.bp]
 	create-glyph 'palatalClick' 0x1C2 : glyph-proc
-		include [refer-glyph 'dentalClick'] AS_BASE
-		include : HBar.b SB RightSB ([mix ParenBot ParenTop 0.5] + XH * 0.1) OverlayStroke
-		include : HBar.t SB RightSB ([mix ParenBot ParenTop 0.5] - XH * 0.1) OverlayStroke
+		local df : include : DivFrame para.advanceScaleF
+		include : BarShape df.middle Ascender Descender df.mvs [df.markSet.bp]
+		include : HBar.b df.leftSB df.rightSB ([mix Descender Ascender 0.5] + XH * 0.1) OverlayStroke
+		include : HBar.t df.leftSB df.rightSB ([mix Descender Ascender 0.5] - XH * 0.1) OverlayStroke
