@@ -10,37 +10,15 @@ glyph-block Letter-Latin-Ezh : begin
 	glyph-block-import Letter-Shared-Shapes : CurlyTail SerifedArcEnd PalatalHook RetroflexHook
 	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
 
-	define [StdTerminal df top bottom xArcMid yArcMid yMidLeft stroke hook origBar] : list
-		g4 xArcMid yArcMid
-		hookend bottom (sw -- stroke)
-		g4 (df.leftSB + OX) (bottom + hook)
-
-	define [HooklessTerminal df top bottom xArcMid yArcMid yMidLeft stroke hook origBar] : list
-		g4.down.mid xArcMid yArcMid [heading Downward]
-
-	define [RetroflexConnectionTerminal df top bottom xArcMid yArcMid yMidLeft stroke hook origBar] : list
-		g4 xArcMid yArcMid
-		SerifedArcEnd.RtlRhs df.leftSB bottom stroke hook origBar
-
-	define [CurlyTailTerminal df top bottom xArcMid yArcMid yMidLeft stroke hook origBar] : begin
-		local fine : Math.min stroke : df.adviceStroke2 3.5 3 (yMidLeft - bottom)
-		return : list
-			g4 xArcMid yArcMid
-			CurlyTail.n fine bottom df.leftSB df.width (bottom + 0.5 * fine)
-				yLoopTop -- ([mix yMidLeft bottom 0.5] + 0.25 * fine)
-				swBefore -- stroke
-
 	define [ConventionalTop df top bottom xTopLeft xTopRight xMidLeft yMidLeft stroke] : glyph-proc
 		include : tagged 'strokeTop' : HBar.t xTopLeft xTopRight top stroke
-		include : dispiro
-			corner xTopRight (top - stroke) [widths.rhs [VSwToH stroke]]
-			corner xMidLeft  yMidLeft       [widths.lhs [VSwToH stroke]]
+		include : tagged 'strokeMiddle' : ExtLineRhsToLhs 0 [VSwToH stroke] xTopRight (top - stroke) xMidLeft yMidLeft
 
 	define [CursiveTop df top bottom xTopLeft xTopRight xMidLeft yMidLeft stroke] : glyph-proc
-		define hook : Math.min Hook : mix stroke (top - yMidLeft) 0.5
+		define hook : Math.min Hook : [mix stroke (top - yMidLeft) 0.5] - stroke * 0.25
 		define hookTerminalWidth : Math.min stroke : df.adviceStroke2 3.5 3 (top - bottom)
-		define xDiagWidth : 1 * stroke
-		define yFootHeight : [Math.max (0.15 * (top - bottom)) (stroke * 0.625)] + 0.4 * stroke
+		define xDiagWidth : stroke * 1.0
+		define yFootHeight : [Math.max (0.15 * (top - bottom)) (stroke * 0.625)] + stroke * 0.4
 		define yHookDepth : hook + stroke * 0.25
 		define yHookStraightDepth : Math.min (yHookDepth - stroke * 1.1) (yHookDepth / 3 - stroke * 0.25)
 		define xHookDepth     : Math.max (0.250 * (df.rightSB - df.leftSB)) (hookTerminalWidth * 1.500)
@@ -66,9 +44,27 @@ glyph-block Letter-Latin-Ezh : begin
 				curl [mix (df.leftSB + xMockTailDepth) xTopRight 4.00] (top - 4.00 * yTailDepth)
 
 		include : VBar.r xTopRight top (top - yFootHeight) [VSwToH xDiagWidth]
-		include : dispiro
-			corner xTopRight (top - yFootHeight) [widths.rhs [VSwToH stroke]]
-			corner xMidLeft  yMidLeft            [widths.lhs [VSwToH stroke]]
+		include : tagged 'strokeMiddle' : ExtLineRhsToLhs 0 [VSwToH stroke] xTopRight (top - yFootHeight) xMidLeft yMidLeft
+
+	define [StdTerminal df top bottom xArcMid yArcMid yMidLeft stroke hook origBar] : list
+		g4 xArcMid yArcMid
+		hookend bottom (sw -- stroke)
+		g4 (df.leftSB + OX) (bottom + hook)
+
+	define [HooklessTerminal df top bottom xArcMid yArcMid yMidLeft stroke hook origBar] : list
+		g4.down.mid xArcMid yArcMid [heading Downward]
+
+	define [RetroflexConnectionTerminal df top bottom xArcMid yArcMid yMidLeft stroke hook origBar] : list
+		g4 xArcMid yArcMid
+		SerifedArcEnd.RtlRhs df.leftSB bottom stroke hook origBar
+
+	define [CurlyTailTerminal df top bottom xArcMid yArcMid yMidLeft stroke hook origBar] : begin
+		local fine : Math.min stroke : df.adviceStroke2 3.5 3 (yMidLeft - bottom)
+		return : list
+			g4 xArcMid yArcMid
+			CurlyTail.n fine bottom df.leftSB df.width (bottom + 0.5 * fine)
+				yLoopTop -- ([mix yMidLeft bottom 0.5] + 0.25 * fine)
+				swBefore -- stroke
 
 	glyph-block-export EzhShape
 	define flex-params [EzhShape] : glyph-proc
@@ -350,9 +346,7 @@ glyph-block Letter-Latin-Ezh : begin
 		local yMidRight : RevEzhShape.yMidRight top bottom pyMidRight
 
 		include : HBar.t xTopLeft RightSB top
-		include : dispiro
-			corner xTopLeft (top - Stroke) [widths.lhs [VSwToH Stroke]]
-			corner xMidRight yMidRight     [widths.rhs [VSwToH Stroke]]
+		include : ExtLineLhsToRhs 0 [VSwToH Stroke] xTopLeft (top - Stroke) xMidRight yMidRight
 
 		include : dispiro
 			widths.lhs
