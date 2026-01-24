@@ -11,7 +11,7 @@ git clone --depth 1 https://github.com/be5invis/Iosevka.git
 cd Iosevka
 ```
 
-If you want to use a particular version, checkout the appropriate [version tag]((../../../tags)) or branch, for example:
+If you want to use a particular version, checkout the appropriate [version tag](../../../tags) or branch, for example:
 ```
 git checkout v34.0.0
 ```
@@ -74,4 +74,4 @@ docker run -it --rm -v $PWD:/work iosevka-builder ttf::myfont1 ttf::myfont2 cont
 ls -lR dist/ # Recursively list build result directories
 ```
 
-To prepare the custom build plans, please refer to [Configuring Custom Build](https://github.com/be5invis/Iosevka/blob/main/doc/custom-build.md#configuring-custom-build) or use the [Customizer](https://be5invis.github.io/Iosevka/customizer).
+To prepare the custom build plans, please refer to [Configuring Custom Build](../doc/custom-build.md#configuring-custom-build) or use the [Customizer](https://be5invis.github.io/Iosevka/customizer).
