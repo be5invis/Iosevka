@@ -769,7 +769,9 @@ async function getCollectPlans(target, rawCollectPlans) {
 		const ttcComposition = {}; // Collect plan for master TTCs
 		const singleGroupTtcInfos = {}; // single-group TTCs
 
-		const shouldProduceSgr = collect.release && collect.from.length > 1;
+		if (!collect || !collect.from || !collect.from.length) continue;
+
+		const shouldProduceSgr = collect.from.length > 1;
 
 		if (shouldProduceSgr) {
 			for (const prefix of collect.from) {
@@ -780,8 +782,6 @@ async function getCollectPlans(target, rawCollectPlans) {
 				singleGroupTtcInfos[sgrPrefix] = { from: prefix, comp: {} };
 			}
 		}
-
-		if (!collect || !collect.from || !collect.from.length) continue;
 
 		for (const prefix of collect.from) {
 			const [gri] = await target.need(BuildPlanOf(prefix));
@@ -859,6 +859,45 @@ const SpecificTtc = task.group(`ttc`, async (target, cgr) => {
 });
 const SpecificSuperTtc = task.group(`super-ttc`, async (target, cgr) => {
 	await target.need(CollectedSuperTtcFile(cgr));
+});
+
+const SpecificSgrTtc = task.group(`sgr-ttc`, async (target, cgr) => {
+	const [cPlan] = await target.need(CollectPlans);
+	const plan = cPlan[cgr];
+	if (Object.keys(plan.singleGroupTtcInfos).length === 0) {
+		throw new Error(`Collection ${cgr} has only one group - SGR output not applicable`);
+	}
+	for (const sgr in plan.singleGroupTtcInfos) {
+		const ttcFiles = Object.keys(plan.singleGroupTtcInfos[sgr].comp);
+		await target.need(ttcFiles.map(f => SGrTtcFile(cgr, sgr, f)));
+	}
+});
+const SpecificSgrSuperTtc = task.group(`sgr-super-ttc`, async (target, cgr) => {
+	const [cPlan] = await target.need(CollectPlans);
+	const plan = cPlan[cgr];
+	if (Object.keys(plan.singleGroupTtcInfos).length === 0) {
+		throw new Error(`Collection ${cgr} has only one group - SGR output not applicable`);
+	}
+	for (const sgr in plan.singleGroupTtcInfos) {
+		await target.need(SGrSuperTtcFile(cgr, sgr));
+	}
+});
+
+const SpecificAllTtc = task.group(`all-ttc`, async (target, cgr) => {
+	await target.need(SpecificTtc(cgr));
+	const [cPlan] = await target.need(CollectPlans);
+	const plan = cPlan[cgr];
+	if (Object.keys(plan.singleGroupTtcInfos).length > 0) {
+		await target.need(SpecificSgrTtc(cgr));
+	}
+});
+const SpecificAllSuperTtc = task.group(`all-super-ttc`, async (target, cgr) => {
+	await target.need(SpecificSuperTtc(cgr));
+	const [cPlan] = await target.need(CollectPlans);
+	const plan = cPlan[cgr];
+	if (Object.keys(plan.singleGroupTtcInfos).length > 0) {
+		await target.need(SpecificSgrSuperTtc(cgr));
+	}
 });
 
 const CollectedSuperTtcFile = file.make(
