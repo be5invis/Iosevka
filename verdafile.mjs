@@ -848,25 +848,38 @@ function fnStandardTtc(fIsGlyfTtc, prefix, suffixMapping, sfi) {
 	)}`;
 }
 
+function validateCollectPlan(cPlan, cgr) {
+	const plan = cPlan[cgr];
+	if (!plan) throw new Error(`Collection ${cgr} not found`);
+	return plan;
+}
+
+function validateSgrPlan(cPlan, cgr) {
+	const plan = validateCollectPlan(cPlan, cgr);
+	if (Object.keys(plan.singleGroupTtcInfos).length === 0)
+		throw new Error(`Collection ${cgr} has only one group - SGr output not applicable`);
+	return plan;
+}
+
 ///////////////////////////////////////////////////////////
 //////               Font Collection                 //////
 ///////////////////////////////////////////////////////////
 
 const SpecificTtc = task.group(`ttc`, async (target, cgr) => {
 	const [cPlan] = await target.need(CollectPlans);
-	const ttcFiles = Array.from(Object.keys(cPlan[cgr].ttcComposition));
+	const plan = validateCollectPlan(cPlan, cgr);
+	const ttcFiles = Array.from(Object.keys(plan.ttcComposition));
 	await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
 });
 const SpecificSuperTtc = task.group(`super-ttc`, async (target, cgr) => {
+	const [cPlan] = await target.need(CollectPlans);
+	validateCollectPlan(cPlan, cgr);
 	await target.need(CollectedSuperTtcFile(cgr));
 });
 
 const SpecificSgrTtc = task.group(`sgr-ttc`, async (target, cgr) => {
 	const [cPlan] = await target.need(CollectPlans);
-	const plan = cPlan[cgr];
-	if (Object.keys(plan.singleGroupTtcInfos).length === 0) {
-		throw new Error(`Collection ${cgr} has only one group - SGR output not applicable`);
-	}
+	const plan = validateSgrPlan(cPlan, cgr);
 	for (const sgr in plan.singleGroupTtcInfos) {
 		const ttcFiles = Object.keys(plan.singleGroupTtcInfos[sgr].comp);
 		await target.need(ttcFiles.map(f => SGrTtcFile(cgr, sgr, f)));
@@ -874,10 +887,7 @@ const SpecificSgrTtc = task.group(`sgr-ttc`, async (target, cgr) => {
 });
 const SpecificSgrSuperTtc = task.group(`sgr-super-ttc`, async (target, cgr) => {
 	const [cPlan] = await target.need(CollectPlans);
-	const plan = cPlan[cgr];
-	if (Object.keys(plan.singleGroupTtcInfos).length === 0) {
-		throw new Error(`Collection ${cgr} has only one group - SGR output not applicable`);
-	}
+	const plan = validateSgrPlan(cPlan, cgr);
 	for (const sgr in plan.singleGroupTtcInfos) {
 		await target.need(SGrSuperTtcFile(cgr, sgr));
 	}
@@ -886,7 +896,7 @@ const SpecificSgrSuperTtc = task.group(`sgr-super-ttc`, async (target, cgr) => {
 const SpecificAllTtc = task.group(`all-ttc`, async (target, cgr) => {
 	await target.need(SpecificTtc(cgr));
 	const [cPlan] = await target.need(CollectPlans);
-	const plan = cPlan[cgr];
+	const plan = validateCollectPlan(cPlan, cgr);
 	if (Object.keys(plan.singleGroupTtcInfos).length > 0) {
 		await target.need(SpecificSgrTtc(cgr));
 	}
@@ -894,7 +904,7 @@ const SpecificAllTtc = task.group(`all-ttc`, async (target, cgr) => {
 const SpecificAllSuperTtc = task.group(`all-super-ttc`, async (target, cgr) => {
 	await target.need(SpecificSuperTtc(cgr));
 	const [cPlan] = await target.need(CollectPlans);
-	const plan = cPlan[cgr];
+	const plan = validateCollectPlan(cPlan, cgr);
 	if (Object.keys(plan.singleGroupTtcInfos).length > 0) {
 		await target.need(SpecificSgrSuperTtc(cgr));
 	}
