@@ -850,14 +850,14 @@ function fnStandardTtc(fIsGlyfTtc, prefix, suffixMapping, sfi) {
 
 function validateCollectPlan(cPlan, cgr) {
 	const plan = cPlan[cgr];
-	if (!plan) throw new Error(`Collection ${cgr} not found`);
+	if (!plan) throw new Error(`Collection ${cgr} not found.`);
 	return plan;
 }
 
 function validateSgrPlan(cPlan, cgr) {
 	const plan = validateCollectPlan(cPlan, cgr);
-	if (Object.keys(plan.singleGroupTtcInfos).length === 0)
-		throw new Error(`Collection ${cgr} has only one group - SGr output not applicable`);
+	if (Object.keys(plan.singleGroupTtcInfos).length <= 1)
+		throw new Error(`Collection ${cgr} has only one group - SGr output not applicable.`);
 	return plan;
 }
 
