@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 import [MathSansSerif DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -11,132 +11,130 @@ glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import Mark-Shared-Metrics : markMiddle markExtend
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Mark-Below : belowMarkMid
-	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-import Letter-Shared : SetGrekUpperTonos
 	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
 	glyph-block-import Letter-Shared-Shapes : LeftHook MidHook EngHook UpwardHookShape
 	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender PalatalHook
-	glyph-block-import Letter-Latin-Upper-F : kEFMidBarShrink
+	glyph-block-import Letter-Latin-Upper-F : kEFMidBarShrink EFVJutLength
 
 	define SLAB-NONE                   0
-	define SLAB-TOP-LEFT               1
-	define SLAB-TOP-LEFT-BOTTOM-RIGHT  2
-	define SLAB-TAILED-CYRILLIC        3
+	define SLAB-TL                     1
+	define SLAB-TL-BR                  2
+	define SLAB-TAILED                 3
 	define SLAB-ALL                    4
 	define SLAB-ALL-BGR                5
-	define SLAB-TAILED-CYRILLIC-BGR    6
+	define SLAB-TAILED-BGR             6
 
-	define [HSerifs slabType l r top _sw] : begin
-		local sf : SerifFrame top 0 l r (swRef -- _sw)
-		return : match slabType
-			[Just SLAB-NONE]                  : glyph-proc
-			[Just SLAB-TOP-LEFT]              : begin          sf.lt.outer
-			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : composite-proc sf.lt.outer                        sf.rb.outer
-			[Just SLAB-TAILED-CYRILLIC]       : composite-proc sf.lt.full  sf.rt.full  sf.lb.full
-			[Just SLAB-ALL]                   : composite-proc sf.lt.full  sf.rt.full  sf.lb.full sf.rb.full
-			[Just SLAB-ALL-BGR]               : composite-proc sf.lt.outer sf.rt.inner sf.lb.full sf.rb.full
-			[Just SLAB-TAILED-CYRILLIC-BGR]   : composite-proc sf.lt.outer sf.rt.inner sf.lb.full
+	define [HShape] : with-params [df top slabType [fTailed false] [sw df.mvs]] : glyph-proc
+		include : tagged 'strokeL' : VBar.l df.leftSB 0 top sw
+		include : tagged 'strokeR' : if fTailed
+			RightwardTailedBar df.rightSB 0 top sw
+			VBar.r             df.rightSB 0 top sw
+		include : tagged 'crossbar' : HBar.m (df.leftSB - O) (df.rightSB + O) [mix 0 top HBarPos] sw
 
-	define [LeftHalfHSerifs slabType l r top _sw] : begin
-		local sf : SerifFrame top 0 l r (swRef -- _sw)
-		return : match slabType
-			[Just SLAB-NONE]                  : glyph-proc
-			[Just SLAB-TOP-LEFT]              : begin          sf.lt.outer
-			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : begin          sf.lt.outer
-			[Just SLAB-TAILED-CYRILLIC]       : composite-proc sf.lt.fullSide sf.lb.fullSide
-			[Just SLAB-ALL]                   : composite-proc sf.lt.fullSide sf.lb.fullSide
-			[Just SLAB-ALL-BGR]               : composite-proc sf.lt.outer    sf.lb.fullSide
-			[Just SLAB-TAILED-CYRILLIC-BGR]   : composite-proc sf.lt.outer    sf.lb.fullSide
+		local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
+		include : match slabType
+			[Just SLAB-TL]         : begin          sf.lt.outer
+			[Just SLAB-TL-BR]      : composite-proc sf.lt.outer                        sf.rb.outer
+			[Just SLAB-TAILED]     : composite-proc sf.lt.full  sf.rt.full  sf.lb.full
+			[Just SLAB-ALL]        : composite-proc sf.lt.full  sf.rt.full  sf.lb.full sf.rb.full
+			[Just SLAB-ALL-BGR]    : composite-proc sf.lt.outer sf.rt.inner sf.lb.full sf.rb.full
+			[Just SLAB-TAILED-BGR] : composite-proc sf.lt.outer sf.rt.inner sf.lb.full
+			__                     : glyph-proc
 
-	define [RightHalfHSerifs slabType l r top _sw] : begin
-		local sf : SerifFrame top 0 l r (swRef -- _sw)
-		return : match slabType
-			[Just SLAB-NONE]                  : glyph-proc
-			[Just SLAB-TOP-LEFT]              : glyph-proc
-			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : begin                         sf.rb.outer
-			[Just SLAB-TAILED-CYRILLIC]       : begin          sf.rt.fullSide
-			[Just SLAB-ALL]                   : composite-proc sf.rt.fullSide sf.rb.fullSide
-			[Just SLAB-ALL-BGR]               : composite-proc sf.rt.inner    sf.rb.fullSide
-			[Just SLAB-TAILED-CYRILLIC-BGR]   : begin          sf.rt.inner
+	define [TurnedHShape] : with-params [df top slabType [fTailed false] [sw df.mvs]] : glyph-proc
+		include : LeaningAnchor.Below.VBar.r df.rightSB sw
+		include : tagged 'strokeL' : VBar.l df.leftSB ([mix 0 top HBarPos] - sw / 2) top sw
+		include : tagged 'strokeR' : if fTailed
+			RightwardTailedBar df.rightSB 0 top sw
+			VBar.r             df.rightSB 0 top sw
+		include : tagged 'crossbar' : HBar.m (df.leftSB - O) (df.rightSB + O) [mix 0 top HBarPos] sw
 
-	define [TurnedHSerifs slabType l r top _sw] : begin
-		local sf : SerifFrame top 0 l r (swRef -- _sw)
-		return : match slabType
-			[Just SLAB-NONE]                  : glyph-proc
-			[Just SLAB-TOP-LEFT]              : begin          sf.lt.outer
-			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : composite-proc sf.lt.outer             sf.rb.outer
-			[Just SLAB-TAILED-CYRILLIC]       : composite-proc sf.lt.full  sf.rt.full
-			[Just SLAB-ALL]                   : composite-proc sf.lt.full  sf.rt.full  sf.rb.fullSide
-			[Just SLAB-ALL-BGR]               : composite-proc sf.lt.outer sf.rt.inner sf.rb.fullSide
-			[Just SLAB-TAILED-CYRILLIC-BGR]   : composite-proc sf.lt.outer sf.rt.inner
+		local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
+		include : match slabType
+			[Just SLAB-TL]         : begin          sf.lt.outer
+			[Just SLAB-TL-BR]      : composite-proc sf.lt.outer             sf.rb.outer
+			[Just SLAB-TAILED]     : composite-proc sf.lt.full  sf.rt.full
+			[Just SLAB-ALL]        : composite-proc sf.lt.full  sf.rt.full  sf.rb.fullSide
+			__                     : glyph-proc
 
-	define [HShape l r top _sw] : glyph-proc
-		local sw : fallback _sw Stroke
-		include : tagged 'strokeL' : VBar.l l 0 top sw
-		include : tagged 'strokeR' : VBar.r r 0 top sw
-		include : tagged 'crossbar' : HBar.m (l - O) (r + O) [mix 0 top HBarPos] sw
+	define [LeftHalfHShape] : with-params [df top slabType [fTailed false] [sw df.mvs]] : glyph-proc
+		local xMockLeft   : mix 0 df.leftSB 1.5
+		local xMockRight  : mix df.width df.rightSB : kEFMidBarShrink (slabType === SLAB-ALL)
+		local xMockMiddle : mix (xMockLeft - [if (slabType === SLAB-NONE) 0 SideJut]) xMockRight 0.5
+		local xLeft  : xMockLeft  + (df.middle - xMockMiddle)
+		local xRight : xMockRight + (df.middle - xMockMiddle)
 
-	define [TurnedHShape l r top _sw] : glyph-proc
-		local sw : fallback _sw Stroke
-		include : LeaningAnchor.Below.VBar.r r sw
-		include : tagged 'strokeL' : VBar.l l ([mix 0 top HBarPos] - sw / 2) top sw
-		include : tagged 'strokeR' : VBar.r r 0 top sw
-		include : tagged 'crossbar' : HBar.m (l - O) (r + O) [mix 0 top HBarPos] sw
+		include : LeaningAnchor.Above.VBar.l xLeft sw
+		include : LeaningAnchor.Below.VBar.l xLeft sw
+		include : tagged 'strokeL' : VBar.l xLeft 0 top sw
+		include : tagged 'crossbar' : HBar.m (xLeft - O) xRight [mix 0 top HBarPos] sw
 
-	define [LeftHalfHShape l r top _sw] : glyph-proc
-		local sw : fallback _sw Stroke
-		include : LeaningAnchor.Above.VBar.l l sw
-		include : LeaningAnchor.Below.VBar.l l sw
-		include : tagged 'strokeL' : VBar.l l 0 top sw
-		include : tagged 'crossbar' : HBar.m (l - O) r [mix 0 top HBarPos] sw
+		local sf : SerifFrame top 0 xLeft xRight (swRef -- sw)
+		include : match slabType
+			[Just SLAB-TL]         : begin          sf.lt.outer
+			[Just SLAB-TL-BR]      : begin          sf.lt.outer
+			[Just SLAB-TAILED]     : composite-proc sf.lt.fullSide sf.lb.fullSide
+			[Just SLAB-ALL]        : composite-proc sf.lt.fullSide sf.lb.fullSide : tagged 'serifMR' : new-glyph : glyph-proc
+				local { jutTop jutBot jutMid } : EFVJutLength top HBarPos sw
+				local swVJut : VJutStroke * (sw / Stroke)
+				include : VSerif.mr xRight [mix 0 top HBarPos] jutMid swVJut
+			__                     : glyph-proc
 
-	define [RightHalfHShape l r top _sw] : glyph-proc
-		local sw : fallback _sw Stroke
-		include : LeaningAnchor.Above.VBar.r r sw
-		include : LeaningAnchor.Below.VBar.r r sw
-		include : tagged 'strokeR' : VBar.r r 0 top sw
-		include : tagged 'crossbar' : HBar.m l (r + O) [mix 0 top HBarPos] sw
+	define [RightHalfHShape] : with-params [df top slabType [fTailed false] [sw df.mvs]] : glyph-proc
+		local xMockLeft   : mix 0 df.leftSB : kEFMidBarShrink (slabType === SLAB-ALL)
+		local xMockRight  : mix df.width df.rightSB 1.5
+		local xMockMiddle : mix xMockLeft (xMockRight + [if (slabType === SLAB-NONE) 0 SideJut]) 0.5
+		local xLeft  : xMockLeft  + (df.middle - xMockMiddle)
+		local xRight : xMockRight + (df.middle - xMockMiddle)
 
-	define [TailedHShape l r top _sw] : glyph-proc
-		local sw : fallback _sw Stroke
-		include : tagged 'strokeL' : VBar.l l 0 top sw
-		include : tagged 'strokeR' : RightwardTailedBar r 0 top (sw -- sw)
-		include : tagged 'crossbar' : HBar.m (l - O) (r + O) [mix 0 top HBarPos] sw
+		include : LeaningAnchor.Above.VBar.r xRight sw
+		include : LeaningAnchor.Below.VBar.r xRight sw
+		include : tagged 'strokeR' : if fTailed
+			RightwardTailedBar xRight 0 top sw
+			VBar.r             xRight 0 top sw
+		include : tagged 'crossbar' : HBar.m xLeft (xRight + O) [mix 0 top HBarPos] sw
 
-	define [EnGheShape Body df top slabType vSlab] : glyph-proc
-		local sw : Math.min df.mvs : AdviceStroke 2.75 df.adws
-		local xm : Math.min (Width - df.leftSB) : if SLAB
-			[mix df.leftSB df.rightSB 0.625] + [HSwToV : 0.25 * df.mvs]
-			mix df.leftSB df.rightSB : if (df.adws > 1) (2 / 3) (3 / 4)
-		local xTopBarRightEnd : mix df.width df.rightSB : if vSlab 0.25 0.375
+		local sf : SerifFrame top 0 xLeft xRight (swRef -- sw)
+		include : match slabType
+			[Just SLAB-TL-BR]      : begin                         sf.rb.outer
+			[Just SLAB-TAILED]     : begin          sf.rt.fullSide
+			[Just SLAB-ALL]        : composite-proc sf.rt.fullSide sf.rb.fullSide : tagged 'serifML' : new-glyph : glyph-proc
+				local { jutTop jutBot jutMid } : EFVJutLength top HBarPos sw
+				local swVJut : VJutStroke * (sw / Stroke)
+				include : VSerif.ml xLeft [mix 0 top HBarPos] jutMid swVJut
+			__                     : glyph-proc
 
-		include : Body             df.leftSB xm top sw
-		include : HSerifs slabType df.leftSB xm top sw
+	define [EnGheShape] : with-params [df top slabType [fTailed false] [sw [Math.min df.mvs : AdviceStroke 2.75 df.adws]] [serifTR SLAB]] : glyph-proc
+		local subDf : DivFrame (0.75 * df.adws) 2
+		local xTopBarRightEnd : mix df.width df.rightSB : if serifTR 0.25 0.375
 
-		include : HBar.t (xm - [HSwToV sw] - O) xTopBarRightEnd top sw
+		include : HShape subDf top slabType fTailed sw
+		include : HBar.t ((subDf.rightSB - [HSwToV sw]) - O) xTopBarRightEnd top sw
 
-		if vSlab : begin
-			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (xTopBarRightEnd - xm)
-			include : VSerif.dr xTopBarRightEnd top VJut swVJut
+		if serifTR : begin
+			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (xTopBarRightEnd - subDf.rightSB)
+			include : tagged 'serifTR' : VSerif.dr xTopBarRightEnd top VJut swVJut
 
-	define [HwairShape df top yend slabType serifTR] : glyph-proc
-		local xm : df.middle + [HSwToV : 0.5 * df.mvs]
-		include : tagged 'strokeL' : VBar.l df.leftSB 0 top df.mvs
-		include : tagged 'strokeR' : UpwardHookShape
-			left   -- (xm - [HSwToV df.mvs])
+	define [HwairShape] : with-params [df top slabType [fTailed false] [sw df.mvs] [serifTR SLAB] [yend XH]] : glyph-proc
+		local subDf : df.slice 3 2
+
+		include : HShape subDf top slabType fTailed sw
+		eject-contour 'strokeR'
+		eject-contour 'serifRB'
+
+		include : UpwardHookShape
+			left   -- (subDf.rightSB - [HSwToV sw])
 			right  -- df.rightSB
 			ybegin -- top
 			yend   -- yend
 			ada    -- (ArchDepthA * (2 / df.hPack) * df.adws)
 			adb    -- (ArchDepthB * (2 / df.hPack) * df.adws)
-			sw     -- df.mvs
-		include : tagged 'crossbar' : HBar.m (df.leftSB - O) (xm + O) [mix 0 top HBarPos] df.mvs
+			sw     -- sw
 
-		include : HSerifs slabType df.leftSB xm top df.mvs
-		eject-contour 'serifRB'
 		if serifTR : begin
-			local sf2 : [SerifFrame.fromDf df yend 0].slice 1 2
+			local sf2 : [SerifFrame.fromDf df yend 0 (swRef -- sw)].slice 1 2
 			include sf2.rt.full
 
 	define [OverlayStrokeShape top slabType] : begin
@@ -144,17 +142,25 @@ glyph-block Letter-Latin-Upper-H : begin
 		local yt : top - [if slabType Stroke 0]
 		return : HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] [mix yb yt 0.5] [Math.min OverlayStroke : 0.625 * (yt - yb)]
 
-	define HConfig : object
-		serifless                        { HShape       TurnedHShape LeftHalfHShape RightHalfHShape SLAB-NONE                  }
-		tailedSerifless                  { TailedHShape TurnedHShape LeftHalfHShape RightHalfHShape SLAB-NONE                  }
-		topLeftSerifed                   { HShape       TurnedHShape LeftHalfHShape RightHalfHShape SLAB-TOP-LEFT              }
-		tailedTopLeftSerifed             { TailedHShape TurnedHShape LeftHalfHShape RightHalfHShape SLAB-TOP-LEFT              }
-		topLeftBottomRightSerifed        { HShape       TurnedHShape LeftHalfHShape RightHalfHShape SLAB-TOP-LEFT-BOTTOM-RIGHT }
-		serifed                          { HShape       TurnedHShape LeftHalfHShape RightHalfHShape SLAB-ALL                   }
-		tailedSerifed                    { TailedHShape TurnedHShape LeftHalfHShape RightHalfHShape SLAB-TAILED-CYRILLIC       }
-		serifedExceptBottomRight         { HShape       TurnedHShape LeftHalfHShape RightHalfHShape SLAB-TAILED-CYRILLIC       }
-		serifedBGR                       { HShape       TurnedHShape LeftHalfHShape RightHalfHShape SLAB-ALL-BGR               }
-		tailedSerifedBGR                 { TailedHShape TurnedHShape LeftHalfHShape RightHalfHShape SLAB-TAILED-CYRILLIC-BGR   }
+	define HConfig : SuffixCfg.combine
+		SuffixCfg.weave
+			object # tail
+				""                          false
+				tailed                      true
+			function [tail] : object # serifs
+				serifless                   SLAB-NONE
+				topLeftSerifed              SLAB-TL
+				topLeftBottomRightSerifed : match tail
+					[Just 'tailed']     SLAB-TL
+					__                  SLAB-TL-BR
+				serifed                   : match tail
+					[Just 'tailed']     SLAB-TAILED
+					__                  SLAB-ALL
+				serifedBGR                : match tail
+					[Just 'tailed']     SLAB-TAILED-BGR
+					__                  SLAB-ALL-BGR
+		object
+			serifedExceptBottomRight { false SLAB-TAILED }
 
 	define EnGheGheConfig : object
 		serifless       false
@@ -164,81 +170,54 @@ glyph-block Letter-Latin-Upper-H : begin
 		roundedSerifless false
 		roundedSerifed   true
 
-	foreach { suffix { Body TurnedBody LeftHalfBody RightHalfBody slabType } } [Object.entries HConfig] : do
+	foreach { suffix { fTailed slabType } } [Object.entries HConfig] : do
 		create-glyph "H.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : Body             SB RightSB CAP
-			include : HSerifs slabType SB RightSB CAP
+			include : HShape [DivFrame 1] CAP slabType fTailed
 
 		create-glyph "grek/Eta.\(suffix)" : glyph-proc
 			include [refer-glyph "H.\(suffix)"] AS_BASE ALSO_METRICS
 			include : SetGrekUpperTonos [if (slabType === SLAB-NONE) 0 (-SideJut)]
 
-		create-glyph "turnH.\(suffix)" : glyph-proc
+		create-glyph "turnhCap.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : TurnedBody             SB RightSB CAP
-			include : TurnedHSerifs slabType SB RightSB CAP
+			include : TurnedHShape [DivFrame 1] CAP slabType fTailed
 
 		create-glyph "smcpH.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : Body             SB RightSB XH
-			include : HSerifs slabType SB RightSB XH
+			include : HShape [DivFrame 1] XH slabType fTailed
 
 		create-glyph "HLeftHalf.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			local xMockLeft : mix 0 SB 1.5
-			local xMockRight : mix Width RightSB : kEFMidBarShrink (slabType === SLAB-ALL)
-			local xMockMiddle : mix (xMockLeft - [if (slabType === SLAB-NONE) 0 SideJut]) xMockRight 0.5
-			local xLeft  : xMockLeft  + (Middle - xMockMiddle)
-			local xRight : xMockRight + (Middle - xMockMiddle)
-			include : LeftHalfBody             xLeft xRight CAP
-			include : LeftHalfHSerifs slabType xLeft xRight CAP
+			include : LeftHalfHShape [DivFrame 1] CAP slabType fTailed
 
 		create-glyph "HRightHalf.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			local xMockLeft : mix 0 SB : kEFMidBarShrink (slabType === SLAB-ALL)
-			local xMockRight : mix Width RightSB 1.5
-			local xMockMiddle : mix xMockLeft (xMockRight + [if (slabType === SLAB-NONE) 0 SideJut]) 0.5
-			local xLeft  : xMockLeft  + (Middle - xMockMiddle)
-			local xRight : xMockRight + (Middle - xMockMiddle)
-			include : RightHalfBody             xLeft xRight CAP
-			include : RightHalfHSerifs slabType xLeft xRight CAP
+			include : RightHalfHShape [DivFrame 1] CAP slabType fTailed
 
 		create-glyph "smcpHLeftHalf.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			local xMockLeft : mix 0 SB 1.5
-			local xMockRight : mix Width RightSB : kEFMidBarShrink (slabType === SLAB-ALL)
-			local xMockMiddle : mix (xMockLeft - [if (slabType === SLAB-NONE) 0 SideJut]) xMockRight 0.5
-			local xLeft  : xMockLeft  + (Middle - xMockMiddle)
-			local xRight : xMockRight + (Middle - xMockMiddle)
-			include : LeftHalfBody             xLeft xRight XH
-			include : LeftHalfHSerifs slabType xLeft xRight XH
+			include : LeftHalfHShape [DivFrame 1] XH slabType fTailed
 
 		create-glyph "smcpHRightHalf.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			local xMockLeft : mix 0 SB : kEFMidBarShrink (slabType === SLAB-ALL)
-			local xMockRight : mix Width RightSB 1.5
-			local xMockMiddle : mix xMockLeft (xMockRight + [if (slabType === SLAB-NONE) 0 SideJut]) 0.5
-			local xLeft  : xMockLeft  + (Middle - xMockMiddle)
-			local xRight : xMockRight + (Middle - xMockMiddle)
-			include : RightHalfBody             xLeft xRight XH
-			include : RightHalfHSerifs slabType xLeft xRight XH
+			include : RightHalfHShape [DivFrame 1] XH slabType fTailed
 
 		define enGheDf : DivFrame para.advanceScaleM 3
 
 		DefineSelectorGlyph "cyrl/EnGhe" suffix enGheDf 'capital'
 		DefineSelectorGlyph "cyrl/enghe" suffix enGheDf 'e'
 
-		foreach { suffixGhe enGheVSlab } [Object.entries EnGheGheConfig] : do
+		foreach { suffixGhe serifGhe } [Object.entries EnGheGheConfig] : do
 			create-glyph "cyrl/EnGhe.\(suffix).\(suffixGhe)" : glyph-proc
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
-				include : EnGheShape Body enGheDf CAP slabType enGheVSlab
+				include : EnGheShape enGheDf CAP slabType fTailed (serifTR -- serifGhe)
 
 			create-glyph "cyrl/enghe.\(suffix).\(suffixGhe)" : glyph-proc
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
-				include : EnGheShape Body enGheDf XH slabType enGheVSlab
+				include : EnGheShape enGheDf XH slabType fTailed (serifTR -- serifGhe)
 
 		select-variant "cyrl/EnGhe.\(suffix)" (follow -- 'cyrl/EnGhe/GhePart')
 		select-variant "cyrl/enghe.\(suffix)" (follow -- 'cyrl/enghe/ghePart')
@@ -247,23 +226,23 @@ glyph-block Letter-Latin-Upper-H : begin
 
 		DefineSelectorGlyph "Hwair" suffix hwairDf 'capital'
 
-		foreach { suffixV serifTR } [Object.entries HwairVConfig] : do
+		foreach { suffixV serifV } [Object.entries HwairVConfig] : do
 			create-glyph "Hwair.\(suffix).\(suffixV)" : glyph-proc
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
-				include : HwairShape hwairDf CAP XH slabType serifTR
+				include : HwairShape hwairDf CAP slabType fTailed (serifTR -- serifV)
 
 		select-variant "Hwair.\(suffix)" (follow -- 'Hv/v')
 
 		create-glyph "cyrl/NjeKomi.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.capital
-			include : HwairShape df CAP (CAP / 2 + HalfStroke) slabType SLAB
+			include : HwairShape df CAP slabType fTailed (yend -- (CAP / 2 + HalfStroke))
 
 		create-glyph "cyrl/njeKomi.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.e
-			include : HwairShape df XH (XH / 2 + HalfStroke) slabType SLAB
+			include : HwairShape df XH slabType fTailed (yend -- (XH / 2 + HalfStroke))
 
 		create-glyph "HHookLeft.\(suffix)" : glyph-proc
 			include [refer-glyph "H.\(suffix)"] AS_BASE ALSO_METRICS
@@ -304,38 +283,30 @@ glyph-block Letter-Latin-Upper-H : begin
 		create-glyph "cyrl/EnMidHook.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.capDesc
-
-			local xm : df.middle + [HSwToV : 0.5 * df.mvs]
-			include : Body df.leftSB xm CAP df.mvs
-			include : difference [HSerifs slabType df.leftSB xm CAP df.mvs] : intersection
-				MaskBelow Stroke
-				MaskRight [mix xm (df.rightSB - [HSwToV df.mvs]) 0.625]
+			include : HShape [df.slice 3 2] CAP slabType fTailed df.mvs
 			include : MidHook.m df CAP
 
 		create-glyph "cyrl/enMidHook.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.p
-
-			local xm : df.middle + [HSwToV : 0.5 * df.mvs]
-			include : Body df.leftSB xm XH df.mvs
-			include : difference [HSerifs slabType df.leftSB xm XH df.mvs] : intersection
-				MaskBelow Stroke
-				MaskRight [mix xm (df.rightSB - [HSwToV df.mvs]) 0.625]
+			include : HShape [df.slice 3 2] XH slabType fTailed df.mvs
 			include : MidHook.m df XH
 
 	select-variant 'H' 'H'
 	link-reduced-variant 'H/sansSerif' 'H' MathSansSerif
 	select-variant 'H/descBase' (shapeFrom -- 'H')
-	select-variant 'turnH' 0xA78D (follow -- 'H')
+	select-variant 'smcpH' 0x29C (follow -- 'H')
+	select-variant 'turnH' 0xA78D (shapeFrom -- 'turnhCap') (follow -- 'H')
 	select-variant 'HLeftHalf' 0x2C75
+	select-variant 'hLeftHalf' 0x2C76 (shapeFrom -- 'smcpHLeftHalf') (follow -- 'HLeftHalf')
 	select-variant 'HRightHalf' 0xA7F5
+	select-variant 'hRightHalf' 0xA7F6 (shapeFrom -- 'smcpHRightHalf') (follow -- 'HRightHalf')
 
 	select-variant 'grek/Eta' 0x397 (follow -- 'H')
 	link-reduced-variant 'grek/Eta/sansSerif' 'grek/Eta' MathSansSerif (follow -- 'H/sansSerif')
 
-	select-variant 'smcpH' 0x29C (follow -- 'H')
-	select-variant 'smcpHLeftHalf' 0x2C76 (follow -- 'HLeftHalf')
-	select-variant 'smcpHRightHalf' 0xA7F6 (follow -- 'HRightHalf')
+	alias 'grek/Heta' 0x370 'HLeftHalf'
+	alias 'grek/heta' 0x371 [if SLAB 'smcpHLeftHalf.topLeftSerifed' 'smcpHLeftHalf.serifless']
 
 	select-variant 'cyrl/En' 0x41D (shapeFrom -- 'H')
 	select-variant 'cyrl/En/descBase' (shapeFrom -- 'H')
@@ -343,9 +314,6 @@ glyph-block Letter-Latin-Upper-H : begin
 	select-variant 'cyrl/en' 0x43D (shapeFrom -- 'smcpH')
 	select-variant 'cyrl/en/descBase' (shapeFrom -- 'smcpH')
 	select-variant 'cyrl/en.BGR' (shapeFrom -- 'smcpH')
-
-	alias 'grek/Heta' 0x370 'HLeftHalf'
-	alias 'grek/heta' 0x371 [if SLAB 'smcpHLeftHalf.topLeftSerifed' 'smcpHLeftHalf.serifless']
 
 	CreateSelectorVariants 'cyrl/EnGhe' 0x4A4 [Object.keys HConfig] (follow -- 'cyrl/En')
 	CreateSelectorVariants 'cyrl/enghe' 0x4A5 [Object.keys HConfig] (follow -- 'cyrl/en')
@@ -363,11 +331,11 @@ glyph-block Letter-Latin-Upper-H : begin
 	select-variant 'cyrl/EnHook' 0x4C7 (shapeFrom -- 'Heng') (follow -- 'cyrl/En/descBase')
 	select-variant 'cyrl/enHook' 0x4C8 (shapeFrom -- 'smcpHeng') (follow -- 'cyrl/en/descBase')
 
-	select-variant 'cyrl/EnMidHook' 0x0522 (follow -- 'cyrl/En')
-	select-variant 'cyrl/enMidHook' 0x0523 (follow -- 'cyrl/en')
+	select-variant 'cyrl/EnMidHook' 0x522 (follow -- 'cyrl/En')
+	select-variant 'cyrl/enMidHook' 0x523 (follow -- 'cyrl/en')
 
-	select-variant 'cyrl/NjeKomi' 0x050A
-	select-variant 'cyrl/njeKomi' 0x050B
+	select-variant 'cyrl/NjeKomi' 0x50A
+	select-variant 'cyrl/njeKomi' 0x50B
 
 	derive-glyphs 'HCedilla' 0x1E28 'H' : lambda [src gr] : glyph-proc
 		local shift : SB + [HSwToV HalfStroke] - markMiddle
@@ -396,6 +364,7 @@ glyph-block Letter-Latin-Upper-H : begin
 		eject-contour 'serifLB'
 		include : PalatalHook.lExt SB 0
 
+	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/H' 0x210D : glyph-proc
 		include : MarkSet.capital
 		include : VBar.l SB      0 CAP BBS
