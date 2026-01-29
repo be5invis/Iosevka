@@ -370,7 +370,7 @@ const WidthGradeFormatter: GradesFormatter<Gr.Width> = {
 	titleT: (a, i) => {
 		const d = Gr.AllWidthGrades.get(a)!.display;
 		return i
-			? `Click to toggle whether weight ${d} is included.`
+			? `Click to toggle whether width ${d} is included.`
 			: `Weight ${d} is always included and cannot be disabled.`;
 	},
 	getFontStyle: a => ({ ...Gr.DefaultFontStyle, width: a }),
