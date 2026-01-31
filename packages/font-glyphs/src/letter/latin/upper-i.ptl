@@ -16,13 +16,22 @@ glyph-block Letter-Latin-Upper-I : begin
 
 	define ISerifs : namespace
 		export : define [Impl df top jut] : glyph-proc
-			include : HSerif.mb df.middle 0   jut
-			include : HSerif.mt df.middle top jut
+			include : tagged 'serifMB' : HSerif.mb df.middle 0   jut
+			include : tagged 'serifMT' : HSerif.mt df.middle top jut
 			set-base-anchor 'trailing' (df.middle + jut) 0
 
-		export : define [None  df top] : no-shape
-		export : define [Long  df top] : Impl df top : Math.max MidJutCenter (LongJut * df.adws)
-		export : define [Short df top] : Impl df top : Math.max Jut     (MidJutCenter * df.adws)
+		export : define [None df top] : glyph-proc
+			local jut : HSwToV HalfStroke
+			set-base-anchor 'trailing' (df.middle + jut) 0
+			return : object jut
+		export : define [Long df top] : glyph-proc
+			local jut : Math.max MidJutCenter : mix [HSwToV HalfStroke] LongJut df.adws
+			include : Impl df top jut
+			return : object jut
+		export : define [Short df top] : glyph-proc
+			local jut : Math.max Jut : mix [HSwToV HalfStroke] MidJutCenter df.adws
+			include : Impl df top jut
+			return : object jut
 
 	define UpperIConfig : object
 		'straight'     { para.advanceScaleI  ISerifs.None  }
@@ -35,15 +44,11 @@ glyph-block Letter-Latin-Upper-I : begin
 			local df : include : DivFrame adws
 			include : df.markSet.capital
 			include : IShape df CAP
-			include : Serifs df CAP
-
-		create-glyph "grek/Iota.\(suffix)" : glyph-proc
-			local df : DivFrame adws
-			include [refer-glyph "I.\(suffix)"] AS_BASE ALSO_METRICS
-			include : SetGrekUpperTonos [Math.min 0 : df.middle - [if (Serifs != no-shape) Jut : HSwToV HalfStroke] - SB]
+			local serifs : include : Serifs df CAP
+			create-forked-glyph "grek/Iota.\(suffix)" : SetGrekUpperTonos [Math.min 0 : df.middle - serifs.jut - SB]
 
 		create-glyph "ISideways.\(suffix)" : glyph-proc
-			local df : DivFrame (XH / Width) 2 (XH * 0.1 / SB)
+			local df : DivFrame (XH / Width) 2 ((XH * 0.1) / SB)
 			include : PointingTo Width XH Width 0 : function [] : glyph-proc
 				include : IShape df RightSB
 				include : Serifs df RightSB
