@@ -22,7 +22,7 @@ glyph-block Letter-Latin-Lower-J : begin
 			bar - hd.x - [Math.max (Stroke / 3) (df.width / 6)]
 			crossLeft - OX * 2
 
-		if serif : include : HSerif.lt barCenter top (LongJut * df.adws)
+		if serif : include : HSerif.lt barCenter top [Math.max Jut : mix [HSwToV HalfStroke] LongJut df.adws]
 		include : dispiro
 			widths.lhs
 			flat terminal Descender
@@ -34,17 +34,17 @@ glyph-block Letter-Latin-Lower-J : begin
 		set-base-anchor 'trailing' (bar - hd.x) Descender
 		set-base-anchor 'overlay' barCenter (top / 2)
 
-	define XMiddle : namespace
-		export : define [StraightSerifless df] : begin df.middle
-		export : define [StraightSerifed df]   : df.middle + [IBalance2 df]
-		export : define [BentHook df]          : df.middle + JBalance
-		export : define [DiagonalTailed df]    : df.middle + [IBalance2 df]
+	define XMiddleT : namespace
+		export : define [StraightSerifless df] : df.middle + 0
+		export : define [StraightSerifed   df] : df.middle + [IBalance2 df]
+		export : define [BentHook          df] : df.middle + JBalance
+		export : define [DiagonalTailed    df] : df.middle + [IBalance2 df]
 		export : define [FlatHookSerifless df] : df.middle + 0.25 * JBalance * df.adws * [mix 1 df.adws 2]
-		export : define [FlatHookSerifed df]   : df.middle + JBalance * df.adws
+		export : define [FlatHookSerifed   df] : df.middle + JBalance * df.adws
 
-	define Body : namespace
+	define JBody : namespace
 		export : define [BentHook df top xMiddle] : glyph-proc
-			local hookx : Math.min (xMiddle - (Width * 0.5) - [HSwToV HalfStroke] + OXHook) (xMiddle - [HSwToV : 1.5 * Stroke] + OXHook)
+			local hookx : Math.min ((xMiddle - df.middle) - [HSwToV HalfStroke] + OXHook) (xMiddle - [HSwToV : 1.5 * Stroke] + OXHook)
 			set-base-anchor "below" [mix hookx xMiddle 0.5] Descender
 			include : dispiro
 				widths.rhs
@@ -64,7 +64,7 @@ glyph-block Letter-Latin-Lower-J : begin
 			include : FlatHookDotlessJShape df dfHook top
 				crossLeft -- crossLeft
 				barCenter -- xMiddle
-				serif -- false
+				serif     -- false
 
 		export : define [DiagonalTailed df top xMiddle] : glyph-proc
 			include : dispiro
@@ -73,12 +73,12 @@ glyph-block Letter-Latin-Lower-J : begin
 				DiagTail.L xMiddle Descender [DiagTail.StdDepth df Stroke] Stroke
 			set-base-anchor "trailing" (xMiddle - [HSwToV HalfStroke]) Descender
 
-	define Serifs : namespace
-		export : define [None  df top xMiddle] : no-shape
-		export : define [Long  df top xMiddle] : HSerif.lt xMiddle top (LongJut * df.adws)
-		export : define [Short df top xMiddle] : HSerif.lt xMiddle top Jut
+	define JSerifs : namespace
+		export : define [None  df top xMiddle] : tagged 'serifLT' : no-shape
+		export : define [Long  df top xMiddle] : tagged 'serifLT' : HSerif.lt xMiddle top [Math.max Jut : mix [HSwToV HalfStroke] LongJut df.adws]
+		export : define [Short df top xMiddle] : tagged 'serifLT' : HSerif.lt xMiddle top Jut
 
-	define Marks : namespace
+	define JMarks : namespace
 		export : define [Serifless df top xMiddle] : glyph-proc
 			set-base-anchor 'above'   xMiddle  top
 			set-base-anchor 'overlay' xMiddle (top / 2)
@@ -87,38 +87,30 @@ glyph-block Letter-Latin-Lower-J : begin
 			include : Serifless df top xMiddle
 			include : LeaningAnchor.Above.At [mix df.middle xMiddle (7/8)]
 
-	define Div : namespace
-		export : define BentHook          1
-		export : define DiagonalTailed    para.advanceScaleI
-		export : define StraightSerifless para.advanceScaleII
-		export : define StraightSerifed   para.advanceScaleI
-		export : define FlatHookSerifless para.advanceScaleII
-		export : define FlatHookSerifed   para.advanceScaleI
-
 	define JConfig : object
-		'bentHookSerifless'          { "BentHook"        Serifs.None   XMiddle.BentHook           Marks.Serifless  Div.BentHook          }
-		'bentHookShortSerifed'       { "BentHook"        Serifs.Short  XMiddle.BentHook           Marks.Serifless  Div.BentHook          }
-		'bentHookSerifed'            { "BentHook"        Serifs.Long   XMiddle.BentHook           Marks.Serifed    Div.BentHook          }
-		'diagonalTailedSerifless'    { "DiagonalTailed"  Serifs.None   XMiddle.DiagonalTailed     Marks.Serifless  Div.DiagonalTailed    }
-		'diagonalTailedShortSerifed' { "DiagonalTailed"  Serifs.Short  XMiddle.DiagonalTailed     Marks.Serifless  Div.DiagonalTailed    }
-		'diagonalTailedSerifed'      { "DiagonalTailed"  Serifs.Long   XMiddle.DiagonalTailed     Marks.Serifed    Div.DiagonalTailed    }
-		'straightSerifless'          { "Straight"        Serifs.None   XMiddle.StraightSerifless  Marks.Serifless  Div.StraightSerifless }
-		'straightShortSerifed'       { "Straight"        Serifs.Short  XMiddle.StraightSerifless  Marks.Serifless  Div.StraightSerifless }
-		'straightSerifed'            { "Straight"        Serifs.Long   XMiddle.StraightSerifed    Marks.Serifed    Div.StraightSerifed   }
-		'flatHookSerifless'          { "FlatHook"        Serifs.None   XMiddle.FlatHookSerifless  Marks.Serifless  Div.FlatHookSerifless }
-		'flatHookShortSerifed'       { "FlatHook"        Serifs.Short  XMiddle.FlatHookSerifless  Marks.Serifless  Div.FlatHookSerifless }
-		'flatHookSerifed'            { "FlatHook"        Serifs.Long   XMiddle.FlatHookSerifed    Marks.Serifed    Div.FlatHookSerifed   }
+		'bentHookSerifless'          { JBody.BentHook        JSerifs.None   XMiddleT.BentHook           JMarks.Serifless  1                   }
+		'bentHookShortSerifed'       { JBody.BentHook        JSerifs.Short  XMiddleT.BentHook           JMarks.Serifless  1                   }
+		'bentHookSerifed'            { JBody.BentHook        JSerifs.Long   XMiddleT.BentHook           JMarks.Serifed    1                   }
+		'diagonalTailedSerifless'    { JBody.DiagonalTailed  JSerifs.None   XMiddleT.DiagonalTailed     JMarks.Serifless  para.advanceScaleI  }
+		'diagonalTailedShortSerifed' { JBody.DiagonalTailed  JSerifs.Short  XMiddleT.DiagonalTailed     JMarks.Serifless  para.advanceScaleI  }
+		'diagonalTailedSerifed'      { JBody.DiagonalTailed  JSerifs.Long   XMiddleT.DiagonalTailed     JMarks.Serifed    para.advanceScaleI  }
+		'straightSerifless'          { JBody.Straight        JSerifs.None   XMiddleT.StraightSerifless  JMarks.Serifless  para.advanceScaleII }
+		'straightShortSerifed'       { JBody.Straight        JSerifs.Short  XMiddleT.StraightSerifless  JMarks.Serifless  para.advanceScaleII }
+		'straightSerifed'            { JBody.Straight        JSerifs.Long   XMiddleT.StraightSerifed    JMarks.Serifed    para.advanceScaleI  }
+		'flatHookSerifless'          { JBody.FlatHook        JSerifs.None   XMiddleT.FlatHookSerifless  JMarks.Serifless  para.advanceScaleII }
+		'flatHookShortSerifed'       { JBody.FlatHook        JSerifs.Short  XMiddleT.FlatHookSerifless  JMarks.Serifless  para.advanceScaleII }
+		'flatHookSerifed'            { JBody.FlatHook        JSerifs.Long   XMiddleT.FlatHookSerifed    JMarks.Serifed    para.advanceScaleI  }
 
-	foreach { suffix { shapeId Serif xMiddleT Marks adws } } [Object.entries JConfig] : do
+	foreach { suffix { Body Serifs xMiddleT Marks adws } } [Object.entries JConfig] : do
 		local df : DivFrame adws
 		local xMiddle : xMiddleT df
 
 		create-glyph "dotlessj.\(suffix)" : glyph-proc
 			set-width df.width
 			include : df.markSet.p
-			include : Body.(shapeId) df XH xMiddle
-			include : tagged 'serifLT' : Serif df XH xMiddle
-			include : Marks df XH xMiddle
+			include : Body   df XH xMiddle
+			include : Serifs df XH xMiddle
+			include : Marks  df XH xMiddle
 
 		create-glyph "dotlessjBar.\(suffix)" : glyph-proc
 			include [refer-glyph "dotlessj.\(suffix)"] AS_BASE ALSO_METRICS
@@ -168,9 +160,9 @@ glyph-block Letter-Latin-Lower-J : begin
 	create-glyph 'mathbb/dotlessj' : glyph-proc
 		include : MarkSet.p
 		local center : Middle + JBalance + BBD / 2
-		set-base-anchor 'above'   (center - [HSwToV BBS] / 2 - BBD / 2)  XH
-		set-base-anchor 'overlay' (center - [HSwToV BBS] / 2 - BBD / 2) (XH / 2)
-		local hookx : center - (Width * 0.5) - [HSwToV BBD] + OXHook
+		set-base-anchor 'above'   (center - [HSwToV : 0.5 * BBS] - BBD / 2)  XH
+		set-base-anchor 'overlay' (center - [HSwToV : 0.5 * BBS] - BBD / 2) (XH / 2)
+		local hookx : (center - Middle) - [HSwToV BBD] + OXHook
 		local turn : arch.adjust-x.bot [mix center hookx 0.5]
 		include : dispiro
 			widths.rhs BBS
@@ -178,7 +170,7 @@ glyph-block Letter-Latin-Lower-J : begin
 			curl center (Descender + ArchDepthA)
 			hookend Descender (sw -- BBS)
 			g4 hookx (Descender + JHook)
-		include : HBar.t (center - [HSwToV BBS] / 2 - BBD - Jut) center XH BBS
+		include : HBar.t (center - [HSwToV : 0.5 * BBS] - BBD - Jut) center XH BBS
 		include : intersection
 			VBar.r (center - BBD) Descender XH BBS
 			spiro-outline
