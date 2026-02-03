@@ -54,20 +54,20 @@ glyph-block Letter-Latin-Long-S : begin
 		LongSUpperHalf (-1) Middle top [mix top bottom 0.5] hookx hooky fine
 		LongSLowerHalf (-1) Middle [mix top bottom 0.5] bottom hookx hooky fine
 
-	define [IFishHookShape top bottom fSlab] : glyph-proc
+	define [IFishHookShape top bottom fSlab _kSerif] : glyph-proc
 		local balance : IBalance2 : DivFrame 1
-		include : with-transform [Translate balance 0] : glyph-proc
-			include : VBar.m Middle bottom (top - Hook)
-			include : VerticalHook.m Middle (top - Hook) ((-LongJut) + balance) ((-Hook) + HalfStroke)
-			if fSlab : begin
-				local serifLength : 1 * MidJutCenter
-				local xSerifPos : Middle + OX
-				include : HSerif.mb xSerifPos bottom serifLength
+		local m : Middle + balance
+		include : VBar.m m bottom (top - Hook)
+		include : VerticalHook.m m (top - Hook) ((-LongJut) + balance) ((-Hook) + HalfStroke)
+		if fSlab : begin
+			local serifLength : Math.max Jut : mix [HSwToV HalfStroke] MidJutCenter : fallback _kSerif 1
+			local xSerifPos : m - [IBalance : DivFrame 1]
+			include : HSerif.mb xSerifPos bottom serifLength
 
-	define [StandardSerifs m0 fSlab] : glyph-proc
+	define [StandardSerifs m0 fSlab _kSerif] : glyph-proc
 		local m : m0 + [HSwToV HalfStroke]
-		local serifLength : 1 * MidJutCenter
-		local xSerifPos : m + (Middle - m) / Width * serifLength
+		local serifLength : Math.max Jut : mix [HSwToV HalfStroke] MidJutCenter : fallback _kSerif 1
+		local xSerifPos : mix m Middle (serifLength / Width)
 		if [maskBits fSlab SLAB_BOTTOM] : begin
 			include : tagged "serifLB" : HSerif.mb xSerifPos 0 serifLength
 		if [maskBits fSlab SLAB_MIDDLE] : begin
@@ -79,7 +79,7 @@ glyph-block Letter-Latin-Long-S : begin
 				MaskLeft (m + TINY)
 				HSerif.mt xSerifPos XH serifLength
 
-	define [LongSBentHookBase y0 m fSlab] : glyph-proc
+	define [LongSBentHookBase y0 m fSlab _kSerif] : glyph-proc
 		local xTerminal : RightSB + RBalance2 + [Math.max 0 : m - [StdSmallFBarLeftPos0]]
 		include : dispiro
 			widths.lhs
@@ -88,22 +88,22 @@ glyph-block Letter-Latin-Long-S : begin
 			flat m (Ascender - ArchDepthA)
 			curl m 0 [heading Downward]
 		include : LeaningAnchor.Above.Hook m xTerminal
-		set-base-anchor "overlay" (m + [HSwToV : 0.65 * Stroke]) (Ascender * OverlayPos)
-		include : StandardSerifs m fSlab
+		set-base-anchor "overlay" (m + [HSwToV : 0.65 * Stroke]) [mix 0 Ascender OverlayPos]
+		include : StandardSerifs m fSlab _kSerif
 
 	define [LongSBentHookOverlayBar m] : LetterBarOverlay.m.in
 		x   -- (m + [HSwToV HalfStroke])
-		bot -- (0.75 * XH - Stroke)
+		bot -- ([mix 0 XH 0.75] - Stroke)
 		top -- (Ascender - Stroke)
 		py  -- OverlayPos
 
 	define [LongSSymmetricOverlayBar m] : LetterBarOverlay.m.in
 		x   -- m
-		bot -- (0.75 * XH - Stroke)
+		bot -- ([mix 0 XH 0.75] - Stroke)
 		top -- (Ascender - Stroke)
 		py  -- OverlayPos
 
-	define [LongSFlatHookNoTailShape m yBot fSlab] : glyph-proc
+	define [LongSFlatHookNoTailShape m yBot fSlab _kSerif] : glyph-proc
 		local hd : FlatHookDepth [DivFrame 1]
 		include : dispiro
 			widths.lhs
@@ -113,8 +113,8 @@ glyph-block Letter-Latin-Long-S : begin
 			flat m (Ascender - hd.y)
 			curl m yBot [heading Downward]
 		include : LeaningAnchor.Above.Hook m RightSB
-		set-base-anchor "overlay" (m + [HSwToV : 0.65 * Stroke]) (Ascender * OverlayPos)
-		include : StandardSerifs m fSlab
+		set-base-anchor "overlay" (m + [HSwToV : 0.65 * Stroke]) [mix 0 Ascender OverlayPos]
+		include : StandardSerifs m fSlab _kSerif
 
 	# Non-descending variants
 	define SerifSuffixes : object
@@ -140,7 +140,7 @@ glyph-block Letter-Latin-Long-S : begin
 
 		create-glyph "longs.flatHookExt\(suffix)" : glyph-proc
 			include [refer-glyph "longs.flatHook\(suffix)"] AS_BASE ALSO_METRICS
-			include : HBar.t RightSB (2 * Width) Ascender
+			include : HBar.t RightSB [mix 0 Width 2] Ascender
 
 	# Descending and Tailed variants
 	define SerifSuffixesDescending : object
@@ -158,7 +158,7 @@ glyph-block Letter-Latin-Long-S : begin
 
 		create-glyph "longs.flatHookExtDescending\(suffix)" : glyph-proc
 			include [refer-glyph "longs.flatHookDescending\(suffix)"] AS_BASE ALSO_METRICS
-			include : HBar.t RightSB (2 * Width) Ascender
+			include : HBar.t RightSB [mix 0 Width 2] Ascender
 
 		create-glyph "longs.flatHookTailed\(suffix)" : glyph-proc
 			include : MarkSet.bp
@@ -169,7 +169,7 @@ glyph-block Letter-Latin-Long-S : begin
 
 		create-glyph "longs.flatHookExtTailed\(suffix)" : glyph-proc
 			include [refer-glyph "longs.flatHookTailed\(suffix)"] AS_BASE ALSO_METRICS
-			include : HBar.t (Middle + HookX + (0.25 - TanSlope) * Stroke) (2 * Width) Ascender
+			include : HBar.t (Middle + HookX + (0.25 - TanSlope) * Stroke) [mix 0 Width 2] Ascender
 
 		create-glyph "longs.flatHookDiagonalTailed\(suffix)" : glyph-proc
 			include : MarkSet.bp
@@ -183,7 +183,7 @@ glyph-block Letter-Latin-Long-S : begin
 
 		create-glyph "longs.flatHookExtDiagonalTailed\(suffix)" : glyph-proc
 			include [refer-glyph "longs.flatHookDiagonalTailed\(suffix)"] AS_BASE ALSO_METRICS
-			include : HBar.t (Middle + HookX + (0.25 - TanSlope) * Stroke) (2 * Width) Ascender
+			include : HBar.t (Middle + HookX + (0.25 - TanSlope) * Stroke) [mix 0 Width 2] Ascender
 
 		create-glyph "longs.bentHookDescending\(suffix)" : glyph-proc
 			include : MarkSet.bp
@@ -244,17 +244,14 @@ glyph-block Letter-Latin-Long-S : begin
 	create-glyph "eshCurlyTail" 0x286 : glyph-proc
 		include : MarkSet.bp
 		local fine : AdviceStroke 3.5
-		# local rinner : LongJut / 2 - fine / 2
-		local m : Middle + [HSwToV HalfStroke] - FBalance
-		# local x2 : mix RightSB m 0.25
-		# local y2 : Descender + O
+		local m : Middle - FBalance
 		include : union
-			LongSUpperHalf (+1) (Middle - FBalance) Ascender 0 (HookX + QuarterStroke) Hook
+			LongSUpperHalf (+1) m Ascender 0 (HookX + QuarterStroke) Hook
 			dispiro
 				widths.rhs
-				flat m (-O) [heading Downward]
-				curl m (Descender + LongJut)
-				CurlyTail.n fine Descender (m - LongJut - [HSwToV Stroke])
+				flat (m + [HSwToV HalfStroke]) (-O) [heading Downward]
+				curl (m + [HSwToV HalfStroke]) (Descender + LongJut)
+				CurlyTail.n fine Descender ((m - [HSwToV HalfStroke]) - LongJut)
 					x2 -- (RightSB + [HSwToV : 0.5 * fine])
 					y2 -- (Descender + 0.5 * fine)
 
