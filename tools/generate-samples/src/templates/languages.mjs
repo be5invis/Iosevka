@@ -34,6 +34,7 @@ const languages = [
     { lang: 'Portuguese',    sample: 'Luís argüia à Júlia que «brações, fé, chá, óxido, pôr, zângão» eram palavras do português.' },
     { lang: 'Romanian',      sample: 'Înjurând pițigăiat, zoofobul comandă vexat whisky și tequila.', localeId :'ro' },
     { lang: 'Russian',       sample: 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.' },
+    { lang: 'Northern Sámi', sample: 'Vuol Ruoŧa geđggiid leat máŋga luosa ja čuovžža.', localeId :'se' },
     { lang: 'Serbian',       sample: 'Ајшо, лепото и чежњо, за љубав срца мога дођи у Хаџиће на кафу.', localeId: 'sr' },
     { lang: 'Slovak',        sample: 'Kŕdeľ šťastných ďatľov učí pri ústí Váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso.' },
     { lang: 'Slovenian',     sample: 'V kožuščku hudobnega fanta stopiclja mizar.' },
