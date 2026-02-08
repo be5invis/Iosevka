@@ -3,12 +3,12 @@
 ## 1. Building Docker Image
 
 Before building the font files, we'll first need to build a Docker image. This has to be done only once.
-We're going to use image name `iosevka-builder` here, but you can set it to whatever you want.
+We're going to use the image name `iosevka-builder` here, but you can set it to whatever you want.
 
 ```bash
 git clone --depth 1 https://github.com/be5invis/Iosevka.git
-cd Iosevka/docker
-docker build -t iosevka-builder .
+cd Iosevka
+docker build -t iosevka-builder docker
 ```
 
 To confirm that the docker image now exists, you can run:
@@ -20,10 +20,10 @@ The output should be something like this:
 iosevka-builder            latest      c847d5e08886   About a minute ago   491MB
 ```
 
-At this point, you can delete the cloned repo, because the Docker container is going to download a fresh copy of the source by default. (That is unless you want to make the Docker container use a local copy - see below.)
+At this point, you can delete the cloned repo, because the Docker container is going to download a fresh copy of the source by default. (That is, unless you want to make the Docker container use a local copy - see below.)
 
 ```bash
-cd ../..
+cd ..
 rm -rf Iosevka/
 ```
 
@@ -66,11 +66,11 @@ docker run -it --rm -e SOURCE=v34.1.0 -v $PWD:/work iosevka-builder contents::Io
 #### Custom Build Plans
 
 This example will:
-- Gather build plans from `myfont1.toml`, `myfont2.toml` and `myfont3.toml` to a single `private-build-plans.toml` file.
-- Build `myfont1` and `myfont2` as TTF, and `myfont3` in all formats.
+- Gather build plans from `myfont1.toml`, `myfont2.toml` and `myfont3.toml` into a single `private-build-plans.toml` file.
+- Build `MyFont1` and `MyFont2` as TTF, and `MyFont3` in all formats.
 ```bash
 cat myfont1.toml myfont2.toml myfont3.toml > private-build-plans.toml
-docker run -it --rm -e SOURCE=v34.1.0 -v $PWD:/work iosevka-builder ttf::myfont1 ttf::myfont2 contents::myfont3
+docker run -it --rm -e SOURCE=v34.1.0 -v $PWD:/work iosevka-builder ttf::MyFont1 ttf::MyFont2 contents::MyFont3
 ```
 
 To prepare the custom build plans, please refer to [Configuring Custom Build](../doc/custom-build.md#configuring-custom-build) or use the [Customizer](https://be5invis.github.io/Iosevka/customizer).
@@ -83,18 +83,17 @@ docker run -it --rm -e SOURCE=you/YourIosevkaFork@v34.1.0 -v $PWD:/work iosevka-
 
 #### Interactive Mode (Downloaded Source)
 
-To keep the downloaded source between builds, override the entrypoint and run `build.sh` for the first build (downloads source, installs deps):
+To keep the downloaded source between builds, override the entrypoint to get an interactive shell.
+`/build.sh` keeps track of the version used for the previous run and re-downloads only if necessary.
 
 ```bash
 docker run -it --rm -v $PWD:/work --entrypoint bash iosevka-builder
-# Run the first build using /build.sh
-$ /build.sh ttf::myfont && cd /iosevka
-# Now we can run builds repeatedly from the same source tarball, e.g.:
+$ /build.sh ttf::MyFont
+# Make some changes and rebuild
 $ cat myfont1.toml myfont2.toml myfont3.toml > private-build-plans.toml
-$ npm run build -- contents::MyFont1 ttf::MyFont2 webfont::MyFont3
-# Make some changes to .toml and rebuild
-$ cat myfont1.toml myfont2.toml myfont3.toml > private-build-plans.toml
-$ npm run build -- contents::MyFont1 ttf::MyFont2 webfont::MyFont3
+$ /build.sh ttf::MyFont
+# Rebuild with a different source version
+$ SOURCE=v34.0.0 /build.sh ttf::MyFont
 $ exit
 ```
 
@@ -103,7 +102,7 @@ $ exit
 To build from a local Iosevka checkout, override the entrypoint like so:
 
 ```bash
-docker run -it --rm -v /path/to/iosevka:/work --entrypoint bash iosevka-builder -c 'npm install && npm run build -- ttf::myfont'
+docker run -it --rm -v /path/to/iosevka:/work --entrypoint bash iosevka-builder -c 'npm install && npm run build -- ttf::MyFont'
 ```
 
 #### Interactive Mode (Local Source)
@@ -113,7 +112,7 @@ To run repeated builds from local source in interactive mode:
 ```bash
 docker run -it --rm -v /path/to/iosevka:/work --entrypoint bash iosevka-builder
 $ npm install
-$ npm run build -- ttf::myfont
+$ npm run build -- ttf::MyFont
 $ exit
 ```
 

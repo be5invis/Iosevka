@@ -6,6 +6,8 @@ DEFAULT_ARGS="contents::Iosevka"
 REPO="be5invis/Iosevka"
 REF=""
 BUILD_ARGS="$@"
+TMP_TARGZ="/tmp/iosevka.tar.gz"
+TMP_HEADERS="/tmp/headers.txt"
 set -e
 
 [[ -z $BUILD_ARGS ]] && echo 'Usage: docker run -it --rm -v $PWD:/work <DOCKER_IMAGE> <BUILD_ARGS>'
@@ -38,20 +40,48 @@ elif [[ -n "$SOURCE" ]]; then
     REF="$SOURCE"
 fi
 if [[ -z "$REF" ]]; then
-    REF=$(curl -fsSL --max-filesize 4096 "https://api.github.com/repos/${REPO}/releases/latest" | grep -Po '"tag_name":\s*"\Kv[\d\.]+') || true
+    REF=$(curl -fsSL -r 0-2047 "https://api.github.com/repos/${REPO}/releases/latest" | grep -Po '"tag_name":\s*"\Kv[\d\.]+') || true
     [[ -z "$REF" ]] && { echo "Failed to fetch latest release for ${REPO}"; exit 3; }
     echo "Latest release: ${REF}"
 fi
+# Fetch source tarball if not already downloaded using URL+ETag as unique cache ID.
+# REPO+REF wouldn't suffice - branch head could have changed since last run.
+# We could use commit SHA instead, but that would be an extra API call.
 TARGZ_URL="https://github.com/${REPO}/archive/${REF}.tar.gz"
-echo "Downloading ${REPO}@${REF}..."
-mkdir -p "$IOSEVKA_DIR"
-curl -fsSL "$TARGZ_URL" | tar xz --strip-components=1 -C "$IOSEVKA_DIR" || {
-    echo "Failed to download: $TARGZ_URL"; exit 4
-}
+ETAG_FILE="$IOSEVKA_DIR/.etag"
+CURL_OPTS=(-sSL -D "$TMP_HEADERS" -o "$TMP_TARGZ" -w '%{http_code}')
+# If request URL is the same as last run, add If-None-Match header
+if [[ -f "$ETAG_FILE" ]] && read -r CACHED_URL CACHED_ETAG < "$ETAG_FILE" && [[ "$CACHED_URL" == "$TARGZ_URL" ]]; then
+    CURL_OPTS+=(-H "If-None-Match: $CACHED_ETAG")
+fi
 
-echo "Installing npm dependencies..."
-[[ -n "$NPM_REG" ]] && npm config set registry "$NPM_REG"
-cd "$IOSEVKA_DIR" && npm ci
+echo "Fetching ${REPO}@${REF}..."
+HTTP_CODE=$(curl "${CURL_OPTS[@]}" "$TARGZ_URL") || true
+
+if [[ "$HTTP_CODE" == "304" ]]; then
+    echo "Source unchanged (HTTP 304), skipping."
+elif [[ "$HTTP_CODE" == "200" ]]; then
+    echo "Extracting..."
+    rm -rf "$IOSEVKA_DIR"
+    mkdir -p "$IOSEVKA_DIR"
+    tar xz --strip-components=1 -C "$IOSEVKA_DIR" < "$TMP_TARGZ" || {
+        echo "Failed to extract: $TARGZ_URL"; exit 4
+    }
+    # Save ETag for future conditional requests
+    ETAG=$(grep -i '^etag:' "$TMP_HEADERS" | tail -1 | tr -d '\r' | awk '{print $2}')
+    [[ -n "$ETAG" ]] && echo "$TARGZ_URL $ETAG" > "$ETAG_FILE"
+else
+    echo "Failed to download: $TARGZ_URL (HTTP $HTTP_CODE)"; exit 5
+fi
+rm -f "$TMP_TARGZ" "$TMP_HEADERS"
+
+if [[ -d "$IOSEVKA_DIR/node_modules" ]]; then
+    echo "Dependencies already installed, skipping npm ci."
+else
+    echo "Installing npm dependencies..."
+    [[ -n "$NPM_REG" ]] && npm config set registry "$NPM_REG"
+    cd "$IOSEVKA_DIR" && npm ci
+fi
 
 [[ -f "${WORK_DIR}/${PRIVATE_FILE}" ]] && cp "${WORK_DIR}/${PRIVATE_FILE}" "${IOSEVKA_DIR}/"
 
