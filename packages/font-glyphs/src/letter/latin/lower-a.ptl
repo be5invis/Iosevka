@@ -148,34 +148,40 @@ glyph-block Letter-Latin-Lower-A : begin
 		include : HBar.b (RightSB - BBD) RightSB 0 BBS
 
 	# Greek Lower Alpha
-	create-glyph 'a.crossing' : glyph-proc
-		include : MarkSet.e
-
-		local middle : mix SB RightSB 0.42
-		local fine   : AdviceStroke 3.25
+	define [CrossingBody df top _sw _ada _adb] : glyph-proc
+		local sw  : fallback _sw    df.mvs
+		local ada : fallback _ada : df.archDepthAOf SmallArchDepth sw
+		local adb : fallback _adb : df.archDepthBOf SmallArchDepth sw
+		local middle : mix df.leftSB df.rightSB 0.42
+		local fine : df.adviceStroke 3.25
 		local k1 0.25
-		local k2 0.5
+		local k2 0.50
 		local k3 0.35
+		local k4 1.00
 		include : dispiro
-			widths.rhs fine
-			g4   (RightSB - OX * 1.75) XH [heading Downward]
-			bezControls k1 k2 k3 1 6
-			arch.rhs.centerAt.rtl.b middle 0
+			g4   (df.rightSB - OX * 1.75) top [widths.rhs.heading fine Downward]
+			bezControls (0 + k1) (0 + k2) (0 + k3) (0 + k4) 6
+			arch.rhs.centerAt.rtl.b middle 0 (sw -- df.mvs) (swBefore -- fine)
 			archv
-			flatside.lu SB 0 XH SmallArchDepthA SmallArchDepthB (OX * 2)
+			flatside.lu df.leftSB 0 top ada adb (OX * 2) [widths.rhs df.mvs]
 			arcvh
-			arch.rhs.centerAt.ltr.t middle XH
-			bezControls (1 - k3) 0 (1 - k1) (1 - k2) 6
-			g4   (RightSB - OX * 2) 0 [widths.heading 0 fine Downward]
+			arch.rhs.centerAt.ltr.t middle top (sw -- df.mvs) (swAfter -- fine)
+			bezControls (1 - k3) (1 - k4) (1 - k1) (1 - k2) 6
+			g4   (df.rightSB - OX * 2.00) 0 [widths.rhs.heading fine Downward]
 
-		set-base-anchor 'overlay' (middle - OX) (XH * OverlayPos)
+		set-base-anchor 'overlay' (middle - OX) [mix 0 top OverlayPos]
+
+	create-glyph 'a.crossing' : glyph-proc
+		local df : include : DivFrame 1
+		include : df.markSet.e
+		include : CrossingBody df XH
 
 	glyph-block-export SingleStorey
 	define SingleStorey : namespace
-		export : define [FullBarBody df top bar _sw] : glyph-proc
-			local sw : fallback _sw df.mvs
-			local ada : df.archDepthAOf SmallArchDepth sw
-			local adb : df.archDepthBOf SmallArchDepth sw
+		export : define [FullBarBody df top bar _sw _ada _adb] : glyph-proc
+			local sw  : fallback _sw    df.mvs
+			local ada : fallback _ada : df.archDepthAOf SmallArchDepth sw
+			local adb : fallback _adb : df.archDepthBOf SmallArchDepth sw
 			include : OBarRight.shape
 				top   -- top
 				left  -- df.leftSB
@@ -185,10 +191,10 @@ glyph-block Letter-Latin-Lower-A : begin
 				ada   -- ada
 				adb   -- adb
 			include : bar df top sw
-		export : define [TopCutBody df top bar _sw] : glyph-proc
-			local sw : fallback _sw df.mvs
-			local ada : df.archDepthAOf SmallArchDepth sw
-			local adb : df.archDepthBOf SmallArchDepth sw
+		export : define [TopCutBody df top bar _sw _ada _adb] : glyph-proc
+			local sw  : fallback _sw    df.mvs
+			local ada : fallback _ada : df.archDepthAOf SmallArchDepth sw
+			local adb : fallback _adb : df.archDepthBOf SmallArchDepth sw
 			include : OBarRight.shape
 				top   -- top
 				left  -- df.leftSB
@@ -202,10 +208,10 @@ glyph-block Letter-Latin-Lower-A : begin
 				corner  df.rightSB                 top
 				corner  df.rightSB                (top - HalfStroke)
 				corner (df.rightSB - [HSwToV sw]) (top - HalfStroke)
-		export : define [EarlessCornerBody df top bar _sw] : glyph-proc
-			local sw : fallback _sw df.mvs
-			local ada : df.archDepthAOf SmallArchDepth sw
-			local adb : df.archDepthBOf SmallArchDepth sw
+		export : define [EarlessCornerBody df top bar _sw _ada _adb] : glyph-proc
+			local sw  : fallback _sw    df.mvs
+			local ada : fallback _ada : df.archDepthAOf SmallArchDepth sw
+			local adb : fallback _adb : df.archDepthBOf SmallArchDepth sw
 			include : OBarRight.earlessCorner
 				top   -- top
 				left  -- df.leftSB
@@ -217,10 +223,10 @@ glyph-block Letter-Latin-Lower-A : begin
 				rise  -- DToothlessRise
 				mBlend -- DMBlend
 			include : bar df (top - DToothlessRise) sw
-		export : define [EarlessRoundedBody df top bar _sw] : glyph-proc
-			local sw : fallback _sw df.mvs
-			local ada : df.archDepthAOf SmallArchDepth sw
-			local adb : df.archDepthBOf SmallArchDepth sw
+		export : define [EarlessRoundedBody df top bar _sw _ada _adb] : glyph-proc
+			local sw  : fallback _sw    df.mvs
+			local ada : fallback _ada : df.archDepthAOf SmallArchDepth sw
+			local adb : fallback _adb : df.archDepthBOf SmallArchDepth sw
 			include : OBarRight.earlessRounded
 				top   -- top
 				left  -- df.leftSB
@@ -232,27 +238,27 @@ glyph-block Letter-Latin-Lower-A : begin
 				yTerminal -- ada
 			include : bar df (top - adb) sw
 
-		export : define [SeriflessBar df top sw] : glyph-proc
+		export : define [SeriflessBar df top _sw] : glyph-proc
 			set-base-anchor 'trailing' df.rightSB 0
-			include : VBar.r df.rightSB 0 top sw
-		export : define [TopSerifedBar df top sw] : glyph-proc
-			include : SeriflessBar df top sw
-			local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
+			include : VBar.r df.rightSB 0 top _sw
+		export : define [TopSerifedBar df top _sw] : glyph-proc
+			include : SeriflessBar df top _sw
+			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
 			include sf.rt.outer
-		export : define [BottomSerifedBar df top sw] : glyph-proc
-			include : SeriflessBar df top sw
-			local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
+		export : define [BottomSerifedBar df top _sw] : glyph-proc
+			include : SeriflessBar df top _sw
+			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
 			include sf.rb.outer
-		export : define [DoubleSerifedBar df top sw] : glyph-proc
-			include : SeriflessBar df top sw
-			local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
+		export : define [DoubleSerifedBar df top _sw] : glyph-proc
+			include : SeriflessBar df top _sw
+			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
 			include : composite-proc sf.rt.outer sf.rb.outer
-		export : define [TailedBar df top sw] : glyph-proc
+		export : define [TailedBar df top _sw] : glyph-proc
 			set-base-anchor 'trailing' (df.rightSB + SideJut) 0
-			include : RightwardTailedBar df.rightSB 0 top sw
-		export : define [TailedSerifedBar df top sw] : glyph-proc
-			include : TailedBar df top sw
-			local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
+			include : RightwardTailedBar df.rightSB 0 top _sw
+		export : define [TailedSerifedBar df top _sw] : glyph-proc
+			include : TailedBar df top _sw
+			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
 			include sf.rt.outer
 
 	glyph-block-export SingleStoreyConfig
@@ -283,16 +289,16 @@ glyph-block Letter-Latin-Lower-A : begin
 			local df : include : DivFrame 1
 			include : df.markSet.e
 			include : body df XH bar
-		create-glyph "AScript.\(suffix)" : glyph-proc
+		create-glyph "aCap.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.capital
-			include : body df CAP bar
-		create-glyph "aBar.\(suffix)" : glyph-proc
-			include [refer-glyph "a.\(suffix)"] AS_BASE ALSO_METRICS
-			include : HBar.m [mix 0 SB 0.3] [mix Width RightSB 0.3] (XH / 2) [AdviceStroke2 2 4 XH]
+			include : body df CAP bar nothing ArchDepthA ArchDepthB
 		create-glyph "aRetroflexHook.\(suffix)" : glyph-proc
 			include [refer-glyph "a.\(suffix)"] AS_BASE ALSO_METRICS
 			include : RetroflexHook.rSideJut RightSB 0 (yOverflow -- Stroke)
+		create-glyph "aBar.\(suffix)" : glyph-proc
+			include [refer-glyph "a.\(suffix)"] AS_BASE ALSO_METRICS
+			include : HBar.m [mix 0 SB 0.3] [mix Width RightSB 0.3] (XH / 2) [Math.min OverlayStroke : AdviceStroke2 2 3 XH]
 
 	select-variant 'a' 'a'
 	link-reduced-variant 'a/sansSerif' 'a' MathSansSerif
@@ -307,15 +313,15 @@ glyph-block Letter-Latin-Lower-A : begin
 	select-variant 'grek/alpha' 0x3B1 (shapeFrom -- 'a')
 	link-reduced-variant 'grek/alpha/sansSerif' 'grek/alpha' MathSansSerif (shapeFrom -- 'a')
 
+	select-variant 'AScript' 0x2C6D (follow -- [conditional-follow SLAB 'a/singleStorey/autoSerifed/slab' 'a/singleStorey/autoSerifed/sans']) (shapeFrom -- 'aCap')
 	select-variant 'aScript' 0x251  (follow -- [conditional-follow SLAB 'a/singleStorey/autoSerifed/slab' 'a/singleStorey/autoSerifed/sans']) (shapeFrom -- 'a')
-	select-variant 'AScript' 0x2C6D (follow -- [conditional-follow SLAB 'a/singleStorey/autoSerifed/slab' 'a/singleStorey/autoSerifed/sans'])
-
-	select-variant 'aScriptBar' 0xAB30 (follow -- [conditional-follow SLAB 'a/singleStorey/autoSerifed/slab' 'a/singleStorey/autoSerifed/sans']) (shapeFrom -- 'aBar')
 
 	select-variant 'aScriptRetroflexHook' 0x1D90 (follow -- [conditional-follow SLAB 'aRetroflexHook/singleStorey/autoSerifed/slab' 'aRetroflexHook/singleStorey/autoSerifed/sans']) (shapeFrom -- 'aRetroflexHook')
 
-	CreateTurnedLetter 'turnaScript' 0x252  'aScript' HalfAdvance (XH / 2)
+	select-variant 'aScriptBar' 0xAB30 (follow -- [conditional-follow SLAB 'a/singleStorey/autoSerifed/slab' 'a/singleStorey/autoSerifed/sans']) (shapeFrom -- 'aBar')
+
 	CreateTurnedLetter 'turnAScript' 0x2C70 'AScript' HalfAdvance (CAP / 2)
+	CreateTurnedLetter 'turnaScript' 0x252  'aScript' HalfAdvance (XH / 2)
 
 	CreateAccentedComposition 'aGrave'      0xE0   'a' 'graveAbove'
 	CreateAccentedComposition 'aAcute'      0xE1   'a' 'acuteAbove'
@@ -333,7 +339,7 @@ glyph-block Letter-Latin-Lower-A : begin
 	CreateAccentedComposition 'aBelowring'  0x1E01 'a' 'ringBelow'
 	CreateAccentedComposition 'aBelowdot'   0x1EA1 'a' 'dotBelow'
 	CreateAccentedComposition 'aHook'       0x1EA3 'a' 'hookAbove'
-	CreateAccentedComposition 'aRightHalfRing' 0x1E9A 'a' 'rightHalfRingTR'
+	CreateAccentedComposition 'aRightHalfRingTR' 0x1E9A 'a' 'rightHalfRingTR'
 
 	CreateMultiAccentedComposition 'aDieresisMacron'     0x1DF  'a' { 'dieresisAbove'   'macronAbove' }
 	CreateMultiAccentedComposition 'aDotMacron'          0x1E1  'a' { 'dotAbove'        'macronAbove' }
