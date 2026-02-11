@@ -1,0 +1,57 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Upper-Be : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : LeaningAnchor
+	glyph-block-import Letter-Shared-Shapes : UpwardHookShape SerifFrame
+	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
+	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos Yeri RevYeri
+
+	create-glyph 'cyrl/Be' 0x411 : glyph-proc
+		include : MarkSet.capital
+		include : Yeri.UprightShape CAP
+		include : HBar.t (SB - O) [mix SB RightSB 0.9] CAP
+		if SLAB : begin
+			local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos
+			include : VSerif.dr [mix SB RightSB 0.9] CAP jutTop
+
+	alias 'latn/Be' 0x182 'cyrl/Be'
+
+	create-glyph 'latn/De' 0x18B : glyph-proc
+		include : MarkSet.capital
+		include : RevYeri.Shape CAP
+		include : HBar.t [mix SB RightSB 0.1] (RightSB + O) CAP
+		if SLAB : begin
+			local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos
+			include : VSerif.dl [mix SB RightSB 0.1] CAP jutTop
+
+	create-glyph 'cyrl/DeKomi' 0x500 : glyph-proc
+		include : MarkSet.capital
+		include : RevYeri.Shape CAP
+		include : LeaningAnchor.Above.VBar.r RightSB
+
+	create-glyph 'cyrl/DjeKomi' 0x502 : glyph-proc
+		local df : include : DivFrame para.advanceScaleMM 3
+		include : df.markSet.capital
+
+		include : RevYeri.RoundShape CAP
+			left   -- df.leftSB
+			right  -- (df.middle + [HSwToV : 0.5 * df.mvs])
+			stroke -- df.mvs
+			jut    -- (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)])
+		include : UpwardHookShape
+			left   -- (df.middle - [HSwToV : 0.5 * df.mvs])
+			right  -- df.rightSB
+			ybegin -- CAP
+			yend   -- (CAP / 2 + HalfStroke)
+			ada    -- (ArchDepthA * (2 / df.hPack) * df.adws)
+			adb    -- (ArchDepthB * (2 / df.hPack) * df.adws)
+			sw     -- df.mvs
+		if SLAB : begin
+			local sf2 : [SerifFrame.fromDf df (CAP / 2 + HalfStroke) 0].slice 1 2
+			include sf2.rt.full
