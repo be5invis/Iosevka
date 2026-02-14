@@ -8,17 +8,38 @@ glyph-block Letter-Cyrillic-Be : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
-	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos Yeri
+	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos Yeri RevYeri
 
-	create-glyph 'cyrl/Be' 0x411 : glyph-proc
-		include : MarkSet.capital
-		include : Yeri.UprightShape CAP
-		include : HBar.t (SB - O) [mix SB RightSB 0.9] CAP
-		if SLAB : begin
-			local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos
-			include : VSerif.dr [mix SB RightSB 0.9] CAP jutTop
+	define BeConfig : object
+		serifless       { false false false }
+		topRightSerifed { false true  false }
+		motionSerifed   { true  true  false }
+		serifed         { true  true  true  }
 
-	alias 'latn/Be' 0x182 'cyrl/Be'
+	foreach { suffix { fSerifTL fSerifTR fSerifBL } } [Object.entries BeConfig] : do
+		create-glyph "cyrl/Be.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : Yeri.UprightShape CAP (fSlab -- false)
+			include : HBar.t (SB - O) [mix SB RightSB 0.9] CAP
+			if fSerifTL : include : tagged 'serifTL' : HSerif.lt SB CAP SideJut
+			if fSerifTR : begin
+				local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos
+				include : tagged 'serifTR' : VSerif.dr [mix SB RightSB 0.9] CAP jutTop
+			if fSerifBL : include : tagged 'serifBL' : HSerif.lb SB 0 SideJut
+		create-glyph "cyrl/BeRev.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : RevYeri.Shape CAP (fSlab -- false)
+			include : HBar.t [mix SB RightSB 0.1] (RightSB + O) CAP
+			if fSerifTL : include : tagged 'serifTR' : HSerif.rt RightSB CAP SideJut
+			if fSerifTR : begin
+				local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos
+				include : tagged 'serifTL' : VSerif.dl [mix SB RightSB 0.1] CAP jutTop
+			if fSerifBL : include : tagged 'serifBR' : HSerif.rb RightSB 0 SideJut
+
+	select-variant 'cyrl/Be' 0x411
+
+	select-variant 'latn/Be' 0x182 (shapeFrom -- 'cyrl/Be')
+	select-variant 'latn/De' 0x18B (shapeFrom -- 'cyrl/BeRev')
 
 	create-glyph 'cyrl/be' 0x431 : glyph-proc
 		include : MarkSet.b
