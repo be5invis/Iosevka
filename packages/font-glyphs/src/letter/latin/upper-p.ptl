@@ -12,8 +12,8 @@ glyph-block Letter-Latin-Upper-P : begin
 	glyph-block-import Letter-Shared : SetGrekUpperTonos
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay LeftHook
-	glyph-block-export PConfig PShape PShapeOutline RevPShape PBarPosY PRotundaShape BBPShape
 
+	glyph-block-export PBarPosY
 	define [PBarPosY top sw bp] : [mix 0 (top - sw) bp] - sw * PShape.SwBelowBar
 
 	define [PRotundaOutlineKnots top df mul bp overshoot sw offset endX hook] : begin
@@ -69,7 +69,7 @@ glyph-block Letter-Latin-Upper-P : begin
 			flat [arch.adjust-x.bot (left + turnRadius) (sw -- sw)] bowlBottom
 			curl (right + O) bowlBottom [heading Rightward]
 
-
+	glyph-block-export PShapeOutline
 	define flex-params [PShapeOutline] : glyph-proc
 		local-parameter : top
 		local-parameter : df        -- [DivFrame 1]
@@ -82,6 +82,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		include : spiro-outline
 			PShapeOutlineKnots top df mul bp overshoot sw offset
 
+	glyph-block-export PShape
 	define flex-params [PShape] : glyph-proc
 		local-parameter : top
 		local-parameter : df        -- [DivFrame 1]
@@ -98,6 +99,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		if withBar : include : tagged 'strokeL' : VBar.l [mix 0 df.leftSB mul] 0 top sw
 		if slab : include : slab top df sw mul
 
+	glyph-block-export PRotundaShape
 	define flex-params [PRotundaShape] : glyph-proc
 		local-parameter : top
 		local-parameter : df        -- [DivFrame 1]
@@ -113,6 +115,7 @@ glyph-block Letter-Latin-Upper-P : begin
 			widths.rhs sw
 			PRotundaOutlineKnots top df mul bp overshoot sw 0 endX hook
 
+	glyph-block-export RevPShape
 	define flex-params [RevPShape] : glyph-proc
 		local-parameter : top
 		local-parameter : df        -- [DivFrame 1]
@@ -174,6 +177,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		Math.max ([PBarPosY top sw bp] + 0.5 * sw + TINY) [mix top [PBarPosY top sw bp] 0.5]
 		0.2 * (df.rightSB - df.leftSB) * ([AdviceStroke 5] / Stroke)
 
+	glyph-block-export PConfig
 	define PConfig : SuffixCfg.weave
 		object # openness
 			closed           false
@@ -282,12 +286,13 @@ glyph-block Letter-Latin-Upper-P : begin
 	select-variant 'PStrokeBottom' 0xA750 (follow -- 'P')
 
 	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-export BBPShape
 	define [BBPShape] : with-params [[mul PShape.defaultMul] [overshoot PShape.defaultOvershoot]] : glyph-proc
 		define sb : mix 0 SB mul
 		include : difference
-			PShape CAP (sw -- BBS) (mul -- mul) (overshoot -- overshoot) (slab -- false)
-			Rect (CAP - BBS) 0 (sb + [HSwToV BBS] / 2) (sb + BBD)
-		include : VBar.l sb 0 CAP BBS
+			PShape CAP (sw -- BBS) (mul -- mul) (overshoot -- overshoot) (slab -- null)
+			Rect (CAP - BBS) 0 (sb + [HSwToV : 0.5 * BBS]) (sb + BBD)
+		include : VBar.l  sb        0 CAP BBS
 		include : VBar.l (sb + BBD) 0 CAP BBS
 		include : HBar.b sb (sb + BBD) 0 BBS
 		include : intersection
