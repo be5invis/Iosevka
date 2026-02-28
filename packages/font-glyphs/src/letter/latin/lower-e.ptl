@@ -22,26 +22,30 @@ glyph-block Letter-Latin-Lower-E : begin
 	define SLAB-CLASSICAL  1
 	define SLAB-INWARD     2
 
-	define [SmallESerifedTerminalShape df top stroke hook tailSlab isStart] : match tailSlab
-		[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs df.rightSB 0 stroke hook
-		[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs df.rightSB 0 stroke hook
-		__ : list
-			hookend 0 (sw -- stroke) (suppressSwash -- isStart)
-			g4 (df.rightSB - [if (!isStart && para.isItalic && (para.slopeAngle > 0)) 0 0.5] * OX) [SmallEHook top stroke hook (!isStart && para.isItalic && (para.slopeAngle > 0))]
+	define [SmallESerifedTerminalShape df top stroke hook tailSlab isClockwise] : begin
+		local doSwash : !isClockwise && para.isItalic && (para.slopeAngle > 0)
+		return : match tailSlab
+			[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs df.rightSB 0 stroke hook
+			[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs df.rightSB 0 stroke hook
+			__ : list
+				hookend 0 (sw -- stroke) (suppressSwash -- isClockwise)
+				g4 (df.rightSB - [if doSwash 0 0.5] * OX) [SmallEHook top stroke hook doSwash]
 
-	define [RevSmallESerifedTerminalShape df top stroke hook tailSlab isStart] : match tailSlab
-		[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs df.leftSB 0 stroke hook
-		[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs df.leftSB 0 stroke hook
-		__ : list
-			hookend 0 (sw -- stroke) (suppressSwash -- isStart)
-			g4 (df.leftSB + [if (!isStart && para.isItalic && (para.slopeAngle < 0)) 0 0.5] * OX) [SmallEHook top stroke hook (!isStart && para.isItalic && (para.slopeAngle < 0))]
+	define [RevSmallESerifedTerminalShape df top stroke hook tailSlab isCounterClockwise] : begin
+		local doSwash : !isCounterClockwise && para.isItalic && (para.slopeAngle < 0)
+		return : match tailSlab
+			[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs df.leftSB 0 stroke hook
+			[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs df.leftSB 0 stroke hook
+			__ : list
+				hookend 0 (sw -- stroke) (suppressSwash -- isCounterClockwise)
+				g4 (df.leftSB + [if doSwash 0 0.5] * OX) [SmallEHook top stroke hook doSwash]
 
-	define [SmallETerminalSerif df top stroke hook tailSlab isStart] : match tailSlab
+	define [SmallETerminalSerif df top stroke hook tailSlab isClockwise] : match tailSlab
 		[Just SLAB-CLASSICAL] : ArcEndSerif.R       df.rightSB 0 stroke hook
 		[Just SLAB-INWARD]    : ArcEndSerif.InwardR df.rightSB 0 stroke hook
 		__                    : no-shape
 
-	define [RevSmallETerminalSerif df top stroke hook tailSlab isStart] : match tailSlab
+	define [RevSmallETerminalSerif df top stroke hook tailSlab isCounterClockwise] : match tailSlab
 		[Just SLAB-CLASSICAL] : ArcEndSerif.L       df.leftSB 0 stroke hook
 		[Just SLAB-INWARD]    : ArcEndSerif.InwardL df.leftSB 0 stroke hook
 		__                    : no-shape
@@ -128,10 +132,10 @@ glyph-block Letter-Latin-Lower-E : begin
 		local adb2 : ArchDepthBOf : (1 - DesignParameters.eBarPos) * SmallArchDepth
 		local path : include : dispiro
 			widths.lhs stroke
-			[if para.isItalic g2 flat] xStart (yBarBottom + (2/3) * extraCurliness)
-			[if para.isItalic g2.right.mid curl] [mix xStart df.rightSB (0.475 + 0.1 * TanSlope)] (yBarBottom - (1/3) * extraCurliness) [if (para.isItalic && (para.slopeAngle > 0)) null [heading Rightward]]
-			if (para.isItalic && (para.slopeAngle > 0)) {} { [archv] }
-			g4 (df.rightSB - OX) [YSmoothMidR top yBarBottom ada2 adb2]
+			[if para.isItalic g2   flat]      xStart                                      yBarBottom
+			[if para.isItalic virt curl] [mix xStart df.rightSB (0.475 + 0.1 * TanSlope)] yBarBottom [if para.isItalic nothing [heading Rightward]]
+			archv
+			g4 ((df.rightSB - OX) - 0.5 * (df.width / HalfUPM) * extraCurliness) [YSmoothMidR top yBarBottom ada2 adb2]
 			arch.lhs top (sw -- stroke)
 			flatside.ld df.leftSB 0 top ada adb
 			SmallESerifedTerminalShape df top stroke hook tailSlab cw
@@ -163,9 +167,9 @@ glyph-block Letter-Latin-Lower-E : begin
 		local adb2 : ArchDepthBOf : (1 - DesignParameters.eBarPos) * SmallArchDepth
 		include : dispiro
 			widths.rhs stroke
-			[if para.isItalic g2 flat] xStart (yBarBottom + (2/3) * extraCurliness)
-			[if para.isItalic g2.left.mid curl] [mix xStart df.leftSB (0.475 - 0.1 * TanSlope)] (yBarBottom - (1/3) * extraCurliness) [if (para.isItalic && (para.slopeAngle < 0)) null [heading Leftward]]
-			if (para.isItalic && (para.slopeAngle < 0)) {} { [archv] }
+			[if para.isItalic g2          flat]      xStart                                     (yBarBottom + (2/3) * extraCurliness)
+			[if para.isItalic g2.left.mid curl] [mix xStart df.leftSB (0.475 - 0.1 * TanSlope)] (yBarBottom - (1/3) * extraCurliness) [heading Leftward]
+			archv
 			g4 (df.leftSB + OX) [YSmoothMidL top yBarBottom ada2 adb2]
 			arch.rhs top (sw -- stroke)
 			flatside.rd df.rightSB 0 top ada adb

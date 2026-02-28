@@ -440,7 +440,7 @@ glyph-block CommonShapes : begin
 		local atBottom : toStraight.y > yRef
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 		local dtu : if isStart (yRef > toFinish.y) (yRef < toFinish.y)
-		local doSwash : !suppressSwash && !isStart && atBottom && (isTail || (para.isItalic && (para.slopeAngle != 0) && [if (para.slopeAngle > 0) ltr [not ltr]]))
+		local doSwash : !suppressSwash && !isStart && atBottom && (para.isItalic || isTail) && (para.slopeAngle != 0) && [if (para.slopeAngle > 0) ltr [not ltr]]
 		local superness DesignParameters.superness
 
 		local y : yRef + [if (yRef > toFinish.y) (-1) (+1)] * overshoot
@@ -660,8 +660,8 @@ glyph-block CommonShapes : begin
 				return r
 
 		define [archBlender _before _after args] : begin
-			local before : fallback args.mockPre _before
-			local after : fallback args.mockPost _after
+			local before : fallback args.mockPre  _before
+			local after  : fallback args.mockPost _after
 
 			local u : Math.abs : after.x  - before.x
 			local v : Math.abs : after.y  - args.y
@@ -745,7 +745,7 @@ glyph-block CommonShapes : begin
 		include : Ungizmo
 		include : Translate (-x) (-y)
 		include : Scale [fallback sx (-1)] [fallback sy sx (-1)]
-		include : Translate x y
+		include : Translate (+x) (+y)
 		include : Regizmo
 
 	glyph-block-export ScaleAround
@@ -809,32 +809,47 @@ glyph-block CommonShapes : begin
 		set currentGlyph.markBnchors {.}
 
 	glyph-block-export ExtLineCenter
-	define [ExtLineCenter k sw x1 y1 x2 y2] : dispiro
-		widths.center sw
-		corner [mix x1 x2 (0-k)] [mix y1 y2 (0-k)]
-		corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)]
+	define [ExtLineCenter x1 y1 x2 y2 _sw _k] : begin
+		local sw : fallback _sw Stroke
+		local k  : fallback _k  0
+		return : dispiro
+			widths.center sw
+			corner [mix x1 x2 (0-k)] [mix y1 y2 (0-k)]
+			corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)]
 
 	glyph-block-export ExtLineLhs
-	define [ExtLineLhs k sw x1 y1 x2 y2] : dispiro
-		widths.lhs sw
-		corner [mix x1 x2 (0-k)] [mix y1 y2 (0-k)]
-		corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)]
+	define [ExtLineLhs x1 y1 x2 y2 _sw _k] : begin
+		local sw : fallback _sw Stroke
+		local k  : fallback _k  0
+		return : dispiro
+			widths.lhs sw
+			corner [mix x1 x2 (0-k)] [mix y1 y2 (0-k)]
+			corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)]
 
 	glyph-block-export ExtLineLhsToRhs
-	define [ExtLineLhsToRhs k sw x1 y1 x2 y2] : dispiro
-		corner [mix x1 x2 (0-k)] [mix y1 y2 (0-k)] [widths.lhs sw]
-		corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)] [widths.rhs sw]
+	define [ExtLineLhsToRhs x1 y1 x2 y2 _sw _k] : begin
+		local sw : fallback _sw Stroke
+		local k  : fallback _k  0
+		return : dispiro
+			corner [mix x1 x2 (0-k)] [mix y1 y2 (0-k)] [widths.lhs sw]
+			corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)] [widths.rhs sw]
 
 	glyph-block-export ExtLineRhs
-	define [ExtLineRhs k sw x1 y1 x2 y2] : dispiro
-		widths.rhs sw
-		corner [mix x1 x2 (0-k)] [mix y1 y2 (0-k)]
-		corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)]
+	define [ExtLineRhs x1 y1 x2 y2 _sw _k] : begin
+		local sw : fallback _sw Stroke
+		local k  : fallback _k  0
+		return : dispiro
+			widths.rhs sw
+			corner [mix x1 x2 (0-k)] [mix y1 y2 (0-k)]
+			corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)]
 
 	glyph-block-export ExtLineRhsToLhs
-	define [ExtLineRhsToLhs k sw x1 y1 x2 y2] : dispiro
-		corner [mix x1 x2 (0-k)] [mix y1 y2 (0-k)] [widths.rhs sw]
-		corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)] [widths.lhs sw]
+	define [ExtLineRhsToLhs x1 y1 x2 y2 _sw _k] : begin
+		local sw : fallback _sw Stroke
+		local k  : fallback _k  0
+		return : dispiro
+			corner [mix x1 x2 (0-k)] [mix y1 y2 (0-k)] [widths.rhs sw]
+			corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)] [widths.lhs sw]
 
 	# Dot variant constructor
 	glyph-block-export DotVariants

@@ -25,17 +25,27 @@ glyph-block Letter-Latin-Lower-Q : begin
 			flat       (x0 - [HSwToV : 0.5 * sw]) yt [heading Downward]
 			DiagTail.R (x0 - [HSwToV : 0.5 * sw]) yb (0.875 * Hook - 0.375 * sw) sw
 
-	define [EaredBody terminal top bottom] : glyph-proc
+	define [EaredBody terminal top bottom _ada _adb] : glyph-proc
+		local ada : fallback _ada SmallArchDepthA
+		local adb : fallback _adb SmallArchDepthB
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRight.shape (top -- top)
+		include : OBarRight.shape
+			top -- top
+			ada -- ada
+			adb -- adb
 		include : match terminal
 			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom top
 			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom top
 			__                     : VBar.r             RightSB bottom top
 
-	define [TopCutBody terminal top bottom] : glyph-proc
+	define [TopCutBody terminal top bottom _ada _adb] : glyph-proc
+		local ada : fallback _ada SmallArchDepthA
+		local adb : fallback _adb SmallArchDepthB
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRight.shape (top -- top)
+		include : OBarRight.shape
+			top -- top
+			ada -- ada
+			adb -- adb
 		include : match terminal
 			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - HalfStroke)
 			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - HalfStroke)
@@ -45,21 +55,34 @@ glyph-block Letter-Latin-Lower-Q : begin
 			corner  RightSB                    (top - HalfStroke)
 			corner (RightSB - [HSwToV Stroke]) (top - HalfStroke)
 
-	define [EarlessCornerBody terminal top bottom] : glyph-proc
+	define [EarlessCornerBody terminal top bottom _ada _adb] : glyph-proc
+		local ada : fallback _ada SmallArchDepthA
+		local adb : fallback _adb SmallArchDepthB
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRight.earlessCorner (top -- top) (rise -- DToothlessRise) (mBlend -- DMBlend)
+		include : OBarRight.earlessCorner
+			top -- top
+			ada -- ada
+			adb -- adb
+			rise -- DToothlessRise
+			mBlend -- DMBlend
 		include : match terminal
 			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - DToothlessRise)
 			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - DToothlessRise)
 			__                     : VBar.r             RightSB bottom (top - DToothlessRise)
 
-	define [EarlessRoundedBody terminal top bottom] : glyph-proc
+	define [EarlessRoundedBody terminal top bottom _ada _adb] : glyph-proc
+		local ada : fallback _ada SmallArchDepthA
+		local adb : fallback _adb SmallArchDepthB
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRight.earlessRounded (top -- top) (yTerminal -- SmallArchDepthA)
+		include : OBarRight.earlessRounded
+			top -- top
+			ada -- ada
+			adb -- adb
+			yTerminal -- ada
 		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - SmallArchDepthB)
-			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - SmallArchDepthB)
-			__                     : VBar.r             RightSB bottom (top - SmallArchDepthB)
+			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - adb)
+			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - adb)
+			__                     : VBar.r             RightSB bottom (top - adb)
 
 	define [RtSerif y] : tagged 'serifRT' : HSerif.rt RightSB y SideJut
 	define [RbSerif y] : tagged 'serifRB' : union
@@ -84,7 +107,7 @@ glyph-block Letter-Latin-Lower-Q : begin
 			bottomSerifed      { null    RbSerif }
 			serifed            { RtSerif RbSerif }
 
-	foreach { suffix { Body terminal {sRT sRB} } } [Object.entries QConfig] : do
+	foreach { suffix { Body terminal { sRT sRB } } } [Object.entries QConfig] : do
 		create-glyph "q.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			include : Body terminal XH Descender
@@ -93,9 +116,9 @@ glyph-block Letter-Latin-Lower-Q : begin
 			include : LeaningAnchor.Below.VBar.r RightSB
 
 		if (terminal === TERMINAL-NORMAL && !sRB) : begin
-			create-glyph "QRTail.\(suffix)" : glyph-proc
+			create-glyph "qCapRTail.\(suffix)" : glyph-proc
 				include : MarkSet.capDesc
-				include : Body terminal CAP 0
+				include : Body terminal CAP 0 ArchDepthA ArchDepthB
 				include : RetroflexHook.rExt RightSB 0
 				if sRT : include : sRT CAP
 				include : LeaningAnchor.Below.VBar.r RightSB
@@ -110,7 +133,7 @@ glyph-block Letter-Latin-Lower-Q : begin
 	select-variant 'q' 'q'
 	link-reduced-variant 'q/sansSerif' 'q' MathSansSerif
 	alias 'cyrl/qa' 0x51B 'q'
-	select-variant 'QRTail' 0x24A (follow -- 'qRTail')
+	select-variant 'QRTail' 0x24A (shapeFrom -- 'qCapRTail') (follow -- 'qRTail')
 	select-variant 'qRTail' 0x24B
 	select-variant "q/hookTopBase" (shapeFrom -- 'q')
 

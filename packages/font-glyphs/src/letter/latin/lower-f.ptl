@@ -16,16 +16,20 @@ glyph-block Letter-Latin-Lower-F : begin
 		set-base-anchor 'palatalHookPos' (barLeft + [HSwToV : Stroke + [Math.max VJutStroke : Width / 12]]) 0
 
 	glyph-block-export fbar
-	define fbar : XH * DesignParameters.fBarPosToXH + Stroke * DesignParameters.fbarStrokeAdj
+	define fbar : [mix 0 XH DesignParameters.fBarPosToXH] + Stroke * DesignParameters.fbarStrokeAdj
 	define [SmallFBottomSerif df] : glyph-proc
 		local l : [mix df.leftSB df.rightSB 0.020] + HalfStroke * TanSlope
 		local r : [mix df.leftSB df.rightSB 0.875] + HalfStroke * TanSlope
-		include : dispiro [widths.lhs] [flat l 0] [curl r 0]
+		include : dispiro
+			widths.lhs
+			flat l 0
+			curl r 0
 		set-base-anchor 'palatalHookPos' r 0
 
 	define [NarrowBottomSerif df] : glyph-proc
-		include : HSerif.mb df.middle 0 (LongJut * df.adws)
-		set-base-anchor 'palatalHookPos' (df.middle + LongJut * df.adws + HalfStroke * TanSlope) 0
+		local jut : Math.max MidJutCenter : mix [HSwToV HalfStroke] LongJut df.adws
+		include : HSerif.mb df.middle 0 jut
+		set-base-anchor 'palatalHookPos' (df.middle + jut + HalfStroke * TanSlope) 0
 
 	define [StdFShapeT sink df offset barleft sw] : sink
 		widths.lhs sw
@@ -33,9 +37,9 @@ glyph-block Letter-Latin-Lower-F : begin
 		hookstart (Ascender - offset) (sw -- sw)
 		flat (barleft + offset) (Ascender - ArchDepthA * 0.8)
 		[if offset corner curl] (barleft + offset) 0 [heading Downward]
-		if offset {[corner (df.rightSB + RBalance2 - (OX - O) - offset) 0]} {}
+		if offset { [corner (df.rightSB + RBalance2 - (OX - O) - offset) 0] } {}
 
-	define [SmallFDownExtension barLeft] : VBar.l barLeft 0.1 (Descender * 0.9)
+	define [SmallFDownExtension barLeft] : VBar.l barLeft 0.1 [mix 0 Descender 0.9]
 
 	define [SmallFDownHook df barRight counterHookLeft] : begin
 		local hd : FlatHookDepth df
@@ -51,7 +55,8 @@ glyph-block Letter-Latin-Lower-F : begin
 	define [SmallFDiagonalTail df barLeft] : begin
 		local xBarMiddle : barLeft + [HSwToV HalfStroke]
 		return : dispiro
-			flat xBarMiddle TINY [widths.center.heading Stroke Downward]
+			widths.center
+			flat xBarMiddle TINY [heading Downward]
 			DiagTail.L xBarMiddle Descender [DiagTail.StdDepth df Stroke] Stroke
 
 	glyph-block-export StdSmallFBarLeftPos
@@ -178,7 +183,7 @@ glyph-block Letter-Latin-Lower-F : begin
 	select-variant 'f' 'f'
 	link-reduced-variant 'f/sansSerif' 'f' MathSansSerif
 	select-variant 'fLenis' 0xAB35 (shapeFrom -- 'f')
-	select-variant 'fLTail' 0x192  (shapeFrom -- 'f')
+	select-variant 'fHookBottom' 0x192 (shapeFrom -- 'f')
 	select-variant 'f/compLigLeft1' (shapeFrom -- 'f')
 	select-variant 'f/compLigLeft2' (shapeFrom -- 'f')
 	select-variant 'f/compLigLeft3' (shapeFrom -- 'f')
