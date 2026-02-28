@@ -144,7 +144,7 @@ glyph-block Letter-Latin-Lower-N : begin
 				begin NBottomLeftYatSerif
 				begin nothing
 
-	foreach { suffix { Body tailed {sLT sLB sRB} } } [Object.entries NConfig] : do
+	foreach { suffix { Body tailed { sLT sLB sRB } } } [Object.entries NConfig] : do
 		create-glyph "n.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			set-base-anchor 'trailing' RightSB 0
@@ -153,6 +153,13 @@ glyph-block Letter-Latin-Lower-N : begin
 			if sLT : include : sLT [DivFrame 1] XH
 			if sLB : include : sLB [DivFrame 1] 0
 			if sRB : include : sRB [DivFrame 1] 0
+
+		if (!tailed) : create-glyph "Eng.\(suffix)" : glyph-proc
+			include : MarkSet.capDesc
+			include : Body CAP SB RightSB 0 Stroke ArchDepthA ArchDepthB
+			include : EngHook RightSB 0 Descender
+			if sLT : include : sLT [DivFrame 1] CAP
+			if sLB : include : sLB [DivFrame 1] 0
 
 		if (!tailed) : create-glyph "eng.\(suffix)" : glyph-proc
 			include : MarkSet.p
@@ -195,7 +202,7 @@ glyph-block Letter-Latin-Lower-N : begin
 		create-glyph "latn/Eta.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
 			include : LeaningAnchor.Below.VBar.r RightSB
-			include : Body CAP SB RightSB [if tailed (CAP - SmallArchDepthB + O) Descender] Stroke
+			include : Body CAP SB RightSB [if tailed (CAP - SmallArchDepthB + O) Descender] Stroke ArchDepthA ArchDepthB
 			if tailed : include : EndingTail RightSB Descender (CAP - SmallArchDepthB) Stroke
 			if sLT : include : sLT [DivFrame 1] CAP
 			if sLB : include : sLB [DivFrame 1] 0
@@ -249,22 +256,22 @@ glyph-block Letter-Latin-Lower-N : begin
 		if (!tailed) : create-glyph "engPalatalHook.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleM 1
 			include : df.markSet.p
-			local dfSub : DivFrame (0.75 * para.advanceScaleM) 2
-			include : Body XH dfSub.leftSB dfSub.rightSB 0 dfSub.mvs dfSub.smallArchDepthA dfSub.smallArchDepthB
-			include : EngHook dfSub.rightSB 0 Descender (sw -- dfSub.mvs)
-			if sLT : include : sLT dfSub XH
-			if sLB : include : sLB dfSub 0
+			local subDf : DivFrame (0.75 * para.advanceScaleM) 2
+			include : Body XH subDf.leftSB subDf.rightSB 0 subDf.mvs subDf.smallArchDepthA subDf.smallArchDepthB
+			include : EngHook subDf.rightSB 0 Descender (sw -- subDf.mvs)
+			if sLT : include : sLT subDf XH
+			if sLB : include : sLB subDf 0
 			include : PalatalHook.r
 				x -- df.rightSB
 				y -- 0
-				xLink -- dfSub.rightSB
-				refSw -- dfSub.mvs
-				maskOut -- [intersection [MaskBelow 0] [MaskLeft dfSub.rightSB]]
+				xLink -- subDf.rightSB
+				refSw -- subDf.mvs
+				maskOut -- [intersection [MaskBelow 0] [MaskLeft subDf.rightSB]]
 
 		if (!tailed && !sRB) : create-glyph "RInsular.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
 			include : LeaningAnchor.Below.VBar.l SB
-			include : Body CAP SB RightSB (-Descender) Stroke
+			include : Body CAP SB RightSB (-Descender) Stroke ArchDepthA ArchDepthB
 			include : RetroflexHook.rExt RightSB (-Descender)
 			include : VBar.l SB Descender 0
 			if sLT : include : sLT [DivFrame 1] CAP
@@ -281,12 +288,12 @@ glyph-block Letter-Latin-Lower-N : begin
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.p
 
-			local dfHalf : df.slice 3 2
-			include : Body XH dfHalf.leftSB dfHalf.rightSB [if tailed (XH - dfHalf.smallArchDepthB + O) 0] dfHalf.mvs dfHalf.smallArchDepthA dfHalf.smallArchDepthB
-			if tailed : include : EndingTail dfHalf.rightSB 0 (XH - dfHalf.smallArchDepthB) dfHalf.mvs
-			if sLT : include : sLT dfHalf XH
-			if sLB : include : sLB dfHalf 0
-			if sRB : include : sRB dfHalf 0
+			local subDf : df.slice 3 2
+			include : Body XH subDf.leftSB subDf.rightSB [if tailed (XH - subDf.smallArchDepthB + O) 0] df.mvs subDf.smallArchDepthA subDf.smallArchDepthB
+			if tailed : include : EndingTail subDf.rightSB 0 (XH - subDf.smallArchDepthB) df.mvs
+			if sLT : include : sLT subDf XH
+			if sLB : include : sLB subDf 0
+			if sRB : include : sRB subDf 0
 
 			include : MidHook.m df XH
 
@@ -308,6 +315,7 @@ glyph-block Letter-Latin-Lower-N : begin
 	select-variant 'cyrl/pe.italic/descBase' (shapeFrom -- 'n')
 	alias 'cyrl/pe.BGR' null 'cyrl/pe.italic'
 
+	select-variant 'Eng' 0x14A (follow -- 'eng')
 	select-variant 'eng' 0x14B
 	link-reduced-variant 'eng/phoneticRight' 'eng'
 	select-variant 'nHookLeft' 0x272
@@ -338,11 +346,12 @@ glyph-block Letter-Latin-Lower-N : begin
 	CreateAccentedComposition 'nAcute.PLK' null 'n' 'kreskaAbove'
 
 	do "n with Apostrophe"
-		derive-glyphs 'nApostrophe/comma' null 'commaAbove/asPunctuation' : function [src gr] : glyph-proc
-			include : with-transform [Translate (Middle + SB) 0]
+		glyph-block-import Mark-Shared-Metrics : markMiddle
+		derive-glyphs 'nApostrophe/commaTL' null 'commaAbove/asPunctuation' : function [src gr] : glyph-proc
+			include : with-transform [Translate (SB - markMiddle) 0]
 				refer-glyph src
 
-		derive-composites 'nApostrophe' 0x149 'n' 'nApostrophe/comma'
+		derive-composites 'nApostrophe' 0x149 'n' 'nApostrophe/commaTL'
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/n' 0x1D55F : glyph-proc

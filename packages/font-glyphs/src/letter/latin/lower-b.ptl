@@ -9,6 +9,7 @@ glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
+	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : OBarLeft TopHook
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
 
@@ -47,8 +48,8 @@ glyph-block Letter-Latin-Lower-B : begin
 			bottomSerifed   { LBSerifs   false  }
 			serifed         { FullSerifs true   }
 
-	foreach { suffix { Body {Serifs doTS} }} [Object.entries BConfig] : do
-		local yOverlay : mix XH (Ascender - [if doTS Stroke 0]) 0.5
+	foreach { suffix { Body {Serifs doST} }} [Object.entries BConfig] : do
+		local yOverlay : mix XH (Ascender - [if doST Stroke 0]) 0.5
 		create-glyph "b.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : Body Ascender
@@ -56,47 +57,50 @@ glyph-block Letter-Latin-Lower-B : begin
 			include : LeaningAnchor.Above.VBar.l SB
 			set-base-anchor 'overlayOnExtension' (SB + [HSwToV HalfStroke]) yOverlay
 			set-base-anchor 'overlay' Middle (XH / 2)
+			set-base-anchor 'strike'  Middle (XH / 2)
 
 		create-glyph "bStroke.\(suffix)" : glyph-proc
 			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
-			include : LetterBarOverlay.l.in SB XH (Ascender - [if doTS Stroke 0])
+			include : LetterBarOverlay.l.in SB XH (Ascender - [if doST Stroke 0])
 
 		create-glyph "bSlash.\(suffix)" : glyph-proc
 			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
 			include : dispiro
 				widths.center OverlayStroke
-				flat [mix SB 0       0.7]   (yOverlay - Ascender * 0.1)
-				curl [mix SB RightSB 0.625] (yOverlay + Ascender * 0.05)
+				flat [mix SB 0       0.700] (yOverlay - 0.10 * (Ascender - 0))
+				curl [mix SB RightSB 0.625] (yOverlay + 0.05 * (Ascender - 0))
 
 		create-glyph "latn/be.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : Body Ascender
-			local xLeft : SB - O
-			local xRight : mix SB RightSB 0.9
-			include : HBar.t xLeft xRight Ascender
 			include : Serifs
-			if doTS : include : VSerif.dr xRight Ascender VJut
-			include : LeaningAnchor.Above.VBar.m [mix xLeft xRight 0.5]
+			local xTopRight : mix SB RightSB 0.9
+			include : HBar.t (SB - O) xTopRight Ascender
+			if doST : include : VSerif.dr xTopRight Ascender [Math.min VJut : mix Stroke (Ascender - XH) 0.5]
+			include : LeaningAnchor.Above.At [mix SB xTopRight 0.5]
 
-		if [not doTS] : create-glyph "bHookTop.\(suffix)" : glyph-proc
+		if [not doST] : create-glyph "bHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : Body XH
-			include : TopHook.toRight.lBarInner SB (XH / 2) Ascender
 			include : Serifs
+			include : TopHook.toRight.lBarInner SB (XH / 2) Ascender
 			include : LeaningAnchor.Above.VBar.l SB
 
-	select-variant 'b'       'b'
+	select-variant 'b' 'b'
+	link-reduced-variant 'b/sansSerif' 'b' MathSansSerif
+
 	select-variant 'bStroke' 0x180  (follow -- 'b')
+	CreateAccentedComposition 'bBar' null 'b' 'hStrike'
+
 	select-variant 'bSlash'  0x2422 (follow -- 'b')
 	select-variant 'latn/be' 0x183  (follow -- 'b')
+
+	select-variant 'bHookTop' 0x253
 
 	derive-composites 'bPalatalHook' 0x1D80 'b' : PalatalHook.r
 		x -- [mix [arch.adjust-x.bot Middle] RightSB 0.75]
 		y -- 0
 		yAttach -- [mix O SmallArchDepthA : archv.yFromX 0.75]
-
-	link-reduced-variant 'b/sansSerif' 'b' MathSansSerif
-	select-variant 'bHookTop' 0x253
 
 	derive-multi-part-glyphs 'bDot' 0x1E03 {'b' 'dotAbove'} : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
