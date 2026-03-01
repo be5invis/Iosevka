@@ -1,5 +1,10 @@
 ## Modifications since last major version
 
+### 34.2.1
+
+* Fix Iosevka Fixed width validation by removing U+1F8D0..U+1F8D8 from the Fixed fonts.
+
+
 ### 34.2.0
 
 * Add Latin localization forms for Sámi languages.
