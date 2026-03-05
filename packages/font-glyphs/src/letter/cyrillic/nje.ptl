@@ -18,14 +18,18 @@ glyph-block Letter-Cyrillic-Nje : begin
 	define SLAB-TAILED-CYRILLIC        3
 	define SLAB-ALL                    4
 
-	define [LeftHalf slabType df top] : glyph-proc
-		local dfSub : df.slice 3 2
-		include : VBar.l dfSub.leftSB 0 top dfSub.mvs
-		include : HBar.m dfSub.leftSB dfSub.rightSB (top * HBarPos) dfSub.mvs
+	define [CyrNjeStroke df top] : Math.min df.mvs : AdviceStroke2 3 3 top df.adws
 
-		local sf : SerifFrame.fromDf dfSub top 0
+	define [LeftHalf slabType df top] : glyph-proc
+		local sw : CyrNjeStroke df top
+
+		local subDf : df.slice 3 2
+		include : VBar.l subDf.leftSB 0 top sw
+		include : HBar.m subDf.leftSB subDf.rightSB [mix 0 top HBarPos] sw
+
+		local sf : SerifFrame.fromDf subDf top 0 (swRef -- sw)
 		include : match slabType
-			[Just SLAB-NONE]   : glyph-proc
+			[Just SLAB-NONE]     : glyph-proc
 			[Just SLAB-TOP-LEFT] : begin sf.lt.outer
 			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : composite-proc sf.lt.outer sf.rb.outer
 			[Just SLAB-TAILED-CYRILLIC] : if sf.enoughSpaceForFullSerifs
@@ -36,15 +40,12 @@ glyph-block Letter-Cyrillic-Nje : begin
 				composite-proc sf.lt.outer sf.rt.outer sf.lb.outer
 
 	define [RightHalf Yeri df top] : glyph-proc
+		local sw : CyrNjeStroke df top
 		include : Yeri top
-			left   -- (df.middle - [HSwToV : 0.5 * df.mvs])
+			left   -- (df.middle - [HSwToV : 0.5 * sw])
 			right  -- (df.rightSB - O)
-			stroke -- df.mvs
-		eject-contour 'serifYeriLT'
-		eject-contour 'serifYeriLB'
-
-	define NjeReduction : object
-		serifed 'serifedExceptBottomRight'
+			stroke -- sw
+			fSlab  -- false
 
 	define LeftHalfConfig : object
 		serifless                        { SLAB-NONE                  }
@@ -64,7 +65,7 @@ glyph-block Letter-Cyrillic-Nje : begin
 			include : df.markSet.e
 			include : LeftHalf slabType df XH
 
-	foreach { suffix { Uc Lc } } [Object.entries YeriConfig] : do
+	foreach { suffix { Uc Lc BGRc } } [Object.entries YeriConfig] : do
 		create-glyph "cyrl/Nje/rightHalf.\(suffix)"  : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.capital
