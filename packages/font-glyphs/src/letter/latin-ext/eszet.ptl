@@ -11,28 +11,34 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth PalatalHook SerifFrame
 	glyph-block-import Letter-Latin-S : AdviceSArchDepth
-	glyph-block-import Letter-Latin-Lower-F : fbar
+	glyph-block-import Letter-Latin-Lower-F : ySmallFBarPos
 
-	define NO-TAIL    0
-	define DESCENDING 1
-	define TAILED     2
+	define NO-TAIL             0
+	define DESCENDING          1
+	define TAILED              2
 
-	define SERIF-NONE    0
-	define SERIF-BOT     1
-	define SERIF-MID     2
-	define SERIF-MID-XH  4
+	define SERIF-NONE          0
+	define SERIF-BOT           1
+	define SERIF-MID           2
+	define SERIF-MID-XH        4
+	define SERIF-MID-HALF-ASC  8
 
-	define SERIF-DUAL    : SERIF-BOT + SERIF-MID
-	define SERIF-DUAL-XH : SERIF-BOT + SERIF-MID-XH
+	define SERIF-DUAL          : SERIF-BOT + SERIF-MID
+	define SERIF-DUAL-XH       : SERIF-BOT + SERIF-MID-XH
+	define SERIF-DUAL-HALF-ASC : SERIF-BOT + SERIF-MID-HALF-ASC
 
 	define [EszetSerifs df fTraditional slab] : glyph-proc
-		local sf : SerifFrame.fromDf df fbar 0
+		local sf : SerifFrame.fromDf df ySmallFBarPos 0
 		if [maskBits slab SERIF-BOT] : include : if fTraditional sf.lb.full sf.lb.outer
 		if [maskBits slab SERIF-MID] : include sf.lt.outer
 
 		if [maskBits slab SERIF-MID-XH] : begin
 			local sfXH : SerifFrame.fromDf df XH 0
 			include sfXH.lt.outer
+
+		if [maskBits slab SERIF-MID-HALF-ASC] : begin
+			local sfHalfAsc : SerifFrame.fromDf df ([mix 0 Ascender 0.5] + HalfStroke) 0
+			include sfHalfAsc.lt.outer
 
 	define [Traditional fFlathook] : function [slab tail] : glyph-proc
 		include : MarkSet.bp
@@ -158,21 +164,23 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 
 	define EszetConfig : SuffixCfg.weave
 		object # body
-			traditional             [Traditional false]
-			traditionalFlatHook     [Traditional true]
-			sulzbacher              Sulzbacher
-			longSSLig               LongSSLig
+			traditional              [Traditional false]
+			traditionalFlatHook      [Traditional true]
+			sulzbacher                Sulzbacher
+			longSSLig                 LongSSLig
 		object # terminal
-			''                      NO-TAIL
-			'descending'            DESCENDING
-			'tailed'                TAILED
+			''                        NO-TAIL
+			'descending'              DESCENDING
+			'tailed'                  TAILED
 		object # serifs
-			serifless               SERIF-NONE
-			bottomSerifed           SERIF-BOT
-			middleSerifed           SERIF-MID
-			dualSerifed             SERIF-DUAL
-			middleSerifedXH         SERIF-MID-XH
-			dualSerifedXH           SERIF-DUAL-XH
+			serifless                 SERIF-NONE
+			bottomSerifed             SERIF-BOT
+			middleSerifed             SERIF-MID
+			dualSerifed               SERIF-DUAL
+			middleSerifedXH           SERIF-MID-XH
+			dualSerifedXH             SERIF-DUAL-XH
+			middleSerifedHalfAscender SERIF-MID-HALF-ASC
+			dualSerifedHalfAscender   SERIF-DUAL-HALF-ASC
 
 	foreach { suffix { Base tail serif } } [pairs-of EszetConfig] : do
 		create-glyph "eszet.\(suffix)" : Base serif tail
