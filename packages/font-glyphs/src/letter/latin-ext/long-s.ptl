@@ -12,16 +12,18 @@ glyph-block Letter-Latin-Long-S : begin
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth LetterBarOverlay
 	glyph-block-import Letter-Shared-Shapes : PalatalHook RetroflexHook VerticalHook
-	glyph-block-import Letter-Latin-Lower-F : StdSmallFBarLeftPos StdSmallFBarLeftPos0 fbar
+	glyph-block-import Letter-Latin-Lower-F : StdSmallFBarLeftPos StdSmallFBarLeftPos0 ySmallFBarPos
 	glyph-block-import Letter-Latin-Lower-F : SmallFDiagonalTail
 
-	define SLAB_SERIFLESS 0
-	define SLAB_BOTTOM    1
-	define SLAB_MIDDLE    2
-	define SLAB_MIDDLE_XH 4
+	define SLAB_SERIFLESS       0
+	define SLAB_BOTTOM          1
+	define SLAB_MIDDLE          2
+	define SLAB_MIDDLE_XH       4
+	define SLAB_MIDDLE_HALF_ASC 8
 
-	define SLAB_DOUBLE    : SLAB_BOTTOM + SLAB_MIDDLE
-	define SLAB_DOUBLE_XH : SLAB_BOTTOM + SLAB_MIDDLE_XH
+	define SLAB_DOUBLE          : SLAB_BOTTOM + SLAB_MIDDLE
+	define SLAB_DOUBLE_XH       : SLAB_BOTTOM + SLAB_MIDDLE_XH
+	define SLAB_DOUBLE_HALF_ASC : SLAB_BOTTOM + SLAB_MIDDLE_HALF_ASC
 
 	define [LongSUpperHalf sign x top bottom hookX hookY _sw] : begin
 		local hd : FlatHookDepth [DivFrame 1]
@@ -73,11 +75,15 @@ glyph-block Letter-Latin-Long-S : begin
 		if [maskBits fSlab SLAB_MIDDLE] : begin
 			include : tagged "serifLM" : intersection
 				MaskLeft (m + TINY)
-				HSerif.mt xSerifPos fbar serifLength
+				HSerif.mt xSerifPos ySmallFBarPos serifLength
 		if [maskBits fSlab SLAB_MIDDLE_XH] : begin
 			include : tagged "serifLM" : intersection
 				MaskLeft (m + TINY)
 				HSerif.mt xSerifPos XH serifLength
+		if [maskBits fSlab SLAB_MIDDLE_HALF_ASC] : begin
+			include : tagged "serifLM" : intersection
+				MaskLeft (m + TINY)
+				HSerif.mt xSerifPos ([mix 0 Ascender 0.5] + HalfStroke) serifLength
 
 	define [LongSBentHookBase y0 m fSlab _kSerif] : glyph-proc
 		local xTerminal : RightSB + RBalance2 + [Math.max 0 : m - [StdSmallFBarLeftPos0]]
@@ -118,12 +124,14 @@ glyph-block Letter-Latin-Long-S : begin
 
 	# Non-descending variants
 	define SerifSuffixes : object
-		"Serifless"       { SLAB_SERIFLESS 1   }
-		"MiddleSerifed"   { SLAB_MIDDLE    0.5 }
-		"MiddleSerifedXH" { SLAB_MIDDLE_XH 0.5 }
-		"BottomSerifed"   { SLAB_BOTTOM    0.5 }
-		"DoubleSerifed"   { SLAB_DOUBLE    0.5 }
-		"DoubleSerifedXH" { SLAB_DOUBLE_XH 0.5 }
+		"Serifless"                 { SLAB_SERIFLESS       1.0 }
+		"MiddleSerifed"             { SLAB_MIDDLE          0.5 }
+		"MiddleSerifedXH"           { SLAB_MIDDLE_XH       0.5 }
+		"MiddleSerifedHalfAscender" { SLAB_MIDDLE_HALF_ASC 0.5 }
+		"BottomSerifed"             { SLAB_BOTTOM          0.5 }
+		"DoubleSerifed"             { SLAB_DOUBLE          0.5 }
+		"DoubleSerifedXH"           { SLAB_DOUBLE_XH       0.5 }
+		"DoubleSerifedHalfAscender" { SLAB_DOUBLE_HALF_ASC 0.5 }
 
 	foreach { suffix { serifStyle pShift } } [Object.entries SerifSuffixes] : do
 		create-glyph "longs.bentHook\(suffix)" : glyph-proc
@@ -144,9 +152,10 @@ glyph-block Letter-Latin-Long-S : begin
 
 	# Descending and Tailed variants
 	define SerifSuffixesDescending : object
-		"Serifless"       { SLAB_SERIFLESS 1   }
-		"MiddleSerifed"   { SLAB_MIDDLE    0.5 }
-		"MiddleSerifedXH" { SLAB_MIDDLE_XH 0.5 }
+		"Serifless"                 { SLAB_SERIFLESS       1.0 }
+		"MiddleSerifed"             { SLAB_MIDDLE          0.5 }
+		"MiddleSerifedXH"           { SLAB_MIDDLE_XH       0.5 }
+		"MiddleSerifedHalfAscender" { SLAB_MIDDLE_HALF_ASC 0.5 }
 
 	foreach { suffix { serifStyle pShift } } [Object.entries SerifSuffixesDescending] : do
 		create-glyph "longs.flatHookDescending\(suffix)" : glyph-proc
