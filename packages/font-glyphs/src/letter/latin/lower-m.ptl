@@ -249,7 +249,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			"bottomRightSerifed"           { RbSerifs   }
 			"topLeftAndBottomRightSerifed" { LtRbSerifs }
 
-	foreach { suffix { {Body earless} {shortLeg} {tailed} {Serifs} } } [pairs-of SmallMConfig] : do
+	foreach { suffix { { Body earless } { shortLeg } { tailed } { Serifs } } } [pairs-of SmallMConfig] : do
 		define [mShapeBody df top _sw _ada _adb] : begin
 			return : mShapeBodyImpl df top Body earless shortLeg tailed Serifs _sw _ada _adb
 
@@ -384,7 +384,7 @@ glyph-block Letter-Latin-Lower-M : begin
 				[Just 'toothed'] { LtRbSerifs }
 				__               { RbSerifs   } # The name-shaping mapping is swapped by design
 
-	foreach { suffix { {Body toothless tailed} {Serifs} } } [pairs-of TurnMConfig] : do
+	foreach { suffix { { Body toothless tailed } { Serifs } } } [pairs-of TurnMConfig] : do
 		define [turnMShapeBody df top _sw _ada _adb] : glyph-proc
 			include : turnMShapeBodyImpl df top Body toothless tailed Serifs _sw _ada _adb
 
@@ -400,18 +400,6 @@ glyph-block Letter-Latin-Lower-M : begin
 				SmallMSmoothA df ArchDepth
 				SmallMSmoothB df ArchDepth
 
-		if (!tailed) : begin
-			create-glyph "turnmLeg.\(suffix)" : glyph-proc
-				local df : include : dfM
-				include : df.markSet.p
-				include : turnMShapeBody df XH
-				eject-contour 'serifLT'
-				include : VBar.r df.rightSB Descender XH df.mvs
-				if (Serifs !== no-shape) : begin
-					local sf : SerifFrame.fromDf df XH Descender
-					include sf.rb.fullSide
-				include : LeaningAnchor.Below.VBar.r df.rightSB
-
 		create-glyph "turnmSideways.\(suffix)" : glyph-proc
 			local realHeight : XH * para.advanceScaleMM
 			local realTop : XH / 2 + realHeight / 2
@@ -422,19 +410,31 @@ glyph-block Letter-Latin-Lower-M : begin
 				include : turnMShapeBody df RightSB
 				include : Translate 0 (SB / 2)
 
-		if (Body === SmallMArches && !tailed) : begin
-			create-glyph "cyrl/shcha.italic.\(suffix)" : glyph-proc
-				local df : include : dfM
-				include : df.markSet.e
-				include : turnMShapeBody df XH
-				eject-contour 'serifLT'
-				include : CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
-			create-glyph "cyrl/shwe.italic.\(suffix)" : glyph-proc
+		if (!tailed) : begin
+			create-glyph "turnmLeg.\(suffix)" : glyph-proc
 				local df : include : dfM
 				include : df.markSet.p
 				include : turnMShapeBody df XH
 				eject-contour 'serifLT'
-				include : CyrCurlDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
+				include : VBar.r df.rightSB Descender XH df.mvs
+				if (Serifs !== no-shape) : begin
+					local sf : SerifFrame.fromDf df XH Descender
+					include sf.rb.[if para.isItalic 'outer' 'fullSide']
+				include : LeaningAnchor.Below.VBar.r df.rightSB
+
+			if (Body === SmallMArches) : begin
+				create-glyph "cyrl/shcha.italic.\(suffix)" : glyph-proc
+					local df : include : dfM
+					include : df.markSet.e
+					include : turnMShapeBody df XH
+					eject-contour 'serifLT'
+					include : CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
+				create-glyph "cyrl/shwe.italic.\(suffix)" : glyph-proc
+					local df : include : dfM
+					include : df.markSet.p
+					include : turnMShapeBody df XH
+					eject-contour 'serifLT'
+					include : CyrCurlDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
 
 	select-variant 'turnm' 0x26F (follow -- [conditional-follow [MEnoughSpaceForFullSerifs : dfM] 'turnm/full' 'turnm/reduced'])
 	select-variant 'turnm/reduced' (shapeFrom -- 'turnm')
