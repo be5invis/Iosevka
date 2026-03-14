@@ -10,6 +10,9 @@ export function linreg(x0, y0, x1, y1, x) {
 export function clamp(l, h, x) {
 	return x < l ? l : x > h ? h : x;
 }
+export function quantize(x, step) {
+	return step * Math.round(x / step);
+}
 export function fallback(...args) {
 	for (const item of args) if (item !== void 0) return item;
 	return void 0;

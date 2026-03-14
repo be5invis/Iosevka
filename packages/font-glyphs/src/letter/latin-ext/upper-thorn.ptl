@@ -4,14 +4,15 @@ import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 
 glyph-module
 
-glyph-block Letter-Latin-Thorn : begin
+glyph-block Letter-Latin-Upper-Thorn : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay SerifFrame
 
-	define xThornBarLeft : mix 0 SB 1.25
+	define kSB 1.25
+	define xThornBarLeft : mix 0 SB kSB
 
 	define [yThornBowlBot top slab] : [mix 0 top 0.19] + [if slab 0.375 0] * Stroke
 	define [yThornBowlTop top slab] : top - [yThornBowlBot top slab]
@@ -19,9 +20,10 @@ glyph-block Letter-Latin-Thorn : begin
 	define [yThornBowlAsymmetricBot top slab] : [mix 0 top 0.25] + [if slab 0.125 0] * Stroke
 	define [yThornBowlAsymmetricTop top slab] : top - [mix 0 [yThornBowlAsymmetricBot top slab] 0.7] + [if slab (-0.125) (+0.250)] * Stroke
 
+	glyph-block-export ThornShapeImpl
 	define [ThornShapeImpl top slabTop slabBot yBowlBot yBowlTop] : glyph-proc
 		local xTurn : Math.max
-			RightSB - [BowlXDepth yBowlTop yBowlBot xThornBarLeft RightSB Stroke]
+			RightSB       - [BowlXDepth yBowlTop yBowlBot xThornBarLeft RightSB Stroke]
 			xThornBarLeft + [HSwToV Stroke]
 
 		include : dispiro
@@ -66,7 +68,8 @@ glyph-block Letter-Latin-Thorn : begin
 			include : MarkSet.capital
 			include : Body CAP doST doSB
 
-		if (Body !== ThornAsymmetricShape) : begin
+		if (Body !== ThornAsymmetricShape)
+		: then : begin
 			create-glyph "ThornStroke.\(suffix)" : glyph-proc
 				include : MarkSet.capital
 				include : ThornShapeImpl CAP doST doSB
@@ -77,7 +80,7 @@ glyph-block Letter-Latin-Thorn : begin
 					top -- (CAP - [if doST Stroke 0])
 					bot -- (CAP - [yThornBowlAsymmetricBot CAP doST])
 
-		if (Body === ThornAsymmetricShape) : begin
+		: else : begin
 			create-glyph "ThornStrokeBottom.\(suffix)" : glyph-proc
 				include [refer-glyph "Thorn.\(suffix)"] AS_BASE ALSO_METRICS
 				include : LetterBarOverlay.l.in
@@ -88,10 +91,3 @@ glyph-block Letter-Latin-Thorn : begin
 	select-variant 'Thorn' 0xDE
 	select-variant 'ThornStroke' 0xA764
 	select-variant 'ThornStrokeBottom' 0xA766
-
-	glyph-block-import Letter-Greek-Phi : yCapitalPhiBowlBot yCapitalPhiBowlTop
-	create-glyph 'grek/Sho' 0x3F7 : glyph-proc
-		include : MarkSet.capital
-		include : ThornShapeImpl CAP SLAB SLAB
-			yCapitalPhiBowlBot 0 CAP SLAB
-			yCapitalPhiBowlTop 0 CAP SLAB
