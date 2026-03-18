@@ -1,6 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
+import [MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -9,28 +10,44 @@ glyph-block Letter-Greek-Lower-Gamma : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 
-	alias 'grek/gamma.straight' null 'cyrl/ue.straightSerifless'
-	alias 'grek/gamma.curly'    null 'cyrl/ue.curlySerifless'
+	alias 'grek/gamma.straightSerifless' null 'cyrl/ue.straightSerifless'
+	alias 'grek/gamma.straightSerifed'   null 'cyrl/ue.straightMotionSerifed'
 
-	create-glyph 'grek/gamma.casual' : glyph-proc
-		include : MarkSet.p
+	alias 'grek/gamma.curlySerifless' null 'cyrl/ue.curlySerifless'
+	alias 'grek/gamma.curlySerifed'   null 'cyrl/ue.curlyMotionSerifed'
 
-		local xMid : [mix SB RightSB 0.46] + [HSwToV HalfStroke]
-		local xStart : SB + [HSwToV : 0.4 * Stroke]
+	define [GammaBaseShape df k ltOvershoot] : glyph-proc
+		local xMid : [mix df.leftSB df.rightSB 0.46] + [HSwToV HalfStroke]
+		local xStart : df.leftSB + [HSwToV : k * Stroke]
+		local yStart : XH - ltOvershoot
 		include : dispiro
-			g4 xStart (XH - O) [widths.rhs]
+			g4   xStart yStart [widths.rhs]
 			bezControls 0.33 0.17 1 0.62 6 important
 			flat xMid 0
 			curl xMid Descender [heading Downward]
 
 		include : dispiro
 			widths.rhs
-			flat RightSB XH [heading Downward]
-			curl RightSB (XH * 0.9) [heading Downward]
+			flat df.rightSB      XH        [heading Downward]
+			curl df.rightSB [mix XH 0 0.1] [heading Downward]
 			quadControls 0 0.3 6
-			g4   xMid 0 [widths.rhs : Stroke * 0.9]
+			g4   xMid 0 [widths.rhs (Stroke * 0.9)]
 
+	create-glyph 'grek/gamma.casualSerifless' : glyph-proc
+		local df : include : DivFrame 1
+		include : df.markSet.p
+		include : GammaBaseShape df 0.4 O
+
+	create-glyph 'grek/gamma.casualSerifed' : glyph-proc
+		local df : include : DivFrame 1
+		include : df.markSet.p
+		include : difference
+			GammaBaseShape df 0.75 0
+			Rect XH (XH - Stroke) 0 (df.leftSB + [HSwToV HalfStroke])
+		include : HSerif.lt (df.leftSB + [HSwToV QuarterStroke]) XH (SideJut + [HSwToV QuarterStroke])
+		
 	select-variant 'grek/gamma' 0x3B3
+	link-reduced-variant 'grek/gamma/sansSerif' 'grek/gamma' MathSansSerif
 
 	create-glyph 'mathbb/grek/gamma' 0x213D : glyph-proc
 		include : MarkSet.p
