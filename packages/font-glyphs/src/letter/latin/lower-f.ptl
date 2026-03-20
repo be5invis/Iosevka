@@ -91,7 +91,9 @@ glyph-block Letter-Latin-Lower-F : begin
 			[Just CH-SERIF]         : SmallFBottomSerif df
 
 	define [NarrowStdFShapeT sink df offset barleft sw] : begin
-		local hookRight : mix barleft (df.rightSB + RBalance2 - (OX - O)) 1.0
+		local pAdaptive : if (para.advanceScaleF < 1) ((1 - df.adws) / (1 - para.advanceScaleF)) 0
+		local hookScale : mix 0.75 1.0 pAdaptive
+		local hookRight : mix barleft (df.rightSB + RBalance2 - (OX - O)) hookScale
 		return : sink
 			widths.lhs sw
 			g4 [Math.max (barleft + offset + [HSwToV : 2.125 * sw]) (hookRight - offset)] (Ascender - Hook * 0.75)
@@ -111,9 +113,10 @@ glyph-block Letter-Latin-Lower-F : begin
 		include : NarrowStdFShapeT dispiro df 0 barLeft0 Stroke
 		include : Translate (barLeft - barLeft0) 0
 
+		local pAdaptive : if (para.advanceScaleF < 1) ((1 - df.adws) / (1 - para.advanceScaleF)) 0
 		local stdCrossRight : mix df.leftSB df.rightSB m
-		local narrowCrossRight : mix barLeft stdCrossRight 1.4
-		local narrowCrossLeft : mix df.leftSB barLeft 0.375
+		local narrowCrossRight : mix barLeft stdCrossRight [mix 0.85 1.4 pAdaptive]
+		local narrowCrossLeft : mix df.leftSB barLeft [mix 0.5 0.375 pAdaptive]
 		include : HCrossBar.top narrowCrossLeft narrowCrossRight bh
 
 		match counterHook
