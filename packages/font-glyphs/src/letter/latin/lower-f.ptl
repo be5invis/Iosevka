@@ -90,6 +90,43 @@ glyph-block Letter-Latin-Lower-F : begin
 			[Just CH-DIAGONAL-HOOK] : SmallFDiagonalTail df barLeft
 			[Just CH-SERIF]         : SmallFBottomSerif df
 
+	define [NarrowStdFShapeT sink df offset barleft sw] : begin
+		local hookRight : mix barleft (df.rightSB + RBalance2 - (OX - O)) 1.0
+		return : sink
+			widths.lhs sw
+			g4 [Math.max (barleft + offset + [HSwToV : 2.125 * sw]) (hookRight - offset)] (Ascender - Hook * 0.75)
+			hookstart (Ascender - offset) (sw -- sw)
+			flat (barleft + offset) (Ascender - ArchDepthA * 0.8)
+			[if offset corner curl] (barleft + offset) 0 [heading Downward]
+			if offset { [corner (hookRight - offset) 0] } {}
+
+	define [NarrowStdFShape df m bh counterHook] : glyph-proc
+		local barAtCenter : (counterHook === CH-HOOK) || (counterHook === CH-DIAGONAL-HOOK)
+		local barLeft0 : [mix df.leftSB df.rightSB 0.35] - [HSwToV QuarterStroke]
+		local barLeft : [mix df.leftSB df.rightSB : if barAtCenter 0.45 0.35] - [HSwToV : Stroke * [if barAtCenter 0.45 0.25]]
+
+		include : LeaningAnchor.Above.Hook barLeft ([mix barLeft (df.rightSB + barLeft - barLeft0) 0.75])
+		set-base-anchor 'overlay' (barLeft + [HSwToV HalfStroke]) (bh / 2)
+
+		include : NarrowStdFShapeT dispiro df 0 barLeft0 Stroke
+		include : Translate (barLeft - barLeft0) 0
+
+		local stdCrossRight : mix df.leftSB df.rightSB m
+		local narrowCrossRight : mix barLeft stdCrossRight 1.4
+		local narrowCrossLeft : mix df.leftSB barLeft 0.375
+		include : HCrossBar.top narrowCrossLeft narrowCrossRight bh
+
+		match counterHook
+			[Just CH-NONE] : include : SetPalatalHookPos barLeft
+			[Just CH-EXTENSION] : include : SmallFDownExtension barLeft
+			[Just CH-HOOK] : begin
+				local barRight : barLeft + [HSwToV Stroke]
+				local crossRight : mix df.width df.rightSB m
+				local counterHookLeft : Math.max df.leftSB : barRight - (crossRight - barLeft) * 0.75
+				include : SmallFDownHook df barRight counterHookLeft
+			[Just CH-DIAGONAL-HOOK] : include : SmallFDiagonalTail df barLeft
+			[Just CH-SERIF] : include : SmallFBottomSerif df
+
 	define [NarrowFShape clcStyle] : function [df m bh counterHook] : glyph-proc
 		local topHookExt : match clcStyle
 			[Just 1] Width
@@ -146,6 +183,7 @@ glyph-block Letter-Latin-Lower-F : begin
 	define SmallFConfig : SuffixCfg.weave
 		object # body
 			""                                { StandardFShape      dfN }
+			narrow                            { NarrowStdFShape     dfF }
 			flatHook                          { [NarrowFShape 0]    dfF }
 			flatHookCLC1                      { [NarrowFShape 1]    dfF }
 			flatHookCLC2                      { [NarrowFShape 2]    dfF }
