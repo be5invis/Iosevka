@@ -34,10 +34,13 @@ glyph-block Letter-Latin-Lower-J : begin
 		set-base-anchor 'trailing' (bar - hd.x) Descender
 		set-base-anchor 'overlay' barCenter (top / 2)
 
+	define dfNarrowJ : DivFrame para.advanceScaleF
+
 	define XMiddleT : namespace
 		export : define [StraightSerifless df] : df.middle + 0
 		export : define [StraightSerifed   df] : df.middle + [IBalance2 df]
 		export : define [BentHook          df] : df.middle + JBalance
+		export : define [NarrowBentHook    df] : df.middle + JBalance
 		export : define [DiagonalTailed    df] : df.middle + [IBalance2 df]
 		export : define [FlatHookSerifless df] : df.middle + 0.25 * JBalance * df.adws * [mix 1 df.adws 2]
 		export : define [FlatHookSerifed   df] : df.middle + JBalance * df.adws
@@ -51,6 +54,20 @@ glyph-block Letter-Latin-Lower-J : begin
 				flat (xMiddle + [HSwToV HalfStroke]) top [heading Downward]
 				curl (xMiddle + [HSwToV HalfStroke]) (Descender + ArchDepthA)
 				hookend Descender
+				g4 hookx (Descender + JHook)
+
+		export : define [NarrowBentHook df top xMiddle] : glyph-proc
+			local pAdaptive : if (para.advanceScaleF < 1) ((1 - df.adws) / (1 - para.advanceScaleF)) 0
+			local hookScale : mix 0.8 1.0 pAdaptive
+			local hookxFull : Math.min ((xMiddle - df.middle) - [HSwToV HalfStroke] + OXHook) (xMiddle - [HSwToV : 1.5 * Stroke] + OXHook)
+			local hookx : mix xMiddle hookxFull hookScale
+			local swTerminal : mix Stroke [AdviceStroke 2.75 df.adws] [mix 0.35 0.1 pAdaptive]
+			set-base-anchor "below" [mix hookx xMiddle 0.5] Descender
+			include : dispiro
+				widths.rhs
+				flat (xMiddle + [HSwToV HalfStroke]) top [heading Downward]
+				curl (xMiddle + [HSwToV HalfStroke]) (Descender + ArchDepthA)
+				hookend Descender (swTerminal -- swTerminal)
 				g4 hookx (Descender + JHook)
 
 		export : define [Straight df top xMiddle] : glyph-proc
@@ -91,6 +108,9 @@ glyph-block Letter-Latin-Lower-J : begin
 		'bentHookSerifless'          { JBody.BentHook        JSerifs.None   XMiddleT.BentHook           JMarks.Serifless  1                   }
 		'bentHookShortSerifed'       { JBody.BentHook        JSerifs.Short  XMiddleT.BentHook           JMarks.Serifless  1                   }
 		'bentHookSerifed'            { JBody.BentHook        JSerifs.Long   XMiddleT.BentHook           JMarks.Serifed    1                   }
+		'narrowBentHookSerifless'    { JBody.NarrowBentHook  JSerifs.None   XMiddleT.NarrowBentHook     JMarks.Serifless  para.advanceScaleF  }
+		'narrowBentHookShortSerifed' { JBody.NarrowBentHook  JSerifs.Short  XMiddleT.NarrowBentHook     JMarks.Serifless  para.advanceScaleF  }
+		'narrowBentHookSerifed'      { JBody.NarrowBentHook  JSerifs.Long   XMiddleT.NarrowBentHook     JMarks.Serifed    para.advanceScaleF  }
 		'diagonalTailedSerifless'    { JBody.DiagonalTailed  JSerifs.None   XMiddleT.DiagonalTailed     JMarks.Serifless  para.advanceScaleI  }
 		'diagonalTailedShortSerifed' { JBody.DiagonalTailed  JSerifs.Short  XMiddleT.DiagonalTailed     JMarks.Serifless  para.advanceScaleI  }
 		'diagonalTailedSerifed'      { JBody.DiagonalTailed  JSerifs.Long   XMiddleT.DiagonalTailed     JMarks.Serifed    para.advanceScaleI  }
