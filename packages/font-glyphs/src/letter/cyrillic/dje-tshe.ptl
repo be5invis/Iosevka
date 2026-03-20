@@ -29,37 +29,38 @@ glyph-block Letter-Cyrillic-Dje-Tshe : begin
 			local xMidBarLeft : Math.max (df.rightSB - (RightSB - SB)) : if doSerifLT
 				[mix df.leftSB df.rightSB 0.35] - [HSwToV : 0.50 * sw]
 				[mix df.leftSB df.rightSB 0.20] - [HSwToV : 0.25 * sw]
-			local mockWidth : (df.rightSB - xMidBarLeft) + SB * 2
-			local archDepth : ArchDepth * (mockWidth / Width)
 
-			local xTopBarLeft : mix 0 df.leftSB : if doSerifLT 0.250 0.375
-			local xTopBarRight : Math.max
-				mix xTopBarLeft (xMidBarLeft + [HSwToV : 0.5 * sw]) 2
-				mix df.leftSB df.rightSB 0.475
-			include : HBar.t xTopBarLeft xTopBarRight CAP sw
+			local mockWidth : (df.rightSB - xMidBarLeft) + SB * 2
+			local mockAdws  : mockWidth / Width
+			local archDepth : ArchDepth * mockAdws
 
 			include : VBar.l xMidBarLeft 0 CAP sw
 			include : nShoulder.earlessCorner
 				left   -- xMidBarLeft
 				right  -- df.rightSB
-				top    -- ([mix 0 CAP YeriBarPos] + 0.5 * sw)
+				top    -- ([mix 0 CAP YeriBarPos] + sw / 2)
 				bottom -- 0
 				ada    -- [ArchDepthAOf archDepth mockWidth]
 				adb    -- [ArchDepthBOf archDepth mockWidth]
 				stroke -- sw
 				rise   -- DToothlessRise
 
+			local xTopBarLeft : mix 0 df.leftSB : if doSerifLT 0.250 0.375
+			local xTopBarRight : Math.max
+				mix xTopBarLeft (xMidBarLeft + [HSwToV : 0.5 * sw]) 2
+				mix xMidBarLeft df.rightSB 0.475
+
+			include : HBar.t xTopBarLeft xTopBarRight CAP sw
 			if doSerifLT : begin
 				local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos sw
-				local swVJut : Math.min (VJutStroke * (sw / Stroke))
+				local swVJut : Math.min
+					VJutStroke * (sw / Stroke)
 					VSwToH : 0.625 * (xMidBarLeft - xTopBarLeft)
 				include : composite-proc
 					tagged 'serifLT' : VSerif.dl xTopBarLeft  CAP jutTop swVJut
 					tagged 'serifRT' : VSerif.dr xTopBarRight CAP jutTop swVJut
 
-			local sf : SerifFrame CAP 0 xMidBarLeft df.rightSB
-				swRef -- sw
-				adws  -- (mockWidth / Width)
+			local sf : SerifFrame CAP 0 xMidBarLeft df.rightSB (swRef -- sw) (adws -- mockAdws)
 			if doSerifLB : include sf.lb.full
 			if doSerifRB : include sf.rb.[if fMotion 'outer' 'full']
 
