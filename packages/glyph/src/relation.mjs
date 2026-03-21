@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import util from "util";
 
 export const Dotless = {
 	tag: "dtls",
@@ -419,8 +420,9 @@ function queryCvFeatureTagsOf(sink, gid, glyph, tagSet) {
 		const target = gr.get(glyph);
 		if (target === gid) continue;
 
-		if (existingTargets.has(target)) continue;
-		existingTargets.add(target);
+		const targetCombination = `${gr.tag}/${target}`;
+		if (existingTargets.has(targetCombination)) continue;
+		existingTargets.add(targetCombination);
 
 		let series = existingFeatures.get(gr.tag);
 		if (!series) {
