@@ -1,0 +1,75 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Dje-Tshe : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : nShoulder SerifFrame EngHook
+	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
+	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos
+
+	define HConfig : object
+		serifless                 { false false false }
+		topLeftSerifed            { true  false false }
+		topLeftBottomRightSerifed { true  false true  }
+		serifed                   { true  true  true  }
+
+	foreach { suffix { doSerifLT doSerifLB doSerifRB } } [pairs-of HConfig] : do
+		define fMotion : (doSerifLT || doSerifRB) && !doSerifLB
+		define df : DivFrame para.advanceScaleT 2
+		define sw : df.adviceStroke2 2.75 3 CAP
+
+		create-glyph "cyrl/Tshe.\(suffix)" : glyph-proc
+			set-width df.width
+			include : df.markSet.capital
+
+			local xMidBarLeft : Math.max (df.rightSB - (RightSB - SB)) : if doSerifLT
+				[mix df.leftSB df.rightSB 0.35] - [HSwToV : 0.50 * sw]
+				[mix df.leftSB df.rightSB 0.20] - [HSwToV : 0.25 * sw]
+
+			local mockWidth : (df.rightSB - xMidBarLeft) + SB * 2
+			local mockAdws  : mockWidth / Width
+			local archDepth : ArchDepth * mockAdws
+
+			include : VBar.l xMidBarLeft 0 CAP sw
+			include : nShoulder.earlessCorner
+				left   -- xMidBarLeft
+				right  -- df.rightSB
+				top    -- ([mix 0 CAP YeriBarPos] + sw / 2)
+				bottom -- 0
+				ada    -- [ArchDepthAOf archDepth mockWidth]
+				adb    -- [ArchDepthBOf archDepth mockWidth]
+				stroke -- sw
+				rise   -- DToothlessRise
+
+			local xTopBarLeft : mix 0 df.leftSB : if doSerifLT 0.250 0.375
+			local xTopBarRight : Math.max
+				mix xTopBarLeft (xMidBarLeft + [HSwToV : 0.5 * sw]) 2
+				mix xMidBarLeft df.rightSB 0.475
+
+			include : HBar.t xTopBarLeft xTopBarRight CAP sw
+			if doSerifLT : begin
+				local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos sw
+				local swVJut : Math.min
+					VJutStroke * (sw / Stroke)
+					VSwToH : 0.625 * (xMidBarLeft - xTopBarLeft)
+				include : composite-proc
+					tagged 'serifLT' : VSerif.dl xTopBarLeft  CAP jutTop swVJut
+					tagged 'serifRT' : VSerif.dr xTopBarRight CAP jutTop swVJut
+
+			local sf : SerifFrame CAP 0 xMidBarLeft df.rightSB (swRef -- sw) (adws -- mockAdws)
+			if doSerifLB : include sf.lb.full
+			if doSerifRB : include sf.rb.[if fMotion 'outer' 'full']
+
+		create-glyph "cyrl/Dje.\(suffix)" : glyph-proc
+			set-width df.width
+			include : df.markSet.capDesc
+			include [refer-glyph "cyrl/Tshe.\(suffix)"]
+			eject-contour 'serifRB'
+			include : EngHook df.rightSB 0 Descender (sw -- sw)
+
+	select-variant 'cyrl/Tshe' 0x40B (follow -- 'hCap')
+	select-variant 'cyrl/Dje'  0x402 (follow -- 'hCap/descBase')
