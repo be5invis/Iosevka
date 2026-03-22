@@ -10,6 +10,7 @@ glyph-block Letter-Greek-Psi : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
+	glyph-block-import Letter-Latin-Lower-T : yShortNeck1 yShortNeck2
 	glyph-block-import Letter-Latin-V : VCornerHalfWidth VHookRightShape VSerifs VMotionSerifs
 
 	define [PsiShape] : with-params [df y1 y2 y3 y4 ada adb doSerifLT doSerifRT doSerifMT doSerifMB] : glyph-proc
@@ -17,7 +18,7 @@ glyph-block Letter-Greek-Psi : begin
 		include : VBar.m df.middle y2 y4 df.mvs
 		include : VBar.m df.middle y1 (y2 + HalfStroke)
 
-		local doFullSerifs : (df.width > para.refJut * 7) && doSerifLT && doSerifRT && doSerifMT && doSerifMB
+		local doFullSerifs : (df.width > para.refJut * 7) && (doSerifLT || doSerifRT) && doSerifMT && doSerifMB
 		if doSerifLT : include : tagged 'serifLT' : piecewise
 			doFullSerifs : HSerif.mt (df.leftSB + [HSwToV : 0.5 * df.mvs]) y3 (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)])
 			true         : HSerif.lt df.leftSB y3 SideJut
@@ -49,9 +50,11 @@ glyph-block Letter-Greek-Psi : begin
 			doSerifMB -- SLAB
 
 	define [CyrPsiShape fBarStraight] : function [] : with-params [df y1 y2 y3 y4 ada adb doSerifLT doSerifRT doSerifMT doSerifMB] : glyph-proc
-		local fine : Math.min df.mvs : AdviceStroke 3.3 df.adws
-		local fine2 : clamp fine Stroke : VSwToH : 2 * VCornerHalfWidth * (fine / Stroke)
-		local doFullSerifs : (df.width > para.refJut * 7) && doSerifLT && doSerifMT && doSerifMB
+		local fine   : Math.min df.mvs : AdviceStroke 3.5 df.adws
+		local coarse : VSwToH : 2 * VCornerHalfWidth * (fine / Stroke)
+		local fine2  : clamp fine Stroke coarse
+
+		local doFullSerifs : (df.width > para.refJut * 7) && (doSerifLT || doSerifRT) && doSerifMT && doSerifMB
 		include : with-transform [ApparentTranslate 0 (y2 - 0)] : union
 			VHookRightShape
 				df             -- df
@@ -67,12 +70,12 @@ glyph-block Letter-Greek-Psi : begin
 				no-shape
 
 		include : VBar.m df.middle y2 y4 fine
-		include : VBar.m df.middle y1 (y2 + HalfStroke) fine2
+		include : VBar.m df.middle y1 (y2 + HalfStroke) coarse
 		if doSerifMT : include : tagged 'serifMT' : piecewise
-			(y4 > y3)    : HSerif.lt (df.middle - [HSwToV : 0.5 * fine]) y4 SideJut fine2 fine
+			(y4 > y3)    : HSerif.lt (df.middle - [HSwToV : 0.5 * fine]) y4 SideJut [Math.min fine2 : y4 - y3] fine
 			doFullSerifs : HSerif.mt df.middle y4 (Jut - [HSwToV : 0.5 * (Stroke - fine)]) fine2
 			true         : no-shape
-		if doSerifMB : include : tagged 'serifMB' : HSerif.mb df.middle y1 (MidJutCenter - [HSwToV : 0.5 * (Stroke - fine2)]) fine2
+		if doSerifMB : include : tagged 'serifMB' : HSerif.mb df.middle y1 (MidJutCenter - [HSwToV : 0.5 * (Stroke - coarse)]) fine2
 
 	define VConfig : object
 		straight            true
@@ -92,8 +95,10 @@ glyph-block Letter-Greek-Psi : begin
 
 	define GrekLowerPsiConfig : SuffixCfg.weave
 		object # top
-			""                { Ascender  'bp' }
-			flatTop           { XH        'p'  }
+			""                { Ascender     'bp' }
+			shortNeck         { yShortNeck1  'bp' }
+			shortNeck2        { yShortNeck2  'bp' }
+			flatTop           { XH           'p'  }
 		object # slab
 			serifless           false
 			serifed             true
@@ -126,4 +131,6 @@ glyph-block Letter-Greek-Psi : begin
 
 	select-variant 'grek/psi' 0x3C8
 	link-reduced-variant 'grek/psi/sansSerif' 'grek/psi' MathSansSerif
+	select-variant 'grek/psi/noAscend' (shapeFrom -- 'grek/psi')
+
 	CreateSelectorVariants 'cyrl/psi' 0x471 [Object.keys GrekLowerPsiConfig] (follow -- 'grek/psi')
