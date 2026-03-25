@@ -10,101 +10,120 @@ glyph-block Symbol-Math-Frame : begin
 
 	glyph-block-export MathEnclosureSw
 	define MathEnclosureSw : AdviceStroke 4
-	local kBox : 2 / 3
-	local leftBox : SB * kBox
-	local rightBox : Width - SB * kBox
+
+	local kBox      : 2 / 3
+	local leftBox   : mix 0     SB      kBox
+	local rightBox  : mix Width RightSB kBox
 	local radiusBox : (rightBox - leftBox) / 2
-	local topBox : SymbolMid + radiusBox
+	local topBox    : SymbolMid + radiusBox
 	local bottomBox : SymbolMid - radiusBox
 
-
-	local kCircle : 2 / 3
-	local leftCircle : SB * kCircle
-	local rightCircle : Width - SB * kCircle
+	local kCircle      : 2 / 3
+	local leftCircle   : mix 0     SB      kCircle
+	local rightCircle  : mix Width RightSB kCircle
 	local radiusCircle : (rightCircle - leftCircle) / 2
+	local topCircle    : SymbolMid + radiusCircle
+	local bottomCircle : SymbolMid - radiusCircle
+
+	create-glyph 'mathO/outline' : glyph-proc
+		include : spiro-outline
+			g4 Middle topCircle
+			archv nothing 2
+			g4 leftCircle SymbolMid
+			arcvh nothing 2
+			g4 Middle bottomCircle
+			archv nothing 2
+			g4 rightCircle SymbolMid
+			arcvh nothing 2
+			close
 
 	create-glyph 'mathO' : glyph-proc
 		include : dispiro
 			widths.lhs MathEnclosureSw
-			g4 Middle (SymbolMid + radiusCircle - O)
+			g4 Middle (topCircle - O)
 			archv nothing 2
 			g4 (leftCircle + O) SymbolMid
 			arcvh nothing 2
-			g4 Middle (SymbolMid - radiusCircle + O)
+			g4 Middle (bottomCircle + O)
 			archv nothing 2
 			g4 (rightCircle - O) SymbolMid
 			arcvh nothing 2
 			close
 
-	create-glyph 'mathOlefthalf' : glyph-proc
+	create-glyph 'mathOLeftHalf' : glyph-proc
 		include : dispiro
-			g4.left.start Middle (SymbolMid + radiusCircle - O) [widths.lhs.heading MathEnclosureSw Leftward]
+			widths.lhs MathEnclosureSw
+			g4.left.start Middle (topCircle - O) [heading Leftward]
 			archv
 			g4.down.mid (leftCircle + O) SymbolMid [heading Downward]
 			arcvh
-			g4.right.end Middle (SymbolMid - radiusCircle + O) [heading Rightward]
+			g4.right.end Middle (bottomCircle + O) [heading Rightward]
 
-	create-glyph 'mathOrighthalf' : glyph-proc
+	create-glyph 'mathORightHalf' : glyph-proc
 		include : dispiro
-			g4.right.start Middle (SymbolMid + radiusCircle - O) [widths.rhs.heading MathEnclosureSw Rightward]
+			widths.rhs MathEnclosureSw
+			g4.right.start Middle (topCircle - O) [heading Rightward]
 			archv
 			g4.down.mid (rightCircle - O) SymbolMid [heading Downward]
 			arcvh
-			g4.left.end Middle (SymbolMid - radiusCircle + O) [heading Leftward]
+			g4.left.end Middle (bottomCircle + O) [heading Leftward]
 
-	create-glyph 'mathOOutline' : glyph-proc
+	create-glyph 'mathBox/outline' : glyph-proc
 		include : spiro-outline
-			g4 Middle (SymbolMid + radiusCircle)
-			archv nothing 2
-			g4 (leftCircle) SymbolMid
-			arcvh nothing 2
-			g4 Middle (SymbolMid - radiusCircle)
-			archv nothing 2
-			g4 (rightCircle) SymbolMid
-			arcvh nothing 2
-			close
-
-	create-glyph 'mathBoxOutline' : glyph-proc
-		include : spiro-outline
-			corner leftBox topBox
-			corner leftBox bottomBox
+			corner leftBox  topBox
+			corner leftBox  bottomBox
 			corner rightBox bottomBox
 			corner rightBox topBox
 
 	create-glyph 'mathBox' : glyph-proc
-		include : intersection [refer-glyph 'mathBoxOutline'] : union
-			dispiro [widths.lhs MathEnclosureSw] [flat leftBox topBox] [curl leftBox bottomBox]
-			dispiro [widths.lhs MathEnclosureSw] [flat leftBox bottomBox] [curl rightBox bottomBox]
-			dispiro [widths.lhs MathEnclosureSw] [flat rightBox bottomBox] [curl rightBox topBox]
-			dispiro [widths.lhs MathEnclosureSw] [flat rightBox topBox] [curl leftBox topBox]
+		include : intersection [refer-glyph 'mathBox/outline'] : union
+			dispiro
+				widths.lhs MathEnclosureSw
+				flat leftBox  topBox
+				curl leftBox  bottomBox
+			dispiro
+				widths.lhs MathEnclosureSw
+				flat leftBox  bottomBox
+				curl rightBox bottomBox
+			dispiro
+				widths.lhs MathEnclosureSw
+				flat rightBox bottomBox
+				curl rightBox topBox
+			dispiro
+				widths.lhs MathEnclosureSw
+				flat rightBox topBox
+				curl leftBox  topBox
 
 	for-width-kinds WideWidth1
 		local radiusBig : (TackTop - TackBot) / 2 * [Math.sqrt MosaicWidthScalar]
-		local leftBig : MosaicMiddle - radiusBig
-		local rightBig : MosaicMiddle + radiusBig
+		local leftBig   : MosaicMiddle - radiusBig
+		local rightBig  : MosaicMiddle + radiusBig
+		local topBig    : SymbolMid + radiusBig
+		local bottomBig : SymbolMid - radiusBig
+
+		create-glyph [MangleName 'mathOBig/outline'] : glyph-proc
+			set-width MosaicWidth
+			include : spiro-outline
+				g4 MosaicMiddle topBig
+				archv nothing 2
+				g4 leftBig SymbolMid
+				arcvh nothing 2
+				g4 MosaicMiddle bottomBig
+				archv nothing 2
+				g4 rightBig SymbolMid
+				arcvh nothing 2
+				close
+
 		create-glyph [MangleName 'mathOBig'] : glyph-proc
 			set-width MosaicWidth
 			include : dispiro
 				widths.lhs GeometryStroke
-				g4 MosaicMiddle (SymbolMid + radiusBig - O)
+				g4 MosaicMiddle (topBig - O)
 				archv nothing 2
 				g4 (leftBig + O) SymbolMid
 				arcvh nothing 2
-				g4 MosaicMiddle (SymbolMid - radiusBig + O)
+				g4 MosaicMiddle (bottomBig + O)
 				archv nothing 2
 				g4 (rightBig - O) SymbolMid
-				arcvh nothing 2
-				close
-
-		create-glyph [MangleName 'mathOOutlineBig'] : glyph-proc
-			set-width MosaicWidth
-			include : spiro-outline
-				g4 MosaicMiddle (SymbolMid + radiusBig)
-				archv nothing 2
-				g4 (leftBig) SymbolMid
-				arcvh nothing 2
-				g4 MosaicMiddle (SymbolMid - radiusBig)
-				archv nothing 2
-				g4 (rightBig) SymbolMid
 				arcvh nothing 2
 				close
