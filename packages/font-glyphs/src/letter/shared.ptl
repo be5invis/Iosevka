@@ -736,34 +736,35 @@ glyph-block Letter-Shared-Shapes : begin
 			define {dCosAngle dSinAngle} : superEllipseDerivative tailAngle
 
 			define fine : FineSw sw
-			define r : rIn + 0.5 * fine
-			define dxTurn : [HSwToV : 0.5 * sw] + rIn + 0.5 * sign * TanSlope * fine
-			define dxTailStart : dxTurn + sinAngle * (r * [mix 1 HVContrast sinAngle])
-			define dyTailStart : (rIn + fine) - cosAngle * r
+			define dxTurn rIn
+			define dxTailStart : dxTurn + sinAngle * rIn
+			define dyTailStart : (rIn + fine) - cosAngle * rIn
 			define dxDepth : (depth - 0.25 * sw) * (+dSinAngle)
 			define dyDepth : (depth - 0.25 * sw) * (-dCosAngle)
 			return : list
 				g4.[if (sign > 0) "right" "left"].mid
 					cx + sign * dxTurn
-					cy + O + 0.5 * fine
-					widths.center fine
+					cy + O + fine
+					[if (sign > 0) widths.rhs widths.lhs] fine
 				alsoThruThem : FArc tailAngle 4
-				flat (cx + sign *  dxTailStart)            (cy + O + dyTailStart) [widths.center fine]
+				flat (cx + sign * dxTailStart)             (cy + O + dyTailStart)
 				curl (cx + sign * (dxTailStart + dxDepth)) (cy + O + dyTailStart + dyDepth)
 
 		export : define [R cx cy depth sw] : begin
 			define rInY : 1 * DefaultTightBendInnerRadius
+			define innerX : cx + [HSwToV : 0.5 * sw]
 			return : list
-				curl cx (cy + [FineSw sw] + rInY)
+				curl innerX (cy + [FineSw sw] + rInY) [widths.rhs sw]
 				arcvh 8 DiagTailSuperness
-				F (+1) cx cy rInY DiagTailAngle depth sw
+				F (+1) innerX cy rInY DiagTailAngle depth sw
 
 		export : define [L cx cy depth sw] : begin
 			define rInY : 1 * DefaultTightBendInnerRadius
+			define innerX : cx - [HSwToV : 0.5 * sw]
 			return : list
-				curl cx (cy + [FineSw sw] + rInY)
+				curl innerX (cy + [FineSw sw] + rInY) [widths.lhs sw]
 				arcvh 8 DiagTailSuperness
-				F (-1) cx cy rInY DiagTailAngle depth sw
+				F (-1) innerX cy rInY DiagTailAngle depth sw
 
 	define [JutIn left right jut swRef hSplit] : begin
 		local ink : HSwToV swRef
