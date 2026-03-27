@@ -8,10 +8,10 @@ export class MdCol {
 		);
 	}
 	log(...s) {
-		this.data += s.join("") + "\n";
+		this.data += `${s.join("")}\n`;
 	}
 	apply(s) {
-		return s.replace(this.matchRegex, (m, $1) => {
+		return s.replace(this.matchRegex, (_m, $1) => {
 			return (
 				`<!-- BEGIN ${this.sectionName} -->\n` +
 				`<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->\n\n` +

@@ -9,7 +9,7 @@ export function postProcessingFeatureParams(para, font) {
 
 	const nm = new NameManager();
 
-	for (const [name, ss] of para.variants.composites) {
+	for (const [_name, ss] of para.variants.composites) {
 		if (!ss.description) continue;
 		for (const feat of font.gsub.features) {
 			if (feat.tag !== ss.tag) continue;

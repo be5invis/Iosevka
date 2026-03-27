@@ -100,13 +100,13 @@ export class DependencyManager {
 		const gGlyphGraph = this.traverseGlyphDependenciesImpl(glyphs, false);
 		const gBlockGraph = this.traverseGlyphDependenciesImpl(glyphs, true);
 
-		let glyphIdFilter = new Set();
-		let blockIdFilter = new Set();
+		const glyphIdFilter = new Set();
+		const blockIdFilter = new Set();
 		for (const g of gGlyphGraph.keys()) {
 			if (g.identifier) glyphIdFilter.add(g.identifier);
 		}
 		for (const g of gBlockGraph.keys()) {
-			let b = this.glyphToBlock.get(g);
+			const b = this.glyphToBlock.get(g);
 			if (b) blockIdFilter.add(b);
 		}
 
@@ -114,11 +114,11 @@ export class DependencyManager {
 	}
 
 	traverseGlyphDependenciesImpl(glyphs, fBlockwiseExpand) {
-		let state = new Map();
+		const state = new Map();
 		for (const glyph of glyphs) if (glyph) state.set(glyph, DEP_TRAVERSE_PENDING);
 
 		for (let cycle = 0; cycle < 64; cycle++) {
-			let szBefore = state.size;
+			const szBefore = state.size;
 			this.expandeByVariants(state);
 			if (fBlockwiseExpand) this.blockwiseExpandGlyphs(state);
 			this.traverseDirectDependenciesImpl(state);
@@ -135,9 +135,9 @@ export class DependencyManager {
 		}
 	}
 	blockwiseExpandGlyphs(state) {
-		let blocks = new Set();
+		const blocks = new Set();
 		for (const glyph of state.keys()) {
-			let b = this.glyphToBlock.get(glyph);
+			const b = this.glyphToBlock.get(glyph);
 			if (b) blocks.add(b);
 		}
 		for (const b of blocks) {
@@ -174,8 +174,8 @@ export class GlyphBlock {
 		this.exports = {};
 	}
 	resolve() {
-		if (this.resolved == 2) return this.exports;
-		if (this.resolved == 1) throw new Error(`Circular dependency detected: ${this.id}`);
+		if (this.resolved === 2) return this.exports;
+		if (this.resolved === 1) throw new Error(`Circular dependency detected: ${this.id}`);
 		this.resolved = 1;
 
 		const prevBlockName = this.execState.currentBlockId;
@@ -227,7 +227,7 @@ export class GlyphSaveSink {
 			saveGlyphName = $1;
 			unicode = $2 || 0;
 		} else if ($1 && typeof $1 === "number") {
-			saveGlyphName = "uni" + $1.toString(16).padStart(4, "0").toUpperCase();
+			saveGlyphName = `uni${$1.toString(16).padStart(4, "0").toUpperCase()}`;
 			unicode = $1;
 		}
 
@@ -253,7 +253,7 @@ export class GlyphSaveSink {
 
 			this.glyphStore.addGlyph(saveGlyphName, glyphObject);
 			if (unicode) {
-				let u = typeof unicode === "string" ? unicode.codePointAt(0) : unicode;
+				const u = typeof unicode === "string" ? unicode.codePointAt(0) : unicode;
 				this.glyphStore.encodeGlyph(u, glyphObject);
 			}
 		}

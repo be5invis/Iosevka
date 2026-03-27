@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 import * as toml from "@iarna/toml";
 import * as VariantDataParser from "@iosevka/param/variant";
@@ -13,8 +13,8 @@ function getCvData(parsed) {
 	return Array.from(samplerGroups.values());
 }
 function getSpecialVariantsData(parsed) {
-	let result = new Map();
-	for (const [keyPrime, prime] of parsed.primes) {
+	const result = new Map();
+	for (const [_keyPrime, prime] of parsed.primes) {
 		if (!prime.isSpecial) continue;
 		result.set(prime.key, prime.toJson());
 	}
@@ -106,14 +106,14 @@ function getCompWithLens(variants, c, lens) {
 	};
 }
 function getSelectorKey(prime, variant) {
-	return prime.key + "#" + variant.key;
+	return `${prime.key}#${variant.key}`;
 }
 function isLigatureSampler(prime) {
 	return / /.test(prime.sampler);
 }
 function buildupComposite(variants, para, ...composites) {
-	let compositionMap = new Map();
-	let hotChars = new Map();
+	const compositionMap = new Map();
+	const hotChars = new Map();
 	for (const composite of composites) {
 		if (!composite) continue;
 		for (const [prime, variant] of composite.decompose(para, variants.selectorTree)) {
@@ -132,7 +132,7 @@ function buildupComposite(variants, para, ...composites) {
 	return { composition: Object.fromEntries(compositionMap), hotChars };
 }
 function uniqueHotChars(cfgDefault, cfgSS) {
-	let s = new Set();
+	const s = new Set();
 	for (const [hc, v] of cfgSS) {
 		if (cfgDefault.get(hc) !== v) s.add(hc);
 	}

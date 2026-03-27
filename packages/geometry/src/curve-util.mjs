@@ -5,7 +5,7 @@ import { Point, Vec2 } from "./point.mjs";
 import { Transform } from "./transform.mjs";
 
 function convertContourToArcs(contour) {
-	if (!contour || !contour.length) return [];
+	if (!contour?.length) return [];
 	const newContour = [];
 	let z0 = Point.from(Point.Type.Corner, contour[0]);
 	for (let j = 1; j < contour.length; j++) {
@@ -120,26 +120,33 @@ export class BezToContoursSink {
 		this.lastContour = [];
 	}
 	moveTo(x, y) {
-		if (!isFinite(x) || !isFinite(y)) throw new Error("Invalid coordinates detected in moveTo");
+		if (!Number.isFinite(x) || !Number.isFinite(y))
+			throw new Error("Invalid coordinates detected in moveTo");
 		this.endShape();
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
 	}
 	lineTo(x, y) {
-		if (!isFinite(x) || !isFinite(y)) throw new Error("Invalid coordinates detected in lineTo");
+		if (!Number.isFinite(x) || !Number.isFinite(y))
+			throw new Error("Invalid coordinates detected in lineTo");
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
 	}
 	curveTo(xc, yc, x, y) {
-		if (!isFinite(xc) || !isFinite(yc) || !isFinite(x) || !isFinite(y))
+		if (
+			!Number.isFinite(xc) ||
+			!Number.isFinite(yc) ||
+			!Number.isFinite(x) ||
+			!Number.isFinite(y)
+		)
 			throw new Error("Invalid coordinates detected in curveTo");
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Quadratic, xc, yc));
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.Corner, x, y));
 	}
 	cubicTo(x1, y1, x2, y2, x, y) {
-		if (!isFinite(x1) || !isFinite(y1))
+		if (!Number.isFinite(x1) || !Number.isFinite(y1))
 			throw new Error("Invalid coordinates detected in cubicTo");
-		if (!isFinite(x2) || !isFinite(y2))
+		if (!Number.isFinite(x2) || !Number.isFinite(y2))
 			throw new Error("Invalid coordinates detected in cubicTo");
-		if (!isFinite(x) || !isFinite(y))
+		if (!Number.isFinite(x) || !Number.isFinite(y))
 			throw new Error("Invalid coordinates detected in cubicTo");
 
 		this.lastContour.push(Point.transformedXY(this.gizmo, Point.Type.CubicStart, x1, y1));

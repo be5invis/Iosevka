@@ -21,7 +21,7 @@ export class PenKnotCollector {
 	}
 	pushKnot(c) {
 		if (this.m_finished) throw new Error("Cannot push knot after finish");
-		let k = new PenKnot(c.type, c.x, c.y, this.m_profile);
+		const k = new PenKnot(c.type, c.x, c.y, this.m_profile);
 		this.knots.push(k);
 		this.m_lastKnot = k;
 
@@ -115,17 +115,18 @@ export class PenSpiroExpander {
 		}
 	}
 	calculateShiftedProfile(iEdge) {
-		let traceT = [],
+		const traceT = [],
 			traceU = [];
 		for (let i = 0; i < this.m_knotsT.length; i++) {
 			const trT = this.getTrace(this.m_knotsT[i], iEdge);
 			const trU = trT.clone();
 			this.m_gizmo.unapplyToSink(trT, trU);
-			traceT.push(trT), traceU.push(trU);
+			traceT.push(trT);
+			traceU.push(trU);
 		}
 		this.interpolateUnimportantTraceKnots(traceU, traceT);
 
-		let arcc = new SimplyCollectArcs();
+		const arcc = new SimplyCollectArcs();
 		SpiroJs.spiroToArcsOnContext(traceT, this.m_closed, arcc);
 		this.m_traces.push(arcc.arcs);
 	}
@@ -161,9 +162,9 @@ export class PenSpiroExpander {
 		}
 	}
 	interpolateUnimportantTraceKnotsRg(traceU, traceT, last, next) {
-		let count = next > last ? next - last : traceU.length - last + next;
+		const count = next > last ? next - last : traceU.length - last + next;
 		for (let offset = 1; offset < count; offset++) {
-			let i = (last + offset) % traceU.length;
+			const i = (last + offset) % traceU.length;
 			this.interpolateKnot(
 				this.m_knotsU[last],
 				traceU[last],
@@ -220,7 +221,7 @@ function makeProfiledStroke(contours, arcForward, arcBackward) {
 function subdivideKnotPair(arcForward, arcBackward, delta) {
 	const MAX_STOPS = 16;
 
-	let sinkForward = [],
+	const sinkForward = [],
 		sinkBackward = [];
 	for (let stops = 1; stops < MAX_STOPS; stops++) {
 		sinkForward.length = 0;
@@ -240,7 +241,8 @@ function subdivideKnotPair(arcForward, arcBackward, delta) {
 function uniformSubdivide(arc, stops, sink) {
 	for (; stops > 1; stops--) {
 		const f = arc.subdivide(1 / stops);
-		sink.push(f[0]), (arc = f[1]);
+		sink.push(f[0]);
+		arc = f[1];
 	}
 	sink.push(arc);
 }

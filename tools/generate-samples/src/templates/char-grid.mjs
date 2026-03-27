@@ -16,7 +16,7 @@ function CharGrid(args) {
 	const ITEM_SIZE = 1.5;
 
 	let rows = 0;
-	let frames = [];
+	const frames = [];
 	for (let offset = 0; offset < ITEMS_PER_ROW; offset++) {
 		frames.push({
 			"horizontal-align": "center",
@@ -50,7 +50,7 @@ function CharGrid(args) {
 					{ "font-weight": 600 },
 					{ "font-size": 0.5 * EM },
 					{ color: theme.body },
-					"U+" + char.lch.toString(16).toUpperCase().padStart(4, "0"),
+					`U+${char.lch.toString(16).toUpperCase().padStart(4, "0")}`,
 				],
 			});
 		}

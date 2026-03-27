@@ -4,9 +4,9 @@ import { ArrayUtil } from "@iosevka/util";
 import ttfaRanges from "../generated/ttfa-ranges.mjs";
 
 export async function generateTtfaControls(gsOrig, gsTtf) {
-	let ttfaControls = [`# Machine generated. Do not modify.`];
+	const ttfaControls = [`# Machine generated. Do not modify.`];
 
-	let alignments = [];
+	const alignments = [];
 	for (const cfg of ttfaRanges) {
 		const alignment = new Alignment(cfg.scriptTag, cfg.featureTag, cfg.ranges);
 		alignment.collectDefault(gsOrig, gsTtf);
@@ -30,7 +30,7 @@ export async function generateTtfaControls(gsOrig, gsTtf) {
 		alignment.write(ttfaControls, gsTtf);
 	}
 
-	return ttfaControls.join("\n") + "\n";
+	return `${ttfaControls.join("\n")}\n`;
 }
 
 class Alignment {
@@ -58,9 +58,9 @@ class Alignment {
 
 	extend(gsOrig, gsTtf) {
 		for (;;) {
-			let sizeBefore = this.allGlyphs.size;
+			const sizeBefore = this.allGlyphs.size;
 
-			for (const [go, gd] of this.allGlyphs) {
+			for (const [go, _gd] of this.allGlyphs) {
 				const cvs = [
 					...Gr.AnyCvOrCherryPicking.query(go),
 					Gr.Texture.ExtL,
@@ -81,14 +81,14 @@ class Alignment {
 				}
 			}
 
-			let sizeAfter = this.allGlyphs.size;
+			const sizeAfter = this.allGlyphs.size;
 			if (sizeAfter <= sizeBefore) break;
 		}
 	}
 
 	write(sink, gsTtf) {
 		const gOrd = gsTtf.decideOrder();
-		let nonDefaultGlyphIndices = [];
+		const nonDefaultGlyphIndices = [];
 		for (const [go, gd] of this.allGlyphs) {
 			if (this.defaultGlyphs.has(go)) continue;
 			nonDefaultGlyphIndices.push(gOrd.reverse(gd));

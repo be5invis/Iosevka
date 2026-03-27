@@ -51,7 +51,7 @@ export class Transform {
 		sink.y = (yy * this.xx - xx * this.yx) / denom;
 	}
 	unapply(pt) {
-		let sink = new Vec2(0, 0);
+		const sink = new Vec2(0, 0);
 		this.unapplyToSink(pt, sink);
 		return sink;
 	}
@@ -82,7 +82,7 @@ export class Transform {
 		return tfm.xx === 1 && tfm.yy === 1 && tfm.xy === 0 && tfm.yx === 0;
 	}
 	static isIdentity(tfm) {
-		return this.isTranslate(tfm) && tfm.tx === 0 && tfm.ty === 0;
+		return Transform.isTranslate(tfm) && tfm.tx === 0 && tfm.ty === 0;
 	}
 	static isPositive(tfm) {
 		return tfm.xx * tfm.yy - tfm.xy * tfm.yx > 0;

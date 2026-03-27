@@ -25,7 +25,7 @@ function regulateGlyphStore(cache, para, skew, glyphStore) {
 	}
 }
 
-function flattenSimpleGlyph(cache, para, skew, g) {
+function flattenSimpleGlyph(cache, para, _skew, g) {
 	try {
 		if (!g.gizmo) throw new TypeError("No gizmo");
 		const gSimplified = Geom.SimplifyGeometry.wrapWithGizmo(g.geometry, g.gizmo);

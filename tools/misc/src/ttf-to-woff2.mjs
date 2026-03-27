@@ -1,6 +1,4 @@
-"use strict";
-
-import fs from "fs";
+import fs from "node:fs";
 
 import * as wawoff from "wawoff2";
 

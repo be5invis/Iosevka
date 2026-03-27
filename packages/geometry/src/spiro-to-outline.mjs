@@ -65,7 +65,7 @@ class SpiroSimplifier {
 	endShape() {
 		this.flushArcs();
 	}
-	moveTo(x, y) {
+	moveTo(_x, _y) {
 		this.m_nKnotsProcessed += 1;
 	}
 	arcTo(arc) {

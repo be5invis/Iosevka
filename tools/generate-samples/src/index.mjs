@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 import { parseLigationData } from "@iosevka/data-export/ligation-data";
 import { getCharMapAndSupportedLanguageList } from "@iosevka/data-export/supported-languages";
@@ -26,11 +26,11 @@ class Generator {
 	}
 	async add(name, template, args) {
 		for (const theme of ["light", "dark"]) {
-			const fullName = name + "." + theme;
+			const fullName = `${name}.${theme}`;
 			const argsWithTheme = { ...args, theme };
 			const generated = template(argsWithTheme);
 			generated.fontFiles = this.fontFiles;
-			let jsonPath = path.join(this.outputDir, fullName + ".json");
+			const jsonPath = path.join(this.outputDir, `${fullName}.json`);
 			await fs.promises.writeFile(jsonPath, JSON.stringify(generated, null, "  "));
 			this.tasksGenerated.push(fullName);
 		}

@@ -2,7 +2,7 @@ import { joinCamel } from "@iosevka/util";
 
 export function apply(data, para, argv) {
 	const parsed = parse(data, argv);
-	let tagSet = new Set();
+	const tagSet = new Set();
 	for (const prime of parsed.primes.values()) {
 		if (!prime.tag) continue;
 		if (!tagSet.has(prime.tag)) tagSet.add(prime.tag);
@@ -41,7 +41,7 @@ export function parse(data, argv) {
 		const comp = new Composite(k, data.composite[k]);
 		composites.set(k, comp);
 	}
-	if (argv && argv.variantCompositesFromBuildPlan) {
+	if (argv?.variantCompositesFromBuildPlan) {
 		for (const k in argv.variantCompositesFromBuildPlan) {
 			const key = `buildPlans.${k}`;
 			const comp = new Composite(key, argv.variantCompositesFromBuildPlan[k]);
@@ -108,7 +108,7 @@ class CvTagAllocator {
 			ans += String.fromCharCode((n % 26) + 0x41);
 			n = Math.floor(n / 26);
 		} while (n > 0);
-		while (ans.length < 2) ans = "A" + ans;
+		while (ans.length < 2) ans = `A${ans}`;
 		return ans;
 	}
 }
@@ -195,17 +195,17 @@ export class PrimeVariant {
 		this.snapshotFeatureApplication = cfg.snapshotFeatureApplication;
 	}
 	resolveFor(para, gn) {
-		let vs = {};
+		const vs = {};
 		this.resolve(para, vs);
 		return vs[gn];
 	}
-	resolve(para, vs) {
+	resolve(_para, vs) {
 		Object.assign(vs, this.selector);
 	}
 
 	// Gr methods
 	get(glyph) {
-		if (glyph && glyph.related && glyph.related.cv) return glyph.related.cv.get(this);
+		if (glyph?.related?.cv) return glyph.related.cv.get(this);
 		else return null;
 	}
 	set(glyph, toGid) {
@@ -215,11 +215,7 @@ export class PrimeVariant {
 		glyph.related.cv.set(this, toGid);
 	}
 	getPreventDeriving(glyph) {
-		return (
-			glyph.related &&
-			glyph.related.preventCvDeriving &&
-			!!glyph.related.preventCvDeriving.has(this)
-		);
+		return glyph.related?.preventCvDeriving && !!glyph.related.preventCvDeriving.has(this);
 	}
 	setPreventDeriving(glyph) {
 		if (!glyph.related) glyph.related = {};
@@ -227,7 +223,7 @@ export class PrimeVariant {
 		glyph.related.preventCvDeriving.add(this);
 	}
 	amendName(name) {
-		return name + "." + this.tag + "-" + this.rank;
+		return `${name}.${this.tag}-${this.rank}`;
 	}
 	amendOtName(name) {
 		return this.amendName(name);
@@ -278,7 +274,7 @@ class Composite {
 			}
 			catalog.get(this.inherits).resolve(para, selTree, catalog, vs);
 		}
-		for (const [prime, variant] of this.decompose(para, selTree)) {
+		for (const [_prime, variant] of this.decompose(para, selTree)) {
 			variant.resolve(para, vs);
 		}
 	}
@@ -311,13 +307,13 @@ class VariantBuilder {
 				a.rank - b.rank,
 		);
 
-		let ans = {};
+		const ans = {};
 		let itemRank = 0;
 		for (const item of globalState.sink) {
-			let cfg = item.createPrimeVariant();
+			const cfg = item.createPrimeVariant();
 			cfg.rank = ++itemRank;
 			if (!cfg.key) throw new Error("Invalid variant key");
-			if (ans[cfg.key]) throw new Error("Duplicate variant : " + cfg.key);
+			if (ans[cfg.key]) throw new Error(`Duplicate variant : ${cfg.key}`);
 			ans[cfg.key] = cfg;
 		}
 		return ans;
@@ -340,7 +336,7 @@ class VbStage {
 		for (const v of this.alternatives.values()) v.fallback(this.defaultAlternative);
 	}
 	accept(globalState, localState) {
-		let variantList = Array.from(this.alternatives.values());
+		const variantList = Array.from(this.alternatives.values());
 		variantList.sort((a, b) => (a.rank || 0) - (b.rank || 0));
 		for (const v of variantList) {
 			const ans = v.tryAccept(globalState, localState);
@@ -513,7 +509,7 @@ class VbLocalState {
 		if (!segment) return;
 		if (!this.descriptions.has(joiner)) this.descriptions.set(joiner, []);
 
-		let descriptionSentence = this.descriptions.get(joiner);
+		const descriptionSentence = this.descriptions.get(joiner);
 		switch (mode) {
 			case "append":
 				descriptionSentence.push(segment);
@@ -549,12 +545,12 @@ class VbLocalState {
 		return this.key.join("-");
 	}
 	produceDescription() {
-		let desc = [];
+		const desc = [];
 		for (const [joiner, segments] of this.descriptions) {
 			if (!segments.length) continue;
 			desc.push(`${joiner} ${arrayToSentence(segments)}`);
 		}
-		return this.descriptionLeader + " " + desc.join("; ");
+		return `${this.descriptionLeader} ${desc.join("; ")}`;
 	}
 
 	createPrimeVariant() {
@@ -569,7 +565,7 @@ class VbLocalState {
 }
 
 function arrayToSentence(arr) {
-	if (arr.length == 1) return arr[0];
-	let last = arr.pop();
-	return arr.join(", ") + ", and " + last;
+	if (arr.length === 1) return arr[0];
+	const last = arr.pop();
+	return `${arr.join(", ")}, and ${last}`;
 }

@@ -1,6 +1,6 @@
-import fs from "fs";
-import path from "path";
-import url from "url";
+import fs from "node:fs";
+import path from "node:path";
+import url from "node:url";
 
 import SemVer from "semver";
 
@@ -38,7 +38,7 @@ async function GenerateChangeList(argv, out) {
 		) {
 			out.log(``);
 			out.log(`## Changes of version ${version}`);
-			out.log(notes.trimEnd() + "\n");
+			out.log(`${notes.trimEnd()}\n`);
 		}
 	}
 }

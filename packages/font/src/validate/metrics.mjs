@@ -4,7 +4,7 @@ import isInCi from "is-in-ci";
 // characters (AW > 0) have the same width. We use this method to validate whether our
 // "Fixed" subfamilies are properly built.
 export function validateFontConfigMono(font) {
-	let awSet = new Map(); // advance width to unicodes
+	const awSet = new Map(); // advance width to unicodes
 	for (const [ch, g] of [...font.cmap.unicode.entries()]) {
 		const aw = g.horizontal.end - g.horizontal.start;
 		if (aw > 0) {
@@ -13,7 +13,7 @@ export function validateFontConfigMono(font) {
 			else awSet.set(aw, new Set([ch]));
 		}
 	}
-	for (const [ch, vs, g] of [...font.cmap.vs.entries()]) {
+	for (const [ch, _vs, g] of [...font.cmap.vs.entries()]) {
 		const aw = g.horizontal.end - g.horizontal.start;
 		if (aw > 0) {
 			const s = awSet.get(aw);
