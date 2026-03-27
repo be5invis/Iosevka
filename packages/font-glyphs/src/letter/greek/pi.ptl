@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 import [DesignParameters] from "../../meta/aesthetics.mjs"
 
 glyph-module
@@ -10,22 +10,38 @@ glyph-block Letter-Greek-Pi : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft BBBarRight
 	glyph-block-import Letter-Shared : CreateTurnedLetter
-	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar SerifFrame
-	glyph-block-import Letter-Shared-Shapes : CyrDescender MidHook
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar RightwardDiagTailedBar
+	glyph-block-import Letter-Shared-Shapes : SerifFrame CyrDescender MidHook
+
+	define TERMINAL-STRAIGHT 0
+	define TERMINAL-TAILED   1
+	define TERMINAL-DIAGONAL 2
 
 	glyph-block-export PiShape
-	define [PiShape] : with-params [df top bottom [shrinkRate 0.05] [fine Stroke] [doSerif false] [endShrink 0] [tailed false]] : glyph-proc
+	define flex-params [PiShape] : glyph-proc
+		local-parameter : df
+		local-parameter : top
+		local-parameter : bottom
+		local-parameter : shrinkRate -- 0.05
+		local-parameter : fine       -- Stroke
+		local-parameter : doSerif    -- false
+		local-parameter : endShrink  -- 0
+		local-parameter : terminal   -- TERMINAL-STRAIGHT
+
 		local shrink : if doSerif 0 (shrinkRate * (df.rightSB - df.leftSB))
 		local endexpand : if doSerif 0 ((-endShrink) * (df.rightSB - df.leftSB) || shrink / 2)
 		include : HBar.t (df.leftSB - endexpand) (df.rightSB + endexpand) top fine
 		include : VBar.l (df.leftSB + shrink) bottom (top - fine / 2) fine
-		if tailed
-			include : RightwardTailedBar (df.rightSB - shrink) bottom top
-			include : VBar.r (df.rightSB - shrink) bottom (top - fine / 2) fine
+		include : match terminal
+			[Just TERMINAL-TAILED]   : RightwardTailedBar     (df.rightSB - shrink) bottom (top - fine / 2) fine
+			[Just TERMINAL-DIAGONAL] : RightwardDiagTailedBar (df.rightSB - shrink) bottom (top - fine / 2) fine
+			__                       : VBar.r                 (df.rightSB - shrink) bottom (top - fine / 2) fine
 
 		if doSerif : begin
 			local sf : SerifFrame top bottom (df.leftSB + shrink) (df.rightSB - shrink) (swRef -- fine)
-			include : composite-proc sf.lt.outer sf.rt.outer sf.lb.full sf.rb.full
+			include : composite-proc sf.lt.outer sf.rt.outer sf.lb.full : match terminal
+				[Just TERMINAL-STRAIGHT] sf.rb.full
+				__                       [no-shape]
 
 	create-glyph 'grek/Pi' 0x3A0 : glyph-proc
 		include : MarkSet.capital
@@ -48,16 +64,20 @@ glyph-block Letter-Greek-Pi : begin
 
 	define SmallPiShrink : (1/6) - [HSwToV QuarterStroke] / (RightSB - SB)
 
-	define SmallPiConfig : object
-		smallCap { {0             SLAB  } false }
-		tailless { {SmallPiShrink false } false }
-		tailed   { {SmallPiShrink false } true  }
+	define SmallPiConfig : SuffixCfg.weave
+		object # body
+			""             { SmallPiShrink false }
+			smallCapital   { 0             SLAB  }
+		object # tail
+			tailless         TERMINAL-STRAIGHT
+			tailed           TERMINAL-TAILED
+			diagonalTailed   TERMINAL-DIAGONAL
 
 	foreach { suffix { { shrink slab } tail } } [pairs-of SmallPiConfig] : do
 		create-glyph "grek/pi.\(suffix)" : glyph-proc
 			define df : include : DivFrame 1
 			include : df.markSet.e
-			include : PiShape df XH 0 (shrinkRate -- shrink) (doSerif -- slab) (tailed -- tail)
+			include : PiShape df XH 0 (shrinkRate -- shrink) (doSerif -- slab) (terminal -- tail)
 
 	select-variant 'grek/pi' 0x3C0
 
@@ -65,22 +85,14 @@ glyph-block Letter-Greek-Pi : begin
 		local xm : df.middle + [HSwToV : 0.5 * df.mvs]
 		include : HBar.t df.leftSB xm top df.mvs
 		include : VBar.l df.leftSB 0 (top - df.mvs / 2) df.mvs
-		include : VBar.r xm 0 (top - df.mvs / 2) df.mvs
+		include : VBar.r xm        0 (top - df.mvs / 2) df.mvs
 		include : MidHook.m df top
 
 		if SLAB : begin
 			local sf : [SerifFrame.fromDf df top 0].slice 0 1
-			if (df.width > para.refJut * 7)
-			: then
-				include sf.lt.outer
-				include sf.rt.outer
-				include sf.lb.full
-				include sf.rb.full
-			: else
-				include sf.lt.outer
-				include sf.rt.outer
-				include sf.lb.outer
-				include sf.rb.outer
+			include : if sf.enoughSpaceForFullSerifs
+				composite-proc sf.lt.outer sf.rt.outer sf.lb.full  sf.rb.full
+				composite-proc sf.lt.outer sf.rt.outer sf.lb.outer sf.rb.outer
 
 	create-glyph 'cyrl/PeMidHook' 0x4A6 : glyph-proc
 		define df : include : DivFrame para.advanceScaleMM 3

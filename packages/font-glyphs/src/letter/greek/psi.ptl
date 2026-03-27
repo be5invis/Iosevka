@@ -19,12 +19,12 @@ glyph-block Letter-Greek-Psi : begin
 		include : VBar.m df.middle y1 (y2 + HalfStroke)
 
 		local doFullSerifs : (df.width > para.refJut * 7) && (doSerifLT || doSerifRT) && doSerifMT && doSerifMB
-		if doSerifLT : include : tagged 'serifLT' : piecewise
-			doFullSerifs : HSerif.mt (df.leftSB + [HSwToV : 0.5 * df.mvs]) y3 (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)])
-			true         : HSerif.lt df.leftSB y3 SideJut
-		if doSerifRT : include : tagged 'serifRT' : piecewise
-			doFullSerifs : HSerif.mt (df.rightSB - [HSwToV : 0.5 * df.mvs]) y3 (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)])
-			true         : HSerif.rt df.rightSB y3 SideJut
+		if doSerifLT : include : tagged 'serifLT' : if doFullSerifs
+			HSerif.mt (df.leftSB + [HSwToV : 0.5 * df.mvs]) y3 (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)])
+			HSerif.lt df.leftSB y3 SideJut
+		if doSerifRT : include : tagged 'serifRT' : if doFullSerifs
+			HSerif.mt (df.rightSB - [HSwToV : 0.5 * df.mvs]) y3 (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)])
+			HSerif.rt df.rightSB y3 SideJut
 		if doSerifMT : include : tagged 'serifMT' : piecewise
 			(y4 > y3)    : HSerif.lt (df.middle - [HSwToV : 0.5 * df.mvs]) y4 SideJut
 			doFullSerifs : HSerif.mt df.middle y4 (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)])
@@ -50,9 +50,9 @@ glyph-block Letter-Greek-Psi : begin
 			doSerifMB -- SLAB
 
 	define [CyrPsiShape fBarStraight] : function [] : with-params [df y1 y2 y3 y4 ada adb doSerifLT doSerifRT doSerifMT doSerifMB] : glyph-proc
-		local fine   : Math.min df.mvs : AdviceStroke 3.5 df.adws
-		local coarse : VSwToH : 2 * VCornerHalfWidth * (fine / Stroke)
-		local fine2  : clamp fine Stroke coarse
+		local fine    : Math.min df.mvs : AdviceStroke 3.5 df.adws
+		local coarse  : VSwToH : 2 * VCornerHalfWidth * (fine / Stroke)
+		local swSerif : clamp fine Stroke coarse
 
 		local doFullSerifs : (df.width > para.refJut * 7) && (doSerifLT || doSerifRT) && doSerifMT && doSerifMB
 		include : with-transform [ApparentTranslate 0 (y2 - 0)] : union
@@ -65,17 +65,17 @@ glyph-block Letter-Greek-Psi : begin
 				hookWidthInner -- (TailX / 3 - [HSwToV : 0.25 * fine])
 			if doSerifLT
 				new-glyph : glyph-proc
-					include : [if doFullSerifs VSerifs VMotionSerifs] df fBarStraight (y3 - y2) fine2 fine
+					include : [if doFullSerifs VSerifs VMotionSerifs] df fBarStraight (y3 - y2) swSerif fine
 					eject-contour 'serifRT'
 				no-shape
 
 		include : VBar.m df.middle y2 y4 fine
 		include : VBar.m df.middle y1 (y2 + HalfStroke) coarse
 		if doSerifMT : include : tagged 'serifMT' : piecewise
-			(y4 > y3)    : HSerif.lt (df.middle - [HSwToV : 0.5 * fine]) y4 SideJut [Math.min fine2 : y4 - y3] fine
-			doFullSerifs : HSerif.mt df.middle y4 (Jut - [HSwToV : 0.5 * (Stroke - fine)]) fine2
+			(y4 > y3)    : HSerif.lt (df.middle - [HSwToV : 0.5 * fine]) y4 SideJut [Math.min swSerif : y4 - y3] fine
+			doFullSerifs : HSerif.mt df.middle y4 (Jut - [HSwToV : 0.5 * (Stroke - fine)]) swSerif
 			true         : no-shape
-		if doSerifMB : include : tagged 'serifMB' : HSerif.mb df.middle y1 (MidJutCenter - [HSwToV : 0.5 * (Stroke - coarse)]) fine2
+		if doSerifMB : include : tagged 'serifMB' : HSerif.mb df.middle y1 (MidJutCenter - [HSwToV : 0.5 * (Stroke - coarse)]) swSerif
 
 	define VConfig : object
 		straight            true
