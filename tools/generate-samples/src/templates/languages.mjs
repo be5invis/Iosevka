@@ -1,6 +1,5 @@
 import themes from "../themes/index.mjs";
 
-// prettier-ignore
 const languages = [
 	{
 		lang: "English",

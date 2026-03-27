@@ -79,7 +79,6 @@ function setMainNames(font, naming) {
 	const isOblique = naming.slope === "oblique";
 	const isBold = naming.weight > 650;
 
-	// prettier-ignore
 	font.os2.fsSelection = accumulateFlags(
 		[Ot.Os2.FsSelection.OBLIQUE, isOblique],
 		[Ot.Os2.FsSelection.BOLD, isBold],
@@ -88,7 +87,6 @@ function setMainNames(font, naming) {
 		[Ot.Os2.FsSelection.USE_TYPO_METRICS, true],
 	);
 
-	// prettier-ignore
 	font.head.macStyle = accumulateFlags(
 		[Ot.Head.MacStyle.Bold, isBold],
 		[Ot.Head.MacStyle.Italic, isItalic || isOblique],

@@ -126,7 +126,6 @@ export function SetupBuilders(bindings) {
 
 	// Add the directed/heading knot builders
 	{
-		// prettier-ignore
 		const knotTypes = [
 			[g4, g4, g4, g4],
 			[g2, g2, g2, g2],

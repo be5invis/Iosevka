@@ -301,7 +301,6 @@ const LigtionCompositesFromBuildPlan = computed(
 	},
 );
 
-// eslint-disable-next-line complexity
 const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileName) => {
 	const [{ fileNameToBpMap, buildPlans }] = await target.need(BuildPlans);
 	const [version] = await target.need(Version);

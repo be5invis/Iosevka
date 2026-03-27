@@ -41,7 +41,6 @@ export default async function main(argv) {
 	// Perform codegen
 	const options = await resolveConfig(argv.out);
 	const sourceRaw =
-		`/* eslint-disable */\n` +
 		`// Machine generated. Do not modify.\n` +
 		`export default ` +
 		JSON.stringify(out, null, "\t") +

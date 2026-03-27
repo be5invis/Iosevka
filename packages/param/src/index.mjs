@@ -41,7 +41,6 @@ export function apply(sink, parametersData, styles, blendArgs) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-// eslint-disable-next-line complexity
 function intro(source, style, blendArgs, sink) {
 	let hive = source[style];
 	if (!hive) return;
