@@ -126,15 +126,16 @@ export function SetupBuilders(bindings) {
 
 	// Add the directed/heading knot builders
 	{
+		// biome-ignore format: keep the columns aligned for readability
 		const knotTypes = [
-			[g4, g4, g4, g4],
-			[g2, g2, g2, g2],
-			[corner, corner, corner, corner],
-			[straight, flat, g2, curl],
-			[g2c, g2, corner, corner],
-			[cg2, corner, corner, g2],
-			[flatc, flat, corner, corner],
-			[ccurl, corner, corner, curl],
+			[ g4,       g4,     g4,     g4     ],
+			[ g2,       g2,     g2,     g2     ],
+			[ corner,   corner, corner, corner ],
+			[ straight, flat,   g2,     curl   ],
+			[ g2c,      g2,     corner, corner ],
+			[ cg2,      corner, corner, g2     ],
+			[ flatc,    flat,   corner, corner ],
+			[ ccurl,    corner, corner, curl   ],
 		];
 		const directions = [
 			// Straights
