@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "node:fs";
 
 export default main;
 async function main(argv) {

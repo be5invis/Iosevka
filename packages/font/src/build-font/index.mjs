@@ -39,5 +39,5 @@ export async function buildFont(para, cache) {
 	// Validation : Metrics
 	if (para.forceMonospace) validateFontConfigMono(font);
 
-	return { font, glyphStore: cleanGs, cacheUpdated: cache && cache.isUpdated(), ttfaControls };
+	return { font, glyphStore: cleanGs, cacheUpdated: cache?.isUpdated(), ttfaControls };
 }

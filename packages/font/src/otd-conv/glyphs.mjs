@@ -17,7 +17,7 @@ export function convertGlyphs(gsOrig) {
 		const us = gsOrig.queryUnicodeOf(gSrc);
 		if (us) {
 			for (const u of us) {
-				if (!(isFinite(u - 0) && u)) continue;
+				if (!(Number.isFinite(u - 0) && u)) continue;
 				cmap.unicode.set(u, gs.queryBySourceGlyph(gSrc));
 				gs.setPrimaryUnicode(gSrc, u);
 			}
@@ -69,7 +69,7 @@ class MappedGlyphStore {
 		const gs = Ot.ListGlyphStoreFactory.createStoreFromList([...this.m_mapping.values()]);
 		return gs.decideOrder();
 	}
-	fill(name, source) {
+	fill(_name, source) {
 		const g = this.queryBySourceGlyph(source);
 		if (!g) throw new Error("Unreachable");
 
@@ -87,13 +87,13 @@ class MappedGlyphStore {
 		}
 	}
 	fillOtGlyphNames() {
-		let conflictSet = new Set();
-		let rev = new Map();
+		const conflictSet = new Set();
+		const rev = new Map();
 		for (const [u, g] of this.m_primaryUnicodeMapping) rev.set(g, u);
 		const glyphsInBuildOrder = Array.from(this.m_mapping).sort(
 			([a], [b]) => a.subRank - b.subRank,
 		);
-		for (const [gSrc, gOt] of glyphsInBuildOrder) gOt.name = undefined;
+		for (const [_gSrc, gOt] of glyphsInBuildOrder) gOt.name = undefined;
 
 		// Name by Unicode
 		for (const [gSrc, gOt] of glyphsInBuildOrder) {
@@ -142,9 +142,9 @@ class MappedGlyphStore {
 
 		// validate
 		{
-			let gnSet = new Set();
-			for (const [gSrc, gOt] of this.m_mapping) {
-				if (gnSet.has(gOt.name)) throw new Error("Unreachable! duplicate name " + gOt.name);
+			const gnSet = new Set();
+			for (const [_gSrc, gOt] of this.m_mapping) {
+				if (gnSet.has(gOt.name)) throw new Error(`Unreachable! duplicate name ${gOt.name}`);
 				gnSet.add(gOt.name);
 			}
 		}
@@ -195,13 +195,13 @@ function addVsLinks(gsOrig, gs, cmap, gr, vs) {
 		if (!gDstLinked) continue;
 
 		for (const u of us) {
-			if (!(isFinite(u - 0) && u)) continue;
+			if (!(Number.isFinite(u - 0) && u)) continue;
 			cmap.vs.set(u, vs, gDstLinked);
 		}
 	}
 }
 
-function byRank([gna, a], [gnb, b]) {
+function byRank([_gna, a], [_gnb, b]) {
 	return (
 		b.glyphRank - a.glyphRank ||
 		a.grRank - b.grRank ||

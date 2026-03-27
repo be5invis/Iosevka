@@ -1,13 +1,13 @@
 import themes from "../themes/index.mjs";
 
-export default (function (args) {
+export default args => {
 	const theme = themes[args.theme];
 	const EM = 48;
 	const elementHeight = 1.5 * EM;
 	const canvasWidth = 30 * EM;
 	const canvasHeight = 15 * EM;
 	const weights = [100, 200, 300, 400, 500, 600, 700, 800, 900];
-	let frames = [];
+	const frames = [];
 	for (const [iWeight, weight] of weights.entries()) {
 		const top = canvasHeight / 2 + elementHeight * (iWeight - weights.length / 2);
 		frames.push({
@@ -30,4 +30,4 @@ export default (function (args) {
 		});
 	}
 	return { width: canvasWidth, height: canvasHeight, frames };
-});
+};

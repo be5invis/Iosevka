@@ -1,5 +1,5 @@
-import fs from "fs";
-import zlib from "zlib";
+import fs from "node:fs";
+import zlib from "node:zlib";
 
 import * as Caching from "@iosevka/geometry-cache";
 import { createGrDisplaySheet } from "@iosevka/glyph/relation";
@@ -29,7 +29,7 @@ async function main(argv) {
 	// Save TTF
 	if (argv.o) await saveTTF(argv.o, font);
 	// Save cache
-	if (argv.cache && cache && cache.isUpdated()) {
+	if (argv.cache && cache?.isUpdated()) {
 		await Caching.save(argv.cache.output, argv.menu.version, cache, true);
 	}
 
@@ -38,7 +38,7 @@ async function main(argv) {
 
 // Save character map file
 async function saveCharMap(argv, glyphStore) {
-	let charMap = [];
+	const charMap = [];
 	for (const [gn] of glyphStore.namedEntries()) {
 		charMap.push([
 			gn,

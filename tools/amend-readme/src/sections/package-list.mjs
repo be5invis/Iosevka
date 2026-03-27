@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 import { ImgX, MdCol } from "../md-format-tools.mjs";
 
@@ -18,7 +18,7 @@ export default async function processPackageList(argv, dirs) {
 	md.log(await fs.promises.readFile(headerPath, "utf-8"));
 
 	md.log(`<table>`);
-	for (let [groupID, gr] of Object.entries(pkgShapesData)) {
+	for (const [groupID, gr] of Object.entries(pkgShapesData)) {
 		const prime = gr.subGroups[groupID];
 		const familyName = buildName("\u00a0", ...prime.family.split(" "));
 		const sTtcName = buildName("-", "SuperTTC", groupID, argv.version);
@@ -54,7 +54,7 @@ export default async function processPackageList(argv, dirs) {
 			`</tr>`,
 		);
 		let lastSubGroupID = null;
-		for (const [subGroupID, subGr] of Object.entries(gr.subGroups)) {
+		for (const [subGroupID, _subGr] of Object.entries(gr.subGroups)) {
 			lastSubGroupID = subGroupID;
 		}
 		for (const [subGroupID, subGr] of Object.entries(gr.subGroups)) {
@@ -64,7 +64,7 @@ export default async function processPackageList(argv, dirs) {
 				const downloadLink = `${DownloadLinkPrefix}/${fileName}.zip`;
 				return `<b><a href="${downloadLink}">${label}</a></b>`;
 			};
-			const leader = "&nbsp;&nbsp;&nbsp;&nbsp;" + (subGroupID === lastSubGroupID ? "└" : "├");
+			const leader = `&nbsp;&nbsp;&nbsp;&nbsp;${subGroupID === lastSubGroupID ? "└" : "├"}`;
 			const superTtcPrefix = hasSpacings ? "SuperTTC-SGr" : "SuperTTC";
 			const ttcPrefix = hasSpacings ? "PkgTTC-SGr" : "PkgTTC";
 			md.log(

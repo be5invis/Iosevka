@@ -1,6 +1,4 @@
-"use strict";
-
-import fs from "fs";
+import fs from "node:fs";
 
 const WebfontFormatMap = new Map([
 	["WOFF2", "woff2"],
@@ -14,7 +12,7 @@ export default function (output, family, hs, formats, unhinted) {
 	}
 	let ans = ``;
 	for (const ext of formats) {
-		if (!WebfontFormatMap.get(ext)) throw new TypeError("Invalid webfont file format " + ext);
+		if (!WebfontFormatMap.get(ext)) throw new TypeError(`Invalid webfont file format ${ext}`);
 	}
 	for (const term of hs) {
 		const dirSuffix = unhinted ? "-Unhinted" : "";
@@ -27,7 +25,7 @@ export default function (output, family, hs, formats, unhinted) {
 			.join(", ");
 		ans += `
 @font-face {
-	font-family: '${family + " Web"}';
+	font-family: '${`${family} Web`}';
 	font-display: swap;
 	font-weight: ${term.css.weight};
 	font-stretch: ${term.css.stretch};
@@ -39,7 +37,7 @@ export default function (output, family, hs, formats, unhinted) {
 			// CHROME hates a family with both Italic and Oblique
 			ans += `
 @font-face {
-	font-family: '${family + " Web Oblique"}';
+	font-family: '${`${family} Web Oblique`}';
 	font-display: swap;
 	font-weight: ${term.css.weight};
 	font-stretch: ${term.css.stretch};

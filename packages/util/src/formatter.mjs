@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 
 const TAG_INVALID = 0x11000000;
 const TAG_BEGIN_STRUCT = 0x12340001;
@@ -13,7 +13,7 @@ const TAG_END_STRUCT_TYPE = 0x12340008;
 const TAG_TYPED_POINT = 0x12340010;
 const TAG_GIZMO = 0x12340011;
 const TAG_LIST_LENGTH = 0x12340012;
-const POINT = 0x12340013;
+const _POINT = 0x12340013;
 
 const TAG_EMBED_BEGIN = 0x12340020;
 const TAG_EMBED_END = 0x12340021;

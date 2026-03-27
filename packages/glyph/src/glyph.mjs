@@ -1,4 +1,4 @@
-import * as util from "util";
+import * as util from "node:util";
 
 import * as Geom from "@iosevka/geometry";
 import { Anchor } from "@iosevka/geometry/anchor";
@@ -26,7 +26,7 @@ export class Glyph {
 		this.ctxTag = null;
 	}
 
-	[util.inspect.custom](depth, options) {
+	[util.inspect.custom](_depth, options) {
 		return options.stylize(this.toString(), "special");
 	}
 
@@ -49,11 +49,11 @@ export class Glyph {
 	get unicode() {
 		throw new TypeError("Glyph::unicode has been deprecated");
 	}
-	set unicode(x) {
+	set unicode(_x) {
 		throw new TypeError("Glyph::unicode has been deprecated");
 	}
 	// PTL pattern matching
-	static unapply(obj, arity) {
+	static unapply(obj, _arity) {
 		if (obj instanceof Glyph) return [obj];
 		else return null;
 	}
@@ -105,7 +105,7 @@ export class Glyph {
 		if (g instanceof Function) throw new Error("Unreachable");
 		if (g.isMarkSet) throw new Error("Invalid component to be introduced.");
 		// Combine anchors and get offset
-		let shift = new Vec2(0, 0);
+		const shift = new Vec2(0, 0);
 		this.combineMarks(g, shift);
 		this.includeGlyphImpl(g, shift.x, shift.y);
 		if (copyAnchors) this.copyAnchors(g);
@@ -123,8 +123,8 @@ export class Glyph {
 
 	// Geometry inclusion
 	includeGeometry(g) {
-		let deps = g.getDependencies();
-		if (deps && deps.length) for (const dep of deps) this.dependsOn(dep);
+		const deps = g.getDependencies();
+		if (deps?.length) for (const dep of deps) this.dependsOn(dep);
 		if (this.ctxTag) g = new Geom.TaggedGeometry(g, this.ctxTag);
 		this.geometry = Geom.combineWith(this.geometry, g);
 	}
@@ -200,14 +200,16 @@ export class Glyph {
 		if (g.baseAnchors) for (const k in g.baseAnchors) this.baseAnchors[k] = g.baseAnchors[k];
 	}
 	setBaseAnchor(id, x, y) {
-		if (isNaN(x - 0) || isNaN(y - 0)) throw new Error(`NaN found in anchor coord for ${id}`);
+		if (Number.isNaN(x - 0) || Number.isNaN(y - 0))
+			throw new Error(`NaN found in anchor coord for ${id}`);
 		this.baseAnchors[id] = new Anchor(x, y).transform(this.gizmo);
 	}
 	setMarkAnchor(id, x, y, mbx, mby) {
-		if (isNaN(x - 0) || isNaN(y - 0)) throw new Error(`NaN found in anchor coord for ${id}`);
+		if (Number.isNaN(x - 0) || Number.isNaN(y - 0))
+			throw new Error(`NaN found in anchor coord for ${id}`);
 		this.markAnchors[id] = new Anchor(x, y).transform(this.gizmo);
 		if (mbx != null && mby != null) {
-			if (isNaN(mbx - 0) || isNaN(mby - 0))
+			if (Number.isNaN(mbx - 0) || Number.isNaN(mby - 0))
 				throw new Error(`NaN found in anchor coord for ${id}`);
 			this.baseAnchors[id] = new Anchor(mbx, mby).transform(this.gizmo);
 		}

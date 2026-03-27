@@ -1,6 +1,6 @@
 import themes from "../themes/index.mjs";
 
-export default (function (args) {
+export default args => {
 	const theme = themes[args.theme];
 	const EM = 48;
 	const elementWidth = 2.75 * EM;
@@ -17,7 +17,7 @@ export default (function (args) {
 		[+(1 / 4), "Iosevka Slab", "italic"],
 	];
 	const weights = [100, 200, 300, 400, 500, 600, 700, 800, 900];
-	let frames = [];
+	const frames = [];
 	for (const [iLine, [pOffset, family, slope]] of lineConfig.entries()) {
 		for (const [iWeight, weight] of weights.entries()) {
 			const left = canvasWidth / 2 + elementWidth * (iWeight + pOffset - weights.length / 2);
@@ -64,4 +64,4 @@ export default (function (args) {
 	});
 
 	return { width: canvasWidth, height: canvasHeight + sigilHeight, frames };
-});
+};

@@ -54,8 +54,8 @@ function setMainNames(font, naming) {
 		naming.slope,
 	);
 	let compatFamily = family;
-	if (compat.familySuffix !== "Regular") compatFamily = family + " " + compat.familySuffix;
-	if (compatFamily.length >= 31) compatFamily = family + " " + compat.familySuffixShort;
+	if (compat.familySuffix !== "Regular") compatFamily = `${family} ${compat.familySuffix}`;
+	if (compatFamily.length >= 31) compatFamily = `${family} ${compat.familySuffixShort}`;
 
 	nameFont(font, Ot.Name.NameID.LegacyFamily, compatFamily);
 	nameFont(font, Ot.Name.NameID.LegacySubfamily, compat.style);
@@ -79,21 +79,19 @@ function setMainNames(font, naming) {
 	const isOblique = naming.slope === "oblique";
 	const isBold = naming.weight > 650;
 
-	// prettier-ignore
 	font.os2.fsSelection = accumulateFlags(
-		[Ot.Os2.FsSelection.OBLIQUE,          isOblique],
-		[Ot.Os2.FsSelection.BOLD,             isBold],
-		[Ot.Os2.FsSelection.ITALIC,           isItalic || isOblique],
-		[Ot.Os2.FsSelection.REGULAR,          !isBold && !isItalic && !isOblique],
-		[Ot.Os2.FsSelection.USE_TYPO_METRICS, true]
+		[Ot.Os2.FsSelection.OBLIQUE, isOblique],
+		[Ot.Os2.FsSelection.BOLD, isBold],
+		[Ot.Os2.FsSelection.ITALIC, isItalic || isOblique],
+		[Ot.Os2.FsSelection.REGULAR, !isBold && !isItalic && !isOblique],
+		[Ot.Os2.FsSelection.USE_TYPO_METRICS, true],
 	);
 
-	// prettier-ignore
 	font.head.macStyle = accumulateFlags(
-		[Ot.Head.MacStyle.Bold,               isBold],
-		[Ot.Head.MacStyle.Italic,             isItalic || isOblique],
-		[Ot.Head.MacStyle.Condensed,          naming.width < 5],
-		[Ot.Head.MacStyle.Extended,           naming.width > 5]
+		[Ot.Head.MacStyle.Bold, isBold],
+		[Ot.Head.MacStyle.Italic, isItalic || isOblique],
+		[Ot.Head.MacStyle.Condensed, naming.width < 5],
+		[Ot.Head.MacStyle.Extended, naming.width > 5],
 	);
 }
 
@@ -194,10 +192,10 @@ function getStyleLinkedStyles(menuNameMap, weight, width, slope) {
 	let linkWeight = weight;
 	let linkSlope = slope;
 	let nameSuffixWeight = 400;
-	let nameSuffixWidth = width;
+	const nameSuffixWidth = width;
 	let nameSuffixSlope = "normal";
 
-	if (!(linkWeight === 400 || linkWeight == 700)) {
+	if (!(linkWeight === 400 || linkWeight === 700)) {
 		nameSuffixWeight = linkWeight;
 		linkWeight = 400;
 	}
@@ -224,7 +222,7 @@ export function nameFont(font, nameID, str) {
 	nameFontImpl(font.name.records, 3, 1, 1033, nameID, str); // Windows Unicode English
 }
 function nameFontImpl(records, platformID, encodingID, languageID, nameID, value) {
-	for (let record of records) {
+	for (const record of records) {
 		if (record.platformID !== platformID) continue;
 		if (record.encodingID !== encodingID) continue;
 		if (record.languageID !== languageID) continue;
@@ -236,17 +234,17 @@ function nameFontImpl(records, platformID, encodingID, languageID, nameID, value
 }
 
 function getStyle(menuNameMap, weight, width, slope) {
-	const weightPart = menuNameMap.weight[weight] ?? "W" + weight;
-	const widthPart = menuNameMap.width[width] ?? "Wd" + width;
+	const weightPart = menuNameMap.weight[weight] ?? `W${weight}`;
+	const widthPart = menuNameMap.width[width] ?? `Wd${width}`;
 	const slopePart = menuNameMap.slope[slope] ?? "";
-	const rawName = weightPart + " " + widthPart + " " + slopePart;
+	const rawName = `${weightPart} ${widthPart} ${slopePart}`;
 	return rawName.replace(/ +/g, " ").trim() || "Regular";
 }
 function getShortStyle(menuNameMap, weight, width, slope) {
-	const weightPart = menuNameMap.weightShort[weight] ?? "W" + weight;
-	const widthPart = menuNameMap.widthShort[width] ?? "Wd" + width;
+	const weightPart = menuNameMap.weightShort[weight] ?? `W${weight}`;
+	const widthPart = menuNameMap.widthShort[width] ?? `Wd${width}`;
 	const slopePart = menuNameMap.slopeShort[slope] ?? "";
-	const rawName = weightPart + " " + widthPart + " " + slopePart;
+	const rawName = `${weightPart} ${widthPart} ${slopePart}`;
 	return rawName.replace(/ +/g, " ").trim() || "Regular";
 }
 

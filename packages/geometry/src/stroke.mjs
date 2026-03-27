@@ -11,9 +11,12 @@ import {
 export function strokeArcs(arcs, radius, contrast, fInside) {
 	let currentArcs = null;
 	for (const contour of arcs) {
-		let leftSide = offsetContour(contour, -radius, contrast);
-		let rightSide = offsetContour(contour, radius, contrast);
-		let bezs = TypoGeom.ShapeConv.convertShapeToBez3([leftSide, rightSide], GEOMETRY_PRECISION);
+		const leftSide = offsetContour(contour, -radius, contrast);
+		const rightSide = offsetContour(contour, radius, contrast);
+		const bezs = TypoGeom.ShapeConv.convertShapeToBez3(
+			[leftSide, rightSide],
+			GEOMETRY_PRECISION,
+		);
 
 		if (!currentArcs) {
 			currentArcs = bezs;
@@ -50,7 +53,7 @@ export function strokeArcs(arcs, radius, contrast, fInside) {
 function offsetContour(arcs, distance, contrast) {
 	// The arcs here are guaranteed to be simple, i.e. no self-intersections.
 	const fReverse = distance < 0;
-	let offsetArcs = [];
+	const offsetArcs = [];
 	let prevOffsetedArc = new OffsetCurve(arcs[arcs.length - 1], distance, contrast);
 	for (let i = 0; i < arcs.length; i++) {
 		const current = arcs[i];
@@ -98,10 +101,10 @@ function createCap(
 	contrast,
 	prevEndNoOffset, // Previous non-offseted curve's end point
 	prevEnd, // Previous offseted curve's end point
-	dPrevEnd, // Previous offseted curve's end point's derivative
+	_dPrevEnd, // Previous offseted curve's end point's derivative
 	currentStartNoOffset, // Current non-offseted curve's start point
 	currentStart, // Current offseted curve's start point
-	dCurrentStart, // Current offseted curve's start point's derivative
+	_dCurrentStart, // Current offseted curve's start point's derivative
 ) {
 	return new RoundCapCurve(
 		side,

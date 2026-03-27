@@ -1,9 +1,9 @@
-import fs from "fs";
+import fs from "node:fs";
 import { setTimeout } from "node:timers/promises";
-import zlib from "zlib";
+import zlib from "node:zlib";
 
 import * as ContourSetEncoding from "@iosevka/geometry/encoding";
-import { encode, decode } from "@msgpack/msgpack";
+import { decode, encode } from "@msgpack/msgpack";
 
 const Edition = 60;
 const MAX_AGE = 16;
@@ -23,7 +23,7 @@ class Cache {
 		this.diff = new Set();
 	}
 	loadRep(version, rep) {
-		if (!rep || rep.version !== version + "@" + Edition) return;
+		if (!rep || rep.version !== `${version}@${Edition}`) return;
 		this.historyAgeKeys = rep.ageKeys.slice(0, MAX_AGE);
 		const ageKeySet = new Set(this.historyAgeKeys);
 		for (const [k, e] of Object.entries(rep.gf)) {
@@ -33,7 +33,7 @@ class Cache {
 		}
 	}
 	toRep(version, diffOnly) {
-		let gfRep = {};
+		const gfRep = {};
 		for (const [k, e] of this.gf) {
 			if (!diffOnly || this.diff.has(k)) {
 				gfRep[k] = { age: e.age, buf: e.valueBuffer.toString("base64") };
@@ -44,16 +44,16 @@ class Cache {
 				? this.historyAgeKeys
 				: [this.freshAgeKey, ...this.historyAgeKeys];
 		return {
-			version: version + "@" + Edition,
+			version: `${version}@${Edition}`,
 			ageKeys: mergedAgeKeys,
 			gf: gfRep,
 		};
 	}
 	isEmpty() {
-		return this.gf.size == 0;
+		return this.gf.size === 0;
 	}
 	isUpdated() {
-		return this.diff.size != 0;
+		return this.diff.size !== 0;
 	}
 	// Geometry flattening conversion cache
 	getGF(k) {
@@ -64,7 +64,7 @@ class Cache {
 	refreshGF(k) {
 		const entry = this.gf.get(k);
 		if (!entry) return;
-		if (entry.age != this.freshAgeKey) {
+		if (entry.age !== this.freshAgeKey) {
 			this.diff.add(k);
 			entry.age = this.freshAgeKey;
 		}
@@ -82,7 +82,7 @@ class Cache {
 	}
 }
 export async function load(path, version, freshAgeKey) {
-	let cache = new Cache(freshAgeKey);
+	const cache = new Cache(freshAgeKey);
 	if (path && fs.existsSync(path)) {
 		let loadAttempt = 0;
 		while (loadAttempt < 3) {

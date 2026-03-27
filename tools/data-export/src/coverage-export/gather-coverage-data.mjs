@@ -28,7 +28,7 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 	const udatMap = [];
 
 	for (const [[lchBlockStart, lchBlockEnd], block] of await collectBlockData()) {
-		let blockResults = [];
+		const blockResults = [];
 		const [lchStart, lchEnd] = findFirstLastChar(lchBlockStart, lchBlockEnd, covUpright);
 		if (!lchStart || !lchEnd) continue;
 		for (let lch = lchStart; lch < lchEnd; lch++) {
@@ -65,9 +65,9 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 		}
 	}
 
-	let featureSeries = [];
+	const featureSeries = [];
 	for (const [id, x] of featureSeriesStore.values()) {
-		for (let gr of x.groups) gr.sort((a, b) => a.css.localeCompare(b.css));
+		for (const gr of x.groups) gr.sort((a, b) => a.css.localeCompare(b.css));
 		featureSeries[id] = x;
 	}
 
@@ -77,11 +77,11 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 function cleanupBlockResultsForExport(br, udatMap) {
 	br.sort((a, b) => a.lch - b.lch);
 
-	let result = [];
+	const result = [];
 	let lchMin = 0xffffff;
 	let lchMax = 0;
 	for (const ch of br) {
-		let ch1 = { ...ch };
+		const ch1 = { ...ch };
 		if (ch1.lch < lchMin) lchMin = ch1.lch;
 		if (ch1.lch > lchMax) lchMax = ch1.lch;
 		udatMap.push([ch1.lch, ch1.gc, ch1.charName]);
@@ -101,7 +101,7 @@ function cleanupBlockResultsForExport(br, udatMap) {
 function putFeatSeries(store, k, featSeriesList) {
 	if (!featSeriesList) return null;
 
-	let reduced = [];
+	const reduced = [];
 	for (const _featSeries of featSeriesList) {
 		const featSeries = ValidateFeatureSeries(_featSeries);
 
@@ -110,7 +110,7 @@ function putFeatSeries(store, k, featSeriesList) {
 			";;" +
 			featSeries.groups.map(g => g.map(a => a.css).join(";;")).join(";;");
 
-		let vs = store.get(key);
+		const vs = store.get(key);
 		if (vs) {
 			reduced.push(vs[0]);
 		} else {
@@ -121,15 +121,15 @@ function putFeatSeries(store, k, featSeriesList) {
 		}
 	}
 
-	if (!reduced || !reduced.length) return null;
+	if (!reduced?.length) return null;
 	return { [k]: reduced };
 }
 
 function ValidateFeatureSeries(s) {
 	let size = 0;
-	let reducedGroups = [];
+	const reducedGroups = [];
 	for (const g of s.groups) {
-		if (!g || !g.length) continue;
+		if (!g?.length) continue;
 		reducedGroups.push(g);
 		size += g.length;
 	}

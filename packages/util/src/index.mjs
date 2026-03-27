@@ -85,13 +85,13 @@ function joinSuffixListImpl(sink, k, v, telescope, configs) {
 }
 
 export const SuffixCfg = {
-	weave: function (...configs) {
-		let ans = {};
+	weave: (...configs) => {
+		const ans = {};
 		joinSuffixListImpl(ans, "", [], [], configs);
 		return ans;
 	},
-	combine: function (...configs) {
-		let ans = {};
+	combine: (...configs) => {
+		const ans = {};
 		for (const item of configs) for (const [k, v] of Object.entries(item)) ans[k] = v;
 		return ans;
 	},
@@ -133,7 +133,7 @@ export function constant(x) {
 
 export const ArrayUtil = {
 	mapIndexToItems(a, indexes) {
-		let answer = [];
+		const answer = [];
 		for (const item of indexes) answer.push(a[item]);
 		return answer;
 	},

@@ -11,7 +11,7 @@ class BufferWriter {
 		let newCapacity = this.capacity;
 		while (newCapacity < this.length + sizeToAdd) newCapacity *= 2;
 		if (newCapacity > this.capacity) {
-			let newBuffer = Buffer.alloc(newCapacity);
+			const newBuffer = Buffer.alloc(newCapacity);
 			this.buffer.copy(newBuffer);
 			this.buffer = newBuffer;
 			this.capacity = newCapacity;
@@ -50,12 +50,12 @@ class BufferReader {
 		return this.buffer.readUInt8(this.cursor++);
 	}
 	nextUInt32() {
-		let value = this.buffer.readUInt32LE(this.cursor);
+		const value = this.buffer.readUInt32LE(this.cursor);
 		this.cursor += 4;
 		return value;
 	}
 	nextFloat64() {
-		let value = this.buffer.readDoubleLE(this.cursor);
+		const value = this.buffer.readDoubleLE(this.cursor);
 		this.cursor += 8;
 		return value;
 	}
@@ -70,7 +70,7 @@ class BufferReader {
 ///  - 16 bytes per point: x and y coordinates, each coordinate is a float64
 export function encode(cs) {
 	let totalPoints = 0;
-	let contourPointCounts = [];
+	const contourPointCounts = [];
 	for (const contour of cs) {
 		totalPoints += contour.length;
 		contourPointCounts.push(contour.length);
@@ -105,7 +105,7 @@ export function encode(cs) {
 export function decode(buf) {
 	const reader = new BufferReader(buf);
 	const numContours = reader.nextUInt32();
-	const numPoints = reader.nextUInt32();
+	const _numPoints = reader.nextUInt32();
 	const contourPointCounts = [];
 	for (let i = 0; i < numContours; i++) {
 		contourPointCounts.push(reader.nextUInt32());

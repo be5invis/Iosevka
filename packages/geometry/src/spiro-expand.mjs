@@ -70,7 +70,7 @@ export class BiKnotCollector {
 	}
 
 	getMonoKnots() {
-		let a = [];
+		const a = [];
 		for (const c of this.knots) {
 			a.push(c.toMono());
 		}
@@ -235,9 +235,9 @@ export class SpiroExpander {
 	}
 
 	interpolateUnimportantKnotsRg(lhsT, rhsT, lhsU, rhsU, jBefore, jAfter) {
-		let count = jAfter > jBefore ? jAfter - jBefore : lhsT.length - jBefore + jAfter;
+		const count = jAfter > jBefore ? jAfter - jBefore : lhsT.length - jBefore + jAfter;
 		for (let offset = 1; offset < count; offset++) {
-			let j = (jBefore + offset) % lhsT.length;
+			const j = (jBefore + offset) % lhsT.length;
 
 			const knotUBefore = this.m_biKnotsU[jBefore],
 				knotU = this.m_biKnotsU[j],
@@ -267,10 +267,10 @@ class NormalRectifier {
 	}
 	beginShape() {}
 	endShape() {}
-	moveTo(x, y) {
+	moveTo(_x, _y) {
 		this.nKnotsProcessed += 1;
 	}
-	arcTo(arc, x, y) {
+	arcTo(arc, _x, _y) {
 		if (this.nKnotsProcessed === 1) {
 			const d = new Vec2(arc.deriveX0, arc.deriveY0);
 			if (isTangentValid(d)) {
@@ -303,7 +303,7 @@ class NormalRectifier {
 }
 
 function isTangentValid(d) {
-	return d && isFinite(d.x) && isFinite(d.y);
+	return d && Number.isFinite(d.x) && Number.isFinite(d.y);
 }
 
 function normalX(tangent, contrast) {
@@ -313,6 +313,6 @@ function normalY(tangent) {
 	return tangent.x / Math.hypot(tangent.x, tangent.y);
 }
 
-function cyNth(a, j) {
+function _cyNth(a, j) {
 	return a[j % a.length];
 }
