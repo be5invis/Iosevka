@@ -20,13 +20,17 @@ glyph-block Letter-Latin-Lower-T : begin
 	define SYM-PR-LEFT       2
 	define SYM-PR-BALANCED   3
 
-	define dfNarrowT : DivFrame para.advanceScaleF
-	define [xSmallTBarLeftT  df] : df.middle - df.adws * df.adws * TBalance - [HSwToV HalfStroke]
+	define dfN : DivFrame 1
+	define dfT : DivFrame para.advanceScaleF 1 0.75
+
+	define [xSmallTBarLeftT  df] : df.middle - df.adws * (df.adws * TBalance) - [HSwToV HalfStroke]
 	define [xSmallTCrossRefT df] : [xSmallTBarLeftT df] + df.adws * TBalance2 + [HSwToV HalfStroke]
 
-	define yCrossBar     XH
-	define yShortNeck1 : Math.max [mix XH Ascender 0.5] ([mix XH Ascender 0.875] - Stroke * 0.125)
-	define yShortNeck2 : Math.max [mix XH Ascender 0.5] ([mix XH Ascender 0.750] - Stroke * 0.125)
+	define ySmallTBarPos XH
+
+	glyph-block-export yShortNeck1 yShortNeck2
+	define yShortNeck1 : clamp [mix XH Ascender 0.5] CAP : [mix XH Ascender 0.875] - Stroke * 0.125
+	define yShortNeck2 : clamp [mix XH Ascender 0.5] CAP : [mix XH Ascender 0.750] - Stroke * 0.125
 
 	define BentHook : namespace
 		export : define [BarLeftPos df sym] : match sym
@@ -36,29 +40,29 @@ glyph-block Letter-Latin-Lower-T : begin
 
 		define [xCrossBarPos df sym] : match sym
 			([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {([BarLeftPos df sym] + TanSlope * Stroke) ([xSmallTCrossRefT df] + LongJut * [Math.sqrt df.adws])}
-			__                         {([xSmallTCrossRefT df] - LongJut * [Math.sqrt df.adws]) ([xSmallTCrossRefT df] + LongJut * [Math.sqrt df.adws])}
+			__                        {([xSmallTCrossRefT df] - LongJut * [Math.sqrt df.adws]) ([xSmallTCrossRefT df] + LongJut * [Math.sqrt df.adws])}
 
 		define [XHookTerminal df sym] : match sym
 			[Just SYM-LEFT]        df.rightSB
-			__                   : [BarLeftPos df sym] + [Math.max ((df.width - df.leftSB * 2) * 0.75 + [HSwToV QuarterStroke]) [HSwToV : 2.25 * Stroke]]
+			__                   : [BarLeftPos df sym] + [Math.max ((df.rightSB - df.leftSB) * 0.75 + [HSwToV QuarterStroke]) [HSwToV : 2.25 * Stroke]]
 
 		export : define [HookShapeT sink df sym offset top bot sw] : begin
 			local xLeft : BarLeftPos df sym
 			local xHook : XHookTerminal df sym
-			local xTurn : arch.adjust-x.bot [mix xLeft xHook 0.5]
+			local xTurn : Arch.adjust-x.bot [mix xLeft xHook 0.5]
 			local adb : clamp Hook ((xTurn - xLeft) * 1.2) ArchDepthB
 
 			return : sink
 				widths.lhs sw
 				[if (sink == spiro-outline) corner flat] (offset + xLeft) top [heading Downward]
 				curl (offset + xLeft) (bot + adb)
-				hookend (bot + offset) (sw -- sw)
+				HookEnd (bot + offset) (sw -- sw)
 				g4 (xHook - offset) (bot + Hook)
 				if (sink == spiro-outline) {[corner (xHook - offset) top]} {}
 
 		export : define [CrossBar df sym] : begin
 			local {xcl xcr} : xCrossBarPos df sym
-			return : HCrossBar.top xcl xcr yCrossBar
+			return : HCrossBar.top xcl xcr ySmallTBarPos
 
 		###########################################################################################
 
@@ -76,14 +80,69 @@ glyph-block Letter-Latin-Lower-T : begin
 			set-base-anchor 'bottomRight' gEnd.x gEnd.y
 			set-base-anchor 'overlay' (g.knots.0.x + [HSwToV : 0.625 * Stroke]) (XH * 0.58)
 
-		export : define [Retroflex df sym top bot] : Flat.Retroflex df sym top bot
+		export : define [Retroflex df sym top bot] : FlatHook.Retroflex df sym top bot
+
+	define NarrowBentHook : namespace
+		export : define [BarLeftPos df sym] : BentHook.BarLeftPos df sym
+
+		define [xCrossBarPos df sym] : begin
+			local pAdaptive : if (para.advanceScaleF < 1) ((1 - df.adws) / (1 - para.advanceScaleF)) 0
+			local narrowScaleLeft : mix 0.82 0.87 pAdaptive
+			local narrowScaleRight : mix 0.75 0.875 pAdaptive
+			return : match sym
+				([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {([BarLeftPos df sym] + TanSlope * Stroke) ([xSmallTCrossRefT df] + LongJut * narrowScaleRight * [Math.sqrt df.adws])}
+				__      {([xSmallTCrossRefT df] - LongJut * narrowScaleLeft * [Math.sqrt df.adws]) ([xSmallTCrossRefT df] + LongJut * narrowScaleRight * [Math.sqrt df.adws])}
+
+		define [XHookTerminal df sym] : begin
+			local pAdaptive : if (para.advanceScaleF < 1) ((1 - df.adws) / (1 - para.advanceScaleF)) 0
+			return : match sym
+				[Just SYM-LEFT]      : mix [BarLeftPos df sym] df.rightSB [mix 0.75 1.0 pAdaptive]
+				__                   : [BarLeftPos df sym] + [Math.max ((df.rightSB - df.leftSB) * [mix 0.55 0.80 pAdaptive] + [HSwToV QuarterStroke]) [HSwToV : 2.25 * Stroke]]
+
+		export : define [HookShapeT sink df sym offset top bot sw] : begin
+			local xLeft : BarLeftPos df sym
+			local xHook : XHookTerminal df sym
+			local xTurn : Arch.adjust-x.bot [mix xLeft xHook 0.5]
+			local adb : clamp Hook ((xTurn - xLeft) * 1.2) ArchDepthB
+			local pAdaptive : if (para.advanceScaleF < 1) ((1 - df.adws) / (1 - para.advanceScaleF)) 0
+			local swTerminal : mix sw [AdviceStroke 2.75 df.adws] [mix 0.35 0.1 pAdaptive]
+
+			return : sink
+				widths.lhs sw
+				[if (sink == spiro-outline) corner flat] (offset + xLeft) top [heading Downward]
+				curl (offset + xLeft) (bot + adb)
+				HookEnd (bot + offset) (sw -- sw) (swTerminal -- swTerminal)
+				g4 (xHook - offset) (bot + Hook)
+				if (sink == spiro-outline) {[corner (xHook - offset) top]} {}
+
+		export : define [CrossBar df sym] : begin
+			local {xcl xcr} : xCrossBarPos df sym
+			return : HCrossBar.top xcl xcr ySmallTBarPos
+
+		###########################################################################################
+
+		export : define [Body df sym top bot] : glyph-proc
+			include : CrossBar df sym
+
+			local g : include : HookShapeT dispiro df sym 0 top bot Stroke
+			local gEnd g.knots.(g.knots.length - 1)
+
+			local xLeft : BarLeftPos df sym
+
+			include : LeaningAnchor.Above.VBar.l xLeft
+			include : LeaningAnchor.Below.Hook xLeft gEnd.x
+			set-base-anchor 'hooktopAttach' (xLeft + [HSwToV HalfStroke]) top
+			set-base-anchor 'bottomRight' gEnd.x gEnd.y
+			set-base-anchor 'overlay' (g.knots.0.x + [HSwToV : 0.625 * Stroke]) (XH * 0.58)
+
+		export : define [Retroflex df sym top bot] : FlatHook.Retroflex df sym top bot
 
 	define DiagonalTailed : namespace
 		define [HookShape df sym top bot sw] : begin
 			local xMid : [BarLeftPos df sym] + [HSwToV HalfStroke]
 			local hookDepth : [if (sym === SYM-LEFT) 1.375 1] * [DiagTail.StdDepth [DivFrame : Math.sqrt df.adws] sw] - [HSwToV HalfStroke]
 			return : dispiro
-				flat xMid top [widths.center.heading sw Downward]
+				flat       xMid top [widths.center.heading sw Downward]
 				DiagTail.R xMid bot hookDepth sw
 
 		###########################################################################################
@@ -103,12 +162,12 @@ glyph-block Letter-Latin-Lower-T : begin
 			set-base-anchor 'bottomRight' gEnd.x gEnd.y
 			set-base-anchor 'overlay' (g.knots.0.x + [HSwToV : 0.125 * Stroke]) (XH * 0.58)
 
-		export : define [Retroflex df sym top bot] : Flat.Retroflex df sym top bot
+		export : define [Retroflex df sym top bot] : FlatHook.Retroflex df sym top bot
 
-	define Flat : namespace
+	define FlatHook : namespace
 		export : define [xCrossBarPos df sym] : match sym
 			([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {([BarLeftPos df sym] + TanSlope * Stroke) [mix df.width df.rightSB : mix 1 df.adws 2]}
-			__ {[mix 0 (df.leftSB * 0.6) : mix 1 df.adws 2] [mix df.width df.rightSB : mix 1 df.adws 2]}
+			__                                    {[mix 0 (df.leftSB * 0.6) : mix 1 df.adws 2] [mix df.width df.rightSB : mix 1 df.adws 2]}
 
 		define NORMAL    0
 		define RETROFLEX 1
@@ -133,7 +192,7 @@ glyph-block Letter-Latin-Lower-T : begin
 				__                 xCrossRight
 
 			include : union
-				HCrossBar.top xCrossLeft (xCrossRight + ext) yCrossBar
+				HCrossBar.top xCrossLeft (xCrossRight + ext) ySmallTBarPos
 				dispiro
 					widths.rhs
 					if (shape === RETROFLEX)
@@ -154,13 +213,13 @@ glyph-block Letter-Latin-Lower-T : begin
 			set-base-anchor 'lTailHookAttach' xTailEnd (bot + Stroke)
 
 	define UprightTailed : namespace
-		export : define BarLeftPos Flat.BarLeftPos
+		export : define BarLeftPos FlatHook.BarLeftPos
 		export : define [Body df sym top bot] : glyph-proc
-			local {xCrossLeft xCrossRight} : Flat.xCrossBarPos df sym
+			local {xCrossLeft xCrossRight} : FlatHook.xCrossBarPos df sym
 			local xBarLeft : BarLeftPos df sym
 
 			include : union
-				HCrossBar.top xCrossLeft xCrossRight yCrossBar
+				HCrossBar.top xCrossLeft xCrossRight ySmallTBarPos
 				dispiro
 					widths.rhs
 					flat xCrossRight bot
@@ -176,14 +235,14 @@ glyph-block Letter-Latin-Lower-T : begin
 
 		define [xCrossBarPos df sym] : match sym
 			([Just SYM-LEFT] || [Just SYM-PR-LEFT]) {([BarLeftPos df sym] + TanSlope * Stroke) (df.middle + LongJut * [Math.sqrt df.adws])}
-			__              {(df.middle - LongJut * [Math.sqrt df.adws]) (df.middle + LongJut * [Math.sqrt df.adws])}
+			__                                    {(df.middle - LongJut * [Math.sqrt df.adws]) (df.middle + LongJut * [Math.sqrt df.adws])}
 
 		export : define [Body df sym top bot] : glyph-proc
 			local xLeft : BarLeftPos df sym
 			local { xcl xcr } : xCrossBarPos df sym
 			local xEnd : xLeft + [HSwToV : 1.75 * Stroke]
 			include : VBar.l xLeft 0 top
-			include : HCrossBar.top xcl xcr yCrossBar
+			include : HCrossBar.top xcl xcr ySmallTBarPos
 
 			include : LeaningAnchor.Above.VBar.l xLeft
 			include : LeaningAnchor.Below.VBar.l xLeft
@@ -192,7 +251,7 @@ glyph-block Letter-Latin-Lower-T : begin
 			set-base-anchor 'bottomRight' xEnd (bot + Stroke)
 			set-base-anchor 'lTailHookAttach' xEnd (bot + Stroke)
 
-		export : define [Retroflex df sym top bot] : Flat.CrossRTBody df sym top bot
+		export : define [Retroflex df sym top bot] : FlatHook.CrossRTBody df sym top bot
 
 		export : define [PLBody df sym top bot] : glyph-proc
 			local xLeft : BarLeftPos df sym
@@ -201,10 +260,11 @@ glyph-block Letter-Latin-Lower-T : begin
 
 	define SmallTConfig : SuffixCfg.weave
 		object # body
-			bentHook                       { [DivFrame  1] BentHook           }
-			diagonalTailed                 {  dfNarrowT    DiagonalTailed     }
-			flatHook                       {  dfNarrowT    Flat               }
-			hookless                       {  dfNarrowT    Hookless           }
+			bentHook                       { dfN BentHook       }
+			narrowBentHook                 { dfT NarrowBentHook }
+			diagonalTailed                 { dfT DiagonalTailed }
+			flatHook                       { dfT FlatHook       }
+			hookless                       { dfT Hookless       }
 		object # symmetry
 			""                             SYM-BALANCED
 			"asymmetric"                   SYM-LEFT
@@ -234,10 +294,10 @@ glyph-block Letter-Latin-Lower-T : begin
 				MaskLeft [mix df.leftSB (df.middle - [HSwToV HalfStroke]) 0.5]
 
 		create-glyph "t/teshLeft.\(suffix)" : glyph-proc
-			define df1 : include : DivFrame 1
-			include : df1.markSet.b
-			include : Style.Body df1 sym top 0
-			include : HCrossBar.top df1.middle (df1.width + df1.middle) yCrossBar
+			set-width dfN.width
+			include : dfN.markSet.b
+			include : Style.Body dfN sym top 0
+			include : HCrossBar.top dfN.middle (dfN.width + dfN.middle) ySmallTBarPos
 
 		create-glyph "tHookTop.\(suffix)" : glyph-proc
 			include [refer-glyph "t.\(suffix)"] AS_BASE ALSO_METRICS
@@ -272,28 +332,26 @@ glyph-block Letter-Latin-Lower-T : begin
 			include : TopHook.toRight.mBarInner attach.x XH Ascender
 
 		create-glyph "tCurlyTail.\(suffix)" : glyph-proc
-			include : MarkSet.b
+			set-width dfN.width
+			include : dfN.markSet.b
 
-			local df : DivFrame 1
 			local fine : AdviceStroke 3.5
 			# local rinner : LongJut / 2 - fine / 2
 
-			local xLeft : Style.BarLeftPos df sym
+			local xLeft : Style.BarLeftPos dfN sym
 
 			include : difference
-				Style.Body df sym top 0
-				MaskBelow (yCrossBar - Stroke - TINY)
+				Style.Body dfN sym top 0
+				MaskBelow (ySmallTBarPos - Stroke - TINY)
 
 			include : dispiro
 				widths.lhs
-				flat xLeft (yCrossBar - Stroke) [heading Downward]
+				flat xLeft (ySmallTBarPos - Stroke) [heading Downward]
 				curl xLeft LongJut
 				CurlyTail.n fine 0 (xLeft + [HSwToV Stroke] + LongJut) 0 0
 
 		if (top == Ascender) : begin
 			create-glyph "turntCurlyTail.\(suffix)" : glyph-proc
-				# local df : DivFrame 1
-
 				set-width df.width
 				include : df.markSet.b
 
@@ -350,7 +408,7 @@ glyph-block Letter-Latin-Lower-T : begin
 				[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs df.leftSB 0 stroke SHook
 				[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs df.leftSB 0 stroke SHook
 				__ : list
-					hookend 0 (sw -- stroke)
+					HookEnd 0 (sw -- stroke)
 					g4   df.leftSB (0 + SHook)
 
 	define TSUpperConfig : object
@@ -400,6 +458,6 @@ glyph-block Letter-Latin-Lower-T : begin
 			HCrossBar.top
 				xLeft + (BBD / 2) - LongJut + TBalance2
 				xLeft + (BBD / 2) + LongJut + TBalance2
-				begin yCrossBar
+				begin ySmallTBarPos
 				begin BBS
 			Rect Ascender 0 xLeft (xLeft + BBD)

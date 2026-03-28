@@ -83,7 +83,7 @@ export class QuadifySink {
 
 	// Occurrent cleanup -- corner-corner
 	cleanupOccurrentKnots1(c0) {
-		let drops = [];
+		const drops = [];
 		for (let i = 0; i < c0.length; i++) drops[i] = false;
 		for (let i = 0; i < c0.length; i++) {
 			const iPost = (i + 1) % c0.length;
@@ -105,7 +105,7 @@ export class QuadifySink {
 	// Occurrent cleanup -- off points
 	// This function actually **INSERTS** points for occurrent off knots.
 	cleanupOccurrentKnots2(c0) {
-		let insertAfter = [];
+		const insertAfter = [];
 		for (let i = 0; i < c0.length; i++) insertAfter[i] = false;
 		for (let i = 0; i < c0.length; i++) {
 			const cur = c0[i];
@@ -124,7 +124,7 @@ export class QuadifySink {
 			}
 		}
 
-		let c1 = [];
+		const c1 = [];
 		for (let i = 0; i < c0.length; i++) {
 			const cur = c0[i];
 			c1.push(cur);
@@ -168,7 +168,7 @@ export class QuadifySink {
 			shouldRemove = [],
 			middlePoints = [];
 		for (let rear = 1; rear <= c.length; rear++) {
-			let zFront = c[front],
+			const zFront = c[front],
 				zRear = c[rear % c.length];
 			if (zRear.type === Point.Type.Corner) {
 				let allColinear = true;

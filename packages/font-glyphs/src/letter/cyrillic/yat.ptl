@@ -14,9 +14,21 @@ glyph-block Letter-Cyrillic-Yat : begin
 	glyph-block-import Letter-Cyrillic-Yeri : YeriConfig YeriBarPos
 	glyph-block-import Letter-Cyrillic-Iotified-A : Iotified
 
-	define [yYatDefaultCrossbarPos top pBar stroke] : [mix ([mix 0 top pBar] + stroke / 2) [if SLAB (top - stroke) top] [if SLAB 0.625 0.5]] + (OverlayStroke * (stroke / Stroke)) / 2
+	define [yYatDefaultCrossbarPos top pBar stroke] : begin
+		local bowl : [mix 0 top pBar] + stroke / 2
+		local fine : (OverlayStroke * (stroke / Stroke)) / 2
+		return : [mix bowl [if SLAB (top - stroke) top] [if SLAB 0.625 0.5]] + fine
 
-	define [YatShape] : with-params [df Yeri top [pBar YeriBarPos] [fCapital false] [stroke [Math.min df.mvs : AdviceStroke 2.75 df.adws]] [yCrossbarPos [yYatDefaultCrossbarPos top pBar stroke]] [xCrossbarLeftExt nothing]] : glyph-proc
+	define flex-params [YatShape] : glyph-proc
+		local-parameter : df
+		local-parameter : Yeri
+		local-parameter : top
+		local-parameter : pBar          -- YeriBarPos
+		local-parameter : fCapital      -- false
+		local-parameter : stroke        -- [AdviceStroke 2.75 df.adws]
+		local-parameter : yCrossbarPos  -- [yYatDefaultCrossbarPos top pBar stroke]
+		local-parameter : xCrossbarLeftExt -- nothing
+
 		local xYeriLeft : Math.max (df.rightSB - (RightSB - SB)) : if SLAB
 			[mix df.leftSB df.rightSB 0.35] - [HSwToV : 0.50 * stroke]
 			[mix df.leftSB df.rightSB 0.20] - [HSwToV : 0.25 * stroke]
@@ -43,46 +55,67 @@ glyph-block Letter-Cyrillic-Yat : begin
 				eject-contour 'serifYeriLT'
 				include : tagged 'serifLT' : HSerif.lt xYeriLeft top SideJut stroke
 
-	define [IotifiedYatShape] : with-params [df Yeri top [pBar YeriBarPos] [fCapital false] [stroke [Math.min df.mvs : AdviceStroke 2.75 (df.adws * (7 / 9))]] [yCrossbarPos [yYatDefaultCrossbarPos top pBar stroke]]] : glyph-proc
+	define flex-params [IotifiedYatShape] : glyph-proc
+		local-parameter : df
+		local-parameter : Yeri
+		local-parameter : top
+		local-parameter : pBar          -- YeriBarPos
+		local-parameter : fCapital      -- false
+		local-parameter : stroke        -- [AdviceStroke 2.75 (df.adws * (7 / 9))]
+		local-parameter : yCrossbarPos  -- [yYatDefaultCrossbarPos top pBar stroke]
+		local-parameter : xCrossbarLeftExt -- df.leftSB
+
 		local gap : 0.25 * (df.rightSB - df.leftSB) + [if SLAB 0.375 0.125] * stroke
 		local subDf : DivFrame [Math.min ((df.width - gap) / Width) (df.adws * (7 / 9))] 2
 
 		local shift : df.width - subDf.width
-		include : with-transform [ApparentTranslate shift 0] : new-glyph : glyph-proc
+
+		define [Yat] : new-glyph : glyph-proc
 			include : YatShape subDf Yeri top
 				pBar          -- pBar
 				fCapital      -- fCapital
 				stroke        -- stroke
 				yCrossbarPos  -- yCrossbarPos
-				xCrossbarLeftExt -- (df.leftSB - shift)
+				xCrossbarLeftExt -- (xCrossbarLeftExt - shift)
 			eject-contour 'serifDL'
 
-		include : Iotified.[if fCapital 'full' 'ascender'] df top 0 (fCapital -- fCapital) (swRef -- stroke)
+		include : with-transform [ApparentTranslate shift 0] : Yat
+
+		include : Iotified.[if fCapital 'full' 'ascender'] df top 0
+			fCapital -- fCapital
+			swRef    -- stroke
 
 	define [SakhaYatShape Yeri df top] : glyph-proc
+		local jut : Math.min
+			Jut - [HSwToV : 0.5 * (Stroke - df.mvs)]
+			mix [HSwToV : 0.5 * df.mvs] Jut ((2 / df.hPack) * df.adws)
 		include : Yeri top
 			left   -- (df.middle - [HSwToV : 0.5 * df.mvs])
 			right  -- df.rightSB
 			stroke -- df.mvs
-			jut    -- [Math.min (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)]) : mix [HSwToV : 0.5 * df.mvs] Jut : (2/3) * df.adws]
+			jut    -- jut
 
 		local fEnoughSpaceForFullSerifs : df.width > 7 * para.refJut
 		if [not fEnoughSpaceForFullSerifs] : eject-contour 'serifYeriLB'
-		include : Iotified.[if fEnoughSpaceForFullSerifs 'full' 'outer'] df top (df.middle + [HSwToV : 0.5 * df.mvs]) (top - df.mvs / 2)
+		include : Iotified.[if fEnoughSpaceForFullSerifs 'full' 'outer'] df top
+			hBarRight -- (df.middle + [HSwToV : 0.5 * df.mvs])
+			hBarY     -- (top - df.mvs / 2)
 
-	foreach { suffix { Uc Lc } } [pairs-of YeriConfig] : do
+	foreach { suffix { Uc Lc BGRc } } [pairs-of YeriConfig] : do
 		create-glyph "cyrl/Yat.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleT 2
 			include : df.markSet.capital
 			include : YatShape df Uc CAP
-				pBar -- 0.5
+				pBar     -- 0.5
 				fCapital -- true
+				stroke   -- [Math.min df.mvs : AdviceStroke2 2.75 3 CAP df.adws]
 
 		create-glyph "cyrl/yat.upright.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleT 2
 			include : df.markSet.b
 			include : YatShape df Lc Ascender
-				pBar -- ([mix 0 XH YeriBarPos] / Ascender)
+				pBar   -- ([mix 0 XH YeriBarPos] / Ascender)
+				stroke -- [Math.min df.mvs : AdviceStroke2 2.75 3 XH df.adws]
 				yCrossbarPos -- XH
 
 		create-glyph "cyrl/yatTall.\(suffix)" : glyph-proc
@@ -91,21 +124,24 @@ glyph-block Letter-Cyrillic-Yat : begin
 			local asc : mix XH Ascender 2
 			include : ExtendAboveBaseAnchors asc
 			include : YatShape df Lc asc
-				pBar -- ([mix 0 XH YeriBarPos] / asc)
+				pBar   -- ([mix 0 XH YeriBarPos] / asc)
+				stroke -- [Math.min df.mvs : AdviceStroke2 2.75 3 XH df.adws]
 				yCrossbarPos -- Ascender
 
 		create-glyph "cyrl/YatIotified.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.capital
 			include : IotifiedYatShape df Uc CAP
-				pBar -- 0.5
+				pBar     -- 0.5
 				fCapital -- true
+				stroke   -- [Math.min df.mvs : AdviceStroke2 2.75 3 CAP (df.adws * (7 / 9))]
 
 		create-glyph "cyrl/yatIotified.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.b
 			include : IotifiedYatShape df Lc Ascender
-				pBar -- ([mix 0 XH YeriBarPos] / Ascender)
+				pBar   -- ([mix 0 XH YeriBarPos] / Ascender)
+				stroke -- [Math.min df.mvs : AdviceStroke2 2.75 3 XH (df.adws * (7 / 9))]
 				yCrossbarPos -- XH
 
 		create-glyph "latn/yatSakha.upright.\(suffix)" : glyph-proc
@@ -118,12 +154,12 @@ glyph-block Letter-Cyrillic-Yat : begin
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.e
 
-			local dfSub : df.slice 3 2
-			local xMidBarLeft : dfSub.rightSB - [HSwToV df.mvs]
+			local subDf : df.slice 3 2
+			local xMidBarLeft : subDf.rightSB - [HSwToV df.mvs]
 
 			include : Lc XH xMidBarLeft df.rightSB
 				stroke -- df.mvs
-				yStart -- (XH - dfSub.smallArchDepthB)
+				yStart -- (XH - subDf.smallArchDepthB)
 			eject-contour 'serifYeriLT'
 			eject-contour 'serifYeriLB'
 
@@ -133,12 +169,12 @@ glyph-block Letter-Cyrillic-Yat : begin
 			local df : include : DivFrame [mix 1 para.advanceScaleMM 2] 4
 			include : df.markSet.e
 
-			local dfSub : df.slice 4 3 0
-			local xMidBarLeft : dfSub.rightSB - [HSwToV df.mvs]
+			local subDf : df.slice 4 3 0
+			local xMidBarLeft : subDf.rightSB - [HSwToV df.mvs]
 
 			include : Lc XH xMidBarLeft df.rightSB
 				stroke -- df.mvs
-				yStart -- (XH - SmallArchDepthB * 0.5 * df.adws)
+				yStart -- (XH - SmallArchDepthB * (2 / df.hPack) * df.adws)
 			eject-contour 'serifYeriLT'
 			eject-contour 'serifYeriLB'
 

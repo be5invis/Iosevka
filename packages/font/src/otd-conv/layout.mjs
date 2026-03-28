@@ -138,7 +138,7 @@ class LookupStore {
 		if (!dst || !handler) return;
 		if (otdLookup.subtables) throw new Error("Unreachable.");
 		if (otdLookup.ignoreGlyphs) {
-			let s = new Set();
+			const s = new Set();
 			for (const gn of otdLookup.ignoreGlyphs) {
 				const g = this.glyphs.queryByName(gn);
 				if (g) s.add(g);
@@ -328,7 +328,7 @@ function convertMarkRecords(marks, mm, store) {
 		const mark = marks[gn];
 		const g = store.glyphs.queryByName(gn);
 		if (!g) continue;
-		let markAnchors = [];
+		const markAnchors = [];
 		markAnchors[mm.get(mark.class)] = Vec2.from(mark);
 		out.set(g, { markAnchors: markAnchors });
 	}

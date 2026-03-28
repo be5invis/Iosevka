@@ -13,7 +13,7 @@ glyph-block Letter-Latin-Lower-R : begin
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 
 	local dfN : DivFrame 1
-	local dfR : DivFrame para.advanceScaleF
+	local dfR : DivFrame para.advanceScaleF 1 0.75
 
 	# Modes
 	local rStraight             0
@@ -23,6 +23,8 @@ glyph-block Letter-Latin-Lower-R : begin
 	local rEarless              4
 	local rCornerHooked         5
 	local rCornerHookedSerifed  6
+	local rNarrowHook           7
+	local rNarrowHookSerifed    8
 
 	define [RDim df mode _strokeBar _stroke] : namespace
 		local strokeBar : fallback _strokeBar Stroke
@@ -36,6 +38,8 @@ glyph-block Letter-Latin-Lower-R : begin
 			[Just rCornerHooked]        { (5 / 8)                1        0        0       2.35 }
 			[Just rCornerHookedSerifed] { (4 / 3)               (2 / 3)  (1 / 4)  (1 / 3)  2.35 }
 			[Just rEarless]             {  1                     1       (1 / 2)   0       2.35 }
+			[Just rNarrowHook]          {  1                     1       (1 / 2)   0       2.35 }
+			[Just rNarrowHookSerifed]   { (4 / 3)               (2 / 3)  (3 / 4)  (1 / 3)  2.35 }
 
 		export : local xBar : df.leftSB + RBalance * rBalanceMultiplier + [HSwToV strokeBar]
 		local rSerifX : xBar - [HSwToV : 0.5 * strokeBar]
@@ -52,15 +56,21 @@ glyph-block Letter-Latin-Lower-R : begin
 		export : local [rTopSerif y] : tagged 'serifLT'
 			HSerif.lt rSerifX y (rSerifLeftJut + [HSwToV : 0.5 * strokeBar])
 		export : local fine ShoulderFine
-		export : local rHookX : df.rightSB + RBalance2 * rBalanceMultiplier - (OX - O)
+		local rHookXFull : df.rightSB + RBalance2 * rBalanceMultiplier - (OX - O)
+		local pAdaptive : if (para.advanceScaleF < 1) ((1 - df.adws) / (1 - para.advanceScaleF)) 0
+		export : local rHookX : match mode
+			([Just rNarrowHook] || [Just rNarrowHookSerifed]) : mix xBar rHookXFull [mix 0.85 1.15 pAdaptive]
+			__ rHookXFull
 		export : local xArchMiddle : match mode
 			[Just rStraight]                                      : mix (xBar - fine) rHookX (0.54 + 2 * TanSlope * strokeBar / Width)
 			[Just rSerifed]                                       : mix (xBar - fine) rHookX (0.59 + 2 * TanSlope * strokeBar / Width)
 			([Just rNarrow]       || [Just rNarrowSerifed])       : mix df.width rHookX : Math.max 1.01 (5 / 4 * [mix 1 dfR.adws 2])
 			([Just rCornerHooked] || [Just rCornerHookedSerifed]) : rHookX - [HSwToV : 0.5 * strokeBar]
 			[Just rEarless]                                       : mix (xBar - [HSwToV strokeBar]) rHookX 0.5
+			[Just rNarrowHook]                                    : mix (xBar - fine) rHookX (0.54 + 2 * TanSlope * strokeBar / Width)
+			[Just rNarrowHookSerifed]                             : mix (xBar - fine) rHookX (0.59 + 2 * TanSlope * strokeBar / Width)
 		local mixpin : match mode
-			([Just rSerifed] || [Just rCornerHooked] || [Just rCornerHookedSerifed]) : begin
+			([Just rSerifed] || [Just rCornerHooked] || [Just rCornerHookedSerifed] || [Just rNarrowHookSerifed]) : begin
 				0.65 + 0.25 * strokeA / Width + 4 * TanSlope * strokeA / Width
 			__ : 0.65 + 4 * TanSlope * strokeA / Width
 		local rmiddlein : [mix xBar (rHookX - [HSwToV : 1.05 * strokeA]) mixpin] - CorrectionOMidS
@@ -152,7 +162,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		include : dispiro
 			widths.lhs
 			g4   [Math.max rHookX : xBar + 1.25 * Stroke] (XH - rHookY)
-			hookstart XH
+			HookStart XH
 			flat (xBar - [HSwToV Stroke]) [Math.max TINY : XH - SmallArchDepthA]
 			curl (xBar - [HSwToV Stroke]) 0 [heading Downward]
 		if doBottomSerif : include : rBottomSerif 0
@@ -177,6 +187,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			hookless       { CompactShape        dfN rNarrow       rNarrowSerifed       }
 			cornerHooked   { CornerHookShape     dfN rCornerHooked rCornerHookedSerifed }
 			compact        { CompactShape        dfR rNarrow       rNarrowSerifed       }
+			narrowHook     { StandardShape       dfR rNarrowHook   rNarrowHookSerifed   }
 			hooklessFlap   { FlapHooklessShape   dfN rNarrow       rNarrowSerifed       }
 			compactFlap    { FlapHooklessShape   dfR rNarrow       rNarrowSerifed       }
 

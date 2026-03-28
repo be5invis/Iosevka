@@ -1,6 +1,6 @@
-import fs from "fs";
-import path from "path";
-import url from "url";
+import fs from "node:fs";
+import path from "node:path";
+import url from "node:url";
 
 import ugc from "@unicode/unicode-17.0.0/General_Category/index.js";
 import ucdNames from "@unicode/unicode-17.0.0/Names/index.js";

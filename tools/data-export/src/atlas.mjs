@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "node:fs";
 
 import { getCharMapAndSupportedLanguageList } from "./supported-languages.mjs";
 
@@ -13,12 +13,9 @@ async function main(argv) {
 	if (argv.outputShared) {
 		await fs.promises.writeFile(argv.outputShared, JSON.stringify(cl.shared, null, 2));
 	}
-
-	{
-		delete cl.udatMap;
-		await fs.promises.writeFile(
-			argv.output,
-			JSON.stringify({ version: argv.version, ...cl.unique }, null, 2),
-		);
-	}
+	delete cl.udatMap;
+	await fs.promises.writeFile(
+		argv.output,
+		JSON.stringify({ version: argv.version, ...cl.unique }, null, 2),
+	);
 }

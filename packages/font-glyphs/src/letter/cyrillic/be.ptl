@@ -10,7 +10,7 @@ glyph-block Letter-Cyrillic-Be : begin
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Shapes : UpwardHookShape SerifFrame
 	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
-	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos Yeri RevYeri
+	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos YeriUpper RevYeriUpper
 
 	define BeConfig : object
 		standardSerifless         { false false }
@@ -22,43 +22,48 @@ glyph-block Letter-Cyrillic-Be : begin
 
 		create-glyph "cyrl/Be.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : Yeri.UprightShape CAP (fSlab -- false)
+			local stroke : AdviceStroke2 2 3 CAP
+			include : YeriUpper.Shape CAP SB RightSB stroke (fSlab -- false)
 			include : HBar.t (SB - O) [mix SB RightSB 0.9] CAP
 			if doST : begin
-				include : tagged 'serifTL' : HSerif.lt SB CAP SideJut
-				local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos
-				include : tagged 'serifTR' : VSerif.dr [mix SB RightSB 0.9] CAP jutTop
-			if doSB : include : tagged 'serifBL' : HSerif.lb SB 0 SideJut
+				include : tagged 'serifLT' : HSerif.lt SB CAP SideJut stroke
+				local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos stroke
+				local swVJut : VJutStroke * (stroke / Stroke)
+				include : tagged 'serifRT' : VSerif.dr [mix SB RightSB 0.9] CAP jutTop swVJut
+			if doSB : include : tagged 'serifLB' : HSerif.lb SB 0 SideJut stroke
 
 		create-glyph "cyrl/BeRev.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : RevYeri.Shape CAP (fSlab -- false)
+			local stroke : AdviceStroke2 2 3 CAP
+			include : RevYeriUpper.Shape CAP SB RightSB stroke (fSlab -- false)
 			include : HBar.t [mix SB RightSB 0.1] (RightSB + O) CAP
 			if doST : begin
-				include : tagged 'serifTR' : HSerif.rt RightSB CAP SideJut
-				local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos
-				include : tagged 'serifTL' : VSerif.dl [mix SB RightSB 0.1] CAP jutTop
-			if doSB : include : tagged 'serifBR' : HSerif.rb RightSB 0 SideJut
+				include : tagged 'serifRT' : HSerif.rt RightSB CAP SideJut stroke
+				local { jutTop jutBot jutMid } : EFVJutLength CAP YeriBarPos stroke
+				local swVJut : VJutStroke * (stroke / Stroke)
+				include : tagged 'serifLT' : VSerif.dl [mix SB RightSB 0.1] CAP jutTop swVJut
+			if doSB : include : tagged 'serifRB' : HSerif.rb RightSB 0 SideJut stroke
 
 		create-glyph "cyrl/DeKomi.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : LeaningAnchor.Above.VBar.r RightSB
-			include : RevYeri.Shape CAP (fSlab -- false)
-			if doST : include : tagged 'serifTR' : if fMotion
-				HSerif.lt (RightSB - [HSwToV Stroke]) CAP SideJut
-				HSerif.mt (RightSB - [HSwToV HalfStroke]) CAP Jut
-			if doSB : include : tagged 'serifBR' : HSerif.rb RightSB 0 SideJut
+			local stroke : AdviceStroke2 2 3 CAP
+			include : LeaningAnchor.Above.VBar.r RightSB stroke
+			include : RevYeriUpper.Shape CAP SB RightSB stroke (fSlab -- false)
+			if doST : include : tagged 'serifRT' : if fMotion
+				HSerif.lt (RightSB - [HSwToV stroke]) CAP SideJut stroke
+				HSerif.mt (RightSB - [HSwToV : 0.5 * stroke]) CAP (Jut - [HSwToV : 0.5 * (Stroke - stroke)]) stroke
+			if doSB : include : tagged 'serifRB' : HSerif.rb RightSB 0 SideJut stroke
 
 		create-glyph "cyrl/DjeKomi.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.capital
 
-			include : RevYeri.RoundShape CAP
+			include : RevYeriUpper.RoundShape CAP
 				left   -- df.leftSB
 				right  -- (df.middle + [HSwToV : 0.5 * df.mvs])
 				stroke -- df.mvs
 				fSlab  -- false
-			if doST : include : tagged 'serifTR' : if fMotion
+			if doST : include : tagged 'serifRT' : if fMotion
 				HSerif.lt (df.middle - [HSwToV : 0.5 * df.mvs]) CAP SideJut df.mvs
 				HSerif.mt df.middle CAP (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)]) df.mvs
 			include : UpwardHookShape
@@ -75,7 +80,7 @@ glyph-block Letter-Cyrillic-Be : begin
 
 	select-variant 'cyrl/Be' 0x411
 
-	alias 'latn/Be' 0x182 'cyrl/Be'
+	select-variant 'latn/Be' 0x182 (shapeFrom -- 'cyrl/Be')    (follow -- 'bCap')
 	select-variant 'latn/De' 0x18B (shapeFrom -- 'cyrl/BeRev') (follow -- 'dCap')
 
 	select-variant 'cyrl/DeKomi'  0x500 (follow -- 'dCap')
@@ -91,9 +96,9 @@ glyph-block Letter-Cyrillic-Be : begin
 		include : dispiro
 			widths.rhs ShoulderFine
 			straight.up.start (SB + OX + [HSwToV : Stroke - ShoulderFine]) (yRingTop - ada)
-			arch.rhs yRingTop (swBefore -- ShoulderFine)
+			Arch.rhs yRingTop (swBefore -- ShoulderFine)
 			flatside.rd RightSB 0 yRingTop ada adb
-			arch.rhs 0
+			Arch.rhs 0
 			flatside.lu SB      0 yRingTop ada adb
 			alsoThruThem [list {0.3 0.85} {0.65 0.925}] important g4
-			g4   (RightSB - [HSwToV : Stroke / 16]) Ascender [heading Rightward]
+			g4   (RightSB - [HSwToV : 0.0625 * Stroke]) Ascender [heading Rightward]

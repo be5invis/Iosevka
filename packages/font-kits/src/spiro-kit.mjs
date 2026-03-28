@@ -1,13 +1,13 @@
 import { DiSpiroGeometry, SpiroGeometry } from "@iosevka/geometry";
 import {
 	AfBase,
+	DecorInterpolator,
 	InterpolatorBase,
 	SpiroFlattener,
 	TerminateInstruction,
 	UserCloseKnotPair,
 	UserControlKnot,
 	VirtualControlKnot,
-	DecorInterpolator,
 } from "@iosevka/geometry/spiro-control";
 import { bez3, clamp, fallback, mix } from "@iosevka/util";
 
@@ -30,9 +30,6 @@ class SpiroImplBase {
 }
 
 class DispiroImpl extends SpiroImplBase {
-	constructor(bindings, controls) {
-		super(bindings, controls);
-	}
 	applyToGlyph(glyph) {
 		const gizmo = glyph.gizmo || this.bindings.GlobalTransform;
 		const collector = new BiKnotCollector(this.bindings.Contrast);
@@ -44,9 +41,6 @@ class DispiroImpl extends SpiroImplBase {
 }
 
 class SpiroOutlineImpl extends SpiroImplBase {
-	constructor(bindings, controls) {
-		super(bindings, controls);
-	}
 	applyToGlyph(glyph) {
 		const gizmo = glyph.gizmo || this.bindings.GlobalTransform;
 		const collector = new BiKnotCollector(this.bindings.Contrast);
@@ -104,8 +98,8 @@ class DirectedKnotPairBuilder {
 }
 
 function DirPairImpl(kPre, kCenter, kPost, dirX, dirY, dPre, dPost) {
-	let tyPre = kPre(0, 0).type;
-	let tyPost = kPost(0, 0).type;
+	const tyPre = kPre(0, 0).type;
+	const tyPost = kPost(0, 0).type;
 	return (x, y, af) =>
 		new UserCloseKnotPair(kCenter(x, y, af), tyPre, tyPost, dirX, dirY, dPre, dPost);
 }
@@ -132,8 +126,8 @@ export function SetupBuilders(bindings) {
 
 	// Add the directed/heading knot builders
 	{
-		// prettier-ignore
-		let knotTypes = [
+		// biome-ignore format: keep the columns aligned for readability
+		const knotTypes = [
 			[ g4,       g4,     g4,     g4     ],
 			[ g2,       g2,     g2,     g2     ],
 			[ corner,   corner, corner, corner ],
@@ -143,7 +137,7 @@ export function SetupBuilders(bindings) {
 			[ flatc,    flat,   corner, corner ],
 			[ ccurl,    corner, corner, curl   ],
 		];
-		let directions = [
+		const directions = [
 			// Straights
 			{ name: "up", x: 0, y: 1 },
 			{ name: "down", x: 0, y: -1 },
@@ -182,23 +176,23 @@ export function SetupBuilders(bindings) {
 	}
 
 	function widths(l, r) {
-		if (!isFinite(l)) throw new TypeError("NaN detected for left width");
-		if (!isFinite(r)) throw new TypeError("NaN detected for right width");
+		if (!Number.isFinite(l)) throw new TypeError("NaN detected for left width");
+		if (!Number.isFinite(r)) throw new TypeError("NaN detected for right width");
 		return new AfSetWidths(l, r);
 	}
-	widths.lhs = function (w) {
+	widths.lhs = w => {
 		w = fallback(w, Stroke);
-		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
+		if (!Number.isFinite(w)) throw new TypeError("NaN detected for left width");
 		return widths(w, 0);
 	};
-	widths.rhs = function (w) {
+	widths.rhs = w => {
 		w = fallback(w, Stroke);
-		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
+		if (!Number.isFinite(w)) throw new TypeError("NaN detected for left width");
 		return widths(0, w);
 	};
-	widths.center = function (w) {
+	widths.center = w => {
 		w = fallback(w, Stroke);
-		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
+		if (!Number.isFinite(w)) throw new TypeError("NaN detected for left width");
 		return widths(w / 2, w / 2);
 	};
 
@@ -212,7 +206,7 @@ export function SetupBuilders(bindings) {
 		}
 	}
 	function heading(d) {
-		if (!isFinite(d.x) || !isFinite(d.y))
+		if (!Number.isFinite(d.x) || !Number.isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
 		return new AfHeading(d);
 	}
@@ -230,31 +224,31 @@ export function SetupBuilders(bindings) {
 		}
 	}
 
-	widths.heading = function (l, r, d) {
-		if (!isFinite(l)) throw new TypeError("NaN detected for left width");
-		if (!isFinite(r)) throw new TypeError("NaN detected for right width");
-		if (!isFinite(d.x) || !isFinite(d.y))
+	widths.heading = (l, r, d) => {
+		if (!Number.isFinite(l)) throw new TypeError("NaN detected for left width");
+		if (!Number.isFinite(r)) throw new TypeError("NaN detected for right width");
+		if (!Number.isFinite(d.x) || !Number.isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
 		return new AfWidthsHeading(l, r, d);
 	};
-	widths.lhs.heading = function (w, d) {
+	widths.lhs.heading = (w, d) => {
 		w = fallback(w, Stroke);
-		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
-		if (!isFinite(d.x) || !isFinite(d.y))
+		if (!Number.isFinite(w)) throw new TypeError("NaN detected for left width");
+		if (!Number.isFinite(d.x) || !Number.isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
 		return new AfWidthsHeading(w, 0, d);
 	};
-	widths.rhs.heading = function (w, d) {
+	widths.rhs.heading = (w, d) => {
 		w = fallback(w, Stroke);
-		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
-		if (!isFinite(d.x) || !isFinite(d.y))
+		if (!Number.isFinite(w)) throw new TypeError("NaN detected for left width");
+		if (!Number.isFinite(d.x) || !Number.isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
 		return new AfWidthsHeading(0, w, d);
 	};
-	widths.center.heading = function (w, d) {
+	widths.center.heading = (w, d) => {
 		w = fallback(w, Stroke);
-		if (!isFinite(w)) throw new TypeError("NaN detected for left width");
-		if (!isFinite(d.x) || !isFinite(d.y))
+		if (!Number.isFinite(w)) throw new TypeError("NaN detected for left width");
+		if (!Number.isFinite(d.x) || !Number.isFinite(d.y))
 			throw new TypeError("NaN detected for heading directions");
 		return new AfWidthsHeading(w / 2, w / 2, d);
 	};
@@ -343,24 +337,15 @@ export function SetupBuilders(bindings) {
 	}
 
 	function AlsoThruSeries(ty) {
-		const fn = function (rx, ry, raf) {
-			return new SimpleMixInterpolator(ty, rx, ry, 0, 0, raf);
-		};
-		fn.withOffset = function (rx, ry, deltaX, deltaY, raf) {
-			return new SimpleMixInterpolator(ty, rx, ry, deltaX, deltaY, raf);
-		};
-		fn.distFromStart = function (dist, raf) {
-			return new DistanceFromStartInterpolator(ty, dist, 0, 0, raf);
-		};
-		fn.distTillEnd = function (dist, raf) {
-			return new DistTillEndInterpolator(ty, dist, 0, 0, raf);
-		};
-		fn.distFromStart.withOffset = function (dist, deltaX, deltaY, raf) {
-			return new DistanceFromStartInterpolator(ty, dist, deltaX, deltaY, raf);
-		};
-		fn.distTillEnd.withOffset = function (dist, deltaX, deltaY, raf) {
-			return new DistTillEndInterpolator(ty, dist, deltaX, deltaY, raf);
-		};
+		const fn = (rx, ry, raf) => new SimpleMixInterpolator(ty, rx, ry, 0, 0, raf);
+		fn.withOffset = (rx, ry, deltaX, deltaY, raf) =>
+			new SimpleMixInterpolator(ty, rx, ry, deltaX, deltaY, raf);
+		fn.distFromStart = (dist, raf) => new DistanceFromStartInterpolator(ty, dist, 0, 0, raf);
+		fn.distTillEnd = (dist, raf) => new DistTillEndInterpolator(ty, dist, 0, 0, raf);
+		fn.distFromStart.withOffset = (dist, deltaX, deltaY, raf) =>
+			new DistanceFromStartInterpolator(ty, dist, deltaX, deltaY, raf);
+		fn.distTillEnd.withOffset = (dist, deltaX, deltaY, raf) =>
+			new DistTillEndInterpolator(ty, dist, deltaX, deltaY, raf);
 		return fn;
 	}
 
@@ -379,12 +364,12 @@ export function SetupBuilders(bindings) {
 			this.ty = fallback(ty, g2);
 		}
 		resolveInterpolation(before, after) {
-			let innerKnots = [];
+			const innerKnots = [];
 			for (const [rx, ry, rt] of this.rs) {
 				const x = mix(before.x, after.x, rx);
 				const y = mix(before.y, after.y, ry);
 				const af =
-					this.raf && this.raf.blend && rt !== void 0
+					this.raf?.blend && rt !== void 0
 						? this.raf.blend(rt)
 						: this.raf
 							? this.raf
@@ -407,7 +392,7 @@ export function SetupBuilders(bindings) {
 			this.ty = fallback(ty, g2);
 		}
 		resolveInterpolation(before, after) {
-			let innerKnots = [];
+			const innerKnots = [];
 			for (const rt of this.rs) {
 				innerKnots.push(
 					this.ty(
@@ -420,14 +405,12 @@ export function SetupBuilders(bindings) {
 			return innerKnots;
 		}
 	}
-	alsoThruThem.computed = function (rs, raf, ty) {
-		return new MultiMixComputeInterpolator(rs, raf, ty);
-	};
+	alsoThruThem.computed = (rs, raf, ty) => new MultiMixComputeInterpolator(rs, raf, ty);
 
 	// Bezier control interpolator
 
-	function bezControlsImpl(x1, y1, x2, y2, samples, raf, ty) {
-		let rs = [];
+	function bezControlsImpl(x1, y1, x2, y2, samples, raf, _ty) {
+		const rs = [];
 		for (let j = 1; j < samples; j = j + 1)
 			rs.push([
 				bez3(0, x1, x2, 1, j / samples),
@@ -458,11 +441,11 @@ export function SetupBuilders(bindings) {
 			this.superness = superness;
 		}
 		resolveInterpolation(before, after) {
-			let innerKnots = [];
+			const innerKnots = [];
 			for (let j = 1; j < this.steps; j++) {
 				const theta = (((j + 1) / (this.steps + 2)) * Math.PI) / 2;
-				const c = Math.pow(Math.cos(theta), 2 / this.superness);
-				const s = Math.pow(Math.sin(theta), 2 / this.superness);
+				const c = Math.cos(theta) ** (2 / this.superness);
+				const s = Math.sin(theta) ** (2 / this.superness);
 				const x = mix(before.x, after.x, s);
 				const y = mix(before.y, after.y, 1 - c);
 				innerKnots.push(g2(x, y, unimportant));
@@ -477,11 +460,11 @@ export function SetupBuilders(bindings) {
 			this.superness = superness;
 		}
 		resolveInterpolation(before, after) {
-			let innerKnots = [];
+			const innerKnots = [];
 			for (let j = 1; j < this.steps; j++) {
 				const theta = (((j + 1) / (this.steps + 2)) * Math.PI) / 2;
-				const c = Math.pow(Math.cos(theta), 2 / this.superness);
-				const s = Math.pow(Math.sin(theta), 2 / this.superness);
+				const c = Math.cos(theta) ** (2 / this.superness);
+				const s = Math.sin(theta) ** (2 / this.superness);
 				const x = mix(before.x, after.x, 1 - c);
 				const y = mix(before.y, after.y, s);
 				innerKnots.push(g2(x, y, unimportant));
@@ -490,38 +473,34 @@ export function SetupBuilders(bindings) {
 		}
 	}
 
-	let DEFAULT_STEPS = 6;
+	const DEFAULT_STEPS = 6;
 	function archv(samples, superness) {
 		return new ArcHvInterpolator(
 			fallback(samples, DEFAULT_STEPS),
 			fallback(superness, Superness),
 		);
 	}
-	archv.superness = function (s) {
-		return new ArcHvInterpolator(DEFAULT_STEPS, s);
-	};
+	archv.superness = s => new ArcHvInterpolator(DEFAULT_STEPS, s);
 	function arcvh(samples, superness) {
 		return new ArcVhInterpolator(
 			fallback(samples, DEFAULT_STEPS),
 			fallback(superness, Superness),
 		);
 	}
-	arcvh.superness = function (s) {
-		return new ArcVhInterpolator(DEFAULT_STEPS, s);
-	};
-	archv.yFromX = function (px, _s) {
+	arcvh.superness = s => new ArcVhInterpolator(DEFAULT_STEPS, s);
+	archv.yFromX = (px, _s) => {
 		const s = fallback(_s, Superness);
-		return 1 - Math.pow(1 - Math.pow(px, s), 1 / s);
+		return 1 - (1 - px ** s) ** (1 / s);
 	};
-	archv.sCos = function (angle, _s) {
+	archv.sCos = (angle, _s) => {
 		const c = Math.cos((angle / 180) * Math.PI);
-		if (c < 0) return -Math.pow(-c, 2 / fallback(_s, Superness));
-		else return Math.pow(c, 2 / fallback(_s, Superness));
+		if (c < 0) return -((-c) ** (2 / fallback(_s, Superness)));
+		else return c ** (2 / fallback(_s, Superness));
 	};
-	archv.sSin = function (angle, _s) {
+	archv.sSin = (angle, _s) => {
 		const s = Math.sin((angle / 180) * Math.PI);
-		if (s < 0) return -Math.pow(-s, 2 / fallback(_s, Superness));
-		else return Math.pow(s, 2 / fallback(_s, Superness));
+		if (s < 0) return -((-s) ** (2 / fallback(_s, Superness)));
+		else return s ** (2 / fallback(_s, Superness));
 	};
 
 	function dispiro(...controls) {

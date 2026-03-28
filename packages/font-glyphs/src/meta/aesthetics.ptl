@@ -73,6 +73,8 @@ export : define [calculateMetrics para] : begin
 	define HookX para.hookx
 	define TailX para.tailX
 	define TailY para.tailY
+	define DiagTailAngle para.diagTailAngle
+	define DiagTailDepth para.diagTailDepth
 	define ArchDepth para.archDepth
 	define SmallArchDepth para.smallArchDepth
 
@@ -170,7 +172,7 @@ export : define [calculateMetrics para] : begin
 	define [ArchDepthAClamped top bot ada adb] : ada * [Math.min 1 : (top - bot) / (ada + adb)]
 	define [ArchDepthBClamped top bot ada adb] : adb * [Math.min 1 : (top - bot) / (ada + adb)]
 	define [YSmoothMidR top bot _ada _adb] : begin
-		if (bot > top) : throw : new Error "YSmoothMidR: bot > top"
+		if (bot > top) : return : YSmoothMidR bot top _ada _adb
 		local ada : fallback _ada ArchDepthA
 		local adb : fallback _adb ArchDepthB
 		local delta : (adb - ada) / 2
@@ -180,7 +182,7 @@ export : define [calculateMetrics para] : begin
 		return : yNotAdjusted - delta * [Math.min 1 : (top - bot) / (ada + adb)]
 	set YSmoothMidR.cr : function [c r _ada _adb] : YSmoothMidR (c + r) (c - r) _ada _adb
 	define [YSmoothMidL top bot _ada _adb] : begin
-		if (bot > top) : throw : new Error "YSmoothMidL: bot > top"
+		if (bot > top) : return : YSmoothMidL bot top _ada _adb
 		local ada : fallback _ada ArchDepthA
 		local adb : fallback _adb ArchDepthB
 		local delta : (adb - ada) / 2
@@ -196,11 +198,12 @@ export : define [calculateMetrics para] : begin
 	define OperatorStroke : AdviceStroke 2.75
 	define GeometryStroke : AdviceStroke 4
 
-	define [UnicodeWeightGrade n _adws _swRef] : begin
+	define [UnicodeWeightGrade n00 _adws _swRef] : begin
+		local n : n00 / 100
 		local adws : fallback _adws 1
-		local kw : 10 - adws - n / 200
+		local kw : 10 - adws - n / 2
 		define [mulPow s] : (0.25 + s / 8) * [StrokeWidthBlend 2 1]
-		local kMul : [Math.pow (n / 100) : mulPow adws] / [Math.pow 4 : mulPow 2]
+		local kMul : [Math.pow n : mulPow adws] / [Math.pow 4 : mulPow 2]
 		local kAdj : [fallback _swRef Stroke] / [AdviceStroke 6]
 		return : kMul * kAdj * [AdviceStroke kw]
 
@@ -212,17 +215,18 @@ export : define [calculateMetrics para] : begin
 		ParenBot OperTop OperBot TackTop TackBot PlusTop PlusBot PictTop PictBot BgOpTop BgOpBot
 		BgTkTop BgTkBot Italify Upright Scale Translate ApparentTranslate Rotate GlobalTransform
 		TanSlope HVContrast Upward Downward Rightward Leftward O OX OXHook Hook AHook SHook RHook
-		JHook HookX TailX TailY ArchDepth SmallArchDepth Stroke HalfStroke QuarterStroke DotSize
-		PeriodSize HBarPos OverlayPos Jut LongJut VJut LongVJut VJutStroke AccentStackOffset
-		AccentWidth AccentClearance AccentHeight CThin CThinB SLAB IBalance IBalance2 JBalance
-		JBalance2 TBalance TBalance2 RBalance RBalance2 FBalance OneBalance WideWidth0 WideWidth1
-		WideWidth2 WideWidth3 WideWidth4 EssUpper EssLower EssQuestion RightSB Middle DotRadius
-		PeriodRadius ArchDepthA ArchDepthB SmallArchDepthA SmallArchDepthB CorrectionOMidX
-		CorrectionOMidS compositeBaseAnchors AdviceStroke AdviceStroke2 AdviceStrokeInSpace
-		OverlayStroke OperatorStroke GeometryStroke UnicodeWeightGrade StrokeWidthBlend ArchDepthAOf
-		ArchDepthBOf ArchDepthAClamped ArchDepthBClamped SmoothAdjust SideJut MidJutSide MidJutCenter
-		YSmoothMidR YSmoothMidL DToothlessRise DMBlend ShoulderFine DefaultTightBendInnerRadius
-		HSwToV VSwToH NarrowUnicodeT WideUnicodeT VERY-FAR TINY]
+		JHook HookX TailX TailY DiagTailAngle DiagTailDepth ArchDepth SmallArchDepth Stroke
+		HalfStroke QuarterStroke DotSize PeriodSize HBarPos OverlayPos Jut LongJut VJut LongVJut
+		VJutStroke AccentStackOffset AccentWidth AccentClearance AccentHeight CThin CThinB SLAB
+		IBalance IBalance2 JBalance JBalance2 TBalance TBalance2 RBalance RBalance2 FBalance
+		OneBalance WideWidth0 WideWidth1 WideWidth2 WideWidth3 WideWidth4 EssUpper EssLower
+		EssQuestion RightSB Middle DotRadius PeriodRadius ArchDepthA ArchDepthB SmallArchDepthA
+		SmallArchDepthB CorrectionOMidX CorrectionOMidS compositeBaseAnchors AdviceStroke
+		AdviceStroke2 AdviceStrokeInSpace OverlayStroke OperatorStroke GeometryStroke
+		UnicodeWeightGrade StrokeWidthBlend ArchDepthAOf ArchDepthBOf ArchDepthAClamped
+		ArchDepthBClamped SmoothAdjust SideJut MidJutSide MidJutCenter YSmoothMidR YSmoothMidL
+		DToothlessRise DMBlend ShoulderFine DefaultTightBendInnerRadius HSwToV VSwToH
+		NarrowUnicodeT WideUnicodeT VERY-FAR TINY]
 
 export : define [setFontMetrics para metrics fm] : begin
 	define [object CAP Descender XH Width SymbolMid] metrics
@@ -459,7 +463,7 @@ export : define [GenDivFrame metrics] : begin
 			set this.shoulderFine : metrics.ShoulderFine * (mvs / metrics.Stroke)
 			set this.markSet      : MarksetDiv adws sbMul metrics
 
-			# No-overshoot metrics -- used for arch depth calculation
+			# No-overshoot metrics -- used for Arch depth calculation
 			set this.ox                 ox
 			set this.widthNoOvershoot : this.width - ox
 			set this.divNoOvershoot   : this.widthNoOvershoot / metrics.Width

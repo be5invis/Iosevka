@@ -10,6 +10,9 @@ export function linreg(x0, y0, x1, y1, x) {
 export function clamp(l, h, x) {
 	return x < l ? l : x > h ? h : x;
 }
+export function quantize(x, step) {
+	return step * Math.round(x / step);
+}
 export function fallback(...args) {
 	for (const item of args) if (item !== void 0) return item;
 	return void 0;
@@ -82,13 +85,13 @@ function joinSuffixListImpl(sink, k, v, telescope, configs) {
 }
 
 export const SuffixCfg = {
-	weave: function (...configs) {
-		let ans = {};
+	weave: (...configs) => {
+		const ans = {};
 		joinSuffixListImpl(ans, "", [], [], configs);
 		return ans;
 	},
-	combine: function (...configs) {
-		let ans = {};
+	combine: (...configs) => {
+		const ans = {};
 		for (const item of configs) for (const [k, v] of Object.entries(item)) ans[k] = v;
 		return ans;
 	},
@@ -130,7 +133,7 @@ export function constant(x) {
 
 export const ArrayUtil = {
 	mapIndexToItems(a, indexes) {
-		let answer = [];
+		const answer = [];
 		for (const item of indexes) answer.push(a[item]);
 		return answer;
 	},

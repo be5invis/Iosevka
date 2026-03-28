@@ -8,25 +8,27 @@ glyph-block Letter-Cyrillic-Yery : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
-	glyph-block-import Letter-Cyrillic-Yeri : Yeri CyrYerShape
+	glyph-block-import Letter-Cyrillic-Yeri : YeriUpper YeriLower
+	glyph-block-import Letter-Cyrillic-Yer : CyrYerShape
 
-	define [CyrYeryShape fBackYer] : function [Base df top fTailed] : glyph-proc
+	define [CyrYeryShape fBackYer] : function [Yeri df top fTailed] : glyph-proc
 		local stroke : Math.min df.mvs : if fBackYer
-			AdviceStroke 2.75 : df.adws * (7 / 9)
-			AdviceStroke 2.00 : df.adws * (3 / 4)
+			AdviceStroke2 2.75 3 top : df.adws * (7 / 9)
+			AdviceStroke2 2.00 3 top : df.adws * (3 / 4)
 		local jut : Jut - [HSwToV : 0.5 * (Stroke - stroke)]
 
 		local xMiddleSym : mix 0 df.width : if fBackYer (5 / 9) (1 / 2)
-		local xMiddle : Math.min (df.leftSB + ([mix Width df.width : if fBackYer (1 / 3) 0] - SB * 2))
+		local xMiddle : Math.min
+			df.leftSB + ([mix Width df.width : if fBackYer (1 / 3) 0] - SB * 2)
 			mix (xMiddleSym + [HSwToV : 0.5 * stroke]) (df.rightSB - [HSwToV stroke]) 0.25
 
 		include : if fBackYer
-			CyrYerShape Base top
+			CyrYerShape Yeri top
 				left   -- df.leftSB
 				right  -- xMiddle
 				stroke -- stroke
 				jut    -- jut
-			Base top
+			Yeri top
 				left   -- df.leftSB
 				right  -- xMiddle
 				stroke -- stroke
@@ -36,19 +38,20 @@ glyph-block Letter-Cyrillic-Yery : begin
 			RightwardTailedBar df.rightSB 0 top stroke
 			VBar.r             df.rightSB 0 top stroke
 
-		if SLAB : begin
-			local useFullSerifs : Base === Yeri.UprightShape || (Base === Yeri.AutoItalicShape && [not para.isItalic])
-
-			if useFullSerifs : include : tagged 'serifRT' : HSerif.mt (df.rightSB - [HSwToV : 0.5 * stroke]) top jut stroke
-			if [not fTailed] : include : tagged 'serifRB' : if useFullSerifs
-				HSerif.mb (df.rightSB - [HSwToV : 0.5 * stroke]) 0 jut stroke
-				HSerif.rb df.rightSB 0 (jut - [HSwToV : 0.5 * stroke]) stroke
+		if SLAB : include : composite-proc
+			tagged 'serifRT' : piecewise
+				Yeri.useFullSerifs : HSerif.mt (df.rightSB - [HSwToV : 0.5 * stroke]) top jut stroke
+				true               : no-shape
+			tagged 'serifRB' : piecewise
+				fTailed            : no-shape
+				Yeri.useFullSerifs : HSerif.mb (df.rightSB - [HSwToV : 0.5 * stroke]) 0 jut stroke
+				true               : HSerif.rb df.rightSB 0 (jut - [HSwToV : 0.5 * stroke]) stroke
 
 	define YeryConfig : SuffixCfg.weave
 		object # Yeri
-			corner        { Yeri.UprightShape Yeri.AutoItalicShape }
-			round         { Yeri.RoundShape   Yeri.RoundShape      }
-			cursive       { Yeri.CursiveShape Yeri.CursiveShape    }
+			corner        { YeriUpper.Shape        YeriLower.Shape        }
+			round         { YeriUpper.RoundShape   YeriLower.RoundShape   }
+			cursive       { YeriUpper.CursiveShape YeriLower.CursiveShape }
 		object # Tail
 			""            false
 			tailed        true

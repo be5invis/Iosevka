@@ -55,7 +55,7 @@ const validMetricOverrideFields = new Set([
 function initBindings(para, argv) {
 	const valueBindings = new Map();
 	for (const k of validMetricOverrideFields) {
-		valueBindings.set("default_" + k, para[k]);
+		valueBindings.set(`default_${k}`, para[k]);
 	}
 	valueBindings.set("weight", argv.shape.weight);
 	valueBindings.set("width", argv.shape.width);
@@ -69,7 +69,8 @@ function blend(against, ...pairs) {
 	const xs = [],
 		ys = [];
 	for (const [x, y] of pairs) {
-		xs.push(x), ys.push(y);
+		xs.push(x);
+		ys.push(y);
 	}
 	return monotonicInterpolate(xs, ys)(against);
 }
@@ -82,7 +83,7 @@ class State {
 		this.input = input;
 		this.cp = 0;
 	}
-	fetch(ch) {
+	fetch(_ch) {
 		return this.input[this.cp];
 	}
 	test(ch) {
@@ -102,7 +103,7 @@ class State {
 		if (this.cp < this.input.length) this.fail();
 	}
 	fail() {
-		throw new SyntaxError("Failed to parse expression: " + this.input + "@" + this.cp);
+		throw new SyntaxError(`Failed to parse expression: ${this.input}@${this.cp}`);
 	}
 }
 
@@ -121,7 +122,7 @@ function Sum(state, bindings) {
 	let f = Term(state, bindings);
 	skipSpaces(state);
 	while (state.test("+") || state.test("-")) {
-		let op = state.advance();
+		const op = state.advance();
 		skipSpaces(state);
 		const g = Term(state, bindings);
 		skipSpaces(state);
@@ -140,7 +141,7 @@ function Term(state, bindings) {
 	let f = Factor(state, bindings);
 	skipSpaces(state);
 	while (state.test("*") || state.test("/")) {
-		let op = state.advance();
+		const op = state.advance();
 		skipSpaces(state);
 		const g = Factor(state, bindings);
 		skipSpaces(state);
@@ -175,7 +176,7 @@ function Primitive(state, bindings) {
 	if (state.test("[")) return List("[", "]", state, bindings);
 	state.fail();
 }
-function Lit(state, bindings) {
+function Lit(state, _bindings) {
 	let integerPart = 0;
 	let fractionPart = 0;
 	let fractionScale = 1;
@@ -214,7 +215,7 @@ function Group(state, bindings) {
 	return e;
 }
 function List(start, end, state, bindings) {
-	let results = [];
+	const results = [];
 	state.expectAndAdvance(start);
 	skipSpaces(state);
 	results.push(Expression(state, bindings));

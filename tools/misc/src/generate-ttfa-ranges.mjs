@@ -1,6 +1,4 @@
-"use strict";
-
-import fs from "fs";
+import fs from "node:fs";
 
 import { ArrayUtil } from "@iosevka/util";
 import { format, resolveConfig } from "prettier";
@@ -30,7 +28,7 @@ export default async function main(argv) {
 		}
 	}
 
-	let out = [];
+	const out = [];
 
 	for (const [key, value] of results) {
 		out.push({
@@ -43,7 +41,6 @@ export default async function main(argv) {
 	// Perform codegen
 	const options = await resolveConfig(argv.out);
 	const sourceRaw =
-		`/* eslint-disable */\n` +
 		`// Machine generated. Do not modify.\n` +
 		`export default ` +
 		JSON.stringify(out, null, "\t") +

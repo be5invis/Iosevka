@@ -3,13 +3,13 @@ export function applyLigationData(data, para, argv) {
 	const composites = { ...data.composite, ...argv.ligtionCompositesFromBuildPlan };
 
 	const taggedBuildups = {};
-	for (const [key, config] of Object.entries(data.composite)) {
+	for (const [_key, config] of Object.entries(data.composite)) {
 		if (!config.tag) continue;
 		taggedBuildups[config.tag] = createBuildupForComposite(simples, composites, config);
 	}
 
 	if (argv.ligations) {
-		taggedBuildups["calt"] = createBuildupForComposite(simples, composites, argv.ligations);
+		taggedBuildups.calt = createBuildupForComposite(simples, composites, argv.ligations);
 	}
 	if (argv.customLigationTags) {
 		for (const [tag, config] of Object.entries(argv.customLigationTags)) {
@@ -21,7 +21,7 @@ export function applyLigationData(data, para, argv) {
 }
 
 export function createBuildupForComposite(simples, composites, config) {
-	let sink = new Set();
+	const sink = new Set();
 	addComposite(sink, simples, composites, config);
 	return Array.from(sink);
 }
@@ -31,7 +31,7 @@ function addByKey(sink, simples, composites, key) {
 	} else if (composites[key]) {
 		addComposite(sink, simples, composites, composites[key]);
 	} else {
-		throw new Error("Cannot find ligation group " + key);
+		throw new Error(`Cannot find ligation group ${key}`);
 	}
 }
 function addComposite(sink, simples, composites, config) {

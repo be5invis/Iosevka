@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 import * as Toml from "@iarna/toml";
 import { CliProc, Ot } from "ot-builder";
@@ -61,7 +61,7 @@ async function main(argv) {
 // To derive -Term variants, simply apply NWID
 async function deriveTerm(font) {
 	const gsub = font.gsub;
-	let nwidMap = new Map();
+	const nwidMap = new Map();
 	for (const feature of gsub.features) {
 		if (feature.tag !== "NWID") continue;
 		for (const lookup of feature.lookups) {

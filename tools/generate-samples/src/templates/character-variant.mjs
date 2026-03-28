@@ -1,9 +1,9 @@
 import themes from "../themes/index.mjs";
 
-export default (function (args) {
+export default args => {
 	const theme = themes[args.theme];
 	const unitWidth = 128;
-	let frames = [];
+	const frames = [];
 	for (const ch of args.hotChars) {
 		const slopeClasses = args.slopeDependent ? ["normal", "italic"] : ["normal"];
 		for (const slope of slopeClasses) {
@@ -30,4 +30,4 @@ export default (function (args) {
 		height: 160,
 		frames,
 	};
-});
+};

@@ -9,7 +9,7 @@ export default async function processCvOt(argv, dirs) {
 	md.log(`<table>`);
 	for (const cv of variantsData.primes) {
 		if (!cv.tag) continue;
-		let effVariants = [];
+		const effVariants = [];
 		for (const cvv of cv.variants) if (cvv.rank) effVariants.push(cvv);
 		const entryWidth = sampleImageCountEmOfCv(cv);
 		const imgWidth = 32 * entryWidth;
