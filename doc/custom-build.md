@@ -1385,7 +1385,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>e</code> with more rounded shape (default for Italic)</td></tr>
     </table></details>
   - Styles for `f`
-    <details><summary>20 variants</summary>
+    <details><summary>45 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-f-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'serifless'</code>, <code>cv41 = 1</code></td></tr>
     <tr><td><code>f</code> without bottom serif, hook or extension (default for Sans Upright)</td></tr>
@@ -1427,6 +1427,56 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>f</code> with flat top hook, and diagonal tail</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-f-flat-hook-diagonal-tailed-crossbar-at-x-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-flat-hook-diagonal-tailed-crossbar-at-x-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'flat-hook-diagonal-tailed-crossbar-at-x-height'</code>, <code>cv41 = 20</code></td></tr>
     <tr><td><code>f</code> with flat top hook, diagonal tail, and crossbar at X-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-serifless-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-serifless-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'serifless-crossbar-at-half-ascender-height'</code>, <code>cv41 = 21</code></td></tr>
+    <tr><td><code>f</code> without bottom serif, hook or extension; with crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-serifed-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-serifed-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'serifed-crossbar-at-half-ascender-height'</code>, <code>cv41 = 22</code></td></tr>
+    <tr><td><code>f</code> with bottom serif, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-extended-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-extended-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'extended-crossbar-at-half-ascender-height'</code>, <code>cv41 = 23</code></td></tr>
+    <tr><td><code>f</code> with descending extension, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-tailed-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-tailed-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'tailed-crossbar-at-half-ascender-height'</code>, <code>cv41 = 24</code></td></tr>
+    <tr><td><code>f</code> with descending bottom hook, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-diagonal-tailed-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-diagonal-tailed-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'diagonal-tailed-crossbar-at-half-ascender-height'</code>, <code>cv41 = 25</code></td></tr>
+    <tr><td><code>f</code> with diagonal tail, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-serifless'</code>, <code>cv41 = 26</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar; without bottom serif, hook or extension</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-serifless-crossbar-at-x-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-serifless-crossbar-at-x-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-serifless-crossbar-at-x-height'</code>, <code>cv41 = 27</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, and crossbar at X-height; without bottom serif, hook or extension</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-serifed'</code>, <code>cv41 = 28</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, and bottom serif</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-serifed-crossbar-at-x-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-serifed-crossbar-at-x-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-serifed-crossbar-at-x-height'</code>, <code>cv41 = 29</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, bottom serif, and crossbar at X-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-extended.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-extended.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-extended'</code>, <code>cv41 = 30</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, and descending extension</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-extended-crossbar-at-x-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-extended-crossbar-at-x-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-extended-crossbar-at-x-height'</code>, <code>cv41 = 31</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, descending extension, and crossbar at X-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-tailed'</code>, <code>cv41 = 32</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, and descending bottom hook</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-tailed-crossbar-at-x-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-tailed-crossbar-at-x-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-tailed-crossbar-at-x-height'</code>, <code>cv41 = 33</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, descending bottom hook, and crossbar at X-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-diagonal-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-diagonal-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-diagonal-tailed'</code>, <code>cv41 = 34</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, and diagonal tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-diagonal-tailed-crossbar-at-x-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-diagonal-tailed-crossbar-at-x-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-diagonal-tailed-crossbar-at-x-height'</code>, <code>cv41 = 35</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, diagonal tail, and crossbar at X-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-flat-hook-serifless-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-flat-hook-serifless-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'flat-hook-serifless-crossbar-at-half-ascender-height'</code>, <code>cv41 = 36</code></td></tr>
+    <tr><td><code>f</code> with flat top hook, and crossbar at half ascender-height; without bottom serif, hook or extension</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-flat-hook-serifed-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-flat-hook-serifed-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'flat-hook-serifed-crossbar-at-half-ascender-height'</code>, <code>cv41 = 37</code></td></tr>
+    <tr><td><code>f</code> with flat top hook, bottom serif, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-flat-hook-extended-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-flat-hook-extended-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'flat-hook-extended-crossbar-at-half-ascender-height'</code>, <code>cv41 = 38</code></td></tr>
+    <tr><td><code>f</code> with flat top hook, descending extension, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-flat-hook-tailed-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-flat-hook-tailed-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'flat-hook-tailed-crossbar-at-half-ascender-height'</code>, <code>cv41 = 39</code></td></tr>
+    <tr><td><code>f</code> with flat top hook, descending bottom hook, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-flat-hook-diagonal-tailed-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-flat-hook-diagonal-tailed-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'flat-hook-diagonal-tailed-crossbar-at-half-ascender-height'</code>, <code>cv41 = 40</code></td></tr>
+    <tr><td><code>f</code> with flat top hook, diagonal tail, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-serifless-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-serifless-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-serifless-crossbar-at-half-ascender-height'</code>, <code>cv41 = 41</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, and crossbar at half ascender-height; without bottom serif, hook or extension</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-serifed-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-serifed-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-serifed-crossbar-at-half-ascender-height'</code>, <code>cv41 = 42</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, bottom serif, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-extended-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-extended-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-extended-crossbar-at-half-ascender-height'</code>, <code>cv41 = 43</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, descending extension, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-tailed-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-tailed-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-tailed-crossbar-at-half-ascender-height'</code>, <code>cv41 = 44</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, descending bottom hook, and crossbar at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-f-narrow-diagonal-tailed-crossbar-at-half-ascender-height.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-f-narrow-diagonal-tailed-crossbar-at-half-ascender-height.dark.svg#gh-dark-mode-only" width=32/></td><td><code>f = 'narrow-diagonal-tailed-crossbar-at-half-ascender-height'</code>, <code>cv41 = 45</code></td></tr>
+    <tr><td><code>f</code> with narrow top hook with narrower crossbar, diagonal tail, and crossbar at half ascender-height</td></tr>
     </table></details>
   - Styles for `g`
     <details><summary>12 variants</summary>
@@ -1507,7 +1557,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>i</code> with top serif and slightly curly tail</td></tr>
     </table></details>
   - Styles for `j`
-    <details><summary>8 variants</summary>
+    <details><summary>10 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-j-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-j-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>j = 'serifless'</code>, <code>cv45 = 1</code></td></tr>
     <tr><td><code>j</code> without serif</td></tr>
@@ -1525,6 +1575,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>j</code> with diagonal tail</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-j-diagonal-tailed-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-j-diagonal-tailed-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>j = 'diagonal-tailed-serifed'</code>, <code>cv45 = 8</code></td></tr>
     <tr><td><code>j</code> with top serif and diagonal tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-j-narrow-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-j-narrow-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>j = 'narrow-serifless'</code>, <code>cv45 = 9</code></td></tr>
+    <tr><td><code>j</code> with narrower hook</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-j-narrow-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-j-narrow-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>j = 'narrow-serifed'</code>, <code>cv45 = 10</code></td></tr>
+    <tr><td><code>j</code> with narrower hook and top serif</td></tr>
     </table></details>
   - Styles for `k`
     <details><summary>40 variants</summary>
@@ -1778,9 +1832,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-p-eared-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-p-eared-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>p = 'eared-serifless'</code>, <code>cv50 = 1</code></td></tr>
     <tr><td><code>p</code> with eared shape; without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-p-eared-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-p-eared-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>p = 'eared-motion-serifed'</code>, <code>cv50 = 2</code></td></tr>
-    <tr><td><code>p</code> with eared shape, and motion serifs</td></tr>
+    <tr><td><code>p</code> with eared shape, and motion serifs (default for Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-p-eared-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-p-eared-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>p = 'eared-serifed'</code>, <code>cv50 = 3</code></td></tr>
-    <tr><td><code>p</code> with eared shape, and serifs (default for Slab)</td></tr>
+    <tr><td><code>p</code> with eared shape, and serifs (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-p-earless-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-p-earless-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>p = 'earless-corner-serifless'</code>, <code>cv50 = 4</code></td></tr>
     <tr><td><code>p</code> with earless (cornered) shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-p-earless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-p-earless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>p = 'earless-corner-serifed'</code>, <code>cv50 = 5</code></td></tr>
@@ -1791,24 +1845,24 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>p</code> with earless (rounded) shape, and serifs</td></tr>
     </table></details>
   - Styles for `q`
-    <details><summary>20 variants</summary>
+    <details><summary>24 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-serifless'</code>, <code>cv51 = 1</code></td></tr>
     <tr><td><code>q</code> with straight terminal; without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-bottom-serifed'</code>, <code>cv51 = 2</code></td></tr>
-    <tr><td><code>q</code> with straight terminal, and serif at bottom (default for Slab Italic)</td></tr>
+    <tr><td><code>q</code> with straight terminal, and serif at bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-motion-serifed'</code>, <code>cv51 = 3</code></td></tr>
-    <tr><td><code>q</code> with straight terminal, and motion serifs</td></tr>
+    <tr><td><code>q</code> with straight terminal, and motion serifs (top-right)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-serifed'</code>, <code>cv51 = 4</code></td></tr>
     <tr><td><code>q</code> with straight terminal, and serifs (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'tailed-serifless'</code>, <code>cv51 = 5</code></td></tr>
     <tr><td><code>q</code> with tailed terminal; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-tailed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-tailed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'tailed-motion-serifed'</code>, <code>cv51 = 6</code></td></tr>
-    <tr><td><code>q</code> with tailed terminal, and motion serifs</td></tr>
+    <tr><td><code>q</code> with tailed terminal, and motion serifs (top-right)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-diagonal-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-diagonal-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'diagonal-tailed-serifless'</code>, <code>cv51 = 7</code></td></tr>
     <tr><td><code>q</code> with diagonally tailed terminal; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-diagonal-tailed-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-diagonal-tailed-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'diagonal-tailed-motion-serifed'</code>, <code>cv51 = 8</code></td></tr>
-    <tr><td><code>q</code> with diagonally tailed terminal, and motion serifs</td></tr>
+    <tr><td><code>q</code> with diagonally tailed terminal, and motion serifs (top-right)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-top-cut-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'top-cut-straight-serifless'</code>, <code>cv51 = 9</code></td></tr>
     <tr><td><code>q</code> with a diagonal cut at top, and straight terminal; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-top-cut-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'top-cut-straight-serifed'</code>, <code>cv51 = 10</code></td></tr>
@@ -1833,9 +1887,17 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>q</code> with earless (rounded) shape, and tailed terminal; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-q-earless-rounded-diagonal-tailed-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-earless-rounded-diagonal-tailed-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'earless-rounded-diagonal-tailed-serifless'</code>, <code>cv51 = 20</code></td></tr>
     <tr><td><code>q</code> with earless (rounded) shape, and diagonally tailed terminal; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-q-straight-motion-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-straight-motion-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'straight-motion-bottom-serifed'</code>, <code>cv51 = 21</code></td></tr>
+    <tr><td><code>q</code> with straight terminal, and motion serifs at terminal (bottom-right) (default for Slab Italic)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-q-top-cut-straight-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-top-cut-straight-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'top-cut-straight-motion-serifed'</code>, <code>cv51 = 22</code></td></tr>
+    <tr><td><code>q</code> with a diagonal cut at top, straight terminal, and motion serifs at terminal (bottom-right)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-q-earless-corner-straight-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-earless-corner-straight-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'earless-corner-straight-motion-serifed'</code>, <code>cv51 = 23</code></td></tr>
+    <tr><td><code>q</code> with earless (cornered) shape, straight terminal, and motion serifs at terminal (bottom-right)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-q-earless-rounded-straight-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-q-earless-rounded-straight-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>q = 'earless-rounded-straight-motion-serifed'</code>, <code>cv51 = 24</code></td></tr>
+    <tr><td><code>q</code> with earless (rounded) shape, straight terminal, and motion serifs at terminal (bottom-right)</td></tr>
     </table></details>
   - Styles for `r`
-    <details><summary>20 variants</summary>
+    <details><summary>24 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-r-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-r-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>r = 'serifless'</code>, <code>cv52 = 1</code></td></tr>
     <tr><td><code>r</code> with normal body shape; without serifs (default for Sans)</td></tr>
@@ -1877,6 +1939,14 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>r</code> with compact body shape (identical to 'hookless' for monospace fonts), and serif at bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-r-compact-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-r-compact-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>r = 'compact-serifed'</code>, <code>cv52 = 20</code></td></tr>
     <tr><td><code>r</code> with compact body shape (identical to 'hookless' for monospace fonts), and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-r-narrow-hook-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-r-narrow-hook-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>r = 'narrow-hook-serifless'</code>, <code>cv52 = 21</code></td></tr>
+    <tr><td><code>r</code> with narrow hook body shape; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-r-narrow-hook-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-r-narrow-hook-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>r = 'narrow-hook-top-serifed'</code>, <code>cv52 = 22</code></td></tr>
+    <tr><td><code>r</code> with narrow hook body shape, and serif at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-r-narrow-hook-base-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-r-narrow-hook-base-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>r = 'narrow-hook-base-serifed'</code>, <code>cv52 = 23</code></td></tr>
+    <tr><td><code>r</code> with narrow hook body shape, and serif at bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-r-narrow-hook-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-r-narrow-hook-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>r = 'narrow-hook-serifed'</code>, <code>cv52 = 24</code></td></tr>
+    <tr><td><code>r</code> with narrow hook body shape, and serifs</td></tr>
     </table></details>
   - Styles for `s`
     <details><summary>5 variants</summary>
@@ -1893,7 +1963,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>s</code> with inward serifs at both end (default for Slab Italic)</td></tr>
     </table></details>
   - Styles for `t`
-    <details><summary>24 variants</summary>
+    <details><summary>30 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-t-bent-hook.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-t-bent-hook.dark.svg#gh-dark-mode-only" width=32/></td><td><code>t = 'bent-hook'</code>, <code>cv54 = 1</code></td></tr>
     <tr><td><code>t</code> with bent hook, and crossbar at both sides of the vertical stem (default)</td></tr>
@@ -1943,6 +2013,18 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td><code>t</code> without hook or tail; with crossbar at only right side of the vertical stem, and a shorter neck</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-t-hookless-asymmetric-short-neck2.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-t-hookless-asymmetric-short-neck2.dark.svg#gh-dark-mode-only" width=32/></td><td><code>t = 'hookless-asymmetric-short-neck2'</code>, <code>cv54 = 24</code></td></tr>
     <tr><td><code>t</code> without hook or tail; with crossbar at only right side of the vertical stem, and a more shorter neck</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-t-narrow-bent-hook.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-t-narrow-bent-hook.dark.svg#gh-dark-mode-only" width=32/></td><td><code>t = 'narrow-bent-hook'</code>, <code>cv54 = 25</code></td></tr>
+    <tr><td><code>t</code> with narrow bent hook with narrower crossbar, and crossbar at both sides of the vertical stem</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-t-narrow-bent-hook-short-neck.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-t-narrow-bent-hook-short-neck.dark.svg#gh-dark-mode-only" width=32/></td><td><code>t = 'narrow-bent-hook-short-neck'</code>, <code>cv54 = 26</code></td></tr>
+    <tr><td><code>t</code> with narrow bent hook with narrower crossbar, crossbar at both sides of the vertical stem, and a shorter neck</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-t-narrow-bent-hook-short-neck2.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-t-narrow-bent-hook-short-neck2.dark.svg#gh-dark-mode-only" width=32/></td><td><code>t = 'narrow-bent-hook-short-neck2'</code>, <code>cv54 = 27</code></td></tr>
+    <tr><td><code>t</code> with narrow bent hook with narrower crossbar, crossbar at both sides of the vertical stem, and a more shorter neck</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-t-narrow-bent-hook-asymmetric.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-t-narrow-bent-hook-asymmetric.dark.svg#gh-dark-mode-only" width=32/></td><td><code>t = 'narrow-bent-hook-asymmetric'</code>, <code>cv54 = 28</code></td></tr>
+    <tr><td><code>t</code> with narrow bent hook with narrower crossbar, and crossbar at only right side of the vertical stem</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-t-narrow-bent-hook-asymmetric-short-neck.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-t-narrow-bent-hook-asymmetric-short-neck.dark.svg#gh-dark-mode-only" width=32/></td><td><code>t = 'narrow-bent-hook-asymmetric-short-neck'</code>, <code>cv54 = 29</code></td></tr>
+    <tr><td><code>t</code> with narrow bent hook with narrower crossbar, crossbar at only right side of the vertical stem, and a shorter neck</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-t-narrow-bent-hook-asymmetric-short-neck2.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-t-narrow-bent-hook-asymmetric-short-neck2.dark.svg#gh-dark-mode-only" width=32/></td><td><code>t = 'narrow-bent-hook-asymmetric-short-neck2'</code>, <code>cv54 = 30</code></td></tr>
+    <tr><td><code>t</code> with narrow bent hook with narrower crossbar, crossbar at only right side of the vertical stem, and a more shorter neck</td></tr>
     </table></details>
   - Styles for `u`
     <details><summary>13 variants</summary>
@@ -2243,7 +2325,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Capital Eszet (<code>ẞ</code>) with top-left corner, and serifs</td></tr>
     </table></details>
   - Styles for `ſ` (Long-S)
-    <details><summary>30 variants</summary>
+    <details><summary>40 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-bent-hook-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-bent-hook-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'bent-hook-serifless'</code>, <code>cv62 = 1</code></td></tr>
     <tr><td>Long S (<code>ſ</code>) with bending top hook; without serifs (default for Sans Upright)</td></tr>
@@ -2305,9 +2387,29 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Long S (<code>ſ</code>) with flat top hook, terminal has a diagonal tail, and middle serif</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-flat-hook-diagonal-tailed-middle-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-flat-hook-diagonal-tailed-middle-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'flat-hook-diagonal-tailed-middle-serifed-xh'</code>, <code>cv62 = 30</code></td></tr>
     <tr><td>Long S (<code>ſ</code>) with flat top hook, terminal has a diagonal tail, and middle serif at x-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-bent-hook-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-bent-hook-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'bent-hook-middle-serifed-half-ascender'</code>, <code>cv62 = 31</code></td></tr>
+    <tr><td>Long S (<code>ſ</code>) with bending top hook, and middle serif at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-bent-hook-double-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-bent-hook-double-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'bent-hook-double-serifed-half-ascender'</code>, <code>cv62 = 32</code></td></tr>
+    <tr><td>Long S (<code>ſ</code>) with bending top hook, and bottom and middle serifs at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-bent-hook-descending-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-bent-hook-descending-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'bent-hook-descending-middle-serifed-half-ascender'</code>, <code>cv62 = 33</code></td></tr>
+    <tr><td>Long S (<code>ſ</code>) with bending top hook, terminal descends baseline, and middle serif at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-bent-hook-tailed-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-bent-hook-tailed-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'bent-hook-tailed-middle-serifed-half-ascender'</code>, <code>cv62 = 34</code></td></tr>
+    <tr><td>Long S (<code>ſ</code>) with bending top hook, terminal has a tail, and middle serif at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-bent-hook-diagonal-tailed-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-bent-hook-diagonal-tailed-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'bent-hook-diagonal-tailed-middle-serifed-half-ascender'</code>, <code>cv62 = 35</code></td></tr>
+    <tr><td>Long S (<code>ſ</code>) with bending top hook, terminal has a diagonal tail, and middle serif at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-flat-hook-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-flat-hook-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'flat-hook-middle-serifed-half-ascender'</code>, <code>cv62 = 36</code></td></tr>
+    <tr><td>Long S (<code>ſ</code>) with flat top hook, and middle serif at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-flat-hook-double-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-flat-hook-double-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'flat-hook-double-serifed-half-ascender'</code>, <code>cv62 = 37</code></td></tr>
+    <tr><td>Long S (<code>ſ</code>) with flat top hook, and bottom and middle serifs at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-flat-hook-descending-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-flat-hook-descending-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'flat-hook-descending-middle-serifed-half-ascender'</code>, <code>cv62 = 38</code></td></tr>
+    <tr><td>Long S (<code>ſ</code>) with flat top hook, terminal descends baseline, and middle serif at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-flat-hook-tailed-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-flat-hook-tailed-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'flat-hook-tailed-middle-serifed-half-ascender'</code>, <code>cv62 = 39</code></td></tr>
+    <tr><td>Long S (<code>ſ</code>) with flat top hook, terminal has a tail, and middle serif at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-long-s-flat-hook-diagonal-tailed-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-long-s-flat-hook-diagonal-tailed-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>long-s = 'flat-hook-diagonal-tailed-middle-serifed-half-ascender'</code>, <code>cv62 = 40</code></td></tr>
+    <tr><td>Long S (<code>ſ</code>) with flat top hook, terminal has a diagonal tail, and middle serif at half ascender-height</td></tr>
     </table></details>
   - Styles for `ß` (Eszet)
-    <details><summary>40 variants</summary>
+    <details><summary>48 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-traditional-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-traditional-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'traditional-serifless'</code>, <code>cv63 = 1</code></td></tr>
     <tr><td>Eszet (<code>ß</code>) with traditional, Fraktur-like shape; without serifs</td></tr>
@@ -2389,6 +2491,22 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Eszet (<code>ß</code>) with ligature of long-S (<code>ſ</code>) and <code>s</code>, terminal containing tail, and serif at middle</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-longs-s-lig-tailed-middle-serifed-xh.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-tailed-middle-serifed-xh.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'longs-s-lig-tailed-middle-serifed-xh'</code>, <code>cv63 = 40</code></td></tr>
     <tr><td>Eszet (<code>ß</code>) with ligature of long-S (<code>ſ</code>) and <code>s</code>, terminal containing tail, and serif at middle at x-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-sulzbacher-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'sulzbacher-middle-serifed-half-ascender'</code>, <code>cv63 = 41</code></td></tr>
+    <tr><td>Eszet (<code>ß</code>) with more modern, beta-like shape, and serif at middle at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-sulzbacher-dual-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-dual-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'sulzbacher-dual-serifed-half-ascender'</code>, <code>cv63 = 42</code></td></tr>
+    <tr><td>Eszet (<code>ß</code>) with more modern, beta-like shape, and serif at middle (half ascender-height) and bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-sulzbacher-descending-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-descending-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'sulzbacher-descending-middle-serifed-half-ascender'</code>, <code>cv63 = 43</code></td></tr>
+    <tr><td>Eszet (<code>ß</code>) with more modern, beta-like shape, terminal descends baseline, and serif at middle at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-sulzbacher-tailed-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-sulzbacher-tailed-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'sulzbacher-tailed-middle-serifed-half-ascender'</code>, <code>cv63 = 44</code></td></tr>
+    <tr><td>Eszet (<code>ß</code>) with more modern, beta-like shape, terminal containing tail, and serif at middle at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-longs-s-lig-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'longs-s-lig-middle-serifed-half-ascender'</code>, <code>cv63 = 45</code></td></tr>
+    <tr><td>Eszet (<code>ß</code>) with ligature of long-S (<code>ſ</code>) and <code>s</code>, and serif at middle at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-longs-s-lig-dual-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-dual-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'longs-s-lig-dual-serifed-half-ascender'</code>, <code>cv63 = 46</code></td></tr>
+    <tr><td>Eszet (<code>ß</code>) with ligature of long-S (<code>ſ</code>) and <code>s</code>, and serif at middle (half ascender-height) and bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-longs-s-lig-descending-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-descending-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'longs-s-lig-descending-middle-serifed-half-ascender'</code>, <code>cv63 = 47</code></td></tr>
+    <tr><td>Eszet (<code>ß</code>) with ligature of long-S (<code>ſ</code>) and <code>s</code>, terminal descends baseline, and serif at middle at half ascender-height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-eszet-longs-s-lig-tailed-middle-serifed-half-ascender.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-eszet-longs-s-lig-tailed-middle-serifed-half-ascender.dark.svg#gh-dark-mode-only" width=32/></td><td><code>eszet = 'longs-s-lig-tailed-middle-serifed-half-ascender'</code>, <code>cv63 = 48</code></td></tr>
+    <tr><td>Eszet (<code>ß</code>) with ligature of long-S (<code>ſ</code>) and <code>s</code>, terminal containing tail, and serif at middle at half ascender-height</td></tr>
     </table></details>
   - Styles for `ð` (Lowercase Eth (`ð`))
     <details><summary>2 variants</summary>
@@ -2420,9 +2538,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-thorn-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-thorn-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-thorn = 'serifless'</code>, <code>cv66 = 1</code></td></tr>
     <tr><td>Lowercase Thorn (<code>þ</code>) without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-thorn-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-thorn-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-thorn = 'motion-serifed'</code>, <code>cv66 = 2</code></td></tr>
-    <tr><td>Lowercase Thorn (<code>þ</code>) with motion serifs</td></tr>
+    <tr><td>Lowercase Thorn (<code>þ</code>) with motion serifs (default for Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-thorn-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-thorn-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-thorn = 'serifed'</code>, <code>cv66 = 3</code></td></tr>
-    <tr><td>Lowercase Thorn (<code>þ</code>) with serifs (default for Slab)</td></tr>
+    <tr><td>Lowercase Thorn (<code>þ</code>) with serifs (default for Slab Upright)</td></tr>
     </table></details>
   - Styles for `α` (Greek lower Alpha)
     <details><summary>15 variants</summary>
@@ -2479,14 +2597,20 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek capital Gamma (<code>Γ</code>) with motion serifs at top and bottom (default for Slab)</td></tr>
     </table></details>
   - Styles for `γ` (Greek lower Gamma)
-    <details><summary>3 variants</summary>
+    <details><summary>6 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-gamma-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-gamma-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-gamma = 'straight'</code>, <code>cv70 = 1</code></td></tr>
     <tr><td>Greek lower Gamma (<code>γ</code>) with straight shape</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-gamma-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-gamma-curly.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-gamma = 'curly'</code>, <code>cv70 = 2</code></td></tr>
     <tr><td>Greek lower Gamma (<code>γ</code>) with curly shape</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-gamma-casual.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-gamma-casual.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-gamma = 'casual'</code>, <code>cv70 = 3</code></td></tr>
-    <tr><td>Greek lower Gamma (<code>γ</code>) with casual shape (default)</td></tr>
+    <tr><td>Greek lower Gamma (<code>γ</code>) with casual shape (default for Sans)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-gamma-straight-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-gamma-straight-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-gamma = 'straight-serifed'</code>, <code>cv70 = 4</code></td></tr>
+    <tr><td>Greek lower Gamma (<code>γ</code>) with straight shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-gamma-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-gamma-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-gamma = 'curly-serifed'</code>, <code>cv70 = 5</code></td></tr>
+    <tr><td>Greek lower Gamma (<code>γ</code>) with curly shape, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-gamma-casual-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-gamma-casual-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-gamma = 'casual-serifed'</code>, <code>cv70 = 6</code></td></tr>
+    <tr><td>Greek lower Gamma (<code>γ</code>) with casual shape, and serifs (default for Slab)</td></tr>
     </table></details>
   - Styles for `Δ` (Greek capital Delta (`Δ`))
     <details><summary>2 variants</summary>
@@ -2708,9 +2832,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-nu-curly-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-nu-curly-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-nu = 'curly-serifed'</code>, <code>cv78 = 4</code></td></tr>
     <tr><td>Greek lower Nu (<code>ν</code>) with curly shape, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-nu-casual.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-nu-casual.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-nu = 'casual'</code>, <code>cv78 = 5</code></td></tr>
-    <tr><td>Greek lower Nu (<code>ν</code>) with casual shape (default)</td></tr>
+    <tr><td>Greek lower Nu (<code>ν</code>) with casual shape (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-nu-casual-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-nu-casual-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-nu = 'casual-serifed'</code>, <code>cv78 = 6</code></td></tr>
-    <tr><td>Greek lower Nu (<code>ν</code>) with casual shape, and serifs</td></tr>
+    <tr><td>Greek lower Nu (<code>ν</code>) with casual shape, and serifs (default for Slab)</td></tr>
     </table></details>
   - Styles for `ξ` (Greek lower Xi)
     <details><summary>2 variants</summary>
@@ -2721,14 +2845,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Xi (<code>ξ</code>) with flat top (default)</td></tr>
     </table></details>
   - Styles for `π` (Greek lower Pi)
-    <details><summary>3 variants</summary>
+    <details><summary>4 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-pi-tailless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-pi-tailless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-pi = 'tailless'</code>, <code>cv80 = 1</code></td></tr>
-    <tr><td>Greek lower Pi (<code>π</code>) with a tailless shape</td></tr>
+    <tr><td>Greek lower Pi (<code>π</code>) with tailless shape</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-pi-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-pi-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-pi = 'tailed'</code>, <code>cv80 = 2</code></td></tr>
-    <tr><td>Greek lower Pi (<code>π</code>) with a tailed shape (default)</td></tr>
+    <tr><td>Greek lower Pi (<code>π</code>) with tailed shape (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-pi-small-capital.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-pi-small-capital.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-pi = 'small-capital'</code>, <code>cv80 = 3</code></td></tr>
-    <tr><td>Greek lower Pi (<code>π</code>) with a small-capital shape</td></tr>
+    <tr><td>Greek lower Pi (<code>π</code>) with small-capital shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-pi-diagonal-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-pi-diagonal-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-pi = 'diagonal-tailed'</code>, <code>cv80 = 4</code></td></tr>
+    <tr><td>Greek lower Pi (<code>π</code>) with diagonal tail</td></tr>
     </table></details>
   - Styles for `τ` (Greek lower Tau)
     <details><summary>6 variants</summary>
@@ -2759,7 +2885,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Upsilon (<code>υ</code>) with casual shape, and serifs (default for Slab)</td></tr>
     </table></details>
   - Styles for `φ` (Greek lower Phi)
-    <details><summary>3 variants</summary>
+    <details><summary>5 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-phi-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-straight.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-phi = 'straight'</code>, <code>cv83 = 1</code></td></tr>
     <tr><td>Greek lower Phi (<code>φ</code>) with straight shape</td></tr>
@@ -2767,6 +2893,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Phi (<code>φ</code>) with cursive shape (default)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-phi-neo-hellenic.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-neo-hellenic.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-phi = 'neo-hellenic'</code>, <code>cv83 = 3</code></td></tr>
     <tr><td>Greek lower Phi (<code>φ</code>) with neo-hellenic shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-phi-straight-short-neck.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-straight-short-neck.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-phi = 'straight-short-neck'</code>, <code>cv83 = 4</code></td></tr>
+    <tr><td>Greek lower Phi (<code>φ</code>) with straight shape, and a shorter neck</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-phi-straight-short-neck2.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-phi-straight-short-neck2.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-phi = 'straight-short-neck2'</code>, <code>cv83 = 5</code></td></tr>
+    <tr><td>Greek lower Phi (<code>φ</code>) with straight shape, and a more shorter neck</td></tr>
     </table></details>
   - Styles for `χ` (Greek lower Chi)
     <details><summary>13 variants</summary>
@@ -2799,7 +2929,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Chi (<code>χ</code>) with Chancery shape</td></tr>
     </table></details>
   - Styles for `ψ` (Greek lower Psi)
-    <details><summary>4 variants</summary>
+    <details><summary>8 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'serifless'</code>, <code>cv85 = 1</code></td></tr>
     <tr><td>Greek lower Psi (<code>ψ</code>) without serifs (default for Sans)</td></tr>
@@ -2809,6 +2939,14 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Psi (<code>ψ</code>) with flat top; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-flat-top-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-flat-top-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'flat-top-serifed'</code>, <code>cv85 = 4</code></td></tr>
     <tr><td>Greek lower Psi (<code>ψ</code>) with flat top, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-short-neck-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-short-neck-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'short-neck-serifless'</code>, <code>cv85 = 5</code></td></tr>
+    <tr><td>Greek lower Psi (<code>ψ</code>) with a shorter neck; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-short-neck-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-short-neck-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'short-neck-serifed'</code>, <code>cv85 = 6</code></td></tr>
+    <tr><td>Greek lower Psi (<code>ψ</code>) with a shorter neck, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-short-neck2-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-short-neck2-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'short-neck2-serifless'</code>, <code>cv85 = 7</code></td></tr>
+    <tr><td>Greek lower Psi (<code>ψ</code>) with a more shorter neck; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-psi-short-neck2-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-psi-short-neck2-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-psi = 'short-neck2-serifed'</code>, <code>cv85 = 8</code></td></tr>
+    <tr><td>Greek lower Psi (<code>ψ</code>) with a more shorter neck, and serifs</td></tr>
     </table></details>
   - Styles for `∂` (Partial derivative symbol)
     <details><summary>3 variants</summary>
@@ -3164,9 +3302,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-er-eared-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-eared-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-er = 'eared-serifless'</code>, <code>VAAA = 1</code></td></tr>
     <tr><td>Cyrillic Lower Er (<code>р</code>) with eared shape; without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-er-eared-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-eared-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-er = 'eared-motion-serifed'</code>, <code>VAAA = 2</code></td></tr>
-    <tr><td>Cyrillic Lower Er (<code>р</code>) with eared shape, and motion serifs</td></tr>
+    <tr><td>Cyrillic Lower Er (<code>р</code>) with eared shape, and motion serifs (default for Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-er-eared-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-eared-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-er = 'eared-serifed'</code>, <code>VAAA = 3</code></td></tr>
-    <tr><td>Cyrillic Lower Er (<code>р</code>) with eared shape, and serifs (default for Slab)</td></tr>
+    <tr><td>Cyrillic Lower Er (<code>р</code>) with eared shape, and serifs (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-er-earless-corner-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-earless-corner-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-er = 'earless-corner-serifless'</code>, <code>VAAA = 4</code></td></tr>
     <tr><td>Cyrillic Lower Er (<code>р</code>) with earless (cornered) shape; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-er-earless-corner-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-er-earless-corner-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-er = 'earless-corner-serifed'</code>, <code>VAAA = 5</code></td></tr>
@@ -3521,6 +3659,14 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Braille uses round dots (default)</td></tr>
     <tr><td rowspan="2" width="92"><img src="../images/cv-braille-dot-square.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-braille-dot-square.dark.svg#gh-dark-mode-only" width=64/></td><td><code>braille-dot = 'square'</code>, <code>VDAD = 2</code></td></tr>
     <tr><td>Braille uses square dots</td></tr>
+    </table></details>
+  - Styles for `…` (Ellipsis dot density and spacing)
+    <details><summary>2 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ellipsis-density-normal.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ellipsis-density-normal.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ellipsis-density = 'normal'</code>, <code>VDAE = 1</code></td></tr>
+    <tr><td>Ellipsis with normal spacing (default)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-ellipsis-density-dense.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-ellipsis-density-dense.dark.svg#gh-dark-mode-only" width=32/></td><td><code>ellipsis-density = 'dense'</code>, <code>VDAE = 2</code></td></tr>
+    <tr><td>Ellipsis with tighter dot spacing</td></tr>
     </table></details>
   - Styles for `~`
     <details><summary>2 variants</summary>
