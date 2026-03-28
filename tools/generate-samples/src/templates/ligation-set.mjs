@@ -4,7 +4,7 @@ function* makeSample(theme, args) {
 	const groupSet = new Set(args.ligSets);
 	for (const row of args.ligationSamples) {
 		for (const sampleStr of row) {
-			let sat = [];
+			const sat = [];
 
 			for (const [lgName, lg] of Object.entries(args.ligationCherry)) {
 				if (!new Set(lg.samples || []).has(sampleStr)) continue;
@@ -33,7 +33,7 @@ function trimNewline(xs) {
 	while (xs.length && xs[xs.length - 1] === "\n") xs.pop();
 	return xs;
 }
-export default (function (args) {
+export default args => {
 	const theme = themes[args.theme];
 	return {
 		width: 1200,
@@ -52,4 +52,4 @@ export default (function (args) {
 			},
 		],
 	};
-});
+};

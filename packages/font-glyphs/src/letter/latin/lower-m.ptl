@@ -156,7 +156,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			return : sink
 				widths.rhs sw
 				[if (sink == dispiro) g2 corner] (df.leftSB - offset) (top - DToothlessRise)
-				arch.rhs top (sw -- sw) (blendPre -- {})
+				Arch.rhs top (sw -- sw) (blendPre -- {})
 				flat (xMidBarRightSide - offset) [Math.max (top - adb) (mbot + TINY)] [heading Downward]
 				[if (sink == dispiro) curl corner] (xMidBarRightSide - offset) mbot [heading Downward]
 				if (sink == spiro-outline) { [corner (df.leftSB - offset) 0 ] } { }
@@ -166,7 +166,7 @@ glyph-block Letter-Latin-Lower-M : begin
 				widths.rhs sw
 				g2 [mix df.rightSB xMidBarLeftSide 1.5] (top - 2 * DToothlessRise)
 				g2 xMidBarLeftSide (top - DToothlessRise)
-				arch.rhs top (sw -- sw) (blendPre -- {})
+				Arch.rhs top (sw -- sw) (blendPre -- {})
 				flat df.rightSB [Math.max (top - adb) (rbot + TINY)] [heading Downward]
 				curl df.rightSB rbot [heading Downward]
 		include : tagged 'barL' : VBar.l df.leftSB lbot (top - DToothlessRise) sw
@@ -211,7 +211,7 @@ glyph-block Letter-Latin-Lower-M : begin
 		include : dispiro
 			widths.rhs sw
 			g4 df.leftSB (top - DToothlessRise)
-			arch.rhs top (sw -- sw) (blendPre -- {})
+			Arch.rhs top (sw -- sw) (blendPre -- {})
 			flat df.rightSB [Math.max (top - adb) (rbot + TINY)]
 			curl df.rightSB rbot [heading Downward]
 
@@ -249,7 +249,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			"bottomRightSerifed"           { RbSerifs   }
 			"topLeftAndBottomRightSerifed" { LtRbSerifs }
 
-	foreach { suffix { {Body earless} {shortLeg} {tailed} {Serifs} } } [pairs-of SmallMConfig] : do
+	foreach { suffix { { Body earless } { shortLeg } { tailed } { Serifs } } } [pairs-of SmallMConfig] : do
 		define [mShapeBody df top _sw _ada _adb] : begin
 			return : mShapeBodyImpl df top Body earless shortLeg tailed Serifs _sw _ada _adb
 
@@ -273,9 +273,8 @@ glyph-block Letter-Latin-Lower-M : begin
 				local fine : [AdviceStroke 4] * (df.mvs / Stroke)
 				local rinner : XH * 0.15 - fine * 0.75
 				local sw : [AdviceStroke 3] * (df.mvs / Stroke)
-				local gap : (df.rightSB - df.leftSB - [HSwToV fine]) / 3
 				local m2 : Math.max
-					df.leftSB + gap * 2 - [HSwToV : 0.25 * fine]
+					[mix df.leftSB (df.rightSB - [HSwToV fine]) (2 / 3)] - [HSwToV : 0.25 * fine]
 					df.rightSB - (RightSB - SB) / 2 - [HSwToV : 0.5 * fine]
 				local x2 : df.rightSB + SideJut
 				local y2 : rinner * 2 + fine - O
@@ -310,7 +309,7 @@ glyph-block Letter-Latin-Lower-M : begin
 					local df : include : DivFrame [mix 1 para.advanceScaleMM 2] 4
 					include : df.markSet.e
 					local subDf : df.slice 4 3 0
-					include : Body   subDf XH 0 0 (XH - SmallArchDepthB * 0.5 * df.adws - TINY)
+					include : Body   subDf XH 0 0 (XH - SmallArchDepthB * (2 / df.hPack) * df.adws - TINY)
 					include : Serifs subDf XH 0 0 0 false false
 
 				create-glyph "cyrl/tje.italic/base/cursive.\(suffix)" : glyph-proc
@@ -385,7 +384,7 @@ glyph-block Letter-Latin-Lower-M : begin
 				[Just 'toothed'] { LtRbSerifs }
 				__               { RbSerifs   } # The name-shaping mapping is swapped by design
 
-	foreach { suffix { {Body toothless tailed} {Serifs} } } [pairs-of TurnMConfig] : do
+	foreach { suffix { { Body toothless tailed } { Serifs } } } [pairs-of TurnMConfig] : do
 		define [turnMShapeBody df top _sw _ada _adb] : glyph-proc
 			include : turnMShapeBodyImpl df top Body toothless tailed Serifs _sw _ada _adb
 
@@ -401,18 +400,6 @@ glyph-block Letter-Latin-Lower-M : begin
 				SmallMSmoothA df ArchDepth
 				SmallMSmoothB df ArchDepth
 
-		if (!tailed) : begin
-			create-glyph "turnmLeg.\(suffix)" : glyph-proc
-				local df : include : dfM
-				include : df.markSet.p
-				include : turnMShapeBody df XH
-				eject-contour 'serifLT'
-				include : VBar.r df.rightSB Descender XH df.mvs
-				if (Serifs !== no-shape) : begin
-					local sf : SerifFrame.fromDf df XH Descender
-					include sf.rb.fullSide
-				include : LeaningAnchor.Below.VBar.r df.rightSB
-
 		create-glyph "turnmSideways.\(suffix)" : glyph-proc
 			local realHeight : XH * para.advanceScaleMM
 			local realTop : XH / 2 + realHeight / 2
@@ -423,19 +410,31 @@ glyph-block Letter-Latin-Lower-M : begin
 				include : turnMShapeBody df RightSB
 				include : Translate 0 (SB / 2)
 
-		if (Body === SmallMArches && !tailed) : begin
-			create-glyph "cyrl/shcha.italic.\(suffix)" : glyph-proc
-				local df : include : dfM
-				include : df.markSet.e
-				include : turnMShapeBody df XH
-				eject-contour 'serifLT'
-				include : CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
-			create-glyph "cyrl/shwe.italic.\(suffix)" : glyph-proc
+		if (!tailed) : begin
+			create-glyph "turnmLeg.\(suffix)" : glyph-proc
 				local df : include : dfM
 				include : df.markSet.p
 				include : turnMShapeBody df XH
 				eject-contour 'serifLT'
-				include : CyrCurlDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
+				include : VBar.r df.rightSB Descender XH df.mvs
+				if (Serifs !== no-shape) : begin
+					local sf : SerifFrame.fromDf df XH Descender
+					include sf.rb.[if para.isItalic 'outer' 'fullSide']
+				include : LeaningAnchor.Below.VBar.r df.rightSB
+
+			if (Body === SmallMArches) : begin
+				create-glyph "cyrl/shcha.italic.\(suffix)" : glyph-proc
+					local df : include : dfM
+					include : df.markSet.e
+					include : turnMShapeBody df XH
+					eject-contour 'serifLT'
+					include : CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
+				create-glyph "cyrl/shwe.italic.\(suffix)" : glyph-proc
+					local df : include : dfM
+					include : df.markSet.p
+					include : turnMShapeBody df XH
+					eject-contour 'serifLT'
+					include : CyrCurlDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
 
 	select-variant 'turnm' 0x26F (follow -- [conditional-follow [MEnoughSpaceForFullSerifs : dfM] 'turnm/full' 'turnm/reduced'])
 	select-variant 'turnm/reduced' (shapeFrom -- 'turnm')
@@ -469,8 +468,8 @@ glyph-block Letter-Latin-Lower-M : begin
 		local df : include : DivFrame 1 3
 		include : df.markSet.e
 
-		local bbs : AdviceStroke 8
-		local bbd : BBD * [Math.min (3 / 4) (bbs / BBS)]
+		local bbs : Math.min BBS : AdviceStroke 8
+		local bbd : BBD * [Math.min 0.75 : bbs / BBS]
 		define xMid : mix (df.leftSB + bbd + [HSwToV bbs]) df.rightSB 0.5
 
 		include : BBBarLeft df.leftSB 0 XH (bbd -- bbd) (bbs -- bbs)

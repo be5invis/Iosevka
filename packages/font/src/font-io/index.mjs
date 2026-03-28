@@ -1,9 +1,9 @@
-import fs from "fs";
+import fs from "node:fs";
 
 import { FontIo, Ot } from "ot-builder";
 
 export function CreateEmptyFont(para) {
-	let font = {
+	const font = {
 		head: new Ot.Head.Table(),
 		hhea: new Ot.MetricHead.Hhea(),
 		os2: new Ot.Os2.Table(4),

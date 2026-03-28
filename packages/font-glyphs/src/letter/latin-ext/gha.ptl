@@ -8,15 +8,18 @@ glyph-module
 glyph-block Letter-Latin-Gha : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
-	glyph-block-import Letter-Latin-Lower-Q : RDiagTailedBar
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar RightwardDiagTailedBar
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 
 	define TERMINAL-NORMAL  0
 	define TERMINAL-TAILED  1
 	define TERMINAL-DIAG    2
 
-	define [GhaShape df terminal top bot _ada _adb fSlab] : glyph-proc
+	define SLAB-NONE        0
+	define SLAB-OUTER       1
+	define SLAB-FULL        2
+
+	define [GhaShape df terminal top bot _ada _adb slabType] : glyph-proc
 		local sw : Math.min df.mvs : AdviceStroke 2 (0.75 * df.adws)
 		local gap : 0.375 * (df.rightSB - df.leftSB) - [HSwToV : 0.25 * sw] + sw / 16
 		local subDf : DivFrame [Math.min ((df.width - gap) / Width) (0.75 * df.adws)] 2
@@ -25,9 +28,9 @@ glyph-block Letter-Latin-Gha : begin
 		local adb : [fallback _adb SmallArchDepthB] * 0.75 * df.adws
 		include : OShape top 0 subDf.leftSB subDf.rightSB sw ada adb
 		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar (df.rightSB - OX) bot top sw
-			[Just TERMINAL-DIAG]   : RDiagTailedBar     (df.rightSB - OX) bot top sw
-			__                     : VBar.r             (df.rightSB - OX) bot top sw
+			[Just TERMINAL-TAILED] : RightwardTailedBar     (df.rightSB - OX) bot top sw
+			[Just TERMINAL-DIAG]   : RightwardDiagTailedBar (df.rightSB - OX) bot top sw
+			__                     : VBar.r                 (df.rightSB - OX) bot top sw
 		include : dispiro
 			widths.lhs sw
 			flat ((subDf.rightSB - OX) - [HSwToV : 0.5 * sw])        (top - adb) [heading Rightward]
@@ -35,28 +38,32 @@ glyph-block Letter-Latin-Gha : begin
 			alsoThru 0.5 0.15
 			g4   ((df.rightSB - OX) - [HSwToV sw]) top [widths.rhs sw]
 
-		if fSlab : include : tagged 'serifRB' : union
-			HSerif.rb ((df.rightSB - OX) - [HSwToV : 0.5 * sw]) bot (Jut        - [HSwToV : 0.5 * (Stroke - sw)]) sw
-			HSerif.lb ((df.rightSB - OX) - [HSwToV : 0.5 * sw]) bot (MidJutSide - [HSwToV : 0.5 * (Stroke - sw)]) sw
+		include : tagged 'serifRB' : match slabType
+			[Just SLAB-OUTER] : HSerif.rb (df.rightSB - OX) bot SideJut sw
+			[Just SLAB-FULL]  : union
+				HSerif.rb ((df.rightSB - OX) - [HSwToV : 0.5 * sw]) bot (Jut        - [HSwToV : 0.5 * (Stroke - sw)]) sw
+				HSerif.lb ((df.rightSB - OX) - [HSwToV : 0.5 * sw]) bot (MidJutSide - [HSwToV : 0.5 * (Stroke - sw)]) sw
+			__                : no-shape
 
 		include : LeaningAnchor.Below.VBar.r (df.rightSB - OX) sw
 
 	define GhaConfig : object
-		straightSerifless       { TERMINAL-NORMAL false }
-		straightBottomSerifed   { TERMINAL-NORMAL true  }
-		tailedSerifless         { TERMINAL-TAILED false }
-		diagonalTailedSerifless { TERMINAL-DIAG   false }
+		serifless               { TERMINAL-NORMAL  SLAB-NONE  }
+		motionBottomSerifed     { TERMINAL-NORMAL  SLAB-OUTER }
+		bottomSerifed           { TERMINAL-NORMAL  SLAB-FULL  }
+		tailedSerifless         { TERMINAL-TAILED  SLAB-NONE  }
+		diagonalTailedSerifless { TERMINAL-DIAG    SLAB-NONE  }
 
-	foreach { suffix { terminal doSB } } [Object.entries GhaConfig] : do
+	foreach { suffix { terminal slabType } } [Object.entries GhaConfig] : do
 		create-glyph "Gha.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleM 3
 			include : df.markSet.capDesc
-			include : GhaShape df terminal CAP Descender ArchDepthA ArchDepthB doSB
+			include : GhaShape df terminal CAP Descender ArchDepthA ArchDepthB slabType
 
 		create-glyph "gha.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleM 3
 			include : df.markSet.p
-			include : GhaShape df terminal XH Descender SmallArchDepthA SmallArchDepthB doSB
+			include : GhaShape df terminal XH Descender SmallArchDepthA SmallArchDepthB slabType
 
 	select-variant 'Gha' 0x1A2 (follow -- 'gha')
 	select-variant 'gha' 0x1A3

@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 import { parseVariantsData } from "@iosevka/data-export/variants-data";
 
@@ -52,7 +52,7 @@ function formatCv(md, dirs, info) {
 	md.log(`  - ${info.introMD}`);
 	md.log(`${INDENT}<details><summary>${info.alternatives.length} variants</summary>`);
 	const imgWidth = 32 * info.sampleImageCountEm;
-	let sTable = INDENT + "<table>" + "\n";
+	let sTable = `${INDENT}<table>\n`;
 	for (const alt of info.alternatives) {
 		const imageId = `${dirs.images}/cv-${alt.imageId}`;
 		const image = ImgX(imageId, imgWidth);
@@ -61,15 +61,15 @@ function formatCv(md, dirs, info) {
 			INDENT +
 			`<tr><td rowspan="2" width="${2 * 14 + imgWidth}">${image}</td>` +
 			`<td>${selectorText}</td></tr>\n`;
-		sTable += INDENT + `<tr><td>${alt.description}</td></tr>\n`;
+		sTable += `${INDENT}<tr><td>${alt.description}</td></tr>\n`;
 	}
-	sTable += INDENT + "</table></details>";
+	sTable += `${INDENT}</table></details>`;
 	md.log(sTable);
 }
 function formatDescription(s) {
 	return s
-		.replace(/`` (\S+?) ``/g, ($0, $1) => `<code>${escapeHtml($1)}</code>`)
-		.replace(/`([^`]+?)`/g, ($0, $1) => `<code>${escapeHtml($1)}</code>`);
+		.replace(/`` (\S+?) ``/g, (_$0, $1) => `<code>${escapeHtml($1)}</code>`)
+		.replace(/`([^`]+?)`/g, (_$0, $1) => `<code>${escapeHtml($1)}</code>`);
 }
 function escapeHtml(s) {
 	return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

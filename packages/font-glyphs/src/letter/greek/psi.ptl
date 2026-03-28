@@ -2,50 +2,135 @@ $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 import [DesignParameters] from "../../meta/aesthetics.mjs"
-import [MathSansSerif] from "@iosevka/glyph/relation"
+import [MathSansSerif DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
 glyph-block Letter-Greek-Psi : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
+	glyph-block-import Letter-Latin-Lower-T : yShortNeck1 yShortNeck2
+	glyph-block-import Letter-Latin-V : VCornerHalfWidth VHookRightShape VSerifs VMotionSerifs
 
-	define [PsiShape df y1 y2 y3 y4 ada adb doBotSerif doTopSerif doSideSerifL doSideSerifR] : glyph-proc
+	define [PsiShape] : with-params [df y1 y2 y3 y4 ada adb doSerifLT doSerifRT doSerifMT doSerifMB] : glyph-proc
 		include : UShape y3 y2 df.leftSB df.rightSB df.mvs ada adb
 		include : VBar.m df.middle y2 y4 df.mvs
 		include : VBar.m df.middle y1 (y2 + HalfStroke)
 
-		if doSideSerifL : include : tagged 'serifLT' : HSerif.lt df.leftSB  y3 SideJut
-		if doSideSerifR : include : tagged 'serifRT' : HSerif.rt df.rightSB y3 SideJut
-		if doTopSerif   : include : tagged 'serifMT' : HSerif.mt df.middle CAP MidJutCenter
-		if doBotSerif   : include : tagged 'serifMB' : HSerif.mb df.middle 0   MidJutCenter
+		local doFullSerifs : (df.width > para.refJut * 7) && (doSerifLT || doSerifRT) && doSerifMT && doSerifMB
+		if doSerifLT : include : tagged 'serifLT' : if doFullSerifs
+			HSerif.mt (df.leftSB + [HSwToV : 0.5 * df.mvs]) y3 (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)])
+			HSerif.lt df.leftSB y3 SideJut
+		if doSerifRT : include : tagged 'serifRT' : if doFullSerifs
+			HSerif.mt (df.rightSB - [HSwToV : 0.5 * df.mvs]) y3 (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)])
+			HSerif.rt df.rightSB y3 SideJut
+		if doSerifMT : include : tagged 'serifMT' : piecewise
+			(y4 > y3)    : HSerif.lt (df.middle - [HSwToV : 0.5 * df.mvs]) y4 SideJut
+			doFullSerifs : HSerif.mt df.middle y4 (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)])
+			true         : no-shape
+		if doSerifMB : include : tagged 'serifMB' : HSerif.mb df.middle y1 MidJutCenter
 
 	create-glyph 'grek/Psi' 0x3A8 : glyph-proc
 		local df : include : DivFrame para.advanceScaleM 3
 		include : df.markSet.capital
-		include : PsiShape df 0 (CAP * 0.3) CAP CAP df.archDepthA df.archDepthB SLAB (SLAB && (df.width > para.refJut * 7)) SLAB SLAB
-
-	alias 'cyrl/Psi' 0x470 'grek/Psi'
+		include : PsiShape df 0 [mix 0 CAP 0.3] CAP CAP df.archDepthA df.archDepthB
+			doSerifLT -- SLAB
+			doSerifRT -- SLAB
+			doSerifMT -- SLAB
+			doSerifMB -- SLAB
 
 	create-glyph 'smcpPsi' 0x1D2A : glyph-proc
 		local df : include : DivFrame para.advanceScaleT 3
 		include : df.markSet.e
-		include : PsiShape df 0 (XH * 0.3) XH XH df.archDepthA df.archDepthB SLAB false SLAB SLAB
+		include : PsiShape df 0 [mix 0 XH 0.3] XH XH df.archDepthA df.archDepthB
+			doSerifLT -- SLAB
+			doSerifRT -- SLAB
+			doSerifMT -- false
+			doSerifMB -- SLAB
+
+	define [CyrPsiShape fBarStraight] : function [] : with-params [df y1 y2 y3 y4 ada adb doSerifLT doSerifRT doSerifMT doSerifMB] : glyph-proc
+		local fine    : Math.min df.mvs : AdviceStroke 3.5 df.adws
+		local coarse  : VSwToH : 2 * VCornerHalfWidth * (fine / Stroke)
+		local swSerif : clamp fine Stroke coarse
+
+		local doFullSerifs : (df.width > para.refJut * 7) && (doSerifLT || doSerifRT) && doSerifMT && doSerifMB
+		include : with-transform [ApparentTranslate 0 (y2 - 0)] : union
+			VHookRightShape
+				df             -- df
+				fBarStraight   -- fBarStraight
+				top            -- (y3 - y2)
+				sw             -- fine
+				hookWidthOuter -- (TailX / 3)
+				hookWidthInner -- (TailX / 3 - [HSwToV : 0.25 * fine])
+			if doSerifLT
+				new-glyph : glyph-proc
+					include : [if doFullSerifs VSerifs VMotionSerifs] df fBarStraight (y3 - y2) swSerif fine
+					eject-contour 'serifRT'
+				no-shape
+
+		include : VBar.m df.middle y2 y4 fine
+		include : VBar.m df.middle y1 (y2 + HalfStroke) coarse
+		if doSerifMT : include : tagged 'serifMT' : piecewise
+			(y4 > y3)    : HSerif.lt (df.middle - [HSwToV : 0.5 * fine]) y4 SideJut [Math.min swSerif : y4 - y3] fine
+			doFullSerifs : HSerif.mt df.middle y4 (Jut - [HSwToV : 0.5 * (Stroke - fine)]) swSerif
+			true         : no-shape
+		if doSerifMB : include : tagged 'serifMB' : HSerif.mb df.middle y1 (MidJutCenter - [HSwToV : 0.5 * (Stroke - coarse)]) swSerif
+
+	define VConfig : object
+		straight            true
+		curly               false
+
+	foreach { suffix fBarStraight } [Object.entries VConfig] : do
+		create-glyph "cyrl/Psi.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleM 3
+			include : df.markSet.capital
+			include : [CyrPsiShape fBarStraight] df 0 [mix 0 CAP 0.3] CAP CAP df.archDepthA df.archDepthB
+				doSerifLT -- SLAB
+				doSerifRT -- false
+				doSerifMT -- SLAB
+				doSerifMB -- SLAB
+
+	select-variant 'cyrl/Psi' 0x470 (follow -- 'cyrl/Psi/Izhitsa')
 
 	define GrekLowerPsiConfig : SuffixCfg.weave
 		object # top
-			""                  Ascender
-			flatTop             XH
+			""                { Ascender     'bp' }
+			shortNeck         { yShortNeck1  'bp' }
+			shortNeck2        { yShortNeck2  'bp' }
+			flatTop           { XH           'p'  }
 		object # slab
 			serifless           false
 			serifed             true
 
-	foreach { suffix { top slab } } [Object.entries GrekLowerPsiConfig] : do
+	foreach { suffix { { top mk } fSlab } } [Object.entries GrekLowerPsiConfig] : do
+		define df : DivFrame para.advanceScaleM 3
+
 		create-glyph "grek/psi.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleM 3
-			include : df.markSet.[if (top > XH) 'bp' 'p']
-			include : PsiShape df Descender 0 XH top df.smallArchDepthA df.smallArchDepthB false false slab false
+			set-width df.width
+			include : df.markSet.(mk)
+			include : PsiShape df Descender 0 XH top df.smallArchDepthA df.smallArchDepthB
+				doSerifLT -- fSlab
+				doSerifRT -- false
+				doSerifMT -- false
+				doSerifMB -- false
+
+		DefineSelectorGlyph "cyrl/psi" suffix df mk
+
+		foreach { suffixV fBarStraight } [Object.entries VConfig] : do
+			create-glyph "cyrl/psi.\(suffix).\(suffixV)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : [CyrPsiShape fBarStraight] df Descender 0 XH top df.smallArchDepthA df.smallArchDepthB
+					doSerifLT -- fSlab
+					doSerifRT -- false
+					doSerifMT -- (fSlab && SLAB && (!para.isItalic || (top > XH)))
+					doSerifMB -- (fSlab && SLAB &&  !para.isItalic)
+
+		select-variant "cyrl/psi.\(suffix)" (follow -- 'cyrl/psi/izhitsa')
 
 	select-variant 'grek/psi' 0x3C8
 	link-reduced-variant 'grek/psi/sansSerif' 'grek/psi' MathSansSerif
-	select-variant 'cyrl/psi' 0x471 (shapeFrom -- 'grek/psi')
+	select-variant 'grek/psi/noAscend' (shapeFrom -- 'grek/psi')
+
+	CreateSelectorVariants 'cyrl/psi' 0x471 [Object.keys GrekLowerPsiConfig] (follow -- 'grek/psi')

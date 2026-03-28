@@ -1,8 +1,6 @@
-"use strict";
-
-import fs from "fs";
-import path from "path";
-import url from "url";
+import fs from "node:fs";
+import path from "node:path";
+import url from "node:url";
 
 import semver from "semver";
 
@@ -49,7 +47,7 @@ async function GetLatestVersion() {
 async function updateMainJsonVersion(version) {
 	const packageJson = JSON.parse(await fs.promises.readFile(PackageJsonPath));
 	packageJson.version = version;
-	await fs.promises.writeFile(PackageJsonPath, JSON.stringify(packageJson, null, "  ") + "\n");
+	await fs.promises.writeFile(PackageJsonPath, `${JSON.stringify(packageJson, null, "  ")}\n`);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,20 +72,20 @@ async function exists(fileName) {
 	try {
 		await fs.promises.access(fileName);
 		return true;
-	} catch (e) {
+	} catch (_e) {
 		return false;
 	}
 }
 
 async function updateSubPackagesVersion(internalPackages, version) {
-	for (const [pkgName, pkgJsonPath] of internalPackages) {
+	for (const [_pkgName, pkgJsonPath] of internalPackages) {
 		const packageJson = JSON.parse(await fs.promises.readFile(pkgJsonPath));
 		packageJson.version = version;
 		if (packageJson.dependencies) {
-			for (const [depName, depVersion] of Object.entries(packageJson.dependencies)) {
+			for (const [depName, _depVersion] of Object.entries(packageJson.dependencies)) {
 				if (internalPackages.has(depName)) packageJson.dependencies[depName] = version;
 			}
 		}
-		await fs.promises.writeFile(pkgJsonPath, JSON.stringify(packageJson, null, "  ") + "\n");
+		await fs.promises.writeFile(pkgJsonPath, `${JSON.stringify(packageJson, null, "  ")}\n`);
 	}
 }

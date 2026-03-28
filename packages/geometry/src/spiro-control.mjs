@@ -34,7 +34,7 @@ export class SpiroFlattener {
 			if (!nd) break;
 		}
 
-		let final = [];
+		const final = [];
 		for (const c of this.controls) {
 			this.addToSink(final, c.resolveNonInterpolated());
 		}
@@ -72,7 +72,7 @@ export class SpiroFlattener {
 
 	doInterpolate() {
 		let nd = 0;
-		let sink = [];
+		const sink = [];
 		const dr = this.getDependenciesForInterpolation();
 		for (let i = 0; i < this.controls.length; i++) {
 			if (dr.deps[i] <= DEP_SKIP) {
@@ -92,19 +92,19 @@ export class SpiroFlattener {
 	}
 
 	getDependenciesForInterpolation() {
-		let nNonDependent = 0;
+		let _nNonDependent = 0;
 		let nDependent = 0;
-		let deps = [];
+		const deps = [];
 		/// Index to the next non-dependent control
-		let nextNonDependentIdx = [];
-		let prevNonDependentIdx = [];
+		const nextNonDependentIdx = [];
+		const prevNonDependentIdx = [];
 
 		for (let i = 0; i < this.controls.length; i++) {
-			let s = this.controls[i].getDependency(RES_DEP_STAGE_INTERPOLATION);
+			const s = this.controls[i].getDependency(RES_DEP_STAGE_INTERPOLATION);
 			if (s) {
 				nDependent += 1;
 			} else {
-				nNonDependent += 1;
+				_nNonDependent += 1;
 			}
 			deps.push(s);
 			nextNonDependentIdx.push(-1);
@@ -137,7 +137,7 @@ export class SpiroFlattener {
 			prevNonDependentIdx[i] = iLastNonDependent;
 		}
 		for (let i = 0; i < this.controls.length; i++) {
-			if (deps[i] != 0) {
+			if (deps[i] !== 0) {
 				nextNonDependentIdx[i] = nextNonDependentIdx[prevNonDependentIdx[i]];
 			}
 		}
@@ -219,7 +219,7 @@ export class UserControlKnot {
 	}
 
 	static isCoordinateValid(x) {
-		return isFinite(x);
+		return Number.isFinite(x);
 	}
 }
 
@@ -289,8 +289,6 @@ export class VirtualControlKnot {
 }
 
 export class InterpolatorBase {
-	constructor() {}
-
 	getDependency(stage) {
 		switch (stage) {
 			case RES_DEP_STAGE_INTERPOLATION:
@@ -309,7 +307,7 @@ export class InterpolatorBase {
 	resolveNonInterpolated() {
 		throw new Error("Unreachable: All interpolations shall be resolved now");
 	}
-	resolveInterpolation(pre, post) {
+	resolveInterpolation(_pre, _post) {
 		throw new Error("Unimplemented");
 	}
 }
@@ -324,7 +322,7 @@ export class DecorInterpolator extends InterpolatorBase {
 		super();
 		this.items = items;
 	}
-	resolveInterpolation(pre, post) {
+	resolveInterpolation(_pre, _post) {
 		return this.items;
 	}
 }

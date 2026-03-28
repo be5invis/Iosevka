@@ -105,7 +105,7 @@ export class GlyphStore {
 	}
 	queryUnicodeOf(g) {
 		const s = this.encodingBackward.get(g);
-		if (!s || !s.size) return null;
+		if (!s?.size) return null;
 		return s;
 	}
 	queryUnicodeOfName(name) {

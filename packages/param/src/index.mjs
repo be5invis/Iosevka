@@ -3,10 +3,10 @@ import { monotonicInterpolate } from "@iosevka/util/monotonic-interpolate";
 export { createSubsetFilter, SubsetFilter } from "./subset-filter.mjs";
 
 export function init(data, argv) {
-	let para = {};
+	const para = {};
 	apply(para, data, ["iosevka"]);
-	if (argv.shape.serifs) apply(para, data, ["serifs-" + argv.shape.serifs]);
-	if (argv.shape.spacing) apply(para, data, ["spacing-" + argv.shape.spacing]);
+	if (argv.shape.serifs) apply(para, data, [`serifs-${argv.shape.serifs}`]);
+	if (argv.shape.spacing) apply(para, data, [`spacing-${argv.shape.spacing}`]);
 	applyBlendingParam(argv, para, data, "shapeWeight", "weight");
 	applyBlendingParam(argv, para, data, "shapeWidth", "width");
 	applyBlendingParam(argv, para, data, "shapeSlopeAngle", "slopeAngle");
@@ -41,7 +41,6 @@ export function apply(sink, parametersData, styles, blendArgs) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-// eslint-disable-next-line complexity
 function intro(source, style, blendArgs, sink) {
 	let hive = source[style];
 	if (!hive) return;
@@ -83,23 +82,23 @@ function getBlendArg(blendArgs, style) {
 }
 
 function hiveBlend(hive, value) {
-	if (!hive || !hive.blend || value == null) return hive;
+	if (!hive?.blend || value == null) return hive;
 	const block = hive.blend;
 	delete hive.blend;
 	const generatedHive = { ...hive };
-	let keys = new Set();
+	const keys = new Set();
 	for (const grade in block) {
-		if (!isFinite(parseFloat(grade))) continue;
+		if (!Number.isFinite(parseFloat(grade))) continue;
 		for (const key in block[grade]) {
 			if (block[grade][key] == null) continue;
 			keys.add(key);
 		}
 	}
 	for (const key of keys) {
-		let xs = [],
+		const xs = [],
 			ys = [];
 		for (const grade in block) {
-			if (!isFinite(parseFloat(grade))) continue;
+			if (!Number.isFinite(parseFloat(grade))) continue;
 			if (block[grade][key] == null) continue;
 			xs.push(grade);
 			ys.push(block[grade][key]);

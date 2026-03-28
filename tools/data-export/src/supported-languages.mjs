@@ -1,5 +1,5 @@
-import fs from "fs";
-import zlib from "zlib";
+import fs from "node:fs";
+import zlib from "node:zlib";
 
 import { decode } from "@msgpack/msgpack";
 import cldr from "cldr";
@@ -33,13 +33,13 @@ function getSupportLocaleSet(rawCoverage) {
 			...(exemplar.numbers || []),
 			...(exemplar.punctuation || []),
 		].join("");
-		let fullSupport = true;
+		let _fullSupport = true;
 		let basicSupport = true;
 		for (const ch of basicChars) {
 			if (!rawCoverage.has(ch.codePointAt(0))) basicSupport = false;
 		}
 		for (const ch of fullChars) {
-			if (!rawCoverage.has(ch.codePointAt(0))) fullSupport = false;
+			if (!rawCoverage.has(ch.codePointAt(0))) _fullSupport = false;
 		}
 		if (basicSupport) {
 			supportLocaleSet.add(locale);
@@ -70,7 +70,7 @@ function getSupportedLangs(supportLocaleSet) {
 			const upperLoc = seg.slice(0, m).join("_");
 			const subDisplayName = cldr.extractLanguageDisplayNames("en")[upperLoc];
 			if (subDisplayName)
-				displayName = subDisplayName + (upperLoc === loc ? "" : "\u00A0(" + loc + ")");
+				displayName = subDisplayName + (upperLoc === loc ? "" : `\u00A0(${loc})`);
 		}
 		if (displayName && !excludedSupportedLanguages.has(displayName)) {
 			supportLangSet.add(displayName);

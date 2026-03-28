@@ -12,23 +12,26 @@ glyph-block Letter-Cyrillic-Lje : begin
 	glyph-block-import Letter-Cyrillic-Yeri : YeriConfig
 
 	define [CyrLjeShape Yeri df top] : glyph-proc
+		local sw : Math.min df.mvs : AdviceStroke2 3 3 top df.adws
 		local xTopLeft : mix df.leftSB df.rightSB 0.025
-		local jut : Math.min (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)]) : mix [HSwToV : 0.5 * df.mvs] Jut : (2/3) * df.adws
+		local xBotLeft : mix df.leftSB 0 [if SLAB 1.00 0.75]
+		local jut : Math.min
+			Jut - [HSwToV : 0.5 * (Stroke - sw)]
+			mix [HSwToV : 0.5 * sw] Jut ((2 / df.hPack) * df.adws)
 		include : LegShape
 			ztop -- [Point.fromXY Point.Type.Corner xTopLeft top]
-			zbot -- [Point.fromXY Point.Type.Corner [mix df.leftSB 0 : if SLAB 1 0.75] 0]
+			zbot -- [Point.fromXY Point.Type.Corner xBotLeft 0]
 			xb   -- xTopLeft
-			fine -- df.mvs
+			fine -- sw
 		include : Yeri top
-			left   -- (df.middle - [HSwToV : 0.5 * df.mvs])
+			left   -- (df.middle - [HSwToV : 0.5 * sw])
 			right  -- (df.rightSB - O)
-			stroke -- df.mvs
+			stroke -- sw
 			jut    -- jut
-		include : HBar.t xTopLeft df.middle top df.mvs
-		if SLAB : begin
-			include : HSerif.lt xTopLeft top (jut - [HSwToV : 0.5 * df.mvs]) df.mvs
+		include : HBar.t xTopLeft df.middle top sw
+		if SLAB : include : HSerif.lt xTopLeft top (jut - [HSwToV : 0.5 * sw]) sw
 
-	foreach { suffix { Uc Lc } } [Object.entries YeriConfig] : do
+	foreach { suffix { Uc Lc BGRc } } [Object.entries YeriConfig] : do
 		create-glyph "cyrl/Lje.\(suffix)"  : glyph-proc
 			local df : include : DivFrame para.advanceScaleMM 3
 			include : df.markSet.capital

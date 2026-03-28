@@ -5,14 +5,14 @@ import { ssStrings } from "./templates/package-sample.mjs";
 export default main;
 
 async function main(args) {
-	let out = { tokens: [] };
+	const out = { tokens: [] };
 	for (const line of ssStrings) {
-		let outLine = [];
+		const outLine = [];
 		for (const [id, token] of line.entries()) {
 			if (id > 0) {
 				outLine.push({ text: " ", scopes: [] });
 			}
-			let combined = Array.from(token).join("");
+			const combined = Array.from(token).join("");
 			outLine.push({ text: combined, scopes: ["dim"] });
 		}
 		out.tokens.push(outLine);

@@ -10,20 +10,12 @@ glyph-block Letter-Latin-Lower-Q : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Shared-Metrics : markHalfStroke
 	glyph-block-import Mark-Adjustment : LeaningAnchor
-	glyph-block-import Letter-Shared-Shapes : OBarRight RightwardTailedBar
-	glyph-block-import Letter-Shared-Shapes : DiagTail TopHook RetroflexHook
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar RightwardDiagTailedBar
+	glyph-block-import Letter-Shared-Shapes : OBarRight TopHook RetroflexHook
 
 	define TERMINAL-NORMAL  0
 	define TERMINAL-TAILED  1
 	define TERMINAL-DIAG    2
-
-	glyph-block-export RDiagTailedBar
-	define [RDiagTailedBar x0 yb yt _sw] : begin
-		local sw : fallback _sw Stroke
-		return : dispiro
-			widths.center sw
-			flat       (x0 - [HSwToV : 0.5 * sw]) yt [heading Downward]
-			DiagTail.R (x0 - [HSwToV : 0.5 * sw]) yb (0.875 * Hook - 0.375 * sw) sw
 
 	define [EaredBody terminal top bottom _ada _adb] : glyph-proc
 		local ada : fallback _ada SmallArchDepthA
@@ -34,9 +26,9 @@ glyph-block Letter-Latin-Lower-Q : begin
 			ada -- ada
 			adb -- adb
 		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom top
-			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom top
-			__                     : VBar.r             RightSB bottom top
+			[Just TERMINAL-TAILED] : RightwardTailedBar     RightSB bottom top
+			[Just TERMINAL-DIAG]   : RightwardDiagTailedBar RightSB bottom top
+			__                     : VBar.r                 RightSB bottom top
 
 	define [TopCutBody terminal top bottom _ada _adb] : glyph-proc
 		local ada : fallback _ada SmallArchDepthA
@@ -47,9 +39,9 @@ glyph-block Letter-Latin-Lower-Q : begin
 			ada -- ada
 			adb -- adb
 		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - HalfStroke)
-			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - HalfStroke)
-			__                     : VBar.r             RightSB bottom (top - HalfStroke)
+			[Just TERMINAL-TAILED] : RightwardTailedBar     RightSB bottom (top - HalfStroke)
+			[Just TERMINAL-DIAG]   : RightwardDiagTailedBar RightSB bottom (top - HalfStroke)
+			__                     : VBar.r                 RightSB bottom (top - HalfStroke)
 		include : spiro-outline
 			corner  RightSB                     top
 			corner  RightSB                    (top - HalfStroke)
@@ -66,9 +58,9 @@ glyph-block Letter-Latin-Lower-Q : begin
 			rise -- DToothlessRise
 			mBlend -- DMBlend
 		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - DToothlessRise)
-			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - DToothlessRise)
-			__                     : VBar.r             RightSB bottom (top - DToothlessRise)
+			[Just TERMINAL-TAILED] : RightwardTailedBar     RightSB bottom (top - DToothlessRise)
+			[Just TERMINAL-DIAG]   : RightwardDiagTailedBar RightSB bottom (top - DToothlessRise)
+			__                     : VBar.r                 RightSB bottom (top - DToothlessRise)
 
 	define [EarlessRoundedBody terminal top bottom _ada _adb] : glyph-proc
 		local ada : fallback _ada SmallArchDepthA
@@ -80,32 +72,34 @@ glyph-block Letter-Latin-Lower-Q : begin
 			adb -- adb
 			yTerminal -- ada
 		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - adb)
-			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - adb)
-			__                     : VBar.r             RightSB bottom (top - adb)
+			[Just TERMINAL-TAILED] : RightwardTailedBar     RightSB bottom (top - adb)
+			[Just TERMINAL-DIAG]   : RightwardDiagTailedBar RightSB bottom (top - adb)
+			__                     : VBar.r                 RightSB bottom (top - adb)
 
 	define [RtSerif y] : tagged 'serifRT' : HSerif.rt RightSB y SideJut
 	define [RbSerif y] : tagged 'serifRB' : union
 		HSerif.lb (RightSB - [HSwToV HalfStroke]) y MidJutSide
 		HSerif.rb (RightSB - [HSwToV HalfStroke]) y Jut
+	define [RbSerifOuter y] : tagged 'serifRB' : HSerif.rb RightSB y SideJut
 	define [RtSerifAuto y] : NeedSlab SLAB : RtSerif y
 	define [RbSerifAuto y] : NeedSlab SLAB : RbSerif y
 
 	define QConfig : SuffixCfg.weave
 		object # body
-			""                   EaredBody
-			earlessCorner        EarlessCornerBody
-			earlessRounded       EarlessRoundedBody
-			topCut               TopCutBody
+			""                    EaredBody
+			earlessCorner         EarlessCornerBody
+			earlessRounded        EarlessRoundedBody
+			topCut                TopCutBody
 		object # tail
-			straight             TERMINAL-NORMAL
-			tailed               TERMINAL-TAILED
-			diagonalTailed       TERMINAL-DIAG
+			""                    TERMINAL-NORMAL
+			tailed                TERMINAL-TAILED
+			diagonalTailed        TERMINAL-DIAG
 		object # serifs
-			serifless          { null    null    }
-			motionSerifed      { RtSerif null    }
-			bottomSerifed      { null    RbSerif }
-			serifed            { RtSerif RbSerif }
+			serifless           { null        null         }
+			motionSerifed       { RtSerif     null         }
+			bottomSerifed       { null        RbSerif      }
+			motionBottomSerifed { null        RbSerifOuter }
+			serifed             { RtSerif     RbSerif      }
 
 	foreach { suffix { Body terminal { sRT sRB } } } [Object.entries QConfig] : do
 		create-glyph "q.\(suffix)" : glyph-proc

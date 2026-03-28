@@ -1,0 +1,163 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Yer : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : VerticalHook
+	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos YeriConfig
+
+	glyph-block-export CyrYerShape
+	define flex-params [CyrYerShape] : glyph-proc
+		local-parameter : Yeri
+		local-parameter : top
+		local-parameter : left   -- SB
+		local-parameter : right  -- RightSB
+		local-parameter : stroke -- [AdviceStroke 2.75]
+		local-parameter : jut    -- (Jut - [HSwToV : 0.5 * (Stroke - stroke)])
+		local-parameter : pBar   -- YeriBarPos
+
+		local xYeriLeft : Math.max (right - (RightSB - SB)) : if SLAB
+			[mix left right 0.35] - [HSwToV : 0.50 * stroke]
+			[mix left right 0.20] - [HSwToV : 0.25 * stroke]
+		local xTopBarLeft : mix 0 left : if SLAB 0.250 0.375
+
+		include : HBar.t xTopBarLeft ((xYeriLeft + [HSwToV stroke]) + O) top stroke
+		include : Yeri top
+			left   -- xYeriLeft
+			right  -- right
+			stroke -- stroke
+			jut    -- jut
+			pBar   -- pBar
+
+		if SLAB : begin
+			local swVJut : Math.min (VJutStroke * (stroke / Stroke)) : VSwToH : 0.625 * (xYeriLeft - xTopBarLeft)
+			include : VSerif.dl xTopBarLeft top VJut swVJut
+
+	define flex-params [CyrNeutralYerShape] : glyph-proc
+		local-parameter : Yeri
+		local-parameter : top
+		local-parameter : left   -- SB
+		local-parameter : right  -- RightSB
+		local-parameter : stroke -- [AdviceStroke 2.75]
+		local-parameter : jut    -- (Jut - [HSwToV : 0.5 * (Stroke - stroke)])
+		local-parameter : pBar   -- YeriBarPos
+
+		local xYeriLeft : Math.max (right - (RightSB - SB)) : if SLAB
+			[mix left right 0.35] - [HSwToV : 0.50 * stroke]
+			[mix left right 0.20] - [HSwToV : 0.25 * stroke]
+		local xTopBarLeft : mix 0 left : if SLAB 0.250 0.375
+
+		include : Yeri top
+			left   -- xYeriLeft
+			right  -- right
+			stroke -- stroke
+			jut    -- jut
+			pBar   -- pBar
+			yStart -- (top - TailY - 0.5 * stroke)
+		eject-contour 'serifYeriLT'
+
+		include : VerticalHook.l xYeriLeft (top - TailY - 0.5 * stroke)
+			xDepth -- (xTopBarLeft - xYeriLeft - [HSwToV : 0.5 * stroke])
+			yDepth -- (-TailY)
+			sw     -- stroke
+
+	define flex-params [ZhuangToneSixShape] : glyph-proc
+		local-parameter : Yeri
+		local-parameter : top
+		local-parameter : left   -- SB
+		local-parameter : right  -- RightSB
+		local-parameter : stroke -- [AdviceStroke 2.75]
+		local-parameter : jut    -- (Jut - [HSwToV : 0.5 * (Stroke - stroke)])
+		local-parameter : pBar   -- YeriBarPos
+
+		local xYeriLeft : Math.max (right - (RightSB - SB)) : if SLAB
+			[mix left right 0.35] - [HSwToV : 0.50 * stroke]
+			[mix left right 0.20] - [HSwToV : 0.25 * stroke]
+		local xTopBarLeft : mix 0 left : if SLAB 0.250 0.375
+
+		include : Yeri top
+			left   -- xYeriLeft
+			right  -- right
+			stroke -- stroke
+			jut    -- jut
+			pBar   -- pBar
+		eject-contour 'serifYeriLT'
+
+		local mockWidth : (right - left) + SB * 2
+		local yTopBarLeft : top - (xYeriLeft - xTopBarLeft) * (HalfUPM / mockWidth)
+		local fine : Math.min stroke : AdviceStroke 5.5 (mockWidth / Width)
+		include : ExtLineLhs xYeriLeft top xTopBarLeft yTopBarLeft fine
+
+	foreach { suffix { Uc Lc BGRc } } [Object.entries YeriConfig] : do
+		create-glyph "cyrl/Yer.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleT 2
+			include : df.markSet.capital
+			include : CyrYerShape Uc CAP
+				left   -- df.leftSB
+				right  -- df.rightSB
+				stroke -- [df.adviceStroke2 2.75 3 CAP]
+		create-glyph "cyrl/yer.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleT 2
+			include : df.markSet.e
+			include : CyrYerShape Lc XH
+				left   -- df.leftSB
+				right  -- df.rightSB
+				stroke -- [df.adviceStroke2 2.75 3 XH]
+		create-glyph "cyrl/yer.BGR.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleT 2
+			include : df.markSet.e
+			include : CyrYerShape BGRc XH
+				left   -- df.leftSB
+				right  -- df.rightSB
+				stroke -- [df.adviceStroke2 2.75 3 XH]
+		create-glyph "cyrl/yerTall.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleT 2
+			include : df.markSet.b
+			include : CyrYerShape Lc Ascender
+				left   -- df.leftSB
+				right  -- df.rightSB
+				stroke -- [df.adviceStroke2 2.75 3 XH]
+				pBar   -- ([mix 0 XH YeriBarPos] / Ascender)
+		create-glyph "cyrl/YerNeutral.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleT 2
+			include : df.markSet.capital
+			include : CyrNeutralYerShape Uc CAP
+				left   -- df.leftSB
+				right  -- df.rightSB
+				stroke -- [df.adviceStroke2 2.75 3 CAP]
+		create-glyph "cyrl/yerNeutral.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleT 2
+			include : df.markSet.e
+			include : CyrNeutralYerShape Lc XH
+				left   -- df.leftSB
+				right  -- df.rightSB
+				stroke -- [df.adviceStroke2 2.75 3 XH]
+		create-glyph "ZhuangToneSix.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleT 2
+			include : df.markSet.capital
+			include : ZhuangToneSixShape Uc CAP
+				left   -- df.leftSB
+				right  -- df.rightSB
+				stroke -- [df.adviceStroke2 2.75 3 CAP]
+		create-glyph "zhuangToneSix.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleT 2
+			include : df.markSet.e
+			include : ZhuangToneSixShape Lc XH
+				left   -- df.leftSB
+				right  -- df.rightSB
+				stroke -- [df.adviceStroke2 2.75 3 XH]
+
+	select-variant 'cyrl/Yer' 0x42A
+	select-variant 'cyrl/yer' 0x44A
+	select-variant 'cyrl/yer.BGR'
+	select-variant 'cyrl/yerTall' 0x1C86 (follow -- 'cyrl/yer')
+
+	select-variant 'cyrl/YerNeutral' 0xA64E (follow -- 'cyrl/Yer')
+	select-variant 'cyrl/yerNeutral' 0xA64F (follow -- 'cyrl/yer')
+
+	select-variant 'ZhuangToneSix' 0x184 (follow -- 'cyrl/Yer')
+	select-variant 'zhuangToneSix' 0x185 (follow -- 'cyrl/yer')

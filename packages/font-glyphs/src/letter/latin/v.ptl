@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 import [MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -139,36 +139,38 @@ glyph-block Letter-Latin-V : begin
 			curl [mix xLoopL xLoopR 0.5] yLoopB
 			archv
 			g4   (xLoopR - O) [mix yLoopB top 0.5]
-			arch.lhs top (swBefore -- swLoop) (sw -- swLoopMix1) (swAfter -- swLoopMix2)
+			Arch.lhs top (swBefore -- swLoop) (sw -- swLoopMix1) (swAfter -- swLoopMix2)
 			g4   xLoopL       [mix top yLoopB 0.5] [widths.lhs swLoopMix2]
 			flat [mix vxStartL vxEndL : if fBarStraight 0.5 0.425] [mix top 0 0.5] [widths.lhs : mix sw cornerSw 0.5]
 			curl vxEndL 0 [widths.lhs cornerSw]
 
-	define [VSerifs] : with-params [df fBarStraight top [sw Stroke]] : begin
+	glyph-block-export VSerifs
+	define [VSerifs] : with-params [df fBarStraight top [sw Stroke] [swRef sw]] : begin
 		local sbScale  : if fBarStraight StraightSbShrink 1
 		local sbOffset : if fBarStraight (OX * [StrokeWidthBlend 1 2]) 0
-		local sf : SerifFrame top 0 ([mix 0 df.leftSB sbScale] - sbOffset) ([mix df.width df.rightSB sbScale] + sbOffset) (swRef -- sw)
+		local sf : SerifFrame top 0 ([mix 0 df.leftSB sbScale] - sbOffset) ([mix df.width df.rightSB sbScale] + sbOffset) (swRef -- swRef) (swSerif -- sw)
 		return : composite-proc sf.lt.full sf.rt.full
 
-	define [VAutoSerifs] : with-params [df fBarStraight top [sw Stroke]] : if SLAB [VSerifs df fBarStraight top sw] [no-shape]
+	define [VAutoSerifs] : with-params [df fBarStraight top [sw Stroke] [swRef sw]] : NeedSlab SLAB : VSerifs df fBarStraight top sw swRef
 
-	define [VMotionSerifs] : with-params [df fBarStraight top [sw Stroke]] : begin
+	glyph-block-export VMotionSerifs
+	define [VMotionSerifs] : with-params [df fBarStraight top [sw Stroke] [swRef sw]] : begin
 		local sbScale  : if fBarStraight StraightSbShrink 1
 		local sbOffset : if fBarStraight (OX * [StrokeWidthBlend 1 2]) 0
-		local sf : SerifFrame top 0 ([mix 0 df.leftSB sbScale] - sbOffset) ([mix df.width df.rightSB sbScale] + sbOffset) (swRef -- sw)
+		local sf : SerifFrame top 0 ([mix 0 df.leftSB sbScale] - sbOffset) ([mix df.width df.rightSB sbScale] + sbOffset) (swRef -- swRef) (swSerif -- sw)
 		return : composite-proc sf.lt.outer
 
-	define VStandardConfig : object
-		straight              { VAutoSerifs   true  }
-		curly                 { VAutoSerifs   false }
-		straightSerifless     { no-shape      true  }
-		curlySerifless        { no-shape      false }
-		straightMotionSerifed { VMotionSerifs true  }
-		curlyMotionSerifed    { VMotionSerifs false }
-		straightSerifed       { VSerifs       true  }
-		curlySerifed          { VSerifs       false }
+	define VStandardConfig : SuffixCfg.weave
+		object # straight bar
+			straight              true
+			curly                 false
+		object # serifs
+			""                    VAutoSerifs
+			serifless             no-shape
+			motionSerifed         VMotionSerifs
+			serifed               VSerifs
 
-	foreach { suffix { Serifs fStraightBar }} [Object.entries VStandardConfig] : do
+	foreach { suffix { fStraightBar Serifs } } [Object.entries VStandardConfig] : do
 		create-glyph "V.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : VShape [DivFrame 1] fStraightBar CAP Stroke
@@ -240,7 +242,7 @@ glyph-block Letter-Latin-V : begin
 		define xArcEnd   : [mix SB RightSB 0.8] + sw * 0.375
 		define yArcEnd   : top - O
 		define rInY : 1 * DefaultTightBendInnerRadius
-		define xArcMidBottom : arch.adjust-x.bot (xBar + [HSwToV : sw + rInY]) sw
+		define xArcMidBottom : Arch.adjust-x.bot (xBar + [HSwToV : sw + rInY]) sw
 		define yArcMidBottom : 0 + O
 
 		include : dispiro

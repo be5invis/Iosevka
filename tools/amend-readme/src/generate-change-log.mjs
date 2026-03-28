@@ -1,6 +1,6 @@
-import fs from "fs";
-import path from "path";
-import url from "url";
+import fs from "node:fs";
+import path from "node:path";
+import url from "node:url";
 
 import semver from "semver";
 
@@ -26,7 +26,7 @@ async function GenerateChangeList(argv, out) {
 	out.log(`## Modifications since last major version`);
 	for (const [version, notes] of sortedFragments) {
 		out.log(`\n### ${version}\n`);
-		out.log(notes.trimEnd() + "\n");
+		out.log(`${notes.trimEnd()}\n`);
 	}
 }
 export default async function main(argv) {

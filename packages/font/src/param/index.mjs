@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 import * as Toml from "@iarna/toml";
 import * as Parameters from "@iosevka/param";
@@ -28,7 +28,7 @@ export async function getParametersT(argv) {
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
 	function createParaImpl(argv) {
-		let para = Parameters.init(deepClone(parametersData), argv);
+		const para = Parameters.init(deepClone(parametersData), argv);
 		VariantData.apply(deepClone(rawVariantsData), para, argv);
 		applyLigationData(deepClone(rawLigationData), para, argv);
 		if (argv.subset) para.subset = argv.subset;
@@ -40,7 +40,7 @@ export async function getParametersT(argv) {
 	}
 	function paraT(argv) {
 		const para = createParaImpl(argv);
-		para.createFork = function (tf) {
+		para.createFork = tf => {
 			const argv1 = deepClone(argv);
 			tf(argv1, argv);
 			return paraT(argv1);

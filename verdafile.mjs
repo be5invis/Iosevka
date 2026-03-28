@@ -1,6 +1,6 @@
-import * as FS from "fs";
 import { randomUUID } from "node:crypto";
-import * as Path from "path";
+import * as FS from "node:fs";
+import * as Path from "node:path";
 
 import * as toml from "@iarna/toml";
 import deepEqual from "deep-equal";
@@ -64,32 +64,32 @@ const Version = computed(`env::version`, async target => {
 	return pj.version;
 });
 
-const TtfAutoHintApp = oracle(`oracle:check-ttfautohint-exists`, async target => {
+const TtfAutoHintApp = oracle(`oracle:check-ttfautohint-exists`, async _target => {
 	try {
 		return await which(process.env.TTFAUTOHINT_PATH || "ttfautohint");
-	} catch (e) {
+	} catch (_e) {
 		fail("External dependency <ttfautohint>, needed for building hinted font, does not exist.");
 	}
 });
 
 const Woff2CompressApp = oracle(`oracle:check-woff2-compress-app`, async target => {
 	const [rp] = await target.need(RawPlans);
-	if (rp.buildOptions && rp.buildOptions.woff2CompressApp) {
+	if (rp.buildOptions?.woff2CompressApp) {
 		return rp.buildOptions.woff2CompressApp;
 	} else {
 		try {
 			return await which("woff2_compress");
-		} catch (e) {
+		} catch (_e) {
 			// No woff2_compress found, use fallback
 			return null;
 		}
 	}
 });
 
-const SevenZipApp = oracle(`oracle:check-7zip-exists`, async target => {
+const SevenZipApp = oracle(`oracle:check-7zip-exists`, async _target => {
 	try {
 		return await which(process.env.SEVEN_ZIP_PATH || "7z");
-	} catch (e) {
+	} catch (_e) {
 		fail("External dependency <7z>, needed for building archives, does not exist.");
 	}
 });
@@ -119,7 +119,7 @@ const DependenciesFor = computed.make(
 	async (target, pakcageJsonPath) => {
 		const [pjf] = await target.need(sfu(pakcageJsonPath));
 		const pj = JSON.parse(await FS.promises.readFile(pjf.full, "utf-8"));
-		let subGoals = [];
+		const subGoals = [];
 		for (const pkgName in pj.dependencies) {
 			if (/^@iosevka/.test(pkgName)) continue;
 			subGoals.push(InstalledVersion(pkgName, pj.dependencies[pkgName]));
@@ -237,7 +237,7 @@ function isDeriveToSpacing(spacing) {
 function isDeriveFromSpacing(spacing) {
 	return !spacing || spacing === "normal";
 }
-function spacingDeriveCompatible(pfxTo, bpTo, pfxFrom, bpFrom) {
+function spacingDeriveCompatible(_pfxTo, bpTo, _pfxFrom, bpFrom) {
 	// If the two build plans are the same, then they are compatible.
 	return deepEqual(rectifyPlanForSpacingDerive(bpTo), rectifyPlanForSpacingDerive(bpFrom));
 }
@@ -257,7 +257,7 @@ function rectifyPlanForSpacingDerive(p) {
 const BuildPlanOf = computed.group("metadata:build-plan-of", async (target, gid) => {
 	const [{ buildPlans }] = await target.need(BuildPlans);
 	const plan = buildPlans[gid];
-	if (!plan) fail(`Build plan for '${gid}' not found.` + whyBuildPlanIsnNotThere(gid));
+	if (!plan) fail(`Build plan for '${gid}' not found.${whyBuildPlanIsnNotThere(gid)}`);
 	return plan;
 });
 
@@ -270,9 +270,9 @@ const VariantCompositesFromBuildPlan = computed(
 	`metadata:variant-composites-from-build-plan`,
 	async target => {
 		const [{ buildPlans }] = await target.need(BuildPlans);
-		let data = {};
+		const data = {};
 		for (const bpn in buildPlans) {
-			let bp = buildPlans[bpn];
+			const bp = buildPlans[bpn];
 			if (bp.variants) {
 				data[bpn] = bp.variants;
 			}
@@ -285,9 +285,9 @@ const LigtionCompositesFromBuildPlan = computed(
 	`metadata:ligation-composites-from-build-plan`,
 	async target => {
 		const [{ buildPlans }] = await target.need(BuildPlans);
-		let data = {};
+		const data = {};
 		for (const bpn in buildPlans) {
-			let bp = buildPlans[bpn];
+			const bp = buildPlans[bpn];
 			if (bp.ligations) {
 				data[`buildPlans.${bpn}`] = bp.ligations;
 			}
@@ -301,16 +301,15 @@ const LigtionCompositesFromBuildPlan = computed(
 	},
 );
 
-// eslint-disable-next-line complexity
 const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileName) => {
 	const [{ fileNameToBpMap, buildPlans }] = await target.need(BuildPlans);
 	const [version] = await target.need(Version);
 
 	const fi0 = fileNameToBpMap[fileName];
-	if (!fi0) fail(`Build plan for '${fileName}' not found.` + whyBuildPlanIsnNotThere(fileName));
+	if (!fi0) fail(`Build plan for '${fileName}' not found.${whyBuildPlanIsnNotThere(fileName)}`);
 
 	const bp = buildPlans[fi0.prefix];
-	if (!bp) fail(`Build plan for '${fileName}' not found.` + whyBuildPlanIsnNotThere(fileName));
+	if (!bp) fail(`Build plan for '${fileName}' not found.${whyBuildPlanIsnNotThere(fileName)}`);
 
 	const sfm = getSuffixMapping(bp.weights, bp.slopes, bp.widths);
 	const sfi = sfm[fi0.suffix];
@@ -390,7 +389,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 });
 
 function fetchHintReferenceSuffix(sfm) {
-	if (sfm["regular"]) return "regular";
+	if (sfm.regular) return "regular";
 
 	let bestSuffix = null,
 		bestSfi = null;
@@ -426,33 +425,33 @@ function getSuffixMapping(weights, slopes, widths) {
 	return mapping;
 }
 function getSuffixMappingItem(weights, w, slopes, s, widths, wd) {
-	const weightDef = wwsDefValidate("Weight definition of " + s, weights[w]);
-	const widthDef = wwsDefValidate("Width definition of " + s, widths[wd]);
-	const slopeDef = wwsDefValidate("Slope definition of " + s, slopes[s]);
+	const weightDef = wwsDefValidate(`Weight definition of ${s}`, weights[w]);
+	const widthDef = wwsDefValidate(`Width definition of ${s}`, widths[wd]);
+	const slopeDef = wwsDefValidate(`Slope definition of ${s}`, slopes[s]);
 	return {
 		// Weights
 		weight: w,
-		shapeWeight: nValidate("Shape weight of " + w, weightDef.shape, VlShapeWeight),
-		cssWeight: nValidate("CSS weight of " + w, weightDef.css, VlCssWeight),
-		menuWeight: nValidate("Menu weight of " + w, weightDef.menu, VlMenuWeight),
+		shapeWeight: nValidate(`Shape weight of ${w}`, weightDef.shape, VlShapeWeight),
+		cssWeight: nValidate(`CSS weight of ${w}`, weightDef.css, VlCssWeight),
+		menuWeight: nValidate(`Menu weight of ${w}`, weightDef.menu, VlMenuWeight),
 
 		// Widths
 		width: wd,
-		shapeWidth: nValidate("Shape width of " + wd, widthDef.shape, VlShapeWidth),
-		cssStretch: sValidate("CSS stretch of " + wd, widthDef.css, VlCssFontStretch),
-		menuWidth: nValidate("Menu width of " + wd, widthDef.menu, VlMenuWidth),
+		shapeWidth: nValidate(`Shape width of ${wd}`, widthDef.shape, VlShapeWidth),
+		cssStretch: sValidate(`CSS stretch of ${wd}`, widthDef.css, VlCssFontStretch),
+		menuWidth: nValidate(`Menu width of ${wd}`, widthDef.menu, VlMenuWidth),
 
 		// Slopes
 		slope: s,
-		shapeSlope: sValidate("Shape slope of " + s, slopeDef.shape, VlShapeSlope),
-		shapeSlopeAngle: nValidate("Angle of " + s, slopeDef.angle, VlSlopeAngle),
-		cssStyle: sValidate("CSS style of " + s, slopeDef.css, VlCssStyle),
-		menuSlope: sValidate("Menu slope of " + s, slopeDef.menu, VlShapeSlope),
+		shapeSlope: sValidate(`Shape slope of ${s}`, slopeDef.shape, VlShapeSlope),
+		shapeSlopeAngle: nValidate(`Angle of ${s}`, slopeDef.angle, VlSlopeAngle),
+		cssStyle: sValidate(`CSS style of ${s}`, slopeDef.css, VlCssStyle),
+		menuSlope: sValidate(`Menu slope of ${s}`, slopeDef.menu, VlShapeSlope),
 	};
 }
 
 function makeFileName(prefix, suffix) {
-	return prefix + "-" + suffix;
+	return `${prefix}-${suffix}`;
 }
 function makeSuffix(w, wd, s, fallback) {
 	return (
@@ -462,7 +461,7 @@ function makeSuffix(w, wd, s, fallback) {
 	);
 }
 
-function whyBuildPlanIsnNotThere(gid) {
+function whyBuildPlanIsnNotThere(_gid) {
 	if (!FS.existsSync(PRIVATE_BUILD_PLANS))
 		return "\n        -- Possible reason: Config file 'private-build-plans.toml' does not exist.";
 	return "";
@@ -550,25 +549,25 @@ const DistUnhintedTTF = file.make(
 
 const BuildCM = file.make(
 	(gr, f) => `${BUILD}/TTF/${gr}/${f}.charmap.mpz`,
-	async (target, output, gr, f) => {
+	async (target, _output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
 	},
 );
 const BuildTtfaControls = file.make(
 	(gr, f) => `${BUILD}/TTF/${gr}/${f}.ttfa.txt`,
-	async (target, output, gr, f) => {
+	async (target, _output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
 	},
 );
 const BuildNoGcUnhintedTtfImpl = file.make(
 	(gr, f) => `${BUILD}/TTF/${gr}/${f}.no-gc.ttf`,
-	async (target, output, gr, f) => {
+	async (target, _output, gr, f) => {
 		await target.need(DistUnhintedTTF(gr, f));
 	},
 );
 const BuildNoGcTtfImpl = file.make(
 	(gr, f) => `${BUILD}/TTF/${gr}/${f}.no-gc.hinted.ttf`,
-	async (target, output, gr, f) => {
+	async (target, _output, gr, f) => {
 		await target.need(DistHintedTTF(gr, f));
 	},
 );
@@ -656,26 +655,26 @@ const DistWoff2 = file.make(
 ///////////////////////////////////////////////////////////
 
 // Group-level entry points
-const Entry_GroupContents = task.group("contents", async (target, gr) => {
+const _Entry_GroupContents = task.group("contents", async (target, gr) => {
 	await target.need(Entry_GroupFonts(gr), Entry_GroupUnhintedFonts(gr));
 	return gr;
 });
-const Entry_GroupTTFs = task.group("ttf", async (target, gr) => {
+const _Entry_GroupTTFs = task.group("ttf", async (target, gr) => {
 	await target.need(GroupTtfsImpl(gr, false));
 });
-const Entry_GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gr) => {
+const _Entry_GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gr) => {
 	await target.need(GroupTtfsImpl(gr, true));
 });
-const Entry_GroupWoff2s = task.group("woff2", async (target, gr) => {
+const _Entry_GroupWoff2s = task.group("woff2", async (target, gr) => {
 	await target.need(GroupWoff2Impl(gr, false));
 });
-const Entry_GroupUnhintedWoff2s = task.group("woff2-unhinted", async (target, gr) => {
+const _Entry_GroupUnhintedWoff2s = task.group("woff2-unhinted", async (target, gr) => {
 	await target.need(GroupWoff2Impl(gr, true));
 });
-const Entry_GroupWebFonts = task.group("webfont", async (target, gr) => {
+const _Entry_GroupWebFonts = task.group("webfont", async (target, gr) => {
 	await target.need(GroupWebFontsImpl(gr, false));
 });
-const Entry_GroupUnhintedWebFonts = task.group("webfont-unhinted", async (target, gr) => {
+const _Entry_GroupUnhintedWebFonts = task.group("webfont-unhinted", async (target, gr) => {
 	await target.need(GroupWebFontsImpl(gr, true));
 });
 const Entry_GroupFonts = task.group("fonts", async (target, gr) => {
@@ -760,7 +759,7 @@ const SGR_PREFIX_PREFIX = "SGr-";
 async function getCollectPlans(target, rawCollectPlans) {
 	const plans = {};
 
-	let allCollectableGroups = new Set();
+	const allCollectableGroups = new Set();
 
 	for (const collectPrefix in rawCollectPlans) {
 		const collect = rawCollectPlans[collectPrefix];
@@ -769,7 +768,7 @@ async function getCollectPlans(target, rawCollectPlans) {
 		const ttcComposition = {}; // Collect plan for master TTCs
 		const singleGroupTtcInfos = {}; // single-group TTCs
 
-		if (!collect || !collect.from || !collect.from.length) continue;
+		if (!collect?.from?.length) continue;
 
 		const shouldProduceSgr = collect.from.length > 1;
 
@@ -893,7 +892,7 @@ const SpecificSgrSuperTtc = task.group(`sgr-super-ttc`, async (target, cgr) => {
 	}
 });
 
-const SpecificAllTtc = task.group(`all-ttc`, async (target, cgr) => {
+const _SpecificAllTtc = task.group(`all-ttc`, async (target, cgr) => {
 	await target.need(SpecificTtc(cgr));
 	const [cPlan] = await target.need(CollectPlans);
 	const plan = validateCollectPlan(cPlan, cgr);
@@ -901,7 +900,7 @@ const SpecificAllTtc = task.group(`all-ttc`, async (target, cgr) => {
 		await target.need(SpecificSgrTtc(cgr));
 	}
 });
-const SpecificAllSuperTtc = task.group(`all-super-ttc`, async (target, cgr) => {
+const _SpecificAllSuperTtc = task.group(`all-super-ttc`, async (target, cgr) => {
 	await target.need(SpecificSuperTtc(cgr));
 	const [cPlan] = await target.need(CollectPlans);
 	const plan = validateCollectPlan(cPlan, cgr);
@@ -930,7 +929,7 @@ const CollectedTtcFile = file.make(
 );
 
 const SGrTtcFile = file.make(
-	(cgr, sgr, f) => `${DIST_TTC}/${sgr}/${f}.ttc`,
+	(_cgr, sgr, f) => `${DIST_TTC}/${sgr}/${f}.ttc`,
 	async (target, out, cgr, sgr, f) => {
 		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
 		const sgrInfo = cp[cgr].singleGroupTtcInfos[sgr];
@@ -940,7 +939,7 @@ const SGrTtcFile = file.make(
 	},
 );
 const SGrSuperTtcFile = file.make(
-	(cgr, sgr) => `${DIST_SUPER_TTC}/${sgr}.ttc`,
+	(_cgr, sgr) => `${DIST_SUPER_TTC}/${sgr}.ttc`,
 	async (target, out, cgr, sgr) => {
 		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
 		const sgrInfo = cp[cgr].singleGroupTtcInfos[sgr];
@@ -979,11 +978,11 @@ async function buildGlyphSharingTtc(target, parts, out) {
 async function foldWithTempFileRetryImpl(inputPaths, fn) {
 	try {
 		return await fn(inputPaths);
-	} catch (e) {
+	} catch (_e) {
 		// Retry with temporary files
 		const tempPaths = [];
 		for (const input of inputPaths) {
-			let tmp = `${BUILD}/${String(randomUUID())}.${Path.extname(input)}`;
+			const tmp = `${BUILD}/${String(randomUUID())}.${Path.extname(input)}`;
 			await cp(input, tmp);
 			tempPaths.push(tmp);
 		}
@@ -1016,7 +1015,7 @@ const SuperTtcZip = file.make(
 	},
 );
 const SgrTtcZip = file.make(
-	(cgr, sgr, version) => `${ARCHIVE_DIR}/PkgTTC-${sgr}-${version}.zip`,
+	(_cgr, sgr, version) => `${ARCHIVE_DIR}/PkgTTC-${sgr}-${version}.zip`,
 	async (target, out, cgr, sgr) => {
 		const sevenZip = await target.need(SevenZipApp);
 		const [cPlan] = await target.need(CollectPlans, de`${out.dir}`);
@@ -1026,7 +1025,7 @@ const SgrTtcZip = file.make(
 	},
 );
 const SgrSuperTtcZip = file.make(
-	(cgr, sgr, version) => `${ARCHIVE_DIR}/SuperTTC-${sgr}-${version}.zip`,
+	(_cgr, sgr, version) => `${ARCHIVE_DIR}/SuperTTC-${sgr}-${version}.zip`,
 	async (target, out, cgr, sgr) => {
 		const sevenZip = await target.need(SevenZipApp);
 		await target.need(de`${out.dir}`, SGrSuperTtcFile(cgr, sgr));
@@ -1108,7 +1107,7 @@ const Pages = task(`pages`, async t => {
 
 const PagesDir = oracle(`pages-dir-path`, async t => {
 	const [rp] = await t.need(RawPlans);
-	if (!rp.buildOptions || !rp.buildOptions.__pagesDir) fail("Pages directory not found");
+	if (!rp.buildOptions?.__pagesDir) fail("Pages directory not found");
 	return rp.buildOptions.__pagesDir;
 });
 
@@ -1170,7 +1169,7 @@ const PagesFontExport = task.group(`pages:font-export`, async (target, gr) => {
 	await rm(Path.resolve(outDir, "TTF"));
 });
 
-const PagesFastFont = task.group(`pages:ff`, async (t, gr) => {
+const _PagesFastFont = task.group(`pages:ff`, async (t, gr) => {
 	await t.need(PagesDataExport, PagesAtlasExport(gr), PagesFastFontExportImpl(gr));
 });
 const PagesFastFontExportImpl = task.group(`pages:fast-font-export-impl`, async (target, gr) => {
@@ -1231,11 +1230,11 @@ const AmendReadmeFor = task.make(
 const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t, out) => {
 	const [cp] = await t.need(CollectPlans);
 	const [{ buildPlans }] = await t.need(BuildPlans);
-	let releaseNoteGroups = {};
+	const releaseNoteGroups = {};
 	for (const [k, plan] of Object.entries(cp)) {
 		if (!plan.inRelease || plan.isAmended) continue;
 		const primePlan = buildPlans[plan.groupDecomposition[0]];
-		let subGroups = {};
+		const subGroups = {};
 		for (const gr of plan.groupDecomposition) {
 			const bp = buildPlans[gr];
 			subGroups[gr] = {
@@ -1264,7 +1263,7 @@ const AmendLicenseYear = task("amend-readme:license-year", async target => {
 
 const SampleImages = task(`sample-images`, async target => {
 	const [tasksToTake] = await target.need(SampleImagesPre, de(IMAGES));
-	let tasks = [];
+	const tasks = [];
 	for (const id of tasksToTake) tasks.push(ScreenShotImpl(id));
 	await target.need(tasks);
 });
@@ -1298,9 +1297,9 @@ const PackageSnapshotConfig = async target => {
 	const cfg = [];
 	for (const key in plan.buildPlans) {
 		const p = plan.buildPlans[key];
-		if (!p || !p.snapshotFamily) continue;
+		if (!p?.snapshotFamily) continue;
 		cfg.push({
-			name: "package-sample-" + key,
+			name: `package-sample-${key}`,
 			fontFamily: p.snapshotFamily,
 			fontFeatures: p.snapshotFeature,
 		});
@@ -1360,19 +1359,19 @@ const ChangeFileList = oracle.make(
 //////                   Entries                     //////
 ///////////////////////////////////////////////////////////
 
-const Clean = task(`clean`, async () => {
+const _Clean = task(`clean`, async () => {
 	await rm(BUILD);
 	await rm(DIST);
 	await rm(ARCHIVE_DIR);
 	build.deleteJournal();
 });
 
-const CleanDist = task(`clean-dist`, async () => {
+const _CleanDist = task(`clean-dist`, async () => {
 	await rm(DIST);
 	await rm(ARCHIVE_DIR);
 });
 
-const RegenerateCode = task(`regenerate-code`, async target => {
+const _RegenerateCode = task(`regenerate-code`, async target => {
 	target.is.volatile();
 	echo.action(echo.hl.command("Codegen"), "Generating TTFA ranges...");
 	await silently.node(`tools/misc/src/generate-ttfa-ranges.mjs`, {
@@ -1380,7 +1379,7 @@ const RegenerateCode = task(`regenerate-code`, async target => {
 	});
 });
 
-const Release = task(`release`, async target => {
+const _Release = task(`release`, async target => {
 	await target.need(ReleaseAncillary);
 	await target.need(ReleaseArchives, ReleaseSha256Text);
 });
@@ -1391,7 +1390,7 @@ const ReleaseAncillary = task(`release:ancillary`, async target => {
 const ReleaseArchives = task(`release:archives`, async target => {
 	const [collectPlans] = await target.need(CollectPlans, UtilScripts);
 
-	let goals = [];
+	const goals = [];
 	for (const [cgr, plan] of Object.entries(collectPlans)) {
 		if (!plan.inRelease) continue;
 		goals.push(ReleaseArchivesFor(cgr));
@@ -1412,9 +1411,9 @@ const ReleaseSha256Text = file(`${ARCHIVE_DIR}/SHA-256.txt`, async (target, out)
 const ReleaseArchivesFor = task.group(`release:archives-for`, async (target, cgr) => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans, UtilScripts);
 	const plan = collectPlans[cgr];
-	if (!plan || !plan.inRelease) throw new Error(`CollectGroup ${cgr} is not in release.`);
+	if (!plan?.inRelease) throw new Error(`CollectGroup ${cgr} is not in release.`);
 
-	let goals = [];
+	const goals = [];
 
 	goals.push(TtcZip(cgr, version));
 	goals.push(SuperTtcZip(cgr, version));
@@ -1444,7 +1443,7 @@ const Scripts = task("scripts", async target => {
 	const [jsList] = await target.need(FindScriptsUnder(`mjs`, PACKAGES));
 	const jsFromPtlSet = new Set(Object.keys(jsFromPtlMap));
 
-	let subGoals = [];
+	const subGoals = [];
 	for (const js of jsFromPtlSet) subGoals.push(CompiledJsFromPtl(js));
 	for (const js of jsList) if (!jsFromPtlSet.has(js)) subGoals.push(sfu(js));
 	await target.need(subGoals);
@@ -1466,8 +1465,8 @@ const JsFilesFromPtl = computed("scripts-js-from-ptl", async target => {
 });
 const MacroPtlFiles = computed("macro-ptl-files", async target => {
 	const [jsFromPtlMap] = await target.need(JsFilesFromPtl);
-	let macroGoals = [];
-	for (const [mjs, { isMacro, fromPath }] of Object.entries(jsFromPtlMap)) {
+	const macroGoals = [];
+	for (const [_mjs, { isMacro, fromPath }] of Object.entries(jsFromPtlMap)) {
 		if (isMacro) macroGoals.push(sfu(fromPath));
 	}
 	await target.need(macroGoals);
@@ -1475,7 +1474,7 @@ const MacroPtlFiles = computed("macro-ptl-files", async target => {
 function compiledMjsPathFromPtlPath(path) {
 	const dirName = Path.dirname(path);
 	const newDirName = dirName.replace(/packages\/([\w-]+)\/src(?=$|\/)/, "packages/$1/lib");
-	const newFileName = Path.basename(path, Path.extname(path)) + ".mjs";
+	const newFileName = `${Path.basename(path, Path.extname(path))}.mjs`;
 	const isMacro = Path.basename(path) === "macros.ptl";
 	return [
 		`${newDirName}/${newFileName}`,
@@ -1581,7 +1580,7 @@ function resolveWwsAspect(aspectName, bpName, buildPlans, defaultConfig, deps) {
 
 	if (bp[aspectName]) {
 		const aspect = bp[aspectName];
-		if (typeof aspect.inherits == "string") {
+		if (typeof aspect.inherits === "string") {
 			if (aspect.inherits === "default") {
 				return defaultConfig[aspectName];
 			} else {
@@ -1683,7 +1682,7 @@ function wwsDefValidate(key, obj) {
 
 function nValidate(key, v, validator) {
 	if (validator.fixup) v = validator.fix(v);
-	if (typeof v !== "number" || !isFinite(v) || !validator.validate(v)) {
+	if (typeof v !== "number" || !Number.isFinite(v) || !validator.validate(v)) {
 		throw new TypeError(`${key} = ${v} is not a valid number.`);
 	}
 	return v;
@@ -1699,7 +1698,7 @@ const VlShapeWidth = {
 	fix(x) {
 		if (x >= 3 && x <= 9) {
 			if (g_widthFixupMemory.has(x)) return g_widthFixupMemory.get(x);
-			const xCorrected = Math.round(500 * Math.pow(Math.sqrt(600 / 500), x - 5));
+			const xCorrected = Math.round(500 * Math.sqrt(600 / 500) ** (x - 5));
 			echo.warn(
 				`The build plan is using legacy width grade ${x}. ` +
 					`Converting to unit width ${xCorrected}.`,
@@ -1725,15 +1724,15 @@ const VlShapeSlope = { validate: x => x === "upright" || x === "oblique" || x ==
 const VlCssStyle = { validate: x => x === "normal" || x === "oblique" || x === "italic" };
 const VlCssFontStretch = {
 	validate: x =>
-		x == "ultra-condensed" ||
-		x == "extra-condensed" ||
-		x == "condensed" ||
-		x == "semi-condensed" ||
-		x == "normal" ||
-		x == "semi-expanded" ||
-		x == "expanded" ||
-		x == "extra-expanded" ||
-		x == "ultra-expanded",
+		x === "ultra-condensed" ||
+		x === "extra-condensed" ||
+		x === "condensed" ||
+		x === "semi-condensed" ||
+		x === "normal" ||
+		x === "semi-expanded" ||
+		x === "expanded" ||
+		x === "extra-expanded" ||
+		x === "ultra-expanded",
 };
 
 // Utilities

@@ -1,4 +1,4 @@
-import { Joining, AnyCv, TieMark, Nwid, Wwid, VS01, CvDecompose } from "@iosevka/glyph/relation";
+import { AnyCv, CvDecompose, Joining, Nwid, TieMark, VS01, Wwid } from "@iosevka/glyph/relation";
 
 const ApplePostNames = new Map([
 	/* spell-checker: disable */
@@ -292,8 +292,8 @@ function byPairGrImpl(grCis, tagCis, tagTrans, gSrcBase, gOtBase, nm, conflictSe
 	if (!gnDst) return 0;
 	const gOtDst = nm.get(gnDst);
 	if (!gOtDst || gOtDst.name) return 0;
-	const nameS = gOtBase.name + "." + tagTrans;
-	const nameT = gOtBase.name + "." + tagCis;
+	const nameS = `${gOtBase.name}.${tagTrans}`;
+	const nameT = `${gOtBase.name}.${tagCis}`;
 	if (!conflictSet.has(nameS) && !conflictSet.has(nameT)) {
 		conflictSet.add(nameS);
 		conflictSet.add(nameT);
@@ -309,7 +309,7 @@ function byPairGrImpl(grCis, tagCis, tagTrans, gSrcBase, gOtBase, nm, conflictSe
 export function byDecompose(gSrcBase, gOtBase, internalNameMap, conflictSet) {
 	const parts = CvDecompose.get(gSrcBase);
 
-	if (!parts || !parts.length) return 0;
+	if (!parts?.length) return 0;
 
 	let newNamesCount = 0;
 	for (const [index, gnPart] of parts.entries()) {
