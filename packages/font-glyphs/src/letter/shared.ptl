@@ -131,6 +131,23 @@ glyph-block Letter-Shared-Metrics : begin
 			HSwToV : 1.25 * sw
 			trShrink * [Math.min ((top - bottom) * 0.45) ((right - left + [HSwToV sw]) * 0.875)]
 
+	glyph-block-export EFMidBarShrinkK EFMidBarPosY EFVJutLength
+	define [EFMidBarShrinkK df fSerifRT _swRef] : begin
+		local swRef : fallback _swRef df.mvs
+		return : 1 + ([Math.max (0.15 * (df.rightSB - df.leftSB)) (0.5 * swRef)] + [if fSerifRT 0.25 0] * swRef) / df.leftSB
+	define [EFMidBarPosY top bot _pyBar] : mix bot top : fallback _pyBar DesignParameters.upperEBarPos
+	define [EFVJutLength top bot _pyBar _stroke _jutTop _jutBot] : begin
+		local height : top - bot
+		local barPos : EFMidBarPosY height 0 _pyBar
+		local stroke : fallback _stroke Stroke
+		local jutTop : fallback _jutTop : Math.min VJut : mix stroke (height - (barPos + stroke / 2)) 0.5
+		local jutBot : fallback _jutBot : Math.min VJut : mix stroke (0      + (barPos - stroke / 2)) 0.5
+		# Remaining space
+		local coJutTop : (height - (barPos - stroke / 2)) - jutTop
+		local coJutBot : (0      + (barPos + stroke / 2)) - jutBot
+		local jutMid : mix (stroke / 2) ([Math.min VJut coJutTop coJutBot] - stroke / 2) 0.5
+		return { jutTop jutBot jutMid }
+
 glyph-block Letter-Shared-Shapes : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
@@ -138,8 +155,12 @@ glyph-block Letter-Shared-Shapes : begin
 
 	glyph-block-export RightwardTailedBar
 	define [RightwardTailedBar] : with-params [x low high [sw Stroke]] : begin
-		local hookDepth : Math.max SideJut [AdviceStroke 8] (SB * 0.625)
-		local hookTurn  : Math.max [AdviceStroke 16] (hookDepth - [AdviceStroke 16])
+		local hookDepth : Math.max SideJut
+			AdviceStroke 8
+			0.625 * (SB - 0)
+		local hookTurn : Math.max
+			0         + [AdviceStroke 16]
+			hookDepth - [AdviceStroke 16]
 		return : dispiro
 			widths.lhs sw
 			flat (x - [HSwToV sw]) high [heading Downward]
@@ -150,8 +171,12 @@ glyph-block Letter-Shared-Shapes : begin
 
 	glyph-block-export InvRightwardTailedBar
 	define [InvRightwardTailedBar] : with-params [x low high [sw Stroke]] : begin
-		local hookDepth : Math.max SideJut [AdviceStroke 8] (SB * 0.625)
-		local hookTurn  : Math.max [AdviceStroke 16] (hookDepth - [AdviceStroke 16])
+		local hookDepth : Math.max SideJut
+			AdviceStroke 8
+			0.625 * (SB - 0)
+		local hookTurn : Math.max
+			0         + [AdviceStroke 16]
+			hookDepth - [AdviceStroke 16]
 		return : dispiro
 			widths.rhs sw
 			flat (x - [HSwToV sw]) low [heading Upward]
@@ -255,13 +280,13 @@ glyph-block Letter-Shared-Shapes : begin
 
 		export : define [shape] : begin
 			local a : Array.prototype.slice.call arguments 0
-			glyph-proc
-				include : dispiro : knots.apply null a
+			return : dispiro
+				knots.apply null a
 
 		export : define [mask] : begin
 			local a : Array.prototype.slice.call arguments 0
-			glyph-proc
-				include : spiro-outline : knots.apply null [a.concat { (fMask -- true) }]
+			return : spiro-outline
+				knots.apply null [a.concat { (fMask -- true) }]
 
 		export : define flex-params [earlessCorner] : begin
 			local-parameter : left
@@ -319,12 +344,12 @@ glyph-block Letter-Shared-Shapes : begin
 				if fMask {[corner right top]} {}
 		export : define [shape] : begin
 			local a : Array.prototype.slice.call arguments 0
-			glyph-proc
-				include : dispiro : knots.apply null a
+			return : dispiro
+				knots.apply null a
 		export : define [mask] : begin
 			local a : Array.prototype.slice.call arguments 0
-			glyph-proc
-				include : spiro-outline : knots.apply null [a.concat { (fMask -- true) }]
+			return : spiro-outline
+				knots.apply null [a.concat { (fMask -- true) }]
 
 		export : define flex-params [toothlessCorner] : begin
 			local-parameter : left
@@ -359,55 +384,51 @@ glyph-block Letter-Shared-Shapes : begin
 				flat right [Math.min (bottom + ada) (rightY0 - TINY)]
 				curl right rightY0 [heading Upward]
 
-	glyph-block-export cheBowl
-	define cheBowl : namespace
-		export : define flex-params [shape] : begin
-			local-parameter : left
-			local-parameter : right
-			local-parameter : top
-			local-parameter : bottom
-			local-parameter : ada       -- ArchDepthA
-			local-parameter : adb       -- ArchDepthB
-			local-parameter : stroke    -- Stroke
-
-			define xMid : [mix left right 0.5] + [HSwToV : 0.2 * stroke]
-			define rise : DToothlessRise + 0.25 * stroke
-
-			return : dispiro
-				flat left top [widths.lhs.heading stroke Downward]
-				curl left [Math.min (bottom + adb) (top - TINY)]
-				Arch.lhs.centerAt.ltr.b xMid bottom (sw -- stroke)
-				g4 right (bottom + rise)
-
 	glyph-block-export : OBarLeft
 	define OBarLeft : namespace
 		define kSkewShift 0.5
-		export : define [arcStart] : with-params [
-				[top XH] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
-				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[ystart ((top - ada) - TINY)]
-			] : begin
+		export : define flex-params [arcStart] : begin
+			local-parameter : top               -- XH
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+			local-parameter : ystart            -- ((top - ada) - TINY)
+
 			local xstart : left + [HSwToV : sw - fine]
 			return : list
 				flat xstart ystart [widths.rhs fine]
 				curl xstart [Math.max (top - ada) (ystart + TINY)]
 				Arch.rhs top (sw -- sw) (swBefore -- fine)
 
-		export : define [arcEnd] : with-params [
-				[bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
-				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[yend ((bot + adb) + TINY)]
-			] : begin
+		export : define flex-params [arcEnd] : begin
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+			local-parameter : yend              -- ((bot + adb) + TINY)
+
 			local xend : left + [HSwToV : sw - fine]
 			return : list
 				Arch.rhs bot (sw -- sw) (swAfter -- fine)
 				flat xend [Math.min (bot + adb) (yend - TINY)] [widths.rhs fine]
 				curl xend yend
 
-		export : define [shape] : with-params [
-				[top XH] [bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
-				[ada SmallArchDepthA] [adb SmallArchDepthB]
-			] : begin
+		export : define flex-params [shape] : begin
+			local-parameter : top               -- XH
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+
 			return : dispiro
 				widths.lhs fine
 				flatside.ld (left + [HSwToV : sw - fine]) bot top ada adb 0
@@ -416,10 +437,18 @@ glyph-block Letter-Shared-Shapes : begin
 				Arch.lhs top (sw -- sw) (swAfter -- fine)
 				flatside.ld (left + [HSwToV : sw - fine]) bot top ada adb 0 [widths.lhs fine]
 
-		export : define [toothlessCorner] : with-params [
-				[top XH] [bot 0] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
-				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
-			] : begin
+		export : define flex-params [toothlessCorner] : begin
+			local-parameter : top               -- XH
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : rise              -- SHook
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : mBlend            -- Math.SQRT1_2
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+
 			return : dispiro
 				g4 left (bot + rise) [widths.lhs sw]
 				alsoThru.g2 0.5 mBlend important
@@ -430,10 +459,17 @@ glyph-block Letter-Shared-Shapes : begin
 				flat (left + [HSwToV : sw - fine]) (top - ada) [widths.lhs fine]
 				curl (left + [HSwToV : sw - fine]) ((top - ada) - TINY) [widths.lhs fine]
 
-		export : define [toothlessRounded] : with-params [
-				[top XH] [bot 0] [left SB] [right RightSB] [yTerminal CAP] [sw Stroke] [fine ShoulderFine]
-				[ada SmallArchDepthA] [adb SmallArchDepthB]
-			] : begin
+		export : define flex-params [toothlessRounded] : begin
+			local-parameter : top               -- XH
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : yTerminal         -- CAP
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+
 			return : dispiro
 				flat left yTerminal [widths.lhs.heading sw Downward]
 				curl left [Math.min (bot + adb) (yTerminal - TINY)]
@@ -443,10 +479,18 @@ glyph-block Letter-Shared-Shapes : begin
 				flat (left + [HSwToV : sw - fine]) ((top - ada) + TINY) [widths.lhs fine]
 				curl (left + [HSwToV : sw - fine]) (top - ada) [widths.lhs fine]
 
-		export : define [earlessCorner] : with-params [
-				[top XH] [bot 0] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
-				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
-			] : begin
+		export : define flex-params [earlessCorner] : begin
+			local-parameter : top               -- XH
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : rise              -- SHook
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : mBlend            -- Math.SQRT1_2
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+
 			return : dispiro
 				flat (left + [HSwToV : sw - fine]) ((bot + adb) + TINY) [widths.lhs fine]
 				curl (left + [HSwToV : sw - fine]) (bot + adb) [widths.lhs fine]
@@ -457,10 +501,17 @@ glyph-block Letter-Shared-Shapes : begin
 				alsoThru.g2 0.5 (1 - mBlend) important
 				g4 left (top - rise) [widths.lhs sw]
 
-		export : define [earlessRounded] : with-params [
-				[top XH] [bot 0] [left SB] [right RightSB] [yTerminal Descender] [sw Stroke]
-				[fine ShoulderFine] [ada SmallArchDepthA] [adb SmallArchDepthB]
-			] : begin
+		export : define flex-params [earlessRounded] : begin
+			local-parameter : top               -- XH
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : yTerminal         -- Descender
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+
 			return : dispiro
 				flat (left + [HSwToV : sw - fine]) ((bot + adb) + TINY) [widths.lhs fine]
 				curl (left + [HSwToV : sw - fine]) (bot + adb) [widths.lhs fine]
@@ -473,108 +524,159 @@ glyph-block Letter-Shared-Shapes : begin
 	glyph-block-export : OBarRight
 	define OBarRight : namespace
 		define kSkewShift 0.5
-		export : define [arcStart] : with-params [
-				[top XH] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
-				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[ystart ((top - adb) - TINY)]
-			] : begin
+		export : define flex-params [arcStart] : begin
+			local-parameter : top               -- XH
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+			local-parameter : ystart            -- ((top - adb) - TINY)
+
 			local xstart : right - [HSwToV : sw - fine]
 			return : list
 				flat xstart ystart [widths.lhs fine]
 				curl xstart [Math.max (top - adb) (ystart + TINY)]
 				Arch.lhs top (sw -- sw) (swBefore -- fine)
 
-		export : define [arcEnd] : with-params [
-				[bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
-				[ada SmallArchDepthA] [adb SmallArchDepthB]
-				[yend ((bot + ada) + TINY)]
-			] : begin
+		export : define flex-params [arcEnd] : begin
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+			local-parameter : yend              -- ((bot + ada) + TINY)
+
 			local xend : right - [HSwToV : sw - fine]
 			return : list
 				Arch.lhs bot (sw -- sw) (swAfter -- fine)
 				flat xend [Math.min (bot + ada) (yend - TINY)] [widths.lhs fine]
 				curl xend yend
 
-		export : define [shape] : with-params [
-				[top XH] [bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
-				[ada SmallArchDepthA] [adb SmallArchDepthB]
-			] : new-glyph : glyph-proc
-			include : OBarLeft.shape
-				top   -- top
-				bot   -- bot
-				left  -- left
-				right -- right
-				sw    -- sw
-				fine  -- fine
-				ada   -- ada
-				adb   -- adb
-			include : FlipAround [mix left right 0.5] [mix bot top 0.5]
+		export : define flex-params [shape] : begin
+			local-parameter : top               -- XH
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
 
-		export : define [toothlessCorner] : with-params [
-				[top XH] [bot 0] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
-				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
-			] : new-glyph : glyph-proc
-			include : OBarLeft.earlessCorner
-				top    -- top
-				bot    -- bot
-				left   -- left
-				right  -- right
-				rise   -- rise
-				sw     -- sw
-				fine   -- fine
-				mBlend -- mBlend
-				ada    -- ada
-				adb    -- adb
-			include : FlipAround [mix left right 0.5] [mix bot top 0.5]
+			return : new-glyph : composite-proc
+				OBarLeft.shape
+					top   -- top
+					bot   -- bot
+					left  -- left
+					right -- right
+					sw    -- sw
+					fine  -- fine
+					ada   -- ada
+					adb   -- adb
+				FlipAround [mix left right 0.5] [mix bot top 0.5]
 
-		export : define [toothlessRounded] : with-params [
-				[top XH] [bot 0] [left SB] [right RightSB] [sw Stroke] [fine ShoulderFine]
-				[yTerminal CAP] [ada SmallArchDepthA] [adb SmallArchDepthB]
-			] : new-glyph : glyph-proc
-			include : OBarLeft.earlessRounded
-				top       -- top
-				bot       -- bot
-				left      -- left
-				right     -- right
-				sw        -- sw
-				fine      -- fine
-				yTerminal -- (top - yTerminal)
-				ada       -- ada
-				adb       -- adb
-			include : FlipAround [mix left right 0.5] [mix bot top 0.5]
+		export : define flex-params [toothlessCorner] : begin
+			local-parameter : top               -- XH
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : rise              -- SHook
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : mBlend            -- Math.SQRT1_2
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
 
-		export : define [earlessCorner] : with-params [
-				[top XH] [bot 0] [left SB] [right RightSB] [rise SHook] [sw Stroke] [fine ShoulderFine]
-				[mBlend Math.SQRT1_2] [ada SmallArchDepthA] [adb SmallArchDepthB]
-			] : new-glyph : glyph-proc
-			include : OBarLeft.toothlessCorner
-				top    -- top
-				bot    -- bot
-				left   -- left
-				right  -- right
-				rise   -- rise
-				sw     -- sw
-				fine   -- fine
-				mBlend -- mBlend
-				ada    -- ada
-				adb    -- adb
-			include : FlipAround [mix left right 0.5] [mix bot top 0.5]
+			return : new-glyph : composite-proc
+				OBarLeft.earlessCorner
+					top    -- top
+					bot    -- bot
+					left   -- left
+					right  -- right
+					rise   -- rise
+					sw     -- sw
+					fine   -- fine
+					mBlend -- mBlend
+					ada    -- ada
+					adb    -- adb
+				FlipAround [mix left right 0.5] [mix bot top 0.5]
 
-		export : define [earlessRounded] : with-params [
-				[top XH] [bot 0] [left SB] [right RightSB] [yTerminal Descender] [sw Stroke]
-				[fine ShoulderFine] [ada SmallArchDepthA] [adb SmallArchDepthB]
-			] : new-glyph : glyph-proc
-			include : OBarLeft.toothlessRounded
-				top       -- top
-				bot       -- bot
-				left      -- left
-				right     -- right
-				sw        -- sw
-				fine      -- fine
-				yTerminal -- (top - yTerminal)
-				ada       -- ada
-				adb       -- adb
-			include : FlipAround [mix left right 0.5] [mix bot top 0.5]
+		export : define flex-params [toothlessRounded] : begin
+			local-parameter : top               -- XH
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : yTerminal         -- CAP
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+
+			return : new-glyph : composite-proc
+				OBarLeft.earlessRounded
+					top       -- top
+					bot       -- bot
+					left      -- left
+					right     -- right
+					sw        -- sw
+					fine      -- fine
+					yTerminal -- (top - yTerminal)
+					ada       -- ada
+					adb       -- adb
+				FlipAround [mix left right 0.5] [mix bot top 0.5]
+
+		export : define flex-params [earlessCorner] : begin
+			local-parameter : top               -- XH
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : rise              -- SHook
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : mBlend            -- Math.SQRT1_2
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+
+			return : new-glyph : composite-proc
+				OBarLeft.toothlessCorner
+					top    -- top
+					bot    -- bot
+					left   -- left
+					right  -- right
+					rise   -- rise
+					sw     -- sw
+					fine   -- fine
+					mBlend -- mBlend
+					ada    -- ada
+					adb    -- adb
+				FlipAround [mix left right 0.5] [mix bot top 0.5]
+
+		export : define flex-params [earlessRounded] : begin
+			local-parameter : top               -- XH
+			local-parameter : bot               -- 0
+			local-parameter : left              -- SB
+			local-parameter : right             -- RightSB
+			local-parameter : yTerminal         -- Descender
+			local-parameter : sw                -- Stroke
+			local-parameter : fine              -- ShoulderFine
+			local-parameter : ada               -- SmallArchDepthA
+			local-parameter : adb               -- SmallArchDepthB
+
+			return : new-glyph : composite-proc
+				OBarLeft.toothlessRounded
+					top       -- top
+					bot       -- bot
+					left      -- left
+					right     -- right
+					sw        -- sw
+					fine      -- fine
+					yTerminal -- (top - yTerminal)
+					ada       -- ada
+					adb       -- adb
+				FlipAround [mix left right 0.5] [mix bot top 0.5]
 
 	glyph-block-export FlatHookDepth
 	define [FlatHookDepth df s] : object
@@ -701,7 +803,6 @@ glyph-block Letter-Shared-Shapes : begin
 
 	glyph-block-export DiagTail
 	define DiagTail : namespace
-
 		export : define [StdDepth df sw] : Math.max (0.5 * sw)
 			df.adws * para.unitWidthScalar * DiagTailDepth - 0.25 * sw
 
@@ -747,7 +848,7 @@ glyph-block Letter-Shared-Shapes : begin
 					cy + O + fine
 					[if (sign > 0) widths.rhs widths.lhs] fine
 				alsoThruThem : FArc tailAngle 4
-				flat (cx + sign * dxTailStart)             (cy + O + dyTailStart)
+				flat (cx + sign *  dxTailStart)            (cy + O + dyTailStart)
 				curl (cx + sign * (dxTailStart + dxDepth)) (cy + O + dyTailStart + dyDepth)
 
 		export : define [R cx cy depth sw] : begin
