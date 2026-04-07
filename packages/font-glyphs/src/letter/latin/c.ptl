@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Latin-C : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Shared-Metrics : markMiddle
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors ExtendBelowBaseAnchors LeaningAnchor
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateDependentComposite
 	glyph-block-import Letter-Shared-Metrics : EFVJutLength
@@ -446,35 +447,41 @@ glyph-block Letter-Latin-C : begin
 
 	derive-glyphs 'cyrl/The' 0x4AA "cyrl/Es" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		local desc : (-LongVJut) + QuarterStroke
+		local desc : 0 - LongVJut + QuarterStroke
 		include : ExtendBelowBaseAnchors desc
 		include : difference
-			VBar.m [Arch.adjust-x.bot Middle] desc (Stroke + O) VJutStroke
+			VBar.m [Arch.adjust-x.bot Middle] desc (O + Stroke) VJutStroke
 			OShapeOutline.NoOvershoot CAP 0 SB RightSB Stroke ArchDepthA ArchDepthB
 
 	derive-multi-part-glyphs 'cyrl/The.BSH' null { 'cyrl/Es' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
-		include : refer-glyph mark
-		include : Translate Width AccentClearance
+		include : with-transform
+			ApparentTranslate
+				[Arch.adjust-x.bot Middle] - markMiddle
+				0                          + AccentClearance
+			refer-glyph mark
 		include [refer-glyph base] AS_BASE ALSO_METRICS
-		include : ExtendBelowBaseAnchors (-AccentHeight)
+		include : ExtendBelowBaseAnchors (0 - AccentHeight)
 
 	alias 'cyrl/The.CHU' null 'CCedilla'
 
 	derive-glyphs 'cyrl/the' 0x4AB "cyrl/es" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		local desc : (-LongVJut) + QuarterStroke
+		local desc : 0 - LongVJut + QuarterStroke
 		include : ExtendBelowBaseAnchors desc
 		include : difference
-			VBar.m [Arch.adjust-x.bot Middle] desc (Stroke + O) VJutStroke
+			VBar.m [Arch.adjust-x.bot Middle] desc (O + Stroke) VJutStroke
 			OShapeOutline.NoOvershoot XH 0 SB RightSB Stroke SmallArchDepthA SmallArchDepthB
 
 	derive-multi-part-glyphs 'cyrl/the.BSH' null { 'cyrl/es' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
-		include : refer-glyph mark
-		include : Translate Width AccentClearance
+		include : with-transform
+			ApparentTranslate
+				[Arch.adjust-x.bot Middle] - markMiddle
+				0                          + AccentClearance
+			refer-glyph mark
 		include [refer-glyph base] AS_BASE ALSO_METRICS
-		include : ExtendBelowBaseAnchors (-AccentHeight)
+		include : ExtendBelowBaseAnchors (0 - AccentHeight)
 
 	alias 'cyrl/the.CHU' null 'cCedilla'
 
@@ -515,7 +522,7 @@ glyph-block Letter-Latin-C : begin
 		define [xTop df] : mix df.leftSB df.rightSB (0.5 + sl)
 
 		define swBarThick : AdviceStroke 3
-		define swBarFine : AdviceStroke [StrokeWidthBlend 3 5.5]
+		define swBarFine  : AdviceStroke [StrokeWidthBlend 3.0 5.5]
 
 		define [FullBar df sw] : dispiro
 			flat [xBot df] bot [widths.center.heading sw Downward]
@@ -525,10 +532,10 @@ glyph-block Letter-Latin-C : begin
 			local cofine : AdviceStroke 4
 			return : union
 				dispiro
-					flat [xTop df] top [widths.center.heading cofine Downward]
+					flat [xTop df]      top          [widths.center.heading cofine    Downward]
 					curl df.middle [mix top bot 0.5] [widths.center.heading swBarFine Downward]
 				dispiro
-					flat [xBot df] bot [widths.center.heading cofine Upward]
+					flat [xBot df]      bot          [widths.center.heading cofine    Upward]
 					curl df.middle [mix bot top 0.5] [widths.center.heading swBarFine Upward]
 
 		define [OutlineMask df] : lift-@ : spiro-outline
@@ -549,9 +556,10 @@ glyph-block Letter-Latin-C : begin
 			DependentSelector.set currentGlyph selector
 
 			include : difference [FullBar df swBarThick] [OutlineMask df]
-			if (fillType === 1) : include : intersection [FullBar df swBarFine] [OutlineMask df]
-			if (fillType === 2) : include : intersection [InterruptBar df]
-				difference [OutlineMask df] [InterruptMask df]
+			include : match fillType
+				[Just 1] : intersection [FullBar df swBarFine] [OutlineMask df]
+				[Just 2] : intersection [InterruptBar df] [difference [OutlineMask df] [InterruptMask df]]
+				__       : no-shape
 
 	select-variant 'cent/bar' (follow -- 'cent')
 
