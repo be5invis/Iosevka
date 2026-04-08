@@ -4,10 +4,10 @@
   Please describe the motivation behind this change and how it fits into the overall project. You can also include any relevant background information or context that may help reviewers understand the purpose of this change.
 -->
 
-### Introduced Characters
+### Influenced Characters
 
 <!--
-  Please list the characters that are added by this change. You can use the following format:
+  Please list the characters that are added or modified by this change. You can use the following format:
   - U+XXXX: <character> (name)
 -->
 
@@ -20,5 +20,7 @@
 ### Samples
 
 <!--
-  Please provide sample images of the introduced characters before and after the change.
+  Please provide sample images of the influenced characters before and after the change. You can use the following format:
+  - Before: ![before](link_to_before_image)
+  - After: ![after](link_to_after_image)
 -->
