@@ -341,8 +341,8 @@ glyph-block Letter-Latin-S : begin
 	select-variant 'cyrl/ghe.italic' (shapeFrom -- 'revs') (follow -- 's')
 	alias 'cyrl/ghe.BGR' null 'cyrl/ghe.italic'
 
-	alias 'cyrl/DzeRev' 0xA644 'revS'
-	alias 'cyrl/dzeRev' 0xA645 'revs'
+	alias 'cyrl/revDze' 0xA644 'revS'
+	alias 'cyrl/revdze' 0xA645 'revs'
 
 	select-variant 'cyrl/Dzwe' 0xA682 (follow -- 'S')
 	select-variant 'cyrl/dzwe' 0xA683 (follow -- 's')
@@ -417,13 +417,13 @@ glyph-block Letter-Latin-S : begin
 		define theta : Math.PI / 4
 		foreach sign [items-of { (+1) (-1) }] : begin
 			include : SStrokeAlt
-				df -- df
-				top -- CAP
-				hook -- Hook
-				swStart -- (BBS * [if (sign > 0) CThin 1])
-				swEnd   -- (BBS * [if (sign < 0) CThin 1])
+				df        -- df
+				top       -- CAP
+				hook      -- Hook
+				swStart   -- (BBS * [if (sign > 0) CThin 1])
+				swEnd     -- (BBS * [if (sign < 0) CThin 1])
 				oXLeftTop -- O
-				ess -- BBD
+				ess       -- BBD
 				offsetC -- {
 					.x (0.5 * sign * BBD * [Math.sin theta])
 					.y (0.5 * sign * BBD * [Math.cos theta])
@@ -443,13 +443,13 @@ glyph-block Letter-Latin-S : begin
 		define theta : Math.PI / 5
 		foreach sign [items-of { (+1) (-1) }] : begin
 			include : SStrokeAlt
-				df -- df
-				top -- XH
-				hook -- SHook
-				swStart -- (BBS * [if (sign > 0) CThin 1])
-				swEnd   -- (BBS * [if (sign < 0) CThin 1])
+				df        -- df
+				top       -- XH
+				hook      -- SHook
+				swStart   -- (BBS * [if (sign > 0) CThin 1])
+				swEnd     -- (BBS * [if (sign < 0) CThin 1])
 				oXLeftTop -- (OX / 8)
-				ess -- BBD
+				ess       -- BBD
 				offsetC -- {
 					.x (0.5 * sign * BBD * [Math.sin theta])
 					.y (0.5 * sign * BBD * [Math.cos theta])
@@ -492,10 +492,10 @@ glyph-block Letter-Latin-S : begin
 			local cofine : AdviceStroke 4
 			return : union
 				dispiro
-					flat [xTop df] (CAP - overflow) [widths.center.heading cofine Downward]
+					flat [xTop df] (CAP - overflow)  [widths.center.heading cofine    Downward]
 					curl df.middle [mix top bot 0.5] [widths.center.heading swBarFine Downward]
 				dispiro
-					flat [xBot df] (0 + overflow) [widths.center.heading cofine Upward]
+					flat [xBot df] (0   + overflow)  [widths.center.heading cofine    Upward]
 					curl df.middle [mix bot top 0.5] [widths.center.heading swBarFine Upward]
 
 		define [DollarMask df stroke] : begin
@@ -515,7 +515,7 @@ glyph-block Letter-Latin-S : begin
 			local yTermLeft  : mix yMid (top - [AdviceSArchDepth (top - bot) (-1) swBarThick]) 0.5
 			local yTermRight : mix yMid (bot + [AdviceSArchDepth (top - bot) (-1) swBarThick]) 0.5
 
-			return : dispiro [corner 0 yTermLeft : widths.center gap] [corner Width yTermRight]
+			return : ExtLineCenter 0 yTermLeft Width yTermRight gap
 
 		create-glyph "dollar/bar.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
@@ -525,9 +525,10 @@ glyph-block Letter-Latin-S : begin
 			local [outlineMask] : DollarMask df : AdviceStroke2 2 3 CAP
 
 			include : difference [FullBar df swBarThick] [outlineMask]
-			if (fillType === 1) : include : intersection [FullBar df swBarFine] [outlineMask]
-			if (fillType === 2) : include : intersection [InterruptBar df]
-				difference [outlineMask] [InterruptMask df]
+			include : match fillType
+				[Just 1] : intersection [FullBar df swBarFine] [outlineMask]
+				[Just 2] : intersection [InterruptBar df] [difference [outlineMask] [InterruptMask df]]
+				__       : no-shape
 
 	select-variant 'dollar/bar' (follow -- 'dollar')
 
