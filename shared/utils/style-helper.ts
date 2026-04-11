@@ -59,11 +59,11 @@ export function resolveUserChoice(uc: CharacterVariantChoice, ctx: ChoiceResolut
 	const featureAssignment: Gr.FeatureAssignmentW = {};
 	const nonDefaultFeatureAssignment: Gr.FeatureAssignmentW = {};
 	const userFriendlyFeatureAssignment: Gr.FeatureAssignmentW = {};
-	if (ss && ss.rank) userFriendlyFeatureAssignment[ss.tag] = 1;
+	if (ss?.rank) userFriendlyFeatureAssignment[ss.tag] = 1;
 
 	for (const k in resolvedComposition) {
 		const prime = Cv.CharacterVariants.get(k);
-		if (!prime || !prime.tag) continue;
+		if (!prime?.tag) continue;
 		const variant = prime.variants.get(resolvedComposition[k]);
 		if (!variant) continue;
 
@@ -84,7 +84,7 @@ export function resolveUserChoice(uc: CharacterVariantChoice, ctx: ChoiceResolut
 	for (const k in resolvedCompositionNS) {
 		if (resolvedCompositionNS[k] !== resolvedCompositionInherited[k]) {
 			const prime = Cv.CharacterVariants.get(k);
-			if (!prime || !prime.tag) continue;
+			if (!prime?.tag) continue;
 			const variant = prime.variants.get(resolvedComposition[k]);
 			if (!variant) continue;
 			for (const hc of prime.hotChars) {
@@ -119,7 +119,7 @@ export function getCompositionOverride(
 	const out: Cv.VariantCompositionW = {};
 
 	for (const k in subject) {
-		if (subject[k] != defaultComp[k]) {
+		if (subject[k] !== defaultComp[k]) {
 			out[k] = subject[k];
 			empty = false;
 		}
@@ -170,7 +170,7 @@ export type DeliverableCustomizerProps = {
 
 export function createCustomizerPropsFromUrl<T extends DeliverableCustomizerProps>(st0: T): T {
 	let st = { ...st0 };
-	if (!globalThis || !globalThis.location) return st;
+	if (!globalThis?.location) return st;
 	const urlParams = new URLSearchParams(globalThis.location.search);
 
 	if (urlParams.get("slab")) {
@@ -216,10 +216,10 @@ export function createCustomizerPropsFromUrl<T extends DeliverableCustomizerProp
 export function createUrlFromCustomizerProps<T extends DeliverableCustomizerProps>(st: T) {
 	let s = "";
 	if (st.serifStyle === Gr.SerifStyle.Slab) {
-		s += (s ? "&" : "") + `slab=1`;
+		s += `${s ? "&" : ""}slab=1`;
 	}
 	if (st.charVariants.inherits && st.charVariants.inherits !== Cv.NopStylisticSet) {
-		s += (s ? "&" : "") + `ss-inherits=${st.charVariants.inherits.key}`;
+		s += `${s ? "&" : ""}ss-inherits=${st.charVariants.inherits.key}`;
 	}
 	if (st.charVariants.design) {
 		for (const key in st.charVariants.design) {
@@ -232,9 +232,9 @@ export function createUrlFromCustomizerProps<T extends DeliverableCustomizerProp
 		}
 	}
 	if (st.ligationSet.selector) {
-		s += (s ? "&" : "") + `ligations=${st.ligationSet.selector}`;
+		s += `${s ? "&" : ""}ligations=${st.ligationSet.selector}`;
 	} else {
-		s += (s ? "&" : "") + `ligation-off=true`;
+		s += `${s ? "&" : ""}ligation-off=true`;
 	}
 	return s;
 }

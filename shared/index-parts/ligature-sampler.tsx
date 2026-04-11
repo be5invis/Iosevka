@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 import { createContext, useContext, useState } from "react";
 
 import { FeatureUsageShower } from "../components/feature-usage-shower";
@@ -169,7 +169,7 @@ export function LigationSamplerInnerImpl(props: {
 		const runs: React.ReactNode[] = [];
 		for (let j = 0; j < ls.length; j++) {
 			const sample = ls[j];
-			if (j) runs.push(<span key={"gap " + j}> </span>);
+			if (j) runs.push(<span key={`gap ${j}`}> </span>);
 
 			const sat: { required: number; satisfied: number }[] = [];
 
@@ -191,7 +191,7 @@ export function LigationSamplerInnerImpl(props: {
 			for (; rank >= 1 && (!sat[rank] || sat[rank].satisfied < sat[rank].required); rank--);
 
 			runs.push(
-				<span key={"item " + j} className={"rank-" + rank}>
+				<span key={`item ${j}`} className={`rank-${rank}`}>
 					{sample}
 				</span>,
 			);
@@ -216,7 +216,7 @@ function TagShower() {
 
 	const directives: Gr.FeatureAssignmentW = {};
 	if (ctx.currentLigationSet.rank && ctx.currentLigationSet.tag !== "calt") {
-		directives["calt"] = 0;
+		directives.calt = 0;
 	}
 	directives[ctx.currentLigationSet.tag] = ctx.currentLigationSet.rank;
 	return <FeatureUsageShower directives={directives} />;

@@ -10,12 +10,12 @@ import {
 import {
 	ImportConfigurationPopup,
 	ImportConfigurationPopupEnableButton,
-	PopupUxProps,
+	type PopupUxProps,
 } from "../shared/components/customizer-import-popup";
 import { EnumSelect } from "../shared/components/enum-select";
 import { Section } from "../shared/components/section";
 import {
-	CustomizerProps,
+	type CustomizerProps,
 	defaultCustomizerProps,
 	getResolvedBuildPlanCharVariants,
 	resolveDisplayStyle,
@@ -146,8 +146,7 @@ function ReferenceFontUploader() {
 		);
 
 		const fileName = file?.name || "";
-		const fontName =
-			"TARGET-FONT-" + (fileName.replace(/\.[^/.]+$/, "") || "").replace(/\s/g, "-");
+		const fontName = `TARGET-FONT-${(fileName.replace(/\.[^/.]+$/, "") || "").replace(/\s/g, "-")}`;
 		await loadFont(fontName, file);
 
 		pSm.set(
@@ -161,7 +160,7 @@ function ReferenceFontUploader() {
 
 	const label = pSm.val.loading
 		? "Loading..."
-		: "📁 " + (pSm.val.displayName || "Load reference font...");
+		: `📁 ${pSm.val.displayName || "Load reference font..."}`;
 
 	const input = pSm.val.loading ? null : (
 		<input type="file" accept=".ttf,.otf,.woff,woff2" onChange={onFileUpload} />
@@ -217,7 +216,7 @@ function EditPanel() {
 				onItemClear={CvClearSink(prime, slopeKey, pCc)}
 				activeVariantKey={resolved.resolvedComposition[prime.key]}
 				activeVariantKind={
-					cc.charVariants[slopeKey] && prime.key in cc.charVariants[slopeKey]!
+					cc.charVariants[slopeKey] && prime.key in cc.charVariants[slopeKey]
 						? ActiveVariantKind.NonDefault
 						: ActiveVariantKind.Default
 				}
@@ -239,7 +238,7 @@ function TargetFontSample(props: TargetFontSampleProps) {
 			className="target-sample"
 			style={{
 				fontFamily: pSm.val.name,
-				fontStyle: Gr.AllSlopeGrades.get(pSm.val.matchSlope)!.css,
+				fontStyle: Gr.AllSlopeGrades.get(pSm.val.matchSlope)?.css,
 			}}
 		>
 			{props.text}
@@ -252,7 +251,7 @@ function CvSink(prime: Cv.Prime, into: StyleHelper.SlopeKey, pCC: Ptr<Customizer
 		pCC.set(
 			produce(cc => {
 				if (!cc.charVariants[into]) cc.charVariants[into] = {};
-				cc.charVariants[into]![prime.key] = k;
+				cc.charVariants[into][prime.key] = k;
 			}),
 		);
 }

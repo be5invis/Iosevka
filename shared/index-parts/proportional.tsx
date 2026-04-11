@@ -3,7 +3,6 @@ import { Fragment } from "react";
 import { PickerFrame } from "../components/picker-frame";
 import { Section } from "../components/section";
 import { TokenizedCode } from "../components/tokenized-code";
-import { WordNumber } from "../components/word-number";
 import * as Gr from "../data-import/grades";
 import * as tokenizedSampleCode from "../tokenized-sample-code";
 
@@ -34,7 +33,7 @@ function Desc(props: { styleGrades: Gr.Style[] }) {
 			<h2 className="header">For Every Writing</h2>
 			<div className="content">
 				<p>
-					The <WordNumber n={props.styleGrades.length} /> quasi-proportional families:{" "}
+					The quasi-proportional families:{" "}
 					<FamilyNameList styleGrades={props.styleGrades} />, are made for{" "}
 					<em>documents</em> and <em>writing</em>. They provide more variety on character
 					widths, including a slightly wider letter <code>w</code>

@@ -9,7 +9,7 @@ import * as Coverage from "../shared/data-import/atlas";
 import * as Gr from "../shared/data-import/grades";
 import { unicodeGcMap, unicodeNameMap } from "../shared/data-import/unicode-data-map";
 import { joinCls } from "../shared/utils/join-classes";
-import { Ptr } from "../shared/utils/ptr";
+import type { Ptr } from "../shared/utils/ptr";
 
 export default function Specimen() {
 	return (
@@ -310,7 +310,7 @@ function FilledStrip(props: { name: string; flex: number; low: number; high: num
 	);
 }
 function FilledStripInnerButton(props: { name: string; code: number }) {
-	const title = formatUnicode(props.code) + "\n" + props.name;
+	const title = `${formatUnicode(props.code)}\n${props.name}`;
 	const onClick = () => {
 		const e = document.getElementById(`specimen-anchor--${formatUnicode(props.code)}`);
 		if (e) e.scrollIntoView({ behavior: "smooth" });
@@ -371,15 +371,13 @@ function CharacterSpecimenInner(props: { fontStyle: Gr.FontStyle }) {
 	const ctx = useContext(SpecimenContext);
 	return (
 		<>
-			<>
-				{ctx.val.atlas.unicodeCoverage.map(block => (
-					<SpecimenBlock
-						key={`block-` + block.name}
-						block={block}
-						fontStyle={props.fontStyle}
-					/>
-				))}
-			</>
+			{ctx.val.atlas.unicodeCoverage.map(block => (
+				<SpecimenBlock
+					key={`block-${block.name}`}
+					block={block}
+					fontStyle={props.fontStyle}
+				/>
+			))}
 			{ctx.val.standouts.length ? (
 				<div className="standouts">
 					{ctx.val.standouts.map((s, index) => (
@@ -429,7 +427,7 @@ function SpecimenBlock(props: SpecimenBlockProps) {
 			<div className="anchors">{anchors}</div>
 			<div
 				className={joinCls("specimen-block-body", inView ? "visible" : "virtualized")}
-				style={{ height: (props.block.characters.length / 16) * 4 + "rem" }}
+				style={{ height: `${(props.block.characters.length / 16) * 4}rem` }}
 				ref={ref}
 			>
 				{sampleChars}
@@ -692,8 +690,8 @@ function formatCharInfo(ch: Coverage.Character, titleOverride?: string, variantO
 		"\u200b";
 	return (
 		`U+${formatUnicode(ch.lch)} ⟦${charSamp}⟧\n${charName || ""}\n(${gc})` +
-		(titleOverride ? "\n" + titleOverride : "") +
-		(variantOverride ? "\n" + variantOverride : "")
+		(titleOverride ? `\n${titleOverride}` : "") +
+		(variantOverride ? `\n${variantOverride}` : "")
 	);
 }
 

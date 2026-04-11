@@ -2,7 +2,8 @@ import * as Toml from "@iarna/toml";
 import { pascalCase } from "change-case";
 import { produce } from "immer";
 import Head from "next/head";
-import React, { createContext, useContext } from "react";
+import type React from "react";
+import { createContext, useContext } from "react";
 import { useLifecycles } from "react-use";
 
 import {
@@ -13,13 +14,13 @@ import { CheckGroup } from "../shared/components/check-group";
 import {
 	ImportConfigurationPopup,
 	ImportConfigurationPopupEnableButton,
-	PopupUxProps,
+	type PopupUxProps,
 } from "../shared/components/customizer-import-popup";
 import { EnumSelect } from "../shared/components/enum-select";
 import { Section } from "../shared/components/section";
 import { TokenizedCode } from "../shared/components/tokenized-code";
 import {
-	CustomizerProps,
+	type CustomizerProps,
 	defaultCustomizerProps,
 	formatBuildPlan,
 	resolveDisplayStyle,
@@ -356,7 +357,7 @@ const WeightGradeFormatter: GradesFormatter<Gr.Weight> = {
 	identifier: a => `weight-${a}`,
 	display: a => String(a),
 	titleT: (a, i) => {
-		const d = Gr.AllWeightGrades.get(a)!.display;
+		const d = Gr.AllWeightGrades.get(a)?.display;
 		return i
 			? `Click to toggle whether weight ${d} is included.`
 			: `Weight ${d} is always included and cannot be disabled.`;
@@ -368,7 +369,7 @@ const WidthGradeFormatter: GradesFormatter<Gr.Width> = {
 	identifier: a => `width-${a}`,
 	display: a => String(a),
 	titleT: (a, i) => {
-		const d = Gr.AllWidthGrades.get(a)!.display;
+		const d = Gr.AllWidthGrades.get(a)?.display;
 		return i
 			? `Click to toggle whether width ${d} is included.`
 			: `Weight ${d} is always included and cannot be disabled.`;
@@ -380,7 +381,7 @@ const SlopeGradeFormatter: GradesFormatter<Gr.Slope> = {
 	identifier: a => `slope-${a}`,
 	display: a => Gr.Slope[a],
 	titleT: (a, i) => {
-		const d = Gr.AllSlopeGrades.get(a)!.display;
+		const d = Gr.AllSlopeGrades.get(a)?.display;
 		return i
 			? `Click to toggle whether slope ${d} is included.`
 			: `Slope ${d} is always included and cannot be disabled.`;
@@ -402,7 +403,7 @@ function CvSink(prime: Cv.Prime, into: StyleHelper.SlopeKey, pCC: Ptr<Customizer
 		pCC.set(
 			produce(cc => {
 				if (!cc.charVariants[into]) cc.charVariants[into] = {};
-				cc.charVariants[into]![prime.key] = k;
+				cc.charVariants[into][prime.key] = k;
 			}),
 		);
 }
@@ -480,7 +481,7 @@ function VariantsInheritanceField() {
 				>
 					{Array.from(Cv.StylisticSets.values()).map(x => (
 						<option key={x.key} value={x.key}>
-							{x.description + (x.tag && x.rank ? " (" + x.tag + ")" : "")}
+							{x.description + (x.tag && x.rank ? ` (${x.tag})` : "")}
 						</option>
 					))}
 				</select>
@@ -491,9 +492,10 @@ function VariantsInheritanceField() {
 
 type VariantGroupProps = { slopeKey: StyleHelper.SlopeKey; visible: boolean };
 function VariantGroup(props: VariantGroupProps) {
-	if (!props.visible) return null;
 	const pCC = useContext(CustomizerCtx);
 	const cc = pCC.val;
+
+	if (!props.visible) return null;
 
 	const targetSlope =
 		props.slopeKey === "italic"
@@ -519,7 +521,7 @@ function VariantGroup(props: VariantGroupProps) {
 					activeVariantKey={resolved.resolvedComposition[prime.key]}
 					activeVariantKind={
 						cc.charVariants[props.slopeKey] &&
-						prime.key in cc.charVariants[props.slopeKey]!
+						prime.key in (cc.charVariants[props.slopeKey] || {})
 							? ActiveVariantKind.NonDefault
 							: ActiveVariantKind.Default
 					}

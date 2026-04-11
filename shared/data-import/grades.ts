@@ -27,6 +27,11 @@ export class GradeRepository<E extends number, F extends GradeFormat = GradeForm
 	get(gr: E) {
 		return this.m_grades.get(gr);
 	}
+	getCertain(gr: E) {
+		const fmt = this.m_grades.get(gr);
+		if (!fmt) throw new Error(`Grade ${gr} not found`);
+		return fmt;
+	}
 	has(gr: E) {
 		return this.m_grades.has(gr);
 	}
@@ -255,9 +260,9 @@ export function fontStyleToCls(fs: FontStyle) {
 	if (fs.style === Style.QPESlab) classes.push("qpe-slab");
 	if (fs.style === Style.FiraCode) classes.push("fira-code");
 	if (fs.style === Style.IbmPlex) classes.push("ibm-plex");
-	if (fs.weight) classes.push("w-" + fs.weight);
-	if (fs.width) classes.push("wd-" + fs.width);
-	if (fs.slope) classes.push("s-" + fs.slope);
+	if (fs.weight) classes.push(`w-${fs.weight}`);
+	if (fs.width) classes.push(`wd-${fs.width}`);
+	if (fs.slope) classes.push(`s-${fs.slope}`);
 	return classes.join(" ");
 }
 export function fontStyleToOtStyle(fs: FontStyle) {

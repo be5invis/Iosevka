@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import rawMetadata from "./raw/metadata.json";
 
 export type RawPrime = {
@@ -43,9 +42,14 @@ export type StylisticSet = {
 export type VariantDefaults = PerStyleSlope<VariantComposition>;
 
 export const CharacterVariants = parsePrimeMaps(rawMetadata.variantsData.primes);
-export const StylisticSets = parseStylisticSets(rawMetadata.variantsData.composites as any);
-export const CharacterVariantDefaults: VariantDefaults = rawMetadata.variantsData.defaults as any;
-export const NopStylisticSet: StylisticSet = (rawMetadata.variantsData.composites as any)[0];
+export const StylisticSets = parseStylisticSets(
+	rawMetadata.variantsData.composites as StylisticSet[],
+);
+export const CharacterVariantDefaults: VariantDefaults = rawMetadata.variantsData
+	.defaults as VariantDefaults;
+export const NopStylisticSet: StylisticSet = (
+	rawMetadata.variantsData.composites as StylisticSet[]
+)[0];
 
 function parsePrimeMaps(raw: RawPrime[]) {
 	const m = new Map<string, Prime>();

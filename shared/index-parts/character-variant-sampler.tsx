@@ -1,4 +1,3 @@
-import * as React from "react";
 import { createContext, useContext, useState } from "react";
 
 import { ActiveVariantKind, CharacterVariantPicker } from "../components/character-variant-picker";
@@ -14,7 +13,7 @@ import Stats from "../data-import/stats";
 import * as tokenizedSampleCode from "../tokenized-sample-code";
 import { joinCls } from "../utils/join-classes";
 import {
-	CharacterVariantChoice,
+	type CharacterVariantChoice,
 	createUrlFromCustomizerProps,
 	DefaultCvChoice,
 	resolveUserChoice,

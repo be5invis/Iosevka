@@ -64,7 +64,7 @@ type CodeTokenProps = {
 function CodeToken(props: CodeTokenProps) {
 	return (
 		<span className={joinCls("token", ...props.token.scopes)}>
-			{props.highlightCharSet && props.highlightCharSet.size ? (
+			{props.highlightCharSet?.size ? (
 				<HighlightChars text={props.token.text} highlightCharSet={props.highlightCharSet} />
 			) : (
 				props.token.text
@@ -80,7 +80,7 @@ type HighlightCharsProps = {
 function HighlightChars(props: HighlightCharsProps) {
 	if (!props.highlightCharSet.size) return <>{props.text}</>;
 	const re = new RegExp(
-		"(" + Array.from(props.highlightCharSet.keys()).map(escapeRegExp).join("|") + ")",
+		`(${Array.from(props.highlightCharSet.keys()).map(escapeRegExp).join("|")})`,
 		"g",
 	);
 	const subRuns: React.ReactElement[] = [];

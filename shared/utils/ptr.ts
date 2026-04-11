@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 
 export type Ptr<T> = { val: T; set: Dispatch<SetStateAction<T>> };
 export const Ptr = {

@@ -1,12 +1,12 @@
 import { useState } from "react";
 
 import {
-	CustomizerProps,
+	type CustomizerProps,
 	defaultCustomizerProps,
 	dropInheritedCvs,
 	parseCustomization,
 } from "../customizer";
-import { Ptr } from "../utils/ptr";
+import type { Ptr } from "../utils/ptr";
 
 export type PopupUxProps = {
 	popupVisible: boolean;

@@ -1,4 +1,4 @@
-import { useState, createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 import * as Gr from "../data-import/grades";
 import { joinCls } from "../utils/join-classes";
@@ -44,7 +44,8 @@ export function PickerFrame(props: PickerFrameProps) {
 		if (props.onFontStyleChange) {
 			const currentStyle = rectifiedFs.style || Gr.Style.Sans;
 			const previousStyle = fontStyle.style || Gr.Style.Sans;
-			if (currentStyle != previousStyle) props.onFontStyleChange(currentStyle, previousStyle);
+			if (currentStyle !== previousStyle)
+				props.onFontStyleChange(currentStyle, previousStyle);
 		}
 
 		if (props.onFontSet) {
@@ -173,10 +174,10 @@ type PickerButtonProps = {
 function Button(props: PickerButtonProps) {
 	const ctx = useContext(PickerFrameCtx);
 	let fActive = true;
-	const currentStyle = { ...Gr.DefaultFontStyle, ...ctx.currentFontStyle };
-	for (const prop in props.apply) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		if ((currentStyle as any)[prop] !== (props.apply as any)[prop]) fActive = false;
+	const currentStyle: Gr.FontStyle = { ...Gr.DefaultFontStyle, ...ctx.currentFontStyle };
+	for (const _prop in props.apply) {
+		const prop = _prop as keyof Gr.FontStyle;
+		if (currentStyle[prop] !== props.apply[prop]) fActive = false;
 	}
 	return (
 		<a

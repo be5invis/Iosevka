@@ -2,10 +2,10 @@ import * as React from "react";
 import { createContext, useContext, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 
-import * as Cv from "../data-import/cv";
+import type * as Cv from "../data-import/cv";
 import * as Gr from "../data-import/grades";
 import { joinCls } from "../utils/join-classes";
-import { Ptr } from "../utils/ptr";
+import type { Ptr } from "../utils/ptr";
 
 export enum ActiveVariantKind {
 	Default = 0,
@@ -74,9 +74,9 @@ export function CharacterVariantOptionsList(props: CvPanelGroupProps) {
 	}
 
 	return (
-		<div className="options" style={{ width: 1.75 * Math.min(9, maxItems) + "rem" }}>
+		<div className="options" style={{ width: `${1.75 * Math.min(9, maxItems)}rem` }}>
 			{groups.map((gr, idx) =>
-				gr && gr.length ? (
+				gr?.length ? (
 					<div className="group" key={idx}>
 						{gr}
 					</div>

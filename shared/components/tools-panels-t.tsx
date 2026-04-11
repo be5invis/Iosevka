@@ -1,7 +1,7 @@
 import React from "react";
 
 import { joinCls } from "../utils/join-classes";
-import { Ptr } from "../utils/ptr";
+import type { Ptr } from "../utils/ptr";
 
 type SwitchPanelUsageProps = { showUsage: boolean };
 const SwitchPanelUsageCtx = React.createContext<Ptr<SwitchPanelUsageProps>>({
@@ -37,7 +37,7 @@ function ToolsPanelStrip(props: ToolsPanelsTProps) {
 	let newWindowLink = "customizer";
 	if (props.customizerPageHashT) {
 		const hash = props.customizerPageHashT();
-		if (hash) newWindowLink += "?" + hash;
+		if (hash) newWindowLink += `?${hash}`;
 	}
 	return (
 		<div className="panel tools">

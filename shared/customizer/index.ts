@@ -45,7 +45,7 @@ export function parseCustomization(tomlText: string, sink: CustomizerProps) {
 			sink = { ...sink, spacing: parseSpacingGrade(plan.spacing) };
 		if (typeof plan.serifs === "string")
 			sink = { ...sink, serifStyle: parseSerifsGrade(plan.serifs) };
-		if (typeof plan.noCvSs === "boolean") sink = { ...sink, fExportCvSs: !plan["noCvSs"] };
+		if (typeof plan.noCvSs === "boolean") sink = { ...sink, fExportCvSs: !plan.noCvSs };
 		if (typeof plan.exportGlyphNames === "boolean")
 			sink = { ...sink, fExportGlyphNames: plan.exportGlyphNames };
 
@@ -61,7 +61,7 @@ export function parseCustomization(tomlText: string, sink: CustomizerProps) {
 function isJsonMap(x: unknown): x is Toml.JsonMap {
 	if (!x) return false;
 	if (typeof x !== "object") return false;
-	if (x instanceof Array) return false;
+	if (Array.isArray(x)) return false;
 	if (x instanceof Date) return false;
 	return true;
 }
@@ -80,7 +80,7 @@ function parseWeights(toml: Toml.JsonMap, sink: CustomizerProps) {
 		if (typeof v.shape !== "number") continue;
 		for (const [gr, _f] of Gr.AllWeightGrades) if (gr === v.shape) weights.add(gr);
 	}
-	if (weights.size != 0) sink = { ...sink, weightGradesIncluded: weights };
+	if (weights.size !== 0) sink = { ...sink, weightGradesIncluded: weights };
 	return sink;
 }
 
@@ -107,7 +107,7 @@ function parseWidths(toml: Toml.JsonMap, sink: CustomizerProps) {
 	} else {
 		widths.add(Gr.Width.Normal);
 	}
-	if (widths.size != 0) sink = { ...sink, defaultWidthAtExpanded, widthGradesIncluded: widths };
+	if (widths.size !== 0) sink = { ...sink, defaultWidthAtExpanded, widthGradesIncluded: widths };
 	return sink;
 }
 
@@ -120,7 +120,7 @@ function parseSlopes(toml: Toml.JsonMap, sink: CustomizerProps) {
 			if (f.shape === v.shape) slopes.add(gr);
 		}
 	}
-	if (slopes.size != 0) sink = { ...sink, slopeGradesIncluded: slopes };
+	if (slopes.size !== 0) sink = { ...sink, slopeGradesIncluded: slopes };
 	return sink;
 }
 
@@ -166,8 +166,8 @@ function parseCharVariants(toml: Toml.JsonMap, sink: CustomizerProps) {
 export function formatBuildPlan(cc: CustomizerProps) {
 	const plan: Toml.JsonMap = {
 		family: cc.family,
-		spacing: Gr.SpacingGrades.get(cc.spacing)!.internal,
-		serifs: Gr.DefaultSerifStyleGrades.get(cc.serifStyle)!.internal,
+		spacing: Gr.SpacingGrades.getCertain(cc.spacing).internal,
+		serifs: Gr.DefaultSerifStyleGrades.getCertain(cc.serifStyle).internal,
 		noCvSs: !cc.fExportCvSs,
 		exportGlyphNames: cc.fExportGlyphNames,
 	};
@@ -225,7 +225,7 @@ function formatWidths(cc: CustomizerProps, plan: Toml.JsonMap) {
 		if (cc.widthGradesIncluded.has(wd)) {
 			const adjustedWidth = wd * (cc.defaultWidthAtExpanded ? 500 / 600 : 1);
 			let matchingWidth = Gr.Width.Normal;
-			let matchingFmt = Gr.AllWidthGrades.get(matchingWidth)!;
+			let matchingFmt = Gr.AllWidthGrades.getCertain(matchingWidth);
 
 			for (const [gr, fmt] of Gr.AllWidthGrades) {
 				if (Math.abs(gr - adjustedWidth) < Math.abs(matchingWidth - adjustedWidth)) {

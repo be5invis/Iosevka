@@ -1,4 +1,4 @@
-import * as Gr from "../data-import/grades";
+import type * as Gr from "../data-import/grades";
 
 export type FeatureUsageShowerProps = {
 	directives: Gr.FeatureAssignment;
@@ -8,7 +8,7 @@ export function FeatureUsageShower(props: FeatureUsageShowerProps) {
 	for (const [tag, on] of Object.entries(props.directives)) {
 		const space =
 			fontFeatureSettingsCss.length % 5 === 0
-				? "\n" + " ".repeat(4 + "font-feature-settings: ".length)
+				? `\n${" ".repeat(4 + "font-feature-settings: ".length)}`
 				: " ";
 		fontFeatureSettingsCss.push(
 			<span key={fontFeatureSettingsCss.length}>

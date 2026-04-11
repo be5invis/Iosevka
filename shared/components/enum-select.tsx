@@ -1,4 +1,4 @@
-import * as Gr from "../data-import/grades";
+import type * as Gr from "../data-import/grades";
 
 export type EnumSelectingProps<E extends number> = {
 	value: E;
