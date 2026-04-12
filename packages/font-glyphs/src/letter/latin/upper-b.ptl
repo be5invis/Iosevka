@@ -11,55 +11,65 @@ glyph-block Letter-Latin-Upper-B : begin
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay SerifFrame LeftHook
-	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define BArcMix           0.93
 	define BBarPos           0.52
 	define AsymmetricBBarPos 0.60
-	define [BShapeArcsT] : with-params [sink top stroke offset barPos topArcShift topArcInnerShift] : glyph-proc
-		local bowl : top * barPos + stroke * (1 - barPos)
-		local barleft SB
-		local mockBowlDepth : BowlXDepth top (bowl - stroke) barleft RightSB stroke
-		local curvleft : (RightSB - (SB * 0.5)) - mockBowlDepth + topArcInnerShift
-		local curvleftTop : Math.min curvleft : (RightSB - (SB * 0.5)) - OX - stroke * 1.375 + topArcInnerShift
+
+	define AsymmetricBTopArcShift      : (-0.05) * (RightSB - SB)
+	define AsymmetricBTopArcInnerShift : (-0.10) * (RightSB - SB)
+
+	define [BShapeArcsT sink] : function [] : with-params [top stroke offset barPos topArcShift topArcInnerShift] : glyph-proc
+		local bowl : mix stroke top barPos
+		local mockBowlDepth : BowlXDepth top (bowl - stroke) SB RightSB stroke
+		local curveLeftBot : [mix Width RightSB 1.5] - mockBowlDepth + topArcInnerShift
+		local curveLeftTop : Math.min curveLeftBot : [mix Width RightSB 1.5] - OX - stroke * 1.375 + topArcInnerShift
 		local xTopArcRight : [mix SB RightSB BArcMix] - OX * 2 + topArcShift
+		local xBotArcRight : RightSB - OX * 2
 		local fine : stroke * CThin
 
-		local ada    : ArchDepthAOf : ArchDepth * 0.9
-		local adb    : ArchDepthBOf : ArchDepth * 0.9
-		local adaTop : ArchDepthAOf : ArchDepth * 0.9 - (curvleft - curvleftTop)
-		local adbTop : ArchDepthBOf : ArchDepth * 0.9 - (curvleft - curvleftTop)
+		local adaBot : ArchDepthAOf : ArchDepth * 0.9
+		local adbBot : ArchDepthBOf : ArchDepth * 0.9
+		local adaTop : ArchDepthAOf : ArchDepth * 0.9 - (curveLeftBot - curveLeftTop)
+		local adbTop : ArchDepthBOf : ArchDepth * 0.9 - (curveLeftBot - curveLeftTop)
 
 		include : sink
 			widths.rhs stroke
-			flat (barleft - O) (top - offset) [heading Rightward]
-			curl [Arch.adjust-x.top curvleftTop (sw -- stroke)] (top - offset)
+			flat (SB - O) (top - offset) [heading Rightward]
+			curl [Arch.adjust-x.top curveLeftTop (sw -- stroke)] (top - offset)
 			archv
-			g4 (xTopArcRight - offset) [YSmoothMidR top (bowl - stroke) adaTop adbTop]
+			g4   (xTopArcRight - offset) [YSmoothMidR top (bowl - stroke) adaTop adbTop]
 			arcvh
-			flat [Arch.adjust-x.bot curvleftTop (sw -- stroke)] (bowl - fine + offset) [widths.rhs fine]
-			curl (barleft - O) (bowl - fine + offset) [heading Leftward]
+			flat [Arch.adjust-x.bot curveLeftTop (sw -- stroke)] (bowl - fine + offset) [widths.rhs fine]
+			curl (SB - O) (bowl - fine + offset) [heading Leftward]
 
 		include : sink
 			widths.rhs fine
-			flat (barleft - O) (bowl - stroke + fine - offset) [heading Rightward]
-			curl [Arch.adjust-x.top curvleft (sw -- stroke)] (bowl - stroke + fine - offset)
+			flat (SB - O) (bowl - stroke + fine - offset) [heading Rightward]
+			curl [Arch.adjust-x.top curveLeftBot (sw -- stroke)] (bowl - stroke + fine - offset)
 			archv
-			g4 (RightSB - OX * 2 - offset) [YSmoothMidR bowl 0 ada adb] [widths.rhs stroke]
+			g4   (xBotArcRight - offset) [YSmoothMidR bowl 0 adaBot adbBot] [widths.rhs stroke]
 			arcvh
-			flat [Arch.adjust-x.bot curvleft (sw -- stroke)] offset
-			curl (barleft - O) offset [heading Leftward]
+			flat [Arch.adjust-x.bot curveLeftBot (sw -- stroke)] (0 + offset)
+			curl (SB - O) (0 + offset) [heading Leftward]
 
 		return : object bowl
 
+	define flex-params [BShape] : glyph-proc
+		local-parameter : top
+		local-parameter : stroke           -- [AdviceStroke2 2 3 (top - 0)]
+		local-parameter : barPos           -- BBarPos
+		local-parameter : topArcShift      -- 0
+		local-parameter : topArcInnerShift -- 0
+		local-parameter : serifTop         -- false
+		local-parameter : serifBot         -- false
 
-	define [BShape] : with-params [top [stroke : AdviceStroke2 2 3 top] [barPos BBarPos] [topArcShift 0] [topArcInnerShift 0] [serifTop false] [serifBot false]] : glyph-proc
 		include : VBar.l SB 0 top stroke
-		local dims : include : BShapeArcsT dispiro top
-			offset -- 0
-			stroke -- stroke
-			barPos -- barPos
-			topArcShift -- topArcShift
+		local dims : include : [BShapeArcsT dispiro] top
+			offset           -- 0
+			stroke           -- stroke
+			barPos           -- barPos
+			topArcShift      -- topArcShift
 			topArcInnerShift -- topArcInnerShift
 
 		set-base-anchor 'strike' Middle (dims.bowl - 0.5 * stroke)
@@ -68,73 +78,157 @@ glyph-block Letter-Latin-Upper-B : begin
 		if serifTop : include sf.lt.outer
 		if serifBot : include sf.lb.outer
 
-	define [BShapeMask] : with-params [top [stroke : AdviceStroke2 2 3 top] [barPos BBarPos] [topArcShift 0] [topArcInnerShift 0]] : glyph-proc
-		include : BShapeArcsT spiro-outline top
-			offset -- 1
-			stroke -- stroke
-			barPos -- barPos
-			topArcShift -- topArcShift
+	define flex-params [BShapeMask] : glyph-proc
+		local-parameter : top
+		local-parameter : stroke           -- [AdviceStroke2 2 3 (top - 0)]
+		local-parameter : barPos           -- BBarPos
+		local-parameter : topArcShift      -- 0
+		local-parameter : topArcInnerShift -- 0
+
+		include : [BShapeArcsT spiro-outline] top
+			offset           -- 1
+			stroke           -- stroke
+			barPos           -- barPos
+			topArcShift      -- topArcShift
 			topArcInnerShift -- topArcInnerShift
 
-	define [InterruptShape bp top sw st sb] : begin
-		local bowl : top * bp + sw * (1 - bp)
-		local gap : Math.max (((RightSB - SB) - [HSwToV : 2 * sw]) * 0.15) : AdviceStroke 10
-		return : VBar.l (SB + [HSwToV sw]) (bowl - 1 * sw + O) (bowl + 0 * sw - O) gap
+	define [InterruptShape bp] : function [top sw _st _sb] : begin
+		local bowl : mix sw top bp
+		return : VBar.l
+			SB + [HSwToV sw]
+			bowl - sw + O
+			bowl      - O
+			VSwToH : 0.20 * (RightSB - SB) * ([AdviceStroke 5] / Stroke)
 
-	define [StdShape top sw st sb] : BShape top (stroke -- sw) (serifTop -- st) (serifBot -- sb)
-	define [StdShapeInterrupted top sw st sb] : difference [StdShape top sw st sb] [InterruptShape BBarPos top sw st sb]
-	define [StdMask top sw] : BShapeMask top (stroke -- sw)
-
-	define [AsymmetricShape top sw st sb] : BShape top
-		stroke -- [fallback sw : AdviceStroke2 2 3 top]
-		barPos -- AsymmetricBBarPos
-		topArcShift -- ((-0.05) * (RightSB - SB))
-		topArcInnerShift -- ((-0.1) * (RightSB - SB))
+	define [StdShape top sw st sb] : BShape top
+		stroke   -- sw
+		barPos   -- BBarPos
 		serifTop -- st
 		serifBot -- sb
-	define [AsymmetricShapeInterrupted top sw st sb] : difference [AsymmetricShape top sw st sb] [InterruptShape 0.6 top sw st sb]
+	define [StdShapeInterrupted top sw st sb] : difference
+		StdShape                 top sw st sb
+		[InterruptShape BBarPos] top sw st sb
+	define [StdMask top sw] : BShapeMask top
+		stroke   -- sw
+		barPos   -- BBarPos
+
+	define [AsymmetricShape top sw st sb] : BShape top
+		stroke           -- [fallback sw : AdviceStroke2 2 3 (top - 0)]
+		barPos           -- AsymmetricBBarPos
+		topArcShift      -- AsymmetricBTopArcShift
+		topArcInnerShift -- AsymmetricBTopArcInnerShift
+		serifTop         -- st
+		serifBot         -- sb
+	define [AsymmetricShapeInterrupted top sw st sb] : difference
+		AsymmetricShape                    top sw st sb
+		[InterruptShape AsymmetricBBarPos] top sw st sb
 	define [AsymmetricMask top sw] : BShapeMask top
-		stroke -- [fallback sw : AdviceStroke2 2 3 top]
-		barPos -- AsymmetricBBarPos
-		topArcShift -- ((-0.05) * (RightSB - SB))
-		topArcInnerShift -- ((-0.1) * (RightSB - SB))
+		stroke           -- [fallback sw : AdviceStroke2 2 3 (top - 0)]
+		barPos           -- AsymmetricBBarPos
+		topArcShift      -- AsymmetricBTopArcShift
+		topArcInnerShift -- AsymmetricBTopArcInnerShift
+
+	### Cyrillic Lower Ve
+
+	define [CursiveCyrVeArcsT sink] : function [] : with-params [top stroke offset barPos topArcShift topArcInnerShift] : glyph-proc
+		local bowl : mix stroke top barPos
+		local mockBowlDepth : BowlXDepth top (bowl - stroke) SB RightSB stroke
+		local curveLeftBot : [mix Width RightSB 1.5] - mockBowlDepth + topArcInnerShift
+		local curveLeftTop : Math.min curveLeftBot : [mix Width RightSB 1.5] - OX - stroke * 1.375 + topArcInnerShift
+		local xTopArcRight : [mix SB RightSB BArcMix] - OX * 2 + topArcShift
+		local xBotArcRight : RightSB - OX * 2
+		local fine : stroke * CThin
+
+		local adaBot : ArchDepthAOf : ArchDepth * 0.9
+		local adbBot : ArchDepthBOf : ArchDepth * 0.9
+		local adaTop : ArchDepthAOf : ArchDepth * 0.9 - (curveLeftBot - curveLeftTop)
+		local adbTop : ArchDepthBOf : ArchDepth * 0.9 - (curveLeftBot - curveLeftTop)
+
+		include : sink
+			widths.lhs fine
+			flat (SB - O) (bowl - fine + offset) [heading Rightward]
+			curl [Arch.adjust-x.bot curveLeftTop (sw -- stroke)] (bowl - fine + offset)
+			archv
+			g4   (xTopArcRight - offset) [YSmoothMidR top (bowl - stroke) adaTop adbTop] [widths.lhs stroke]
+			Arch.lhs (top - offset) (sw -- stroke)
+			flatside.ld (SB + offset) 0 top adaTop adbBot 0 [widths.lhs.heading stroke Downward]
+			Arch.lhs (0   + offset) (sw -- stroke)
+			g4   (xBotArcRight - offset) [YSmoothMidR bowl 0 adaBot adbBot] [widths.lhs stroke]
+			arcvh
+			flat [Arch.adjust-x.top curveLeftBot (sw -- stroke)] (bowl - stroke + fine - offset) [widths.lhs fine]
+			curl (SB - O) (bowl - stroke + fine - offset) [heading Leftward]
+
+		return : object bowl
+
+	define flex-params [CursiveCyrVeShape] : glyph-proc
+		local-parameter : top
+		local-parameter : stroke           -- [AdviceStroke2 2 3 (top - 0)]
+		local-parameter : barPos           -- BBarPos
+		local-parameter : topArcShift      -- 0
+		local-parameter : topArcInnerShift -- 0
+		local-parameter : serifTop         -- false
+		local-parameter : serifBot         -- false
+
+		local dims : include : [CursiveCyrVeArcsT dispiro] top
+			offset           -- 0
+			stroke           -- stroke
+			barPos           -- barPos
+			topArcShift      -- topArcShift
+			topArcInnerShift -- topArcInnerShift
+
+		set-base-anchor 'strike' Middle (dims.bowl - 0.5 * stroke)
+
+	create-glyph "smcpB.cursive" : glyph-proc
+		include : MarkSet.e
+		include : CursiveCyrVeShape XH
+	create-glyph "smcpB.cursiveTall" : glyph-proc
+		include : MarkSet.b
+		include : CursiveCyrVeShape Ascender
 
 	define [BOverlayStroke top bp] : begin
-		local stroke : AdviceStroke2 2 3 top
-		return : LetterBarOverlay.l.in SB stroke (top * bp - 0.5 * stroke)
+		local stroke : AdviceStroke2 2 3 (top - 0)
+		return : LetterBarOverlay.l.in SB stroke ([mix stroke top bp] - stroke)
 			space -- { 0 (RightSB - [HSwToV Stroke]) }
 
 	define [BOverlayBar top bp] : begin
-		local stroke : AdviceStroke2 2 3 top
-		return : HBar.m [mix 0 SB 0.3] [mix Width RightSB 0.3] (top * bp)
+		local stroke : AdviceStroke2 2 3 (top - 0)
+		return : HBar.t [mix 0 SB 0.3] [mix Width RightSB 0.3] [mix stroke top bp] stroke
 
-	define [BahtBar sw] : VBar.m [mix SB RightSB 0.48] (CAP - Descender / 2) (Descender / 2) sw
-	define [BitcoinBar sw] : begin
+	define [BahtBar sw] : begin
+		local asc  : CAP + ([mix XH Ascender 0.5] - XH)
+		local desc : mix 0 Descender 0.5
 		local xMid : mix SB RightSB 0.48
-		local gap : Math.max ((RightSB - SB) / 6) : AdviceStroke 4
+		return : VBar.m xMid asc desc sw
+	define [BitcoinBar sw] : begin
+		local asc  : CAP + ([mix XH Ascender 0.5] - XH)
+		local desc : mix 0 Descender 0.5
+		local xMid : mix SB RightSB 0.48
+		local gap  : Math.max
+			AdviceStroke 4
+			(RightSB - SB) / 6
 		return : union
-			VBar.m (xMid - (gap + [HSwToV sw]) / 2) (CAP - Descender / 2) (Descender / 2) sw
-			VBar.m (xMid + (gap + [HSwToV sw]) / 2) (CAP - Descender / 2) (Descender / 2) sw
+			VBar.m (xMid - gap / 2 - [HSwToV : 0.5 * sw]) asc desc sw
+			VBar.m (xMid + gap / 2 + [HSwToV : 0.5 * sw]) asc desc sw
 
 	define BConfig : SuffixCfg.weave
 		object # body
 			standard                  { StdShape                   StdMask        BBarPos           false }
-			moreAsymmetric            { AsymmetricShape            AsymmetricMask AsymmetricBBarPos false }
 			standardInterrupted       { StdShapeInterrupted        StdMask        BBarPos           true  }
+			moreAsymmetric            { AsymmetricShape            AsymmetricMask AsymmetricBBarPos false }
 			moreAsymmetricInterrupted { AsymmetricShapeInterrupted AsymmetricMask AsymmetricBBarPos true  }
 		object # serifs
-			serifless         { false false }
-			unilateralSerifed { true  false }
-			bilateralSerifed  { true  true  }
+			serifless                 { false false }
+			unilateralSerifed         { true  false }
+			bilateralSerifed          { true  true  }
 
-	foreach { suffix { {body mask bp fGap} {ts bs} } } [Object.entries BConfig] : do
+	foreach { suffix { { body mask bp fGap } { ts bs } } } [Object.entries BConfig] : do
 		local fMotion : ts && !bs
 		local fAsymmetric : mask === AsymmetricMask
-		local currencySw : AdviceStroke2 3.5 3 CAP
+		local currencySw : AdviceStroke2 3.5 3 (CAP - 0)
 
 		create-glyph "B.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : body CAP [AdviceStroke2 2 3 CAP] ts bs
+			include : body CAP [AdviceStroke2 2 3 (CAP - 0)] ts bs
 
 		create-glyph "BStroke.\(suffix)" : glyph-proc
 			include [refer-glyph "B.\(suffix)"] AS_BASE ALSO_METRICS
@@ -149,27 +243,34 @@ glyph-block Letter-Latin-Upper-B : begin
 			include [refer-glyph "B.\(suffix)"] AS_BASE ALSO_METRICS
 			include : BOverlayBar CAP bp
 
-		if (!fAsymmetric) : create-glyph "cyrl/ve.\(suffix)" : glyph-proc
+		if (!fAsymmetric) : create-glyph "smcpB.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : body XH [AdviceStroke2 2 3 XH] ts bs
+			include : body XH [AdviceStroke2 2 3 (XH - 0)] ts bs
 
 		if (!fGap && !fAsymmetric) : create-glyph "smcpBBar.\(suffix)" : glyph-proc
-			include [refer-glyph "cyrl/ve.\(suffix)"] AS_BASE ALSO_METRICS
+			include [refer-glyph "smcpB.\(suffix)"] AS_BASE ALSO_METRICS
 			include : BOverlayBar XH bp
 
 		create-glyph "currency/baht.\(suffix)" : union
 			body CAP currencySw ts bs
-			intersection [BahtBar : AdviceStroke 5] [mask CAP : AdviceStroke2 2 3 CAP]
-			difference   [BahtBar   Stroke]         [mask CAP : AdviceStroke2 2 3 CAP]
+			intersection
+				BahtBar  : AdviceStroke  5
+				mask CAP : AdviceStroke2 2 3 (CAP - 0)
+			difference
+				BahtBar  : AdviceStroke  2
+				mask CAP : AdviceStroke2 2 3 (CAP - 0)
 
 		create-glyph "currency/bitcoin.\(suffix)" : union
 			body CAP currencySw ts bs
-			difference [BitcoinBar : AdviceStroke 5] [mask CAP : AdviceStroke2 2 3 CAP]
+			difference
+				BitcoinBar : AdviceStroke  5
+				mask CAP   : AdviceStroke2 2 3 (CAP - 0)
 
 		if (!bs) : create-glyph "latn/Beta.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
 			include : LeaningAnchor.Below.VBar.l SB
-			include : body CAP [AdviceStroke2 2 3 CAP] ts false
+			include [refer-glyph "B.\(suffix)"]
+			eject-contour "serifLB"
 			include : VBar.l SB Descender 0
 			if SLAB : begin
 				local sf : SerifFrame.fromDf [DivFrame 1] CAP Descender
@@ -177,100 +278,83 @@ glyph-block Letter-Latin-Upper-B : begin
 
 	select-variant 'B' 'B'
 	link-reduced-variant 'B/sansSerif' 'B' MathSansSerif
-	select-variant 'currency/baht' 0xE3F (follow -- 'B')
+	select-variant 'Bhookleft' 0x181
+	select-variant 'BStroke'   0x243 (follow -- 'B')
+	select-variant 'BBar'
+	select-variant 'smcpB'     0x299
+	select-variant 'smcpBBar'  0x1D03
+
+	select-variant 'currency/baht'    0xE3F  (follow -- 'B')
 	select-variant 'currency/bitcoin' 0x20BF (follow -- 'B')
-	select-variant 'BStroke' 0x243 (follow -- 'B')
-	select-variant 'latn/Beta' 0xA7B4
+
 	alias 'grek/Beta' 0x392 'B'
 	alias-reduced-variant 'grek/Beta/sansSerif' 'grek/Beta' 'B/sansSerif' MathSansSerif
+	select-variant 'latn/Beta' 0xA7B4
+
 	alias 'cyrl/Ve' 0x412 'B'
+	select-variant 'cyrl/ve' 0x432 (shapeFrom -- 'smcpB')
+	alias 'cyrl/ve.BGR' null 'smcpB.cursiveTall'
 
-	select-variant 'BBar'
-	select-variant 'Bhookleft' 0x181
-
-	define [CursiveCyrveShape top] : glyph-proc
-		local stroke : AdviceStroke2 2 3 top
-		local fine : stroke * CThin
-		local yMiddle : top * HBarPos
-		local xMidLeft : mix (RightSB - [HSwToV stroke]) (SB + [HSwToV stroke]) 0.7
-		local xMidArc  : Math.max Middle : mix xMidLeft RightSB 0.1
-		include : dispiro
-			widths.lhs fine
-			flat xMidLeft (yMiddle + (stroke / 2 - fine)) [heading Rightward]
-			curl xMidArc  (yMiddle + (stroke / 2 - fine)) [heading Rightward]
-			archv
-			g4   ((RightSB + O) - OX) ([mix (yMiddle + stroke / 2) (top - O - stroke) (ArchDepthA / (ArchDepthA + ArchDepthB))] - [HSwToV : TanSlope * stroke]) [widths.lhs stroke]
-			Arch.lhs top
-			flatside.ld SB 0 top SmallArchDepthA SmallArchDepthB O
-			Arch.lhs 0
-			g4   ((RightSB - O) - OX) ([mix (O + stroke) (yMiddle - stroke / 2) (ArchDepthA / (ArchDepthA + ArchDepthB))] - [HSwToV : TanSlope * stroke])
-			arcvh
-			flat xMidArc  (yMiddle - (stroke / 2 - fine)) [widths.lhs.heading fine Leftward]
-			curl xMidLeft (yMiddle - (stroke / 2 - fine)) [heading Leftward]
-
-	create-glyph 'cyrl/ve.cursive' : glyph-proc
-		include : MarkSet.e
-		include : CursiveCyrveShape XH
-
-	create-glyph 'cyrl/ve.cursiveTall' : glyph-proc
-		include : MarkSet.b
-		include : CursiveCyrveShape Ascender
-
-	select-variant 'cyrl/ve'  0x432
-	select-variant 'smcpB'    0x299  (shapeFrom -- 'cyrl/ve')
-	select-variant 'smcpBBar' 0x1D03
-
+	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/B' 0x1D539 : glyph-proc
 		include : MarkSet.capital
 		include : difference
-			union
-				BShape CAP (stroke -- BBS) (serifs -- false)
-				intersection
-					BShapeMask CAP (stroke -- BBS)
-					union
-						VBar.r ((RightSB - OX * 2) - BBD) 0 (CAP * BBarPos) BBS
-						VBar.r (([mix SB RightSB BArcMix] - OX * 2) - BBD) (CAP * BBarPos) CAP BBS
-						VBar.l (SB + BBD) 0 CAP BBS
+			union [BShape CAP (stroke -- BBS)] : intersection [BShapeMask CAP (stroke -- BBS)] : union
+				VBar.r         ((RightSB          - OX * 2) - BBD)      0              [mix 0 CAP BBarPos] BBS
+				VBar.r (([mix SB RightSB BArcMix] - OX * 2) - BBD) [mix 0 CAP BBarPos]        CAP          BBS
+				VBar.l       (SB                            + BBD)      0                     CAP          BBS
 			Rect (CAP - BBS) (0 + BBS) (SB + [HSwToV BBS]) (SB + BBD)
 
-	### Greek Beta
+	### Greek Lower Beta
 
 	create-glyph 'grek/beta.standard' : glyph-proc
 		include : MarkSet.bp
 		include : LeaningAnchor.Below.VBar.l SB
-		define pBar 0.55
-		define fine : Stroke * CThin
-		define yMiddle : Ascender * pBar - Stroke * 0.2
-		define ada : ArchDepthAOf (ArchDepth * 0.75) (Width * 0.5)
-		define adb : ArchDepthBOf (ArchDepth * 0.75) (Width * 0.5)
-		define xMidLeft : mix (RightSB - [HSwToV Stroke]) (SB + [HSwToV Stroke]) 0.7
-		define xMidArc  : Math.max Middle : mix xMidLeft RightSB 0.1
-		include : dispiro
-			widths.lhs fine
-			flat xMidLeft (yMiddle + (Stroke / 2 - fine)) [heading Rightward]
-			curl xMidArc  (yMiddle + (Stroke / 2 - fine)) [heading Rightward]
-			archv
-			g4   ((RightSB + O * 3) - OX) [YSmoothMidR Ascender (yMiddle - Stroke / 2) ada adb] [widths.lhs]
-			Arch.lhs Ascender
-			flat SB (Ascender - SmallArchDepthA)
-			curl SB Descender [heading Downward]
-		include : dispiro
-			widths.lhs ShoulderFine
-			g4.down.start (SB + [HSwToV : Stroke - ShoulderFine]) adb
-			Arch.lhs 0 (swBefore -- ShoulderFine)
-			g4   (RightSB - OX) [YSmoothMidR (yMiddle + Stroke / 2) 0 ada adb] [widths.lhs]
-			arcvh
-			flat xMidArc  (yMiddle - (Stroke / 2 - fine)) [widths.lhs.heading fine Leftward]
-			curl xMidLeft (yMiddle - (Stroke / 2 - fine)) [heading Leftward]
 
-	alias 'grek/beta.cursive'  null  'cyrl/ve.cursiveTall'
+		local bowl : mix Stroke Ascender BBarPos
+		local mockBowlDepth : BowlXDepth Ascender (bowl - Stroke) SB RightSB Stroke
+		local curveLeftBot : [mix Width RightSB 1.5] - mockBowlDepth
+		local curveLeftTop : Math.min curveLeftBot : [mix Width RightSB 1.5] - OX - Stroke * 1.375
+		local xTopArcRight : [mix SB RightSB BArcMix] - OX * 2
+		local xBotArcRight : RightSB - OX * 2
+		local fine : Stroke * CThin
+
+		local adaBot : ArchDepthAOf : ArchDepth * 0.9
+		local adbBot : ArchDepthBOf : ArchDepth * 0.9
+		local adaTop : ArchDepthAOf : ArchDepth * 0.9 - (curveLeftBot - curveLeftTop)
+		local adbTop : ArchDepthBOf : ArchDepth * 0.9 - (curveLeftBot - curveLeftTop)
+
+		include : difference
+			union
+				dispiro
+					widths.lhs fine
+					flat (SB - O) (bowl - fine) [heading Rightward]
+					curl [Arch.adjust-x.bot curveLeftTop] (bowl - fine)
+					archv
+					g4   xTopArcRight [YSmoothMidR Ascender (bowl - Stroke) adaTop adbTop] [widths.lhs]
+					Arch.lhs Ascender
+					flat SB (Ascender - adaTop) [heading Downward]
+					curl SB Descender           [heading Downward]
+				dispiro
+					widths.lhs ShoulderFine
+					g4.down.start (SB + [HSwToV : Stroke - ShoulderFine]) adbBot [heading Downward]
+					Arch.lhs 0 (swBefore -- ShoulderFine)
+					g4   xBotArcRight [YSmoothMidR bowl 0 adaBot adbBot] [widths.lhs]
+					arcvh
+					flat [Arch.adjust-x.top curveLeftBot] (bowl - Stroke + fine) [widths.lhs fine]
+					curl (SB - O) (bowl - Stroke + fine) [heading Leftward]
+			[InterruptShape BBarPos] Ascender Stroke
+
+	create-glyph 'grek/beta.cursive' : glyph-proc
+		include : MarkSet.b
+		include : difference
+			CursiveCyrVeShape        Ascender Stroke
+			[InterruptShape BBarPos] Ascender Stroke
+
 	select-variant 'grek/beta' 0x3B2
-
-	alias 'grek/betaSymbol' 0x3D0 'cyrl/ve.cursiveTall'
-	alias 'cyrl/ve.BGR'     null  'cyrl/ve.cursiveTall'
-
+	alias 'grek/betaSymbol' 0x3D0 'grek/beta.cursive'
 	derive-composites 'latn/beta' 0xA7B5 'grek/beta.standard'
-		if SLAB [SerifFrame.fromDf [DivFrame 1] XH Descender].lb.fullSide [no-shape]
+		NeedSlab SLAB [SerifFrame.fromDf [DivFrame 1] XH Descender].lb.fullSide
 
 	create-glyph 'cyrl/veRounded' 0x1C80 : glyph-proc
 		include : MarkSet.e
