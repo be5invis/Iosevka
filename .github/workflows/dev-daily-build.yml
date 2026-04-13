@@ -1,6 +1,13 @@
-name: PR Font Build Validation
-
-on: [pull_request]
+name: "Dev Daily Build"
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for running manually"
+        required: false
+        default: "Manual check"
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   build:
@@ -10,21 +17,14 @@ jobs:
 
     strategy:
       matrix:
-        fontName:
-          [
-            "Iosevka",
-            "IosevkaFixed",
-            "IosevkaSlab",
-            "IosevkaAile",
-            "IosevkaEtoile",
-            "IosevkaNoVarTest",
-          ]
+        fontName: ["Iosevka", "IosevkaSlab", "IosevkaAile", "IosevkaEtoile"]
 
     steps:
       # Checkout repository into `iosevka` sub directory
       - uses: actions/checkout@v6
         with:
           path: iosevka
+          ref: dev
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -42,4 +42,10 @@ jobs:
         working-directory: iosevka
         run: |
           npm install
-          npm run build -- contents::${{ matrix.fontName }}
+          npm run build -- ttc::${{ matrix.fontName }}
+
+      - name: Upload Font Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ttc-${{ matrix.fontName }}
+          path: iosevka/dist/.ttc/${{ matrix.fontName }}/
