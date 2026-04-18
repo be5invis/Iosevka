@@ -130,6 +130,97 @@ glyph-block Letter-Latin-Upper-B : begin
 
 	### Cyrillic Lower Ve
 
+	define [RoundedCyrVeArcsT sink] : function [] : with-params [top stroke offset barPos topArcShift topArcInnerShift] : glyph-proc
+		local bowl : mix stroke top barPos
+		local mockBowlDepth : BowlXDepth top (bowl - stroke) SB RightSB stroke
+		local curveLeftBot : [mix Width RightSB 1.5] - mockBowlDepth + topArcInnerShift
+		local curveLeftTop : Math.min curveLeftBot : [mix Width RightSB 1.5] - OX - stroke * 1.375 + topArcInnerShift
+		local xTopArcRight : [mix SB RightSB BArcMix] - OX * 2 + topArcShift
+		local xBotArcRight : RightSB - OX * 2
+		local fine : stroke * CThin
+
+		local adaBot : ArchDepthAOf : ArchDepth * 0.9
+		local adbBot : ArchDepthBOf : ArchDepth * 0.9
+		local adaTop : ArchDepthAOf : ArchDepth * 0.9 - (curveLeftBot - curveLeftTop)
+		local adbTop : ArchDepthBOf : ArchDepth * 0.9 - (curveLeftBot - curveLeftTop)
+
+		include : sink
+			widths.lhs fine
+			flat (SB - O) (bowl - fine + offset) [heading Rightward]
+			curl [Arch.adjust-x.bot curveLeftTop (sw -- stroke)] (bowl - fine + offset)
+			archv
+			g4   (xTopArcRight - offset) [YSmoothMidR top (bowl - stroke) adaTop adbTop] [widths.lhs stroke]
+			Arch.lhs (top - offset) (sw -- stroke)
+			flat (SB + offset) [Math.max (0 + TINY) (top - adaTop)] [widths.lhs.heading stroke Downward]
+			curl (SB + offset) 0 [heading Downward]
+
+		include : sink
+			widths.rhs fine
+			flat (SB - O) (bowl - stroke + fine - offset) [heading Rightward]
+			curl [Arch.adjust-x.top curveLeftBot (sw -- stroke)] (bowl - stroke + fine - offset)
+			archv
+			g4   (xBotArcRight - offset) [YSmoothMidR bowl 0 adaBot adbBot] [widths.rhs stroke]
+			arcvh
+			flat [Arch.adjust-x.bot curveLeftBot (sw -- stroke)] (0 + offset)
+			curl (SB - O) (0 + offset) [heading Leftward]
+
+		return : object bowl
+
+	define flex-params [RoundedCyrVeShape] : glyph-proc
+		local-parameter : top
+		local-parameter : stroke           -- [AdviceStroke2 2 3 (top - 0)]
+		local-parameter : barPos           -- BBarPos
+		local-parameter : topArcShift      -- 0
+		local-parameter : topArcInnerShift -- 0
+		local-parameter : serifTop         -- false
+		local-parameter : serifBot         -- false
+
+		local dims : include : [RoundedCyrVeArcsT dispiro] top
+			offset           -- 0
+			stroke           -- stroke
+			barPos           -- barPos
+			topArcShift      -- topArcShift
+			topArcInnerShift -- topArcInnerShift
+
+		set-base-anchor 'strike' Middle (dims.bowl - 0.5 * stroke)
+
+		local sf : SerifFrame.fromDf [DivFrame 1] top 0
+		if serifBot : include sf.lb.outer
+
+	define flex-params [RoundedCyrVeShapeMask] : glyph-proc
+		local-parameter : top
+		local-parameter : stroke           -- [AdviceStroke2 2 3 (top - 0)]
+		local-parameter : barPos           -- BBarPos
+		local-parameter : topArcShift      -- 0
+		local-parameter : topArcInnerShift -- 0
+
+		include : [RoundedCyrVeArcsT spiro-outline] top
+			offset           -- 1
+			stroke           -- stroke
+			barPos           -- barPos
+			topArcShift      -- topArcShift
+			topArcInnerShift -- topArcInnerShift
+
+	define [RoundedShape top sw st sb] : RoundedCyrVeShape top
+		stroke   -- sw
+		barPos   -- BBarPos
+		serifTop -- st
+		serifBot -- sb
+	define [RoundedShapeInterrupted top sw st sb] : difference
+		RoundedShape             top sw st sb
+		[InterruptShape BBarPos] top sw st sb
+	define [RoundedMask top sw] : RoundedCyrVeShapeMask top
+		stroke   -- sw
+		barPos   -- BBarPos
+
+	create-glyph : glyph-proc
+		include : MarkSet.e
+		local stroke : AdviceStroke2 2 3 (XH - 0)
+		create-forked-glyph "smcpB.roundedTopSerifless"                          : RoundedShape            XH stroke false false
+		create-forked-glyph "smcpB.roundedTopUnilateralBottomSerifed"            : RoundedShape            XH stroke false true
+		create-forked-glyph "smcpB.roundedTopInterruptedSerifless"               : RoundedShapeInterrupted XH stroke false false
+		create-forked-glyph "smcpB.roundedTopInterruptedUnilateralBottomSerifed" : RoundedShapeInterrupted XH stroke false true
+
 	define [CursiveCyrVeArcsT sink] : function [] : with-params [top stroke offset barPos topArcShift topArcInnerShift] : glyph-proc
 		local bowl : mix stroke top barPos
 		local mockBowlDepth : BowlXDepth top (bowl - stroke) SB RightSB stroke
@@ -339,7 +430,7 @@ glyph-block Letter-Latin-Upper-B : begin
 
 	create-glyph 'grek/beta.standard' : glyph-proc
 		include : MarkSet.bp
-		local stroke : AdviceStroke2 2 3 Ascender
+		local stroke : AdviceStroke2 2 3 (Ascender - 0)
 		include : LeaningAnchor.Below.VBar.l SB stroke
 
 		local bowl : mix stroke Ascender BBarPos
@@ -365,8 +456,8 @@ glyph-block Letter-Latin-Upper-B : begin
 					archv
 					g4   xTopArcRight [YSmoothMidR Ascender (bowl - stroke) adaTop adbTop] [widths.lhs stroke]
 					Arch.lhs Ascender (sw -- stroke)
-					flat SB (Ascender - adaTop) [heading Downward]
-					curl SB Descender           [heading Downward]
+					flat SB (Ascender - adaTop) [widths.lhs.heading stroke Downward]
+					curl SB Descender [heading Downward]
 				dispiro
 					widths.lhs shoulderFine
 					g4.down.start (SB + [HSwToV : stroke - shoulderFine]) adbBot [heading Downward]
