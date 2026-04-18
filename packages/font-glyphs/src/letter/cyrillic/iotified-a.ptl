@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Cyrillic-Iotified-A : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Metrics : EFVJutLength
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
 
 	define SLAB-NONE     0
@@ -99,7 +100,7 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 				swRef      -- swRef
 				swSerif    -- swSerif
 
-	do "iotified A"
+	do "Iotified A"
 		glyph-block-import Letter-Latin-Upper-A : AShape AConfig
 
 		foreach { suffix { bodyShape slabKind } } [Object.entries AConfig] : do
@@ -126,7 +127,7 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 					with-transform [ApparentTranslate shift 0]
 						AShape.Mask subDf bodyShape CAP sw
 
-	do "iotified a"
+	do "Iotified a"
 		glyph-block-import Letter-Latin-Lower-A : DoubleStorey DoubleStoreyConfig SingleStorey SingleStoreyConfig
 
 		foreach { suffix { body xTrailing hookStyle } } [Object.entries DoubleStoreyConfig] : do
@@ -162,7 +163,57 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 
 				include : Iotified.full df XH (((subDf.leftSB + OX) + [HSwToV : 0.5 * sw]) + shift) (XH / 2) (swRef -- sw) (swSerif -- subDf.mvs)
 
-	do "iotified e"
+	do "Iotified e"
+		glyph-block-import Letter-Latin-C : CLetterForm CConfig
+
+		foreach { suffix { sty styBot } } [Object.entries CConfig] : do
+			define [IotifiedEShape fCapital fMidSerif df top ada adb] : glyph-proc
+				local sw : Math.min df.mvs : AdviceStroke2 2 3 top (0.75 * df.adws)
+				local gap : 0.375 * (df.rightSB - df.leftSB) - [HSwToV : 0.25 * sw] + sw / 16
+				local subDf : DivFrame [Math.min ((df.width - gap) / Width) (0.75 * df.adws)] 2
+
+				local lf : CLetterForm subDf sty styBot top 0
+					ada -- (ada * 0.75 * df.adws)
+					adb -- (adb * 0.75 * df.adws)
+					sw  -- sw
+
+				local shift : df.width - subDf.width
+				include : with-transform [ApparentTranslate shift 0] : lf.full
+
+				local xMidBarRight : [if (fMidSerif && !fCapital) subDf.middle : mix subDf.rightSB subDf.leftSB 0.35] + shift
+				include : Iotified.full df top
+					hBarRight -- xMidBarRight
+					hBarY     -- (top / 2)
+					fCapital  -- fCapital
+					swRef     -- sw
+
+				if fMidSerif : begin
+					local { jutTop jutBot jutMid } : EFVJutLength top 0 0.5 sw
+						if fCapital Hook nothing
+						if fCapital Hook nothing
+					local swVJut : Math.min (VJutStroke * (sw / Stroke))
+						VSwToH : [if fCapital 0.800 0.625] * ([if fCapital xMidBarRight : (subDf.rightSB - [HSwToV sw]) + shift] - ((subDf.leftSB + [HSwToV sw]) + shift))
+					include : VSerif.mr (xMidBarRight + [if fCapital 0 : HSwToV : 0.5 * swVJut]) (top / 2) jutMid swVJut
+
+			create-glyph "cyrl/EIotified.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.advanceScaleM 3
+				include : df.markSet.capital
+				include : IotifiedEShape true false df CAP ArchDepthA ArchDepthB
+			create-glyph "cyrl/EIotified.\(suffix)Capped" : glyph-proc
+				local df : include : DivFrame para.advanceScaleM 3
+				include : df.markSet.capital
+				include : IotifiedEShape true true df CAP ArchDepthA ArchDepthB
+
+			create-glyph "cyrl/eIotified.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.advanceScaleM 3
+				include : df.markSet.e
+				include : IotifiedEShape false false df XH SmallArchDepthA SmallArchDepthB
+			create-glyph "cyrl/eIotified.\(suffix)Capped" : glyph-proc
+				local df : include : DivFrame para.advanceScaleM 3
+				include : df.markSet.e
+				include : IotifiedEShape false true df XH SmallArchDepthA SmallArchDepthB
+
+	do "Latin iotified e"
 		glyph-block-import Letter-Latin-Lower-E : SmallEConfig
 
 		foreach { suffix { body revbody } } [Object.entries SmallEConfig] : do
@@ -186,4 +237,6 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 
 	select-variant 'cyrl/AIotified' 0xA656 (follow -- 'A')
 	select-variant 'cyrl/aIotified' 0xA657 (follow -- 'cyrl/a')
+	select-variant 'cyrl/EIotified' 0x464  (follow -- 'cyrl/YeUkrainian')
+	select-variant 'cyrl/eIotified' 0x465  (follow -- 'cyrl/yeUkrainian')
 	select-variant 'latn/eIotified' 0xAB61 (follow -- 'e')

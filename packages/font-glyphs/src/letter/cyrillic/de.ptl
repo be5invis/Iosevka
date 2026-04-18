@@ -119,7 +119,7 @@ glyph-block Letter-Cyrillic-De : begin
 
 	select-variant 'cyrl/deSoft' 0xA663 (follow -- 'cyrl/enghe/ghePart')
 
-	foreach { suffix { st sb }} [Object.entries ZeConfig] : do
+	foreach { suffix { { desc } { st sb } } } [Object.entries ZeConfig] : do
 		define [DzzeDescendershape de ada adb] : begin
 			local sr : [mix RightSB Width 0.5] - O * 2
 			local sl : mix sr de.xTopRight 2
@@ -137,19 +137,20 @@ glyph-block Letter-Cyrillic-De : begin
 				adb    -- adb
 			return : union [ze.Shape] [ze.AutoEndSerifL]
 
-		create-glyph "cyrl/Dzze.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : ExtendBelowBaseAnchors BottomExtension
-			local de : include : CyrDeShape true CAP SB RightSB
-			eject-contour 'footR'
-			include : DzzeDescendershape de ArchDepthA ArchDepthB
+		if (!desc && !st) : begin
+			create-glyph "cyrl/Dzze.\(suffix)" : glyph-proc
+				include : MarkSet.capital
+				include : ExtendBelowBaseAnchors BottomExtension
+				local de : include : CyrDeShape true CAP SB RightSB
+				eject-contour 'footR'
+				include : DzzeDescendershape de ArchDepthA ArchDepthB
 
-		create-glyph "cyrl/dzze.upright.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : ExtendBelowBaseAnchors BottomExtension
-			local de : include : CyrDeShape false XH SB RightSB
-			eject-contour 'footR'
-			include : DzzeDescendershape de SmallArchDepthA SmallArchDepthB
+			create-glyph "cyrl/dzze.upright.\(suffix)" : glyph-proc
+				include : MarkSet.e
+				include : ExtendBelowBaseAnchors BottomExtension
+				local de : include : CyrDeShape false XH SB RightSB
+				eject-contour 'footR'
+				include : DzzeDescendershape de SmallArchDepthA SmallArchDepthB
 
 	create-glyph "cyrl/Dwe" 0xA680 : glyph-proc
 		include : MarkSet.capital
@@ -192,26 +193,27 @@ glyph-block Letter-Cyrillic-De : begin
 		include : df.markSet.b
 		include : CyrDeItalicShapeT dispiro df
 
-	foreach { suffix { st sb }} [Object.entries ZeConfig] : do
-		create-glyph "cyrl/dzze.italic.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleMM 3
-			include : df.markSet.bp
+	foreach { suffix { { desc } { st sb } } } [Object.entries ZeConfig] : do
+		if (desc && !st) : begin
+			create-glyph "cyrl/dzze.italic.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.advanceScaleMM 3
+				include : df.markSet.bp
 
-			local subDf : df.slice 3 2 OX
-			include : CyrDeItalicShapeT dispiro subDf df.mvs
+				local subDf : df.slice 3 2 OX
+				include : CyrDeItalicShapeT dispiro subDf df.mvs
 
-			local shift : df.width - subDf.width
-			local ze : CyrZe 1 sb XH Descender
-				left      -- ((subDf.leftSB  + OX) + shift)
-				right     -- ((subDf.rightSB - OX) + shift)
-				blend     -- 0.7
-				hook      -- SHook
-				xOverflow -- 0
-				stroke    -- df.mvs
-				ada       -- SmallArchDepthA
-				adb       -- SmallArchDepthB
-			include : union [ze.Shape] [ze.AutoEndSerifL]
+				local shift : df.width - subDf.width
+				local ze : CyrZe 1 sb XH Descender
+					left      -- ((subDf.leftSB  + OX) + shift)
+					right     -- ((subDf.rightSB - OX) + shift)
+					blend     -- 0.7
+					hook      -- SHook
+					xOverflow -- 0
+					stroke    -- df.mvs
+					ada       -- SmallArchDepthA
+					adb       -- SmallArchDepthB
+				include : union [ze.Shape] [ze.AutoEndSerifL]
 
-	select-variant 'cyrl/Dzze' 0xA688  (follow -- 'cyrl/ZeBottomSerifOnly')
-	select-variant 'cyrl/dzze.upright' (follow -- 'cyrl/zeBottomSerifOnly')
-	select-variant 'cyrl/dzze.italic'  (follow -- 'cyrl/zeBottomSerifOnly')
+	select-variant 'cyrl/Dzze' 0xA688  (follow -- 'cyrl/Dzze/Ze')
+	select-variant 'cyrl/dzze.upright' (follow -- 'cyrl/dzze.upright/ze')
+	select-variant 'cyrl/dzze.italic'  (follow -- 'cyrl/dzze.italic/ze')

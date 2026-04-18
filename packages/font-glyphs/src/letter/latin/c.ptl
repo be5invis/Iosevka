@@ -8,8 +8,10 @@ glyph-module
 glyph-block Letter-Latin-C : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Shared-Metrics : markMiddle
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors ExtendBelowBaseAnchors LeaningAnchor
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateDependentComposite
+	glyph-block-import Letter-Shared-Metrics : EFVJutLength
 	glyph-block-import Letter-Shared-Shapes : CurlyTail SerifedArcStart SerifedArcEnd
 	glyph-block-import Letter-Shared-Shapes : InwardSlabArcStart InwardSlabArcEnd
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerif ArcEndSerif
@@ -129,20 +131,14 @@ glyph-block Letter-Latin-C : begin
 
 	glyph-block-export CConfig
 	define CConfig : object
-		serifless                  { SLAB-NONE      SLAB-NONE      false }
-		bottomSerifed              { SLAB-NONE      SLAB-CLASSICAL false }
-		bottomInwardSerifed        { SLAB-NONE      SLAB-INWARD    false }
-		unilateralSerifed          { SLAB-CLASSICAL SLAB-NONE      false }
-		bilateralSerifed           { SLAB-CLASSICAL SLAB-CLASSICAL false }
-		unilateralInwardSerifed    { SLAB-INWARD    SLAB-NONE      false }
-		bilateralInwardSerifed     { SLAB-INWARD    SLAB-INWARD    false }
-		hybridSerifed1             { SLAB-INWARD    SLAB-CLASSICAL false }
-		bottomMidSerifed           { SLAB-NONE      SLAB-CLASSICAL true  }
-		bottomInwardMidSerifed     { SLAB-NONE      SLAB-INWARD    true  }
-		unilateralMidSerifed       { SLAB-CLASSICAL SLAB-NONE      true  }
-		bilateralMidSerifed        { SLAB-CLASSICAL SLAB-CLASSICAL true  }
-		unilateralInwardMidSerifed { SLAB-INWARD    SLAB-NONE      true  }
-		bilateralInwardMidSerifed  { SLAB-INWARD    SLAB-INWARD    true  }
+		serifless                  { SLAB-NONE      SLAB-NONE      }
+		bottomSerifed              { SLAB-NONE      SLAB-CLASSICAL }
+		bottomInwardSerifed        { SLAB-NONE      SLAB-INWARD    }
+		unilateralSerifed          { SLAB-CLASSICAL SLAB-NONE      }
+		bilateralSerifed           { SLAB-CLASSICAL SLAB-CLASSICAL }
+		unilateralInwardSerifed    { SLAB-INWARD    SLAB-NONE      }
+		bilateralInwardSerifed     { SLAB-INWARD    SLAB-INWARD    }
+		hybridSerifed1             { SLAB-INWARD    SLAB-CLASSICAL }
 
 	foreach { suffix { sty styBot } } [Object.entries CConfig] : do
 		create-glyph "C.\(suffix)" : glyph-proc
@@ -227,16 +223,6 @@ glyph-block Letter-Latin-C : begin
 				include : lf.revFull
 				include : Translate 0 (SB / 2)
 
-		create-glyph "cyrl/esWide.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleT 3
-			include : df.markSet.e
-			local desc : (-LongVJut) + QuarterStroke
-			include : ExtendBelowBaseAnchors desc
-			local lf : CLetterForm df sty styBot XH desc
-				ada -- [df.archDepthAOf SmallArchDepth Stroke]
-				adb -- [df.archDepthBOf SmallArchDepth Stroke]
-			include : lf.full
-
 		create-glyph "cHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
@@ -263,7 +249,87 @@ glyph-block Letter-Latin-C : begin
 			include : CCurlyTailShape [DivFrame 1] sty XH Descender
 			include : AutoStartSerifR [DivFrame 1] sty XH
 
-		define [KoppaShapeT base styTop styBot top] : union
+		create-glyph "cyrl/esWide.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleT 3
+			include : df.markSet.e
+			local desc : (-LongVJut) + QuarterStroke
+			include : ExtendBelowBaseAnchors desc
+			local lf : CLetterForm df sty styBot XH desc
+				ada -- [df.archDepthAOf SmallArchDepth Stroke]
+				adb -- [df.archDepthBOf SmallArchDepth Stroke]
+			include : lf.full
+
+		define [CyrEShepe fCapital fMidSerif df top ada adb] : glyph-proc
+			local sw : Math.min df.mvs : AdviceStroke2 2 3 top df.adws
+			local lf : CLetterForm df sty styBot top 0
+				ada -- ada
+				adb -- adb
+				sw  -- sw
+			include : lf.revFull
+
+			local xMidBarLeft : if (fMidSerif && !fCapital) df.middle : mix df.leftSB df.rightSB 0.35
+			include : HBar.m xMidBarLeft ((df.rightSB - OX) + O) (top / 2) sw
+
+			if fMidSerif : begin
+				local { jutTop jutBot jutMid } : EFVJutLength top 0 0.5 sw
+					if fCapital Hook nothing
+					if fCapital Hook nothing
+				local swVJut : Math.min (VJutStroke * (sw / Stroke))
+					VSwToH : [if fCapital 0.800 0.625] * ((df.rightSB - [HSwToV sw]) - [if fCapital xMidBarLeft : df.leftSB + [HSwToV sw]])
+				include : VSerif.ml (xMidBarLeft - [if fCapital 0 : HSwToV : 0.5 * swVJut]) (top / 2) jutMid swVJut
+
+		define [CyrYeShape fCapital fMidSerif df top ada adb] : glyph-proc
+			local sw : Math.min df.mvs : AdviceStroke2 2 3 top df.adws
+			local lf : CLetterForm df sty styBot top 0
+				ada -- ada
+				adb -- adb
+				sw  -- sw
+			include : lf.full
+
+			local xMidBarRight : if (fMidSerif && !fCapital) df.middle : mix df.rightSB df.leftSB 0.35
+			include : HBar.m ((df.leftSB + OX) - O) xMidBarRight (top / 2) sw
+
+			if fMidSerif : begin
+				local { jutTop jutBot jutMid } : EFVJutLength top 0 0.5 sw
+					if fCapital Hook nothing
+					if fCapital Hook nothing
+				local swVJut : Math.min (VJutStroke * (sw / Stroke))
+					VSwToH : [if fCapital 0.800 0.625] * ([if fCapital xMidBarRight : df.rightSB - [HSwToV sw]] - (df.leftSB + [HSwToV sw]))
+				include : VSerif.mr (xMidBarRight + [if fCapital 0 : HSwToV : 0.5 * swVJut]) (top / 2) jutMid swVJut
+
+		create-glyph "cyrl/E.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : CyrEShepe true false [DivFrame 1] CAP ArchDepthA ArchDepthB
+		create-glyph "cyrl/E.\(suffix)Capped" : glyph-proc
+			include : MarkSet.capital
+			include : CyrEShepe true true [DivFrame 1] CAP ArchDepthA ArchDepthB
+
+		create-glyph "cyrl/e.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrEShepe false false [DivFrame 1] XH SmallArchDepthA SmallArchDepthB
+		create-glyph "cyrl/e.\(suffix)Capped" : glyph-proc
+			include : MarkSet.e
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrEShepe false true [DivFrame 1] XH SmallArchDepthA SmallArchDepthB
+
+		create-glyph "cyrl/YeUkrainian.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : CyrYeShape true false [DivFrame 1] CAP ArchDepthA ArchDepthB
+		create-glyph "cyrl/YeUkrainian.\(suffix)Capped" : glyph-proc
+			include : MarkSet.capital
+			include : CyrYeShape true true [DivFrame 1] CAP ArchDepthA ArchDepthB
+
+		create-glyph "cyrl/yeUkrainian.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrYeShape false false [DivFrame 1] XH SmallArchDepthA SmallArchDepthB
+		create-glyph "cyrl/yeUkrainian.\(suffix)Capped" : glyph-proc
+			include : MarkSet.e
+			set-base-anchor 'cvDecompose' 0 0
+			include : CyrYeShape false true [DivFrame 1] XH SmallArchDepthA SmallArchDepthB
+
+		define [CyrKoppaShapeT base styTop styBot top] : union
 			VBar.r (Middle + [HSwToV Stroke]) Descender HalfStroke
 			difference base
 				Rect (top / 2) Descender (Middle + [HSwToV Stroke]) VERY-FAR
@@ -275,14 +341,14 @@ glyph-block Letter-Latin-C : begin
 		if [not styBot] : create-glyph "cyrl/Koppa.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
 			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
-			include : KoppaShapeT [union [lf.baseTopOnly] [lf.topSerif]] sty styBot CAP
+			include : CyrKoppaShapeT [union [lf.baseTopOnly] [lf.topSerif]] sty styBot CAP
 
 		if [not styBot] : create-glyph "cyrl/koppa.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
 				ada -- SmallArchDepthA
 				adb -- SmallArchDepthB
-			include : KoppaShapeT [union [lf.baseTopOnly] [lf.topSerif]] sty styBot XH
+			include : CyrKoppaShapeT [union [lf.baseTopOnly] [lf.topSerif]] sty styBot XH
 
 		create-glyph "C/descBase.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -312,10 +378,10 @@ glyph-block Letter-Latin-C : begin
 
 	select-variant 'C' 'C'
 	link-reduced-variant 'C/sansSerif' 'C' MathSansSerif
-	select-variant 'revC' 0x2183 (follow -- 'C')
-
-	alias 'cyrl/Es' 0x421 'C'
 	alias 'grek/SigmaLunate' 0x3F9 'C'
+
+	select-variant 'revC' 0x2183 (follow -- 'C')
+	alias 'grek/revSigmaLunate' 0x3FD 'revC'
 
 	select-variant 'CHookTop' 0x187
 	select-variant 'smcpC' 0x1D04 (follow -- 'C')
@@ -324,23 +390,30 @@ glyph-block Letter-Latin-C : begin
 
 	select-variant 'c' 'c'
 	link-reduced-variant 'c/sansSerif' 'c' MathSansSerif
+	alias 'grek/sigmaLunate' 0x3F2 'c.serifless'
+
 	select-variant 'revc' 0x2184 (follow -- 'c')
+	alias 'grek/revsigmaLunate' 0x37B 'revc.serifless'
 
 	select-variant 'c/centKernelStd' (follow -- 'c')
 	select-variant 'c/centKernelCap' (follow -- 'c')
-
-	alias 'cyrl/es' 0x441 'c'
-	alias 'grek/sigmaLunate' 0x3F2 'c.serifless'
-
-	select-variant 'cyrl/esWide' 0x1C83 (follow -- 'c')
 
 	select-variant 'cCurlyTail' 0x255
 	select-variant 'cHookTop' 0x188
 	select-variant 'cStretched' 0x297 (follow -- 'c')
 	select-variant 'cStretchedCurlyTail' 0x1DF0F (follow -- 'cCurlyTail')
 
-	select-variant 'cyrl/Koppa' 0x480 (follow -- 'CTopSerifOnly')
-	select-variant 'cyrl/koppa' 0x481 (follow -- 'cTopSerifOnly')
+	alias 'cyrl/Es' 0x421 'C'
+	alias 'cyrl/es' 0x441 'c'
+	select-variant 'cyrl/esWide' 0x1C83 (follow -- 'c')
+
+	select-variant 'cyrl/E' 0x42D
+	select-variant 'cyrl/e' 0x44D
+	select-variant 'cyrl/YeUkrainian' 0x404
+	select-variant 'cyrl/yeUkrainian' 0x454
+
+	select-variant 'cyrl/Koppa' 0x480 (follow -- 'C/topSerif')
+	select-variant 'cyrl/koppa' 0x481 (follow -- 'c/topSerif')
 
 	select-variant 'C/descBase'
 	select-variant 'c/descBase'
@@ -351,9 +424,6 @@ glyph-block Letter-Latin-C : begin
 	select-variant 'smcpOOpen'  0x1D10 (shapeFrom -- 'revSmcpC')  (follow -- 'OOpen')
 	select-variant 'oOpenSlash' 0xAB3F (shapeFrom -- 'revcSlash') (follow -- 'oOpen')
 	select-variant 'oOpenSideways' 0x1D12 (shapeFrom -- 'revcSideways') (follow -- 'oOpen')
-
-	alias 'grek/revSigmaLunate' 0x3FD 'revC'
-	alias 'grek/revsigmaLunate' 0x37B 'revc.serifless'
 
 	select-variant 'oOpen/descBase' (shapeFrom -- 'revc')
 	derive-composites 'oOpenRetroflexHook' 0x1D97 'oOpen/descBase'
@@ -385,35 +455,41 @@ glyph-block Letter-Latin-C : begin
 
 	derive-glyphs 'cyrl/The' 0x4AA "cyrl/Es" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		local desc : (-LongVJut) + QuarterStroke
+		local desc : 0 - LongVJut + QuarterStroke
 		include : ExtendBelowBaseAnchors desc
 		include : difference
-			VBar.m [Arch.adjust-x.bot Middle] desc (Stroke + O) VJutStroke
+			VBar.m [Arch.adjust-x.bot Middle] desc (O + Stroke) VJutStroke
 			OShapeOutline.NoOvershoot CAP 0 SB RightSB Stroke ArchDepthA ArchDepthB
 
 	derive-multi-part-glyphs 'cyrl/The.BSH' null { 'cyrl/Es' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
-		include : refer-glyph mark
-		include : Translate Width AccentClearance
+		include : with-transform
+			ApparentTranslate
+				[Arch.adjust-x.bot Middle] - markMiddle
+				0                          + AccentClearance
+			refer-glyph mark
 		include [refer-glyph base] AS_BASE ALSO_METRICS
-		include : ExtendBelowBaseAnchors (-AccentHeight)
+		include : ExtendBelowBaseAnchors (0 - AccentHeight)
 
 	alias 'cyrl/The.CHU' null 'CCedilla'
 
 	derive-glyphs 'cyrl/the' 0x4AB "cyrl/es" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		local desc : (-LongVJut) + QuarterStroke
+		local desc : 0 - LongVJut + QuarterStroke
 		include : ExtendBelowBaseAnchors desc
 		include : difference
-			VBar.m [Arch.adjust-x.bot Middle] desc (Stroke + O) VJutStroke
+			VBar.m [Arch.adjust-x.bot Middle] desc (O + Stroke) VJutStroke
 			OShapeOutline.NoOvershoot XH 0 SB RightSB Stroke SmallArchDepthA SmallArchDepthB
 
 	derive-multi-part-glyphs 'cyrl/the.BSH' null { 'cyrl/es' 'invCommaBelow' } : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
-		include : refer-glyph mark
-		include : Translate Width AccentClearance
+		include : with-transform
+			ApparentTranslate
+				[Arch.adjust-x.bot Middle] - markMiddle
+				0                          + AccentClearance
+			refer-glyph mark
 		include [refer-glyph base] AS_BASE ALSO_METRICS
-		include : ExtendBelowBaseAnchors (-AccentHeight)
+		include : ExtendBelowBaseAnchors (0 - AccentHeight)
 
 	alias 'cyrl/the.CHU' null 'cCedilla'
 
@@ -454,7 +530,7 @@ glyph-block Letter-Latin-C : begin
 		define [xTop df] : mix df.leftSB df.rightSB (0.5 + sl)
 
 		define swBarThick : AdviceStroke 3
-		define swBarFine : AdviceStroke [StrokeWidthBlend 3 5.5]
+		define swBarFine  : AdviceStroke [StrokeWidthBlend 3.0 5.5]
 
 		define [FullBar df sw] : dispiro
 			flat [xBot df] bot [widths.center.heading sw Downward]
@@ -464,10 +540,10 @@ glyph-block Letter-Latin-C : begin
 			local cofine : AdviceStroke 4
 			return : union
 				dispiro
-					flat [xTop df] top [widths.center.heading cofine Downward]
+					flat [xTop df]      top          [widths.center.heading cofine    Downward]
 					curl df.middle [mix top bot 0.5] [widths.center.heading swBarFine Downward]
 				dispiro
-					flat [xBot df] bot [widths.center.heading cofine Upward]
+					flat [xBot df]      bot          [widths.center.heading cofine    Upward]
 					curl df.middle [mix bot top 0.5] [widths.center.heading swBarFine Upward]
 
 		define [OutlineMask df] : lift-@ : spiro-outline
@@ -488,9 +564,10 @@ glyph-block Letter-Latin-C : begin
 			DependentSelector.set currentGlyph selector
 
 			include : difference [FullBar df swBarThick] [OutlineMask df]
-			if (fillType === 1) : include : intersection [FullBar df swBarFine] [OutlineMask df]
-			if (fillType === 2) : include : intersection [InterruptBar df]
-				difference [OutlineMask df] [InterruptMask df]
+			include : match fillType
+				[Just 1] : intersection [FullBar df swBarFine] [OutlineMask df]
+				[Just 2] : intersection [InterruptBar df] [difference [OutlineMask df] [InterruptMask df]]
+				__       : no-shape
 
 	select-variant 'cent/bar' (follow -- 'cent')
 

@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 import [MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -29,19 +29,19 @@ glyph-block Letter-Latin-X : begin
 		: else : begin
 			local height : Math.abs (yOuter - yCenter)
 			local slabClearance : if fSlab ((sw / Stroke) * [AdviceStroke2 2 3 height]) 0
-			local turnyOuter : mix yOuter yCenter [if fSlab [Math.max turn (slabClearance / height)] turn]
-			local cyOuter : mix turnyOuter yCenter tension
-			local straightXOuter : mix xOuter xCenter pStraight
+			local turnyOuter : mix yOuter     yCenter : if fSlab [Math.max turn (slabClearance / height)] turn
+			local cyOuter    : mix turnyOuter yCenter tension
+			local straightXOuter : mix xOuter  xCenter pStraight
 			local straightYOuter : mix cyOuter yCenter pStraight
-			local xCenterAdj : mix xCenter xOuter [fallback _pConn 0]
-			local yCenterAdj : mix yCenter cyOuter [fallback _pConn 0]
+			local xCenterAdj : mix xCenter xOuter  : fallback _pConn 0
+			local yCenterAdj : mix yCenter cyOuter : fallback _pConn 0
 			include : dispiro
 				widths.center sw
-				flat xOuter yOuter [heading [if (yOuter < yCenter) Upward Downward]]
+				flat xOuter yOuter     [heading [if (yOuter < yCenter) Upward Downward]]
 				curl xOuter turnyOuter [heading [if (yOuter < yCenter) Upward Downward]]
 				quadControls 0 ((cyOuter - turnyOuter) / (straightYOuter - turnyOuter)) 24
 				flat straightXOuter straightYOuter
-				curl xCenterAdj yCenterAdj
+				curl xCenterAdj     yCenterAdj
 
 	glyph-block-export XStrand
 	define [XStrand stb slab xLeft yLeft xRight yRight turn pStraight tension _sw] : glyph-proc
@@ -68,23 +68,27 @@ glyph-block Letter-Latin-X : begin
 				flat [mix leftX rightX 0.5] [mix leftY rightY 0.5] [widths.center fine]
 				list
 					flat (leftX - [if fSlab SideJut 0]) (leftY - sign * sw / 2) [widths.center.heading sw Rightward]
-					curl (leftX + TINY) (leftY - sign * sw / 2) [widths.center.heading sw Rightward]
+					curl (leftX + TINY)                 (leftY - sign * sw / 2) [widths.center.heading sw Rightward]
 					alsoThruThem {{blendK1X blendK1Y} {blendK2X blendK2Y}}
-					flat [mix leftX rightX pStraightX] [mix leftY rightY pStraightY] [widths.center : mix sw fine 0.5]
-					corner [mix leftX rightX 0.5] [mix leftY rightY 0.5] [widths.center fine]
+					flat   [mix leftX rightX pStraightX] [mix leftY rightY pStraightY] [widths.center : mix sw fine 0.5]
+					corner [mix leftX rightX 0.5]        [mix leftY rightY 0.5]        [widths.center fine]
 			curl [mix leftX rightX (1 - pStraightX)] [mix leftY rightY (1 - pStraightY)] [widths.center : mix sw fine 0.5]
 			alsoThruThem {{(1 - blendK2X) (1 - blendK2Y)} {(1 - blendK1X) (1 - blendK1Y)}}
-			flat (rightX - TINY) (rightY + sign * sw / 2) [widths.center.heading sw Rightward]
+			flat (rightX - TINY)                 (rightY + sign * sw / 2) [widths.center.heading sw Rightward]
 			curl (rightX + [if fSlab SideJut 0]) (rightY + sign * sw / 2) [widths.center.heading sw Rightward]
 
 	glyph-block-export XCursiveHalfShape
-	define [XCursiveHalfShape] : with-params [
-			top bottom left right
-			[swMid   [AdviceStroke 2.75]]
-			[swEnd   [AdviceStroke 3.00]]
-			[swCoEnd [AdviceStroke 2.00]]
-			[setMark false] [flatTail false]
-		] : glyph-proc
+	define flex-params [XCursiveHalfShape] : glyph-proc
+		local-parameter : top
+		local-parameter : bottom
+		local-parameter : left
+		local-parameter : right
+		local-parameter : swMid    -- [AdviceStroke 2.75]
+		local-parameter : swEnd    -- [AdviceStroke 3.00]
+		local-parameter : swCoEnd  -- [AdviceStroke 2.00]
+		local-parameter : setMark  -- false
+		local-parameter : flatTail -- false
+
 		local ada : ArchDepthAOf (ArchDepth * 0.8) (Width / 2)
 		local adb : ArchDepthBOf (ArchDepth * 0.8) (Width / 2)
 		local adws : (right - left) / (RightSB - Middle)
@@ -130,13 +134,19 @@ glyph-block Letter-Latin-X : begin
 	define STROKE-CURSIVE-FLAT 4
 
 	glyph-block-export XLetterForm
-	define [XLetterForm] : with-params [
-			df top bot stroke1 stroke2 turn tension [sw df.mvs]
-			[swCursiveMid   ([AdviceStroke 2.75] * (sw / Stroke))]
-			[swCursiveEnd   ([AdviceStroke 3.00] * (sw / Stroke))]
-			[swCursiveCoEnd ([AdviceStroke 2.00] * (sw / Stroke))]
-		] : namespace
-		local sw df.mvs
+	define flex-params [XLetterForm] : namespace
+		local-parameter : df
+		local-parameter : top
+		local-parameter : bot
+		local-parameter : stroke1
+		local-parameter : stroke2
+		local-parameter : turn
+		local-parameter : tension
+		local-parameter : sw             -- df.mvs
+		local-parameter : swCursiveMid   -- ([AdviceStroke 2.75] * (sw / Stroke))
+		local-parameter : swCursiveEnd   -- ([AdviceStroke 3.00] * (sw / Stroke))
+		local-parameter : swCursiveCoEnd -- ([AdviceStroke 2.00] * (sw / Stroke))
+
 		export : define [base fSlab] : glyph-proc
 			include : match stroke1
 				[Just STROKE-STRAIGHT] : XStrand true  fSlab df.leftSB bot df.rightSB top turn 0.4 tension sw
@@ -189,25 +199,38 @@ glyph-block Letter-Latin-X : begin
 		export : define [GrekLowerChi sf]     : composite-proc sf.lt.outer sf.rt.full sf.lb.full sf.rb.outer
 
 	glyph-block-export XConfig
-	define XConfig : object
-		straightSerifless               { STROKE-STRAIGHT STROKE-STRAIGHT null                     false }
-		curlySerifless                  { STROKE-CURLY    STROKE-CURLY    null                     false }
-		cursive                         { STROKE-CURSIVE  STROKE-CURSIVE  null                     false }
-		semiChanceryStraightSerifless   { STROKE-STRAIGHT STROKE-CHANCERY null                     false }
-		semiChanceryCurlySerifless      { STROKE-CURLY    STROKE-CHANCERY null                     false }
-		chancery                        { STROKE-CHANCERY STROKE-CHANCERY null                     false }
-		straightSerifed                 { STROKE-STRAIGHT STROKE-STRAIGHT XSerifs.Full             true  }
-		curlySerifed                    { STROKE-CURLY    STROKE-CURLY    XSerifs.Full             true  }
-		semiChanceryStraightSerifed     { STROKE-STRAIGHT STROKE-CHANCERY XSerifs.SemiChancery     true  }
-		semiChanceryCurlySerifed        { STROKE-CURLY    STROKE-CHANCERY XSerifs.SemiChancery     true  }
-		straightUnilateralMotionSerifed { STROKE-STRAIGHT STROKE-STRAIGHT XSerifs.UnilateralMotion false }
-		curlyUnilateralMotionSerifed    { STROKE-CURLY    STROKE-CURLY    XSerifs.UnilateralMotion false }
-		straightBilateralMotionSerifed  { STROKE-STRAIGHT STROKE-STRAIGHT XSerifs.BilateralMotion  false }
-		curlyBilateralMotionSerifed     { STROKE-CURLY    STROKE-CURLY    XSerifs.BilateralMotion  false }
-		straightGrekLowerChiSerifed     { STROKE-STRAIGHT STROKE-STRAIGHT XSerifs.GrekLowerChi     true  }
-		curlyGrekLowerChiSerifed        { STROKE-CURLY    STROKE-CURLY    XSerifs.GrekLowerChi     true  }
+	define XConfig : SuffixCfg.combine
+		SuffixCfg.weave # standard variants
+			object # body
+				straight                { STROKE-STRAIGHT STROKE-STRAIGHT }
+				curly                   { STROKE-CURLY    STROKE-CURLY    }
+			object # height
+				""                      { 0         'capital' 'e' }
+				descending              { Descender 'capDesc' 'p' }
+			object # serifs
+				serifless               { null                     false }
+				unilateralMotionSerifed { XSerifs.UnilateralMotion false }
+				bilateralMotionSerifed  { XSerifs.BilateralMotion  false }
+				serifed                 { XSerifs.Full             true  }
+				grekLowerChiSerifed     { XSerifs.GrekLowerChi     true  }
+		SuffixCfg.weave # semi-chancery variants
+			object # body
+				semiChanceryStraight    { STROKE-STRAIGHT STROKE-CHANCERY }
+				semiChanceryCurly       { STROKE-CURLY    STROKE-CHANCERY }
+			object # height
+				""                      { 0         'capital' 'e' }
+				descending              { Descender 'capDesc' 'p' }
+			object # serifs
+				serifless               { null                 false }
+				serifed                 { XSerifs.SemiChancery true  }
+		object # chancery variants
+			chancery              { { STROKE-CHANCERY STROKE-CHANCERY } { 0         'capital' 'e' } { null false } }
+			chanceryDescending    { { STROKE-CHANCERY STROKE-CHANCERY } { Descender 'capDesc' 'p' } { null false } }
+		object # cursive variants
+			cursive               { { STROKE-CURSIVE  STROKE-CURSIVE  } { 0         'capital' 'e' } { null false } }
+			cursiveDescending     { { STROKE-CURSIVE  STROKE-CURSIVE  } { Descender 'capDesc' 'p' } { null false } }
 
-	foreach { suffix {stroke1 stroke2 serifShape fMaskBase} } [Object.entries XConfig] : do
+	foreach { suffix { { stroke1 stroke2 } { bottom mkCap mkXH } { serifShape fMaskBase } } } [Object.entries XConfig] : do
 		define [letterShape top bot turn tension] : glyph-proc
 			local df : DivFrame 1 2
 			local lf : XLetterForm df top bot stroke1 stroke2 turn tension
@@ -217,40 +240,32 @@ glyph-block Letter-Latin-X : begin
 				include : serifShape sf
 
 		create-glyph "X.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : letterShape CAP 0 0.1 0.28
+			include : MarkSet.(mkCap)
+			include : letterShape CAP bottom 0.1 0.28
 
 		create-glyph "x.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : letterShape XH 0 0.1 0.20
-
-		create-glyph "latn/chi.\(suffix)" : glyph-proc
-			include : MarkSet.p
-			include : letterShape XH Descender 0.1 0.20
-
-		create-glyph "latn/Chi.\(suffix)" : glyph-proc
-			include : MarkSet.capDesc
-			include : letterShape CAP Descender 0.1 0.20
+			include : MarkSet.(mkXH)
+			include : letterShape XH bottom 0.1 0.20
 
 	select-variant 'X' 'X'
 	link-reduced-variant 'X/sansSerif' 'X' MathSansSerif
-	alias 'grek/Chi' 0x3A7 'X'
-	alias-reduced-variant 'grek/Chi/sansSerif' 'grek/Chi' 'X/sansSerif' MathSansSerif
-	alias 'cyrl/Kha' 0x425 'X'
+	select-variant 'smcpX' (shapeFrom -- 'x') (follow -- 'X')
 
 	select-variant 'x' 'x'
 	link-reduced-variant 'x/sansSerif' 'x' MathSansSerif
-	alias 'cyrl/kha' 0x445 'x'
 
+	alias 'grek/Chi' 0x3A7 'X'
+	alias-reduced-variant 'grek/Chi/sansSerif' 'grek/Chi' 'X/sansSerif' MathSansSerif
+	select-variant 'latn/Chi' 0xA7B3 (shapeFrom -- 'X')
+
+	select-variant 'grek/chi' 0x3C7 (shapeFrom -- 'x')
+	link-reduced-variant 'grek/chi/sansSerif' 'grek/chi' MathSansSerif (shapeFrom -- 'x')
+	select-variant 'latn/chi' 0xAB53 (shapeFrom -- 'x')
+
+	alias 'cyrl/Kha' 0x425 'X'
+	alias 'cyrl/kha' 0x445 'x'
 	select-variant 'cyrl/Kha/descBase' (shapeFrom -- 'X') (follow -- 'X/descBase')
 	select-variant 'cyrl/kha/descBase' (shapeFrom -- 'x') (follow -- 'x/descBase')
-
-	select-variant 'grek/chi' 0x3C7 (shapeFrom -- 'latn/chi')
-	link-reduced-variant 'grek/chi/sansSerif' 'grek/chi' MathSansSerif (shapeFrom -- 'latn/chi')
-	select-variant 'latn/chi' 0xAB53 (follow -- 'x')
-	select-variant 'latn/Chi' 0xA7B3 (follow -- 'X')
-
-	select-variant 'smcpX' (shapeFrom -- 'x') (follow -- 'X')
 
 	define [AddDescender Ctor] : function [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
@@ -278,22 +293,18 @@ glyph-block Letter-Latin-X : begin
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	define [BBXShape l r top] : let [kDiag : DiagCorDs top (r - l) BBD] : union
-		intersection
-			Rect top 0 (-Width) (Width * 2)
-			union
-				ExtLineCenter  l                top (r - kDiag * BBD) 0 BBS 1
-				ExtLineCenter (l + kDiag * BBD) top  r                0 BBS 1
+		intersection [Rect top 0 [mix Width 0 2] [mix 0 Width 2]] : union
+			ExtLineCenter  l                top (r - kDiag * BBD) 0 BBS 1
+			ExtLineCenter (l + kDiag * BBD) top  r                0 BBS 1
 		HBar.t l (l + kDiag * BBD) top BBS
 		HBar.b r (r - kDiag * BBD) 0   BBS
-		intersection
-			Rect top 0 (-Width) (Width * 2)
-			difference
-				ExtLineCenter l 0 r top BBS 1
-				spiro-outline
-					corner  l                top
-					corner (l + kDiag * BBD) top
-					corner  r                0
-					corner (r - kDiag * BBD) 0
+		intersection [Rect top 0 [mix Width 0 2] [mix 0 Width 2]] : difference
+			ExtLineCenter l 0 r top BBS 1
+			spiro-outline
+				corner  l                top
+				corner (l + kDiag * BBD) top
+				corner  r                0
+				corner (r - kDiag * BBD) 0
 
 	create-glyph 'mathbb/X' 0x1D54F : composite-proc [MarkSet.capital] [BBXShape SB RightSB CAP]
 	create-glyph 'mathbb/x' 0x1D569 : composite-proc [MarkSet.e]       [BBXShape SB RightSB XH]

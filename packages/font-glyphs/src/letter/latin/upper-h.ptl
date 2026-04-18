@@ -13,10 +13,10 @@ glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import Mark-Below : belowMarkMid
 	glyph-block-import Letter-Shared : SetGrekUpperTonos
 	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
+	glyph-block-import Letter-Shared-Metrics : EFMidBarShrinkK EFVJutLength
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
 	glyph-block-import Letter-Shared-Shapes : LeftHook MidHook EngHook UpwardHookShape
 	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender PalatalHook
-	glyph-block-import Letter-Latin-Upper-F : kEFMidBarShrink EFVJutLength
 
 	define SLAB-NONE                   0
 	define SLAB-TL                     1
@@ -26,14 +26,20 @@ glyph-block Letter-Latin-Upper-H : begin
 	define SLAB-ALL-BGR                5
 	define SLAB-TAILED-BGR             6
 
-	define [HShape] : with-params [df top slabType [fTailed false] [sw df.mvs]] : glyph-proc
-		include : tagged 'strokeL' : VBar.l df.leftSB 0 top sw
-		include : tagged 'strokeR' : if fTailed
-			RightwardTailedBar df.rightSB 0 top sw
-			VBar.r             df.rightSB 0 top sw
-		include : tagged 'crossbar' : HBar.m (df.leftSB - O) (df.rightSB + O) [mix 0 top HBarPos] sw
+	define flex-params [HShape] : glyph-proc
+		local-parameter : df
+		local-parameter : top
+		local-parameter : slabType
+		local-parameter : fTailed  -- false
+		local-parameter : stroke   -- df.mvs
 
-		local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
+		include : tagged 'strokeL' : VBar.l df.leftSB 0 top stroke
+		include : tagged 'strokeR' : if fTailed
+			RightwardTailedBar df.rightSB 0 top stroke
+			VBar.r             df.rightSB 0 top stroke
+		include : tagged 'crossbar' : HBar.m (df.leftSB - O) (df.rightSB + O) [mix 0 top HBarPos] stroke
+
+		local sf : SerifFrame.fromDf df top 0 (swRef -- stroke)
 		include : match slabType
 			[Just SLAB-TL]         : begin          sf.lt.outer
 			[Just SLAB-TL-BR]      : composite-proc sf.lt.outer                        sf.rb.outer
@@ -43,15 +49,21 @@ glyph-block Letter-Latin-Upper-H : begin
 			[Just SLAB-TAILED-BGR] : composite-proc sf.lt.outer sf.rt.inner sf.lb.full
 			__                     : glyph-proc
 
-	define [TurnedHShape] : with-params [df top slabType [fTailed false] [sw df.mvs]] : glyph-proc
-		include : LeaningAnchor.Below.VBar.r df.rightSB sw
-		include : tagged 'strokeL' : VBar.l df.leftSB ([mix 0 top HBarPos] - sw / 2) top sw
-		include : tagged 'strokeR' : if fTailed
-			RightwardTailedBar df.rightSB 0 top sw
-			VBar.r             df.rightSB 0 top sw
-		include : tagged 'crossbar' : HBar.m (df.leftSB - O) (df.rightSB + O) [mix 0 top HBarPos] sw
+	define flex-params [TurnedHShape] : glyph-proc
+		local-parameter : df
+		local-parameter : top
+		local-parameter : slabType
+		local-parameter : fTailed  -- false
+		local-parameter : stroke   -- df.mvs
 
-		local sf : SerifFrame.fromDf df top 0 (swRef -- sw)
+		include : LeaningAnchor.Below.VBar.r df.rightSB stroke
+		include : tagged 'strokeL' : VBar.l df.leftSB ([mix 0 top HBarPos] - stroke / 2) top stroke
+		include : tagged 'strokeR' : if fTailed
+			RightwardTailedBar df.rightSB 0 top stroke
+			VBar.r             df.rightSB 0 top stroke
+		include : tagged 'crossbar' : HBar.m (df.leftSB - O) (df.rightSB + O) [mix 0 top HBarPos] stroke
+
+		local sf : SerifFrame.fromDf df top 0 (swRef -- stroke)
 		include : match slabType
 			[Just SLAB-TL]         : begin          sf.lt.outer
 			[Just SLAB-TL-BR]      : composite-proc sf.lt.outer             sf.rb.outer
@@ -59,82 +71,108 @@ glyph-block Letter-Latin-Upper-H : begin
 			[Just SLAB-ALL]        : composite-proc sf.lt.full  sf.rt.full  sf.rb.fullSide
 			__                     : glyph-proc
 
-	define [LeftHalfHShape] : with-params [df top slabType [fTailed false] [sw df.mvs]] : glyph-proc
+	define flex-params [LeftHalfHShape] : glyph-proc
+		local-parameter : df
+		local-parameter : top
+		local-parameter : slabType
+		local-parameter : fTailed  -- false
+		local-parameter : stroke   -- df.mvs
+
 		local xMockLeft   : mix 0 df.leftSB 1.5
-		local xMockRight  : mix df.width df.rightSB : kEFMidBarShrink (slabType === SLAB-ALL)
+		local xMockRight  : mix df.width df.rightSB : EFMidBarShrinkK df (slabType === SLAB-ALL)
 		local xMockMiddle : mix (xMockLeft - [if (slabType === SLAB-NONE) 0 SideJut]) xMockRight 0.5
 		local xLeft  : xMockLeft  + (df.middle - xMockMiddle)
 		local xRight : xMockRight + (df.middle - xMockMiddle)
 
-		include : LeaningAnchor.Above.VBar.l xLeft sw
-		include : LeaningAnchor.Below.VBar.l xLeft sw
-		include : tagged 'strokeL' : VBar.l xLeft 0 top sw
-		include : tagged 'crossbar' : HBar.m (xLeft - O) xRight [mix 0 top HBarPos] sw
+		include : LeaningAnchor.Above.VBar.l xLeft stroke
+		include : LeaningAnchor.Below.VBar.l xLeft stroke
+		include : tagged 'strokeL' : VBar.l xLeft 0 top stroke
+		include : tagged 'crossbar' : HBar.m (xLeft - O) xRight [mix 0 top HBarPos] stroke
 
-		local sf : SerifFrame top 0 xLeft xRight (swRef -- sw)
+		local sf : SerifFrame top 0 xLeft xRight (swRef -- stroke)
 		include : match slabType
 			[Just SLAB-TL]         : begin          sf.lt.outer
 			[Just SLAB-TL-BR]      : begin          sf.lt.outer
 			[Just SLAB-TAILED]     : composite-proc sf.lt.fullSide sf.lb.fullSide
 			[Just SLAB-ALL]        : composite-proc sf.lt.fullSide sf.lb.fullSide : tagged 'serifMR' : new-glyph : glyph-proc
-				local { jutTop jutBot jutMid } : EFVJutLength top HBarPos sw
-				local swVJut : VJutStroke * (sw / Stroke)
+				local { jutTop jutBot jutMid } : EFVJutLength top 0 HBarPos stroke
+				local swVJut : VJutStroke * (stroke / Stroke)
 				include : VSerif.mr xRight [mix 0 top HBarPos] jutMid swVJut
 			__                     : glyph-proc
 
-	define [RightHalfHShape] : with-params [df top slabType [fTailed false] [sw df.mvs]] : glyph-proc
-		local xMockLeft   : mix 0 df.leftSB : kEFMidBarShrink (slabType === SLAB-ALL)
+	define flex-params [RightHalfHShape] : glyph-proc
+		local-parameter : df
+		local-parameter : top
+		local-parameter : slabType
+		local-parameter : fTailed  -- false
+		local-parameter : stroke   -- df.mvs
+
+		local xMockLeft   : mix 0 df.leftSB : EFMidBarShrinkK df (slabType === SLAB-ALL)
 		local xMockRight  : mix df.width df.rightSB 1.5
 		local xMockMiddle : mix xMockLeft (xMockRight + [if (slabType === SLAB-NONE) 0 SideJut]) 0.5
 		local xLeft  : xMockLeft  + (df.middle - xMockMiddle)
 		local xRight : xMockRight + (df.middle - xMockMiddle)
 
-		include : LeaningAnchor.Above.VBar.r xRight sw
-		include : LeaningAnchor.Below.VBar.r xRight sw
+		include : LeaningAnchor.Above.VBar.r xRight stroke
+		include : LeaningAnchor.Below.VBar.r xRight stroke
 		include : tagged 'strokeR' : if fTailed
-			RightwardTailedBar xRight 0 top sw
-			VBar.r             xRight 0 top sw
-		include : tagged 'crossbar' : HBar.m xLeft (xRight + O) [mix 0 top HBarPos] sw
+			RightwardTailedBar xRight 0 top stroke
+			VBar.r             xRight 0 top stroke
+		include : tagged 'crossbar' : HBar.m xLeft (xRight + O) [mix 0 top HBarPos] stroke
 
-		local sf : SerifFrame top 0 xLeft xRight (swRef -- sw)
+		local sf : SerifFrame top 0 xLeft xRight (swRef -- stroke)
 		include : match slabType
 			[Just SLAB-TL-BR]      : begin                         sf.rb.outer
 			[Just SLAB-TAILED]     : begin          sf.rt.fullSide
 			[Just SLAB-ALL]        : composite-proc sf.rt.fullSide sf.rb.fullSide : tagged 'serifML' : new-glyph : glyph-proc
-				local { jutTop jutBot jutMid } : EFVJutLength top HBarPos sw
-				local swVJut : VJutStroke * (sw / Stroke)
+				local { jutTop jutBot jutMid } : EFVJutLength top 0 HBarPos stroke
+				local swVJut : VJutStroke * (stroke / Stroke)
 				include : VSerif.ml xLeft [mix 0 top HBarPos] jutMid swVJut
 			__                     : glyph-proc
 
-	define [EnGheShape] : with-params [df top slabType [fTailed false] [sw [Math.min df.mvs : AdviceStroke 2.75 df.adws]] [serifTR SLAB]] : glyph-proc
-		local subDf : DivFrame (0.75 * df.adws) 2
-		local xTopBarRightEnd : mix df.width df.rightSB : if serifTR 0.25 0.375
+	define flex-params [EnGheShape] : glyph-proc
+		local-parameter : df
+		local-parameter : top
+		local-parameter : slabType
+		local-parameter : fTailed  -- false
+		local-parameter : stroke   -- [Math.min df.mvs [AdviceStroke 2.75 df.adws] [AdviceStroke 2 (0.75 * df.adws)]]
+		local-parameter : serifTR  -- SLAB
 
-		include : HShape subDf top slabType fTailed sw
-		include : HBar.t ((subDf.rightSB - [HSwToV sw]) - O) xTopBarRightEnd top sw
+		local subDf : DivFrame (0.75 * df.adws) 2
+		include : HShape subDf top slabType fTailed stroke
+
+		local xTopBarRightEnd : mix df.width df.rightSB : if serifTR 0.25 0.375
+		include : HBar.t ((subDf.rightSB - [HSwToV stroke]) - O) xTopBarRightEnd top stroke
 
 		if serifTR : begin
-			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (xTopBarRightEnd - subDf.rightSB)
+			local swVJut : Math.min (VJutStroke * (stroke / Stroke)) : VSwToH : 0.625 * (xTopBarRightEnd - subDf.rightSB)
 			include : tagged 'serifTR' : VSerif.dr xTopBarRightEnd top VJut swVJut
 
-	define [HwairShape] : with-params [df top slabType [fTailed false] [sw df.mvs] [serifTR SLAB] [yend XH]] : glyph-proc
-		local subDf : df.slice 3 2
+	define flex-params [HwairShape] : glyph-proc
+		local-parameter : df
+		local-parameter : top
+		local-parameter : slabType
+		local-parameter : fTailed  -- false
+		local-parameter : stroke   -- df.mvs
+		local-parameter : serifTR  -- SLAB
+		local-parameter : yend     -- XH
 
-		include : HShape subDf top slabType fTailed sw
+		local subDf : df.slice 3 2
+		include : HShape subDf top slabType fTailed stroke
 		eject-contour 'strokeR'
 		eject-contour 'serifRB'
 
 		include : UpwardHookShape
-			left   -- (subDf.rightSB - [HSwToV sw])
+			left   -- (subDf.rightSB - [HSwToV stroke])
 			right  -- df.rightSB
 			ybegin -- top
 			yend   -- yend
 			ada    -- (ArchDepthA * (2 / df.hPack) * df.adws)
 			adb    -- (ArchDepthB * (2 / df.hPack) * df.adws)
-			sw     -- sw
+			sw     -- stroke
 
 		if serifTR : begin
-			local sf2 : [SerifFrame.fromDf df yend 0 (swRef -- sw)].slice 1 2
+			local sf2 : [SerifFrame.fromDf df yend 0 (swRef -- stroke)].slice 1 2
 			include sf2.rt.full
 
 	define [OverlayStrokeShape top slabType] : begin
