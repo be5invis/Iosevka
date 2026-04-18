@@ -130,7 +130,7 @@ glyph-block Letter-Latin-Upper-B : begin
 
 	### Cyrillic Lower Ve
 
-	define [RoundedCyrVeArcsT sink] : function [] : with-params [top stroke offset barPos topArcShift topArcInnerShift] : glyph-proc
+	define [RoundedTopCyrVeArcsT sink] : function [] : with-params [top stroke offset barPos topArcShift topArcInnerShift rise] : glyph-proc
 		local bowl : mix stroke top barPos
 		local mockBowlDepth : BowlXDepth top (bowl - stroke) SB RightSB stroke
 		local curveLeftBot : [mix Width RightSB 1.5] - mockBowlDepth + topArcInnerShift
@@ -151,8 +151,8 @@ glyph-block Letter-Latin-Upper-B : begin
 			archv
 			g4   (xTopArcRight - offset) [YSmoothMidR top (bowl - stroke) adaTop adbTop] [widths.lhs stroke]
 			Arch.lhs (top - offset) (sw -- stroke)
-			flat (SB + offset) [Math.max (0 + TINY) (top - adaTop)] [widths.lhs.heading stroke Downward]
-			curl (SB + offset) 0 [heading Downward]
+			flat (SB + offset) [Math.max (0 + rise + offset + TINY) (top - adaTop)] [widths.lhs.heading stroke Downward]
+			curl (SB + offset) (0 + rise + offset) [heading Downward]
 
 		include : sink
 			widths.rhs fine
@@ -160,66 +160,94 @@ glyph-block Letter-Latin-Upper-B : begin
 			curl [Arch.adjust-x.top curveLeftBot (sw -- stroke)] (bowl - stroke + fine - offset)
 			archv
 			g4   (xBotArcRight - offset) [YSmoothMidR bowl 0 adaBot adbBot] [widths.rhs stroke]
-			arcvh
-			flat [Arch.adjust-x.bot curveLeftBot (sw -- stroke)] (0 + offset)
-			curl (SB - O) (0 + offset) [heading Leftward]
+			if rise
+				list
+					Arch.rhs (0 + offset) (sw -- stroke) (blendPost -- {})
+					g4   (SB + offset) (0 + rise + offset) [widths.rhs stroke]
+				list
+					arcvh
+					flat [Arch.adjust-x.bot curveLeftBot (sw -- stroke)] (0 + offset)
+					curl (SB - O) (0 + offset) [heading Leftward]
 
 		return : object bowl
 
-	define flex-params [RoundedCyrVeShape] : glyph-proc
+	define flex-params [RoundedTopCyrVeShape] : glyph-proc
 		local-parameter : top
 		local-parameter : stroke           -- [AdviceStroke2 2 3 (top - 0)]
 		local-parameter : barPos           -- BBarPos
 		local-parameter : topArcShift      -- 0
 		local-parameter : topArcInnerShift -- 0
+		local-parameter : rise             -- 0
 		local-parameter : serifTop         -- false
 		local-parameter : serifBot         -- false
 
-		local dims : include : [RoundedCyrVeArcsT dispiro] top
+		local dims : include : [RoundedTopCyrVeArcsT dispiro] top
 			offset           -- 0
 			stroke           -- stroke
 			barPos           -- barPos
 			topArcShift      -- topArcShift
 			topArcInnerShift -- topArcInnerShift
+			rise             -- rise
 
 		set-base-anchor 'strike' Middle (dims.bowl - 0.5 * stroke)
 
 		local sf : SerifFrame.fromDf [DivFrame 1] top 0
 		if serifBot : include sf.lb.outer
 
-	define flex-params [RoundedCyrVeShapeMask] : glyph-proc
+	define flex-params [RoundedTopCyrVeShapeMask] : glyph-proc
 		local-parameter : top
 		local-parameter : stroke           -- [AdviceStroke2 2 3 (top - 0)]
 		local-parameter : barPos           -- BBarPos
 		local-parameter : topArcShift      -- 0
 		local-parameter : topArcInnerShift -- 0
+		local-parameter : rise             -- 0
 
-		include : [RoundedCyrVeArcsT spiro-outline] top
+		include : [RoundedTopCyrVeArcsT spiro-outline] top
 			offset           -- 1
 			stroke           -- stroke
 			barPos           -- barPos
 			topArcShift      -- topArcShift
 			topArcInnerShift -- topArcInnerShift
+			rise             -- rise
 
-	define [RoundedShape top sw st sb] : RoundedCyrVeShape top
+	define [RoundedTopShape top sw st sb] : RoundedTopCyrVeShape top
 		stroke   -- sw
 		barPos   -- BBarPos
 		serifTop -- st
 		serifBot -- sb
-	define [RoundedShapeInterrupted top sw st sb] : difference
-		RoundedShape             top sw st sb
+	define [RoundedTopShapeInterrupted top sw st sb] : difference
+		RoundedTopShape          top sw st sb
 		[InterruptShape BBarPos] top sw st sb
-	define [RoundedMask top sw] : RoundedCyrVeShapeMask top
+	define [RoundedTopMask top sw] : RoundedTopCyrVeShapeMask top
 		stroke   -- sw
 		barPos   -- BBarPos
+
+	define [RoundedTopShapeBGR top sw st sb] : RoundedTopCyrVeShape top
+		stroke   -- sw
+		barPos   -- BBarPos
+		rise     -- DToothlessRise
+		serifTop -- st
+		serifBot -- sb
+	define [RoundedTopShapeBGRInterrupted top sw st sb] : difference
+		RoundedTopShapeBGR       top sw st sb
+		[InterruptShape BBarPos] top sw st sb
+	define [RoundedTopBGRMask top sw] : RoundedTopCyrVeShapeMask top
+		stroke   -- sw
+		barPos   -- BBarPos
+		rise     -- DToothlessRise
 
 	create-glyph : glyph-proc
 		include : MarkSet.e
 		local stroke : AdviceStroke2 2 3 (XH - 0)
-		create-forked-glyph "smcpB.roundedTopSerifless"                          : RoundedShape            XH stroke false false
-		create-forked-glyph "smcpB.roundedTopUnilateralBottomSerifed"            : RoundedShape            XH stroke false true
-		create-forked-glyph "smcpB.roundedTopInterruptedSerifless"               : RoundedShapeInterrupted XH stroke false false
-		create-forked-glyph "smcpB.roundedTopInterruptedUnilateralBottomSerifed" : RoundedShapeInterrupted XH stroke false true
+		create-forked-glyph "smcpB.roundedTopSerifless"                          : RoundedTopShape            XH stroke false false
+		create-forked-glyph "smcpB.roundedTopUnilateralBottomSerifed"            : RoundedTopShape            XH stroke false true
+		create-forked-glyph "smcpB.roundedTopInterruptedSerifless"               : RoundedTopShapeInterrupted XH stroke false false
+		create-forked-glyph "smcpB.roundedTopInterruptedUnilateralBottomSerifed" : RoundedTopShapeInterrupted XH stroke false true
+	create-glyph : glyph-proc
+		include : MarkSet.b
+		local stroke : AdviceStroke2 2 3 (Ascender - 0)
+		create-forked-glyph "smcpB.roundedTopTall"            : RoundedTopShapeBGR            Ascender stroke false false
+		create-forked-glyph "smcpB.roundedTopInterruptedTall" : RoundedTopShapeBGRInterrupted Ascender stroke false false
 
 	define [CursiveCyrVeArcsT sink] : function [] : with-params [top stroke offset barPos topArcShift topArcInnerShift] : glyph-proc
 		local bowl : mix stroke top barPos
