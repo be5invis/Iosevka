@@ -3,7 +3,7 @@ import { ArrayUtil } from "@iosevka/util";
 
 import ttfaRanges from "../generated/ttfa-ranges.mjs";
 
-export async function generateTtfaControls(gsOrig, gsTtf) {
+export function generateTtfaControls(gsOrig, gsTtf) {
 	const ttfaControls = [`# Machine generated. Do not modify.`];
 
 	const alignments = [];
