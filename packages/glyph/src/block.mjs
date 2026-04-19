@@ -34,6 +34,9 @@ export class GlyphBuildExecutor {
 		this.glyphBlockStore[id] = block;
 		this.pendingGlyphBlocks.push(block);
 	}
+	release() {
+		this.dependencyManager.release();
+	}
 }
 
 export class RecursiveBuildFilter {
@@ -161,6 +164,9 @@ export class DependencyManager {
 			}
 			if (!found) break;
 		}
+	}
+	release() {
+		this.blockToGlyph.clear();
 	}
 }
 

@@ -1,7 +1,9 @@
+import * as Format from "@iosevka/util/formatter";
+
 import { Point } from "./point.mjs";
 
 /// A generic buffer writer helper class
-class BufferWriter {
+export class BufferWriter {
 	constructor() {
 		this.buffer = Buffer.alloc(0x1000);
 		this.capacity = 0x1000;
@@ -40,7 +42,7 @@ class BufferWriter {
 }
 
 /// A generic buffer reader helper class
-class BufferReader {
+export class BufferReader {
 	constructor(buffer) {
 		this.buffer = buffer;
 		this.cursor = 0;
@@ -61,76 +63,42 @@ class BufferReader {
 	}
 }
 
-/// Encode a contour set to a buffer
-/// Encoding schema:
-///  - 4 bytes: number of contours
-///  - 4 bytes: total number of points
-///  - 4 bytes per contour: number of points in each contour
-///  - N bytes: point types, each point type is a byte
-///  - 16 bytes per point: x and y coordinates, each coordinate is a float64
-export function encode(cs) {
-	let totalPoints = 0;
-	const contourPointCounts = [];
-	for (const contour of cs) {
-		totalPoints += contour.length;
-		contourPointCounts.push(contour.length);
-	}
+export const IntermediateResultsCodec = {
+	encodeKey(geom) {
+		const hasher = new Format.Hasher();
+		geom.hash(hasher);
+		return `i/${hasher.digest()}`;
+	},
 
-	const writer = new BufferWriter();
-
-	// Write the header
-	writer.writeUInt32(cs.length);
-	writer.writeUInt32(totalPoints);
-	for (const count of contourPointCounts) writer.writeUInt32(count);
-
-	// Write the points' type
-	for (const contour of cs) {
-		for (const z of contour) {
-			writer.writeUInt8(z.type);
+	encode(cs) {
+		const writer = new BufferWriter();
+		writer.writeUInt32(cs.length);
+		for (const contour of cs) {
+			writer.writeUInt32(contour.length);
+			for (const z of contour) {
+				writer.writeUInt8(z.type);
+				writer.writeFloat64(z.x);
+				writer.writeFloat64(z.y);
+			}
 		}
-	}
+		return writer.getResult();
+	},
 
-	// Write the points' coordinates
-	for (const contour of cs) {
-		for (const z of contour) {
-			writer.writeFloat64(z.x);
-			writer.writeFloat64(z.y);
+	decode(buffer) {
+		const reader = new BufferReader(buffer);
+		const numContours = reader.nextUInt32();
+		const cs = [];
+		for (let i = 0; i < numContours; i++) {
+			const contourLength = reader.nextUInt32();
+			const contour = [];
+			for (let j = 0; j < contourLength; j++) {
+				const type = reader.nextUInt8();
+				const x = reader.nextFloat64();
+				const y = reader.nextFloat64();
+				contour.push(Point.fromXY(type, x, y));
+			}
+			cs.push(contour);
 		}
-	}
-
-	return writer.getResult();
-}
-
-/// Decode a contour set from a buffer
-export function decode(buf) {
-	const reader = new BufferReader(buf);
-	const numContours = reader.nextUInt32();
-	const _numPoints = reader.nextUInt32();
-	const contourPointCounts = [];
-	for (let i = 0; i < numContours; i++) {
-		contourPointCounts.push(reader.nextUInt32());
-	}
-
-	// Read the points' type, set up the contour set
-	const cs = [];
-	for (let i = 0; i < numContours; i++) {
-		const contour = [];
-		for (let j = 0; j < contourPointCounts[i]; j++) {
-			const type = reader.nextUInt8();
-			contour.push(Point.fromXY(type, 0, 0));
-		}
-		cs.push(contour);
-	}
-
-	// Read the points' coordinates, set the coordinates properly
-	for (let i = 0; i < numContours; i++) {
-		const contour = cs[i];
-		for (let j = 0; j < contourPointCounts[i]; j++) {
-			const z = contour[j];
-			z.x = reader.nextFloat64();
-			z.y = reader.nextFloat64();
-		}
-	}
-
-	return cs;
-}
+		return cs;
+	},
+};

@@ -1,9 +1,11 @@
 import { CliProc } from "ot-builder";
 
+import { convertGlyphGeometryToProxy } from "./geometry.mjs";
 import { convertGlyphs } from "./glyphs.mjs";
 import { convertGdef, convertGpos, convertGsub } from "./layout.mjs";
 
-export function convertOtd(baseFont, otl, gs) {
+export function convertOtd(cache, para, baseFont, otl, gs) {
+	convertGlyphGeometryToProxy(cache, para, gs);
 	const { glyphs, cmap } = convertGlyphs(gs);
 	const gsub = convertGsub(otl.GSUB, glyphs);
 	const gpos = convertGpos(otl.GPOS, glyphs);

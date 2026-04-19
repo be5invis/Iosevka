@@ -1,9 +1,9 @@
 export class GlyphStore {
 	constructor() {
 		this.nameForward = new Map();
-		this.nameBackward = new Map();
+		this.nameBackward = new WeakMap();
 		this.encodingForward = new Map();
-		this.encodingBackward = new Map();
+		this.encodingBackward = new WeakMap();
 	}
 	get size() {
 		return this.nameForward.size;
@@ -62,20 +62,7 @@ export class GlyphStore {
 	queryNameOf(g) {
 		return this.nameBackward.get(g);
 	}
-	deleteGlyph(g) {
-		const name = this.nameBackward.get(g);
-		this.nameBackward.delete(g);
-		if (name) this.nameForward.delete(g);
-		this.deleteUnicodeAssignmentsOf(g);
-	}
-	deleteGlyphByName(name) {
-		const g = this.nameForward.get(name);
-		this.nameForward.delete(g);
-		if (g) {
-			this.nameBackward.delete(g);
-			this.deleteUnicodeAssignmentsOf(g);
-		}
-	}
+
 	encodeGlyph(u, g) {
 		this.encodingForward.set(u, g);
 		let s = this.encodingBackward.get(g);
@@ -117,10 +104,11 @@ export class GlyphStore {
 		return [...this.queryUnicodeOfName(name)];
 	}
 	deleteUnicodeAssignmentsOf(g) {
-		const s = this.nameBackward.get(g);
+		const s = this.encodingBackward.get(g);
 		if (s) for (const u of s) this.encodingForward.delete(u);
 		this.encodingBackward.delete(g);
 	}
+
 	filterByName(nameSet) {
 		const gs1 = new GlyphStore();
 		for (const [name, g] of this.nameForward) {
