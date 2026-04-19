@@ -2,7 +2,6 @@ import fs from "node:fs";
 import zlib from "node:zlib";
 
 import * as Caching from "@iosevka/geometry-cache";
-import { createGrDisplaySheet } from "@iosevka/glyph/relation";
 import { encode } from "@msgpack/msgpack";
 
 import { buildFont } from "./build-font/index.mjs";
@@ -20,10 +19,10 @@ async function main(argv) {
 		? await Caching.load(argv.cache.input, argv.menu.version, argv.cache.freshAgeKey)
 		: null;
 	// Build font
-	const { font, glyphStore, cacheUpdated, ttfaControls } = await buildFont(para, cache);
+	const { font, charMap, cacheUpdated, ttfaControls } = await buildFont(para, cache);
 
 	// Save charmap
-	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
+	if (argv.oCharMap) await fs.promises.writeFile(argv.oCharMap, zlib.gzipSync(encode(charMap)));
 	// Save ttfaControls
 	if (argv.oTtfaControls) await fs.promises.writeFile(argv.oTtfaControls, ttfaControls);
 	// Save TTF
@@ -34,17 +33,4 @@ async function main(argv) {
 	}
 
 	return { cacheUpdated };
-}
-
-// Save character map file
-async function saveCharMap(argv, glyphStore) {
-	const charMap = [];
-	for (const [gn] of glyphStore.namedEntries()) {
-		charMap.push([
-			gn,
-			Array.from(glyphStore.queryUnicodeOfName(gn) || []),
-			...createGrDisplaySheet(glyphStore, gn),
-		]);
-	}
-	await fs.promises.writeFile(argv.oCharMap, zlib.gzipSync(encode(charMap)));
 }

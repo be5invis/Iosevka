@@ -1,3 +1,5 @@
+import * as Timers from "node:timers/promises";
+
 export function mix(a, b, p) {
 	return a + (b - a) * p;
 }
@@ -163,3 +165,9 @@ export const ArrayUtil = {
 		return ranges;
 	},
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+export async function TaskYield() {
+	await Timers.setTimeout(16);
+}

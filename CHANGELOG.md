@@ -1,5 +1,14 @@
 ## Modifications since last major version
 
+### 34.4.0
+
+* Add `above-baseline` variants for Greek Lower Chi (`χ`).
+* Add `tall` variants for Cyrillic Lower Ze (`з`).
+* Add `cursive-interrupted` and `cursive-interrupted-tall` variants for Cyrillic Lower Ve (`в`).
+  - Optimize glyphs for original `cursive` and `cursive-tall` variants.
+* Add `rounded-top` variants for Cyrillic Lower Ve (`в`).
+
+
 ### 34.3.0
 
 * Add narrow bent hook variants for `f`, `j`, `r`, and `t` (#3132).

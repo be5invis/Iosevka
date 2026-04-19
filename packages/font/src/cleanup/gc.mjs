@@ -27,6 +27,7 @@ export function gcFont(glyphStore, subsetFilter, otl) {
 	} while (sizeAfter < sizeBefore);
 
 	analyzeReferenceGraph(glyphStore, markedGlyphNames);
+
 	sweepOtlTable(otl.GSUB, aGsub);
 	sweepOtlTable(otl.GPOS, aGpos);
 	return sweepGlyphs(glyphStore, markedGlyphNames);
