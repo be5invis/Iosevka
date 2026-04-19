@@ -30,11 +30,11 @@ export async function buildFont(para, cache) {
 
 	// Regulate (like geometry conversion)
 	const sf = await createSubsetFilter(para.subset, para.excludedCharRanges);
-	glyphStore = cleanupGlyphStore(cache, para, glyphStore, sf, otl);
+	glyphStore = cleanupGlyphStore(glyphStore, sf, otl);
 	await TaskYield();
 
 	// Convert to TTF
-	const font = convertOtd(baseFont, otl, glyphStore);
+	const font = convertOtd(cache, para, baseFont, otl, glyphStore);
 	await TaskYield();
 	// Build compatibility ligatures
 	if (para.compatibilityLigatures) await buildCompatLigatures(para, font);

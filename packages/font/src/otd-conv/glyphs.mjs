@@ -1,9 +1,12 @@
-import * as Geom from "@iosevka/geometry";
-import { Point } from "@iosevka/geometry/point";
 import { Glyph } from "@iosevka/glyph";
 import * as Gr from "@iosevka/glyph/relation";
 import { Ot } from "ot-builder";
 
+import {
+	TrueTypeContourSetProxy,
+	TrueTypeGeometryProxy,
+	TrueTypeReferenceProxy,
+} from "./geometry.mjs";
 import * as GlyphName from "./glyph-name.mjs";
 
 export function convertGlyphs(gsOrig) {
@@ -77,13 +80,12 @@ class MappedGlyphStore {
 		g.horizontal = { start: 0, end: source.advanceWidth };
 
 		// Fill Geometry
-		if (source.geometry.measureComplexity() & Geom.CPLX_NON_EMPTY) {
-			const rs = source.geometry.toReferences();
-			if (rs) {
-				this.fillReferences(g, rs);
-			} else {
-				this.fillContours(g, source.geometry.toContours());
-			}
+		if (source.geometry instanceof TrueTypeContourSetProxy) {
+			this.fillContours(g, source.geometry);
+		} else if (source.geometry instanceof TrueTypeReferenceProxy) {
+			this.fillReferences(g, source.geometry);
+		} else if (!(source.geometry instanceof TrueTypeGeometryProxy)) {
+			throw new TypeError("Unreachable: geometry is not a proxy");
 		}
 	}
 	fillOtGlyphNames() {
@@ -149,9 +151,9 @@ class MappedGlyphStore {
 			}
 		}
 	}
-	fillReferences(g, rs) {
+	fillReferences(g, proxy) {
 		const gl = new Ot.Glyph.GeometryList();
-		for (const ref of rs) {
+		for (const ref of proxy.refs) {
 			const target = this.queryBySourceGlyph(ref.glyph);
 			if (!target) throw new Error("Unreachable: glyph not found");
 			const tfm = Ot.Glyph.Transform2X3.Translate(ref.x, ref.y);
@@ -159,24 +161,8 @@ class MappedGlyphStore {
 		}
 		g.geometry = gl;
 	}
-	fillContours(g, contours) {
-		const cs = new Ot.Glyph.ContourSet();
-		for (const c of contours) {
-			const c1 = [];
-			for (const z of c) {
-				c1.push(
-					Ot.Glyph.Point.create(
-						z.x,
-						z.y,
-						z.type === Point.Type.Quadratic
-							? Ot.Glyph.PointType.Quad
-							: Ot.Glyph.PointType.Corner,
-					),
-				);
-			}
-			cs.contours.push(c1);
-		}
-		g.geometry = cs;
+	fillContours(g, proxy) {
+		g.geometry = proxy.contourSet;
 	}
 }
 

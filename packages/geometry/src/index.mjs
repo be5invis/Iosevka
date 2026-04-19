@@ -2,6 +2,7 @@ import * as Format from "@iosevka/util/formatter";
 import * as TypoGeom from "typo-geom";
 
 import * as CurveUtil from "./curve-util.mjs";
+import { IntermediateResultsCodec } from "./encoding.mjs";
 import { Point } from "./point.mjs";
 import { QuadifySink } from "./quadify.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
@@ -81,23 +82,23 @@ export class ContourSetGeometry extends GeometryBase {
 // Enabling geometry cache over the deep nodes of the geometry tree
 export class CachedGeometry extends GeometryBase {
 	toContours(ctx) {
-		let ck = null;
+		let cacheKey = null;
 		if (ctx?.cache) {
-			ck = hashGeometry(this);
-			const gf = ctx.cache.getGF(ck);
-			if (gf) {
-				ctx.cache.refreshGF(ck);
-				return gf;
+			cacheKey = IntermediateResultsCodec.encodeKey(this);
+			const existing = ctx.cache.getGF(cacheKey, IntermediateResultsCodec);
+			if (existing) {
+				ctx.cache.refreshGF(cacheKey);
+				return existing;
 			}
 		}
 
-		const outline = this.toContoursImpl(ctx);
-		if (ck && ctx?.cache) ctx.cache.saveGF(ck, outline);
-
-		return outline;
+		const calculated = this.toContoursImpl(ctx);
+		if (cacheKey && ctx?.cache)
+			ctx.cache.saveGF(cacheKey, IntermediateResultsCodec, calculated);
+		return calculated;
 	}
 
-	toContoursImpl() {
+	toContoursImpl(_ctx) {
 		throw new Error("Unimplemented");
 	}
 }
@@ -121,7 +122,7 @@ export class SpiroGeometry extends SimpleGeometry {
 		this.m_closed = closed;
 		this.m_gizmo = gizmo;
 	}
-	toContoursImpl() {
+	toContoursImpl(_ctx) {
 		return spiroToOutlineWithSimplification(this.m_knots, this.m_closed, this.m_gizmo);
 	}
 
@@ -153,7 +154,7 @@ export class SpiroPenGeometry extends SimpleGeometry {
 		this.m_knots = knots;
 	}
 
-	toContoursImpl() {
+	toContoursImpl(_ctx) {
 		const expander = new PenSpiroExpander(
 			this.m_gizmo,
 			this.m_penProfile,
@@ -176,9 +177,9 @@ export class SpiroPenGeometry extends SimpleGeometry {
 		}
 
 		const arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
-		const ctx = new CurveUtil.BezToContoursSink();
-		TypoGeom.ShapeConv.transferBezArcShape(arcs, ctx);
-		return ctx.contours;
+		const sink = new CurveUtil.BezToContoursSink();
+		TypoGeom.ShapeConv.transferBezArcShape(arcs, sink);
+		return sink.contours;
 	}
 
 	measureComplexity() {
@@ -220,7 +221,7 @@ export class DiSpiroGeometry extends SimpleGeometry {
 		this.m_contrast = contrast;
 	}
 
-	toContoursImpl() {
+	toContoursImpl(ctx) {
 		const expandResult = this.expand();
 		const lhs = [...expandResult.lhsUntransformed];
 		const rhs = [...expandResult.rhsUntransformed];
@@ -230,14 +231,14 @@ export class DiSpiroGeometry extends SimpleGeometry {
 
 		if (this.m_closed) {
 			return [
-				...new SpiroGeometry(this.m_gizmo, true, lhs).toContoursImpl(),
-				...new SpiroGeometry(this.m_gizmo, true, rhs).toContoursImpl(),
+				...new SpiroGeometry(this.m_gizmo, true, lhs).toContoursImpl(ctx),
+				...new SpiroGeometry(this.m_gizmo, true, rhs).toContoursImpl(ctx),
 			];
 		} else {
 			lhs[0].type = lhs[lhs.length - 1].type = "corner";
 			rhs[0].type = rhs[rhs.length - 1].type = "corner";
 			const allKnots = lhs.concat(rhs);
-			return new SpiroGeometry(this.m_gizmo, true, allKnots).toContoursImpl();
+			return new SpiroGeometry(this.m_gizmo, true, allKnots).toContoursImpl(ctx);
 		}
 	}
 
@@ -510,19 +511,19 @@ export class BooleanGeometry extends CachedGeometry {
 		return new BooleanGeometry(this.m_operator, this.m_operands.map(f));
 	}
 
-	toContoursImpl() {
+	toContoursImpl(ctx) {
 		if (this.m_operands.length === 0) return [];
 
 		const stack = [];
-		this.asOpStackImpl(stack);
+		this.asOpStackImpl(ctx, stack);
 		const arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
-		const ctx = new CurveUtil.BezToContoursSink();
-		TypoGeom.ShapeConv.transferBezArcShape(arcs, ctx);
-		return ctx.contours;
+		const sink = new CurveUtil.BezToContoursSink();
+		TypoGeom.ShapeConv.transferBezArcShape(arcs, sink);
+		return sink.contours;
 	}
-	asOpStackImpl(sink) {
+	asOpStackImpl(ctx, stack) {
 		if (this.m_operands.length === 0) {
-			sink.push({
+			stack.push({
 				type: "operand",
 				fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
 				shape: [],
@@ -533,16 +534,16 @@ export class BooleanGeometry extends CachedGeometry {
 		for (const [i, operand] of this.m_operands.entries()) {
 			// Push operand
 			if (operand instanceof BooleanGeometry) {
-				operand.asOpStackImpl(sink);
+				operand.asOpStackImpl(ctx, stack);
 			} else {
-				sink.push({
+				stack.push({
 					type: "operand",
 					fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
-					shape: CurveUtil.convertShapeToArcs(operand.toContours()),
+					shape: CurveUtil.convertShapeToArcs(operand.toContours(ctx)),
 				});
 			}
 			// Push operator if i > 0
-			if (i > 0) sink.push({ type: "operator", operator: this.m_operator });
+			if (i > 0) stack.push({ type: "operator", operator: this.m_operator });
 		}
 	}
 
@@ -717,12 +718,13 @@ export class RemoveHolesGeometry extends CachedGeometry {
 }
 
 // This special geometry type is used in the finalization phase to create TTF contours.
-export class SimplifyGeometry extends CachedGeometry {
+export class SimplifyGeometry extends GeometryBase {
 	constructor(g) {
 		super();
 		this.m_geom = g;
 	}
-	toContoursImpl(ctx) {
+	// This will be cached by the caller, so we can afford to be a bit expensive here
+	toContours(ctx) {
 		// Produce simplified arcs
 		let arcs = CurveUtil.convertShapeToArcs(this.m_geom.toContours(ctx));
 		if (this.m_geom.measureComplexity() & CPLX_NON_SIMPLE) {
