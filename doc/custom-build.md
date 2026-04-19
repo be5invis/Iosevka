@@ -2899,7 +2899,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Phi (<code>φ</code>) with straight shape, and a more shorter neck</td></tr>
     </table></details>
   - Styles for `χ` (Greek lower Chi)
-    <details><summary>13 variants</summary>
+    <details><summary>26 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-straight-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-straight-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'straight-serifless'</code>, <code>cv84 = 1</code></td></tr>
     <tr><td>Greek lower Chi (<code>χ</code>) with straight shape; without serifs (default for Sans)</td></tr>
@@ -2927,6 +2927,32 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Chi (<code>χ</code>) with Semi-chancery shape with curly counter-leg, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-chancery.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-chancery.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'chancery'</code>, <code>cv84 = 13</code></td></tr>
     <tr><td>Greek lower Chi (<code>χ</code>) with Chancery shape</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-straight-above-baseline-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-straight-above-baseline-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'straight-above-baseline-serifless'</code>, <code>cv84 = 14</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with straight shape, and short body that sits entirely above the baseline; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-straight-above-baseline-unilateral-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-straight-above-baseline-unilateral-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'straight-above-baseline-unilateral-motion-serifed'</code>, <code>cv84 = 15</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with straight shape, short body that sits entirely above the baseline, and motion serifs at top-left</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-straight-above-baseline-bilateral-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-straight-above-baseline-bilateral-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'straight-above-baseline-bilateral-motion-serifed'</code>, <code>cv84 = 16</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with straight shape, short body that sits entirely above the baseline, and motion serifs at top-left and bottom-right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-straight-above-baseline-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-straight-above-baseline-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'straight-above-baseline-serifed'</code>, <code>cv84 = 17</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with straight shape, short body that sits entirely above the baseline, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-curly-above-baseline-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-curly-above-baseline-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'curly-above-baseline-serifless'</code>, <code>cv84 = 18</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with curly shape, and short body that sits entirely above the baseline; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-curly-above-baseline-unilateral-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-curly-above-baseline-unilateral-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'curly-above-baseline-unilateral-motion-serifed'</code>, <code>cv84 = 19</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with curly shape, short body that sits entirely above the baseline, and motion serifs at top-left</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-curly-above-baseline-bilateral-motion-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-curly-above-baseline-bilateral-motion-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'curly-above-baseline-bilateral-motion-serifed'</code>, <code>cv84 = 20</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with curly shape, short body that sits entirely above the baseline, and motion serifs at top-left and bottom-right</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-curly-above-baseline-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-curly-above-baseline-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'curly-above-baseline-serifed'</code>, <code>cv84 = 21</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with curly shape, short body that sits entirely above the baseline, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-semi-chancery-straight-above-baseline-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-semi-chancery-straight-above-baseline-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'semi-chancery-straight-above-baseline-serifless'</code>, <code>cv84 = 22</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with Semi-chancery shape with straight counter-leg, and short body that sits entirely above the baseline; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-semi-chancery-straight-above-baseline-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-semi-chancery-straight-above-baseline-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'semi-chancery-straight-above-baseline-serifed'</code>, <code>cv84 = 23</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with Semi-chancery shape with straight counter-leg, short body that sits entirely above the baseline, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-semi-chancery-curly-above-baseline-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-semi-chancery-curly-above-baseline-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'semi-chancery-curly-above-baseline-serifless'</code>, <code>cv84 = 24</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with Semi-chancery shape with curly counter-leg, and short body that sits entirely above the baseline; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-semi-chancery-curly-above-baseline-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-semi-chancery-curly-above-baseline-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'semi-chancery-curly-above-baseline-serifed'</code>, <code>cv84 = 25</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with Semi-chancery shape with curly counter-leg, short body that sits entirely above the baseline, and serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-chi-chancery-above-baseline.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-chi-chancery-above-baseline.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-chi = 'chancery-above-baseline'</code>, <code>cv84 = 26</code></td></tr>
+    <tr><td>Greek lower Chi (<code>χ</code>) with Chancery shape, and short body that sits entirely above the baseline</td></tr>
     </table></details>
   - Styles for `ψ` (Greek lower Psi)
     <details><summary>8 variants</summary>
@@ -3011,7 +3037,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower A (<code>а</code>) with single-storey body, earless (rounded top-right), and curly tail</td></tr>
     </table></details>
   - Styles for `в` (Cyrillic Lower Ve)
-    <details><summary>8 variants</summary>
+    <details><summary>14 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-standard-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-standard-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'standard-serifless'</code>, <code>cv88 = 1</code></td></tr>
     <tr><td>Cyrillic Lower Ve (<code>в</code>) with standard body; without serifs (default for Sans Upright)</td></tr>
@@ -3026,9 +3052,21 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-standard-interrupted-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-standard-interrupted-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'standard-interrupted-bilateral-serifed'</code>, <code>cv88 = 6</code></td></tr>
     <tr><td>Cyrillic Lower Ve (<code>в</code>) with standard body, interrupted middle bar, and serifs at both top and bottom</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-cursive.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-cursive.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'cursive'</code>, <code>cv88 = 7</code></td></tr>
-    <tr><td>Cyrillic Lower Ve (<code>в</code>) with cursive body (default for Italic)</td></tr>
+    <tr><td>Cyrillic Lower Ve (<code>в</code>) with cursive body</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-cursive-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-cursive-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'cursive-tall'</code>, <code>cv88 = 8</code></td></tr>
     <tr><td>Cyrillic Lower Ve (<code>в</code>) with cursive body, and tall height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-cursive-interrupted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-cursive-interrupted.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'cursive-interrupted'</code>, <code>cv88 = 9</code></td></tr>
+    <tr><td>Cyrillic Lower Ve (<code>в</code>) with cursive body, and interrupted middle bar (default for Italic)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-cursive-interrupted-tall.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-cursive-interrupted-tall.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'cursive-interrupted-tall'</code>, <code>cv88 = 10</code></td></tr>
+    <tr><td>Cyrillic Lower Ve (<code>в</code>) with cursive body, interrupted middle bar, and tall height</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-rounded-top-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-rounded-top-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'rounded-top-serifless'</code>, <code>cv88 = 11</code></td></tr>
+    <tr><td>Cyrillic Lower Ve (<code>в</code>) with rounded top; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-rounded-top-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-rounded-top-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'rounded-top-unilateral-bottom-serifed'</code>, <code>cv88 = 12</code></td></tr>
+    <tr><td>Cyrillic Lower Ve (<code>в</code>) with rounded top, and serifs at bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-rounded-top-interrupted-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-rounded-top-interrupted-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'rounded-top-interrupted-serifless'</code>, <code>cv88 = 13</code></td></tr>
+    <tr><td>Cyrillic Lower Ve (<code>в</code>) with rounded top, and interrupted middle bar; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ve-rounded-top-interrupted-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ve-rounded-top-interrupted-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ve = 'rounded-top-interrupted-unilateral-bottom-serifed'</code>, <code>cv88 = 14</code></td></tr>
+    <tr><td>Cyrillic Lower Ve (<code>в</code>) with rounded top, interrupted middle bar, and serifs at bottom</td></tr>
     </table></details>
   - Styles for `Ж` (Cyrillic Capital Zhe)
     <details><summary>5 variants</summary>
@@ -3062,7 +3100,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <details><summary>7 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'serifless'</code>, <code>cv91 = 1</code></td></tr>
-    <tr><td>Serifless Cyrillic Capital Ze (<code>З</code>) (default for Sans)</td></tr>
+    <tr><td>Cyrillic Capital Ze (<code>З</code>) without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'unilateral-serifed'</code>, <code>cv91 = 2</code></td></tr>
     <tr><td>Cyrillic Capital Ze (<code>З</code>) with serif at top (default for Slab)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-capital-ze-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-capital-ze = 'unilateral-bottom-serifed'</code>, <code>cv91 = 3</code></td></tr>
@@ -3077,10 +3115,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Capital Ze (<code>З</code>) with inward serif at both top and bottom</td></tr>
     </table></details>
   - Styles for `з` (Cyrillic Lower Ze)
-    <details><summary>7 variants</summary>
+    <details><summary>14 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'serifless'</code>, <code>cv92 = 1</code></td></tr>
-    <tr><td>Serifless Cyrillic Lower Ze (<code>з</code>) (default for Sans)</td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) without serifs (default for Sans)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'unilateral-serifed'</code>, <code>cv92 = 2</code></td></tr>
     <tr><td>Cyrillic Lower Ze (<code>з</code>) with serif at top (default for Slab Upright)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'unilateral-bottom-serifed'</code>, <code>cv92 = 3</code></td></tr>
@@ -3093,6 +3131,20 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Cyrillic Lower Ze (<code>з</code>) with inward serif at bottom (default for Slab Italic)</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'bilateral-inward-serifed'</code>, <code>cv92 = 7</code></td></tr>
     <tr><td>Cyrillic Lower Ze (<code>з</code>) with inward serif at both top and bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-tall-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-tall-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'tall-serifless'</code>, <code>cv92 = 8</code></td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) with tall body that descends below the baseline; without serifs</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-tall-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-tall-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'tall-unilateral-serifed'</code>, <code>cv92 = 9</code></td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) with tall body that descends below the baseline, and serif at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-tall-unilateral-bottom-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-tall-unilateral-bottom-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'tall-unilateral-bottom-serifed'</code>, <code>cv92 = 10</code></td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) with tall body that descends below the baseline, and serif at bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-tall-bilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-tall-bilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'tall-bilateral-serifed'</code>, <code>cv92 = 11</code></td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) with tall body that descends below the baseline, and serif at both top and bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-tall-unilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-tall-unilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'tall-unilateral-inward-serifed'</code>, <code>cv92 = 12</code></td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) with tall body that descends below the baseline, and inward serif at top</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-tall-unilateral-bottom-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-tall-unilateral-bottom-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'tall-unilateral-bottom-inward-serifed'</code>, <code>cv92 = 13</code></td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) with tall body that descends below the baseline, and inward serif at bottom</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-cyrl-ze-tall-bilateral-inward-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-ze-tall-bilateral-inward-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>cyrl-ze = 'tall-bilateral-inward-serifed'</code>, <code>cv92 = 14</code></td></tr>
+    <tr><td>Cyrillic Lower Ze (<code>з</code>) with tall body that descends below the baseline, and inward serif at both top and bottom</td></tr>
     </table></details>
   - Styles for `К` (Cyrillic Capital Ka)
     <details><summary>28 variants</summary>

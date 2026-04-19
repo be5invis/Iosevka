@@ -1,7 +1,9 @@
 import { buildGlyphs } from "@iosevka/font-glyphs";
 import { copyFontMetrics } from "@iosevka/font-glyphs/aesthetics";
 import { buildOtl } from "@iosevka/font-otl";
+import { createGrDisplaySheet } from "@iosevka/glyph/relation";
 import { createSubsetFilter } from "@iosevka/param";
+import { TaskYield } from "@iosevka/util";
 
 import { cleanupGlyphStore } from "../cleanup/index.mjs";
 import { CreateEmptyFont } from "../font-io/index.mjs";
@@ -15,29 +17,53 @@ import { validateFontConfigMono } from "../validate/metrics.mjs";
 export async function buildFont(para, cache) {
 	const baseFont = CreateEmptyFont(para);
 	assignFontNames(baseFont, para.naming, para.isQuasiProportional);
+	await TaskYield();
 
 	// Build glyphs
-	const gs = buildGlyphs(para);
-	copyFontMetrics(gs.fontMetrics, baseFont);
+	let { glyphStore, fontMetrics } = buildGlyphs(para);
+	copyFontMetrics(fontMetrics, baseFont);
+	await TaskYield();
 
 	// Build OTL
-	const otl = buildOtl(para, gs.glyphStore);
+	const otl = buildOtl(para, glyphStore);
+	await TaskYield();
 
 	// Regulate (like geometry conversion)
 	const sf = await createSubsetFilter(para.subset, para.excludedCharRanges);
-	const cleanGs = cleanupGlyphStore(cache, para, gs.glyphStore, sf, otl);
+	glyphStore = cleanupGlyphStore(cache, para, glyphStore, sf, otl);
+	await TaskYield();
 
 	// Convert to TTF
-	const font = await convertOtd(baseFont, otl, cleanGs);
+	const font = convertOtd(baseFont, otl, glyphStore);
+	await TaskYield();
 	// Build compatibility ligatures
 	if (para.compatibilityLigatures) await buildCompatLigatures(para, font);
+	await TaskYield();
 	// Apply post processing
 	postProcessFont(para, font);
+	await TaskYield();
 	// Generate ttfaControls
-	const ttfaControls = await generateTtfaControls(cleanGs, font.glyphs);
+	const ttfaControls = generateTtfaControls(glyphStore, font.glyphs);
+	await TaskYield();
+	// Generate charmap
+	const charMap = getCharMap(glyphStore);
+	await TaskYield();
 
 	// Validation : Metrics
 	if (para.forceMonospace) validateFontConfigMono(font);
+	await TaskYield();
 
-	return { font, glyphStore: cleanGs, cacheUpdated: cache?.isUpdated(), ttfaControls };
+	return { font, charMap, cacheUpdated: cache?.isUpdated(), ttfaControls };
+}
+
+function getCharMap(glyphStore) {
+	const charMap = [];
+	for (const [gn] of glyphStore.namedEntries()) {
+		charMap.push([
+			gn,
+			Array.from(glyphStore.queryUnicodeOfName(gn) || []),
+			...createGrDisplaySheet(glyphStore, gn),
+		]);
+	}
+	return charMap;
 }

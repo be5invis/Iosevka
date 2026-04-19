@@ -535,7 +535,7 @@ const DistUnhintedTTF = file.make(
 			if (cacheUpdated) {
 				const lock = build.locks.alloc(cacheFileName);
 				await lock.acquire();
-				await silently.node(`packages/font/src/merge-cache.mjs`, {
+				await silently.node.worker(`packages/font/src/merge-cache.mjs`, {
 					base: cachePath,
 					diff: cacheDiffPath,
 					version: fi.menu.version,
