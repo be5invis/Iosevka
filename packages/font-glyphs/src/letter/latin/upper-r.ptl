@@ -177,27 +177,22 @@ glyph-block Letter-Latin-Upper-R : begin
 	define [StrikeAnchor] : with-params [charTop sw [bp PShape.BarPos]] : glyph-proc
 		set-base-anchor 'strike' Middle [mix [PBarPosY charTop sw bp] charTop 0.5]
 
-	glyph-block-export RConfig
 	define RConfig : SuffixCfg.weave
-		object # Leg shape
-			straight                     { RLegShape.Straight    RevRLegShape.Straight }
-			curly                        { RLegShape.Curly       RevRLegShape.Curly    }
-			standing                     { RLegShape.Standing    RevRLegShape.Standing }
+		object # leg shape
+			straight                       RLegShape.Straight
+			curly                          RLegShape.Curly
+			standing                       RLegShape.Standing
 		object # openness
 			""                             false
 			open                           true
-		object # tail
-			""                             false
-			tailed                         true
 		object # serifs
-			serifless                    { null                  null                                                                false }
-			topLeftSerifed               { PShape.SlabMotion     RevPShape.SlabMotion                                                false }
-			bottomRightSerifed           { null                  null                                                                true  }
-			topLeftAndBottomRightSerifed { PShape.SlabMotion     RevPShape.SlabMotion                                                true  }
-			serifed                      { PShape.SlabSymmetric  RevPShape.SlabSymmetric                                             true  }
-			smallCyrl                    { PShape.SlabMotion     [if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] true  }
+			serifless                    { null                 false }
+			topLeftSerifed               { PShape.SlabMotion    false }
+			bottomRightSerifed           { null                 true  }
+			topLeftAndBottomRightSerifed { PShape.SlabMotion    true  }
+			serifed                      { PShape.SlabSymmetric true  }
 
-	foreach { suffix { { legShape revLegShape } fGap fTailed { slabs revSlabs doLegSlab } } } [Object.entries RConfig] : begin
+	foreach { suffix { legShape fGap { slabs doLegSlab } } } [Object.entries RConfig] : do
 		define fSlabBot : slabs && slabs !== PShape.SlabMotion
 		define swCap : AdviceStroke2 2 3 CAP
 		define swXH  : AdviceStroke2 2 3 XH
@@ -221,20 +216,10 @@ glyph-block Letter-Latin-Upper-R : begin
 			include : StrikeAnchor XH swXH
 			include : RShape legShape XH (sw -- swXH) (slab -- slabs) (legSlab -- doLegSlab) (open -- fGap)
 
-		create-glyph "cyrl/Ya.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : StrikeAnchor CAP swCap
-			include : RevRShape revLegShape CAP (sw -- swCap) (slab -- revSlabs) (legSlab -- doLegSlab) (open -- fGap)
-
-		create-glyph "cyrl/ya.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : StrikeAnchor XH swXH
-			include : RevRShape revLegShape XH (sw -- swXH) (slab -- revSlabs) (legSlab -- doLegSlab) (open -- fGap) (tailed -- fTailed)
-
 		create-glyph "Yr.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
-			local top : CAP * 0.825 + [if fSlabBot (-0.2125) 0.2500] * Stroke
-			local bp : (CAP * 0.250 + [if fSlabBot (+0.8375) 0.7125] * Stroke) / top
+			local top : [mix 0 CAP 0.825] + [if fSlabBot (-0.2125) (+0.2500)] * Stroke
+			local bp : ([mix 0 CAP 0.250] + [if fSlabBot (+0.8375) (+0.7125)] * Stroke) / top
 			local sw : AdviceStroke2 2 3 top
 			include : LeaningAnchor.Above.VBar.l SB      sw
 			include : LeaningAnchor.Below.VBar.r RightSB sw
@@ -267,38 +252,71 @@ glyph-block Letter-Latin-Upper-R : begin
 				include : RRotundaShape legShape XH bp (sw -- swXH) (legSlab -- doLegSlab) (hook -- AHook)
 
 			create-glyph "currency/indianRupeeSign.\(suffix)" : glyph-proc
-				local shift : (-0.125) * Width
-				include : intersection [Rect CAP 0 SB Width]
-					with-transform [Translate shift 0]
-						PShape CAP (mul -- 1.0) (sw -- swCap) (withBar -- false)
-				local right : RightSB - O - [if (legShape !== RLegShape.Curly) 0 0.0625] * Width
+				local shift : (-0.125) * (Width - 0)
+				include : intersection [Rect CAP 0 SB Width] : with-transform [Translate shift 0]
+					PShape CAP (mul -- 1.0) (sw -- swCap) (withBar -- false)
+				local right : RightSB - O - [if (legShape !== RLegShape.Curly) 0 0.0625] * (Width - 0)
 				include : legShape [RLegTop CAP swCap PShape.BarPos] 0 (Middle + shift) right CAP (SB + shift) doLegSlab swCap
 
 				define sw : AdviceStroke2 2 4 CAP
 				include : HBar.t SB RightSB      CAP                                         sw
 				include : HBar.m SB RightSB [mix CAP [PBarPosY CAP swCap PShape.BarPos] 0.5] sw
 
+	glyph-block-export RevRConfig
+	define RevRConfig : SuffixCfg.weave
+		object # leg shape
+			straight                          RevRLegShape.Straight
+			curly                             RevRLegShape.Curly
+			standing                          RevRLegShape.Standing
+		object # openness
+			""                                false
+			open                              true
+		object # serifs/tail
+			serifless                       { null                       false false }
+			topRightSerifed                 { RevPShape.SlabMotion       false false }
+			bottomLeftSerifed               { null                       true  false }
+			topRightAndBottomLeftSerifed    { RevPShape.SlabMotion       true  false }
+			bottomLeftAndBottomRightSerifed { RevPShape.SlabMotionBottom true  false }
+			serifed                         { RevPShape.SlabSymmetric    true  false }
+			# Tailed variants (Cyrillic lower ya)
+			tailedSerifless                 { null                       false true  }
+			tailedBottomLeftSerifed         { null                       true  true  }
+			tailedSerifed                   { RevPShape.SlabMotion       true  true  }
+
+	foreach { suffix { legShape fGap { slabs doLegSlab doTail } } } [Object.entries RevRConfig] : do
+		define swCap : AdviceStroke2 2 3 CAP
+		define swXH  : AdviceStroke2 2 3 XH
+
+		if (!doTail) : create-glyph "revR.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : StrikeAnchor CAP swCap
+			include : RevRShape legShape CAP (sw -- swCap) (slab -- slabs) (legSlab -- doLegSlab) (open -- fGap)
+
+		create-glyph "revSmcpR.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : StrikeAnchor XH swXH
+			include : RevRShape legShape XH (sw -- swXH) (slab -- slabs) (legSlab -- doLegSlab) (open -- fGap) (tailed -- doTail)
+
 	select-variant 'R' 'R'
 	link-reduced-variant 'R/sansSerif' 'R' MathSansSerif
+	select-variant 'smcpR'    0x280  (follow -- 'R')
+	select-variant 'revSmcpR' 0x1D19 (follow -- 'revR')
+	select-variant 'RBar'     0x24C
+	select-variant 'RRTail'   0x2C64
 
-	select-variant 'RBar' 0x24C
-	select-variant 'RRTail' 0x2C64
-
-	select-variant 'smcpR' 0x280 (follow -- 'R')
-	CreateTurnedLetter 'turnSmcpR' 0x1D1A 'smcpR' HalfAdvance (XH / 2)
+	select-variant 'Yr'                0x1A6  (follow -- 'R')
+	select-variant 'smcpRLongRightLeg' 0xAB46 (follow -- 'R')
 
 	select-variant 'RRotunda' 0xA75A
 	select-variant 'rRotunda' 0xA75B (follow -- 'RRotunda')
 
-	select-variant 'cyrl/Ya' 0x42F
-	select-variant 'cyrl/ya' 0x44F
-	select-variant 'revSmcpR' 0x1D19 (shapeFrom -- 'cyrl/ya') (follow -- 'R')
-	CreateTurnedLetter 'invSmcpR' 0x281 'revSmcpR' HalfAdvance (XH / 2)
-
-	select-variant 'Yr' 0x1A6 (follow -- 'R')
-	select-variant 'smcpRLongRightLeg' 0xAB46 (follow -- 'R')
-
 	select-variant 'currency/indianRupeeSign' 0x20B9 (follow -- 'RRotunda')
+
+	CreateTurnedLetter 'turnSmcpR' 0x1D1A 'smcpR'    HalfAdvance (XH / 2)
+	CreateTurnedLetter 'invSmcpR'  0x281  'revSmcpR' HalfAdvance (XH / 2)
+
+	select-variant 'cyrl/Ya' 0x42F (shapeFrom -- 'revR')
+	select-variant 'cyrl/ya' 0x44F (shapeFrom -- 'revSmcpR')
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/R' 0x211D : glyph-proc

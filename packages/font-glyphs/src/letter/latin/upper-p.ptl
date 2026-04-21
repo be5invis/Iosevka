@@ -138,13 +138,13 @@ glyph-block Letter-Latin-Upper-P : begin
 
 	set PShape.SlabMotion : function [top df sw mul] : glyph-proc
 		include : tagged 'serifLT' : HSerif.lt [mix 0 df.leftSB mul] top SideJut sw
+	set PShape.SlabSymmetric : function [top df sw mul] : glyph-proc
+		include : PShape.SlabMotion top df sw mul
+		include : tagged 'serifLB' : HSerif.mb ([mix 0 df.leftSB mul] + [HSwToV : 0.5 * sw]) 0 (Jut - [HSwToV : 0.5 * (Stroke - sw)]) sw
 	set PShape.SlabFullSymmetric : function [top df sw mul] : glyph-proc
 		include : tagged 'serifLT' : union
 			HSerif.lt [mix 0 df.leftSB mul] top SideJut sw
 			HSerif.rt ([mix 0 df.leftSB mul] + [HSwToV : 0.5 * sw]) top (MidJutSide - [HSwToV : 0.5 * (Stroke - sw)]) sw
-		include : tagged 'serifLB' : HSerif.mb ([mix 0 df.leftSB mul] + [HSwToV : 0.5 * sw]) 0 (Jut - [HSwToV : 0.5 * (Stroke - sw)]) sw
-	set PShape.SlabSymmetric : function [top df sw mul] : glyph-proc
-		include : PShape.SlabMotion top df sw mul
 		include : tagged 'serifLB' : HSerif.mb ([mix 0 df.leftSB mul] + [HSwToV : 0.5 * sw]) 0 (Jut - [HSwToV : 0.5 * (Stroke - sw)]) sw
 	set PShape.SlabAsymmetric : function [top df sw mul] : glyph-proc
 		include : PShape.SlabMotion top df sw mul
@@ -154,11 +154,11 @@ glyph-block Letter-Latin-Upper-P : begin
 
 	set RevPShape.SlabMotion : function [top df sw mul] : glyph-proc
 		include : tagged 'serifRT' : HSerif.rt [mix df.width df.rightSB mul] top SideJut sw
+	set RevPShape.SlabMotionBottom : function [top df sw mul] : glyph-proc
+		include : tagged 'serifRB' : HSerif.rb [mix df.width df.rightSB mul] 0 SideJut sw
 	set RevPShape.SlabSymmetric : function [top df sw mul] : glyph-proc
 		include : RevPShape.SlabMotion top df sw mul
 		include : tagged 'serifRB' : HSerif.mb ([mix df.width df.rightSB mul] - [HSwToV : 0.5 * sw]) 0 (Jut - [HSwToV : 0.5 * (Stroke - sw)]) sw
-	set RevPShape.SlabCyrlItalic : function [top df sw mul] : glyph-proc
-		include : tagged 'serifRB' : HSerif.rb [mix df.width df.rightSB mul] 0 SideJut sw
 	set RevPShape.SlabAsymmetric : function [top df sw mul] : glyph-proc
 		include : RevPShape.SlabMotion top df sw mul
 		include : tagged 'serifRB' : union
@@ -169,13 +169,13 @@ glyph-block Letter-Latin-Upper-P : begin
 		[mix 0 df.leftSB mul] + [HSwToV sw]
 		Math.min ([PBarPosY top sw bp] - 0.5 * sw - TINY) bot
 		Math.max ([PBarPosY top sw bp] + 0.5 * sw + TINY) [mix top [PBarPosY top sw bp] 0.5]
-		VSwToH : 0.2 * (df.rightSB - df.leftSB) * ([AdviceStroke 5] / Stroke)
+		[VSwToH : 0.2 * (df.rightSB - df.leftSB)] * ([AdviceStroke 5] / Stroke)
 
 	set RevPShape.OpenGap : function [] : with-params [top [df [DivFrame 1]] [bot 0] [mul PShape.defaultMul] [bp PShape.BarPos] [sw df.mvs]] : VBar.r
 		[mix df.width df.rightSB mul] - [HSwToV sw]
 		Math.min ([PBarPosY top sw bp] - 0.5 * sw - TINY) bot
 		Math.max ([PBarPosY top sw bp] + 0.5 * sw + TINY) [mix top [PBarPosY top sw bp] 0.5]
-		VSwToH : 0.2 * (df.rightSB - df.leftSB) * ([AdviceStroke 5] / Stroke)
+		[VSwToH : 0.2 * (df.rightSB - df.leftSB)] * ([AdviceStroke 5] / Stroke)
 
 	glyph-block-export PConfig
 	define PConfig : SuffixCfg.weave
@@ -183,11 +183,11 @@ glyph-block Letter-Latin-Upper-P : begin
 			closed           false
 			open             true
 		object # serifs
-			serifless      { null                  null                     }
-			motionSerifed  { PShape.SlabMotion     RevPShape.SlabMotion     }
-			serifed        { PShape.SlabAsymmetric RevPShape.SlabAsymmetric }
+			serifless        null
+			motionSerifed    PShape.SlabMotion
+			serifed          PShape.SlabAsymmetric
 
-	foreach { suffix { fGap { slabs revSlabs } } } [Object.entries PConfig] : do
+	foreach { suffix { fGap slabs } } [Object.entries PConfig] : do
 		define fSlabBot : slabs && slabs !== PShape.SlabMotion
 		define swCap : AdviceStroke2 2 3 CAP
 		define swXH  : AdviceStroke2 2 3 XH
