@@ -5,7 +5,6 @@ import * as Path from "node:path";
 import * as toml from "@iarna/toml";
 import deepEqual from "deep-equal";
 import semver from "semver";
-import * as uuid from "uuid";
 import * as Verda from "verda";
 import which from "which";
 
@@ -471,7 +470,7 @@ function whyBuildPlanIsnNotThere(_gid) {
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
-const ageKey = uuid.v4();
+const ageKey = randomUUID();
 const DistUnhintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/TTF-Unhinted/${fn}.ttf`,
 	async (target, out, gr, fn) => {
