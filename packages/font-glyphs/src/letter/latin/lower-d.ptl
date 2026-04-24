@@ -82,7 +82,7 @@ glyph-block Letter-Latin-Lower-D : begin
 			bottomSerifed            { null     BaseSerif }
 			serifed                  { TopSerif BaseSerif }
 
-	foreach { suffix { Body {topSerif bottomSerif} } } [Object.entries DConfig] : do
+	foreach { suffix { Body { topSerif bottomSerif } } } [Object.entries DConfig] : do
 		local yOverlay : mix XH (Ascender - [if topSerif Stroke 0]) 0.5
 
 		do
@@ -124,28 +124,6 @@ glyph-block Letter-Latin-Lower-D : begin
 			if bottomSerif : include : bottomSerif df Ascender
 			include : LeaningAnchor.Above.VBar.r df.rightSB
 
-		if [not bottomSerif] : create-glyph "cyrl/djeKomi.\(suffix)" : glyph-proc
-			local df : include : DivFrame para.advanceScaleMM 3
-			include : df.markSet.b
-
-			local dfHalf : df.slice 3 2
-			include : Body dfHalf Ascender
-			eject-contour 'rightBar'
-
-			include : with-transform [ApparentTranslate (df.width - dfHalf.width) 0] : UpwardHookShape
-				left   -- dfHalf.leftSB
-				right  -- dfHalf.rightSB
-				ybegin -- Ascender
-				yend   -- (XH / 2 + HalfStroke)
-				ada    -- (ArchDepthA * (2 / df.hPack) * df.adws)
-				adb    -- (ArchDepthB * (2 / df.hPack) * df.adws)
-				sw     -- df.mvs
-
-			if topSerif : include : topSerif dfHalf Ascender
-			if SLAB : begin
-				local sf2 : [SerifFrame.fromDf df (XH / 2 + HalfStroke) 0].slice 1 2
-				include sf2.rt.full
-
 	select-variant 'd' 'd'
 	link-reduced-variant 'd/sansSerif' 'd' MathSansSerif
 	link-reduced-variant 'd/phoneticLeft' 'd'
@@ -156,9 +134,6 @@ glyph-block Letter-Latin-Lower-D : begin
 
 	select-variant 'latn/de' 0x18C (follow -- 'd')
 	select-variant 'dHookTop' 0x257
-
-	alias 'cyrl/deKomi' 0x501 'd'
-	select-variant 'cyrl/djeKomi' 0x503
 
 	link-reduced-variant 'd/descBase' 'd'
 	derive-composites 'dPalatalHook' 0x1D81 'd/descBase' : PalatalHook.r
@@ -190,33 +165,72 @@ glyph-block Letter-Latin-Lower-D : begin
 
 	derive-composites 'tauGallicum' 0xA7C8 'd' : HBar.m (SB - OX) (RightSB + OX) (XH * 0.5) OverlayStroke
 
-	define DCurlyTailConfig : object
-		toothedSerifless  { false }
-		toothedTopSerifed { true  }
+	create-glyph "dCurlyTail.toothedSerifless" : glyph-proc
+		include : MarkSet.b
 
-	foreach { suffix { fSerif } } [Object.entries DCurlyTailConfig] : do
-		create-glyph "dCurlyTail.\(suffix)" : glyph-proc
-			include : MarkSet.b
+		local fine : AdviceStroke 4
+		local rinner : clamp (Width * 0.065) (XH * 0.05) (fine * 0.35)
+		local sw : AdviceStroke 2.75
+		local m : Math.min RightSB (Width - rinner * 2 - fine - OX)
 
-			local fine : AdviceStroke 4
-			local rinner : clamp (Width * 0.065) (XH * 0.05) (fine * 0.35)
-			local sw : AdviceStroke 2.75
-			local m : Math.min RightSB (Width - rinner * 2 - fine - OX)
-
-			include : LeaningAnchor.Above.VBar.r m
-			include : OBarRight.shape (left -- SB) (right -- m) (sw -- sw)
-			include : dispiro
-				widths.lhs sw
-				flat (m - [HSwToV sw]) Ascender [heading Downward]
-				curl (m - [HSwToV sw]) (rinner * 2 + fine)
-				CurlyTail.n fine 0 (m + rinner * 2 + fine)
-					x2 -- ([mix SB m 0.5] - [HSwToV : 0.75 * fine])
-					y2 -- (0.37 * Descender)
-					swBefore -- sw
-					terminalSlopeAdj -- 0.25
-			if fSerif : include : HSerif.lt (m - [HSwToV sw]) Ascender SideJut sw
+		include : LeaningAnchor.Above.VBar.r m
+		include : OBarRight.shape
+			left  -- SB
+			right -- m
+			sw    -- sw
+		include : dispiro
+			widths.lhs sw
+			flat (m - [HSwToV sw]) Ascender [heading Downward]
+			curl (m - [HSwToV sw]) (rinner * 2 + fine)
+			CurlyTail.n fine 0 (m + rinner * 2 + fine)
+				x2 -- ([mix SB m 0.5] - [HSwToV : 0.75 * fine])
+				y2 -- (0.37 * Descender)
+				swBefore -- sw
+				terminalSlopeAdj -- 0.25
+		create-forked-glyph "dCurlyTail.toothedTopSerifed" : HSerif.lt (m - [HSwToV sw]) Ascender SideJut sw
 
 	select-variant 'dCurlyTail' 0x221
+
+	create-glyph "cyrl/djeKomi.toothlessRoundedSerifless" : glyph-proc
+		local df : include : DivFrame para.advanceScaleMM 3
+		include : df.markSet.b
+
+		local subDf : df.slice 3 2
+		include : dispiro
+			OBarRight.arcStart
+				top       -- XH
+				left      -- df.leftSB
+				right     -- (df.middle + [HSwToV : 0.5 * df.mvs])
+				sw        -- df.mvs
+				fine      -- df.shoulderFine
+				ada       -- subDf.smallArchDepthA
+				adb       -- subDf.smallArchDepthB
+			flatside.ld df.leftSB 0 XH subDf.smallArchDepthA subDf.smallArchDepthB
+			OBarRight.arcEnd
+				bot       -- 0
+				left      -- df.leftSB
+				right     -- (df.middle + [HSwToV : 0.5 * df.mvs])
+				sw        -- df.mvs
+				fine      -- (df.mvs * CThinB)
+				ada       -- subDf.smallArchDepthA
+				adb       -- subDf.smallArchDepthB
+				yend      -- XH
+		include : UpwardHookShape
+			left   -- (df.middle - [HSwToV : 0.5 * df.mvs])
+			right  -- df.rightSB
+			ybegin -- Ascender
+			yend   -- (XH / 2 + HalfStroke)
+			ada    -- (ArchDepthA * (2 / df.hPack) * df.adws)
+			adb    -- (ArchDepthB * (2 / df.hPack) * df.adws)
+			sw     -- df.mvs
+		if SLAB : begin
+			local sf2 : [SerifFrame.fromDf df (XH / 2 + HalfStroke) 0].slice 1 2
+			include sf2.rt.full
+
+		create-forked-glyph "cyrl/djeKomi.toothlessRoundedTopSerifed" : HSerif.lt (df.middle - [HSwToV : 0.5 * df.mvs]) Ascender SideJut df.mvs
+
+	alias 'cyrl/deKomi' 0x501 'd'
+	select-variant 'cyrl/djeKomi' 0x503
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	create-glyph 'mathbb/d' 0x1D555 : glyph-proc
