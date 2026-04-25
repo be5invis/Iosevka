@@ -1,6 +1,7 @@
 import { buildGlyphs } from "@iosevka/font-glyphs";
 import { copyFontMetrics } from "@iosevka/font-glyphs/aesthetics";
 import { buildOtl } from "@iosevka/font-otl";
+import * as Geom from "@iosevka/geometry";
 import { createGrDisplaySheet } from "@iosevka/glyph/relation";
 import { createSubsetFilter } from "@iosevka/param";
 import { TaskYield } from "@iosevka/util";
@@ -15,6 +16,8 @@ import { generateTtfaControls } from "../ttfa-controls/index.mjs";
 import { validateFontConfigMono } from "../validate/metrics.mjs";
 
 export async function buildFont(para, cache) {
+	await Geom.Init();
+
 	const baseFont = CreateEmptyFont(para);
 	assignFontNames(baseFont, para.naming, para.isQuasiProportional);
 	await TaskYield();

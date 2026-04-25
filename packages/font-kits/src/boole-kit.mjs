@@ -29,11 +29,11 @@ class BooleImpl {
 }
 export function SetupBuilders(bindings) {
 	const union = (...operands) =>
-		new BooleImpl(bindings, TypoGeom.Boolean.ClipType.ctUnion, operands);
+		new BooleImpl(bindings, TypoGeom.Boolean.ClipType.Union, operands);
 	const intersection = (...operands) =>
-		new BooleImpl(bindings, TypoGeom.Boolean.ClipType.ctIntersection, operands);
+		new BooleImpl(bindings, TypoGeom.Boolean.ClipType.Intersection, operands);
 	const difference = (...operands) =>
-		new BooleImpl(bindings, TypoGeom.Boolean.ClipType.ctDifference, operands);
+		new BooleImpl(bindings, TypoGeom.Boolean.ClipType.Difference, operands);
 	const withKnockout = (mask, ...operands) => difference(union(...operands), mask);
 	return {
 		union: union,

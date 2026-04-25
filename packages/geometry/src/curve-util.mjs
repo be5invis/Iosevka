@@ -155,22 +155,6 @@ export class BezToContoursSink {
 	}
 }
 
-export function InPlaceTransformBez3Shape(tf, shape) {
-	if (!tf || Transform.isIdentity(tf)) return shape;
-	for (const c of shape) {
-		for (let i = 0; i < c.length; i++) c[i] = Bez3WithTransform(c[i], tf);
-	}
-}
-export function Bez3WithTransform(arc, tf) {
-	if (!tf || Transform.isIdentity(tf)) return arc;
-	return new TypoGeom.Arcs.Bez3(
-		Point.transformedXY(tf, Point.Type.Corner, arc.a.x, arc.a.y),
-		Point.transformedXY(tf, Point.Type.CubicStart, arc.b.x, arc.b.y),
-		Point.transformedXY(tf, Point.Type.CubicEnd, arc.c.x, arc.c.y),
-		Point.transformedXY(tf, Point.Type.Corner, arc.d.x, arc.d.y),
-	);
-}
-
 export function Bez3FromHermite(zStart, dStart, zEnd, dEnd) {
 	const a = zStart,
 		d = zEnd;
@@ -228,4 +212,37 @@ export class RoundCapCurve {
 
 		return new Vec2(dx, dy);
 	}
+}
+
+export function InPlaceTransformBez3Shape(tf, shape) {
+	if (!tf || Transform.isIdentity(tf)) return shape;
+	for (const c of shape) {
+		for (let i = 0; i < c.length; i++) c[i] = Bez3WithTransform(c[i], tf);
+	}
+}
+export function Bez3WithTransform(arc, tf) {
+	if (!tf || Transform.isIdentity(tf)) return arc;
+	return new TypoGeom.Arcs.Bez3(
+		Point.transformedXY(tf, Point.Type.Corner, arc.a.x, arc.a.y),
+		Point.transformedXY(tf, Point.Type.CubicStart, arc.b.x, arc.b.y),
+		Point.transformedXY(tf, Point.Type.CubicEnd, arc.c.x, arc.c.y),
+		Point.transformedXY(tf, Point.Type.Corner, arc.d.x, arc.d.y),
+	);
+}
+
+export function rorateShapeToCanonicalStartingPoint(shape) {
+	for (const contour of shape) {
+		rotateContourToCanonicalStartingPoint(contour);
+	}
+}
+function rotateContourToCanonicalStartingPoint(arcContour) {
+	let minIndex = 0;
+	for (let i = 1; i < arcContour.length; i++) {
+		const aMin = arcContour[minIndex].a;
+		const aCurr = arcContour[i].a;
+		if (aCurr.y < aMin.y || (aCurr.y === aMin.y && aCurr.x < aMin.x)) {
+			minIndex = i;
+		}
+	}
+	if (minIndex > 0) arcContour.push(...arcContour.splice(0, minIndex));
 }
