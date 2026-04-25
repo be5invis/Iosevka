@@ -1,0 +1,55 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Komi-De-Dje : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : UpwardHookShape SerifFrame
+	glyph-block-import Letter-Cyrillic-Yeri : RevYeriUpper
+
+	define DeConfig : object
+		standardSerifless         { false false }
+		standardUnilateralSerifed { true  false }
+		standardBilateralSerifed  { true  true  }
+
+	foreach { suffix { doST doSB } } [Object.entries DeConfig] : do
+		define fMotion : doST && !doSB
+
+		create-glyph "cyrl/DeKomi.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : RevYeriUpper.Shape CAP (fSlab -- false)
+			if doST : include : tagged 'serifRT' : if fMotion
+				HSerif.lt (RightSB - [HSwToV Stroke]) CAP SideJut
+				HSerif.mt (RightSB - [HSwToV HalfStroke]) CAP Jut
+			if doSB : include : tagged 'serifRB' : HSerif.rb RightSB 0 SideJut
+
+		create-glyph "cyrl/DjeKomi.\(suffix)" : glyph-proc
+			local df : include : DivFrame para.advanceScaleMM 3
+			include : df.markSet.capital
+
+			include : RevYeriUpper.RoundShape CAP
+				left   -- df.leftSB
+				right  -- (df.middle - [HSwToV : (0.5 - CThinB) * df.mvs])
+				stroke -- df.mvs
+				swVBar -- (df.mvs * CThinB)
+				fSlab  -- false
+			if doST : include : tagged 'serifRT' : if fMotion
+				HSerif.lt (df.middle - [HSwToV : 0.5 * df.mvs]) CAP SideJut df.mvs
+				HSerif.mt df.middle CAP (Jut - [HSwToV : 0.5 * (Stroke - df.mvs)]) df.mvs
+			include : UpwardHookShape
+				left   -- (df.middle - [HSwToV : 0.5 * df.mvs])
+				right  -- df.rightSB
+				ybegin -- CAP
+				yend   -- (CAP / 2 + HalfStroke)
+				ada    -- (ArchDepthA * (2 / df.hPack) * df.adws)
+				adb    -- (ArchDepthB * (2 / df.hPack) * df.adws)
+				sw     -- df.mvs
+			if SLAB : begin
+				local sf2 : [SerifFrame.fromDf df (CAP / 2 + HalfStroke) 0].slice 1 2
+				include sf2.rt.full
+
+	select-variant 'cyrl/DeKomi'  0x500 (follow -- 'dCap')
+	select-variant 'cyrl/DjeKomi' 0x502 (follow -- 'dCap')
