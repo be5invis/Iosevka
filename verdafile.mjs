@@ -511,7 +511,7 @@ const DistUnhintedTTF = file.make(
 			await target.need(de(charMapPath.dir), de(ttfaControlsPath.dir), de(SHARED_CACHE));
 
 			echo.action(echo.hl.command(`Create TTF`), out.full);
-			const { cacheUpdated } = await silently.node("packages/font/src/index.mjs", {
+			const { cacheUpdated } = await silently.node.worker("packages/font/src/index.mjs", {
 				// INPUT: font info
 				...fi,
 				// INPUT: path to parameters

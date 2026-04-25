@@ -9,6 +9,10 @@ import { spiroToBezArcsWithSimplification } from "./spiro-to-outline.mjs";
 import { strokeArcs } from "./stroke.mjs";
 import { Transform } from "./transform.mjs";
 
+export async function Init() {
+	await TypoGeom.Init();
+}
+
 export const CPLX_NON_EMPTY = 0x01; // A geometry tree that is not empty
 export const CPLX_NON_SIMPLE = 0x02; // A geometry tree that contains non-simple contours
 export const CPLX_BROKEN = 0x04; // A geometry tree that contains broken contours
@@ -154,11 +158,11 @@ export class SpiroPenGeometry extends SimpleGeometry {
 		for (const [i, c] of contours.entries()) {
 			stack.push({
 				type: "operand",
-				fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+				fillType: TypoGeom.Boolean.PolyFillType.NonZero,
 				shape: CurveUtil.convertShapeToArcs([c]),
 			});
 			if (i > 0) {
-				stack.push({ type: "operator", operator: TypoGeom.Boolean.ClipType.ctUnion });
+				stack.push({ type: "operator", operator: TypoGeom.Boolean.ClipType.Union });
 			}
 		}
 
@@ -504,7 +508,7 @@ export class BooleanGeometry extends GeometryBase {
 		if (this.m_operands.length === 0) {
 			stack.push({
 				type: "operand",
-				fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+				fillType: TypoGeom.Boolean.PolyFillType.NonZero,
 				shape: [],
 			});
 			return;
@@ -517,7 +521,7 @@ export class BooleanGeometry extends GeometryBase {
 			} else {
 				stack.push({
 					type: "operand",
-					fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+					fillType: TypoGeom.Boolean.PolyFillType.NonZero,
 					shape: operand.toBezArcs(),
 				});
 			}
@@ -579,7 +583,7 @@ export class StrokeGeometry extends GeometryBase {
 		);
 		const arcs = TypoGeom.Boolean.removeOverlap(
 			nonTransformedGeometry.toBezArcs(),
-			TypoGeom.Boolean.PolyFillType.pftNonZero,
+			TypoGeom.Boolean.PolyFillType.NonZero,
 			CurveUtil.BOOLE_RESOLUTION,
 		);
 
@@ -634,7 +638,7 @@ export class RemoveHolesGeometry extends GeometryBase {
 		);
 		let arcs = TypoGeom.Boolean.removeOverlap(
 			nonTransformedGeometry.toBezArcs(),
-			TypoGeom.Boolean.PolyFillType.pftNonZero,
+			TypoGeom.Boolean.PolyFillType.NonZero,
 			CurveUtil.BOOLE_RESOLUTION,
 		);
 
@@ -642,17 +646,17 @@ export class RemoveHolesGeometry extends GeometryBase {
 			const stack = [];
 			stack.push({
 				type: "operand",
-				fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+				fillType: TypoGeom.Boolean.PolyFillType.NonZero,
 				shape: [arcs[0]],
 			});
 
 			for (let i = 1; i < arcs.length; i++) {
 				stack.push({
 					type: "operand",
-					fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
+					fillType: TypoGeom.Boolean.PolyFillType.NonZero,
 					shape: [arcs[i]],
 				});
-				stack.push({ type: "operator", operator: TypoGeom.Boolean.ClipType.ctUnion });
+				stack.push({ type: "operator", operator: TypoGeom.Boolean.ClipType.Union });
 			}
 
 			arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
@@ -702,6 +706,7 @@ export class SimplifyGeometry extends GeometryBase {
 	// Produce simplified arcs
 	toBezArcs() {
 		let arcs = this.m_geom.toBezArcs();
+		CurveUtil.rorateShapeToCanonicalStartingPoint(arcs);
 
 		const needsTransform = !Transform.isTranslate(this.m_gizmo);
 		if (needsTransform) CurveUtil.InPlaceTransformBez3Shape(this.m_gizmo.inverse(), arcs);
@@ -709,7 +714,7 @@ export class SimplifyGeometry extends GeometryBase {
 		if (this.m_geom.measureComplexity() & CPLX_NON_SIMPLE) {
 			arcs = TypoGeom.Boolean.removeOverlap(
 				arcs,
-				TypoGeom.Boolean.PolyFillType.pftNonZero,
+				TypoGeom.Boolean.PolyFillType.NonZero,
 				CurveUtil.BOOLE_RESOLUTION,
 			);
 		}

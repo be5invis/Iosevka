@@ -22,11 +22,11 @@ export function strokeArcs(arcs, radius, contrast, fInside) {
 			currentArcs = bezs;
 		} else {
 			currentArcs = TypoGeom.Boolean.combine(
-				TypoGeom.Boolean.ClipType.ctUnion,
+				TypoGeom.Boolean.ClipType.Union,
 				currentArcs,
 				bezs,
-				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				TypoGeom.Boolean.PolyFillType.pftNonZero,
+				TypoGeom.Boolean.PolyFillType.NonZero,
+				TypoGeom.Boolean.PolyFillType.NonZero,
 				BOOLE_RESOLUTION,
 			);
 		}
@@ -35,11 +35,11 @@ export function strokeArcs(arcs, radius, contrast, fInside) {
 	if (currentArcs) {
 		if (fInside) {
 			return TypoGeom.Boolean.combine(
-				TypoGeom.Boolean.ClipType.ctIntersection,
+				TypoGeom.Boolean.ClipType.Intersection,
 				TypoGeom.ShapeConv.convertShapeToBez3(arcs, GEOMETRY_PRECISION),
 				currentArcs,
-				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				TypoGeom.Boolean.PolyFillType.pftNonZero,
+				TypoGeom.Boolean.PolyFillType.NonZero,
+				TypoGeom.Boolean.PolyFillType.NonZero,
 				BOOLE_RESOLUTION,
 			);
 		} else {
