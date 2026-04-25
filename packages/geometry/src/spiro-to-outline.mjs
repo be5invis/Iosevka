@@ -9,16 +9,15 @@ export function spiroToOutline(knots, fClosed, gizmo) {
 	return s.contours;
 }
 
-export function spiroToOutlineWithSimplification(knots, fClosed, gizmo) {
+export function spiroToBezArcsWithSimplification(knots, fClosed, gizmo) {
 	const simplifier = new SpiroSimplifier(knots);
 	SpiroJs.spiroToArcsOnContext(knots, fClosed, simplifier);
-	const sink = new CurveUtil.BezToContoursSink(gizmo);
-	TypoGeom.ShapeConv.transferGenericShapeAsBezier(
+	const bezs = TypoGeom.ShapeConv.convertShapeToBez3(
 		[simplifier.combinedArcs],
-		sink,
 		CurveUtil.OCCURRENT_PRECISION,
 	);
-	return sink.contours;
+	CurveUtil.InPlaceTransformBez3Shape(gizmo, bezs);
+	return bezs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

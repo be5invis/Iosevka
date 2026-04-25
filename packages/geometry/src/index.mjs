@@ -2,12 +2,10 @@ import * as Format from "@iosevka/util/formatter";
 import * as TypoGeom from "typo-geom";
 
 import * as CurveUtil from "./curve-util.mjs";
-import { IntermediateResultsCodec } from "./encoding.mjs";
-import { Point } from "./point.mjs";
 import { QuadifySink } from "./quadify.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
 import { PenSpiroExpander } from "./spiro-pen-expand.mjs";
-import { spiroToOutlineWithSimplification } from "./spiro-to-outline.mjs";
+import { spiroToBezArcsWithSimplification } from "./spiro-to-outline.mjs";
 import { strokeArcs } from "./stroke.mjs";
 import { Transform } from "./transform.mjs";
 
@@ -17,8 +15,17 @@ export const CPLX_BROKEN = 0x04; // A geometry tree that contains broken contour
 export const CPLX_UNKNOWN = 0xff;
 
 export class GeometryBase {
-	toContours(_ctx) {
+	toBezArcs() {
 		throw new Error("Unimplemented");
+	}
+	toContours() {
+		const sink = new CurveUtil.BezToContoursSink(this.m_gizmo);
+		TypoGeom.ShapeConv.transferBezArcShape(
+			this.toBezArcs(),
+			sink,
+			CurveUtil.GEOMETRY_PRECISION,
+		);
+		return sink.contours;
 	}
 	toReferences() {
 		throw new Error("Unimplemented");
@@ -45,7 +52,10 @@ export class ContourSetGeometry extends GeometryBase {
 		super();
 		this.m_contours = contours;
 	}
-	toContours(_ctx) {
+	toBezArcs() {
+		return CurveUtil.convertShapeToArcs(this.m_contours);
+	}
+	toContours() {
 		return this.m_contours;
 	}
 	toReferences() {
@@ -79,31 +89,7 @@ export class ContourSetGeometry extends GeometryBase {
 	}
 }
 
-// Enabling geometry cache over the deep nodes of the geometry tree
-export class CachedGeometry extends GeometryBase {
-	toContours(ctx) {
-		let cacheKey = null;
-		if (ctx?.cache) {
-			cacheKey = IntermediateResultsCodec.encodeKey(this);
-			const existing = ctx.cache.getGF(cacheKey, IntermediateResultsCodec);
-			if (existing) {
-				ctx.cache.refreshGF(cacheKey);
-				return existing;
-			}
-		}
-
-		const calculated = this.toContoursImpl(ctx);
-		if (cacheKey && ctx?.cache)
-			ctx.cache.saveGF(cacheKey, IntermediateResultsCodec, calculated);
-		return calculated;
-	}
-
-	toContoursImpl(_ctx) {
-		throw new Error("Unimplemented");
-	}
-}
-
-class SimpleGeometry extends CachedGeometry {
+class SimpleGeometry extends GeometryBase {
 	toReferences() {
 		return null;
 	}
@@ -122,8 +108,8 @@ export class SpiroGeometry extends SimpleGeometry {
 		this.m_closed = closed;
 		this.m_gizmo = gizmo;
 	}
-	toContoursImpl(_ctx) {
-		return spiroToOutlineWithSimplification(this.m_knots, this.m_closed, this.m_gizmo);
+	toBezArcs() {
+		return spiroToBezArcsWithSimplification(this.m_knots, this.m_closed, this.m_gizmo);
 	}
 
 	measureComplexity() {
@@ -154,7 +140,7 @@ export class SpiroPenGeometry extends SimpleGeometry {
 		this.m_knots = knots;
 	}
 
-	toContoursImpl(_ctx) {
+	toBezArcs(_ctx) {
 		const expander = new PenSpiroExpander(
 			this.m_gizmo,
 			this.m_penProfile,
@@ -176,10 +162,7 @@ export class SpiroPenGeometry extends SimpleGeometry {
 			}
 		}
 
-		const arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
-		const sink = new CurveUtil.BezToContoursSink();
-		TypoGeom.ShapeConv.transferBezArcShape(arcs, sink);
-		return sink.contours;
+		return TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
 	}
 
 	measureComplexity() {
@@ -221,7 +204,7 @@ export class DiSpiroGeometry extends SimpleGeometry {
 		this.m_contrast = contrast;
 	}
 
-	toContoursImpl(ctx) {
+	toBezArcs() {
 		const expandResult = this.expand();
 		const lhs = [...expandResult.lhsUntransformed];
 		const rhs = [...expandResult.rhsUntransformed];
@@ -231,14 +214,14 @@ export class DiSpiroGeometry extends SimpleGeometry {
 
 		if (this.m_closed) {
 			return [
-				...new SpiroGeometry(this.m_gizmo, true, lhs).toContoursImpl(ctx),
-				...new SpiroGeometry(this.m_gizmo, true, rhs).toContoursImpl(ctx),
+				...new SpiroGeometry(this.m_gizmo, true, lhs).toBezArcs(),
+				...new SpiroGeometry(this.m_gizmo, true, rhs).toBezArcs(),
 			];
 		} else {
 			lhs[0].type = lhs[lhs.length - 1].type = "corner";
 			rhs[0].type = rhs[rhs.length - 1].type = "corner";
 			const allKnots = lhs.concat(rhs);
-			return new SpiroGeometry(this.m_gizmo, true, allKnots).toContoursImpl(ctx);
+			return new SpiroGeometry(this.m_gizmo, true, allKnots).toBezArcs();
 		}
 	}
 
@@ -293,8 +276,8 @@ export class ReferenceGeometry extends GeometryBase {
 		);
 	}
 
-	toContours(ctx) {
-		return this.unwrap().toContours(ctx);
+	toBezArcs() {
+		return this.unwrap().toBezArcs();
 	}
 	toReferences() {
 		if (this.m_glyph.geometry.measureComplexity() & CPLX_NON_EMPTY) {
@@ -324,8 +307,8 @@ export class TaggedGeometry extends GeometryBase {
 		this.m_geom = g;
 		this.m_tag = tag;
 	}
-	toContours(ctx) {
-		return this.m_geom.toContours(ctx);
+	toBezArcs() {
+		return this.m_geom.toBezArcs();
 	}
 	toReferences() {
 		return this.m_geom.toReferences();
@@ -366,11 +349,11 @@ export class TransformedGeometry extends GeometryBase {
 		}
 	}
 
-	toContours(ctx) {
+	toBezArcs() {
 		const result = [];
-		for (const c of this.m_geom.toContours(ctx)) {
+		for (const c of this.m_geom.toBezArcs()) {
 			const c1 = [];
-			for (const z of c) c1.push(Point.transformed(this.m_transform, z));
+			for (const arc of c) c1.push(CurveUtil.Bez3WithTransform(arc, this.m_transform));
 			result.push(c1);
 		}
 		return result;
@@ -412,8 +395,8 @@ export class RadicalGeometry extends GeometryBase {
 		super();
 		this.m_geom = g;
 	}
-	toContours(ctx) {
-		return this.m_geom.toContours(ctx);
+	toBezArcs() {
+		return this.m_geom.toBezArcs();
 	}
 	toReferences() {
 		return null;
@@ -449,10 +432,10 @@ export class CombineGeometry extends GeometryBase {
 	map(f) {
 		return new CombineGeometry(this.m_parts.map(f));
 	}
-	toContours(ctx) {
+	toBezArcs() {
 		const results = [];
 		for (const part of this.m_parts) {
-			for (const c of part.toContours(ctx)) {
+			for (const c of part.toBezArcs()) {
 				results.push(c);
 			}
 		}
@@ -500,7 +483,7 @@ export class CombineGeometry extends GeometryBase {
 	}
 }
 
-export class BooleanGeometry extends CachedGeometry {
+export class BooleanGeometry extends GeometryBase {
 	constructor(operator, operands) {
 		super();
 		this.m_operator = operator;
@@ -511,17 +494,13 @@ export class BooleanGeometry extends CachedGeometry {
 		return new BooleanGeometry(this.m_operator, this.m_operands.map(f));
 	}
 
-	toContoursImpl(ctx) {
+	toBezArcs() {
 		if (this.m_operands.length === 0) return [];
-
 		const stack = [];
-		this.asOpStackImpl(ctx, stack);
-		const arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
-		const sink = new CurveUtil.BezToContoursSink();
-		TypoGeom.ShapeConv.transferBezArcShape(arcs, sink);
-		return sink.contours;
+		this.asOpStackImpl(stack);
+		return TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
 	}
-	asOpStackImpl(ctx, stack) {
+	asOpStackImpl(stack) {
 		if (this.m_operands.length === 0) {
 			stack.push({
 				type: "operand",
@@ -534,12 +513,12 @@ export class BooleanGeometry extends CachedGeometry {
 		for (const [i, operand] of this.m_operands.entries()) {
 			// Push operand
 			if (operand instanceof BooleanGeometry) {
-				operand.asOpStackImpl(ctx, stack);
+				operand.asOpStackImpl(stack);
 			} else {
 				stack.push({
 					type: "operand",
 					fillType: TypoGeom.Boolean.PolyFillType.pftNonZero,
-					shape: CurveUtil.convertShapeToArcs(operand.toContours(ctx)),
+					shape: operand.toBezArcs(),
 				});
 			}
 			// Push operator if i > 0
@@ -582,7 +561,7 @@ export class BooleanGeometry extends CachedGeometry {
 	}
 }
 
-export class StrokeGeometry extends CachedGeometry {
+export class StrokeGeometry extends GeometryBase {
 	constructor(geom, gizmo, radius, contrast, fInside) {
 		super();
 		this.m_geom = geom;
@@ -592,14 +571,14 @@ export class StrokeGeometry extends CachedGeometry {
 		this.m_fInside = fInside;
 	}
 
-	toContoursImpl(ctx) {
+	toBezArcs() {
 		// Produce simplified arcs
 		const nonTransformedGeometry = TransformedGeometry.create(
 			this.m_gizmo.inverse(),
 			this.m_geom,
 		);
 		const arcs = TypoGeom.Boolean.removeOverlap(
-			CurveUtil.convertShapeToArcs(nonTransformedGeometry.toContours(ctx)),
+			nonTransformedGeometry.toBezArcs(),
 			TypoGeom.Boolean.PolyFillType.pftNonZero,
 			CurveUtil.BOOLE_RESOLUTION,
 		);
@@ -608,18 +587,7 @@ export class StrokeGeometry extends CachedGeometry {
 		const fairizedArcs = TypoGeom.Fairize.fairizeBezierShape(arcs);
 
 		// Stroke the arcs
-		const strokedArcs = strokeArcs(
-			fairizedArcs,
-			this.m_radius,
-			this.m_contrast,
-			this.m_fInside,
-		);
-
-		// Convert to Iosevka format
-		const sink = new CurveUtil.BezToContoursSink(this.m_gizmo);
-		TypoGeom.ShapeConv.transferBezArcShape(strokedArcs, sink, CurveUtil.GEOMETRY_PRECISION);
-
-		return sink.contours;
+		return strokeArcs(fairizedArcs, this.m_radius, this.m_contrast, this.m_fInside);
 	}
 	toReferences() {
 		return null;
@@ -651,21 +619,21 @@ export class StrokeGeometry extends CachedGeometry {
 	}
 }
 
-export class RemoveHolesGeometry extends CachedGeometry {
+export class RemoveHolesGeometry extends GeometryBase {
 	constructor(geom, gizmo) {
 		super();
 		this.m_geom = geom;
 		this.m_gizmo = gizmo;
 	}
 
-	toContoursImpl(ctx) {
+	toBezArcs() {
 		// Produce simplified arcs
 		const nonTransformedGeometry = TransformedGeometry.create(
 			this.m_gizmo.inverse(),
 			this.m_geom,
 		);
 		let arcs = TypoGeom.Boolean.removeOverlap(
-			CurveUtil.convertShapeToArcs(nonTransformedGeometry.toContours(ctx)),
+			nonTransformedGeometry.toBezArcs(),
 			TypoGeom.Boolean.PolyFillType.pftNonZero,
 			CurveUtil.BOOLE_RESOLUTION,
 		);
@@ -689,12 +657,7 @@ export class RemoveHolesGeometry extends CachedGeometry {
 
 			arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
 		}
-
-		// Convert to Iosevka format
-		const sink = new CurveUtil.BezToContoursSink(this.m_gizmo);
-		TypoGeom.ShapeConv.transferBezArcShape(arcs, sink, CurveUtil.GEOMETRY_PRECISION);
-
-		return sink.contours;
+		return arcs;
 	}
 	toReferences() {
 		return null;
@@ -719,14 +682,30 @@ export class RemoveHolesGeometry extends CachedGeometry {
 
 // This special geometry type is used in the finalization phase to create TTF contours.
 export class SimplifyGeometry extends GeometryBase {
-	constructor(g) {
+	constructor(geom, gizmo) {
 		super();
-		this.m_geom = g;
+		this.m_geom = geom;
+		this.m_gizmo = gizmo;
 	}
+
 	// This will be cached by the caller, so we can afford to be a bit expensive here
-	toContours(ctx) {
-		// Produce simplified arcs
-		let arcs = CurveUtil.convertShapeToArcs(this.m_geom.toContours(ctx));
+	toContours() {
+		// Convert to TT curves
+		const sink = new QuadifySink();
+		TypoGeom.ShapeConv.transferGenericShape(
+			TypoGeom.Fairize.fairizeBezierShape(this.toBezArcs()),
+			sink,
+			CurveUtil.GEOMETRY_PRECISION,
+		);
+		return sink.contours;
+	}
+	// Produce simplified arcs
+	toBezArcs() {
+		let arcs = this.m_geom.toBezArcs();
+
+		const needsTransform = !Transform.isTranslate(this.m_gizmo);
+		if (needsTransform) CurveUtil.InPlaceTransformBez3Shape(this.m_gizmo.inverse(), arcs);
+
 		if (this.m_geom.measureComplexity() & CPLX_NON_SIMPLE) {
 			arcs = TypoGeom.Boolean.removeOverlap(
 				arcs,
@@ -735,15 +714,11 @@ export class SimplifyGeometry extends GeometryBase {
 			);
 		}
 
-		// Convert to TT curves
-		const sink = new QuadifySink();
-		TypoGeom.ShapeConv.transferGenericShape(
-			TypoGeom.Fairize.fairizeBezierShape(arcs),
-			sink,
-			CurveUtil.GEOMETRY_PRECISION,
-		);
-		return sink.contours;
+		if (needsTransform) CurveUtil.InPlaceTransformBez3Shape(this.m_gizmo, arcs);
+
+		return arcs;
 	}
+
 	toReferences() {
 		return null;
 	}
@@ -751,7 +726,7 @@ export class SimplifyGeometry extends GeometryBase {
 		return this.m_geom.getDependencies();
 	}
 	filterTag(fn) {
-		return new SimplifyGeometry(this.m_geom.filterTag(fn));
+		return new SimplifyGeometry(this.m_geom.filterTag(fn), this.m_gizmo);
 	}
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
@@ -760,19 +735,8 @@ export class SimplifyGeometry extends GeometryBase {
 	hash(h) {
 		h.beginStruct("SimplifyGeometry");
 		h.embed(this.m_geom);
+		h.gizmo(this.m_gizmo);
 		h.endStruct();
-	}
-
-	static wrapWithGizmo(g, gizmo) {
-		const needsTransform = !Transform.isTranslate(gizmo);
-		if (needsTransform) {
-			return new TransformedGeometry(
-				gizmo,
-				new SimplifyGeometry(new TransformedGeometry(gizmo.inverse(), g)),
-			);
-		} else {
-			return new SimplifyGeometry(g);
-		}
 	}
 }
 

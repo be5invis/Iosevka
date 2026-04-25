@@ -1,7 +1,3 @@
-import * as Format from "@iosevka/util/formatter";
-
-import { Point } from "./point.mjs";
-
 /// A generic buffer writer helper class
 export class BufferWriter {
 	constructor() {
@@ -62,43 +58,3 @@ export class BufferReader {
 		return value;
 	}
 }
-
-export const IntermediateResultsCodec = {
-	encodeKey(geom) {
-		const hasher = new Format.Hasher();
-		geom.hash(hasher);
-		return `i/${hasher.digest()}`;
-	},
-
-	encode(cs) {
-		const writer = new BufferWriter();
-		writer.writeUInt32(cs.length);
-		for (const contour of cs) {
-			writer.writeUInt32(contour.length);
-			for (const z of contour) {
-				writer.writeUInt8(z.type);
-				writer.writeFloat64(z.x);
-				writer.writeFloat64(z.y);
-			}
-		}
-		return writer.getResult();
-	},
-
-	decode(buffer) {
-		const reader = new BufferReader(buffer);
-		const numContours = reader.nextUInt32();
-		const cs = [];
-		for (let i = 0; i < numContours; i++) {
-			const contourLength = reader.nextUInt32();
-			const contour = [];
-			for (let j = 0; j < contourLength; j++) {
-				const type = reader.nextUInt8();
-				const x = reader.nextFloat64();
-				const y = reader.nextFloat64();
-				contour.push(Point.fromXY(type, x, y));
-			}
-			cs.push(contour);
-		}
-		return cs;
-	},
-};
