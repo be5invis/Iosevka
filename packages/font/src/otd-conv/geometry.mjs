@@ -48,7 +48,7 @@ class GemetryConverter {
 	#convertSimpleGeometryImpl(g) {
 		try {
 			if (!g.gizmo) throw new TypeError("No gizmo");
-			const gSimplified = Geom.SimplifyGeometry.wrapWithGizmo(g.geometry, g.gizmo);
+			const gSimplified = new Geom.SimplifyGeometry(g.geometry, g.gizmo);
 			return TrueTypeContourSetProxy.FromGeomContours(
 				gSimplified.toContours({ cache: this.cache }),
 			);

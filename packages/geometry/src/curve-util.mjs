@@ -155,6 +155,22 @@ export class BezToContoursSink {
 	}
 }
 
+export function InPlaceTransformBez3Shape(tf, shape) {
+	if (!tf || Transform.isIdentity(tf)) return shape;
+	for (const c of shape) {
+		for (let i = 0; i < c.length; i++) c[i] = Bez3WithTransform(c[i], tf);
+	}
+}
+export function Bez3WithTransform(arc, tf) {
+	if (!tf || Transform.isIdentity(tf)) return arc;
+	return new TypoGeom.Arcs.Bez3(
+		Point.transformedXY(tf, Point.Type.Corner, arc.a.x, arc.a.y),
+		Point.transformedXY(tf, Point.Type.CubicStart, arc.b.x, arc.b.y),
+		Point.transformedXY(tf, Point.Type.CubicEnd, arc.c.x, arc.c.y),
+		Point.transformedXY(tf, Point.Type.Corner, arc.d.x, arc.d.y),
+	);
+}
+
 export function Bez3FromHermite(zStart, dStart, zEnd, dEnd) {
 	const a = zStart,
 		d = zEnd;
