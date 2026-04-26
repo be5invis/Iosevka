@@ -188,10 +188,5 @@ function addVsLinks(gsOrig, gs, cmap, gr, vs) {
 }
 
 function byRank([_gna, a], [_gnb, b]) {
-	return (
-		b.glyphRank - a.glyphRank ||
-		a.grRank - b.grRank ||
-		a.codeRank - b.codeRank ||
-		a.subRank - b.subRank
-	);
+	return Glyph.compareByRank(a, b);
 }

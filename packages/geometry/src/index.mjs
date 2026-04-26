@@ -706,7 +706,6 @@ export class SimplifyGeometry extends GeometryBase {
 	// Produce simplified arcs
 	toBezArcs() {
 		let arcs = this.m_geom.toBezArcs();
-		CurveUtil.rorateShapeToCanonicalStartingPoint(arcs);
 
 		const needsTransform = !Transform.isTranslate(this.m_gizmo);
 		if (needsTransform) CurveUtil.InPlaceTransformBez3Shape(this.m_gizmo.inverse(), arcs);
