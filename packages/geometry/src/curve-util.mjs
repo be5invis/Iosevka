@@ -229,20 +229,3 @@ export function Bez3WithTransform(arc, tf) {
 		Point.transformedXY(tf, Point.Type.Corner, arc.d.x, arc.d.y),
 	);
 }
-
-export function rorateShapeToCanonicalStartingPoint(shape) {
-	for (const contour of shape) {
-		rotateContourToCanonicalStartingPoint(contour);
-	}
-}
-function rotateContourToCanonicalStartingPoint(arcContour) {
-	let minIndex = 0;
-	for (let i = 1; i < arcContour.length; i++) {
-		const aMin = arcContour[minIndex].a;
-		const aCurr = arcContour[i].a;
-		if (aCurr.y < aMin.y || (aCurr.y === aMin.y && aCurr.x < aMin.x)) {
-			minIndex = i;
-		}
-	}
-	if (minIndex > 0) arcContour.push(...arcContour.splice(0, minIndex));
-}

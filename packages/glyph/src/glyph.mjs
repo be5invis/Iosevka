@@ -10,17 +10,21 @@ export class Glyph {
 		this._m_identifier = identifier;
 		// Ranks
 		this.glyphRank = 0;
-		this.grRank = 0;
-		this.codeRank = 0xffffffff;
-		this.subRank = 0xffffffff;
+		this.codeRankHi = 0xffffffff;
+		this.metricRank = 0xffffffff;
+		this.codeRankLo = 0xffffffff;
+		this.subRank = 0;
+
 		// Geometry
 		this.geometry = new Geom.CombineGeometry();
 		this.gizmo = Transform.Id();
+
 		// Metrics
 		this.advanceWidth = 500;
 		this.divFrameParams = null;
 		this.markAnchors = {};
 		this.baseAnchors = {};
+
 		// Tracking
 		this._m_dependencyManager = null;
 		this.ctxTag = null;
@@ -228,6 +232,17 @@ export class Glyph {
 	}
 	deleteMarkAnchor(id) {
 		delete this.markAnchors[id];
+	}
+
+	// Rank comparison
+	static compareByRank(a, b) {
+		return (
+			b.glyphRank - a.glyphRank ||
+			a.codeRankHi - b.codeRankHi ||
+			a.metricRank - b.metricRank ||
+			a.codeRankLo - b.codeRankLo ||
+			a.subRank - b.subRank
+		);
 	}
 }
 

@@ -10,19 +10,23 @@ export class QuadifySink {
 	}
 	beginShape() {}
 	endShape() {
-		if (this.lastContour.length > 2) {
-			let c = this.lastContour;
-			c = this.alignHVKnots(c);
-			c = this.dropDuplicateFirstLast(c);
-			c = this.cleanupOccurrentKnots1(c);
-			c = this.cleanupOccurrentKnots2(c);
-			c = this.cleanupOccurrentKnots1(c);
-			c = this.removeColinearArc(c);
-			c = this.removeColinearCorners(c);
-			c = this.cleanupOccurrentKnots1(c);
-			if (c.length > 2) this.contours.push(c);
-		}
+		let c = this.lastContour;
 		this.lastContour = [];
+		if (c.length <= 2) return;
+
+		c = this.alignHVKnots(c);
+		this.#inPlaceDropDuplicateFirstLast(c);
+		this.#inPlaceCleanupOccurrentKnots1(c);
+		c = this.#cleanupOccurrentKnots2(c);
+		this.#inPlaceCleanupOccurrentKnots1(c);
+		this.#inPlaceRemoveColinearArc(c);
+		this.#inPlaceRemoveColinearCorners(c);
+		this.#inPlaceCleanupOccurrentKnots1(c);
+		this.#inPlaceRoundCoordinates(c);
+		if (c.length <= 2) return;
+
+		this.#inPlaceRotateToOptimizedStart(c);
+		this.contours.push(c);
 	}
 	moveTo(x, y) {
 		this.endShape();
@@ -64,7 +68,7 @@ export class QuadifySink {
 	}
 
 	// Drop the duplicate point (first-last)
-	dropDuplicateFirstLast(c) {
+	#inPlaceDropDuplicateFirstLast(c) {
 		while (c.length > 1) {
 			const first = c[0],
 				last = c[c.length - 1];
@@ -78,17 +82,16 @@ export class QuadifySink {
 				break;
 			}
 		}
-		return c;
 	}
 
 	// Occurrent cleanup -- corner-corner
-	cleanupOccurrentKnots1(c0) {
+	#inPlaceCleanupOccurrentKnots1(c) {
 		const drops = [];
-		for (let i = 0; i < c0.length; i++) drops[i] = false;
-		for (let i = 0; i < c0.length; i++) {
-			const iPost = (i + 1) % c0.length;
-			const pre = c0[i],
-				post = c0[iPost];
+		for (let i = 0; i < c.length; i++) drops[i] = false;
+		for (let i = 0; i < c.length; i++) {
+			const iPost = (i + 1) % c.length;
+			const pre = c[i],
+				post = c[iPost];
 			if (
 				iPost > 0 &&
 				pre.type === Point.Type.Corner &&
@@ -99,12 +102,12 @@ export class QuadifySink {
 			}
 		}
 
-		return dropBy(c0, drops);
+		dropBy(c, drops);
 	}
 
 	// Occurrent cleanup -- off points
 	// This function actually **INSERTS** points for occurrent off knots.
-	cleanupOccurrentKnots2(c0) {
+	#cleanupOccurrentKnots2(c0) {
 		const insertAfter = [];
 		for (let i = 0; i < c0.length; i++) insertAfter[i] = false;
 		for (let i = 0; i < c0.length; i++) {
@@ -138,8 +141,7 @@ export class QuadifySink {
 		return c1;
 	}
 
-	removeColinearCorners(c0) {
-		const c = c0.slice(0);
+	#inPlaceRemoveColinearCorners(c) {
 		let found = false;
 		do {
 			found = false;
@@ -158,10 +160,9 @@ export class QuadifySink {
 				}
 			}
 		} while (found);
-		return c;
 	}
 
-	removeColinearArc(c) {
+	#inPlaceRemoveColinearArc(c) {
 		if (c[0].type !== Point.Type.Corner) throw new Error("Unreachable");
 
 		let front = 0,
@@ -185,7 +186,58 @@ export class QuadifySink {
 			}
 		}
 
-		return dropBy(c, shouldRemove);
+		dropBy(c, shouldRemove);
+	}
+
+	#inPlaceRoundCoordinates(c) {
+		for (const z of c) {
+			z.x = Math.round(z.x);
+			z.y = Math.round(z.y);
+		}
+	}
+
+	#inPlaceRotateToOptimizedStart(c) {
+		let lastX = 0;
+		let lastY = 0;
+		if (this.contours.length > 0) {
+			const lastContour = this.contours[this.contours.length - 1];
+			// all the contours we add into this.contours are guaranteed to have at least 3 points
+			// so we can safely access lastContour[lastContour.length - 1]
+			lastX = lastContour[lastContour.length - 1].x;
+			lastY = lastContour[lastContour.length - 1].y;
+		}
+
+		let minId = 0;
+		const minX = c[0].x;
+		const minY = c[0].y;
+		let minCost = this.#estimateByteCostOfDelta(c[0], lastX, lastY);
+
+		for (let i = 1; i < c.length; i++) {
+			const z = c[i];
+			if (z.type !== Point.Type.Corner) continue;
+			const costT = this.#estimateByteCostOfDelta(z, lastX, lastY);
+			if (
+				costT < minCost ||
+				(costT === minCost && z.y < minY) ||
+				(costT === minCost && z.y === minY && z.x < minX)
+			) {
+				minCost = costT;
+				minId = i;
+			}
+		}
+
+		if (minId > 0) {
+			const rotated = c.splice(0, minId);
+			c.push(...rotated);
+		}
+	}
+
+	#estimateByteCostOfDelta(z, lastX, lastY) {
+		const deltaX = z.x - lastX;
+		const deltaY = z.y - lastY;
+		const costX = deltaX === 0 ? 0 : Math.abs(deltaX) < 128 ? 1 : 2;
+		const costY = deltaY === 0 ? 0 : Math.abs(deltaY) < 128 ? 1 : 2;
+		return costX + costY;
 	}
 }
 
