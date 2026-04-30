@@ -1,5 +1,6 @@
 $$include '../../meta/macros.ptl'
 
+import [Box] from "@iosevka/geometry/box"
 import [mix linreg clamp fallback] from "@iosevka/util"
 
 glyph-module
@@ -12,6 +13,7 @@ glyph-block Symbol-Pictograph-Checking-Marks : begin
 	for-width-kinds WideWidth1 : do
 		define Geom : GeometricDim MosaicUnitWidth MosaicWidth
 		define lightSw  : UnicodeWeightGrade 300  Geom.Scalar GeometryStroke
+		define boldSw   : UnicodeWeightGrade 700  Geom.Scalar GeometryStroke
 		define heavySw  : UnicodeWeightGrade 900  Geom.Scalar GeometryStroke
 
 		define ptMaxWidth : MosaicWidth - SB
@@ -19,44 +21,50 @@ glyph-block Symbol-Pictograph-Checking-Marks : begin
 		define ptHeight  : (ptHeight0 ** 2) / [Math.hypot ptHeight0 : Math.min ptHeight0 ptMaxWidth]
 		define ptWidth  : Math.min ptMaxWidth ptHeight
 		define ptMidX : MosaicWidth / 2
+		define plainBox : Box.fromPointAndSize (MosaicWidth / 2) SymbolMid ptWidth ptHeight
 		define ptSB : (MosaicWidth - ptWidth) / 2
 		define ptRSB : MosaicWidth - ptSB
 		define ptTop : SymbolMid + ptHeight / 2
 		define ptBot : SymbolMid - ptHeight / 2
 
+		define [checkMarkShape box sw] : union
+			dispiro [widths.center sw]
+				g4 box.l ([box.yp 0.46] + 0.5 * sw)
+				alsoThru 0.5 0.4
+				g4 [box.xp 0.4] [box.yp 0.05] [heading Downward]
+			dispiro [widths.center sw]
+				g4 [box.xp 0.4] [box.yp 0.05] [heading Upward]
+				alsoThru 0.5 0.6
+				g4 box.r [box.yp 0.9]
+
 		foreach [{unicode sw} : items-of {{0x2713 lightSw} {0x2714 heavySw}}] : begin
 			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
 				set-width MosaicWidth
-				include : dispiro
-					widths.center sw
-					g4 ptSB ([mix ptBot ptTop 0.46] + 0.5 * sw)
-					alsoThru 0.5 0.4
-					g4 [mix ptSB ptRSB 0.4] [mix ptBot ptTop 0.05] [heading Downward]
-				include : dispiro
-					widths.center sw
-					g4 [mix ptSB ptRSB 0.4] [mix ptBot ptTop 0.05] [heading Upward]
-					alsoThru 0.5 0.6
-					g4 ptRSB [mix ptBot ptTop 0.9]
+				include : checkMarkShape plainBox sw
+
+		define [straightCrossShape box sw] : union
+			dispiro [widths.center sw] [g4 box.r box.t] [g4 box.l box.b]
+			dispiro [widths.center sw] [g4 box.l box.t] [g4 box.r box.b]
 
 		foreach [{unicode sw} : items-of {{0x2715 lightSw} {0x2716 heavySw}} ] : begin
 			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
 				set-width MosaicWidth
-				include : dispiro [widths.center sw] [g4 ptRSB ptTop] [g4 ptSB  ptBot]
-				include : dispiro [widths.center sw] [g4 ptSB  ptTop] [g4 ptRSB ptBot]
+				include : straightCrossShape plainBox sw
+
+		define [curlyCrossShape box sw] : union
+			dispiro [widths.center sw]
+				g4 [box.xp 1.05] [box.yp 1.01]
+				alsoThru 0.53 0.45
+				g4 [box.xp (-0.05)] [box.yp (-0.025)]
+			dispiro [widths.center sw]
+				g4 box.l [box.yp 0.96]
+				alsoThru 0.47 0.5
+				g4 box.r [box.yp 0.05]
 
 		foreach [{unicode sw} : items-of {{0x2717 lightSw} {0x2718 heavySw}} ] : begin
 			create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
 				set-width MosaicWidth
-				include : dispiro
-					widths.center sw
-					g4 [mix ptSB ptRSB 1.05] [mix SymbolMid ptTop 1.02]
-					alsoThru 0.53 0.45
-					g4 [mix ptSB ptRSB (-0.05)] [mix SymbolMid ptBot 1.05]
-				include : dispiro
-					widths.center sw
-					g4 ptSB [mix ptBot ptTop 0.96]
-					alsoThru 0.47 0.5
-					g4 ptRSB [mix ptBot ptTop 0.05]
+				include : curlyCrossShape plainBox sw
 
 		create-glyph [MangleName 'halfCheck'] [MangleUnicode 0x237B] : glyph-proc
 			set-width MosaicWidth
@@ -66,6 +74,21 @@ glyph-block Symbol-Pictograph-Checking-Marks : begin
 				g4 [mix ptSB ptRSB 0.5] [mix ptBot ptTop 0.82]
 				alsoThru 0.47 0.5
 				g4 ptRSB [mix ptBot ptTop 0.42]
+
+		define instLabelBox : [Box.fromPointAndHalfSize (MosaicWidth / 2) SymbolMid Geom.Size].pad [Math.max (MosaicWidth / 16) [AdviceStroke 4]]
+
+		create-glyph [MangleName 0x2705] [MangleUnicode 0x2705] : glyph-proc
+			set-width MosaicWidth
+			include : difference
+				refer-glyph [MangleName 'blackSquare']
+				checkMarkShape instLabelBox boldSw
+
+		create-glyph [MangleName 0x274E] [MangleUnicode 0x274E] : glyph-proc
+			set-width MosaicWidth
+			include : difference
+				refer-glyph [MangleName 'blackSquare']
+				straightCrossShape instLabelBox boldSw
+
 
 	do "Decorative angular brackets"
 		define Geom : GeometricDim Width Width
