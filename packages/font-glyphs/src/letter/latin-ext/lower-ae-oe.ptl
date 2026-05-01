@@ -115,7 +115,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				set-mark-anchor 'cvDecompose' 0 0
 				include : EShape 1 df body
 
-			create-glyph "ae/eInv.\(suffix)" : glyph-proc
+			create-glyph "ae/inve.\(suffix)" : glyph-proc
 				local df : DivFrame para.advanceScaleMM 3
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
@@ -153,9 +153,9 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	do "c subglyphs"
 		glyph-block-import Letter-Latin-C : CLetterForm CConfig
 
-		define [openOShape df sty styBot] : new-glyph : glyph-proc
+		define [openOShape df styTop styBot] : new-glyph : glyph-proc
 			local subDf : df.slice 3 2 OX
-			local lf : CLetterForm subDf sty styBot XH 0
+			local lf : CLetterForm subDf styTop styBot XH 0
 				ada -- subDf.smallArchDepthA
 				adb -- subDf.smallArchDepthB
 				sw  -- df.mvs
@@ -169,26 +169,27 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				sw  -- subDf.mvs
 			include : lf.full
 
-		foreach { suffix { sty styBot } } [Object.entries CConfig] : do
+		foreach { suffix { styTop styBot } } [Object.entries CConfig] : do
 			create-glyph "oe/oOpen.\(suffix)" : glyph-proc
 				local df : include : DivFrame para.advanceScaleMM 3
 				include : df.markSet.e
 				set-base-anchor 'cvDecompose' 0 0
-				include : openOShape df sty styBot
+				include : openOShape df styTop styBot
 
-			create-glyph "cyrl/este.upright/left.\(suffix)" : glyph-proc
-				local df : include : DivFrame para.advanceScaleMM 3.5
-				local subDfLeft : df.slice 3.25 1.875
-				include : df.markSet.e
-				set-base-anchor 'cvDecompose' 0 0
-				include : EsTeLeftShape subDfLeft styBot
+			if (!styTop) : begin
+				create-glyph "cyrl/este.upright/left.\(suffix)" : glyph-proc
+					local df : include : DivFrame para.advanceScaleMM 3.5
+					local subDfLeft : df.slice 3.25 1.875
+					include : df.markSet.e
+					set-base-anchor 'cvDecompose' 0 0
+					include : EsTeLeftShape subDfLeft styBot
 
-			create-glyph "cyrl/este.italic/left.\(suffix)" : glyph-proc
-				local df : include : DivFrame para.advanceScaleMM 4.75
-				local subDfLeft : df.slice 4.5 2
-				include : df.markSet.e
-				set-base-anchor 'cvDecompose' 0 0
-				include : EsTeLeftShape subDfLeft styBot
+				create-glyph "cyrl/este.italic/left.\(suffix)" : glyph-proc
+					local df : include : DivFrame para.advanceScaleMM 4.75
+					local subDfLeft : df.slice 4.5 2
+					include : df.markSet.e
+					set-base-anchor 'cvDecompose' 0 0
+					include : EsTeLeftShape subDfLeft styBot
 
 	do "Ya subglyphs"
 		glyph-block-import Letter-Latin-Upper-P : PShape PBarPosY
@@ -309,29 +310,31 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 		foreach { suffix { doST doSB } } [Object.entries TConfig] : do
 			create-glyph "cyrl/este.upright/right.\(suffix)" : glyph-proc
-				local df : include : DivFrame para.advanceScaleMM 3.5
+				local df : DivFrame para.advanceScaleMM 3.5
 				local subDfLeft : df.slice 3.25 1.875
-				local subdfRight : df.restCompact 1 subDfLeft 2
+				local subDfRight : df.restCompact 1 subDfLeft 2
 
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
-				include : EsTeRightShape subdfRight doST doSB
-				include : ApparentTranslate (df.width - subdfRight.width) 0
+				include : EsTeRightShape subDfRight doST doSB
+				include : ApparentTranslate (df.width - subDfRight.width) 0
 
 	do "Te (italic) subglyphs"
 		glyph-block-import Letter-Latin-Lower-M : mShapeBodyImpl SmallMConfig
+
 		foreach { suffix { { Body earless } { shortLeg } { tailed } { Serifs } } } [pairs-of SmallMConfig] : do
 			create-glyph "cyrl/este.italic/right.\(suffix)" : glyph-proc
 				local df : DivFrame para.advanceScaleMM 4.75
 				local subDfLeft : df.slice 4.5 2
-				local subdfRight : df.restCompact 0.5 subDfLeft 3
+				local subDfRight : df.restCompact 0.5 subDfLeft 3
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
-				include : mShapeBodyImpl subdfRight XH Body earless shortLeg tailed Serifs
-				include : ApparentTranslate (df.width - subdfRight.width) 0
+				include : mShapeBodyImpl subDfRight XH Body earless shortLeg tailed Serifs
+				include : ApparentTranslate (df.width - subDfRight.width) 0
 
 	do "El subglyphs"
 		glyph-block-import Letter-Cyrillic-El : CyrElShape
+
 		create-glyph 'cyrl/Lha/left' : glyph-proc
 			local df : include : DivFrame para.advanceScaleM 3.2
 			include : df.markSet.capital
@@ -364,10 +367,8 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	select-variant "aa" 0xA733 (follow -- 'a/doubleStorey')
 
 	select-variant "ae/a"
-	select-variant "ae/e"     (follow -- 'e')
-	select-variant "ae/eInv"  (follow -- 'e')
+	select-variant "ae/e" (follow -- 'e')
 	select-variant "au/u"
-	select-variant "oe/oOpen" (follow -- 'oOpen')
 	select-variant "ue/u"
 
 	select-variant "cyrl/aye/a" (shapeFrom -- 'ae/a')
@@ -385,21 +386,24 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	derive-composites 'au' 0xA737 'ae/a' 'au/u'
 	derive-composites 'uo' 0xAB63 'ue/u' 'ao/o'
 
-	derive-composites 'aeInv'  0xAB31 'ae/a' 'ae/eInv'
-	derive-composites 'oeInv'  0xAB40 'oe/o' 'ae/eInv'
-	derive-composites 'oOpene' 0xAB62 'oe/oOpen' 'ae/e'
+	CreateTurnedLetter 'turnae' 0x1D02 'ae' HalfAdvance (XH / 2) [DivFrame para.advanceScaleMM 3]
+	CreateTurnedLetter 'turnoe' 0x1D14 'oe' HalfAdvance (XH / 2) [DivFrame para.advanceScaleMM 3]
+
+	select-variant "ae/inve" (follow -- 'e')
+	derive-composites 'aInve' 0xAB31 'ae/a' 'ae/inve'
+	derive-composites 'oInve' 0xAB40 'oe/o' 'ae/inve'
+
+	derive-composites 'turnoeSlash' 0xAB41 'turnoe' 'rightHalfSlashOverlay'
+	derive-composites 'turnoeBar'   0xAB42 'turnoe' 'rightHalfBarOverlay'
+
+	select-variant "oe/oOpen" (follow -- 'oOpen')
+	derive-composites 'oeOpen' 0xAB62 'oe/oOpen' 'ae/e'
 
 	derive-composites 'cyrl/aye'  0x4D5 'cyrl/aye/a'   'ae/e'
 	derive-composites 'cyrl/yaye' 0x519 'cyrl/yaye/ya' 'ae/e'
 
 	derive-composites 'cyrl/Lha' 0x514 'cyrl/Lha/left' 'cyrl/Lha/right'
 	derive-composites 'cyrl/lha' 0x515 'cyrl/lha/left' 'cyrl/lha/right'
-
-	CreateTurnedLetter 'turnae' 0x1D02 'ae' HalfAdvance (XH / 2) [DivFrame para.advanceScaleMM 3]
-	CreateTurnedLetter 'turnoe' 0x1D14 'oe' HalfAdvance (XH / 2) [DivFrame para.advanceScaleMM 3]
-
-	derive-composites 'turnoSlashe' 0xAB41 'turnoe' 'rightHalfSlashOverlay'
-	derive-composites 'turnoBare'   0xAB42 'turnoe' 'rightHalfBarOverlay'
 
 	select-variant 'cyrl/este.upright/left'  (follow -- 'c/bottomSerif')
 	select-variant 'cyrl/este.upright/right' (follow -- 'T')
