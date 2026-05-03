@@ -13,6 +13,10 @@ glyph-block Letter-Latin-Lower-A : begin
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar RetroflexHook
 	glyph-block-import Letter-Shared-Shapes : InwardSlabArcStart
 
+	define HOOK-SLAB-NONE      0
+	define HOOK-SLAB-CLASSICAL 1 # TODO
+	define HOOK-SLAB-INWARD    2
+
 	glyph-block-export DoubleStorey
 	define DoubleStorey : namespace
 		define [ADoubleStoreyStroke df] : AdviceStroke2 2 3 XH df.adws
@@ -23,34 +27,39 @@ glyph-block Letter-Latin-Lower-A : begin
 			local sw : ADoubleStoreyStroke df
 			return : df.archDepthBOf (ArchDepth * [StrokeWidthBlend 0.9 0.81 sw]) sw
 
-		define [ADoubleStoreyHookAndBarT sink df hookStyle y0 stroke] : begin
+		define [ADoubleStoreyHookAndBarT sink] : function [df hookStyle y0 stroke fine] : begin
 			local isMask : sink == spiro-outline
 			return : sink
 				widths.rhs stroke
 				match hookStyle
-					1 : list
+					[Just HOOK-SLAB-INWARD] : InwardSlabArcStart.LtrRhs df.leftSB XH stroke AHook
+					__ : list
 						g4 df.leftSB (XH - AHook)
 						HookStart XH (sw -- stroke)
-					2 : InwardSlabArcStart.LtrRhs df.leftSB XH stroke AHook
 				flat df.rightSB [Math.max (XH - [ADoubleStoreySmoothB df]) (y0 + TINY)]
 				[if isMask corner curl] df.rightSB y0 [heading Downward]
 				if isMask { [corner df.leftSB y0] } {}
 
-		export : define [HookAndBar df hookStyle y0 _stroke] : glyph-proc
-			if ((hookStyle != 1) && (hookStyle != 2)) : throw : new Error "Invalid hookStyle"
-			local sw : fallback _stroke : ADoubleStoreyStroke df
-			include : ADoubleStoreyHookAndBarT dispiro df hookStyle y0 sw
-			if (hookStyle == 2) : include : ArcStartSerif.InwardL df.leftSB XH sw AHook
+		export : define [HookAndBar df hookStyle y0 _sw _fine] : glyph-proc
+			local sw   : fallback _sw : ADoubleStoreyStroke df
+			local fine : fallback _fine df.shoulderFine
+			include : [ADoubleStoreyHookAndBarT dispiro] df hookStyle y0 sw fine
+			include : match hookStyle
+				[Just HOOK-SLAB-INWARD] : ArcStartSerif.InwardL df.leftSB XH sw AHook
+				__                      : no-shape
 
-		export : define [HookAndBarMask df hookStyle y0 _stroke] : begin
-			local sw : fallback _stroke : ADoubleStoreyStroke df
-			return : ADoubleStoreyHookAndBarT spiro-outline df hookStyle y0 sw
+		export : define [HookAndBarMask df hookStyle y0 _sw _fine] : begin
+			local sw   : fallback _sw : ADoubleStoreyStroke df
+			local fine : fallback _fine df.shoulderFine
+			return : [ADoubleStoreyHookAndBarT spiro-outline] df hookStyle y0 sw fine
 
-		define [ADoubleStoreyArcT df sink kind rise stroke bbd] : glyph-proc
+		define [ADoubleStoreyArcT sink] : function [df kind rise stroke fine bbd] : glyph-proc
 			local isMask : sink == spiro-outline
-			local barTop : XH * DesignParameters.aBarPos + stroke * 0.425
-			local ada2 : ArchDepthAOf : SmallArchDepth * DesignParameters.aBarPos
-			local adb2 : ArchDepthBOf : SmallArchDepth * DesignParameters.aBarPos
+			local barTop : [mix 0 XH DesignParameters.aBarPos] + stroke * 0.425
+			local ada  : df.archDepthAOf (SmallArchDepth * 0.9) stroke
+			local adb  : df.archDepthBOf (SmallArchDepth * 0.9) stroke
+			local ada2 :    ArchDepthAOf (SmallArchDepth * DesignParameters.aBarPos)
+			local adb2 :    ArchDepthBOf (SmallArchDepth * DesignParameters.aBarPos)
 			local leftSlopeS : 0.1 * (df.width / HalfUPM)
 			local leftSlope  : leftSlopeS - TanSlope
 			include : sink
@@ -61,9 +70,9 @@ glyph-block Letter-Latin-Lower-A : begin
 				g4 (df.leftSB + OX) ([YSmoothMidL barTop 0 ada2 adb2] - [HSwToV leftSlopeS] * SmoothAdjust) [heading {.x HVContrast .y leftSlope}]
 				match kind
 					0 : list
-						Arch.lhs 0 (sw -- stroke) (swAfter -- df.shoulderFine)
-						[if isMask flat straight.up.end] (df.rightSB - bbd - [HSwToV : stroke - df.shoulderFine]) [Math.min (barTop - [if isMask TINY 0]) : df.archDepthAOf (SmallArchDepth * 0.9) stroke] [widths.lhs df.shoulderFine]
-						if isMask { [corner (df.rightSB - bbd - [HSwToV : stroke - df.shoulderFine]) barTop] } {}
+						Arch.lhs 0 (sw -- stroke) (swAfter -- fine)
+						flat (df.rightSB - bbd - [HSwToV : stroke - fine]) [Math.min (barTop - TINY - [HSwToV : Math.abs : stroke * TanSlope]) (0 + ada)] [widths.lhs fine]
+						[if isMask corner curl] (df.rightSB - bbd - [HSwToV : stroke - fine]) barTop [heading Upward]
 					1 : if rise
 						list
 							Arch.lhs 0 (sw -- stroke) (blendPost -- {})
@@ -77,66 +86,68 @@ glyph-block Letter-Latin-Lower-A : begin
 						flat df.rightSB [Math.min rise : YSmoothMidR barTop 0 ada2 adb2]
 						curl df.rightSB (rise + TINY + [HSwToV : Math.abs : stroke * TanSlope]) [heading Upward]
 
-		export : define [Arc df kind rise _sw _bbd] : ADoubleStoreyArcT df dispiro kind rise
+		export : define [Arc df kind rise _sw _fine _bbd] : [ADoubleStoreyArcT dispiro] df kind rise
 			fallback _sw : ADoubleStoreyStroke df
-			fallback _bbd 0
+			fallback _fine df.shoulderFine
+			fallback _bbd  0
 
-		export : define [ArcMask df kind rise _sw _bbd] : ADoubleStoreyArcT df spiro-outline kind rise
+		export : define [ArcMask df kind rise _sw _fine _bbd] : [ADoubleStoreyArcT spiro-outline] df kind rise
 			fallback _sw : ADoubleStoreyStroke df
-			fallback _bbd 0
+			fallback _fine df.shoulderFine
+			fallback _bbd  0
 
-		export : define [Serifless df hookStyle sw] : union
-			HookAndBar df hookStyle 0 sw
-			Arc        df 0         0 sw
+		export : define [Serifless df hookStyle _sw] : union
+			HookAndBar df hookStyle 0 _sw
+			Arc        df 0         0 _sw
 
-		export : define [Serifed df hookStyle sw] : union
-			Serifless  df hookStyle sw
-			begin [SerifFrame.fromDf df XH 0 (swRef -- [fallback sw : ADoubleStoreyStroke df]) (swSerif -- df.mvs)].rb.outer
+		export : define [Serifed df hookStyle _sw] : union
+			Serifless  df hookStyle _sw
+			begin [SerifFrame.fromDf df XH 0 (swRef -- [fallback _sw : ADoubleStoreyStroke df]) (swSerif -- df.mvs)].rb.outer
 
-		export : define [Tailed df hookStyle sw] : union
-			HookAndBar df hookStyle (XH - [ADoubleStoreySmoothB df] + O) sw
-			Arc        df 0         0                                    sw
-			RightwardTailedBar df.rightSB 0 (XH - [ADoubleStoreySmoothB df]) [fallback sw : ADoubleStoreyStroke df]
+		export : define [Tailed df hookStyle _sw] : union
+			HookAndBar df hookStyle (XH - [ADoubleStoreySmoothB df] + O) _sw
+			Arc        df 0         0                                    _sw
+			RightwardTailedBar df.rightSB 0 (XH - [ADoubleStoreySmoothB df]) [fallback _sw : ADoubleStoreyStroke df]
 
-		export : define [FlatBottomSerifless df hookStyle sw] : union
-			HookAndBar df hookStyle 0 sw
-			Arc        df 1         0 sw
+		export : define [FlatBottomSerifless df hookStyle _sw] : union
+			HookAndBar df hookStyle 0 _sw
+			Arc        df 1         0 _sw
 
-		export : define [FlatBottomSerifed df hookStyle sw] : union
-			FlatBottomSerifless df hookStyle sw
-			begin [SerifFrame.fromDf df XH 0 (swRef -- [fallback sw : ADoubleStoreyStroke df]) (swSerif -- df.mvs)].rb.outer
+		export : define [FlatBottomSerifed df hookStyle _sw] : union
+			FlatBottomSerifless df hookStyle _sw
+			begin [SerifFrame.fromDf df XH 0 (swRef -- [fallback _sw : ADoubleStoreyStroke df]) (swSerif -- df.mvs)].rb.outer
 
-		export : define [ToothlessCorner df hookStyle sw] : union
-			HookAndBar df hookStyle DToothlessRise sw
-			Arc        df 1         DToothlessRise sw
+		export : define [ToothlessCorner df hookStyle _sw] : union
+			HookAndBar df hookStyle DToothlessRise _sw
+			Arc        df 1         DToothlessRise _sw
 
-		export : define [ToothlessRounded df hookStyle sw] : union
-			HookAndBar df hookStyle [ADoubleStoreySmoothA df] sw
-			Arc        df 2         [ADoubleStoreySmoothA df] sw
+		export : define [ToothlessRounded df hookStyle _sw] : union
+			HookAndBar df hookStyle [ADoubleStoreySmoothA df] _sw
+			Arc        df 2         [ADoubleStoreySmoothA df] _sw
 
-		export : define [GetMask shapeFn df sw] : match shapeFn
-			[Just FlatBottomSerifless] : ArcMask df 1 0                         sw
-			[Just FlatBottomSerifed]   : ArcMask df 1 0                         sw
-			[Just ToothlessCorner]     : ArcMask df 1 DToothlessRise            sw
-			[Just ToothlessRounded]    : ArcMask df 2 [ADoubleStoreySmoothA df] sw
-			__                         : ArcMask df 0 0                         sw
+		export : define [GetMask shapeFn df _sw] : match shapeFn
+			[Just FlatBottomSerifless] : ArcMask df 1 0                         _sw
+			[Just FlatBottomSerifed]   : ArcMask df 1 0                         _sw
+			[Just ToothlessCorner]     : ArcMask df 1 DToothlessRise            _sw
+			[Just ToothlessRounded]    : ArcMask df 2 [ADoubleStoreySmoothA df] _sw
+			__                         : ArcMask df 0 0                         _sw
 
 	glyph-block-export DoubleStoreyConfig
 	define DoubleStoreyConfig : object
-		doubleStoreySerifless                            { DoubleStorey.Serifless           RightSB            1 }
-		doubleStoreySerifed                              { DoubleStorey.Serifed            (RightSB + SideJut) 1 }
-		doubleStoreyTailed                               { DoubleStorey.Tailed             (RightSB + SideJut) 1 }
-		doubleStoreyFlatBottomSerifless                  { DoubleStorey.FlatBottomSerifless RightSB            1 }
-		doubleStoreyFlatBottomSerifed                    { DoubleStorey.FlatBottomSerifed  (RightSB + SideJut) 1 }
-		doubleStoreyToothlessCorner                      { DoubleStorey.ToothlessCorner     nothing            1 }
-		doubleStoreyToothlessRounded                     { DoubleStorey.ToothlessRounded    nothing            1 }
-		doubleStoreyHookInwardSerifedSerifless           { DoubleStorey.Serifless           RightSB            2 }
-		doubleStoreyHookInwardSerifedSerifed             { DoubleStorey.Serifed            (RightSB + SideJut) 2 }
-		doubleStoreyHookInwardSerifedTailed              { DoubleStorey.Tailed             (RightSB + SideJut) 2 }
-		doubleStoreyHookInwardSerifedFlatBottomSerifless { DoubleStorey.FlatBottomSerifless RightSB            2 }
-		doubleStoreyHookInwardSerifedFlatBottomSerifed   { DoubleStorey.FlatBottomSerifed  (RightSB + SideJut) 2 }
-		doubleStoreyHookInwardSerifedToothlessCorner     { DoubleStorey.ToothlessCorner     nothing            2 }
-		doubleStoreyHookInwardSerifedToothlessRounded    { DoubleStorey.ToothlessRounded    nothing            2 }
+		doubleStoreySerifless                            { DoubleStorey.Serifless           RightSB            HOOK-SLAB-NONE   }
+		doubleStoreySerifed                              { DoubleStorey.Serifed            (RightSB + SideJut) HOOK-SLAB-NONE   }
+		doubleStoreyTailed                               { DoubleStorey.Tailed             (RightSB + SideJut) HOOK-SLAB-NONE   }
+		doubleStoreyFlatBottomSerifless                  { DoubleStorey.FlatBottomSerifless RightSB            HOOK-SLAB-NONE   }
+		doubleStoreyFlatBottomSerifed                    { DoubleStorey.FlatBottomSerifed  (RightSB + SideJut) HOOK-SLAB-NONE   }
+		doubleStoreyToothlessCorner                      { DoubleStorey.ToothlessCorner     nothing            HOOK-SLAB-NONE   }
+		doubleStoreyToothlessRounded                     { DoubleStorey.ToothlessRounded    nothing            HOOK-SLAB-NONE   }
+		doubleStoreyHookInwardSerifedSerifless           { DoubleStorey.Serifless           RightSB            HOOK-SLAB-INWARD }
+		doubleStoreyHookInwardSerifedSerifed             { DoubleStorey.Serifed            (RightSB + SideJut) HOOK-SLAB-INWARD }
+		doubleStoreyHookInwardSerifedTailed              { DoubleStorey.Tailed             (RightSB + SideJut) HOOK-SLAB-INWARD }
+		doubleStoreyHookInwardSerifedFlatBottomSerifless { DoubleStorey.FlatBottomSerifless RightSB            HOOK-SLAB-INWARD }
+		doubleStoreyHookInwardSerifedFlatBottomSerifed   { DoubleStorey.FlatBottomSerifed  (RightSB + SideJut) HOOK-SLAB-INWARD }
+		doubleStoreyHookInwardSerifedToothlessCorner     { DoubleStorey.ToothlessCorner     nothing            HOOK-SLAB-INWARD }
+		doubleStoreyHookInwardSerifedToothlessRounded    { DoubleStorey.ToothlessRounded    nothing            HOOK-SLAB-INWARD }
 
 	foreach { suffix { body xTrailing hookStyle } } [Object.entries DoubleStoreyConfig] : do
 		create-glyph "a.\(suffix)" : glyph-proc
@@ -154,15 +165,15 @@ glyph-block Letter-Latin-Lower-A : begin
 		local df : include : DivFrame 1
 		include : df.markSet.e
 
-		include : DoubleStorey.HookAndBar df 1 0 BBS
+		include : DoubleStorey.HookAndBar df 0 0 BBS
 		include : intersection
-			DoubleStorey.HookAndBarMask df 1 0
+			DoubleStorey.HookAndBarMask df 0 0
 			VBar.r (RightSB - BBD) 0 XH BBS
 		include : difference
 			union
-				DoubleStorey.Arc df 0 0 BBS BBD
+				DoubleStorey.Arc df 0 0 BBS ShoulderFine BBD
 				intersection
-					DoubleStorey.ArcMask df 0 0 BBS BBD
+					DoubleStorey.ArcMask df 0 0 BBS ShoulderFine BBD
 					VBar.l (SB + OX + BBD) 0 XH BBS
 			Rect XH 0 (RightSB - BBD) Width
 		include : HBar.b (RightSB - BBD) RightSB 0 BBS

@@ -27,25 +27,26 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	do "a subglyphs"
 		glyph-block-import Letter-Latin-Lower-A : DoubleStorey DoubleStoreyConfig
 
-		define [aeAPart body hookStyle pShift df _o] : begin
-			local { subDf shift } : SubDfAndShift pShift df _o
-			return : with-transform [ApparentTranslate shift 0]
-				body subDf hookStyle df.mvs
-
 		foreach { suffix { body xTrailing hookStyle } } [Object.entries DoubleStoreyConfig] : do
 			if (body === DoubleStorey.ToothlessRounded) : begin
 				create-glyph "ae/a.\(suffix)" : glyph-proc
 					local df : include : DivFrame para.advanceScaleMM 3
 					include : df.markSet.e
 					set-base-anchor 'cvDecompose' 0 0
-					include : aeAPart DoubleStorey.ToothlessRounded hookStyle 0 df 0
+					local subDf : df.slice 3 2
+					include : union
+						DoubleStorey.HookAndBar subDf hookStyle (XH / 2) df.mvs (df.mvs * CThinB)
+						DoubleStorey.Arc        subDf 0         (XH / 2) df.mvs (df.mvs * CThinB)
 
 			create-glyph "aa.\(suffix)" : glyph-proc
 				local df : include : DivFrame para.advanceScaleMM 3
 				include : df.markSet.e
-
-				local [left]  : aeAPart DoubleStorey.ToothlessRounded hookStyle 0 df
-				local [right] : aeAPart body                          hookStyle 1 df
+				local { subDf shift } : SubDfAndShift 1 df
+				define [left] : union
+					DoubleStorey.HookAndBar subDf hookStyle subDf.smallArchDepthB df.mvs (df.mvs * CThinB)
+					DoubleStorey.Arc        subDf 0         subDf.smallArchDepthB df.mvs (df.mvs * CThinB)
+				define [right] : with-transform [ApparentTranslate shift 0]
+					body subDf hookStyle df.mvs
 				include : difference [right] : intersection
 					MaskAbove [mix 0 XH DesignParameters.aBarPos]
 					union
