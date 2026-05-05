@@ -163,14 +163,13 @@ export : define [calculateMetrics para] : begin
 	define [StrokeWidthBlend min max sw] : linreg para.canonicalStrokeWidthMin min para.canonicalStrokeWidthMax max [fallback sw Stroke]
 
 	define SmoothAdjust : StrokeWidthBlend 80 144
-	define ArchDepthA : ArchDepth - TanSlope * SmoothAdjust
-	define ArchDepthB : ArchDepth + TanSlope * SmoothAdjust
-	define SmallArchDepthA : SmallArchDepth - TanSlope * SmoothAdjust
-	define SmallArchDepthB : SmallArchDepth + TanSlope * SmoothAdjust
 	define [ArchDepthAOf archDepth width] : archDepth - TanSlope * SmoothAdjust * ([fallback width Width] / Width)
 	define [ArchDepthBOf archDepth width] : archDepth + TanSlope * SmoothAdjust * ([fallback width Width] / Width)
-	define [ArchDepthAClamped top bot ada adb] : ada * [Math.min 1 : (top - bot) / (ada + adb)]
-	define [ArchDepthBClamped top bot ada adb] : adb * [Math.min 1 : (top - bot) / (ada + adb)]
+	define ArchDepthA : ArchDepthAOf ArchDepth
+	define ArchDepthB : ArchDepthBOf ArchDepth
+	define SmallArchDepthA : ArchDepthAOf SmallArchDepth
+	define SmallArchDepthB : ArchDepthBOf SmallArchDepth
+
 	define [YSmoothMidR top bot _ada _adb] : begin
 		if (bot > top) : return : YSmoothMidR bot top _ada _adb
 		local ada : fallback _ada ArchDepthA
@@ -178,7 +177,7 @@ export : define [calculateMetrics para] : begin
 		local delta : (adb - ada) / 2
 		local smOfSma : ada + delta
 		local smOfSmb : adb - delta
-		local yNotAdjusted : mix top bot : smOfSmb / (smOfSma + smOfSmb)
+		local yNotAdjusted : mix bot top : smOfSma / (smOfSma + smOfSmb)
 		return : yNotAdjusted - delta * [Math.min 1 : (top - bot) / (ada + adb)]
 	set YSmoothMidR.cr : function [c r _ada _adb] : YSmoothMidR (c + r) (c - r) _ada _adb
 	define [YSmoothMidL top bot _ada _adb] : begin
@@ -188,9 +187,16 @@ export : define [calculateMetrics para] : begin
 		local delta : (adb - ada) / 2
 		local smOfSma : ada + delta
 		local smOfSmb : adb - delta
-		local yNotAdjusted : mix top bot : smOfSma / (smOfSma + smOfSmb)
+		local yNotAdjusted : mix bot top : smOfSmb / (smOfSma + smOfSmb)
 		return : yNotAdjusted + delta * [Math.min 1 : (top - bot) / (ada + adb)]
 	set YSmoothMidL.cr : function [c r _ada _adb] : YSmoothMidL (c + r) (c - r) _ada _adb
+
+	define [ArchDepthAClamped top bot ada adb] : begin
+		local height : Math.abs : top - bot
+		return : if (ada + adb < height) ada : YSmoothMidR height 0 ada adb
+	define [ArchDepthBClamped top bot ada adb] : begin
+		local height : Math.abs : top - bot
+		return : if (ada + adb < height) adb : YSmoothMidL height 0 ada adb
 
 	define CorrectionOMidX : TanSlope * 0.9 * [StrokeWidthBlend 1.3 0.9]
 	define CorrectionOMidS : Stroke * CorrectionOMidX

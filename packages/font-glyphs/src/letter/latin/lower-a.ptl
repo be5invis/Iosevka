@@ -20,42 +20,52 @@ glyph-block Letter-Latin-Lower-A : begin
 	glyph-block-export DoubleStorey
 	define DoubleStorey : namespace
 		define [ADoubleStoreyStroke df] : AdviceStroke2 2 3 XH df.adws
+		export : define SwAboveBar 0.425
+
 		define [ADoubleStoreySmoothA df] : begin
 			local sw : ADoubleStoreyStroke df
-			return : df.archDepthAOf (ArchDepth * [StrokeWidthBlend 0.9 0.81 sw]) sw
+			local ad : ArchDepth * [StrokeWidthBlend 0.9 0.81 sw]
+			return : ArchDepthAClamped XH 0
+				df.archDepthAOf ad sw
+				df.archDepthBOf ad sw
 		define [ADoubleStoreySmoothB df] : begin
 			local sw : ADoubleStoreyStroke df
-			return : df.archDepthBOf (ArchDepth * [StrokeWidthBlend 0.9 0.81 sw]) sw
+			local ad : ArchDepth * [StrokeWidthBlend 0.9 0.81 sw]
+			return : ArchDepthBClamped XH 0
+				df.archDepthAOf ad sw
+				df.archDepthBOf ad sw
 
 		define [ADoubleStoreyHookAndBarT sink] : function [df hookStyle y0 stroke fine] : begin
 			local isMask : sink == spiro-outline
 			return : sink
 				widths.rhs stroke
 				match hookStyle
-					[Just HOOK-SLAB-INWARD] : InwardSlabArcStart.LtrRhs df.leftSB XH stroke AHook
-					__ : list
-						g4 df.leftSB (XH - AHook)
-						HookStart XH (sw -- stroke)
-				flat df.rightSB [Math.max (XH - [ADoubleStoreySmoothB df]) (y0 + TINY)]
-				[if isMask corner curl] df.rightSB y0 [heading Downward]
+					[Just HOOK-SLAB-INWARD] : InwardSlabArcStart.LtrRhs df.leftSB XH stroke AHook (swAfter -- fine)
+					__ : if fine
+						list
+							g4.up.start (df.leftSB + OXHook) (XH - AHook) [heading Upward]
+							Arch.rhs XH (sw -- stroke) (swAfter -- fine)
+						list
+							g4 df.leftSB (XH - AHook)
+							HookStart XH (sw -- stroke)
+				flat (df.rightSB - [HSwToV : stroke - [fallback fine stroke]]) [Math.max (XH - [ADoubleStoreySmoothB df]) (y0 + TINY)] [if fine [widths.rhs fine] nothing]
+				[if isMask corner curl] (df.rightSB - [HSwToV : stroke - [fallback fine stroke]]) y0 [heading Downward]
 				if isMask { [corner df.leftSB y0] } {}
 
-		export : define [HookAndBar df hookStyle y0 _sw _fine] : glyph-proc
-			local sw   : fallback _sw : ADoubleStoreyStroke df
-			local fine : fallback _fine df.shoulderFine
+		export : define [HookAndBar df hookStyle y0 stroke fine] : glyph-proc
+			local sw : fallback stroke : ADoubleStoreyStroke df
 			include : [ADoubleStoreyHookAndBarT dispiro] df hookStyle y0 sw fine
 			include : match hookStyle
 				[Just HOOK-SLAB-INWARD] : ArcStartSerif.InwardL df.leftSB XH sw AHook
 				__                      : no-shape
 
-		export : define [HookAndBarMask df hookStyle y0 _sw _fine] : begin
-			local sw   : fallback _sw : ADoubleStoreyStroke df
-			local fine : fallback _fine df.shoulderFine
+		export : define [HookAndBarMask df hookStyle y0 stroke fine] : begin
+			local sw : fallback stroke : ADoubleStoreyStroke df
 			return : [ADoubleStoreyHookAndBarT spiro-outline] df hookStyle y0 sw fine
 
 		define [ADoubleStoreyArcT sink] : function [df kind rise stroke fine bbd] : glyph-proc
 			local isMask : sink == spiro-outline
-			local barTop : [mix 0 XH DesignParameters.aBarPos] + stroke * 0.425
+			local barTop : [mix 0 XH DesignParameters.aBarPos] + stroke * SwAboveBar
 			local ada  : df.archDepthAOf (SmallArchDepth * 0.9) stroke
 			local adb  : df.archDepthBOf (SmallArchDepth * 0.9) stroke
 			local ada2 :    ArchDepthAOf (SmallArchDepth * DesignParameters.aBarPos)
@@ -71,7 +81,7 @@ glyph-block Letter-Latin-Lower-A : begin
 				match kind
 					0 : list
 						Arch.lhs 0 (sw -- stroke) (swAfter -- fine)
-						flat (df.rightSB - bbd - [HSwToV : stroke - fine]) [Math.min (barTop - TINY - [HSwToV : Math.abs : stroke * TanSlope]) (0 + ada)] [widths.lhs fine]
+						flat (df.rightSB - bbd - [HSwToV : stroke - fine]) [Math.min (barTop - TINY - [HSwToV : Math.abs : fine * TanSlope]) (0 + ada)] [widths.lhs fine]
 						[if isMask corner curl] (df.rightSB - bbd - [HSwToV : stroke - fine]) barTop [heading Upward]
 					1 : if rise
 						list
