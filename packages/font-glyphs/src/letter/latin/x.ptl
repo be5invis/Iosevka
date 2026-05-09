@@ -1,6 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
+import [Box] from "@iosevka/geometry/box"
 import [MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -135,36 +136,34 @@ glyph-block Letter-Latin-X : begin
 
 	glyph-block-export XLetterForm
 	define flex-params [XLetterForm] : namespace
-		local-parameter : df
-		local-parameter : top
-		local-parameter : bot
+		local-parameter : box
 		local-parameter : stroke1
 		local-parameter : stroke2
 		local-parameter : turn
 		local-parameter : tension
-		local-parameter : sw             -- df.mvs
+		local-parameter : sw             -- Stroke
 		local-parameter : swCursiveMid   -- ([AdviceStroke 2.75] * (sw / Stroke))
 		local-parameter : swCursiveEnd   -- ([AdviceStroke 3.00] * (sw / Stroke))
 		local-parameter : swCursiveCoEnd -- ([AdviceStroke 2.00] * (sw / Stroke))
 
 		export : define [base fSlab] : glyph-proc
 			include : match stroke1
-				[Just STROKE-STRAIGHT] : XStrand true  fSlab df.leftSB bot df.rightSB top turn 0.4 tension sw
-				[Just STROKE-CURLY]    : XStrand false fSlab df.leftSB bot df.rightSB top turn 0.4 tension sw
-				[Just STROKE-CHANCERY] : XChanceryStrand (-1) fSlab df.leftSB bot df.rightSB top false sw
+				[Just STROKE-STRAIGHT] : XStrand true  fSlab box.l box.b box.r box.t turn 0.4 tension sw
+				[Just STROKE-CURLY]    : XStrand false fSlab box.l box.b box.r box.t turn 0.4 tension sw
+				[Just STROKE-CHANCERY] : XChanceryStrand (-1) fSlab box.l box.b box.r box.t false sw
 				([Just STROKE-CURSIVE] || [Just STROKE-CURSIVE-FLAT]) : composite-proc
-					XCursiveHalfShape top bot df.middle df.rightSB
+					XCursiveHalfShape box.t box.b box.xMid box.r
 						swCoEnd  -- swCursiveCoEnd
 						swEnd    -- swCursiveEnd
 						swMid    -- swCursiveMid
 						flatTail -- (stroke1 === STROKE-CURSIVE-FLAT)
-					FlipAround df.middle [mix bot top 0.5]
+					FlipAround box.xMid [mix box.b box.t 0.5]
 				__ : glyph-proc
 			include : match stroke2
-				[Just STROKE-STRAIGHT] : XStrand true  fSlab df.leftSB top df.rightSB bot turn 0.4 tension sw
-				[Just STROKE-CURLY]    : XStrand false fSlab df.leftSB top df.rightSB bot turn 0.4 tension sw
-				[Just STROKE-CHANCERY] : XChanceryStrand (+1) fSlab df.leftSB top df.rightSB bot false sw
-				[Just STROKE-CURSIVE]  : XCursiveHalfShape top bot df.middle df.rightSB
+				[Just STROKE-STRAIGHT] : XStrand true  fSlab box.l box.t box.r box.b turn 0.4 tension sw
+				[Just STROKE-CURLY]    : XStrand false fSlab box.l box.t box.r box.b turn 0.4 tension sw
+				[Just STROKE-CHANCERY] : XChanceryStrand (+1) fSlab box.l box.t box.r box.b false sw
+				[Just STROKE-CURSIVE]  : XCursiveHalfShape box.t box.b box.xMid box.r
 					swCoEnd -- swCursiveCoEnd
 					swEnd   -- swCursiveEnd
 					swMid   -- swCursiveMid
@@ -172,18 +171,18 @@ glyph-block Letter-Latin-X : begin
 				__ : glyph-proc
 
 		export : define [rightHalf fSlab] : glyph-proc
-			local midy : mix top bot 0.5
+			local midy : mix box.t box.b 0.5
 
 			include : match stroke1
-				[Just STROKE-STRAIGHT] : HalfXStrand true  fSlab df.rightSB top df.middle midy turn 0.4 tension sw
-				[Just STROKE-CURLY]    : HalfXStrand false fSlab df.rightSB top df.middle midy turn 0.4 tension sw
-				[Just STROKE-CHANCERY] : XChanceryStrand (-1) fSlab df.leftSB bot df.rightSB top true sw
+				[Just STROKE-STRAIGHT] : HalfXStrand true  fSlab box.r box.t box.xMid midy turn 0.4 tension sw
+				[Just STROKE-CURLY]    : HalfXStrand false fSlab box.r box.t box.xMid midy turn 0.4 tension sw
+				[Just STROKE-CHANCERY] : XChanceryStrand (-1) fSlab box.l box.b box.r box.t true sw
 				__ : glyph-proc
 			include : match stroke2
-				[Just STROKE-STRAIGHT] : HalfXStrand true  fSlab df.rightSB bot df.middle midy turn 0.4 tension sw
-				[Just STROKE-CURLY]    : HalfXStrand false fSlab df.rightSB bot df.middle midy turn 0.4 tension sw
-				[Just STROKE-CHANCERY] : XChanceryStrand (+1) fSlab df.leftSB top df.rightSB bot true sw
-				[Just STROKE-CURSIVE]  : XCursiveHalfShape top bot df.middle df.rightSB
+				[Just STROKE-STRAIGHT] : HalfXStrand true  fSlab box.r box.b box.xMid midy turn 0.4 tension sw
+				[Just STROKE-CURLY]    : HalfXStrand false fSlab box.r box.b box.xMid midy turn 0.4 tension sw
+				[Just STROKE-CHANCERY] : XChanceryStrand (+1) fSlab box.l box.t box.r box.b true sw
+				[Just STROKE-CURSIVE]  : XCursiveHalfShape box.t box.b box.xMid box.r
 					swCoEnd -- swCursiveCoEnd
 					swEnd   -- swCursiveEnd
 					swMid   -- swCursiveMid
@@ -233,8 +232,8 @@ glyph-block Letter-Latin-X : begin
 	foreach { suffix { { stroke1 stroke2 } { bottom mkCap mkXH } { serifShape fMaskBase } } } [Object.entries XConfig] : do
 		define [letterShape top bot turn tension] : glyph-proc
 			local df : DivFrame 1 2
-			local lf : XLetterForm df top bot stroke1 stroke2 turn tension
-			include : WithSerifOverflowMask fMaskBase top bot df.leftSB df.rightSB : lf.base fMaskBase
+			local lf : XLetterForm [df.bodyBox top bot] stroke1 stroke2 turn tension
+			include : WithSerifOverflowMask fMaskBase [df.bodyBox top bot] : lf.base fMaskBase
 			if serifShape : begin
 				local sf : SerifFrame.fromDf df top bot
 				include : serifShape sf
