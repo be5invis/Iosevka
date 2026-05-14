@@ -1,21 +1,26 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
 glyph-block Letter-Latin-Upper-AE-OE : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Metrics : EFVJutLength EFMidBarPosY
+	glyph-block-import Letter-Shared : CreateDependentComposite
 
 	define [AEOEStroke df top] : Math.min df.mvs : AdviceStroke2 3 3 top df.adws
 
 	do "A subglyphs"
-		define SLAB-NONE    0
-		define SLAB-TOP     1
-		define SLAB-BASE    2
-		define SLAB-TRI     3
+		define BODY-CURLY      0
+		define BODY-STRAIGHT   1
+		define BODY-ROUND-TOP  2
+
+		define SLAB-NONE       0
+		define SLAB-TOP        1
+		define SLAB-BASE       2
+		define SLAB-TRI        3
 
 		define [AEAHalfCurly df top eLeft sw] : glyph-proc
 			define fine : Math.min sw : AdviceStroke2 3 4 top df.adws
@@ -80,53 +85,50 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 				arcvh
 				straight.right.end eLeft top [heading Rightward]
 
-		define [AEAHalfSerifs df top slabKind] : begin
-			define sw : AEOEStroke df top
-			define eLeft : df.middle - [HSwToV : 0.25 * sw]
-			return : composite-proc
-				match slabKind
-					([Just SLAB-BASE] || [Just SLAB-TRI]) : HSerif.mb (df.leftSB + [HSwToV : 0.5 * sw]) 0 Jut sw
-					__                                    : no-shape
-				match slabKind
-					[Just SLAB-TRI] : HSerif.lt df.middle top (MidJutSide + [HSwToV QuarterStroke])
-					[Just SLAB-TOP] : HSerif.lt df.middle top [mix MidJutSide LongJut 0.5]
-					__              : no-shape
-
 		define [AEAHalf df bodyShape top slabKind] : glyph-proc
 			define sw : AEOEStroke df top
 			define eLeft : df.middle - [HSwToV : 0.25 * sw]
 			include : match bodyShape
-				[Just 0] : AEAHalfCurly    df top eLeft sw
-				[Just 1] : AEAHalfStraight df top eLeft sw
-				[Just 2] : AEAHalfRoundTop df top eLeft sw
-			include : AEAHalfSerifs df top slabKind
+				[Just BODY-CURLY]     : AEAHalfCurly    df top eLeft sw
+				[Just BODY-STRAIGHT]  : AEAHalfStraight df top eLeft sw
+				[Just BODY-ROUND-TOP] : AEAHalfRoundTop df top eLeft sw
+			include : match slabKind
+				([Just SLAB-BASE] || [Just SLAB-TRI]) : HSerif.mb (df.leftSB + [HSwToV : 0.5 * sw]) 0 (Jut - [HSwToV : 0.5 * (Stroke - sw)]) sw
+				__                                    : no-shape
+			include : match slabKind
+				[Just SLAB-TRI] : HSerif.lt df.middle top      (MidJutSide              - [HSwToV : 0.5 * (HalfStroke - sw)]) sw
+				[Just SLAB-TOP] : HSerif.lt df.middle top ([mix MidJutSide LongJut 0.5] - [HSwToV : 0.5 * (Stroke     - sw)]) sw
+				__              : no-shape
 
-		define AConfig : object
-			straightSerifless     { 1  SLAB-NONE }
-			curlySerifless        { 0  SLAB-NONE }
-			roundTopSerifless     { 2  SLAB-NONE }
-			straightTopSerifed    { 1  SLAB-TOP  }
-			curlyTopSerifed       { 0  SLAB-TOP  }
-			straightBaseSerifed   { 1  SLAB-BASE }
-			curlyBaseSerifed      { 0  SLAB-BASE }
-			roundTopBaseSerifed   { 2  SLAB-BASE }
-			straightTriSerifed    { 1  SLAB-TRI  }
-			curlyTriSerifed       { 0  SLAB-TRI  }
+		define AConfig : SuffixCfg.combine
+			SuffixCfg.weave # standard (angular) variants
+				object # body
+					straight    BODY-STRAIGHT
+					curly       BODY-CURLY
+				object # slabs
+					serifless   SLAB-NONE
+					topSerifed  SLAB-TOP
+					baseSerifed SLAB-BASE
+					triSerifed  SLAB-TRI
+			object # round-top variants
+				roundTopSerifless   { BODY-ROUND-TOP SLAB-NONE }
+				roundTopBaseSerifed { BODY-ROUND-TOP SLAB-BASE }
 
 		foreach { suffix { bodyShape slabKind } } [Object.entries AConfig] : do
 			create-glyph "AE/A.\(suffix)" : glyph-proc
 				define df : include : DivFrame para.advanceScaleMM 3
 				include : df.markSet.capital
-				set-base-anchor 'cvDecompose' 0 0
 				include : AEAHalf df bodyShape CAP slabKind
 			create-glyph "smcpAE/smcpA.\(suffix)" : glyph-proc
 				define df : include : DivFrame para.advanceScaleM 3
 				include : df.markSet.e
-				set-base-anchor 'cvDecompose' 0 0
 				include : AEAHalf df bodyShape XH slabKind
 
-		select-variant 'AE/A'
-		select-variant 'smcpAE/smcpA' (follow -- 'AE/A')
+		select-variant 'AE/A/full'    (shapeFrom -- 'AE/A') (follow -- 'AE/E.serifless/A')
+		select-variant 'AE/A/reduced' (shapeFrom -- 'AE/A') (follow -- 'AE/E.topLeftSerifed/A')
+
+		select-variant 'smcpAE/smcpA/full'    (shapeFrom -- 'smcpAE/smcpA') (follow -- 'AE/E.serifless/A')
+		select-variant 'smcpAE/smcpA/reduced' (shapeFrom -- 'smcpAE/smcpA') (follow -- 'AE/E.topLeftSerifed/A')
 
 	do "O subglyphs"
 		glyph-block-import Letter-Shared-Shapes : OBarRight
@@ -182,7 +184,10 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 		select-variant 'cyrl/YaYe/Ya'
 
 	do "E subglyphs"
+		glyph-block-import Letter-Shared-Metrics : EFVJutLength EFMidBarPosY
+
 		define SLAB-NONE    0
+		define SLAB-MOTION  1
 		define SLAB-ALL     2
 		define SLAB-CAPPED  3
 
@@ -211,30 +216,50 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 					include : VSerif.mr xMidBarRight yBar jutMid swVJut
 
 		define EConfig : object
-			serifless     { SLAB-NONE   }
-			serifed       { SLAB-ALL    }
-			serifedCapped { SLAB-CAPPED }
+			serifless      { SLAB-NONE   }
+			topLeftSerifed { SLAB-MOTION }
+			serifed        { SLAB-ALL    }
+			serifedCapped  { SLAB-CAPPED }
 
 		foreach { suffix { slabKind } } [Object.entries EConfig] : do
 			create-glyph "AE/E.\(suffix)" : glyph-proc
-				define df : DivFrame para.advanceScaleMM 3
-				set-width 0
-				set-mark-anchor 'cvDecompose' 0 0
+				define df : include : DivFrame para.advanceScaleMM 3
+				include : df.markSet.capital
 				include : AEEHalf df CAP slabKind
+				DependentSelector.set currentGlyph : if (suffix === "serifless") 'full' 'reduced'
 			create-glyph "smcpAE/smcpE.\(suffix)" : glyph-proc
-				define df : DivFrame para.advanceScaleM 3
-				set-width 0
-				set-mark-anchor 'cvDecompose' 0 0
+				define df : include : DivFrame para.advanceScaleM 3
+				include : df.markSet.e
 				include : AEEHalf df XH slabKind
+				DependentSelector.set currentGlyph : if (suffix === "serifless") 'full' 'reduced'
+
+			if (suffix !== "topLeftSerifed") : begin
+				create-glyph "OE/E.\(suffix)" : glyph-proc
+					define df : DivFrame para.advanceScaleMM 3
+					set-width 0
+					set-mark-anchor 'cvDecompose' 0 0
+					include : AEEHalf df CAP slabKind
+				create-glyph "smcpOE/smcpE.\(suffix)" : glyph-proc
+					define df : DivFrame para.advanceScaleM 3
+					set-width 0
+					set-mark-anchor 'cvDecompose' 0 0
+					include : AEEHalf df XH slabKind
 
 		select-variant 'AE/E'
+		select-variant 'OE/E'
+
 		select-variant 'smcpAE/smcpE' (follow -- 'AE/E')
+		select-variant 'smcpOE/smcpE' (follow -- 'OE/E')
 
-	derive-composites "AE" 0xC6  'AE/A' 'AE/E'
-	derive-composites "OE" 0x152 'OE/O' 'AE/E'
+	CreateDependentComposite 'AE' 0xC6 'AE/E' : object
+		full    'AE/A/full'
+		reduced 'AE/A/reduced'
+	CreateDependentComposite 'smcpAE' 0x1D01 'smcpAE/smcpE' : object
+		full    'smcpAE/smcpA/full'
+		reduced 'smcpAE/smcpA/reduced'
 
-	derive-composites "smcpAE" 0x1D01 'smcpAE/smcpA' 'smcpAE/smcpE'
-	derive-composites "smcpOE" 0x276  'smcpOE/smcpO' 'smcpAE/smcpE'
+	derive-composites "OE"     0x152 'OE/O'         'OE/E'
+	derive-composites "smcpOE" 0x276 'smcpOE/smcpO' 'smcpOE/smcpE'
 
 	alias 'cyrl/AYe' 0x4D4 'AE'
-	derive-composites "cyrl/YaYe" 0x518 'cyrl/YaYe/Ya' 'AE/E'
+	derive-composites "cyrl/YaYe" 0x518 'cyrl/YaYe/Ya' 'OE/E'
