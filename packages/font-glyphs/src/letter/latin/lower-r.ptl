@@ -47,7 +47,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		local rSerifRightJut : rSerifLeftJut * 1.20
 		export : local [rBottomSerif y] : glyph-proc
 			include : tagged 'serifLB' : union
-				HSerif.lb  rSerifX y (rSerifLeftJut + [HSwToV : 0.5 * strokeBar])
+				HSerif.lb rSerifX y (rSerifLeftJut  + [HSwToV : 0.5 * strokeBar])
 				HSerif.rb rSerifX y (rSerifRightJut + [HSwToV : 0.5 * strokeBar])
 			local xAtt : rSerifX + rSerifRightJut + [HSwToV : 0.5 * strokeBar]
 			set-base-anchor 'palatalHookAttach' xAtt y
@@ -72,7 +72,8 @@ glyph-block Letter-Latin-Lower-R : begin
 		local mixpin : match mode
 			([Just rSerifed] || [Just rCornerHooked] || [Just rCornerHookedSerifed] || [Just rNarrowHookSerifed]) : begin
 				0.65 + 0.25 * strokeA / Width + 4 * TanSlope * strokeA / Width
-			__ : 0.65 + 4 * TanSlope * strokeA / Width
+			__ : begin
+				0.65 + 4 * TanSlope * strokeA / Width
 		local rmiddlein : [mix xBar (rHookX - [HSwToV : 1.05 * strokeA]) mixpin] - CorrectionOMidS
 		export : local skew : Math.max 0 : (xArchMiddle - rmiddlein) / stroke - TanSlope
 		export : local rHookY : RHook * rHookMultiplier + stroke * rHookSwMultiplier
@@ -146,6 +147,18 @@ glyph-block Letter-Latin-Lower-R : begin
 		if doBottomSerif : include : rBottomSerif 0
 		if doTopSerif    : include : rTopSerif    XH
 
+	define [FlatTopShape df md doTopSerif doBottomSerif] : glyph-proc
+		define [object xBar xArchMiddle rHookX rHookY hookSuperness rBottomSerif rTopSerif] : RDim df md
+		include : dispiro
+			widths.lhs
+			g4.up.start rHookX (XH - rHookY) [heading Upward]
+			arcvh nothing hookSuperness
+			flat [Arch.adjust-x.top xArchMiddle] XH
+			curl (xBar - [HSwToV Stroke] - O)    XH [heading Leftward]
+		include : VBar.r xBar 0 XH
+		if doBottomSerif : include : rBottomSerif 0
+		if doTopSerif    : include : rTopSerif    XH
+
 	define [EarlessCornerShape df md doTopSerif doBottomSerif] : glyph-proc
 		define [object xBar xArchMiddle rHookX rHookY hookSuperness rBottomSerif] : RDim df md
 		include : dispiro
@@ -182,6 +195,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		# Body
 		object
 			''             { StandardShape       dfN rStraight     rSerifed             }
+			flatTop        { FlatTopShape        dfN rEarless      rEarless             }
 			earlessCorner  { EarlessCornerShape  dfN rEarless      rEarless             }
 			earlessRounded { EarlessRoundedShape dfN rEarless      rEarless             }
 			hookless       { CompactShape        dfN rNarrow       rNarrowSerifed       }
@@ -198,7 +212,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			baseSerifed    { 0 1 }
 			serifed        { 1 1 }
 
-	foreach { suffix { {F df modeSans modeSerifed} {doTS doBS} } } [pairs-of SmallRConfig] : do
+	foreach { suffix { { F df modeSans modeSerifed } { doTS doBS } } } [pairs-of SmallRConfig] : do
 		local mode : if (doTS || doBS) modeSerifed modeSans
 		create-glyph "r.\(suffix)" : glyph-proc
 			set-width df.width
