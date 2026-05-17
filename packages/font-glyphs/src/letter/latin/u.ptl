@@ -51,6 +51,21 @@ glyph-block Letter-Latin-U : begin
 			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB [Math.min (adb + TINY) (yTL - 0)] top (sw -- sw)
 			include : tagged 'strokeR' : RightwardTailedBar df.rightSB 0 yTR (sw -- sw)
 
+		export : define [FlatBottom df top sw fHookLeft fShortLeg] : glyph-proc
+			local yTL : top - [if fHookLeft (TailY + HalfStroke) 0]
+			local yTR : if fShortLeg [mix [Math.min ada : YSmoothMidR top 0 ada adb] top 0.5] top
+			include : uBowl.toothlessCorner
+				top     -- yTL
+				bottom  -- 0
+				left    -- df.leftSB
+				right   -- df.rightSB
+				stroke  -- sw
+				ada     -- ada
+				adb     -- adb
+				rise    -- 0
+			if fHookLeft : include : TopHook.toLeft.lBarInner df.leftSB [Math.min (adb + TINY) (yTL - 0)] top (sw -- sw)
+			include : tagged 'strokeR' : VBar.r df.rightSB 0 yTR sw
+
 		export : define [ToothlessCorner df top sw fHookLeft fShortLeg] : glyph-proc
 			local yTL : top - [if fHookLeft (TailY + HalfStroke) 0]
 			local yTR : if fShortLeg [mix [Math.min ada : YSmoothMidR top 0 ada adb] top 0.5] top
@@ -82,46 +97,42 @@ glyph-block Letter-Latin-U : begin
 	define UUpper : UShapeGroup ArchDepthA ArchDepthB
 	define ULower : UShapeGroup SmallArchDepthA SmallArchDepthB
 
-	define [UTopLeftSerif df yTop _sw] : begin
-		local sf : SerifFrame.fromDf df yTop 0 (swRef -- _sw)
-		return sf.lt.outer
-
-	define [UTopRightSerif df yTop _sw] : begin
-		local sf : SerifFrame.fromDf df yTop 0 (swRef -- _sw)
-		return sf.rt.inner
-
-	define [UBottomRightSerif df yTop _sw] : glyph-proc
-		local sf : SerifFrame.fromDf df yTop 0 (swRef -- _sw)
-		include sf.rb.outer
-		define trAnchor currentGlyph.baseAnchors.trailing
-		if trAnchor : begin
-			set-base-anchor 'trailing' (trAnchor.x + sf.sideJut) trAnchor.y
-
 	glyph-block-export USerifs
 	define USerifs : namespace
+		define [UTopLeftSerif df yTop _sw] : begin
+			local sf : SerifFrame.fromDf df yTop 0 (swRef -- _sw)
+			return sf.lt.outer
+
+		define [UTopRightSerif df yTop _sw] : begin
+			local sf : SerifFrame.fromDf df yTop 0 (swRef -- _sw)
+			return sf.rt.inner
+
+		define [UBottomRightSerif df yTop _sw] : glyph-proc
+			local sf : SerifFrame.fromDf df yTop 0 (swRef -- _sw)
+			include sf.rb.outer
+			define trAnchor currentGlyph.baseAnchors.trailing
+			if trAnchor : begin
+				set-base-anchor 'trailing' (trAnchor.x + sf.sideJut) trAnchor.y
+
 		export : define [Toothed df top _sw] : glyph-proc
-			include : UTopLeftSerif df top _sw
-			include : UTopRightSerif df top _sw
+			include : UTopLeftSerif     df top _sw
+			include : UTopRightSerif    df top _sw
 			include : UBottomRightSerif df top _sw
 
 		export : define [DescBase df top _sw] : glyph-proc
-			include : UTopLeftSerif df top _sw
+			include : UTopLeftSerif  df top _sw
 			include : UTopRightSerif df top _sw
 
 		export : define [Tailed df top _sw] : glyph-proc
-			include : UTopLeftSerif df top _sw
+			include : UTopLeftSerif  df top _sw
 			include : UTopRightSerif df top _sw
 
 		export : define [BilateralMotion df top _sw] : begin
 			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
 			return : composite-proc sf.lt.outer sf.rt.outer
 
-		export : define [SmallToothless df top _sw] : glyph-proc
-			include : UTopLeftSerif df top _sw
-			include : UTopRightSerif df top _sw
-
 		export : define [MotionToothed df top _sw] : glyph-proc
-			include : UTopLeftSerif df top _sw
+			include : UTopLeftSerif     df top _sw
 			include : UBottomRightSerif df top _sw
 
 		export : define [BottomRight df top _sw] : glyph-proc
@@ -134,26 +145,37 @@ glyph-block Letter-Latin-U : begin
 			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
 			return : composite-proc sf.lt.full sf.rt.full
 
+		export : define [SmallToothless df top _sw] : glyph-proc
+			include : UTopLeftSerif  df top _sw
+			include : UTopRightSerif df top _sw
+
+		export : define [FlatBottom df top _sw] : glyph-proc
+			include : Toothless         df top _sw
+			include : UBottomRightSerif df top _sw
+
 	glyph-block-export CapitalUConfigT
 	define [CapitalUConfigT shapeGroup] : SuffixCfg.weave
 		object # body
 			toothed           shapeGroup.Toothed
 			tailed            shapeGroup.Tailed
+			flatBottom        shapeGroup.FlatBottom
 			toothlessCorner   shapeGroup.ToothlessCorner
 			toothlessRounded  shapeGroup.ToothlessRounded
 		function [body] : object # serifs
-			serifless                { no-shape                false }
-			bottomRightSerifed       { USerifs.BottomRight     false }
-			bilateralMotionSerifed   { USerifs.BilateralMotion true  }
+			serifless                   { no-shape                false }
+			bottomRightSerifed          { USerifs.BottomRight     false }
+			bilateralMotionSerifed      { USerifs.BilateralMotion true  }
 			unilateralMotionSerifed : match body
-				[Just 'toothed'] { USerifs.MotionToothed   true  }
-				__               { USerifs.MotionToothless true  }
+				[Just 'toothed']    { USerifs.MotionToothed   true  }
+				[Just 'flatBottom'] { USerifs.MotionToothed   true  }
+				__                  { USerifs.MotionToothless true  }
 			serifed : match body
-				[Just 'toothed'] { USerifs.Toothed         true  }
-				[Just 'tailed']  { USerifs.Tailed          true  }
-				__               { USerifs.Toothless       true  }
+				[Just 'toothed']    { USerifs.Toothed         true  }
+				[Just 'tailed']     { USerifs.Tailed          true  }
+				[Just 'flatBottom'] { USerifs.FlatBottom      true  }
+				__                  { USerifs.Toothless       true  }
 
-	foreach { suffix { Base {Slabs fLTSlab} } } [Object.entries : CapitalUConfigT UUpper] : do
+	foreach { suffix { Base { Slabs fSlabLT } } } [Object.entries : CapitalUConfigT UUpper] : do
 		create-glyph "U.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
 			include : MarkSet.capital
@@ -162,7 +184,7 @@ glyph-block Letter-Latin-U : begin
 
 		create-glyph "U/withTonos.\(suffix)" : glyph-proc
 			include [refer-glyph "U.\(suffix)"] AS_BASE ALSO_METRICS
-			include : SetGrekUpperTonos [if fLTSlab (-SideJut) 0]
+			include : SetGrekUpperTonos [if fSlabLT (-SideJut) 0]
 
 		create-glyph "smcpU.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
@@ -175,20 +197,23 @@ glyph-block Letter-Latin-U : begin
 		object # body
 			toothed           shapeGroup.Toothed
 			tailed            shapeGroup.Tailed
+			flatBottom        shapeGroup.FlatBottom
 			toothlessCorner   shapeGroup.ToothlessCorner
 			toothlessRounded  shapeGroup.ToothlessRounded
 			descBase          shapeGroup.Toothed
 		function [body] : object # serifs
-			serifless                  no-shape
-			bottomRightSerifed         USerifs.BottomRight
+			serifless                   no-shape
+			bottomRightSerifed          USerifs.BottomRight
 			motionSerifed : match body
-				[Just 'toothed']   USerifs.MotionToothed
-				__                 USerifs.MotionToothless
+				[Just 'toothed']    USerifs.MotionToothed
+				[Just 'flatBottom'] USerifs.MotionToothed
+				__                  USerifs.MotionToothless
 			serifed : match body
-				[Just 'toothed']   USerifs.Toothed
-				[Just 'tailed']    USerifs.Tailed
-				[Just 'descBase']  USerifs.DescBase
-				__                 USerifs.SmallToothless
+				[Just 'toothed']    USerifs.Toothed
+				[Just 'tailed']     USerifs.Tailed
+				[Just 'descBase']   USerifs.DescBase
+				[Just 'flatBottom'] USerifs.Toothed
+				__                  USerifs.SmallToothless
 
 	foreach { suffix { Base Slabs } } [Object.entries : SmallUConfigT ULower] : do
 		create-glyph "u.\(suffix)" : glyph-proc
@@ -315,13 +340,13 @@ glyph-block Letter-Latin-U : begin
 	link-reduced-variant 'u/sansSerif' 'u' MathSansSerif
 	select-variant 'u/descBase' (shapeFrom -- 'u')
 
-	select-variant 'turnh' 0x265
+	select-variant 'turnh' 0x265 (follow -- 'uLongLeg')
 
 	select-variant 'uShortLeg' 0xAB4E
 	select-variant 'uHookLeft' 0xAB52
 
-	select-variant 'turnhHookLeft'      0x2AE
-	select-variant 'turnhHookLeftRTail' 0x2AF
+	select-variant 'turnhHookLeft'      0x2AE (follow -- 'uHookLeftLongLeg')
+	select-variant 'turnhHookLeftRTail' 0x2AF (follow -- 'uHookLeftLongLegRTail')
 
 	select-variant 'uSideways' 0x1D1D (follow -- 'u')
 	select-variant 'uDieresisSideways/base' (follow -- 'u')
@@ -367,8 +392,6 @@ glyph-block Letter-Latin-U : begin
 				corner (SB + outStand) (yTurn + outStandY)
 				corner (SB - outStand) (yTurn - outStandY)
 			UShapeOutline XH 0 (SB - O) (RightSB + O) nothing SmallArchDepthA SmallArchDepthB
-		if SLAB : begin
-			include : HSerif.lt SB XH SideJut
 
 	CreateAccentedComposition 'uDieresis' 0xFC 'u' 'dieresisAbove'
 	CreateAccentedComposition 'uBar' 0x289 'u' 'hStrike'

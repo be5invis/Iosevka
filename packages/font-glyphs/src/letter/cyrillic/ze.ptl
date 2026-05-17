@@ -66,6 +66,7 @@ glyph-block Letter-Cyrillic-Ze : begin
 					[Just FLAT-CONNECTION] : list
 						flat (left - xo) top [widths.rhs.heading stroke Rightward]
 						curl [Arch.adjust-x.top middle stroke] top [heading Rightward]
+						archv
 					[Just OPEN-VERTICAL] : flat right top [widths.rhs.heading stroke Downward]
 					([Just CLOSED-CIRCLE] || [Just CLOSED-ROUND]) : list
 						flat (left + [if (slabTop === CLOSED-CIRCLE) xo 0]) midy [widths.rhs stroke]
@@ -96,6 +97,10 @@ glyph-block Letter-Cyrillic-Ze : begin
 				match slabBot
 					[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs left bot stroke hook (o -- yo)
 					[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs left bot stroke hook (o -- yo)
+					[Just FLAT-CONNECTION] : list
+						arcvh
+						flat [Arch.adjust-x.bot middle stroke] bot [heading Leftward]
+						curl (left - xo) bot [heading Leftward]
 					[Just OPEN-HALF] : list
 					[Just OPEN-VERTICAL] : curl (right - xo * 2) bot [heading Downward]
 					([Just CLOSED-CIRCLE] || [Just CLOSED-ROUND]) : list
@@ -182,10 +187,15 @@ glyph-block Letter-Cyrillic-Ze : begin
 
 		export : define [UpperShape] : begin
 			define [object stroke midx midy fine shoulderFine] : Dim
+			local middle : mix left right 0.5
 			return : dispiro
 				match slabTop
 					[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs right top stroke hook (o -- yo)
 					[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs right top stroke hook (o -- yo)
+					[Just FLAT-CONNECTION] : list
+						flat (right + xo) top [widths.lhs.heading stroke Leftward]
+						curl [Arch.adjust-x.top middle stroke] top [heading Leftward]
+						archv
 					[Just OPEN-VERTICAL] : flat left top [widths.lhs.heading stroke Downward]
 					([Just CLOSED-CIRCLE] || [Just CLOSED-ROUND]) : list
 						flat (right - [if (slabTop === CLOSED-CIRCLE) xo 0]) midy [widths.lhs stroke]
@@ -205,6 +215,7 @@ glyph-block Letter-Cyrillic-Ze : begin
 
 		export : define [LowerShape] : begin
 			define [object stroke midx midy fine shoulderFine] : Dim
+			local middle : mix left right 0.5
 			return : dispiro
 				flat midx   (midy - (stroke / 2 - fine)) [widths.heading fine 0 Leftward]
 				curl Middle (midy - (stroke / 2 - fine)) [heading Leftward]
@@ -213,6 +224,10 @@ glyph-block Letter-Cyrillic-Ze : begin
 				match slabBot
 					[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs right bot stroke hook (o -- yo)
 					[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs right bot stroke hook (o -- yo)
+					[Just FLAT-CONNECTION] : list
+						arcvh
+						flat [Arch.adjust-x.bot middle stroke] bot [heading Rightward]
+						curl (right + xo) bot [heading Rightward]
 					[Just OPEN-VERTICAL] : curl (left + xo * 2) bot [heading Downward]
 					([Just CLOSED-CIRCLE] || [Just CLOSED-ROUND]) : list
 						Arch.lhs bot (sw -- stroke) (o -- yo)
@@ -574,6 +589,17 @@ glyph-block Letter-Cyrillic-Ze : begin
 				corner  df.rightSB                    (top - HalfStroke)
 				corner (df.rightSB - [HSwToV stroke]) (top - HalfStroke)
 
+		define [FlatTopBody df top bar hook ada adb] : glyph-proc
+			local revZe : CyrRevZe FLAT-CONNECTION CLOSED-STEM top 0
+				blend     -- VolBlend
+				hook      -- hook
+				xOverflow -- 0
+				ada       -- ada
+				adb       -- adb
+			define [object stroke] : revZe.Dim
+			include : revZe.Shape
+			include : bar df top stroke
+
 		define [EarlessCornerBody df top bar hook ada adb] : glyph-proc
 			local revZe : CyrRevZe SLAB-INWARD CLOSED-STEM top 0
 				blend     -- VolBlend
@@ -598,23 +624,28 @@ glyph-block Letter-Cyrillic-Ze : begin
 
 		define SingleStoreyConfig : object
 			singleStoreySerifless               { FullBarBody        SingleStorey.SeriflessBar     }
+			singleStoreyTopCutSerifless         { TopCutBody         SingleStorey.SeriflessBar     }
+			singleStoreyFlatTopSerifless        { FlatTopBody        SingleStorey.SeriflessBar     }
 			singleStoreyEarlessCornerSerifless  { EarlessCornerBody  SingleStorey.SeriflessBar     }
 			singleStoreyEarlessRoundedSerifless { EarlessRoundedBody SingleStorey.SeriflessBar     }
-			singleStoreyTopCutSerifless         { TopCutBody         SingleStorey.SeriflessBar     }
 
 			singleStoreySerifed                 { FullBarBody        SingleStorey.BottomSerifedBar }
+			singleStoreyTopCutSerifed           { TopCutBody         SingleStorey.BottomSerifedBar }
+			singleStoreyFlatTopSerifed          { FlatTopBody        SingleStorey.BottomSerifedBar }
 			singleStoreyEarlessCornerSerifed    { EarlessCornerBody  SingleStorey.BottomSerifedBar }
 			singleStoreyEarlessRoundedSerifed   { EarlessRoundedBody SingleStorey.BottomSerifedBar }
-			singleStoreyTopCutSerifed           { TopCutBody         SingleStorey.BottomSerifedBar }
 
 			singleStoreyDoubleSerifed           { FullBarBody        SingleStorey.DoubleSerifedBar }
+			singleStoreyFlatTopDoubleSerifed    { FlatTopBody        SingleStorey.DoubleSerifedBar }
 
 			singleStoreyTailed                  { FullBarBody        SingleStorey.TailedBar        }
+			singleStoreyTopCutTailed            { TopCutBody         SingleStorey.TailedBar        }
+			singleStoreyFlatTopTailed           { FlatTopBody        SingleStorey.TailedBar        }
 			singleStoreyEarlessCornerTailed     { EarlessCornerBody  SingleStorey.TailedBar        }
 			singleStoreyEarlessRoundedTailed    { EarlessRoundedBody SingleStorey.TailedBar        }
-			singleStoreyTopCutTailed            { TopCutBody         SingleStorey.TailedBar        }
 
 			singleStoreyTailedSerifed           { FullBarBody        SingleStorey.TailedSerifedBar }
+			singleStoreyFlatTopTailedSerifed    { FlatTopBody        SingleStorey.TailedSerifedBar }
 
 		foreach { suffix { body bar } } [Object.entries SingleStoreyConfig] : do
 			create-glyph "AeVolapuk.\(suffix)" : glyph-proc
@@ -659,8 +690,8 @@ glyph-block Letter-Cyrillic-Ze : begin
 			include : RightwardTailedBar df.rightSB 0 top stroke
 			include : slab df top stroke
 
-		define [UToothlessRounded df top slab hook ada adb] : glyph-proc
-			local revZe : CyrRevZe OPEN-VERTICAL CLOSED-ROUND top 0
+		define [UFlatBottom df top slab hook ada adb] : glyph-proc
+			local revZe : CyrRevZe OPEN-VERTICAL FLAT-CONNECTION top 0
 				blend     -- VolBlend
 				hook      -- hook
 				xOverflow -- 0
@@ -668,7 +699,7 @@ glyph-block Letter-Cyrillic-Ze : begin
 				adb       -- adb
 			define [object stroke] : revZe.Dim
 			include : revZe.Shape
-			include : VBar.r df.rightSB ada top stroke
+			include : VBar.r df.rightSB 0 top stroke
 			include : slab df top stroke
 
 		define [UToothlessCorner df top slab hook ada adb] : glyph-proc
@@ -683,22 +714,37 @@ glyph-block Letter-Cyrillic-Ze : begin
 			include : VBar.r df.rightSB DToothlessRise top stroke
 			include : slab df top stroke
 
+		define [UToothlessRounded df top slab hook ada adb] : glyph-proc
+			local revZe : CyrRevZe OPEN-VERTICAL CLOSED-ROUND top 0
+				blend     -- VolBlend
+				hook      -- hook
+				xOverflow -- 0
+				ada       -- ada
+				adb       -- adb
+			define [object stroke] : revZe.Dim
+			include : revZe.Shape
+			include : VBar.r df.rightSB ada top stroke
+			include : slab df top stroke
+
 		define SmallUConfig : SuffixCfg.weave
 			object # body
 				toothed           UToothed
 				tailed            UTailed
+				flatBottom        UFlatBottom
 				toothlessCorner   UToothlessCorner
 				toothlessRounded  UToothlessRounded
 			function [body] : object # serifs
 				serifless              no-shape
 				bottomRightSerifed     USerifs.BottomRight
 				motionSerifed : match body
-					[Just 'toothed']   USerifs.MotionToothed
-					__                 USerifs.MotionToothless
+					[Just 'toothed']    USerifs.MotionToothed
+					[Just 'flatBottom'] USerifs.MotionToothed
+					__                  USerifs.MotionToothless
 				serifed : match body
-					[Just 'toothed']   USerifs.Toothed
-					[Just 'tailed']    USerifs.Tailed
-					__                 USerifs.SmallToothless
+					[Just 'toothed']    USerifs.Toothed
+					[Just 'tailed']     USerifs.Tailed
+					[Just 'flatBottom'] USerifs.Toothed
+					__                  USerifs.SmallToothless
 
 		foreach { suffix { Base Slabs } } [Object.entries SmallUConfig] : do
 			create-glyph "UeVolapuk.\(suffix)" : glyph-proc
