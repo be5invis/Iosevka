@@ -28,13 +28,12 @@ glyph-block Symbol-Arrow-Wave : for-width-kinds WideWidth1
 	define o : O * 2
 
 	define waveArrowAmplitude : (Width - SB) * DesignParameters.arrow_size * (0.7 + 0.4 * MosaicWidthScalar)
+	define WaveSw : AdviceStroke (5.5 - MosaicWidthScalar)
+	define waveDist : waveArrowAmplitude * 0.4 + WaveSw / 4 * MosaicWidthScalar
 	do "Wave arrows"
 		glyph-block-import Shared-Symbol-Shapes : CreateWaveShape
 
-		define WaveSw : AdviceStroke (5.5 - MosaicWidthScalar)
-		define WaveShape : CreateWaveShape
-			waveArrowAmplitude * 0.4 + WaveSw / 4 * MosaicWidthScalar
-			begin WaveSw
+		define WaveShape : CreateWaveShape waveDist WaveSw
 		define rightTBias : (MosaicWidth / MosaicUnitWidth) - 1
 		define freeCoT      : arrowSB / MosaicWidth
 		define connectedCoT : (arrowSB / MosaicWidth) + (9 / 32) * MosaicWidthScalar
@@ -71,6 +70,42 @@ glyph-block Symbol-Arrow-Wave : for-width-kinds WideWidth1
 				xfJoin -- [mix arrowSB arrowRSB (p)]
 				unitWidth -- MosaicUnitWidth
 				waveCount -- (2 / MosaicWidthScalar)
+			include : ArrowHead.shape arrowSB SymbolMid arrowRSB SymbolMid
+
+	do "Direct wave arrows"
+		local mag : arrowRSB - arrowSB
+		local p : (mag - o - halfArrowSw) / mag
+
+		define waveMagnitude : waveDist * (3 / 4) - arrowSw / 2
+		define waveSpan : ((MosaicUnitWidth * MosaicWidthScalar) / 2) / (mag * p)
+		define waveBias : 6 / 8
+		define waveSamples 256
+
+		define [SingleWave l r bias] : glyph-proc
+			local center : 1 / 2 + bias * (1 - waveSpan) / 2
+			local wl : mix l r (center - waveSpan / 2)
+			local wr : mix l r (center + waveSpan / 2)
+			local knots {}
+			knots.push : g2 l SymbolMid
+			knots.push : g2 [mix l wl (1 / 2)] SymbolMid
+			foreach [j : range 0 till waveSamples] : begin
+				local k : j / waveSamples
+				local f : -1 + [Math.cos (2 * Math.PI * k)] - 0.075 * ([Math.cos (2 * Math.PI * 3 * k)] - 1)
+				knots.push : g2 [mix wl wr k] (SymbolMid - waveMagnitude * f)
+			knots.push : g2 [mix wr r (1 / 2)] SymbolMid
+			knots.push : g2 r SymbolMid
+			include : dispiro
+				widths.center arrowSw
+				begin knots
+
+		create-glyph [MangleName 'waveArrowDirectLeft'] [MangleUnicode 0x2B3F] : glyph-proc
+			set-width MosaicWidth
+			include : SingleWave [mix arrowSB arrowRSB (1 - p)] arrowRSB waveBias
+			include : ArrowHead.shape arrowRSB SymbolMid arrowSB SymbolMid
+
+		create-glyph [MangleName 'waveArrowDirectRight'] [MangleUnicode 0x2933] : glyph-proc
+			set-width MosaicWidth
+			include : SingleWave arrowSB [mix arrowSB arrowRSB (p)] (-waveBias)
 			include : ArrowHead.shape arrowSB SymbolMid arrowRSB SymbolMid
 
 	do "Squiggle Arrows"
