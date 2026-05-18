@@ -99,59 +99,40 @@ glyph-block Letter-Latin-U : begin
 
 	glyph-block-export USerifs
 	define USerifs : namespace
-		define [UTopLeftSerif df yTop _sw] : begin
-			local sf : SerifFrame.fromDf df yTop 0 (swRef -- _sw)
-			return sf.lt.outer
-
-		define [UTopRightSerif df yTop _sw] : begin
-			local sf : SerifFrame.fromDf df yTop 0 (swRef -- _sw)
-			return sf.rt.inner
-
-		define [UBottomRightSerif df yTop _sw] : glyph-proc
-			local sf : SerifFrame.fromDf df yTop 0 (swRef -- _sw)
+		export : define [BottomRight df top _sw] : glyph-proc
+			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
 			include sf.rb.outer
 			define trAnchor currentGlyph.baseAnchors.trailing
 			if trAnchor : begin
 				set-base-anchor 'trailing' (trAnchor.x + sf.sideJut) trAnchor.y
 
+		export : define [Toothless df top _sw] : begin
+			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
+			return : composite-proc sf.lt.full sf.rt.full
+
+		export : define [SmallToothless df top _sw] : begin
+			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
+			return : composite-proc sf.lt.outer sf.rt.inner
+
 		export : define [Toothed df top _sw] : glyph-proc
-			include : UTopLeftSerif     df top _sw
-			include : UTopRightSerif    df top _sw
-			include : UBottomRightSerif df top _sw
+			include : Toothless   df top _sw
+			include : BottomRight df top _sw
 
-		export : define [DescBase df top _sw] : glyph-proc
-			include : UTopLeftSerif  df top _sw
-			include : UTopRightSerif df top _sw
-
-		export : define [Tailed df top _sw] : glyph-proc
-			include : UTopLeftSerif  df top _sw
-			include : UTopRightSerif df top _sw
+		export : define [SmallToothed df top _sw] : glyph-proc
+			include : SmallToothless df top _sw
+			include : BottomRight    df top _sw
 
 		export : define [BilateralMotion df top _sw] : begin
 			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
 			return : composite-proc sf.lt.outer sf.rt.outer
 
-		export : define [MotionToothed df top _sw] : glyph-proc
-			include : UTopLeftSerif     df top _sw
-			include : UBottomRightSerif df top _sw
-
-		export : define [BottomRight df top _sw] : glyph-proc
-			include : UBottomRightSerif df top _sw
-
-		export : define [MotionToothless df top _sw] : glyph-proc
-			include : UTopLeftSerif df top _sw
-
-		export : define [Toothless df top _sw] : begin
+		export : define [MotionToothless df top _sw] : begin
 			local sf : SerifFrame.fromDf df top 0 (swRef -- _sw)
-			return : composite-proc sf.lt.full sf.rt.full
+			return sf.lt.outer
 
-		export : define [SmallToothless df top _sw] : glyph-proc
-			include : UTopLeftSerif  df top _sw
-			include : UTopRightSerif df top _sw
-
-		export : define [FlatBottom df top _sw] : glyph-proc
-			include : Toothless         df top _sw
-			include : UBottomRightSerif df top _sw
+		export : define [MotionToothed df top _sw] : glyph-proc
+			include : MotionToothless df top _sw
+			include : BottomRight     df top _sw
 
 	glyph-block-export CapitalUConfigT
 	define [CapitalUConfigT shapeGroup] : SuffixCfg.weave
@@ -162,18 +143,15 @@ glyph-block Letter-Latin-U : begin
 			toothlessCorner   shapeGroup.ToothlessCorner
 			toothlessRounded  shapeGroup.ToothlessRounded
 		function [body] : object # serifs
-			serifless                   { no-shape                false }
-			bottomRightSerifed          { USerifs.BottomRight     false }
-			bilateralMotionSerifed      { USerifs.BilateralMotion true  }
+			serifless                { no-shape                false }
+			bottomRightSerifed       { USerifs.BottomRight     false }
+			bilateralMotionSerifed   { USerifs.BilateralMotion true  }
 			unilateralMotionSerifed : match body
-				[Just 'toothed']    { USerifs.MotionToothed   true  }
-				[Just 'flatBottom'] { USerifs.MotionToothed   true  }
-				__                  { USerifs.MotionToothless true  }
+				([Just 'toothed'] || [Just 'flatBottom']) { USerifs.MotionToothed   true  }
+				__                                        { USerifs.MotionToothless true  }
 			serifed : match body
-				[Just 'toothed']    { USerifs.Toothed         true  }
-				[Just 'tailed']     { USerifs.Tailed          true  }
-				[Just 'flatBottom'] { USerifs.FlatBottom      true  }
-				__                  { USerifs.Toothless       true  }
+				([Just 'toothed'] || [Just 'flatBottom']) { USerifs.Toothed         true  }
+				__                                        { USerifs.Toothless       true  }
 
 	foreach { suffix { Base { Slabs fSlabLT } } } [Object.entries : CapitalUConfigT UUpper] : do
 		create-glyph "U.\(suffix)" : glyph-proc
@@ -202,18 +180,14 @@ glyph-block Letter-Latin-U : begin
 			toothlessRounded  shapeGroup.ToothlessRounded
 			descBase          shapeGroup.Toothed
 		function [body] : object # serifs
-			serifless                   no-shape
-			bottomRightSerifed          USerifs.BottomRight
+			serifless                  no-shape
+			bottomRightSerifed         USerifs.BottomRight
 			motionSerifed : match body
-				[Just 'toothed']    USerifs.MotionToothed
-				[Just 'flatBottom'] USerifs.MotionToothed
-				__                  USerifs.MotionToothless
+				([Just 'toothed'] || [Just 'flatBottom']) USerifs.MotionToothed
+				__                                        USerifs.MotionToothless
 			serifed : match body
-				[Just 'toothed']    USerifs.Toothed
-				[Just 'tailed']     USerifs.Tailed
-				[Just 'descBase']   USerifs.DescBase
-				[Just 'flatBottom'] USerifs.Toothed
-				__                  USerifs.SmallToothless
+				([Just 'toothed'] || [Just 'flatBottom']) USerifs.SmallToothed
+				__                                        USerifs.SmallToothless
 
 	foreach { suffix { Base Slabs } } [Object.entries : SmallUConfigT ULower] : do
 		create-glyph "u.\(suffix)" : glyph-proc
