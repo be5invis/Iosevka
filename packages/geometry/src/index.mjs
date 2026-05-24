@@ -591,7 +591,11 @@ export class StrokeGeometry extends GeometryBase {
 		const fairizedArcs = TypoGeom.Fairize.fairizeBezierShape(arcs);
 
 		// Stroke the arcs
-		return strokeArcs(fairizedArcs, this.m_radius, this.m_contrast, this.m_fInside);
+		const out = strokeArcs(fairizedArcs, this.m_radius, this.m_contrast, this.m_fInside);
+
+		// Transform back
+		CurveUtil.InPlaceTransformBez3Shape(this.m_gizmo, out);
+		return out;
 	}
 	toReferences() {
 		return null;
@@ -661,6 +665,9 @@ export class RemoveHolesGeometry extends GeometryBase {
 
 			arcs = TypoGeom.Boolean.combineStack(stack, CurveUtil.BOOLE_RESOLUTION);
 		}
+
+		// Transform back
+		CurveUtil.InPlaceTransformBez3Shape(this.m_gizmo, arcs);
 		return arcs;
 	}
 	toReferences() {
