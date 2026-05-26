@@ -111,7 +111,7 @@ glyph-block Letter-Latin-Lower-R : begin
 					mix df.rightSB (df.width - (xBar - [HSwToV strokeBar])) : if doTopSerif 0.5 1.0
 			set-base-anchor 'overlay' (df.width - (xBar - [HSwToV : 0.5 * strokeBar])) [mix bottom top 0.5]
 			local xAtt : if doTopSerif (df.width - (rSerifX - rSerifTopLeftJut)) (df.width - (xBar - [HSwToV strokeBar]))
-			local xPos : xAtt + [if doTopSerif 0 SideJut]
+			local xPos : xAtt + [if doTopSerif 0 : if doBottomSerif (rSerifTopLeftJut - [HSwToV : 0.5 * strokeBar]) SideJut]
 			set-base-anchor 'palatalHookAttach' xAtt bottom
 			set-base-anchor 'palatalHookPos'    xPos bottom
 			currentGlyph.copyBaseAnchorIfAbsent 'leaningAbove' 'above'
@@ -269,12 +269,6 @@ glyph-block Letter-Latin-Lower-R : begin
 			local pos : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookPos
 			include : PalatalHook.r (x -- pos.x) (y -- pos.y) (xLink -- attach.x)
 
-		create-glyph "rRTail.\(suffix)" : glyph-proc
-			include [refer-glyph "r.\(suffix)"] AS_BASE ALSO_METRICS
-			eject-contour 'serifLB'
-			define [object xBar] : RDim df mode
-			include : RetroflexHook.rExt xBar 0
-
 		create-glyph "turnr.\(suffix)" : glyph-proc
 			set-width df.width
 			include : df.markSet.e
@@ -285,18 +279,6 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : new-glyph : composite-proc
 				refer-glyph "r.\(suffix)"
 				FlipAround df.middle (XH / 2)
-
-		create-glyph "turnrPalatalHook.\(suffix)" : glyph-proc
-			include [refer-glyph "turnr.\(suffix)"] AS_BASE ALSO_METRICS
-			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookAttach
-			local pos : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookPos
-			include : PalatalHook.r (x -- pos.x) (y -- pos.y) (xLink -- attach.x)
-
-		create-glyph "turnrRTail.\(suffix)" : glyph-proc
-			include [refer-glyph "turnr.\(suffix)"] AS_BASE ALSO_METRICS
-			eject-contour 'serifLT'
-			define [object xBar] : RDim df mode
-			include : RetroflexHook.lExt (df.width - xBar) 0
 
 		create-glyph "turnrLongLeg.\(suffix)" : glyph-proc
 			set-width df.width
@@ -309,27 +291,46 @@ glyph-block Letter-Latin-Lower-R : begin
 				refer-glyph "rLongLeg.\(suffix)"
 				FlipAround df.middle (XH / 2)
 
-		create-glyph "turnrLongLegRTail.\(suffix)" : glyph-proc
-			include [refer-glyph "turnrLongLeg.\(suffix)"] AS_BASE ALSO_METRICS
-			eject-contour 'serifLT'
-			define [object xBar] : RDim df mode
-			include : RetroflexHook.lExt (df.width - xBar) 0
+		if [not doBS] : begin
+			create-glyph "rRTail.\(suffix)" : glyph-proc
+				include [refer-glyph "r.\(suffix)"] AS_BASE ALSO_METRICS
+				eject-contour 'serifLB'
+				define [object xBar] : RDim df mode
+				include : RetroflexHook.rExt xBar 0
 
-		create-glyph "turnrHookTop.\(suffix)" : glyph-proc
-			set-width df.width
-			include : df.markSet.b
+			create-glyph "turnrHookTop.\(suffix)" : glyph-proc
+				set-width df.width
+				include : df.markSet.b
 
-			define [object xBar setTurnedMarks] : RDim df mode
-			include : setTurnedMarks Ascender 0 doTS doBS
+				define [object setTurnedMarks] : RDim df mode
+				include : setTurnedMarks Ascender 0 doTS doBS
 
-			include : new-glyph : composite-proc
-				refer-glyph "rRTail.\(suffix)"
-				FlipAround df.middle (XH / 2)
+				include : new-glyph : composite-proc
+					refer-glyph "rRTail.\(suffix)"
+					FlipAround df.middle (XH / 2)
+
+		if [not doTS] : begin
+			create-glyph "turnrPalatalHook.\(suffix)" : glyph-proc
+				include [refer-glyph "turnr.\(suffix)"] AS_BASE ALSO_METRICS
+				local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookAttach
+				local pos : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookPos
+				include : PalatalHook.r (x -- pos.x) (y -- pos.y) (xLink -- attach.x)
+
+			create-glyph "turnrRTail.\(suffix)" : glyph-proc
+				include [refer-glyph "turnr.\(suffix)"] AS_BASE ALSO_METRICS
+				eject-contour 'serifLT'
+				define [object xBar] : RDim df mode
+				include : RetroflexHook.lExt (df.width - xBar) 0
+
+			create-glyph "turnrLongLegRTail.\(suffix)" : glyph-proc
+				include [refer-glyph "turnrLongLeg.\(suffix)"] AS_BASE ALSO_METRICS
+				eject-contour 'serifLT'
+				define [object xBar] : RDim df mode
+				include : RetroflexHook.lExt (df.width - xBar) 0
 
 	select-variant 'r' 'r'
 	link-reduced-variant 'r/sansSerif' 'r' MathSansSerif
-	select-variant 'turnr' 0x279 (follow -- 'r')
-
+	select-variant 'turnr'        0x279 (follow -- 'r')
 	select-variant 'turnrLongLeg' 0x27A (follow -- 'r')
 	select-variant 'turnrRTail'   0x27B (follow -- 'r/hookTopBase')
 	select-variant 'rLongLeg'     0x27C (follow -- 'r')
