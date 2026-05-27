@@ -47,23 +47,22 @@ glyph-block Letter-Latin-Lower-R : begin
 			[Just rNeedle] : df.middle + [HSwToV : 0.5 * strokeBar] - [IBalance2 df]
 			__             : df.leftSB + [HSwToV strokeBar] + RBalance * rBalanceMultiplier
 		local rSerifX : xBar - [HSwToV : 0.5 * strokeBar]
-		local rSerifLeftJut  : [HSwToV : 0.5 * strokeBar] + SideJut + RBalance * rSerifLeftExtender
-		local rSerifRightJut : mix [HSwToV : 0.5 * strokeBar] rSerifLeftJut : match mode
-			[Just rNeedle] : (MidJutSide - [HSwToV HalfStroke]) / SideJut
-			__             : begin 1.20
-		export : local [rTopSerif y] : tagged 'serifLT' : HSerif.lt rSerifX y rSerifLeftJut
-		export : local [rBottomSerif y] : glyph-proc
-			include : tagged 'serifLB' : union
-				HSerif.lb rSerifX y rSerifLeftJut
-				HSerif.rb rSerifX y rSerifRightJut
-			local xAtt : rSerifX + rSerifRightJut
-			set-base-anchor 'palatalHookAttach' xAtt y
-			set-base-anchor 'palatalHookPos'    xAtt y
+		local rSerifTopLeftJut : [HSwToV : 0.5 * strokeBar] + SideJut + RBalance * rSerifLeftExtender
+		local rSerifBottomLeftJut : match mode
+			[Just rNeedle] : Math.max Jut : MidJutCenter - [IBalance df]
+			__             : begin rSerifTopLeftJut
+		local rSerifBottomRightJut : match mode
+			[Just rNeedle] : Math.max MidJutSide : MidJutCenter + [IBalance df]
+			__             : mix [HSwToV : 0.5 * strokeBar] rSerifBottomLeftJut 1.20
+		export : local [rTopSerif    y] : tagged 'serifLT' : HSerif.lt rSerifX y rSerifTopLeftJut
+		export : local [rBottomSerif y] : tagged 'serifLB' : union
+			HSerif.lb rSerifX y rSerifBottomLeftJut
+			HSerif.rb rSerifX y rSerifBottomRightJut
 		export : local fine ShoulderFine
 		local rHookXFull : match mode
 			[Just rNeedle] : Math.max
 				xBar + [HSwToV : 0.125 * stroke] + TINY + [Math.abs : TanSlope * stroke]
-				xBar - [HSwToV : 0.5 * strokeBar] + HookX
+				xBar - [HSwToV : 0.5 * strokeBar] + HookX - OXHook
 			__ : df.rightSB + RBalance2 * rBalanceMultiplier - (OX - O)
 		export : local rHookX : match mode
 			([Just rNarrowHook] || [Just rNarrowHookSerifed]) : mix xBar rHookXFull
@@ -88,7 +87,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			[Just rNarrow]        : xArchMiddle + TINY
 			__                    : begin rHookX
 
-		export : define [setMarks top bottom doTopSerif] : glyph-proc
+		export : define [setMarks top bottom doTopSerif doBottomSerif] : glyph-proc
 			include : LeaningAnchor.Below.VBar.l (xBar - [HSwToV strokeBar])
 			include : match mode
 				[Just rNeedle] : LeaningAnchor.Above.At xArchMiddle
@@ -96,12 +95,14 @@ glyph-block Letter-Latin-Lower-R : begin
 					mix df.leftSB (xBar - [HSwToV strokeBar]) : if doTopSerif 0.5 1.0
 					begin df.rightSB
 			set-base-anchor 'overlay' (xBar - [HSwToV : 0.5 * strokeBar]) [mix bottom top 0.5]
-			set-base-anchor 'palatalHookAttach' xBar bottom
-			set-base-anchor 'palatalHookPos' (xBar + [PalatalHook.adviceGap Stroke]) bottom
+			local xAtt : if doBottomSerif (rSerifX + rSerifBottomRightJut) xBar
+			local xPos : xAtt + [if doBottomSerif 0 : if para.isItalic SideJut : PalatalHook.adviceGap Stroke]
+			set-base-anchor 'palatalHookAttach' xAtt bottom
+			set-base-anchor 'palatalHookPos'    xPos bottom
 			currentGlyph.copyBaseAnchorIfAbsent 'leaningAbove' 'above'
 			currentGlyph.copyBaseAnchorIfAbsent 'leaningBelow' 'below'
 
-		export : define [setTurnedMarks top bottom doTopSerif] : glyph-proc
+		export : define [setTurnedMarks top bottom doTopSerif doBottomSerif] : glyph-proc
 			include : LeaningAnchor.Above.VBar.r (df.width - (xBar - [HSwToV strokeBar]))
 			include : match mode
 				[Just rNeedle] : LeaningAnchor.Below.At (df.width - xArchMiddle)
@@ -109,6 +110,10 @@ glyph-block Letter-Latin-Lower-R : begin
 					begin df.leftSB
 					mix df.rightSB (df.width - (xBar - [HSwToV strokeBar])) : if doTopSerif 0.5 1.0
 			set-base-anchor 'overlay' (df.width - (xBar - [HSwToV : 0.5 * strokeBar])) [mix bottom top 0.5]
+			local xAtt : if doTopSerif (df.width - (rSerifX - rSerifTopLeftJut)) (df.width - (xBar - [HSwToV strokeBar]))
+			local xPos : xAtt + [if doTopSerif 0 : if doBottomSerif (rSerifTopLeftJut - [HSwToV : 0.5 * strokeBar]) SideJut]
+			set-base-anchor 'palatalHookAttach' xAtt bottom
+			set-base-anchor 'palatalHookPos'    xPos bottom
 			currentGlyph.copyBaseAnchorIfAbsent 'leaningAbove' 'above'
 			currentGlyph.copyBaseAnchorIfAbsent 'leaningBelow' 'below'
 
@@ -174,7 +179,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			if doBottomSerif : include : rBottomSerif bottom
 			if doTopSerif    : include : rTopSerif    top
 
-		export : define [EarlessCorner df md top bottom doTopSerif doBottomSerif _ada _adb] : glyph-proc
+		define [EarlessCornerShapeImpl offsetY0] : function [df md top bottom doTopSerif doBottomSerif _ada _adb] : glyph-proc
 			define [object xBar xArchMiddle rHookX rHookY hookSuperness rBottomSerif] : RDim df md
 			include : dispiro
 				widths.lhs
@@ -182,8 +187,11 @@ glyph-block Letter-Latin-Lower-R : begin
 				arcvh nothing hookSuperness
 				g4.left.mid (xArchMiddle - CorrectionOMidS) (top - O) [heading Leftward]
 				g4   (xBar - [HSwToV Stroke]) (top - DToothlessRise)
-			include : VBar.l (xBar - [HSwToV Stroke]) bottom (top - DToothlessRise)
+			include : VBar.l (xBar - [HSwToV Stroke]) bottom (top - offsetY0)
 			if doBottomSerif : include : rBottomSerif bottom
+
+		export : define [EarlessCorner    df md top bottom ts bs _ada _adb] : [EarlessCornerShapeImpl DToothlessRise] df md top bottom ts bs _ada _adb
+		export : define [EarlessCornerHTB df md top bottom ts bs _ada _adb] : [EarlessCornerShapeImpl 0]              df md top bottom ts bs _ada _adb
 
 		export : define [EarlessRounded df md top bottom doTopSerif doBottomSerif _ada _adb] : glyph-proc
 			define [object xBar xArchMiddle rHookX rHookY hookSuperness rBottomSerif] : RDim df md
@@ -198,31 +206,17 @@ glyph-block Letter-Latin-Lower-R : begin
 				curl (xBar - [HSwToV Stroke]) bottom [heading Downward]
 			if doBottomSerif : include : rBottomSerif bottom
 
-		export : define [HooklessFlap df md top bottom doTopSerif doBottomSerif _ada _adb] : glyph-proc
-			define [object xBar rBottomSerif xArchMiddle] : RDim df md
-			local ada : ArchDepthAClamped top bottom
-				fallback _ada SmallArchDepthA
-				fallback _adb SmallArchDepthB
-			include : dispiro
-				widths.lhs
-				g4.left.start (xArchMiddle - CorrectionOMidS * [linreg 72 0.75 108 1 Stroke]) (top - O)
-				archv
-				flat (xBar - [HSwToV Stroke]) (top - ada)
-				curl (xBar - [HSwToV Stroke]) bottom [heading Downward]
-			if doBottomSerif : include : rBottomSerif bottom
-
 	define SmallRConfig : SuffixCfg.weave
 		object # Body
-			""             { SmallRShape.Standard       dfN rStraight     rSerifed             }
-			flatTop        { SmallRShape.FlatTop        dfN rEarless      rEarless             }
-			earlessCorner  { SmallRShape.EarlessCorner  dfN rEarless      rEarless             }
-			earlessRounded { SmallRShape.EarlessRounded dfN rEarless      rEarless             }
-			hookless       { SmallRShape.Compact        dfN rNarrow       rNarrowSerifed       }
-			cornerHooked   { SmallRShape.CornerHook     dfN rCornerHooked rCornerHookedSerifed }
-			compact        { SmallRShape.Compact        dfR rNarrow       rNarrowSerifed       }
-			narrowHook     { SmallRShape.Standard       dfR rNarrowHook   rNarrowHookSerifed   }
-			hooklessFlap   { SmallRShape.HooklessFlap   dfN rNarrow       rNarrowSerifed       }
-			compactFlap    { SmallRShape.HooklessFlap   dfR rNarrow       rNarrowSerifed       }
+			""               { SmallRShape.Standard         dfN rStraight     rSerifed             }
+			flatTop          { SmallRShape.FlatTop          dfN rEarless      rEarless             }
+			earlessCorner    { SmallRShape.EarlessCorner    dfN rEarless      rEarless             }
+			earlessCornerHTB { SmallRShape.EarlessCornerHTB dfN rEarless      rEarless             }
+			earlessRounded   { SmallRShape.EarlessRounded   dfN rEarless      rEarless             }
+			hookless         { SmallRShape.Compact          dfN rNarrow       rNarrowSerifed       }
+			cornerHooked     { SmallRShape.CornerHook       dfN rCornerHooked rCornerHookedSerifed }
+			compact          { SmallRShape.Compact          dfR rNarrow       rNarrowSerifed       }
+			narrowHook       { SmallRShape.Standard         dfR rNarrowHook   rNarrowHookSerifed   }
 		object # Serifs
 			serifless      { 0 0 }
 			topSerifed     { 1 0 }
@@ -237,7 +231,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : df.markSet.e
 
 			define [object setMarks] : RDim df mode
-			include : setMarks XH 0 doTS
+			include : setMarks XH 0 doTS doBS
 
 			include : Body df mode XH 0 doTS doBS
 
@@ -246,7 +240,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : df.markSet.p
 
 			define [object setMarks] : RDim df mode
-			include : setMarks XH Descender doTS
+			include : setMarks XH Descender doTS doBS
 
 			include : Body df mode XH Descender doTS doBS
 
@@ -255,7 +249,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : df.markSet.capDesc
 
 			define [object setMarks] : RDim df mode
-			include : setMarks CAP Descender doTS
+			include : setMarks CAP Descender doTS doBS
 
 			include : Body df mode CAP Descender doTS doBS
 
@@ -275,96 +269,90 @@ glyph-block Letter-Latin-Lower-R : begin
 			local pos : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookPos
 			include : PalatalHook.r (x -- pos.x) (y -- pos.y) (xLink -- attach.x)
 
-		create-glyph "rRTail.\(suffix)" : glyph-proc
+		create-glyph "turnr.\(suffix)" : glyph-proc
 			set-width df.width
 			include : df.markSet.e
-			include : Body df mode XH 0 doTS 0
-			eject-contour 'serifLB'
 
-			define [object xBar] : RDim df mode
-			include : RetroflexHook.rExt xBar 0
-
-		create-glyph "turnr.\(suffix)" : glyph-proc
-			include [refer-glyph "r.\(suffix)"] AS_BASE ALSO_METRICS
-			include : FlipAround df.middle (XH / 2)
-			include : df.markSet.e
 			define [object setTurnedMarks] : RDim df mode
-			include : setTurnedMarks XH 0 doTS
+			include : setTurnedMarks XH 0 doTS doBS
 
-		create-glyph "turnrRTail.\(suffix)" : glyph-proc
-			include [refer-glyph "r.\(suffix)"] AS_BASE ALSO_METRICS
-			eject-contour 'serifLT'
-			include : FlipAround df.middle (XH / 2)
-			include : df.markSet.e
-			define [object xBar setTurnedMarks] : RDim df mode
-			include : setTurnedMarks XH 0 doTS
-			include : RetroflexHook.lExt (df.width - xBar) 0
-
-		create-glyph "turnrPalatalHook.\(suffix)" : glyph-proc
-			include [refer-glyph "r.\(suffix)"] AS_BASE ALSO_METRICS
-			eject-contour 'serifLT'
-			include : FlipAround df.middle (XH / 2)
-			include : df.markSet.e
-			define [object xBar setTurnedMarks] : RDim df mode
-			include : setTurnedMarks XH 0 doTS
-			include : PalatalHook.r
-				xLink -- (df.width - xBar)
-				x -- ((df.width - (xBar - [HSwToV Stroke])) + SideJut)
-				y -- 0
+			include : new-glyph : composite-proc
+				refer-glyph "r.\(suffix)"
+				FlipAround df.middle (XH / 2)
 
 		create-glyph "turnrLongLeg.\(suffix)" : glyph-proc
-			include [refer-glyph "rLongLeg.\(suffix)"] AS_BASE ALSO_METRICS
-			include : FlipAround df.middle (XH / 2)
+			set-width df.width
 			include : df.markSet.b
-			define [object setTurnedMarks] : RDim df mode
-			include : setTurnedMarks Ascender 0 doTS
 
-		create-glyph "turnrLongLegRTail.\(suffix)" : glyph-proc
-			include [refer-glyph "rLongLeg.\(suffix)"] AS_BASE ALSO_METRICS
-			eject-contour 'serifLT'
-			include : FlipAround df.middle (XH / 2)
-			include : df.markSet.b
-			define [object xBar setTurnedMarks] : RDim df mode
-			include : setTurnedMarks Ascender 0 doTS
-			include : RetroflexHook.lExt (df.width - xBar) 0
-
-		create-glyph "turnrHookTop.\(suffix)" : glyph-proc
-			include [refer-glyph "rRTail.\(suffix)"] AS_BASE ALSO_METRICS
-			include : FlipAround df.middle (XH / 2)
-			include : df.markSet.b
 			define [object setTurnedMarks] : RDim df mode
-			include : setTurnedMarks Ascender 0 doTS
+			include : setTurnedMarks Ascender 0 doTS doBS
+
+			include : new-glyph : composite-proc
+				refer-glyph "rLongLeg.\(suffix)"
+				FlipAround df.middle (XH / 2)
+
+		if [not doBS] : begin
+			create-glyph "rRTail.\(suffix)" : glyph-proc
+				include [refer-glyph "r.\(suffix)"] AS_BASE ALSO_METRICS
+				eject-contour 'serifLB'
+				define [object xBar] : RDim df mode
+				include : RetroflexHook.rExt xBar 0
+
+			create-glyph "turnrHookTop.\(suffix)" : glyph-proc
+				set-width df.width
+				include : df.markSet.b
+
+				define [object setTurnedMarks] : RDim df mode
+				include : setTurnedMarks Ascender 0 doTS doBS
+
+				include : new-glyph : composite-proc
+					refer-glyph "rRTail.\(suffix)"
+					FlipAround df.middle (XH / 2)
+
+		if [not doTS] : begin
+			create-glyph "turnrPalatalHook.\(suffix)" : glyph-proc
+				include [refer-glyph "turnr.\(suffix)"] AS_BASE ALSO_METRICS
+				local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookAttach
+				local pos : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookPos
+				include : PalatalHook.r (x -- pos.x) (y -- pos.y) (xLink -- attach.x)
+
+			create-glyph "turnrRTail.\(suffix)" : glyph-proc
+				include [refer-glyph "turnr.\(suffix)"] AS_BASE ALSO_METRICS
+				eject-contour 'serifLT'
+				define [object xBar] : RDim df mode
+				include : RetroflexHook.lExt (df.width - xBar) 0
+
+			create-glyph "turnrLongLegRTail.\(suffix)" : glyph-proc
+				include [refer-glyph "turnrLongLeg.\(suffix)"] AS_BASE ALSO_METRICS
+				eject-contour 'serifLT'
+				define [object xBar] : RDim df mode
+				include : RetroflexHook.lExt (df.width - xBar) 0
 
 	select-variant 'r' 'r'
 	link-reduced-variant 'r/sansSerif' 'r' MathSansSerif
-	select-variant 'turnr' 0x279 (follow -- 'r')
-
-	select-variant 'rLongLeg'     0x27C (follow -- 'r')
+	select-variant 'turnr'        0x279 (follow -- 'r')
 	select-variant 'turnrLongLeg' 0x27A (follow -- 'r')
+	select-variant 'turnrRTail'   0x27B (follow -- 'r/hookTopBase')
+	select-variant 'rLongLeg'     0x27C (follow -- 'r')
+	select-variant 'rRTail'       0x27D (follow -- 'r/rTailBase')
 
-	select-variant 'SInsular' 0xA784 (shapeFrom -- 'rCapLongLeg') (follow -- 'rRTail')
-	select-variant 'sInsular' 0xA785 (shapeFrom -- 'rLongLeg') (follow -- 'rRTail')
-	select-variant 'FInsular' 0xA77B (follow -- 'rRTail')
-	select-variant 'fInsular' 0xA77C (follow -- 'rRTail')
+	select-variant 'rPalatalHook' 0x1D89 (follow -- 'r')
+	select-variant 'turnrHookTop' 0x2C79 (follow -- 'r/rTailBase')
 
-	select-variant 'rRTail' 0x27D
-	select-variant 'turnrHookTop' 0x2C79 (follow -- 'rRTail')
+	select-variant 'turnrLongLegRTail' 0x1DF08 (follow -- 'r/hookTopBase')
+	select-variant 'turnrPalatalHook'  0x1DF15 (follow -- 'r/ascBase')
 
-	select-variant 'turnrRTail' 0x27B (follow -- 'r/ascBase')
-	select-variant 'turnrLongLegRTail' 0x1DF08 (follow -- 'r/ascBase')
-
-	select-variant 'rFlap' 0x27E (shapeFrom -- 'r')
-
-	select-variant 'rPalatalHook'     0x1D89  (follow -- 'r')
-	select-variant 'turnrPalatalHook' 0x1DF15 (follow -- 'r/ascBase')
-	select-variant 'rFlapPalatalHook' 0x1DF16 (shapeFrom -- 'rPalatalHook') (follow -- 'rFlap')
+	select-variant 'SInsular' 0xA784 (follow -- 'r/rTailBase') (shapeFrom -- 'rCapLongLeg')
+	select-variant 'sInsular' 0xA785 (follow -- 'r/rTailBase') (shapeFrom -- 'rLongLeg')
+	select-variant 'FInsular' 0xA77B (follow -- 'r/rTailBase')
+	select-variant 'fInsular' 0xA77C (follow -- 'r/rTailBase')
 
 	define NeedleRShape : namespace
 		export : define [Standard df md top bottom doTopSerif doBottomSerif _ada _adb] : glyph-proc
 			define [object xBar rBottomSerif rTopSerif fine rHookX] : RDim df md
 			local ada : ArchDepthAClamped top bottom
-				fallback _ada SmallArchDepthA
-				fallback _adb SmallArchDepthB
+				fallback _ada : ArchDepthAOf Hook
+				fallback _adb : ArchDepthBOf Hook
 			include : dispiro
 				widths.lhs
 				g4.left.start rHookX (top - O)
@@ -396,8 +384,8 @@ glyph-block Letter-Latin-Lower-R : begin
 		export : define [EarlessRounded df md top bottom doTopSerif doBottomSerif _ada _adb] : glyph-proc
 			define [object xBar rBottomSerif rHookX] : RDim df md
 			local ada : ArchDepthAClamped top bottom
-				fallback _ada SmallArchDepthA
-				fallback _adb SmallArchDepthB
+				fallback _ada : ArchDepthAOf Hook
+				fallback _adb : ArchDepthBOf Hook
 			include : dispiro
 				widths.lhs
 				g4.left.start rHookX (top - O)
@@ -424,11 +412,19 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : df.markSet.e
 
 			define [object setMarks] : RDim df rNeedle
-			include : setMarks XH 0 doTS
+			include : setMarks XH 0 doTS doBS
 
 			include : Body df rNeedle XH 0 doTS doBS
 
+		create-glyph "rNeedlePalatalHook.\(suffix)" : glyph-proc
+			include [refer-glyph "rNeedle.\(suffix)"] AS_BASE ALSO_METRICS
+			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookAttach
+			local pos : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookPos
+			include : PalatalHook.r (x -- pos.x) (y -- pos.y) (xLink -- attach.x)
+
 	select-variant 'rNeedle' 0xAB47
+	select-variant 'rFlap' 0x27E (shapeFrom -- 'rNeedle')
+	select-variant 'rFlapPalatalHook' 0x1DF16 (shapeFrom -- 'rNeedlePalatalHook') (follow -- 'rFlap')
 
 	define [BBRShape df md doTopSerif doBottomSerif _ada _adb] : glyph-proc
 		define [object xBar fine xArchMiddle skew rHookX rHookY hookSuperness] : RDim df md BBS BBD
