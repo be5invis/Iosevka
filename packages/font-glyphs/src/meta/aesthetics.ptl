@@ -228,7 +228,7 @@ export : define [calculateMetrics para] : begin
 		IBalance IBalance2 JBalance JBalance2 TBalance TBalance2 RBalance RBalance2 FBalance
 		OneBalance WideWidth0 WideWidth1 WideWidth2 WideWidth3 WideWidth4 EssUpper EssLower
 		EssQuestion RightSB Middle DotRadius PeriodRadius ArchDepthA ArchDepthB SmallArchDepthA
-		SmallArchDepthB CorrectionOMidX CorrectionOMidS compositeBaseAnchors AdviceStroke
+		SmallArchDepthB CorrectionOMidX CorrectionOMidS AdviceStroke
 		AdviceStroke2 AdviceStrokeInSpace OverlayStroke OperatorStroke GeometryStroke
 		UnicodeWeightGrade StrokeWidthBlend ArchDepthAOf ArchDepthBOf ArchDepthAClamped
 		ArchDepthBClamped SmoothAdjust SideJut MidJutSide MidJutCenter YSmoothMidR YSmoothMidL
@@ -318,79 +318,6 @@ export : define [copyFontMetrics fm1 fm2] : begin
 	set fm2.post.underlinePosition   fm1.post.underlinePosition
 	set fm2.post.underlineThickness  fm1.post.underlineThickness
 
-
-class CMarkSet
-	public [new markAnchors baseAnchors] : begin
-		set this.markAnchors markAnchors
-		set this.baseAnchors baseAnchors
-	public [applyToGlyph g] : begin
-		g.clearAnchors
-		g.copyAnchors this
-
-export : define [compositeBaseAnchors] : begin
-	local baseAnchorSink {.}
-	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.baseAnchors]] : begin
-		set baseAnchorSink.(k) : new Anchor a.baseAnchors.(k).x a.baseAnchors.(k).y a.baseAnchors.(k).type a.baseAnchors.(k).mbx a.baseAnchors.(k).mby
-	return : new CMarkSet null baseAnchorSink
-
-define [MarksetDiv p sbMul me] : begin
-	define width : p * me.Width
-	define middle : p * me.Middle
-	define leftSB   me.SB
-	define rightSB : me.Width * p - me.SB
-	define [ta anchor] : return : new Anchor
-		me.GlobalTransform.applyX anchor.x anchor.y
-		me.GlobalTransform.applyY anchor.x anchor.y
-
-	define [MarkAbove zone]        {.baseAnchors {.above       [ta : new Anchor middle  zone.top]}}
-	define [MarkBelow zone]        {.baseAnchors {.below       [ta : new Anchor middle  zone.bot]}}
-	define [MarkTopLeft zone]      {.baseAnchors {.topLeft     [ta : new Anchor leftSB  zone.top]}}
-	define [MarkTopRight zone]     {.baseAnchors {.topRight    [ta : new Anchor rightSB zone.top]}}
-	define [MarkBottomLeft zone]   {.baseAnchors {.bottomLeft  [ta : new Anchor leftSB  zone.bot]}}
-	define [MarkBottomRight zone]  {.baseAnchors {.bottomRight [ta : new Anchor rightSB zone.bot]}}
-
-	define markTieAbove            {.baseAnchors {.tieAbove    [ta : new Anchor width  (me.XH + me.AccentStackOffset * 1.38)]}}
-	define markTieBelow            {.baseAnchors {.tieBelow    [ta : new Anchor width   me.Descender                        ]}}
-
-	define [buildStandardMarkSet zone] : lambda [] : begin
-		if (this && this.baseAnchors) : begin
-			throw : new Error "A mark set is now a function. Please call it before inclusion"
-		local a : compositeBaseAnchors
-			MarkAbove       zone
-			MarkBelow       zone
-			MarkTopLeft     zone
-			MarkTopRight    zone
-			MarkBottomLeft  zone
-			MarkBottomRight zone
-			begin markTieAbove
-			begin markTieBelow
-
-		# Overlay on stems
-		set a.baseAnchors.overlay : new Anchor
-			* [mix a.baseAnchors.below.x a.baseAnchors.above.x me.OverlayPos]
-			* [mix a.baseAnchors.below.y a.baseAnchors.above.y me.OverlayPos]
-		# Slash over entire letter
-		set a.baseAnchors.slash : new Anchor
-			* [mix a.baseAnchors.below.x a.baseAnchors.above.x 0.5]
-			* [mix a.baseAnchors.below.y a.baseAnchors.above.y 0.5]
-		# Horizontal or near-horizontal strike on letter counter or bowl
-		set a.baseAnchors.strike : new Anchor
-			* [mix a.baseAnchors.below.x a.baseAnchors.above.x 0.5]
-			* [mix a.baseAnchors.below.y a.baseAnchors.above.y 0.5]
-		return a
-
-	return : object
-		OfZone    buildStandardMarkSet
-		capital : buildStandardMarkSet {.top me.CAP      .bot 0}
-		b       : buildStandardMarkSet {.top me.Ascender .bot 0}
-		e       : buildStandardMarkSet {.top me.XH       .bot 0}
-		p       : buildStandardMarkSet {.top me.XH       .bot me.Descender}
-		oper    : buildStandardMarkSet {.top me.OperTop  .bot me.OperBot}
-		tack    : buildStandardMarkSet {.top me.TackTop  .bot me.TackBot}
-		plus    : buildStandardMarkSet {.top me.PlusTop  .bot me.PlusBot}
-		bp      : buildStandardMarkSet {.top me.Ascender .bot me.Descender}
-		capDesc : buildStandardMarkSet {.top me.CAP      .bot me.Descender}
-
 export : define DesignParameters : object
 	# V shape
 	straightVShapeSbShrink      0.8
@@ -440,96 +367,3 @@ export : define DesignParameters : object
 	serifShiftX                0.60
 	# Square dot
 	squareDotScalar            0.95
-
-export : define [GenDivFrame metrics] : begin
-	# Implementation class of a division frame, used to model a letter's core X-direction structure
-	class CDivFrame
-		# _adws: scale factor of advance width
-		# _hPack: number of horizontal divisions
-		# _sbMul: scale factor of sidebearings
-		# _mvs: desired stroke width
-		# _ox: overshoot correction
-		public [new _adws _hPack _sbMul _mvs _ox] : begin
-			local ox    : fallback _ox 0
-			local adws  : fallback _adws 1
-			local hPack : Math.max 1 [fallback _hPack 0]
-			local mvs   : fallback _mvs
-				if _hPack [metrics.AdviceStroke _hPack adws] metrics.Stroke
-			local sbMul : fallback _sbMul
-				Math.min 1 : (metrics.Width * adws - hPack * mvs) / (2 * hPack * metrics.SB)
-
-			set this.params       : object adws hPack sbMul mvs ox
-			set this.adws           adws
-			set this.hPack          hPack
-			set this.width        : metrics.Width * adws
-			set this.middle       : metrics.Middle * adws
-			set this.sb           : metrics.SB * sbMul
-			set this.leftSB       : metrics.SB * sbMul
-			set this.rightSB      : metrics.Width * adws - metrics.SB * sbMul
-			set this.mvs            mvs
-			set this.shoulderFine : metrics.ShoulderFine * (mvs / metrics.Stroke)
-			set this.markSet      : MarksetDiv adws sbMul metrics
-
-			# No-overshoot metrics -- used for Arch depth calculation
-			set this.ox                 ox
-			set this.widthNoOvershoot : this.width - ox
-			set this.divNoOvershoot   : this.widthNoOvershoot / metrics.Width
-
-			set this.archDepth  : this.archDepthOf  metrics.ArchDepth mvs
-			set this.archDepthA : this.archDepthAOf metrics.ArchDepth mvs
-			set this.archDepthB : this.archDepthBOf metrics.ArchDepth mvs
-
-			set this.smallArchDepth  : this.archDepthOf  metrics.SmallArchDepth mvs
-			set this.smallArchDepthA : this.archDepthAOf metrics.SmallArchDepth mvs
-			set this.smallArchDepthB : this.archDepthBOf metrics.SmallArchDepth mvs
-
-		public [archDepthOf d _stroke] : begin
-			return : Math.max (d * this.divNoOvershoot) (1.125 * [fallback _stroke this.mvs])
-		public [archDepthAOf d _stroke] : begin
-			return : metrics.ArchDepthAOf [this.archDepthOf d _stroke] this.widthNoOvershoot
-		public [archDepthBOf d _stroke] : begin
-			return : metrics.ArchDepthBOf [this.archDepthOf d _stroke] this.widthNoOvershoot
-
-		public [slice _divisions _keeps _o] : begin
-			local o : fallback _o 0
-			local divisions : fallback _divisions this.hPack
-			local keeps : fallback _keeps 2
-
-			return : this.sliceFine divisions keeps ((keeps - 1) / (divisions - 1)) 0 o
-
-		public [sliceFine strokes keeps pGap _extraGap _o] : begin
-			local o : fallback _o 0
-			local extraGap : fallback _extraGap 0
-
-			local oneStroke : metrics.HVContrast * this.mvs
-			local totalGap : this.rightSB - this.leftSB - strokes * oneStroke - 2 * o
-
-			local subDfWidth : 2 * this.leftSB + 2 * o + totalGap * pGap + extraGap + oneStroke * keeps
-			local subDfDiv : subDfWidth / metrics.Width
-
-			return : new CDivFrame subDfDiv keeps (this.leftSB / metrics.SB) this.mvs o
-
-		public [rest sub _hPack] : begin
-			return : new CDivFrame ((this.width - sub.width) / metrics.Width) [fallback _hPack (this.hPack - sub.hPack + 1)] (this.leftSB / metrics.SB) this.mvs this.ox
-		public [restCompact kKern sub _hPack] : begin
-			local kern : kKern * ((this.width - this.rightSB) + sub.leftSB)
-			return : new CDivFrame ((this.width - sub.width + kern) / metrics.Width) [fallback _hPack (this.hPack - sub.hPack + 1)] (this.leftSB / metrics.SB) this.mvs this.ox
-
-		public [applyToGlyph g] : begin
-			g.setWidth this.width
-			set g.divFrameParams this.params
-			return this
-
-		public [adviceStroke c] : metrics.AdviceStroke c this.adws
-		public [adviceStroke2 c d h] : metrics.AdviceStroke2 c d h this.adws
-
-		public [frameBox t b] : new Box t b 0 this.width
-		public [bodyBox t b] : new Box t b this.leftSB this.rightSB
-
-
-	# Factory function for CDivFrame
-	define [F _adws _hPack _sbMul _mvs _ox] : begin
-		return : new CDivFrame _adws _hPack _sbMul _mvs _ox
-	set F.fromParams : lambda [params] : begin
-		return : new CDivFrame params.adws params.hPack params.sbMul params.mvs params.ox
-	return F
