@@ -67,8 +67,12 @@ export function joinCamel(a, b) {
 	if (!b) return a;
 	return a + b[0].toUpperCase() + b.slice(1);
 }
-
-function joinSuffixListImpl(sink, k, v, telescope, configs) {
+function joinDot(a, b) {
+	if (!a) return b;
+	if (!b) return a;
+	return `${a}.${b}`;
+}
+function joinSuffixListImpl(sink, joiner, k, v, telescope, configs) {
 	if (!configs.length) {
 		sink[k] = v;
 		return;
@@ -79,17 +83,22 @@ function joinSuffixListImpl(sink, k, v, telescope, configs) {
 	if (!item) return;
 
 	for (const [keySuffix, valueSuffix] of Object.entries(item)) {
-		const k1 = joinCamel(k, keySuffix);
+		const k1 = joiner(k, keySuffix);
 		const v1 = [...v, valueSuffix];
 		const telescope1 = [...telescope, keySuffix];
-		joinSuffixListImpl(sink, k1, v1, telescope1, rest);
+		joinSuffixListImpl(sink, joiner, k1, v1, telescope1, rest);
 	}
 }
 
 export const SuffixCfg = {
 	weave: (...configs) => {
 		const ans = {};
-		joinSuffixListImpl(ans, "", [], [], configs);
+		joinSuffixListImpl(ans, joinCamel, "", [], [], configs);
+		return ans;
+	},
+	dotWeave: (...configs) => {
+		const ans = {};
+		joinSuffixListImpl(ans, joinDot, "", [], [], configs);
 		return ans;
 	},
 	combine: (...configs) => {
