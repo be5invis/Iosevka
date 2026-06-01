@@ -12,8 +12,8 @@ export function linreg(x0, y0, x1, y1, x) {
 export function clamp(l, h, x) {
 	return x < l ? l : x > h ? h : x;
 }
-export function quantize(x, step) {
-	return step * Math.round(x / step);
+export function quantize(x, stepSize) {
+	return stepSize * Math.round(x / stepSize);
 }
 export function fallback(...args) {
 	for (const item of args) if (item !== void 0) return item;
@@ -59,6 +59,24 @@ export function slX(x0, y0, y1, slope) {
 export function distP(x0, y0, x1, y1, dist) {
 	return dist / Math.hypot(x1 - x0, y1 - y0);
 }
+
+function mod(n, d) {
+	return ((n % d) + d) % d;
+}
+export const Waveform = {
+	sine: function (x) {
+		return Math.sin(Math.PI / 2 * x);
+	},
+	square: function (x) {
+		return Math.sign((mod(x - 1, 4) || 2) - 2);
+	},
+	triangle: function (x) {
+		return Math.abs(mod(x - 1, 4) - 2) - 1;
+	},
+	sawtooth: function (x) {
+		return (mod(x - 1, 2) || 1) - 1;
+	},
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 

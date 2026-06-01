@@ -1,7 +1,7 @@
 ### Punctuation symbols
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback Waveform] from "@iosevka/util"
 
 glyph-module
 
@@ -13,16 +13,16 @@ glyph-block Symbol-Punctuation-Percentages : begin
 	define WideUnicode   : WideUnicodeT   WideWidth1
 
 	define [PercentBarCor df sw] : begin
-		local a : 1 - (((df.rightSB - df.leftSB - sw) / (CAP - 0)) ** 2)
-		return : HSwToV : 1 / [if (a <= 0) 1 : Math.sqrt a]
+		local a : Waveform.sawtooth : (df.rightSB - df.leftSB - sw) / (CAP - 0)
+		return : 1 / [Math.sqrt : 1 - a * a]
 
 	define [PercentBarShape df sw] : begin
 		local cor : PercentBarCor df sw
 		return : spiro-outline
 			corner df.leftSB 0
-			corner (df.rightSB - sw * cor) CAP
-			corner df.rightSB CAP
-			corner (df.leftSB + sw * cor) 0
+			corner (df.rightSB - [HSwToV : cor * sw]) CAP
+			corner  df.rightSB                        CAP
+			corner (df.leftSB  + [HSwToV : cor * sw]) 0
 
 	create-glyph 'percent.dots' : glyph-proc
 		include : PercentBarShape [DivFrame 1] Stroke
@@ -46,14 +46,15 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		local dotwidth : refSw * 1.5
 		include : VBar.l SB [mix CAP 0 0.3] CAP dotwidth
 
-		local gap : (df.width - df.leftSB) * 0.9 - refSw * [PercentBarCor slopeDf refSw]
+		local cor : PercentBarCor slopeDf refSw
+		local gap : [mix 0 df.rightSB 0.9] - [HSwToV : cor * refSw]
 		local lowerDotWidth : 1.5 * [AdviceStroke 3 (gap / Width)]
 		include : VBar.r (df.rightSB - gap * 0.45) 0 [mix 0 CAP 0.3] lowerDotWidth
 		include : VBar.r  df.rightSB               0 [mix 0 CAP 0.3] lowerDotWidth
 
 	create-glyph 'basepoint.NWID.dots' : glyph-proc
 		define df : include : DivFrame para.advanceScaleM
-		define slopeDf : DivFrame : Math.min 1 : para.advanceScaleM * 0.8
+		define slopeDf : DivFrame (0.75 * para.advanceScaleM)
 
 		define refSw : AdviceStroke 5 df.adws
 
@@ -61,7 +62,8 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		local dotwidth : refSw * 1.5
 		include : VBar.l SB [mix CAP 0 0.3] CAP dotwidth
 
-		local gap : (df.width - df.leftSB) * 0.9 - refSw * [PercentBarCor slopeDf refSw]
+		local cor : PercentBarCor slopeDf refSw
+		local gap : [mix 0 df.rightSB 0.9] - [HSwToV : cor * refSw]
 		local lowerDotWidth : 1.5 * [AdviceStroke 4 (gap / Width)]
 		include : VBar.r (df.rightSB - gap * 0.6) 0 [mix 0 CAP 0.3] lowerDotWidth
 		include : VBar.r (df.rightSB - gap * 0.3) 0 [mix 0 CAP 0.3] lowerDotWidth
@@ -121,7 +123,6 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		local swBar : AdviceStroke 3
 		local fine : AdviceStroke 4
 		local cor : DiagCorDs CAP (r - l) swBar
-		local pTerm : fine / (2 * [Math.hypot CAP (r - l)])
 		local pFine : 0.5 - [Math.max (CAP / 10) HalfStroke] / [Math.hypot CAP (r - l)]
 
 		include : OShape CAP (CAP / 2) l m swRing ada adb
@@ -138,7 +139,6 @@ glyph-block Symbol-Punctuation-Percentages : begin
 
 	create-glyph : glyph-proc
 		local width : Width * para.advanceScaleM
-		local rightSB : width - SB
 		set-width width
 		local l   : SB / 2
 		local r   : width - l
@@ -147,25 +147,22 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		local adb  : ArchDepthB * 0.5 * para.advanceScaleM
 		local sw   : AdviceStroke2 4 5 CAP para.advanceScaleM
 		local fine : AdviceStroke2 5 5 CAP para.advanceScaleM
-		local cor : HSwToV : 1 / [Math.sqrt : 1 - (((r - l - sw) / (CAP - 0)) ** 2)]
-		local pTerm : fine / (2 * [Math.hypot CAP (r - l)])
-		local pFine : 0.5 - HalfStroke / [Math.hypot CAP (r - l)]
 
-		local otop : CAP / 2 - [Math.max (CAP / 5) (fine * 2)] / 2
+		local otop : CAP / 2 - [Math.max (CAP / 10) fine]
 		local coOtop : CAP - otop
 
-		include : OShape CAP (CAP - otop) l m sw ada adb
+		include : OShape CAP coOtop l m sw ada adb
 
 		include : dispiro
 			flat l [mix otop coOtop 0.3] [widths.center fine]
-			curl r (CAP - otop)          [widths.center sw]
+			curl r coOtop                [widths.center sw]
 
 		# bottom row
 		create-forked-glyph 'permille.NWID.ringsContinuousSlash' : glyph-proc
 			local l1   : l - O
-			local r2   r
-			local gap  : (SB / 2 - O * 2) * para.advanceScaleM
-			local fill : ((r2 - l1) - gap) / 2
+			local r2   : r + 0
+			local gap  : (l1 - O) * para.advanceScaleM
+			local fill : (1/2) * (r2 - l1) - (1/2) * gap
 			local r1 : l1 + fill
 			local l2 : r1 + gap
 			local swp : AdviceStroke2 4 5 CAP para.advanceScaleM
@@ -174,19 +171,19 @@ glyph-block Symbol-Punctuation-Percentages : begin
 
 		create-forked-glyph 'basepoint.NWID.ringsContinuousSlash' : glyph-proc
 			local l1   : l - O
-			local r3   r
-			local gap  : (SB / 2 - O) * para.advanceScaleM
-			local fill : ((r3 - l1) - 2 * gap) / 3
+			local r3   : r + 0
+			local gap  : (l1 - 0) * para.advanceScaleM
+			local fill : (1/3) * (r3 - l1) - (2/3) * gap
 			local r1 : l1 + fill
 			local l2 : r1 + gap
 			local r2 : l2 + fill
 			local l3 : r2 + gap
 			local swp : AdviceStroke2 6 5 CAP para.advanceScaleM
-			local smap : ArchDepthA * (1/3) * para.advanceScaleM
-			local smbp : ArchDepthB * (1/3) * para.advanceScaleM
-			include : OShape otop  0  l1 r1 swp smap smbp
-			include : OShape otop  0  l2 r2 swp smap smbp
-			include : OShape otop  0  l3 r3 swp smap smbp
+			local adap : ArchDepthA * (1/3) * para.advanceScaleM
+			local adbp : ArchDepthB * (1/3) * para.advanceScaleM
+			include : OShape otop  0  l1 r1 swp adap adbp
+			include : OShape otop  0  l2 r2 swp adap adbp
+			include : OShape otop  0  l3 r3 swp adap adbp
 
 	select-variant 'percent' '%'
 	select-variant 'permille.NWID'  [NarrowUnicode 0x2030] (follow -- 'permille.NWID')
