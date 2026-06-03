@@ -11,13 +11,14 @@ glyph-block Digits-Four : begin
 	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
 
 	define [FourStdShape] : with-params [top open crossing [fine [AdviceStroke 3]] [sw Stroke] [bbd 0] [slab SLAB]] : glyph-proc
-		define yBar : Math.max (top * 0.25 + 0.625 * sw) (top * 0.05 + sw + [if (!bbd && slab) Stroke 0])
+		define yBarBot : Math.max ([mix 0 (top - sw) 0.25] - 0.125 * sw) [mix [if (!bbd && slab) Stroke 0] (top - sw) 0.1]
+		define yBarTop : yBarBot + sw
 		define swVBar : [AdviceStroke 2.5] * (sw / Stroke)
 
 		define xVertBar : [mix SB RightSB : if crossing 0.78 0.9125] - (bbd * 0.75) + [if crossing [HSwToV : 0.375 * sw] 0]
-		define yVertBarTop : [mix (yBar - sw) top : if open 0.5 1] - [if open (0.3 * sw) 0]
+		define yVertBarTop : [mix yBarBot top : if open 0.5 1] - [if open (0.3 * sw) 0]
 		define xHBarTerminal : if crossing RightSB xVertBar
-		define xSlopeTop : xVertBar - [HSwToV sw] - [if open 0.06 0.25] * [HSwToV fine]
+		define xSlopeTop : xVertBar - [HSwToV : sw + [if open 0.06 0.25] * fine]
 
 		include : union
 			if open
@@ -28,16 +29,14 @@ glyph-block Digits-Four : begin
 					curl xVertBar [mix @b @t 0.8]    [heading Upward]
 					g2   xVertBar (@t = yVertBarTop) [widths.lhs.heading fine Upward]
 			difference
-				HBar.t (SB + OX) xHBarTerminal yBar sw
+				HBar.t (SB + OX) xHBarTerminal yBarTop sw
 				Rect CAP 0 xVertBar (xVertBar + bbd)
 			intersection
-				if open
-					Rect top yBar 0 Width
-					Rect top yBar 0 xVertBar
+				Rect top yBarTop 0 [if open Width xVertBar]
 				dispiro
 					widths.rhs fine
-					flat (SB + OX) yBar
-					curl [mix (SB + OX) xSlopeTop 2] [mix yBar top 2]
+					flat (SB + OX) yBarTop
+					curl [mix (SB + OX) xSlopeTop 2] [mix yBarTop top 2]
 
 		if bbd : begin
 			include : VBar.r (xVertBar + bbd) 0 yVertBarTop sw
@@ -54,15 +53,16 @@ glyph-block Digits-Four : begin
 		return : FourStdShape top true crossing (fine -- [AdviceStroke 2.75]) (slab -- slab)
 
 	define [FourOpenShape top crossing slab] : glyph-proc
-		local yBar : top * 0.4
+		local yBarBot : Math.max ([mix 0 (top - Stroke) 0.4] - 0.2 * Stroke) [mix [if slab Stroke 0] (top - Stroke) 0.1]
+		local yBarTop : yBarBot + Stroke
 		local fine : AdviceStroke 3
 
 		define xVertBar : mix SB RightSB : if crossing 0.825 0.9125
 		define xHBarTerminal : if crossing RightSB xVertBar
 
-		include : HBar.t SB xHBarTerminal yBar
-		include : VBar.r xVertBar 0 [mix (yBar - Stroke) top 0.75]
-		include : VBar.l SB yBar top
+		include : HBar.t SB xHBarTerminal yBarTop
+		include : VBar.r xVertBar 0 [mix yBarBot top 0.75]
+		include : VBar.l SB yBarTop top
 		if slab : begin
 			include : HSerif.rb (xVertBar - [HSwToV HalfStroke]) 0 Jut
 			include : HSerif.lb (xVertBar - [HSwToV HalfStroke]) 0 MidJutSide
