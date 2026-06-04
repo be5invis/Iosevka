@@ -9,29 +9,38 @@ glyph-block Letter-Latin-OU : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define [OuShape top yBar gapL gapR] : glyph-proc
-		include : OShape (yBar + HalfStroke) 0 SB RightSB nothing ArchDepthA ArchDepthB
+	define [OuShape top yBar yGapLT yGapRT ada adb] : glyph-proc
+		local stroke : AdviceStroke2 2 3 (top - 0)
+		local fine : stroke * CThin
+		include : OShape (yBar + stroke / 2 + O) 0 SB RightSB stroke ada adb
 
-		local xLeft : clamp (SB + [HSwToV : 1.25 * Stroke]) [mix SB RightSB 0.4] (Middle - Width * 0.05)
-		local d : 0.25 * TanSlope * (RightSB - SB)
+		local xGapMT : 0.1 * (Width - 0)
+		local xLeft : clamp
+			SB + [HSwToV : 1.125 * stroke] + TINY + [Math.abs : TanSlope * stroke]
+			mix SB RightSB 0.45
+			Arch.adjust-x.top (Middle - xGapMT / 2) (sw -- stroke)
+		local xRight : clamp
+			mix SB RightSB 0.55
+			RightSB - [HSwToV : 1.125 * stroke] - TINY - [Math.abs : TanSlope * stroke]
+			Arch.adjust-x.top (Middle + xGapMT / 2) (sw -- stroke)
 		include : dispiro
-			widths.lhs
-			g4.left.start [Arch.adjust-x.top xLeft] (top - gapL)
+			widths.lhs stroke
+			g4.left.start xLeft (top - yGapLT)
 			archv
-			g4.down.mid SB ([mix (yBar - HalfStroke) (top - gapL) 0.5] + d)
-			Arch.lhs (yBar - HalfStroke + (Stroke * (1 - CThin))) (sw -- (Stroke * CThin))
-			g4.up.mid RightSB ([mix (yBar - HalfStroke) (top - gapR) 0.5] - d) [widths.lhs]
+			g4.down.mid SB [YSmoothMidL (top - yGapLT) (yBar - stroke / 2) ada adb]
+			Arch.lhs (yBar + stroke / 2 - fine) (swBefore -- stroke) (sw -- fine) (swAfter -- stroke) (o -- 0)
+			g4.up.mid RightSB [YSmoothMidR (top - yGapRT) (yBar - stroke / 2) ada adb] [widths.lhs stroke]
 			arcvh
-			g4.left.end [Arch.adjust-x.top (Width - xLeft)] (top - gapR)
+			g4.left.end xRight (top - yGapRT)
 
 	create-glyph 'OU' 0x222 : glyph-proc
 		include : MarkSet.capital
-		include : OuShape CAP (CAP * HBarPos) (CAP * 0.05) 0
+		include : OuShape CAP [mix 0 CAP HBarPos] (0.05 * (CAP - 0)) 0 ArchDepthA ArchDepthB
 
 	create-glyph 'smcpOU' 0x1D15 : glyph-proc
 		include : MarkSet.e
-		include : OuShape XH (XH * HBarPos) 0 0
+		include : OuShape XH [mix 0 XH HBarPos] 0 0 ArchDepthA ArchDepthB
 
 	create-glyph 'ou' 0x223 : glyph-proc
 		include : MarkSet.b
-		include : OuShape Ascender (Ascender * [mix HBarPos (XH / CAP) 0.5]) 0 0
+		include : OuShape Ascender [mix 0 Ascender : mix HBarPos (XH / CAP) 0.5] 0 0 SmallArchDepthA SmallArchDepthB
