@@ -3,11 +3,11 @@ import { Box } from "@iosevka/geometry/box";
 import { mix } from "@iosevka/util";
 
 export function SetupBuilders(bindings) {
-	const F = (_adws, _hPack, _sbMul, _mvs, _ox) =>
-		new DivFrame(bindings, _adws, _hPack, _sbMul, _mvs, _ox);
+	const F = (_adws, _hPack, _sbMul) => {
+		return DivFrame._Calculate(bindings, _adws, _hPack, _sbMul);
+	};
 
-	F.fromParams = params =>
-		new DivFrame(bindings, params.adws, params.hPack, params.sbMul, params.mvs, params.ox);
+	F.fromParams = params => new DivFrame(bindings, params);
 
 	return F;
 }
@@ -15,32 +15,50 @@ export function SetupBuilders(bindings) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ////// Div Frame
 
+class DivFrameParams {
+	constructor(width, sb, hPack, mvs, ox) {
+		this.width = width; // Advice width, including sidebearings
+		this.sb = sb; // Sidebearing
+		this.hPack = hPack; // Horizontal pack (number of strokes in horizontal direction)
+		this.mvs = mvs; // Stroke width. Originally "m's vert stroke", later generalized
+		this.ox = ox; // x-direction overshoot
+	}
+}
+
 class DivFrame {
-	constructor(bindings, _adws, _hPack, _sbMul, _mvs, _ox) {
-		const ox = _ox ?? 0;
+	static _Calculate(bindings, _adws, _hPack, _sbMul) {
 		const adws = _adws ?? 1;
+		const width = bindings.Width * adws;
 		const hPack = Math.max(1, _hPack ?? 0);
-		const mvs = _mvs ?? (_hPack ? bindings.AdviceStroke(_hPack, adws) : bindings.Stroke);
-		const sbMul =
-			_sbMul ??
-			Math.min(1, (bindings.Width * adws - hPack * mvs) / (2 * hPack * bindings.SB));
+		const mvs = bindings.AdviceStrokeInSpace(
+			width - 2 * bindings.SB,
+			hPack,
+			bindings.HVContrast,
+			1,
+		);
+		const sb = _sbMul
+			? bindings.SB * _sbMul
+			: bindings.SB * Math.min(1, (width - hPack * mvs) / (2 * hPack * bindings.SB));
+
+		return new DivFrame(bindings, new DivFrameParams(width, sb, hPack, mvs, 0));
+	}
+
+	constructor(bindings, params) {
+		const { width, hPack, sb, mvs, ox } = params;
 
 		this.bindings = bindings;
-		this.params = { adws, hPack, sbMul, mvs, ox };
-		this.adws = adws;
+		this.params = params;
+
 		this.hPack = hPack;
-		this.width = bindings.Width * adws;
-		this.middle = 0.5 * this.width;
-		this.sb = sbMul * bindings.SB;
-		this.leftSB = this.sb;
-		this.rightSB = this.width - this.sb;
+		this.width = width;
+		this.middle = 0.5 * width;
+		this.sb = this.leftSB = sb;
+		this.rightSB = width - sb;
 		this.mvs = mvs;
 		this.shoulderFine = (bindings.ShoulderFine * mvs) / bindings.Stroke;
 		this.markSet = new MarksetDiv(bindings, this);
 
 		this.ox = ox;
-		this.widthNoOvershoot = this.width - ox;
-		this.divNoOvershoot = this.widthNoOvershoot / bindings.Width;
 
 		this.archDepth = this.archDepthOf(bindings.ArchDepth, mvs);
 		this.archDepthA = this.archDepthAOf(bindings.ArchDepth, mvs);
@@ -51,8 +69,18 @@ class DivFrame {
 		this.smallArchDepthB = this.archDepthBOf(bindings.SmallArchDepth, mvs);
 	}
 
+	get adws() {
+		return this.width / this.bindings.Width;
+	}
+
+	get widthNoOvershoot() {
+		return this.width - this.ox;
+	}
+	get adwsNoOvershoot() {
+		return this.widthNoOvershoot / this.bindings.Width;
+	}
 	archDepthOf(d, _stroke) {
-		return Math.max(d * this.divNoOvershoot, 1.125 * (_stroke ?? this.mvs));
+		return Math.max(d * this.adwsNoOvershoot, 1.125 * (_stroke ?? this.mvs));
 	}
 	archDepthAOf(d, _stroke) {
 		return this.bindings.ArchDepthAOf(this.archDepthOf(d, _stroke), this.widthNoOvershoot);
@@ -77,26 +105,23 @@ class DivFrame {
 		const totalGap = this.rightSB - this.leftSB - hpk * oneStroke - 2 * o;
 
 		const subDfWidth = 2 * this.sb + 2 * o + totalGap * pGap + extraGap + oneStroke * keeps;
-		const subDfDiv = subDfWidth / this.bindings.Width;
 
 		return new DivFrame(
 			this.bindings,
-			subDfDiv,
-			keeps,
-			this.leftSB / this.bindings.SB,
-			this.mvs,
-			o,
+			new DivFrameParams(subDfWidth, this.sb, keeps, this.mvs, o),
 		);
 	}
 
 	rest(sub, _hPack) {
 		return new DivFrame(
 			this.bindings,
-			(this.width - sub.width) / this.bindings.Width,
-			_hPack ?? this.hPack - sub.hPack + 1,
-			this.leftSB / this.bindings.SB,
-			this.mvs,
-			this.ox,
+			new DivFrameParams(
+				this.width - sub.width,
+				this.sb,
+				_hPack ?? this.hPack - sub.hPack + 1,
+				this.mvs,
+				this.ox,
+			),
 		);
 	}
 
@@ -104,11 +129,13 @@ class DivFrame {
 		const kern = kKern * (this.width - this.rightSB + sub.leftSB);
 		return new DivFrame(
 			this.bindings,
-			(this.width - sub.width + kern) / this.bindings.Width,
-			_hPack ?? this.hPack - sub.hPack + 1,
-			this.leftSB / this.bindings.SB,
-			this.mvs,
-			this.ox,
+			new DivFrameParams(
+				this.width - sub.width + kern,
+				this.sb,
+				_hPack ?? this.hPack - sub.hPack + 1,
+				this.mvs,
+				this.ox,
+			),
 		);
 	}
 
@@ -118,11 +145,36 @@ class DivFrame {
 		return this;
 	}
 
-	adviceStroke(c) {
-		return this.bindings.AdviceStroke(c, this.adws);
+	adviceStroke(c, extraScalar = 1) {
+		return this.bindings.AdviceStrokeInSpace(
+			extraScalar * this.width - 2 * this.bindings.SB,
+			c,
+			this.bindings.HVContrast,
+			1,
+		);
 	}
-	adviceStroke2(c, d, h) {
-		return this.bindings.AdviceStroke2(c, d, h, this.adws);
+	adviceThinnerStroke(c, extraScalar = 1) {
+		return Math.min(
+			this.mvs,
+			this.bindings.AdviceStrokeInSpace(
+				extraScalar * this.width - 2 * this.bindings.SB,
+				c,
+				this.bindings.HVContrast,
+				1,
+			),
+		);
+	}
+
+	adviceStroke2(c, d, h, extraScalar = 1) {
+		return Math.min(
+			this.bindings.AdviceStrokeInSpace(h, d, 1, 1),
+			this.bindings.AdviceStrokeInSpace(
+				extraScalar * this.width - 2 * this.bindings.SB,
+				c,
+				this.bindings.HVContrast,
+				1,
+			),
+		);
 	}
 
 	frameBox(t, b) {

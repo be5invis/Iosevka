@@ -1,8 +1,9 @@
+import [CreateWeightControl] from "@iosevka/font-kits/weight-control"
 import [Vec2 Point] from "@iosevka/geometry/point"
 import [Transform] from "@iosevka/geometry/transform"
 import [Anchor] from "@iosevka/geometry/anchor"
-import [mix linreg clamp fallback] from "@iosevka/util"
 import [Box] from "@iosevka/geometry/box"
+import [mix linreg clamp fallback] from "@iosevka/util"
 
 # Parameter generation
 export : define [calculateMetrics para] : begin
@@ -80,24 +81,9 @@ export : define [calculateMetrics para] : begin
 	define SmallArchDepth para.smallArchDepth
 
 	# Weight Control
-	define BaseFillRate : Math.min 0.95 : [HSwToV : 2 * para.stroke] / (Width - SB * 2)
-	define WeightControlFactor : [Math.atanh BaseFillRate] / BaseFillRate
-	define [StrokeWeightControlSigmoid x] : Math.tanh : WeightControlFactor * x
 
-	define [AdviceStrokeInSpace availSpace contrast crowdedness mul] : begin
-		local nonAdjustedFillRate : crowdedness * contrast * para.stroke / availSpace
-		local adjustedFillRate : StrokeWeightControlSigmoid nonAdjustedFillRate
-		local strokeWidthScalar : Math.min 1 : mul * adjustedFillRate / nonAdjustedFillRate
-		return : para.stroke * strokeWidthScalar
-	define [AdviceStroke crowdedness adws mul] : begin
-		local spaceH : Width * [fallback adws 1] - SB * 2
-		return : AdviceStrokeInSpace spaceH HVContrast crowdedness [fallback mul 1]
-	define [AdviceStroke2 crwX crwY refH adws] : begin
-		local spaceH : Width * [fallback adws 1] - SB * 2
-		local spaceV   refH
-		return : Math.min
-			AdviceStrokeInSpace spaceH HVContrast crwX 1
-			AdviceStrokeInSpace spaceV 1          crwY 1
+	define [object AdviceStrokeInSpace AdviceStroke AdviceStroke2]
+		CreateWeightControl para [object Width SB HVContrast]
 
 	define Stroke : AdviceStroke 2
 	define HalfStroke : Stroke / 2
@@ -228,12 +214,11 @@ export : define [calculateMetrics para] : begin
 		IBalance IBalance2 JBalance JBalance2 TBalance TBalance2 RBalance RBalance2 FBalance
 		OneBalance WideWidth0 WideWidth1 WideWidth2 WideWidth3 WideWidth4 EssUpper EssLower
 		EssQuestion RightSB Middle DotRadius PeriodRadius ArchDepthA ArchDepthB SmallArchDepthA
-		SmallArchDepthB CorrectionOMidX CorrectionOMidS AdviceStroke
-		AdviceStroke2 AdviceStrokeInSpace OverlayStroke OperatorStroke GeometryStroke
-		UnicodeWeightGrade StrokeWidthBlend ArchDepthAOf ArchDepthBOf ArchDepthAClamped
-		ArchDepthBClamped SmoothAdjust SideJut MidJutSide MidJutCenter YSmoothMidR YSmoothMidL
-		DToothlessRise DMBlend ShoulderFine DefaultTightBendInnerRadius HSwToV VSwToH
-		NarrowUnicodeT WideUnicodeT VERY-FAR TINY]
+		SmallArchDepthB CorrectionOMidX CorrectionOMidS AdviceStrokeInSpace AdviceStroke AdviceStroke2
+		OverlayStroke OperatorStroke GeometryStroke UnicodeWeightGrade StrokeWidthBlend ArchDepthAOf
+		ArchDepthBOf ArchDepthAClamped ArchDepthBClamped SmoothAdjust SideJut MidJutSide MidJutCenter
+		YSmoothMidR YSmoothMidL DToothlessRise DMBlend ShoulderFine DefaultTightBendInnerRadius HSwToV
+		VSwToH NarrowUnicodeT WideUnicodeT VERY-FAR TINY]
 
 export : define [setFontMetrics para metrics fm] : begin
 	define [object CAP Descender XH Width SymbolMid] metrics
