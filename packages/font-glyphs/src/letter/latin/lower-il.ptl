@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback boole] from "@iosevka/util"
 import [Dotless MathSansSerif] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -24,7 +24,7 @@ glyph-block Letter-Latin-Lower-I : begin
 	define MODE-L  1 # 'l'-like letters
 
 	define [XMiddleT mode] : namespace
-		define [HookyImpl df doST doSB] : df.middle + ([if doST 1 0] - [if doSB 1 0]) * [IBalance2 df]
+		define [HookyImpl df doST doSB] : df.middle + ([boole doST] - [boole doSB]) * [IBalance2 df]
 		define [FlatTailedImpl df doST] : HookyImpl df (doST && mode !== MODE-L) true
 		define [TailedImpl df doST] : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [TailedDotlessIShift df])
 		export : define [Center df] : df.middle + 0
@@ -257,7 +257,7 @@ glyph-block Letter-Latin-Lower-I : begin
 		create-glyph "grek/tau.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.e
-			local xMiddle : xMiddleT df
+			local xMiddle : xMiddleTMono df
 			include : Body  df XH xMiddle
 			include : Marks df XH xMiddle
 			include : HBar.t df.leftSB df.rightSB XH
@@ -409,36 +409,18 @@ glyph-block Letter-Latin-Lower-I : begin
 			local stretch : Math.sqrt : currentGlyph.advanceWidth / HalfUPM
 			include : FlatSlashShape anchor.x anchor.y (0.5 * OverlayStroke) (0.8 * stretch) (0.4 * stretch)
 
-		create-glyph 'lCurlyTail.serifless' : glyph-proc
+		create-glyph "lCurlyTail.serifless" : glyph-proc
 			local df : include : DivFrame para.advanceScaleI
 			include : df.markSet.b
+			local xMiddle : [XMiddleT MODE-L].[if para.isQuasiProportional 'Center' 'FlatTailed'] df
 			include : dispiro
 				widths.lhs
-				flat (df.middle - [HSwToV HalfStroke]) Ascender [heading Downward]
-				curl (df.middle - [HSwToV HalfStroke]) LongJut
-				CurlyTail.n [AdviceStroke 3.5] 0 (df.middle + [HSwToV HalfStroke] + LongJut) SB 0
-			create-forked-glyph 'lCurlyTail.hooky' : tagged 'serifLT' : HSerif.lt df.middle Ascender LongJut
+				flat (xMiddle - [HSwToV HalfStroke]) Ascender [heading Downward]
+				curl (xMiddle - [HSwToV HalfStroke]) (0 + LongVJut)
+				CurlyTail.n [AdviceStroke 3.5] 0 (xMiddle + [HSwToV HalfStroke] + LongJut) (SB - (Middle - xMiddle)) 0
+			create-forked-glyph "lCurlyTail.hooky" : ILSerifs.Hooky df Ascender xMiddle
 
 		select-variant 'lCurlyTail' 0x234
-
-		create-glyph 'reveshLoop' 0x1AA : glyph-proc
-			local df : include : DivFrame para.advanceScaleI
-			include : df.markSet.bp
-			local fine : AdviceStroke 4
-			include : dispiro
-				widths.center fine
-				g4.down.start df.middle (Ascender - fine * 1.5) [heading Downward]
-				arcvh
-				g4 (df.middle - fine * 1) (Ascender - fine * 2.5) [heading Leftward]
-				archv
-				g4 (df.middle - fine * 2) (Ascender - fine * 1.5) [heading Upward]
-				arcvh
-				g4 (df.middle - fine * 1) (Ascender - fine * 0.5) [heading Rightward]
-				archv
-				flat df.middle (Ascender - fine * 1.5) [widths.center.heading Stroke Downward]
-				curl df.middle 0 [heading Downward]
-				arcvh
-				straight.right.end (df.middle + HookX) (-Hook)
 
 	do "Tau"
 		select-variant 'grek/tau' 0x3C4

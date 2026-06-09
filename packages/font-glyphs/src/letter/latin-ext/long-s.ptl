@@ -70,20 +70,16 @@ glyph-block Letter-Latin-Long-S : begin
 		local m : m0 + [HSwToV HalfStroke]
 		local serifLength : Math.max Jut : mix [HSwToV HalfStroke] MidJutCenter : fallback _kSerif 1
 		local xSerifPos : mix m Middle (serifLength / Width)
-		if [maskBits fSlab SLAB_BOTTOM] : begin
-			include : tagged "serifLB" : HSerif.mb xSerifPos 0 serifLength
-		if [maskBits fSlab SLAB_MIDDLE] : begin
-			include : tagged "serifLM" : intersection
-				MaskLeft (m + TINY)
-				HSerif.mt xSerifPos ySmallFBarPos serifLength
-		if [maskBits fSlab SLAB_MIDDLE_XH] : begin
-			include : tagged "serifLM" : intersection
-				MaskLeft (m + TINY)
-				HSerif.mt xSerifPos XH serifLength
-		if [maskBits fSlab SLAB_MIDDLE_HALF_ASC] : begin
-			include : tagged "serifLM" : intersection
-				MaskLeft (m + TINY)
-				HSerif.mt xSerifPos ([mix 0 Ascender 0.5] + HalfStroke) serifLength
+		if [maskBits fSlab SLAB_BOTTOM] : include : tagged 'serifLB' : HSerif.mb xSerifPos 0 serifLength
+		if [maskBits fSlab SLAB_MIDDLE] : include : tagged 'serifLM' : intersection
+			MaskLeft (m + TINY)
+			HSerif.mt xSerifPos ySmallFBarPos serifLength
+		if [maskBits fSlab SLAB_MIDDLE_XH] : include : tagged 'serifLM' : intersection
+			MaskLeft (m + TINY)
+			HSerif.mt xSerifPos XH serifLength
+		if [maskBits fSlab SLAB_MIDDLE_HALF_ASC] : include : tagged 'serifLM' : intersection
+			MaskLeft (m + TINY)
+			HSerif.mt xSerifPos ([mix 0 Ascender 0.5] + HalfStroke) serifLength
 
 	define [LongSBentHookBase y0 m fSlab _kSerif] : glyph-proc
 		local xTerminal : RightSB + RBalance2 + [Math.max 0 : m - [StdSmallFBarLeftPos0]]
@@ -259,10 +255,10 @@ glyph-block Letter-Latin-Long-S : begin
 			dispiro
 				widths.rhs
 				flat (m + [HSwToV HalfStroke]) (-O) [heading Downward]
-				curl (m + [HSwToV HalfStroke]) (Descender + LongJut)
+				curl (m + [HSwToV HalfStroke]) (Descender + LongVJut)
 				CurlyTail.n fine Descender ((m - [HSwToV HalfStroke]) - LongJut)
 					x2 -- (RightSB + [HSwToV : 0.5 * fine])
-					y2 -- (Descender + 0.5 * fine)
+					y2 -- (Descender + fine / 2)
 
 	create-glyph "iFishHook" 0x27F : glyph-proc
 		include : MarkSet.p
@@ -271,3 +267,22 @@ glyph-block Letter-Latin-Long-S : begin
 	create-glyph "iviby" 0x285 : glyph-proc
 		include : MarkSet.p
 		include : RevLongSShape XH Descender (HookX + QuarterStroke) Hook
+
+	create-glyph "reveshLoop" 0x1AA : glyph-proc
+		local df : include : DivFrame para.advanceScaleI
+		include : df.markSet.bp
+		local fine : AdviceStroke 4
+		include : dispiro
+			widths.center fine
+			g4.down.start df.middle (Ascender - fine * 1.5) [heading Downward]
+			arcvh
+			g4 (df.middle - fine * 1) (Ascender - fine * 2.5) [heading Leftward]
+			archv
+			g4 (df.middle - fine * 2) (Ascender - fine * 1.5) [heading Upward]
+			arcvh
+			g4 (df.middle - fine * 1) (Ascender - fine * 0.5) [heading Rightward]
+			archv
+			flat df.middle (Ascender - fine * 1.5) [widths.center.heading Stroke Downward]
+			curl df.middle (Descender + Hook) [heading Downward]
+			arcvh
+			straight.right.end (df.middle + HookX) (Descender + O + HalfStroke)
