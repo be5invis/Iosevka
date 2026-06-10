@@ -9,6 +9,7 @@ glyph-module
 glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 	glyph-block-import Letter-Shared : CreateTurnedLetter
 	glyph-block-import Letter-Latin-Upper-A : AShape ASerifs
 	glyph-block-import Letter-Latin-V : VShapeOutline VShape VHookRightShape
@@ -21,9 +22,8 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 
 	define LambdaConfig : SuffixCfg.weave
 		object
-			straight true
-			curly    false
-
+			straight     true
+			curly        false
 		object
 			serifless    SLAB-NONE
 			topSerifed   SLAB-TOP
@@ -31,32 +31,36 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 			triSerifed   [bitOr SLAB-TOP SLAB-LEFT SLAB-RIGHT]
 
 	glyph-block-export LambdaShape
-	define [LambdaShape] : with-params [df fBarStraight slabKind top sw] : glyph-proc
-		include : VShape df fBarStraight top sw
-		include : FlipAround df.middle (top / 2)
-		include : ASerifs df top sw slabKind
+	define [LambdaShape] : with-params [df fBarStraight slabKind top sw] : union
+		new-glyph : composite-proc
+			VShape df fBarStraight top sw
+			FlipAround df.middle (top / 2)
+		ASerifs df top sw slabKind
 
-	define [LambdaMask] : with-params [df fBarStraight top sw] : glyph-proc
-		include : VShapeOutline df fBarStraight top sw
-		include : FlipAround df.middle (top / 2)
+	define [LambdaMask] : with-params [df fBarStraight top sw] : new-glyph : composite-proc
+		VShapeOutline df fBarStraight top sw
+		FlipAround df.middle (top / 2)
 
-	define flex-params [LambdaHookLeftShape] : glyph-proc
+	define flex-params [LambdaHookLeftShape] : begin
 		local-parameter : df
 		local-parameter : fBarStraight
 		local-parameter : slabKind
 		local-parameter : top
 		local-parameter : sw
 		local-parameter : hookWidthOuter -- (TailX / 3)
-		local-parameter : hookWidthInner -- (TailX / 3)
-		include : VHookRightShape
-			df             -- df
-			fBarStraight   -- fBarStraight
-			top            -- top
-			sw             -- sw
-			hookWidthOuter -- hookWidthOuter
-			hookWidthInner -- hookWidthInner
-		include : FlipAround df.middle (top / 2)
-		include : ASerifs df top sw [maskOffBits slabKind SLAB-LEFT]
+		local-parameter : hookWidthInner -- (TailX / 3 - [HSwToV : 0.25 * sw])
+
+		return : union
+			new-glyph : composite-proc
+				VHookRightShape
+					df             -- df
+					fBarStraight   -- fBarStraight
+					top            -- top
+					sw             -- sw
+					hookWidthOuter -- hookWidthOuter
+					hookWidthInner -- hookWidthInner
+				FlipAround df.middle (top / 2)
+			ASerifs df top sw [maskOffBits slabKind SLAB-LEFT]
 
 	foreach { suffix { fStraightBar slabKind } } [Object.entries LambdaConfig] : do
 		create-glyph "grek/Lambda.\(suffix)" : glyph-proc
@@ -88,9 +92,8 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 
 		create-glyph "cyrl/Yn.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
-			local df : DivFrame 1 3
-			local vHeight : CAP * 0.875
-			local sw : AdviceStroke 3
+			local df : include : DivFrame para.advanceScaleM 3
+			local vHeight : (CAP - 0) * 0.875
 
 			include : with-transform [ApparentTranslate 0 (CAP - vHeight)] : LambdaHookLeftShape
 				df             -- df
@@ -98,19 +101,17 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 				slabKind       -- slabKind
 				top            -- vHeight
 				sw             -- df.mvs
-				hookWidthInner -- (TailX / 3 - [HSwToV : 0.25 * df.mvs])
 
 			include : dispiro
-				g4.down.start Middle CAP [widths.center.heading [AdviceStroke 6] Downward]
-				flat Middle 0 [widths.center.heading df.mvs Downward]
-				curl Middle Descender [widths.center.heading df.mvs Downward]
+				g4.down.start df.middle CAP [widths.center.heading [df.adviceThinnerStroke 6] Downward]
+				flat df.middle 0         [widths.center.heading df.mvs Downward]
+				curl df.middle Descender [widths.center.heading df.mvs Downward]
 			if [maskBits slabKind SLAB-RIGHT] : begin
-				include : HSerif.mb Middle Descender MidJutCenter
+				include : HSerif.mb df.middle Descender (MidJutCenter - [HSwToV : 0.5 * (Stroke - df.mvs)]) df.mvs
 
 		create-glyph "cyrl/yn.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			local df : DivFrame 1 3
-			local sw : AdviceStroke 3
+			local df : include : DivFrame para.advanceScaleT 3
 
 			include : LambdaHookLeftShape
 				df             -- df
@@ -118,14 +119,13 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 				slabKind       -- [bitOr slabKind SLAB-SMALL-CYRL]
 				top            -- XH
 				sw             -- df.mvs
-				hookWidthInner -- (TailX / 3 - [HSwToV : 0.25 * df.mvs])
 
 			include : dispiro
-				g4.down.start Middle XH [widths.center.heading [AdviceStroke 6] Downward]
-				flat Middle 0 [widths.center.heading df.mvs Downward]
-				curl Middle Descender [widths.center.heading df.mvs Downward]
-			if [maskBits slabKind SLAB-RIGHT] : begin
-				include : HSerif.mb Middle Descender MidJutCenter
+				g4.down.start df.middle XH [widths.center.heading [df.adviceThinnerStroke 6] Downward]
+				flat df.middle 0         [widths.center.heading df.mvs Downward]
+				curl df.middle Descender [widths.center.heading df.mvs Downward]
+			if ([maskBits slabKind SLAB-RIGHT] && [not para.isItalic]) : begin
+				include : HSerif.mb df.middle Descender (MidJutCenter - [HSwToV : 0.5 * (Stroke - df.mvs)]) df.mvs
 
 	select-variant 'grek/Lambda' 0x39B
 	link-reduced-variant 'grek/Lambda/sansSerif' 'grek/Lambda' MathSansSerif
@@ -139,16 +139,18 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 
 	# Delta
 	glyph-block-export DeltaShape
-	define [DeltaShape] : with-params [df top sw fBarStraight] : union
-		LambdaShape
-			df           -- df
-			fBarStraight -- fBarStraight
-			slabKind     -- 0
-			top          -- top
-			sw           -- sw
-		intersection
-			HBar.b 0 df.width 0 sw
-			LambdaMask df fBarStraight top sw
+	define [DeltaShape] : with-params [df top bottom sw fBarStraight] : begin
+		local shapeHeight : Math.abs : top - bottom
+		return : with-transform [ApparentTranslate 0 bottom] : union
+			LambdaShape
+				df           -- df
+				fBarStraight -- fBarStraight
+				slabKind     -- 0
+				top          -- shapeHeight
+				sw           -- sw
+			intersection
+				HBar.b 0 df.width 0 sw
+				LambdaMask df fBarStraight shapeHeight sw
 
 	define DeltaConfig : object
 		straight true
@@ -161,6 +163,7 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 				df           -- [DivFrame 1]
 				fBarStraight -- fBarStraight
 				top          -- CAP
+				bottom       -- 0
 				sw           -- Stroke
 
 		create-glyph "increment.\(suffix)" : glyph-proc
@@ -169,27 +172,26 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 				df           -- [DivFrame 1]
 				fBarStraight -- fBarStraight
 				top          -- CAP
+				bottom       -- 0
 				sw           -- OperatorStroke
 
 		create-glyph "increment.aplForm.\(suffix)" : glyph-proc
 			include : MarkSet.oper
-			define shapeHeight : OperTop - OperBot
 			include : DeltaShape
 				df           -- [DivFrame 1]
 				fBarStraight -- fBarStraight
-				top          -- shapeHeight
+				top          -- OperTop
+				bottom       -- OperBot
 				sw           -- OperatorStroke
-			include : ApparentTranslate 0 (SymbolMid - shapeHeight / 2)
 
 		create-glyph "increment.aplThin.\(suffix)" : glyph-proc
 			include : MarkSet.oper
-			define shapeHeight : OperTop - OperBot
 			include : DeltaShape
 				df           -- [DivFrame 1]
 				fBarStraight -- fBarStraight
-				top          -- shapeHeight
+				top          -- OperTop
+				bottom       -- OperBot
 				sw           -- [AdviceStroke 3.75]
-			include : ApparentTranslate 0 (SymbolMid - shapeHeight / 2)
 
 	define [CodeNonApl u] : if (para.variantSelector.__enableAplForm === 'enable') null u
 	define [CodeApl    u] : if (para.variantSelector.__enableAplForm === 'enable') u null
@@ -206,9 +208,9 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 	derive-glyphs 'cyrl/De.BGR' null 'grek/Delta' : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		local descenderOverflow : if SLAB SideJut : (RightSB - SB) * 0.075
-		local xCutLeft SB
-		local xCutRight RightSB
-		include : HBar.b (xCutLeft  - descenderOverflow) (xCutRight + descenderOverflow) 0
-		include : VBar.l (xCutLeft  - descenderOverflow) ((-LongVJut) + QuarterStroke) Stroke
-		include : VBar.r (xCutRight + descenderOverflow) ((-LongVJut) + QuarterStroke) Stroke
+		local bottomExtension : (-LongVJut) + QuarterStroke
+		include : ExtendBelowBaseAnchors bottomExtension
+		include : HBar.b (SB - descenderOverflow) (RightSB + descenderOverflow) 0
+		include : VBar.l (SB      - descenderOverflow) bottomExtension TINY VJutStroke
+		include : VBar.r (RightSB + descenderOverflow) bottomExtension TINY VJutStroke
 
