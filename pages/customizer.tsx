@@ -1,9 +1,22 @@
+import { javascript } from "@codemirror/lang-javascript";
+import { python } from "@codemirror/lang-python";
+import { oneDark } from "@codemirror/theme-one-dark";
+import {
+	Decoration,
+	type DecorationSet,
+	EditorView,
+	MatchDecorator,
+	ViewPlugin,
+	type ViewUpdate,
+} from "@codemirror/view";
 import * as Toml from "@iarna/toml";
+import CodeMirror from "@uiw/react-codemirror";
 import { pascalCase } from "change-case";
 import { produce } from "immer";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import type React from "react";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useLifecycles } from "react-use";
 
 import {
@@ -30,9 +43,42 @@ import * as Gr from "../shared/data-import/grades";
 import * as Ligation from "../shared/data-import/ligation";
 import { LigationSamplerInnerImpl } from "../shared/index-parts/ligature-sampler";
 import * as tokenizedSampleCode from "../shared/tokenized-sample-code";
+import { buildHotCharRegex, featureAssignmentToCss } from "../shared/utils/feature-style";
 import { joinCls } from "../shared/utils/join-classes";
 import { Ptr, useStatePtr } from "../shared/utils/ptr";
 import * as StyleHelper from "../shared/utils/style-helper";
+
+enum TextEditorLanguage {
+	TypeScript = "TypeScript",
+	Python = "Python",
+}
+type CustomTextEditorSamples = Partial<Record<TextEditorLanguage, string>>;
+
+type TextEditorControlProps = {
+	fontSize: number;
+	language: TextEditorLanguage;
+	onFontSizeChange: (fontSize: number) => void;
+	onLanguageChange: (language: TextEditorLanguage) => void;
+};
+type TextEditorProps = {
+	fontSize: number;
+	fontStyle: Gr.FontStyle;
+	hotChars: StyleHelper.Highlights;
+	language: TextEditorLanguage;
+	value: string;
+	onChange: (value: string) => void;
+};
+
+const TEXT_EDITOR_SAMPLE_PATHS: Record<TextEditorLanguage, string> = {
+	[TextEditorLanguage.TypeScript]: "/customizer-code-samples/sample.ts",
+	[TextEditorLanguage.Python]: "/customizer-code-samples/sample.py",
+};
+const TEXT_EDITOR_DEFAULT_FONT_SIZE = 16;
+const TEXT_EDITOR_MAX_HEIGHT = "24rem";
+
+function trimTerminalNewline(text: string): string {
+	return text.endsWith("\n") ? text.slice(0, -1) : text;
+}
 
 export default function Customizer() {
 	const pCC = useStatePtr(defaultCustomizerProps);
@@ -83,8 +129,14 @@ export default function Customizer() {
 						</div>
 					</Section>
 					<Section className="customizer">
+						<div className="try-panel">
+							<CustomizerHeader index={4}>Try It</CustomizerHeader>
+							<TextEditor />
+						</div>
+					</Section>
+					<Section className="customizer">
 						<div className="result-panel">
-							<CustomizerHeader index={4}>Your Config</CustomizerHeader>
+							<CustomizerHeader index={5}>Your Config</CustomizerHeader>
 							<TomlResultPanel />
 							<BuildInstructionsPanel />
 						</div>
@@ -610,13 +662,7 @@ function GridPreviewCharRows(props: GridPreviewCharRowsProps) {
 		// We apply the "matching" feature for each highlighted character
 		// since Chromium may have problem when many features utilizing
 		// GSUB alternate is applied.
-		const style = f
-			? {
-					fontFeatureSettings: Array.from(Object.entries(f))
-						.map(([k, v]) => `'${k}' ${v}`)
-						.join(","),
-				}
-			: {};
+		const style = f ? { fontFeatureSettings: featureAssignmentToCss(f) } : {};
 		items.push(
 			<li
 				key={s}
@@ -730,6 +776,191 @@ function LigationPreview() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+function TextEditor() {
+	const { basePath } = useRouter();
+	const { val: cc } = useContext(CustomizerCtx);
+	const [language, setLanguage] = useState<TextEditorLanguage>(TextEditorLanguage.TypeScript);
+	const [fontSize, setFontSize] = useState(TEXT_EDITOR_DEFAULT_FONT_SIZE);
+	const [samples, setSamples] = useState<CustomTextEditorSamples>({});
+	// `cc.CharVariants` would be reference equality checked
+	// here. This should be fine because `cc.charVariants`
+	// should only update in an immutable manner.
+	const hotChars = useMemo(
+		() =>
+			StyleHelper.deriveHotChars(cc.charVariants, {
+				isSlab: cc.serifStyle === Gr.SerifStyle.Slab,
+				slope: Gr.Slope.Upright,
+			}),
+		[cc.charVariants, cc.serifStyle],
+	);
+	const effectiveLigations =
+		cc.spacing === Gr.Spacing.Fixed ? Ligation.AvailableLigationSets[0] : cc.ligationSet;
+	const fs: Gr.FontStyle = {
+		style: resolveDisplayStyle(cc),
+		spacingTag: cc.spacing ? "NWID" : "",
+		width: cc.defaultWidthAtExpanded ? Gr.Width.Expanded : Gr.Width.Normal,
+		ligationTag: effectiveLigations.tag,
+		ligationRank: effectiveLigations.rank,
+	};
+
+	// Only load a language sample when selected
+	useEffect(() => {
+		// Preserve user edits when switching back to an already-loaded language.
+		if (samples[language] !== undefined) return;
+
+		let cancelled = false;
+		fetch(`${basePath}${TEXT_EDITOR_SAMPLE_PATHS[language]}`)
+			.then(response => {
+				if (!response.ok) throw new Error(`Failed to load sample: ${response.status}`);
+				return response.text();
+			})
+			.then(text => {
+				if (cancelled) return;
+				setSamples(samples =>
+					samples[language] === undefined
+						? { ...samples, [language]: trimTerminalNewline(text) }
+						: samples,
+				);
+			})
+			.catch(() => {
+				if (cancelled) return;
+				setSamples(samples =>
+					samples[language] === undefined ? { ...samples, [language]: "" } : samples,
+				);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [basePath, language, samples]);
+
+	return (
+		<>
+			<TextEditorControls
+				fontSize={fontSize}
+				language={language}
+				onFontSizeChange={setFontSize}
+				onLanguageChange={setLanguage}
+			/>
+			<CustomCodeMirror
+				fontSize={fontSize}
+				fontStyle={fs}
+				hotChars={hotChars}
+				language={language}
+				onChange={value => setSamples(samples => ({ ...samples, [language]: value }))}
+				value={samples[language] ?? ""}
+			/>
+		</>
+	);
+}
+
+function TextEditorControls(props: TextEditorControlProps) {
+	return (
+		<div className="customizer-body editor-toolbar">
+			<dl className="editor-controls">
+				<dt className="control-label">Language</dt>
+				<dd className="language-control">
+					<select
+						value={props.language}
+						onChange={e => props.onLanguageChange(e.target.value as TextEditorLanguage)}
+					>
+						{Object.values(TextEditorLanguage).map(language => (
+							<option key={language} value={language}>
+								{language}
+							</option>
+						))}
+					</select>
+				</dd>
+				<dt className="control-label">Font Size</dt>
+				<dd className="font-size-control">
+					<input
+						type="range"
+						min={10}
+						max={32}
+						value={props.fontSize}
+						onChange={e => props.onFontSizeChange(Number(e.target.value))}
+					/>
+					<output>{props.fontSize}px</output>
+				</dd>
+			</dl>
+		</div>
+	);
+}
+function CustomCodeMirror(props: TextEditorProps) {
+	// Re-render only when the language changes or when we use a different
+	// character variant/stylistic set/ligation set.
+	const extensions = useMemo(
+		() => [
+			getTextEditorLanguageExtension(props.language),
+			EditorView.lineWrapping,
+			perCharVariantExtension(props.hotChars),
+		],
+		[props.language, props.hotChars],
+	);
+
+	return (
+		<CodeMirror
+			className={Gr.fontStyleToCls(props.fontStyle)}
+			extensions={extensions}
+			maxHeight={TEXT_EDITOR_MAX_HEIGHT}
+			onChange={props.onChange}
+			style={{
+				...Gr.fontStyleToOtStyle(props.fontStyle),
+				fontSize: `${props.fontSize}px`,
+			}}
+			theme={oneDark}
+			value={props.value}
+		/>
+	);
+}
+
+function getTextEditorLanguageExtension(language: TextEditorLanguage) {
+	switch (language) {
+		case TextEditorLanguage.TypeScript:
+			return javascript({ typescript: true });
+		case TextEditorLanguage.Python:
+			return python();
+	}
+}
+
+/**
+ * We apply the "matching" feature for each highlighted character since Chromium
+ * may have problem when many features utilizing GSUB alternate is applied.
+ */
+function perCharVariantExtension(hotChars: StyleHelper.Highlights) {
+	const re = buildHotCharRegex(hotChars);
+	if (!re) return [];
+
+	const charToDecoration = new Map<string, Decoration>();
+	for (const [char, assignment] of hotChars) {
+		charToDecoration.set(
+			char,
+			Decoration.mark({
+				attributes: {
+					style: `font-feature-settings:${featureAssignmentToCss(assignment)}`,
+				},
+			}),
+		);
+	}
+
+	const matcher = new MatchDecorator({
+		regexp: re,
+		decoration: match => charToDecoration.get(match[0]) ?? null,
+	});
+
+	return ViewPlugin.fromClass(
+		class {
+			decorations: DecorationSet;
+			constructor(view: EditorView) {
+				this.decorations = matcher.createDeco(view);
+			}
+			update(update: ViewUpdate) {
+				this.decorations = matcher.updateDeco(update, this.decorations);
+			}
+		},
+		{ decorations: v => v.decorations },
+	);
+}
 
 function TomlResultPanel() {
 	const { val: cc } = useContext(CustomizerCtx);
