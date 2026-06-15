@@ -54,6 +54,7 @@ export : define [calculateMetrics para] : begin
 	define SinSlope : Math.sin : para.slopeAngle / 180 * Math.PI
 	define CosSlope : Math.cos : para.slopeAngle / 180 * Math.PI
 	define HVContrast : Contrast * CosSlope + SinSlope * TanSlope
+	define VHContrast : 1 / HVContrast
 	define [HSwToV sw] : sw * HVContrast
 	define [VSwToH sw] : sw / HVContrast
 
@@ -147,7 +148,7 @@ export : define [calculateMetrics para] : begin
 	define DefaultTightBendInnerDiameter : Math.max (XH / 32) : AdviceStroke2 24 32 XH
 	define DefaultTightBendInnerRadius   : DefaultTightBendInnerDiameter / 2
 
-	define [StrokeWidthBlend min max sw] : linreg para.canonicalStrokeWidthMin min para.canonicalStrokeWidthMax max [fallback sw Stroke]
+	define [StrokeWidthBlend lo hi sw] : linreg para.canonicalStrokeWidthMin lo para.canonicalStrokeWidthMax hi [fallback sw Stroke]
 
 	define SmoothAdjust : StrokeWidthBlend 80 144
 	define [ArchDepthAOf archDepth width] : archDepth - TanSlope * SmoothAdjust * ([fallback width Width] / Width)
@@ -178,11 +179,15 @@ export : define [calculateMetrics para] : begin
 		return : yNotAdjusted + delta * [Math.min 1 : (top - bot) / (ada + adb)]
 	set YSmoothMidL.cr : function [c r _ada _adb] : YSmoothMidL (c + r) (c - r) _ada _adb
 
-	define [ArchDepthAClamped top bot ada adb] : begin
+	define [ArchDepthAClamped top bot _ada _adb] : begin
 		local height : Math.abs : top - bot
+		local ada : fallback _ada ArchDepthA
+		local adb : fallback _adb ArchDepthB
 		return : if (ada + adb < height) ada : YSmoothMidR height 0 ada adb
-	define [ArchDepthBClamped top bot ada adb] : begin
+	define [ArchDepthBClamped top bot _ada _adb] : begin
 		local height : Math.abs : top - bot
+		local ada : fallback _ada ArchDepthA
+		local adb : fallback _adb ArchDepthB
 		return : if (ada + adb < height) adb : YSmoothMidL height 0 ada adb
 
 	define CorrectionOMidX : TanSlope * 0.9 * [StrokeWidthBlend 1.3 0.9]
@@ -207,8 +212,8 @@ export : define [calculateMetrics para] : begin
 		DesignParameters UPM HalfUPM Width SB CAP XH Ascender Descender Contrast SymbolMid ParenTop
 		ParenBot OperTop OperBot TackTop TackBot PlusTop PlusBot PictTop PictBot BgOpTop BgOpBot
 		BgTkTop BgTkBot Italify Upright Scale Translate ApparentTranslate Rotate GlobalTransform
-		TanSlope HVContrast Upward Downward Rightward Leftward O OX OXHook Hook AHook SHook RHook
-		JHook HookX TailX TailY DiagTailAngle DiagTailDepth ArchDepth SmallArchDepth Stroke
+		TanSlope HVContrast VHContrast Upward Downward Rightward Leftward O OX OXHook Hook AHook SHook
+		RHook JHook HookX TailX TailY DiagTailAngle DiagTailDepth ArchDepth SmallArchDepth Stroke
 		HalfStroke QuarterStroke DotSize PeriodSize HBarPos OverlayPos Jut LongJut VJut LongVJut
 		VJutStroke AccentStackOffset AccentWidth AccentClearance AccentHeight CThin CThinB SLAB
 		IBalance IBalance2 JBalance JBalance2 TBalance TBalance2 RBalance RBalance2 FBalance
