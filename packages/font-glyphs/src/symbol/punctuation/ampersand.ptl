@@ -68,7 +68,7 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 			corner [mix xUpperLoopLeft xTerminal 4]            [mix yMockUpperLoopLeftBottom 0 pStraightBar]
 
 
-	create-glyph 'ampersand.closed' : union
+	create-glyph "ampersand.closed" : union
 		intersection
 			ClosedAmpersandLead SwAmpersand ClosedTipSw
 			ClosedAmpersandLeadMask
@@ -90,7 +90,7 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 				curl [mix xUpperLoopLeft xTerminal 2] (-yMockUpperLoopLeftBottom)
 			Rect 0 ((-CAP) * 2) xTerminal (Width * 2)
 
-	create-glyph 'ampersand.upperOpen' : union
+	create-glyph "ampersand.upperOpen" : union
 		intersection
 			ClosedAmpersandLead SwAmpersand ClosedTipSw
 			ClosedAmpersandLeadMask
@@ -141,7 +141,7 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 		corner (xLowerOpenBarLeft  + TanSlope * fineAmp / 2) y
 		corner (xLowerOpenBarRight + TanSlope * fineAmp / 2) y
 
-	create-glyph 'ampersand.lowerOpen' : union
+	create-glyph "ampersand.lowerOpen" : union
 		LowerOpenCrossbar yLowerOpenEnd
 		dispiro
 			widths.rhs SwAmpersand
@@ -184,9 +184,10 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 	define xEtCenterBarRight : mix xEtRight Width 0.5
 	define yEtRightBarTop : mix (yEtMiddle + SwAmpersand / 2) (CAP - SHook) 0.375
 
-	define FORM-TOOTHLESS-CORNER  1
-	define FORM-TOOTHLESS-ROUNDED 2
-	define FORM-TOOTHED           3
+	define FORM-TOOTHED           0
+	define FORM-FLAT-BOTTOM       1
+	define FORM-TOOTHLESS-CORNER  2
+	define FORM-TOOTHLESS-ROUNDED 3
 
 	define [EtUpperHalf] : dispiro
 		g4 xEtRight (CAP - SHook) [widths.lhs]
@@ -202,51 +203,72 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 		archv
 		g4 (xEtLeft + O * 2) adbEt [widths.lhs]
 		match form
+			[Just FORM-TOOTHED] : begin
+				SerifedArcEnd.LtrLhs xEtRight 0 Stroke adaEt Stroke
+			[Just FORM-FLAT-BOTTOM] : list
+				arcvh
+				flat [Arch.adjust-x.bot [mix xEtLeft xEtRight 0.5]] 0
+				curl (xEtRight + O) 0 [heading Rightward]
 			[Just FORM-TOOTHLESS-CORNER] : list
 				Arch.lhs 0 (blendPost -- {})
 				g4   xEtRight DToothlessRise
-
 			[Just FORM-TOOTHLESS-ROUNDED] : list
 				Arch.lhs 0
 				flat xEtRight adaEt
 				curl xEtRight yEtRightBarTop [heading Upward]
-
-			[Just FORM-TOOTHED] : begin
-				SerifedArcEnd.LtrLhs xEtRight 0 Stroke adaEt Stroke
-			_ : list
+			__ : list
 
 
-	create-glyph 'ampersand.etToothlessCorner' : union
-		EtUpperHalf
-		EtLowerHalf FORM-TOOTHLESS-CORNER
-		VBar.r xEtRight DToothlessRise yEtRightBarTop
-
-	create-glyph 'ampersand.etToothlessRounded' : union
-		EtUpperHalf
-		EtLowerHalf FORM-TOOTHLESS-ROUNDED
-
-	create-glyph 'ampersand.etToothed' : union
+	create-glyph "ampersand.etToothed" : union
 		EtUpperHalf
 		EtLowerHalf FORM-TOOTHED
 		VBar.r xEtRight (adaEt + O) yEtRightBarTop
 		VBar.r xEtRight adaEt 0 [Math.max [AdviceStroke 5] (Stroke - ShoulderFine / 2)]
 
-	create-glyph 'ampersand.etTailed' : union
+	create-glyph "ampersand.etTailed" : union
 		EtUpperHalf
 		EtLowerHalf FORM-TOOTHED
 		RightwardTailedBar xEtRight 0 yEtRightBarTop
 
-	define yEtFlatTopEnd : Math.max (ArchDepthA + fineAmp) (CAP * 0.4)
-	define yEtFlatTopBarPos : (OverlayPos * CAP + Stroke * 0.625) / CAP
+	create-glyph "ampersand.etFlatBottom" : union
+		EtUpperHalf
+		EtLowerHalf FORM-FLAT-BOTTOM
+		VBar.r xEtRight 0 yEtRightBarTop
 
-	create-glyph 'ampersand.flatTop' : union
+	create-glyph "ampersand.etToothlessCorner" : union
+		EtUpperHalf
+		EtLowerHalf FORM-TOOTHLESS-CORNER
+		VBar.r xEtRight DToothlessRise yEtRightBarTop
+
+	create-glyph "ampersand.etToothlessRounded" : union
+		EtUpperHalf
+		EtLowerHalf FORM-TOOTHLESS-ROUNDED
+
+	define yEtFlatTopEnd : Math.max (0 + ArchDepthA + fineAmp) [mix 0 CAP 0.4]
+	define pyEtFlatTopBarPos : ([mix 0 CAP OverlayPos] + Stroke * 0.125) / (CAP - 0)
+
+	define [EtFlatTopLowerHalf] : dispiro
+		widths.lhs
+		g4.down.start (SB + OX) [RevEzhShape.yArcMid CAP 0 pyEtFlatTopBarPos adaEt adbEt]
+		Arch.lhs 0 (swAfter -- fineAmp)
+		flat (xLowerOpenRight - OX) adaEt [widths.lhs fineAmp]
+		curl (xLowerOpenRight - OX) yEtFlatTopEnd [heading Upward]
+
+	define [EtFlatTopUpperHalf slab] : RevEzhShape CAP 0
+		fSerifed   -- slab
+		hook       -- 0
+		ada        -- adaEt
+		adb        -- adbEt
+		pyMidRight -- pyEtFlatTopBarPos
+
+	create-glyph "ampersand.flatTopSerifless" : union
 		LowerOpenCrossbar yEtFlatTopEnd
-		RevEzhShape CAP 0 (hookless -- true) (ada -- ArchDepthA) (adb -- ArchDepthB) (pyMidRight -- yEtFlatTopBarPos)
-		dispiro
-			widths.lhs
-			g4.down.start (SB + OX) [RevEzhShape.yArcMid CAP 0 yEtFlatTopBarPos adaEt adbEt]
-			Arch.lhs 0 (swAfter -- fineAmp)
-			flat (xLowerOpenRight - OX) adaEt [widths.lhs fineAmp]
-			curl (xLowerOpenRight - OX) yEtFlatTopEnd [heading Upward]
+		EtFlatTopUpperHalf false
+		EtFlatTopLowerHalf
+
+	create-glyph "ampersand.flatTopSerifed" : union
+		LowerOpenCrossbar yEtFlatTopEnd
+		EtFlatTopUpperHalf true
+		EtFlatTopLowerHalf
 
 	select-variant 'ampersand' '&'

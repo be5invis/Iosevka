@@ -333,10 +333,11 @@ glyph-block Letter-Latin-Ezh : begin
 	define flex-params [RevEzhShape] : glyph-proc
 		local-parameter : top
 		local-parameter : bottom
+		local-parameter : fSerifed      -- false
 		local-parameter : pxTopLeft     -- 0.075
 		local-parameter : pxMidRight    -- 0.800
-		local-parameter : pyMidRight    -- 0.6
-		local-parameter : hookless      -- false
+		local-parameter : pyMidRight    -- 0.550
+		local-parameter : hook          -- Hook
 		local-parameter : ada           -- SmallArchDepthA
 		local-parameter : adb           -- SmallArchDepthB
 
@@ -353,15 +354,15 @@ glyph-block Letter-Latin-Ezh : begin
 			flat xMidRight yMidRight [heading Leftward]
 			curl [Arch.adjust-x.bot Middle] yMidRight
 			archv
-			if hookless
+			if hook
 			: then : list
-				g4.down.mid (SB + OX) [RevEzhShape.yArcMid top bottom pyMidRight ada adb]
-			: else : list
-				g4 (SB + OX) [RevEzhShape.yArcMid top bottom pyMidRight ada adb]
+				g4   (SB + OX) [RevEzhShape.yArcMid top bottom pyMidRight ada adb]
 				HookEnd bottom
-				g4 RightSB (bottom + Hook * ((top - bottom) / CAP))
-		if SLAB : begin
-			local { jutTop jutBot jutMid } : EFVJutLength top bottom pyMidRight nothing nothing (Hook * ((top - bottom) / CAP))
+				g4   RightSB (bottom + hook)
+			: else : list
+				g4.down.mid (SB + OX) [RevEzhShape.yArcMid top bottom pyMidRight ada adb]
+		if fSerifed : begin
+			local { jutTop jutBot jutMid } : EFVJutLength top bottom pyMidRight nothing nothing (hook || nothing)
 			include : VSerif.dr RightSB top jutTop
-	set RevEzhShape.yMidRight : lambda [top bottom pyMidRight] : mix bottom top pyMidRight
+	set RevEzhShape.yMidRight : lambda [top bottom pyMidRight] : [mix bottom top pyMidRight] + HalfStroke
 	set RevEzhShape.yArcMid   : lambda [top bottom pyMidRight ada adb] : YSmoothMidL [RevEzhShape.yMidRight top bottom pyMidRight] bottom ada adb
