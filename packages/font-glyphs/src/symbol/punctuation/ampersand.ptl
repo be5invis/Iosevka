@@ -8,7 +8,7 @@ glyph-module
 glyph-block Symbol-Punctuation-Ampersand : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Latin-Ezh : RevEzhShape
+	glyph-block-import Letter-Latin-Ezh : RevEzh
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar SerifedArcEnd
 
 	define SwAmpersand : AdviceStroke2 2.5 3 CAP
@@ -38,7 +38,7 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 		define x1 : [mix SB RightSB 0.80] - offset
 		define x2 : [mix SB RightSB pXTerminal] + [HSwToV : 0.1 * sw] - offset
 		define y1   0
-		define y2 : CAP * 0.375 + sw / 2
+		define y2 : [mix 0 CAP 0.375] + sw / 2
 		define k1   0.5
 		return : object x1 x2 y1 y2 k1
 	define [ClosedAmpersandLead sw swTip] : begin
@@ -155,7 +155,6 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 			g4   xUpperLoopRight yUpperLoopRight [widths.lhs SwAmpersand]
 			arcvh
 			Arch.lhs.centerAt.rtl.t xUpperLoopTop CAP (sw -- SwAmpersand)
-
 		difference
 			dispiro
 				Arch.lhs.centerAt.rtl.t xUpperLoopTop CAP (sw -- SwAmpersand)
@@ -218,7 +217,6 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 				curl xEtRight yEtRightBarTop [heading Upward]
 			__ : list
 
-
 	create-glyph "ampersand.etToothed" : union
 		EtUpperHalf
 		EtLowerHalf FORM-TOOTHED
@@ -247,28 +245,27 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 	define yEtFlatTopEnd : Math.max (0 + ArchDepthA + fineAmp) [mix 0 CAP 0.4]
 	define pyEtFlatTopBarPos : ([mix 0 CAP OverlayPos] + Stroke * 0.125) / (CAP - 0)
 
-	define [EtFlatTopLowerHalf] : dispiro
-		widths.lhs
-		g4.down.start (SB + OX) [RevEzhShape.yArcMid CAP 0 pyEtFlatTopBarPos adaEt adbEt]
-		Arch.lhs 0 (swAfter -- fineAmp)
-		flat (xLowerOpenRight - OX) adaEt [widths.lhs fineAmp]
-		curl (xLowerOpenRight - OX) yEtFlatTopEnd [heading Upward]
+	define EtFlatTopConfig : object
+		'flatTopSerifless'  false
+		'flatTopSerifed'    true
 
-	define [EtFlatTopUpperHalf slab] : RevEzhShape CAP 0
-		fSerifed   -- slab
-		hook       -- 0
-		ada        -- adaEt
-		adb        -- adbEt
-		pyMidRight -- pyEtFlatTopBarPos
-
-	create-glyph "ampersand.flatTopSerifless" : union
-		LowerOpenCrossbar yEtFlatTopEnd
-		EtFlatTopUpperHalf false
-		EtFlatTopLowerHalf
-
-	create-glyph "ampersand.flatTopSerifed" : union
-		LowerOpenCrossbar yEtFlatTopEnd
-		EtFlatTopUpperHalf true
-		EtFlatTopLowerHalf
+	foreach { suffix fSerifed } [pairs-of EtFlatTopConfig] : do
+		create-glyph "ampersand.\(suffix)" : glyph-proc
+			define et : RevEzh CAP 0
+				fSerifed   -- fSerifed
+				terminal   -- 0
+				ada        -- adaEt
+				adb        -- adbEt
+				pyMidRight -- pyEtFlatTopBarPos
+			define [object xArcMid yArcMid] : et.Dim
+			include : union
+				LowerOpenCrossbar yEtFlatTopEnd
+				et.Shape
+				dispiro
+					widths.lhs
+					g4.down.mid xArcMid yArcMid [heading Downward]
+					Arch.lhs 0 (swAfter -- fineAmp)
+					flat (xLowerOpenRight - OX) adaEt [widths.lhs fineAmp]
+					curl (xLowerOpenRight - OX) yEtFlatTopEnd [heading Upward]
 
 	select-variant 'ampersand' '&'
