@@ -8,12 +8,13 @@ glyph-module
 glyph-block Digits-Four : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : EngHook
 	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
 
 	define [FourStdShape] : with-params [top open crossing [fine [AdviceStroke 3]] [sw Stroke] [bbd 0] [slab SLAB]] : glyph-proc
 		define yBarBot : Math.max ([mix 0 (top - sw) 0.25] - 0.125 * sw) [mix [if (!bbd && slab) Stroke 0] (top - sw) 0.1]
 		define yBarTop : yBarBot + sw
-		define swVBar : [AdviceStroke 2.5] * (sw / Stroke)
+		define swVBar : [AdviceStroke : if open 2.5 2.0] * (sw / Stroke)
 
 		define xVertBar : [mix SB RightSB : if crossing 0.78 0.9125] - (bbd * 0.75) + [if crossing [HSwToV : 0.375 * sw] 0]
 		define yVertBarTop : [mix yBarBot top : if open 0.5 1] - [if open (0.3 * sw) 0]
@@ -24,7 +25,7 @@ glyph-block Digits-Four : begin
 			if open
 				VBar.r xVertBar 0 yVertBarTop swVBar
 				lift-@ : dispiro
-					widths.lhs sw
+					widths.lhs swVBar
 					flat xVertBar (@b = 0)           [heading Upward]
 					curl xVertBar [mix @b @t 0.8]    [heading Upward]
 					g2   xVertBar (@t = yVertBarTop) [widths.lhs.heading fine Upward]
@@ -39,33 +40,35 @@ glyph-block Digits-Four : begin
 					curl [mix (SB + OX) xSlopeTop 2] [mix yBarTop top 2]
 
 		if bbd : begin
-			include : VBar.r (xVertBar + bbd) 0 yVertBarTop sw
+			include : VBar.r (xVertBar + bbd) 0 yVertBarTop swVBar
 			include : HBar.t xVertBar (xVertBar + bbd) CAP sw
 			include : HBar.b xVertBar (xVertBar + bbd) 0   sw
 		if (!bbd && slab) : begin
-			include : HSerif.rb (xVertBar - [HSwToV HalfStroke]) 0 Jut
-			include : HSerif.lb (xVertBar - [HSwToV HalfStroke]) 0 MidJutSide
+			include : HSerif.rb (xVertBar - [HSwToV : 0.5 * swVBar]) 0 Jut
+			include : HSerif.lb (xVertBar - [HSwToV : 0.5 * swVBar]) 0 MidJutSide
 
-	define [FourClosedShape top crossing slab] : begin
-		return : FourStdShape top false crossing (slab -- slab)
+		return : object yBarBot yBarTop swVBar xVertBar
 
-	define [FourSemiOpenShape top crossing slab] : begin
-		return : FourStdShape top true crossing (fine -- [AdviceStroke 2.75]) (slab -- slab)
+	define [FourClosedShape   top crossing slab] : FourStdShape top false crossing (slab -- slab)
+	define [FourSemiOpenShape top crossing slab] : FourStdShape top true  crossing (slab -- slab) (fine -- [AdviceStroke 2.75])
 
 	define [FourOpenShape top crossing slab] : glyph-proc
 		local yBarBot : Math.max ([mix 0 (top - Stroke) 0.4] - 0.2 * Stroke) [mix [if slab Stroke 0] (top - Stroke) 0.1]
 		local yBarTop : yBarBot + Stroke
-		local fine : AdviceStroke 3
+		local swVBar : AdviceStroke 2
 
 		define xVertBar : mix SB RightSB : if crossing 0.825 0.9125
+		define yVertBarTop : mix yBarBot top 0.75
 		define xHBarTerminal : if crossing RightSB xVertBar
 
 		include : HBar.t SB xHBarTerminal yBarTop
-		include : VBar.r xVertBar 0 [mix yBarBot top 0.75]
+		include : VBar.r xVertBar 0 yVertBarTop swVBar
 		include : VBar.l SB yBarTop top
 		if slab : begin
-			include : HSerif.rb (xVertBar - [HSwToV HalfStroke]) 0 Jut
-			include : HSerif.lb (xVertBar - [HSwToV HalfStroke]) 0 MidJutSide
+			include : HSerif.rb (xVertBar - [HSwToV : 0.5 * swVBar]) 0 Jut
+			include : HSerif.lb (xVertBar - [HSwToV : 0.5 * swVBar]) 0 MidJutSide
+
+		return : object yBarBot yBarTop swVBar xVertBar
 
 	define FourConfig : SuffixCfg.weave
 		object # body
@@ -89,11 +92,27 @@ glyph-block Digits-Four : begin
 			include : body CAP crossing slab
 			include : ShiftDown
 
+		if (!slab) : begin
+			create-glyph "Cuatrillo.\(suffix)" : glyph-proc
+				include : MarkSet.capDesc
+				define [object swVBar xVertBar yBarBot] : include : body CAP crossing slab
+				include : EngHook xVertBar 0 Descender (sw -- swVBar)
+				set-base-anchor 'bottomRight' (xVertBar + SB) yBarBot
+
+			create-glyph "cuatrillo.\(suffix)" : glyph-proc
+				include : MarkSet.p
+				define [object swVBar xVertBar yBarBot] : include : body XH crossing slab
+				include : EngHook xVertBar 0 Descender (sw -- swVBar)
+				set-base-anchor 'bottomRight' (xVertBar + SB) yBarBot
+
 	select-variant 'four.lnum' [CodeLnum '4'] (follow -- 'four')
 	select-variant 'four.onum' [CodeOnum '4'] (follow -- 'four')
 
 	link-reduced-variant 'four/sansSerif.lnum' 'four.lnum' MathSansSerif (follow -- 'four/sansSerif')
 	link-reduced-variant 'four/sansSerif.onum' 'four.onum' MathSansSerif (follow -- 'four/sansSerif')
+
+	select-variant 'Cuatrillo' 0xA72C (follow -- 'four/sansSerif')
+	select-variant 'cuatrillo' 0xA72D (follow -- 'four/sansSerif')
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarCenter
 	create-glyph 'mathbb/four' 0x1D7DC : glyph-proc
