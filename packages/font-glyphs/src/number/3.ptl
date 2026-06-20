@@ -1,13 +1,14 @@
 $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
-import [MathSansSerif] from "@iosevka/glyph/relation"
+import [MathSansSerif DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
 glyph-block Digits-Three : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateDependentComposite
 	glyph-block-import Digits-Shared : OnumHeight OnumMarks ShiftDown CodeLnum CodeOnum
 	glyph-block-import Letter-Latin-Ezh : Ezh
 
@@ -62,10 +63,35 @@ glyph-block Digits-Three : begin
 	select-variant 'three.lnum' [CodeLnum '3'] (follow -- 'three')
 	select-variant 'three.onum' [CodeOnum '3'] (follow -- 'three')
 
-	turned 'turnDigitThree' 0x218B 'three.lnum' Middle (CAP / 2)
+	turned 'turnThree' 0x218B 'three.lnum' Middle (CAP / 2)
 
 	link-reduced-variant 'three/sansSerif.lnum' 'three.lnum' MathSansSerif (follow -- 'three/sansSerif')
 	link-reduced-variant 'three/sansSerif.onum' 'three.onum' MathSansSerif (follow -- 'three/sansSerif')
+
+	create-glyph 'Tresillo/selector.twoArcs' : glyph-proc
+		include : MarkSet.capital
+		DependentSelector.set currentGlyph 'twoArcs'
+	create-glyph 'Tresillo/selector.flatTopSerifless' : glyph-proc
+		include : MarkSet.capital
+		DependentSelector.set currentGlyph 'flatTop'
+
+	create-glyph 'tresillo/selector.twoArcs' : glyph-proc
+		include : MarkSet.p
+		DependentSelector.set currentGlyph 'twoArcs'
+	create-glyph 'tresillo/selector.flatTopSerifless' : glyph-proc
+		include : MarkSet.p
+		DependentSelector.set currentGlyph 'flatTop'
+
+	select-variant 'Tresillo/selector' (follow -- 'three/sansSerif')
+	select-variant 'tresillo/selector' (follow -- 'three/sansSerif')
+
+	CreateDependentComposite 'Tresillo' 0xA72A 'Tresillo/selector' : object
+		'twoArcs'          'Tresillo/body/twoArcs'
+		'flatTop'          'revEzh'
+
+	CreateDependentComposite 'tresillo' 0xA72B 'tresillo/selector' : object
+		'twoArcs'          'tresillo/body/twoArcs'
+		'flatTop'          'revezh'
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/three' 0x1D7DB : glyph-proc
