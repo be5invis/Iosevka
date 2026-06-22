@@ -9,11 +9,13 @@ glyph-block Letter-Latin-Ezh : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Metrics : EFVJutLength
 	glyph-block-import Letter-Shared-Shapes : CurlyTail SerifedArcEnd PalatalHook RetroflexHook
+	glyph-block-import Letter-Latin-S : SNeck
 
 	define TERMINAL-NONE 0
 	define TERMINAL-HOOK 1
 	define TERMINAL-DESC 2
 	define TERMINAL-CURL 3
+	define TERMINAL-TAIL 4
 
 	glyph-block-export Ezh
 	define flex-params [Ezh] : namespace
@@ -110,6 +112,12 @@ glyph-block Letter-Latin-Ezh : begin
 							CurlyTail.n fine bottom df.leftSB df.width (bottom + 0.5 * fine)
 								yLoopTop -- ([mix yMidLeft bottom 0.5] + 0.25 * fine)
 								swBefore -- stroke
+						[Just TERMINAL-TAIL] : let [desc : bottom - (0 - Descender)] : list
+							g4 xArcMid yArcMid
+							~~~ [SNeck df (yMidLeft - desc) stroke (stroke * EssRatioLower)]
+							g4 (df.leftSB  + OX) [YSmoothMidL (bottom + stroke) desc ada adb] [widths.lhs stroke]
+							HookEnd desc (sw -- stroke)
+							g4 (df.rightSB - OX) (desc + SHook)
 						__ : list
 							g4 xArcMid yArcMid
 							HookEnd bottom (sw -- stroke)
@@ -282,33 +290,16 @@ glyph-block Letter-Latin-Ezh : begin
 
 		create-glyph "ezhTail.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			local stroke : AdviceStroke2 2 3 (XH - 0)
 			define ezh : Ezh [DivFrame 1] XH 0
 				fCursive  -- fCursive
 				fSerifed  -- fSerifed
 				pyMidLeft -- [if fCursive 0.50 0.52]
-				stroke    -- stroke
+				stroke    -- [AdviceStroke2 2 3 (XH - 0)]
 				hook      -- SHook
 				ada       -- SmallArchDepthA
 				adb       -- SmallArchDepthB
-				terminal  -- TERMINAL-NONE
+				terminal  -- TERMINAL-TAIL
 			include : ezh.Shape
-			define [object xArcMid yArcMid] : ezh.Dim
-			include : dispiro
-				widths.rhs stroke
-				g4.down.mid xArcMid yArcMid [heading Downward]
-				arcvh
-				let [gap : 2 * (stroke * CorrectionOMidX)] : if (gap > TINY)
-					list
-						flat [Math.min (xArcMid - [HSwToV : 1.125 * stroke] - TINY - [Math.abs : TanSlope * stroke]) (Middle + gap / 2)] 0
-						curl [Math.max (SB + OX + [HSwToV : 1.125 * stroke] + TINY + [Math.abs : TanSlope * stroke]) (Middle - gap / 2)] 0
-					list
-						straight.left.mid Middle 0
-				archv
-				g4   (SB + OX + [HSwToV stroke]) [YSmoothMidL stroke Descender SmallArchDepthA SmallArchDepthB]
-				arcvh
-				flat [Math.max (SB + [HSwToV : 1.125 * stroke] + TINY + [Math.abs : TanSlope * stroke]) : Arch.adjust-x.bot Middle (sw -- stroke)] (Descender + stroke)
-				curl RightSB (Descender + stroke)
 
 		create-glyph "ezhCurlyTail.\(suffix)" : glyph-proc
 			include : MarkSet.p
