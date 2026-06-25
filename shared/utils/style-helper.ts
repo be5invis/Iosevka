@@ -28,30 +28,55 @@ export function variantChoiceIsDefault(uc: CharacterVariantChoice) {
 	return true;
 }
 
-export function resolveUserChoice(uc: CharacterVariantChoice, ctx: ChoiceResolutionContext) {
+function resolveComposition(uc: CharacterVariantChoice, ctx: ChoiceResolutionContext) {
 	const variantDefaults = styleSlopePick6(ctx.isSlab, ctx.slope, Cv.CharacterVariantDefaults);
 	const ss = uc.inherits || null;
 	const compositionInherited = !ss
 		? null
 		: styleSlopePick6(ctx.isSlab, ctx.slope, ss.composition);
-	const resolvedCompositionInherited: Cv.VariantComposition = Object.assign(
-		{},
-		variantDefaults,
-		ss?.rank ? compositionInherited : null,
-	);
-
-	const resolvedCompositionNS: Cv.VariantComposition = Object.assign(
-		{},
-		variantDefaults,
-		compositionInherited,
-		uc.design,
-	);
 	const resolvedComposition: Cv.VariantComposition = Object.assign(
 		{},
 		variantDefaults,
 		compositionInherited,
 		uc.design,
 		slopePick3ABC(ctx.slope, uc.upright, uc.italic, uc.oblique),
+	);
+	return { variantDefaults, ss, compositionInherited, resolvedComposition };
+}
+
+export function deriveHotChars(uc: CharacterVariantChoice, ctx: ChoiceResolutionContext) {
+	const { variantDefaults, resolvedComposition } = resolveComposition(uc, ctx);
+
+	const hotChars = new Map<string, Gr.FeatureAssignment>();
+	for (const k in resolvedComposition) {
+		if (resolvedComposition[k] === variantDefaults[k]) continue;
+		const prime = Cv.CharacterVariants.get(k);
+		if (!prime?.tag) continue;
+		const variant = prime.variants.get(resolvedComposition[k]);
+		if (!variant) continue;
+		for (const hc of prime.hotChars) {
+			hotChars.set(hc, { ...hotChars.get(hc), [prime.tag]: variant.rank || 0 });
+		}
+	}
+
+	return hotChars;
+}
+
+export function resolveUserChoice(uc: CharacterVariantChoice, ctx: ChoiceResolutionContext) {
+	const { variantDefaults, ss, compositionInherited, resolvedComposition } = resolveComposition(
+		uc,
+		ctx,
+	);
+	const resolvedCompositionInherited: Cv.VariantComposition = Object.assign(
+		{},
+		variantDefaults,
+		ss?.rank ? compositionInherited : null,
+	);
+	const resolvedCompositionNS: Cv.VariantComposition = Object.assign(
+		{},
+		variantDefaults,
+		compositionInherited,
+		uc.design,
 	);
 
 	const resolvedNonDefaultComposition: Cv.VariantCompositionW = {};
