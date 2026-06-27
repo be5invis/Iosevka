@@ -35,7 +35,7 @@ export function CreateWeightControl(para, bindings) {
 	function AdviceStrokeInSpace(availSpace, crowdedness, contrast = HVContrast, mul = 1) {
 		const nonAdjustedFillRate = (crowdedness * contrast * stroke) / availSpace;
 		const adjustedFillRate = StrokeWeightControlSigmoid(nonAdjustedFillRate);
-		const strokeWidthScalar = Math.min(1, (mul * adjustedFillRate) / nonAdjustedFillRate);
+		const strokeWidthScalar = Math.min(1, mul * (adjustedFillRate / nonAdjustedFillRate));
 		return stroke * strokeWidthScalar;
 	}
 
