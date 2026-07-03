@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix clamp fallback SuffixCfg] from "@iosevka/util"
+import [mix clamp fallback SuffixCfg boole] from "@iosevka/util"
 import [MathSansSerif Joining] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -12,7 +12,7 @@ glyph-block Letter-Latin-Lower-N : begin
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : CurlyTail nShoulder RightwardTailedBar
 	glyph-block-import Letter-Shared-Shapes : MidHook CyrDescender PalatalHook RetroflexHook
-	glyph-block-import Letter-Shared-Shapes : EngHook SerifFrame
+	glyph-block-import Letter-Shared-Shapes : VerticalHook EngHook SerifFrame
 
 	define [AdjustTrailingAnchor] : glyph-proc
 		define trAnchor currentGlyph.baseAnchors.trailing
@@ -168,10 +168,17 @@ glyph-block Letter-Latin-Lower-N : begin
 			if sLB : include : sLB [DivFrame 1] 0
 			if sRB : include : sRB [DivFrame 1] 0
 
-		if (!tailed) : create-glyph "Eng.\(suffix)" : glyph-proc
-			include : MarkSet.capDesc
-			include : Body CAP SB RightSB 0 Stroke ArchDepthA ArchDepthB
-			include : EngHook RightSB 0 Descender
+		if (!tailed) : create-glyph "engCap.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : Body CAP SB RightSB (O + Hook + HalfStroke) Stroke ArchDepthA ArchDepthB
+			local xHookDepth : Math.min (1.2 * HookX)
+				mix ((RightSB - [HSwToV HalfStroke]) - Middle) Jut
+					clamp 0 [boole sLB] : StrokeWidthBlend 0 1
+			include : VerticalHook.r
+				x      -- RightSB
+				y      -- (O + Hook + HalfStroke)
+				xDepth -- (-xHookDepth)
+				yDepth -- Hook
 			if sLT : include : sLT [DivFrame 1] CAP
 			if sLB : include : sLB [DivFrame 1] 0
 
@@ -329,7 +336,7 @@ glyph-block Letter-Latin-Lower-N : begin
 	select-variant 'cyrl/pe.italic/descBase' (shapeFrom -- 'n')
 	alias 'cyrl/pe.BGR' null 'cyrl/pe.italic'
 
-	select-variant 'Eng' 0x14A (follow -- 'eng')
+	select-variant 'engCap' 0x14A (follow -- 'eng')
 	select-variant 'eng' 0x14B
 	link-reduced-variant 'eng/phoneticRight' 'eng'
 	select-variant 'nHookLeft' 0x272
