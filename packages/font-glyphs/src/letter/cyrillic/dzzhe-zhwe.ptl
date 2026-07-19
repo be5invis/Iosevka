@@ -14,21 +14,21 @@ glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
 		local subDf : df.slice 4 keeps _o
 		local subDfFullShift : (df.rightSB - subDf.rightSB) / (4 - keeps)
 		local shift : pShift * subDfFullShift
-		local sw : AdviceStroke 3.3 [df.slice 4 3 _o].adws
+		local sw : [df.slice 4 3 _o].adviceStroke 3.3
 		return : object subDf shift sw
 
-	do "de subglyph"
+	do "De subglyphs"
 		glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
-		glyph-block-import Letter-Cyrillic-De : CyrDeShape CyrDeItalicShapeT BottomExtension
+		glyph-block-import Letter-Cyrillic-De : CyrDeShape CyrDeItalicShape BottomExtension
 
 		define [CyrDzzheDeShape fCapital df top] : glyph-proc
 			local [object subDf sw] : SubDfDimBy4 0 2 df OX
-			local left : if SLAB (subDf.leftSB + 0.5 * SideJut) subDf.leftSB
+			local left : subDf.leftSB + [if SLAB 0.5 0] * SideJut
 			include : CyrDeShape fCapital top left subDf.rightSB sw
 
 		define [CyrDzzheDeItalicShape df] : glyph-proc
 			local [object subDf sw] : SubDfDimBy4 0 2 df OX
-			include : CyrDeItalicShapeT dispiro subDf sw
+			include : CyrDeItalicShape subDf sw
 
 		create-glyph "cyrl/Dzzhe/left" : glyph-proc
 			define df : include : DivFrame [mix 1 para.advanceScaleMM 2] 3.5
@@ -50,7 +50,7 @@ glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
 			set-base-anchor 'cvDecompose' 0 0
 			include : CyrDzzheDeItalicShape df
 
-	do "ze subglyph"
+	do "Ze subglyphs"
 		define [CyrZhweZeShape slabTop slabBot df top bot hook ada adb] : glyph-proc
 			local [object subDf sw] : SubDfDimBy4 0 2 df OX
 			local ze : CyrZe slabTop slabBot top bot
@@ -77,8 +77,10 @@ glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
 					set-base-anchor 'cvDecompose' 0 0
 					include : CyrZhweZeShape slabTop slabBot df XH 0 SHook SmallArchDepthA SmallArchDepthB
 
-	do "zhe subglyphs"
+	do "Zhe subglyphs"
+		glyph-block-import Letter-Cyrillic-De : CyrDeItalicMask
 		glyph-block-import Letter-Cyrillic-Zhe : Zhe
+
 		define [CyrRightZheShape legShape fSlab fMidSlab df top barLeft] : glyph-proc
 			local [object subDf shift sw] : SubDfDimBy4 1 3 df OX
 			include : with-transform [ApparentTranslate shift 0] : Zhe.HalfShape legShape fSlab fMidSlab subDf 0 top top
@@ -102,12 +104,11 @@ glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
 				adb    -- adb
 			include : difference [CyrRightZheShape legShape fSlab fMidSlab df top subDf.middle] [zeNoO.ShapeMask]
 
-		glyph-block-import Letter-Cyrillic-De : CyrDeItalicShapeT
 		define [DzzheZheItalicShape legShape fSlab fMidSlab df top] : glyph-proc
 			local [object subDf sw] : SubDfDimBy4 0 2 df OX
 			include : difference
 				CyrRightZheShape legShape fSlab fMidSlab df top subDf.middle
-				CyrDeItalicShapeT spiro-outline subDf sw
+				CyrDeItalicMask subDf sw
 
 		define ZheConfig : object
 			straight            { Zhe.StraightLegs   SLAB  SLAB }
