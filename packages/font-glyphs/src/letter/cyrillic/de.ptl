@@ -8,6 +8,7 @@ glyph-block Letter-Cyrillic-De : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors ExtendBelowBaseAnchors
+	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Cyrillic-Ze : CyrZe ZeConfig
 
 	glyph-block-export BottomExtension
@@ -142,7 +143,7 @@ glyph-block Letter-Cyrillic-De : begin
 				eject-contour 'footR'
 				include : DzzeDescendershape de SmallArchDepthA SmallArchDepthB
 
-	create-glyph "cyrl/Dwe" 0xA680 : glyph-proc
+	create-glyph 'cyrl/Dwe' 0xA680 : glyph-proc
 		include : MarkSet.capital
 		local asc : CAP + LongVJut - QuarterStroke
 		include : ExtendAboveBaseAnchors asc
@@ -150,7 +151,7 @@ glyph-block Letter-Cyrillic-De : begin
 		local de : include : CyrDeShape true CAP SB RightSB
 		include : VBar.l de.xTopLeft (CAP + O) asc [Math.min de.swInner : VJutStroke * (de.swOuter / Stroke)]
 
-	create-glyph "cyrl/dwe" 0xA681 : glyph-proc
+	create-glyph 'cyrl/dwe.upright' : glyph-proc
 		include : MarkSet.e
 		local asc : XH + LongVJut - QuarterStroke
 		include : ExtendAboveBaseAnchors asc
@@ -159,8 +160,7 @@ glyph-block Letter-Cyrillic-De : begin
 		include : VBar.l de.xTopLeft (XH + O) asc [Math.min de.swInner : VJutStroke * (de.swOuter / Stroke)]
 
 	## Italic
-	glyph-block-export CyrDeItalicShapeT
-	define [CyrDeItalicShapeT sink df _sw] : begin
+	define [CyrDeItalicKnots df _sw] : begin
 		local sw : fallback _sw df.mvs
 		local fine : ShoulderFine * (sw / Stroke)
 
@@ -168,9 +168,8 @@ glyph-block Letter-Cyrillic-De : begin
 		local ada : df.archDepthAOf (SmallArchDepth * (yRingTop / XH)) sw
 		local adb : df.archDepthBOf (SmallArchDepth * (yRingTop / XH)) sw
 
-		return : sink
-			widths.lhs fine
-			straight.up.start ((df.rightSB - OX) - [HSwToV : sw - fine]) (yRingTop - adb)
+		return : list
+			straight.up.start ((df.rightSB - OX) - [HSwToV : sw - fine]) (yRingTop - adb) [widths.lhs fine]
 			Arch.lhs yRingTop (sw -- sw) (swBefore -- fine)
 			flatside.ld df.leftSB  0 yRingTop ada adb
 			Arch.lhs 0 (sw -- sw)
@@ -178,10 +177,25 @@ glyph-block Letter-Cyrillic-De : begin
 			quadControls 0 0.8
 			g4 (df.leftSB + sw * 1.1) Ascender
 
+	glyph-block-export CyrDeItalicShape
+	define [CyrDeItalicShape df _sw] : dispiro
+		CyrDeItalicKnots df _sw
+
+	glyph-block-export CyrDeItalicMask
+	define [CyrDeItalicMask df _sw] : spiro-outline
+		CyrDeItalicKnots df _sw
+
 	create-glyph 'cyrl/de.italic' : glyph-proc
-		local df : include : DivFrame 1
+		include : MarkSet.b
+		include : CyrDeItalicShape [DivFrame 1]
+
+	create-glyph 'cyrl/dwe.italic/base' : glyph-proc
+		local df : DivFrame [StrokeWidthBlend 1.00 0.95] 2
 		include : df.markSet.b
-		include : CyrDeItalicShapeT dispiro df
+		include : CyrDeItalicShape df
+		set-base-anchor 'topRight' (df.rightSB - DotRadius) XH
+
+	CreateAccentedComposition 'cyrl/dwe.italic' null 'cyrl/dwe.italic/base' 'commaTR'
 
 	foreach { suffix { { desc } { st sb } } } [Object.entries ZeConfig] : do
 		if (desc && !st) : begin
@@ -190,7 +204,7 @@ glyph-block Letter-Cyrillic-De : begin
 				include : df.markSet.bp
 
 				local subDf : df.slice 3 2 OX
-				include : CyrDeItalicShapeT dispiro subDf df.mvs
+				include : CyrDeItalicShape subDf df.mvs
 
 				local shift : df.width - subDf.width
 				local ze : CyrZe 1 sb XH Descender
