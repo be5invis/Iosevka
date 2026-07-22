@@ -77,7 +77,13 @@ const Woff2CompressApp = oracle(`oracle:check-woff2-compress-app`, async target 
 		return rp.buildOptions.woff2CompressApp;
 	} else {
 		try {
-			return await which("woff2_compress");
+			return await which("woff2_compress", {
+				// On Windows, `.JS`/`.CMD`/`.PS1` shims (e.g. the `woff2_compress.js`
+				// bin installed by the `wawoff2` package) are resolvable via PATHEXT but
+				// cannot be spawned directly (spawn EFTYPE). Only accept a real native
+				// binary so we cleanly fall back to the wawoff2 library below.
+				pathExt: process.platform === "win32" ? ".EXE;.COM" : undefined,
+			});
 		} catch (_e) {
 			// No woff2_compress found, use fallback
 			return null;
