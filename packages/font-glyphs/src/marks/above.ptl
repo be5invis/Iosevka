@@ -661,47 +661,57 @@ glyph-block Mark-Above : begin
 			close
 
 	#### Breve Marks
-	define [BreveShape] : with-params [top bottom xMiddle width hs] : glyph-proc
+	define [BreveShape] : with-params [top bottom xMiddle width sw] : glyph-proc
 		local leftEnd  : xMiddle - width / 2
 		local rightEnd : xMiddle + width / 2
+		local swEnd : Math.min sw : VSwToH : 0.375 * (rightEnd - leftEnd)
+		local swMid : Math.min sw :          0.375 * (2 * (top - bottom))
+		local xMiddleAdjusted : clamp
+			leftEnd  + [HSwToV : 1.125 * swEnd] + TINY + [Math.abs : TanSlope * swMid]
+			rightEnd - [HSwToV : 1.125 * swEnd] - TINY - [Math.abs : TanSlope * swMid]
+			Arch.adjust-x.bot xMiddle (sw -- swMid)
 		include : dispiro
-			widths.center (hs * 2)
-			g4.down.start leftEnd  top          [heading Downward]
+			g4.down.start leftEnd         top    [widths.lhs.heading swEnd Downward]
 			arcvh
-			g4.right.mid  xMiddle (bottom + hs) [heading Rightward]
+			g4.right.mid  xMiddleAdjusted bottom [widths.lhs swMid]
 			archv
-			g4.up.end     rightEnd top          [heading Upward]
+			g4.up.end     rightEnd        top    [widths.lhs.heading swEnd Upward]
 
-	define [InvBreveShape] : with-params [top bottom xMiddle width hs] : glyph-proc
+	define [InvBreveShape] : with-params [top bottom xMiddle width sw] : glyph-proc
 		local leftEnd  : xMiddle - width / 2
 		local rightEnd : xMiddle + width / 2
+		local swEnd : Math.min sw : VSwToH : 0.375 * (rightEnd - leftEnd)
+		local swMid : Math.min sw :          0.375 * (2 * (top - bottom))
+		local xMiddleAdjusted : clamp
+			leftEnd  + [HSwToV : 1.125 * swEnd] + TINY + [Math.abs : TanSlope * swMid]
+			rightEnd - [HSwToV : 1.125 * swEnd] - TINY - [Math.abs : TanSlope * swMid]
+			Arch.adjust-x.top xMiddle (sw -- swMid)
 		include : dispiro
-			widths.center (hs * 2)
-			g4.up.start  leftEnd  bottom    [heading Upward]
+			g4.up.start  leftEnd         bottom [widths.rhs.heading swEnd Upward]
 			arcvh
-			g4.right.mid xMiddle (top - hs) [heading Rightward]
+			g4.right.mid xMiddleAdjusted top    [widths.rhs swMid]
 			archv
-			g4.down.end  rightEnd bottom    [heading Downward]
+			g4.down.end  rightEnd        bottom [widths.rhs.heading swEnd Downward]
 
 	create-glyph 'breveAbove' 0x306 : glyph-proc
 		set-width 0
 		include : StdAnchors.wide
 		include : BreveShape
 			xMiddle -- markMiddle
-			width   -- (2 * (markExtend * 1.2))
+			width   -- (2 * (markExtend * 1.2 + [HSwToV markHalfStroke]))
 			top     -- aboveMarkTop
 			bottom  -- aboveMarkBot
-			hs      -- markHalfStroke
+			sw      -- markStroke
 
 	create-glyph 'invBreveAbove' 0x311 : glyph-proc
 		set-width 0
 		include : StdAnchors.wide
 		include : InvBreveShape
 			xMiddle -- markMiddle
-			width   -- (2 * (markExtend * 1.2))
+			width   -- (2 * (markExtend * 1.2 + [HSwToV markHalfStroke]))
 			top     -- aboveMarkTop
 			bottom  -- aboveMarkBot
-			hs      -- markHalfStroke
+			sw      -- markStroke
 
 	create-glyph 'breveMacronAbove' 0x1DCB : glyph-proc
 		set-width 0
@@ -709,17 +719,17 @@ glyph-block Mark-Above : begin
 
 		local fine : Math.min markFine : 0.5 * ([AdviceStroke 3.5] * (markStroke / Stroke))
 
-		local leftEnd  : markMiddle - ((aboveMarkTop - aboveMarkBot) - fine) * 1.25
-		local rightEnd : markMiddle + ((aboveMarkTop - aboveMarkBot) - fine) * 1.25
+		local leftEnd  : markMiddle - ((aboveMarkTop - aboveMarkBot) - fine) * 1.25 - [HSwToV fine]
+		local rightEnd : markMiddle + ((aboveMarkTop - aboveMarkBot) - fine) * 1.25 + [HSwToV fine]
 
 		include : dispiro
-			widths.center (fine * 2)
-			g4.down.start     leftEnd                  aboveMarkTop         [heading Downward]
+			widths.lhs (fine * 2)
+			g4.down.start     leftEnd                                   aboveMarkTop [heading Downward]
 			arcvh
-			g4.right.mid [mix leftEnd markMiddle 0.5] (aboveMarkBot + fine) [heading Rightward]
+			g4.right.mid [mix leftEnd (markMiddle + [HSwToV fine]) 0.5] aboveMarkBot [heading Rightward]
 			archv
-			g4.up.end                 markMiddle       aboveMarkTop         [heading Upward]
-		include : HBar.t markMiddle (rightEnd + 0.5 * markStress) aboveMarkTop (fine * 2)
+			g4.up.end                 (markMiddle + [HSwToV fine])      aboveMarkTop [heading Upward]
+		include : HBar.t markMiddle rightEnd aboveMarkTop (fine * 2)
 
 	create-glyph 'macronBreveAbove' 0x1DCC : glyph-proc
 		set-width 0
@@ -727,17 +737,17 @@ glyph-block Mark-Above : begin
 
 		local fine : Math.min markFine : 0.5 * ([AdviceStroke 3.5] * (markStroke / Stroke))
 
-		local leftEnd  : markMiddle - ((aboveMarkTop - aboveMarkBot) - fine) * 1.25
-		local rightEnd : markMiddle + ((aboveMarkTop - aboveMarkBot) - fine) * 1.25
+		local leftEnd  : markMiddle - ((aboveMarkTop - aboveMarkBot) - fine) * 1.25 - [HSwToV fine]
+		local rightEnd : markMiddle + ((aboveMarkTop - aboveMarkBot) - fine) * 1.25 + [HSwToV fine]
 
-		include : HBar.t (leftEnd - 0.5 * markStress) markMiddle aboveMarkTop (fine * 2)
+		include : HBar.t leftEnd markMiddle aboveMarkTop (fine * 2)
 		include : dispiro
-			widths.center (fine * 2)
-			g4.down.start     markMiddle                aboveMarkTop         [heading Downward]
+			widths.lhs (fine * 2)
+			g4.down.start     (markMiddle - [HSwToV fine])               aboveMarkTop [heading Downward]
 			arcvh
-			g4.right.mid [mix markMiddle rightEnd 0.5] (aboveMarkBot + fine) [heading Rightward]
+			g4.right.mid [mix (markMiddle - [HSwToV fine]) rightEnd 0.5] aboveMarkBot [heading Rightward]
 			archv
-			g4.up.end                    rightEnd       aboveMarkTop         [heading Upward]
+			g4.up.end                                      rightEnd      aboveMarkTop [heading Upward]
 
 	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
 		create-glyph "candrabinduAbove.\(suffix)" : glyph-proc
