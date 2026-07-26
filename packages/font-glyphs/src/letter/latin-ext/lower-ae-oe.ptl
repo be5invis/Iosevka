@@ -1,6 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
+import [Point] from "@iosevka/geometry/point"
 
 glyph-module
 
@@ -313,28 +314,38 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				include : LeaningAnchor.Below.VBar.l SB
 
 	do "El subglyphs"
-		glyph-block-import Letter-Cyrillic-El : CyrElShape
+		glyph-block-import Letter-Shared-Shapes : LegShape 
+
+		define [LhaLeftShape df top] : glyph-proc
+			local { subDf } : SubDfAndShiftEx 6 3 0 df
+			local xTopLeft : mix subDf.leftSB (subDf.rightSB - [HSwToV : 0.5 * df.mvs]) 0.075
+			local xBotLeft : mix SB 0 : if SLAB 1.00 0.75
+			include : HBar.t xTopLeft (subDf.rightSB - [HSwToV : 0.5 * df.mvs]) top df.mvs
+			include : LegShape
+				ztop -- [Point.fromXY Point.Type.Corner xTopLeft top]
+				zbot -- [Point.fromXY Point.Type.Corner xBotLeft 0]
+				xmid -- xTopLeft
+				sw   -- df.mvs
+			if SLAB : include : tagged 'serifLT' : HSerif.lt xTopLeft top SideJut df.mvs
 
 		create-glyph 'cyrl/Lha/El' : glyph-proc
 			local df : include : DivFrame para.advanceScaleM 3.2
 			include : df.markSet.capital
-			local { subDf } : SubDfAndShiftEx 6 3 0 df
 			set-base-anchor 'cvDecompose' 0 0
-			include : CyrElShape subDf.leftSB (subDf.rightSB - [HSwToV : 0.5 * df.mvs]) CAP 0 [if SLAB 4 0] df.mvs
+			include : LhaLeftShape df CAP
 
 		create-glyph 'cyrl/lha/el' : glyph-proc
 			local df : include : DivFrame para.advanceScaleM 3.2
 			include : df.markSet.e
-			local { subDf } : SubDfAndShiftEx 6 3 0 df
 			set-base-anchor 'cvDecompose' 0 0
-			include : CyrElShape subDf.leftSB (subDf.rightSB - [HSwToV : 0.5 * df.mvs]) XH 0 [if SLAB 4 0] df.mvs
+			include : LhaLeftShape df XH
 
 	do "Kha subglyphs"
 		glyph-block-import Letter-Shared-Shapes : SerifFrame WithSerifOverflowMask
 		glyph-block-import Letter-Latin-X : XConfig XLetterForm XSerifs
 
 		foreach { suffix { { stroke1 stroke2 } { desc } { serifShape fMaskBase } } } [Object.entries XConfig] : do
-			define [halfLetterShape df top bot turn tension] : glyph-proc
+			define [RhaRightShape df top bot turn tension] : glyph-proc
 				local lf : XLetterForm [df.bodyBox top bot] stroke1 stroke2 turn tension (sw -- df.mvs)
 				include : WithSerifOverflowMask fMaskBase [df.bodyBox top bot] : lf.rightHalf fMaskBase
 				if serifShape : begin
@@ -345,7 +356,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 						[Just XSerifs.BilateralMotion] : composite-proc sf.rb.outer
 						__                             : glyph-proc
 
-			define [LhaRightLetterShape df top bot turn tension] : glyph-proc
+			define [LhaRightShape df top bot turn tension] : glyph-proc
 				local stroke1f : if (stroke1 == 3) 4 stroke1
 				local lf : XLetterForm [df.bodyBox top bot] stroke1f stroke2 turn tension (sw -- df.mvs)
 					sw             -- df.mvs
@@ -366,7 +377,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 					local df : DivFrame para.advanceScaleM 3
 					set-width 0
 					set-mark-anchor 'cvDecompose' 0 0
-					include : halfLetterShape df XH 0 0.1 0.20
+					include : RhaRightShape df XH 0 0.1 0.20
 
 				create-glyph "cyrl/lha/kha.\(suffix)" : glyph-proc
 					local df : DivFrame para.advanceScaleM 3.2
@@ -375,7 +386,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 					local { subDf shift } : SubDfAndShiftEx 6 4 1 df
 					include : with-transform [ApparentTranslate shift 0]
-						LhaRightLetterShape subDf XH 0 0.1 0.20
+						LhaRightShape subDf XH 0 0.1 0.20
 
 				create-glyph "cyrl/Lha/Kha.\(suffix)" : glyph-proc
 					local df : DivFrame para.advanceScaleM 3.2
@@ -384,7 +395,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 					local { subDf shift } : SubDfAndShiftEx 6 4 1 df
 					include : with-transform [ApparentTranslate shift 0]
-						LhaRightLetterShape subDf CAP 0 0.1 0.28
+						LhaRightShape subDf CAP 0 0.1 0.28
 
 	do "subglyph diacritics"
 		create-glyph "turnoeSlash/oSlash/overlay" : glyph-proc

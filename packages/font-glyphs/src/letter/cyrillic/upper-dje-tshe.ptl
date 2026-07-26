@@ -1,0 +1,109 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback boole] from "@iosevka/util"
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Upper-Dje-Tshe : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Metrics : EFVJutLength
+	glyph-block-import Letter-Shared-Shapes : nShoulder SerifFrame VerticalHook
+	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos
+
+	define HConfig : object
+		serifless                 { false false false }
+		topLeftSerifed            { true  false false }
+		topLeftBottomRightSerifed { true  false true  }
+		serifed                   { true  true  true  }
+
+	foreach { suffix { doSerifLT doSerifLB doSerifRB } } [pairs-of HConfig] : do
+		define fMotion : (doSerifLT || doSerifRB) && !doSerifLB
+		define df : DivFrame para.advanceScaleT 2
+		define sw : df.adviceThinnerStroke2 2.75 3 CAP
+
+		define xMidBarLeft : Math.max (df.rightSB - (RightSB - SB)) : if doSerifLT
+			[mix df.leftSB df.rightSB 0.35] - [HSwToV : 0.50 * sw]
+			[mix df.leftSB df.rightSB 0.20] - [HSwToV : 0.25 * sw]
+
+		define mockWidth : (df.rightSB - xMidBarLeft) + SB * 2
+		define mockAdws  : mockWidth / Width
+		define archDepth : ArchDepth * mockAdws
+
+		define yBarTop : [mix 0 CAP YeriBarPos] + sw / 2
+		define mockAda : ArchDepthAOf archDepth mockWidth
+		define mockAdb : ArchDepthBOf archDepth mockWidth
+
+		define ada : ArchDepthAClamped yBarTop 0 mockAda mockAdb
+		define adb : ArchDepthBClamped yBarTop 0 mockAda mockAdb
+
+		define xTopBarLeft : mix 0 df.leftSB : if doSerifLT 0.250 0.375
+		define xTopBarRight : mix xTopBarLeft (xMidBarLeft + [HSwToV : 0.5 * sw]) 2
+
+		define sf : SerifFrame CAP 0 xMidBarLeft df.rightSB (swRef -- sw) (adws -- mockAdws)
+
+		create-glyph "cyrl/Tshe.\(suffix)" : glyph-proc
+			set-width df.width
+			include : df.markSet.capital
+
+			include : VBar.l xMidBarLeft 0 CAP sw
+			include : nShoulder.earlessCorner
+				left   -- xMidBarLeft
+				right  -- df.rightSB
+				top    -- yBarTop
+				bottom -- 0
+				ada    -- ada
+				adb    -- adb
+				stroke -- sw
+
+			include : HBar.t xTopBarLeft xTopBarRight CAP sw
+			if doSerifLT : begin
+				local { jutTop jutBot jutMid } : EFVJutLength CAP 0 YeriBarPos sw
+				local swVJut : Math.min
+					VJutStroke * (sw / Stroke)
+					VSwToH : 0.625 * (xMidBarLeft - xTopBarLeft)
+				include : composite-proc
+					tagged 'serifLT' : VSerif.dl xTopBarLeft  CAP jutTop swVJut
+					tagged 'serifRT' : VSerif.dr xTopBarRight CAP jutTop swVJut
+
+			if doSerifLB : include sf.lb.full
+			if doSerifRB : include sf.rb.[if fMotion 'outer' 'full']
+
+		create-glyph "cyrl/Dje.\(suffix)" : glyph-proc
+			set-width df.width
+			include : df.markSet.capital
+
+			include : VBar.l xMidBarLeft 0 CAP sw
+			include : nShoulder.earlessCorner
+				left   -- xMidBarLeft
+				right  -- df.rightSB
+				top    -- yBarTop
+				bottom -- (O + Hook + sw / 2)
+				ada    -- ada
+				adb    -- adb
+				stroke -- sw
+			local xHookDepth : Math.min (1.2 * HookX) : mix
+				(df.rightSB - [HSwToV : 0.5 * sw]) - [mix xMidBarLeft df.rightSB 0.5]
+				begin sf.jutIn
+				clamp 0 [boole doSerifLB] : StrokeWidthBlend 0 1
+			include : VerticalHook.r
+				x      -- df.rightSB
+				y      -- (O + Hook + sw / 2)
+				xDepth -- (-xHookDepth)
+				yDepth -- Hook
+				sw     -- sw
+
+			include : HBar.t xTopBarLeft xTopBarRight CAP sw
+			if doSerifLT : begin
+				local { jutTop jutBot jutMid } : EFVJutLength CAP 0 YeriBarPos sw
+				local swVJut : Math.min
+					VJutStroke * (sw / Stroke)
+					VSwToH : 0.625 * (xMidBarLeft - xTopBarLeft)
+				include : composite-proc
+					tagged 'serifLT' : VSerif.dl xTopBarLeft  CAP jutTop swVJut
+					tagged 'serifRT' : VSerif.dr xTopBarRight CAP jutTop swVJut
+
+			if doSerifLB : include sf.lb.full
+
+	select-variant 'cyrl/Tshe' 0x40B (follow -- 'hCap')
+	select-variant 'cyrl/Dje'  0x402 (follow -- 'hengCap')

@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix clamp fallback SuffixCfg] from "@iosevka/util"
+import [mix clamp fallback SuffixCfg boole] from "@iosevka/util"
 import [MathSansSerif Joining] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -12,7 +12,7 @@ glyph-block Letter-Latin-Lower-N : begin
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : CurlyTail nShoulder RightwardTailedBar
 	glyph-block-import Letter-Shared-Shapes : MidHook CyrDescender PalatalHook RetroflexHook
-	glyph-block-import Letter-Shared-Shapes : EngHook SerifFrame
+	glyph-block-import Letter-Shared-Shapes : VerticalHook EngHook SerifFrame
 
 	define [AdjustTrailingAnchor] : glyph-proc
 		define trAnchor currentGlyph.baseAnchors.trailing
@@ -168,10 +168,18 @@ glyph-block Letter-Latin-Lower-N : begin
 			if sLB : include : sLB [DivFrame 1] 0
 			if sRB : include : sRB [DivFrame 1] 0
 
-		if (!tailed) : create-glyph "Eng.\(suffix)" : glyph-proc
-			include : MarkSet.capDesc
-			include : Body CAP SB RightSB 0 Stroke ArchDepthA ArchDepthB
-			include : EngHook RightSB 0 Descender
+		if (!tailed) : create-glyph "engCap.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : Body CAP SB RightSB (O + Hook + HalfStroke) Stroke ArchDepthA ArchDepthB
+			local xHookDepth : Math.min (1.2 * HookX) : mix
+				(RightSB - [HSwToV HalfStroke]) - Middle
+				begin Jut
+				clamp 0 [boole sLB] : StrokeWidthBlend 0 1
+			include : VerticalHook.r
+				x      -- RightSB
+				y      -- (O + Hook + HalfStroke)
+				xDepth -- (-xHookDepth)
+				yDepth -- Hook
 			if sLT : include : sLT [DivFrame 1] CAP
 			if sLB : include : sLB [DivFrame 1] 0
 
@@ -200,9 +208,11 @@ glyph-block Letter-Latin-Lower-N : begin
 			local rinner : clamp (Width * 0.065) (XH * 0.05) (fine * 0.35)
 			local sw : AdviceStroke 2.75
 			local m1 : Math.min RightSB : Width - rinner * 2 - fine - OX
+			local mockWidth : m1 + SB
+			local mockAdws : mockWidth / Width
 			include : Body XH SB m1 (rinner * 2 + fine) sw
-				ArchDepthAOf (SmallArchDepth * ((m1 + SB) / Width)) (m1 + SB)
-				ArchDepthBOf (SmallArchDepth * ((m1 + SB) / Width)) (m1 + SB)
+				ArchDepthAOf (SmallArchDepth * mockAdws) mockWidth
+				ArchDepthBOf (SmallArchDepth * mockAdws) mockWidth
 			include : dispiro
 				widths.lhs sw
 				straight.down.start (m1 - [HSwToV sw]) (rinner * 2 + fine - O) [heading Downward]
@@ -329,7 +339,7 @@ glyph-block Letter-Latin-Lower-N : begin
 	select-variant 'cyrl/pe.italic/descBase' (shapeFrom -- 'n')
 	alias 'cyrl/pe.BGR' null 'cyrl/pe.italic'
 
-	select-variant 'Eng' 0x14A (follow -- 'eng')
+	select-variant 'engCap' 0x14A (follow -- 'eng')
 	select-variant 'eng' 0x14B
 	link-reduced-variant 'eng/phoneticRight' 'eng'
 	select-variant 'nHookLeft' 0x272
@@ -359,13 +369,7 @@ glyph-block Letter-Latin-Lower-N : begin
 	CreateAccentedComposition 'nAcute' 0x144 'n' 'acuteAbove'
 	CreateAccentedComposition 'nAcute.PLK' null 'n' 'kreskaAbove'
 
-	do "n with Apostrophe"
-		glyph-block-import Mark-Shared-Metrics : markMiddle
-
-		derive-glyphs 'nApostrophe/commaTL' null 'commaAbove/asPunctuation' : function [src gr] : glyph-proc
-			include : with-transform [Translate (SB - markMiddle) 0] [refer-glyph src]
-
-		derive-composites 'nApostrophe' 0x149 'n' 'nApostrophe/commaTL'
+	CreateAccentedComposition 'nApostrophe' 0x149 'n' 'commaTL/asPunctuation'
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/n' 0x1D55F : glyph-proc

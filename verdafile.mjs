@@ -77,7 +77,13 @@ const Woff2CompressApp = oracle(`oracle:check-woff2-compress-app`, async target 
 		return rp.buildOptions.woff2CompressApp;
 	} else {
 		try {
-			return await which("woff2_compress");
+			return await which("woff2_compress", {
+				// On Windows, `.JS`/`.CMD`/`.PS1` shims (e.g. the `woff2_compress.js`
+				// bin installed by the `wawoff2` package) are resolvable via PATHEXT but
+				// cannot be spawned directly (spawn EFTYPE). Only accept a real native
+				// binary so we cleanly fall back to the wawoff2 library below.
+				pathExt: process.platform === "win32" ? ".EXE;.COM" : undefined,
+			});
 		} catch (_e) {
 			// No woff2_compress found, use fallback
 			return null;
@@ -785,6 +791,8 @@ async function getCollectPlans(target, rawCollectPlans) {
 			const [gri] = await target.need(BuildPlanOf(prefix));
 			const ttfFileNameSet = new Set(gri.targets);
 			const suffixMap = getSuffixMapping(gri.weights, gri.slopes, gri.widths);
+
+			// Standard TTC Collection (cross-family)
 			for (const suffix in suffixMap) {
 				const sfi = suffixMap[suffix];
 
@@ -798,14 +806,26 @@ async function getCollectPlans(target, rawCollectPlans) {
 				const ttcFileName = fnStandardTtc(false, collectPrefix, suffixMap, sfi);
 				if (!ttcComposition[ttcFileName]) ttcComposition[ttcFileName] = [];
 				ttcComposition[ttcFileName].push(glyfTtcFileName);
+			}
 
-				if (shouldProduceSgr) {
-					const sgrPrefix = SGR_PREFIX_PREFIX + prefix;
-					const sgrTtcFileName = fnStandardTtc(false, sgrPrefix, suffixMap, sfi);
-					const sgrInfo = singleGroupTtcInfos[sgrPrefix];
-					if (!sgrInfo.comp[sgrTtcFileName]) sgrInfo.comp[sgrTtcFileName] = [];
-					sgrInfo.comp[sgrTtcFileName].push(ttfTargetName);
-				}
+			// Sgr TTC Collection (single-family, but still allow sharing across Italic and Oblique)
+			for (const suffix in suffixMap) {
+				if (!shouldProduceSgr) continue;
+				const sgrPrefix = SGR_PREFIX_PREFIX + prefix;
+
+				const sfi = suffixMap[suffix];
+
+				const ttfTargetName = makeFileName(prefix, suffix);
+				if (!ttfFileNameSet.has(ttfTargetName)) continue;
+
+				const glyfTtcFileName = fnStandardTtc(true, sgrPrefix, suffixMap, sfi);
+				if (!glyfTtcComposition[glyfTtcFileName]) glyfTtcComposition[glyfTtcFileName] = [];
+				glyfTtcComposition[glyfTtcFileName].push({ dir: prefix, file: ttfTargetName });
+
+				const sgrTtcFileName = fnStandardTtc(false, sgrPrefix, suffixMap, sfi);
+				const sgrInfo = singleGroupTtcInfos[sgrPrefix];
+				if (!sgrInfo.comp[sgrTtcFileName]) sgrInfo.comp[sgrTtcFileName] = [];
+				sgrInfo.comp[sgrTtcFileName].push(glyfTtcFileName);
 			}
 		}
 		plans[collectPrefix] = {
@@ -933,7 +953,7 @@ const SGrTtcFile = file.make(
 		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
 		const sgrInfo = cp[cgr].singleGroupTtcInfos[sgr];
 		const parts = Array.from(new Set(sgrInfo.comp[f] || []));
-		const [inputs] = await target.need(parts.map(pt => DistHintedTTF(sgrInfo.from, pt)));
+		const [inputs] = await target.need(parts.map(pt => GlyfTtc(cgr, pt)));
 		await buildCompositeTtc(out, inputs);
 	},
 );

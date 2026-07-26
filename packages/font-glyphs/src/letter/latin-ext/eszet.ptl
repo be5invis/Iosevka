@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix fallback SuffixCfg] from "@iosevka/util"
+import [mix clamp fallback SuffixCfg] from "@iosevka/util"
 
 import [maskBits] from "@iosevka/util/mask-bit"
 
@@ -9,13 +9,15 @@ glyph-module
 glyph-block Letter-Latin-Lower-Eszet : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : FlatHookDepth PalatalHook SerifFrame
+	glyph-block-import Letter-Shared-Shapes : LeftwardDiagTailedBar SerifFrame
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth PalatalHook
 	glyph-block-import Letter-Latin-S : AdviceSArchDepth
 	glyph-block-import Letter-Latin-Lower-F : ySmallFBarPos
 
-	define NO-TAIL             0
-	define DESCENDING          1
-	define TAILED              2
+	define TERMINAL-BASELINE   0
+	define TERMINAL-DESCENDING 1
+	define TERMINAL-TAILED     2
+	define TERMINAL-DIAGONAL   3
 
 	define SERIF-NONE          0
 	define SERIF-BOT           1
@@ -29,7 +31,7 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 
 	define [EszetSerifs df fTraditional slab] : glyph-proc
 		local sf : SerifFrame.fromDf df ySmallFBarPos 0
-		if [maskBits slab SERIF-BOT] : include : if fTraditional sf.lb.full sf.lb.outer
+		if [maskBits slab SERIF-BOT] : include sf.lb.[if fTraditional 'full' 'outer']
 		if [maskBits slab SERIF-MID] : include sf.lt.outer
 
 		if [maskBits slab SERIF-MID-XH] : begin
@@ -40,24 +42,24 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 			local sfHalfAsc : SerifFrame.fromDf df ([mix 0 Ascender 0.5] + HalfStroke) 0
 			include sfHalfAsc.lt.outer
 
-	define [Traditional fFlathook] : function [slab tail] : glyph-proc
+	define [Traditional fFlathook] : function [slab term] : glyph-proc
 		include : MarkSet.bp
 		local xHook : [mix SB RightSB 0.75] + [HSwToV HalfStroke]
 		local hd : FlatHookDepth [DivFrame 1]
-		if fFlathook
-		: then : include : dispiro
-			widths.lhs
-			flat xHook Ascender
-			curl (SB + hd.x) Ascender
-			archv
-			flat SB (Ascender - hd.y)
-			curl SB 0 [heading Downward]
-		: else : include : dispiro
-			widths.lhs
-			g4   xHook (Ascender - Hook)
-			HookStart Ascender
-			flat SB XH
-			curl SB 0 [heading Downward]
+		include : if fFlathook
+			dispiro
+				widths.lhs
+				flat xHook Ascender
+				curl (SB + hd.x) Ascender
+				archv
+				flat SB (Ascender - hd.y)
+				curl SB 0 [heading Downward]
+			dispiro
+				widths.lhs
+				g4   xHook (Ascender - Hook)
+				HookStart Ascender
+				flat SB XH
+				curl SB 0 [heading Downward]
 		local t : mix 0 Ascender 0.7
 		local tm : [mix Descender t 0.625] + HalfStroke
 		local tl : [mix SB RightSB 0.35] + [HSwToV HalfStroke]
@@ -69,20 +71,20 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 			g2   (RightSB - OX * 1.5) [mix Descender tm 0.70]
 			g2   (RightSB - OX * 1.5) [mix Descender tm 0.67]
 			alsoThru 0.5 0.75
-			g4   ([mix SB RightSB 0.35] + [if tail 0.625 0] * [HSwToV Stroke]) Descender
+			g4   ([mix SB RightSB 0.35] + [if term 0.625 0] * [HSwToV Stroke]) Descender
 		include : dispiro
 			widths.center (Stroke * 1.1)
 			corner tl (tm - Stroke) [heading Upward]
 			corner (RightSB - HalfStroke * 1.2 - OX) t [heading Upward]
 
 		include : EszetSerifs [DivFrame 1] true slab
-		include : match tail
-			[Just DESCENDING] : VBar.l SB Descender 0
-			[Just TAILED]     : PalatalHook.lExt SB 0
-			__ : glyph-proc
+		include : match term
+			[Just TERMINAL-DESCENDING] : VBar.l SB Descender 0
+			[Just TERMINAL-TAILED]     : PalatalHook.lExt SB 0
+			[Just TERMINAL-DIAGONAL]   : LeftwardDiagTailedBar SB Descender 0
+			__                         : no-shape
 
-
-	define [Sulzbacher slab tail] : glyph-proc
+	define [Sulzbacher slab term] : glyph-proc
 		include : MarkSet.b
 
 		define yMiddle : mix 0 Ascender 0.5
@@ -111,67 +113,65 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 			g4   (RightSB - O) [YSmoothMidR (yMiddle + HalfStroke) 0 ada adb]
 			arcvh
 			flat xMiddleBot 0 [heading Leftward]
-			curl xFinal 0 [heading Leftward]
+			curl xFinal     0 [heading Leftward]
 
 		include : EszetSerifs [DivFrame 1] false slab
-		include : match tail
-			[Just DESCENDING] : VBar.l SB Descender 0
-			[Just TAILED]     : PalatalHook.lExt SB 0
-			__ : glyph-proc
+		include : match term
+			[Just TERMINAL-DESCENDING] : VBar.l SB Descender 0
+			[Just TERMINAL-TAILED]     : PalatalHook.lExt SB 0
+			[Just TERMINAL-DIAGONAL]   : LeftwardDiagTailedBar SB Descender 0
+			__                         : no-shape
 
-
-	define [LongSSLig slab tail] : glyph-proc
+	define [LongSSLig slab term] : glyph-proc
 		include : MarkSet.b
 
-		define swOuter : AdviceStroke2 2 3 Ascender
-		define strokeCoeff : StrokeWidthBlend 0 1 swInner
+		define swOuter : AdviceStroke2 2.0 3 Ascender
+		define swInner : AdviceStroke2 2.5 3 Ascender
 		define sEndX : Math.max
 			mix (SB + [HSwToV Stroke]) RightSB 0.1
-			mix SB RightSB 0.3
-		define swInner : AdviceStroke2 2.5 3 Ascender
-		define ess: swInner * EssLower / Stroke
-		define sTurnX : Math.max sEndX [mix SB RightSB 0.3]
-		define sBotX : Math.max (sEndX + 1) [mix sEndX RightSB 0.30]
+			mix  SB                    RightSB 0.3
+		define sTurnX : Math.max  sEndX      [mix SB    RightSB 0.3]
+		define sBotX  : Math.max (sEndX + 1) [mix sEndX RightSB 0.3]
 		define sTopX : sTurnX + (RightSB - sBotX)
 
 		define sTopHookX : sTopX + [HSwToV : 0.5 * swInner]
-		define archDepthATop : ArchDepthAOf (ArchDepth * (sTopHookX - SB - swInner * 0.5) / (RightSB - SB)) (Width - (RightSB - sTopHookX))
-		define archDepthBTop : ArchDepthBOf (ArchDepth * (sTopHookX - SB - swInner * 0.5) / (RightSB - SB)) (Width - (RightSB - sTopHookX))
-		define innerSmoothB : 1 * archDepthBTop # ArchDepthBOf (0.5 * swInner + (widthInner / Width) * [AdviceSArchDepth XH (-1) swInner]) widthInner
+		define archDepth : ArchDepth * (sTopHookX - SB - swInner * 0.5) / (RightSB - SB)
+		define mockWidth : sTopHookX + SB
+		define ada : ArchDepthAOf archDepth mockWidth
+		define adb : ArchDepthBOf archDepth mockWidth
 
 		include : dispiro
 			widths.rhs swOuter
 			flat SB 0 [heading Upward]
-			curl SB (Ascender - archDepthATop)
-			Arch.rhs Ascender
-				sw -- [mix swOuter swInner 0.5]
-				swBefore -- swOuter
-				swAfter -- swInner
-			g4.down.mid sTopHookX (Ascender - archDepthBTop + TanSlope * swInner) [widths.rhs.heading swInner Downward]
-			alsoThru.g2 0.5 0.50 [widths.center swInner]
-			g4   sTurnX [mix innerSmoothB (Ascender - archDepthBTop) 0.5] [widths.lhs.heading swInner Downward]
-			alsoThru.g2 0.5 0.50 [widths.center swInner]
-			g4   (RightSB - OX) (innerSmoothB - 2 * TanSlope * swInner) [widths.rhs.heading swInner Downward]
+			curl SB [Math.max XH : Ascender - ada]
+			Arch.rhs Ascender (swBefore -- swOuter) (sw -- [mix swOuter swInner 0.5]) (swAfter -- swInner)
+			g4.down.mid sTopHookX (Ascender - adb + TanSlope * swInner) [widths.rhs.heading swInner Downward]
+			alsoThru.g2 0.5 0.5 [widths.center swInner]
+			g4   sTurnX [mix (0 + adb) (Ascender - adb) 0.5] [widths.lhs.heading swInner Downward]
+			alsoThru.g2 0.5 0.5 [widths.center swInner]
+			g4   (RightSB - OX) (0 + adb - 2 * TanSlope * swInner) [widths.rhs.heading swInner Downward]
 			arcvh
-			flat [Arch.adjust-x.bot ([Math.max (sEndX + TINY + TanSlope * swInner) : Math.min (RightSB - innerSmoothB) : mix sEndX RightSB 0.375] + TanSlope * swInner) (swInner / 2)] 0
+			flat [Arch.adjust-x.bot ([clamp (sEndX + TINY + TanSlope * swInner) (RightSB - adb) : mix sEndX RightSB 0.375] + TanSlope * swInner) (swInner / 2)] 0
 			curl sEndX 0 [heading Leftward]
 
 		include : EszetSerifs [DivFrame 1] false slab
-		include : match tail
-			[Just DESCENDING] : VBar.l SB Descender 0 swOuter
-			[Just TAILED]     : PalatalHook.lExt SB 0 (sw -- swOuter)
-			__ : no-shape
+		include : match term
+			[Just TERMINAL-DESCENDING] : VBar.l SB Descender 0 swOuter
+			[Just TERMINAL-TAILED]     : PalatalHook.lExt SB 0 (sw -- swOuter)
+			[Just TERMINAL-DIAGONAL]   : LeftwardDiagTailedBar SB Descender 0 swOuter
+			__                         : no-shape
 
 	define EszetConfig : SuffixCfg.weave
 		object # body
-			traditional              [Traditional false]
+			traditionalBentHook      [Traditional false]
 			traditionalFlatHook      [Traditional true]
 			sulzbacher                Sulzbacher
 			longSSLig                 LongSSLig
 		object # terminal
-			''                        NO-TAIL
-			'descending'              DESCENDING
-			'tailed'                  TAILED
+			""                        TERMINAL-BASELINE
+			descending                TERMINAL-DESCENDING
+			tailed                    TERMINAL-TAILED
+			diagonalTailed            TERMINAL-DIAGONAL
 		object # serifs
 			serifless                 SERIF-NONE
 			bottomSerifed             SERIF-BOT
@@ -182,8 +182,8 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 			middleSerifedHalfAscender SERIF-MID-HALF-ASC
 			dualSerifedHalfAscender   SERIF-DUAL-HALF-ASC
 
-	foreach { suffix { Base tail serif } } [pairs-of EszetConfig] : do
-		create-glyph "eszet.\(suffix)" : Base serif tail
+	foreach { suffix { Body terminal serif } } [pairs-of EszetConfig] : do
+		create-glyph "eszet.\(suffix)" : Body serif terminal
 
 	select-variant 'eszet' 0xDF
 
@@ -307,7 +307,7 @@ glyph-block Letter-Latin-Upper-Eszet : begin
 			cornerMotionSerifed { EszetCornerShape SERIF-MOTION }
 			cornerBottomSerifed { EszetCornerShape SERIF-BOTTOM }
 
-	foreach { suffix { Base serif } } [pairs-of CapitalEszetConfig] : do
-		create-glyph "Eszet.\(suffix)" : Base serif
+	foreach { suffix { Body serif } } [pairs-of CapitalEszetConfig] : do
+		create-glyph "Eszet.\(suffix)" : Body serif
 
 	select-variant 'Eszet' 0x1E9E
