@@ -1,6 +1,6 @@
 import { Anchor } from "@iosevka/geometry/anchor";
 import { Box } from "@iosevka/geometry/box";
-import { mix } from "@iosevka/util";
+import { mix, clamp } from "@iosevka/util";
 
 export function SetupBuilders(bindings) {
 	const F = (_adws, _hPack, _sbMul) => {
@@ -36,9 +36,7 @@ class DivFrame {
 			bindings.HVContrast,
 			1,
 		);
-		const sb = _sbMul
-			? bindings.SB * _sbMul
-			: bindings.SB * Math.min(1, (width - hPack * mvs) / (2 * hPack * bindings.SB));
+		const sb = bindings.SB * (_sbMul ?? clamp(0, 1, (width / hPack - mvs) / (2 * bindings.SB)));
 
 		return new DivFrame(bindings, new DivFrameParams(width, sb, hPack, mvs, 0));
 	}
@@ -52,10 +50,10 @@ class DivFrame {
 		this.hPack = hPack;
 		this.width = width;
 		this.middle = 0.5 * width;
-		this.sb = this.leftSB = sb;
+		this.leftSB = this.sb = sb;
 		this.rightSB = width - sb;
 		this.mvs = mvs;
-		this.shoulderFine = (bindings.ShoulderFine * mvs) / bindings.Stroke;
+		this.shoulderFine = bindings.ShoulderFine * (mvs / bindings.Stroke);
 		this.markSet = new MarksetDiv(bindings, this);
 
 		this.ox = ox;
@@ -167,6 +165,19 @@ class DivFrame {
 
 	adviceStroke2(c, d, h, extraScalar = 1) {
 		return Math.min(
+			this.bindings.AdviceStrokeInSpace(h, d, 1, 1),
+			this.bindings.AdviceStrokeInSpace(
+				extraScalar * this.width - 2 * this.bindings.SB,
+				c,
+				this.bindings.HVContrast,
+				1,
+			),
+		);
+	}
+
+	adviceThinnerStroke2(c, d, h, extraScalar = 1) {
+		return Math.min(
+			this.mvs,
 			this.bindings.AdviceStrokeInSpace(h, d, 1, 1),
 			this.bindings.AdviceStrokeInSpace(
 				extraScalar * this.width - 2 * this.bindings.SB,

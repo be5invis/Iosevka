@@ -12,20 +12,21 @@ glyph-block Letter-Latin-Lower-R : begin
 	glyph-block-import Letter-Shared-Shapes : CurlyTail PalatalHook RetroflexHook
 
 	local dfN : DivFrame 1
-	local dfR : DivFrame para.advanceScaleF 1 0.75
+	local dfF : DivFrame para.advanceScaleF 1 0.75
 
 	# Modes
 	define RMode : object
 		Standard           0
 		StandardSerifed    1
-		Hookless           2
-		HooklessSerifed    3
-		Earless            4
-		CornerHook         5
-		CornerHookSerifed  6
-		NarrowHook         7
-		NarrowHookSerifed  8
-		Needle             9
+		NarrowHook         2
+		NarrowHookSerifed  3
+		Hookless           4
+		HooklessSerifed    5
+		CornerHook         6
+		CornerHookSerifed  7
+		Earless            8
+		EarlessSerifed     9
+		Needle            10
 
 	define [RDim df mode _stroke _strokeBar _fine] : namespace
 		local stroke    : fallback _stroke    Stroke
@@ -33,30 +34,33 @@ glyph-block Letter-Latin-Lower-R : begin
 		local strokeA   : mix strokeBar stroke 0.5
 		local fine      : fallback _fine : ShoulderFine * (strokeA / Stroke)
 		local { rBalanceMultiplier rHookMultiplier rHookSwMultiplier rSerifLeftExtender } : match mode
-			[Just RMode.Standard]          {  1                     1       (1 / 2)   0.3      }
-			[Just RMode.StandardSerifed]   { (4 / 3)               (2 / 3)  (3 / 4)  (19 / 30) }
-			[Just RMode.Hookless]          { (2 * (df.adws - 0.5))  1        0        0.3      }
-			[Just RMode.HooklessSerifed]   { (2 * (df.adws - 0.5))  1        0        0.3      }
-			[Just RMode.CornerHook]        { (5 / 8)                1        0        0.3      }
-			[Just RMode.CornerHookSerifed] { (4 / 3)               (2 / 3)  (1 / 4)  (19 / 30) }
-			[Just RMode.Earless]           {  1                     1       (1 / 2)   0.3      }
-			[Just RMode.NarrowHook]        {  1                     1       (1 / 2)   0.3      }
-			[Just RMode.NarrowHookSerifed] { (4 / 3)               (2 / 3)  (3 / 4)  (19 / 30) }
-			[Just RMode.Needle]            {  0                     1        0        0        }
+			[Just RMode.Standard]          {  1                 1       (1 / 2)  (1 / 3) }
+			[Just RMode.StandardSerifed]   { (4 / 3)           (2 / 3)  (3 / 4)  (2 / 3) }
+			[Just RMode.NarrowHook]        {  1                 1       (1 / 2)  (1 / 3) }
+			[Just RMode.NarrowHookSerifed] { (4 / 3)           (2 / 3)  (3 / 4)  (2 / 3) }
+			[Just RMode.Hookless]          { (2 * df.adws - 1)  1       (1 / 2)  (1 / 3) }
+			[Just RMode.HooklessSerifed]   { (2 * df.adws - 1) (2 / 3)  (3 / 4)  (1 / 3) }
+			[Just RMode.CornerHook]        { (5 / 8)            1       (1 / 2)  (1 / 3) }
+			[Just RMode.CornerHookSerifed] { (4 / 3)           (2 / 3)  (3 / 4)  (2 / 3) }
+			[Just RMode.Earless]           {  1                 1       (1 / 2)  (1 / 3) }
+			[Just RMode.EarlessSerifed]    { (4 / 3)            1       (1 / 2)  (2 / 3) }
+			[Just RMode.Needle]            {  1                 1       (1 / 2)   0      }
 
 		export : local rBarLeftX : match mode
-			[Just RMode.Needle] : df.middle - [HSwToV : 0.5 * strokeBar] - [IBalance2 df]
+			[Just RMode.Needle] : mix df.leftSB (df.middle - [HSwToV : 0.5 * strokeBar] - [IBalance2 df]) rBalanceMultiplier
 			__                  : df.leftSB + RBalance * rBalanceMultiplier
 
 		local rTopSerifX : rBarLeftX + [HSwToV : 0.5 * strokeBar]
-		local rTopSerifJut : [HSwToV : 0.5 * strokeBar] + SideJut + RBalance * rSerifLeftExtender
+		local rTopSerifJut : match mode
+			[Just RMode.Needle] : Math.max ([HSwToV : 0.5 * strokeBar] + SideJut) : mix (MidJutCenter - [IBalance df]) (rTopSerifX - df.leftSB) rSerifLeftExtender
+			__                  : [HSwToV : 0.5 * strokeBar] + SideJut + RBalance * rSerifLeftExtender
 		export : local [rTopSerif y] : tagged 'serifLT' : HSerif.lt rTopSerifX y rTopSerifJut
 
 		local rBottomSerifX : match mode
 			[Just RMode.Needle] : rTopSerifX + [IBalance df]
 			__                  : begin rTopSerifX
 		local rBottomSerifJutLeft : match mode
-			[Just RMode.Needle] : begin MidJutCenter
+			[Just RMode.Needle] : rTopSerifJut + [IBalance df]
 			__                  : begin rTopSerifJut
 		local rBottomSerifJutRight : mix [HSwToV : 0.5 * strokeBar] rBottomSerifJutLeft : match mode
 			[Just RMode.Needle] : begin 1.0
@@ -68,7 +72,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		local rHookXFull : match mode
 			[Just RMode.Needle] : Math.max
 				rBarLeftX + [HSwToV : strokeBar + 0.125 * stroke] + TINY + [Math.abs : TanSlope * stroke]
-				rBarLeftX + [HSwToV : 0.5 * strokeBar] + HookX - OXHook
+				[Arch.adjust-x.top (rBarLeftX + [HSwToV : 0.5 * strokeBar] + HookX) (sw -- strokeA)] - OXHook
 			__ : df.rightSB + RBalance2 * rBalanceMultiplier - (OX - O)
 		export : local rHookX : match mode
 			([Just RMode.NarrowHook] || [Just RMode.NarrowHookSerifed]) : mix (rBarLeftX + [HSwToV strokeBar]) rHookXFull
@@ -81,7 +85,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			([Just RMode.CornerHook]      || [Just RMode.CornerHookSerifed]) : rHookX - [HSwToV : 0.5 * strokeBar]
 			__                                                               : mix rBarLeftX rHookX 0.5
 		local pMixIn : match mode
-			([Just RMode.StandardSerifed] || [Just RMode.CornerHook] || [Just RMode.CornerHookSerifed] || [Just RMode.NarrowHookSerifed]) : begin
+			([Just RMode.StandardSerifed] || [Just RMode.NarrowHookSerifed] || [Just RMode.CornerHook] || [Just RMode.CornerHookSerifed]) : begin
 				0.65 + 4 * TanSlope * strokeA / Width + 0.25 * strokeA / Width
 			__ : begin
 				0.65 + 4 * TanSlope * strokeA / Width
@@ -100,9 +104,9 @@ glyph-block Letter-Latin-Lower-R : begin
 			([Just RMode.Hookless] || [Just RMode.HooklessSerifed]) : O * [clamp 0 1 : StrokeWidthBlend 0 16]
 			__ : begin 0
 		local rArchDepth : match mode
-			[Just RMode.Earless] : begin SmallArchDepth
-			[Just RMode.Needle]  : begin Hook
-			__                   : 0.47 * (XH - 0)
+			([Just RMode.Earless] || [Just RMode.EarlessSerifed]) : begin SmallArchDepth
+			[Just RMode.Needle]                                   : begin Hook
+			__                                                    : 0.47 * (XH - 0)
 		export : local rArchDepthA : ArchDepthAClamped XH 0
 			ArchDepthAOf rArchDepth
 			ArchDepthBOf rArchDepth
@@ -151,7 +155,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			if doBottomSerif : include : rBottomSerif bottom
 			if doTopSerif    : include : rTopSerif    top
 
-		define [CompactShapeImpl doHookSerif] : function [df md top bottom doTopSerif doBottomSerif] : glyph-proc
+		define [HooklessShapeImpl doHookSerif] : function [df md top bottom doTopSerif doBottomSerif] : glyph-proc
 			define [object rBarLeftX rBottomSerif rTopSerif rArchMiddleX rHookXN rCorX rArchTopShiftY rArchDepthA] : RDim df md
 			define [ArcKnots] : list
 				flat (rHookXN      - rCorX) (top - rArchTopShiftY) [if doHookSerif [heading Leftward] null]
@@ -172,8 +176,8 @@ glyph-block Letter-Latin-Lower-R : begin
 			if doBottomSerif : include : rBottomSerif bottom
 			if doTopSerif    : include : rTopSerif    top
 
-		export : define [Compact    df md top bottom ts bs] : [CompactShapeImpl false] df md top bottom ts bs
-		export : define [CornerHook df md top bottom ts bs] : [CompactShapeImpl true]  df md top bottom ts bs
+		export : define [Hookless   df md top bottom ts bs] : [HooklessShapeImpl false] df md top bottom ts bs
+		export : define [CornerHook df md top bottom ts bs] : [HooklessShapeImpl true]  df md top bottom ts bs
 
 		export : define [FlatTop df md top bottom doTopSerif doBottomSerif] : glyph-proc
 			define [object rBarLeftX rArchMiddleX rHookX rHookY rHookSuperness rBottomSerif rTopSerif] : RDim df md
@@ -214,14 +218,14 @@ glyph-block Letter-Latin-Lower-R : begin
 	define SmallRConfig : SuffixCfg.weave
 		object # Body
 			""               { SmallRShape.Standard         dfN RMode.Standard   RMode.StandardSerifed   }
-			flatTop          { SmallRShape.FlatTop          dfN RMode.Earless    RMode.Earless           }
-			earlessCorner    { SmallRShape.EarlessCorner    dfN RMode.Earless    RMode.Earless           }
-			earlessCornerHTB { SmallRShape.EarlessCornerHTB dfN RMode.Earless    RMode.Earless           }
-			earlessRounded   { SmallRShape.EarlessRounded   dfN RMode.Earless    RMode.Earless           }
-			hookless         { SmallRShape.Compact          dfN RMode.Hookless   RMode.HooklessSerifed   }
+			flatTop          { SmallRShape.FlatTop          dfN RMode.Earless    RMode.EarlessSerifed    }
+			earlessCorner    { SmallRShape.EarlessCorner    dfN RMode.Earless    RMode.EarlessSerifed    }
+			earlessCornerHTB { SmallRShape.EarlessCornerHTB dfN RMode.Earless    RMode.EarlessSerifed    }
+			earlessRounded   { SmallRShape.EarlessRounded   dfN RMode.Earless    RMode.EarlessSerifed    }
+			hookless         { SmallRShape.Hookless         dfN RMode.Hookless   RMode.HooklessSerifed   }
 			cornerHooked     { SmallRShape.CornerHook       dfN RMode.CornerHook RMode.CornerHookSerifed }
-			compact          { SmallRShape.Compact          dfR RMode.Hookless   RMode.HooklessSerifed   }
-			narrowHook       { SmallRShape.Standard         dfR RMode.NarrowHook RMode.NarrowHookSerifed }
+			compact          { SmallRShape.Hookless         dfF RMode.Hookless   RMode.HooklessSerifed   }
+			narrowHook       { SmallRShape.Standard         dfF RMode.NarrowHook RMode.NarrowHookSerifed }
 		object # Serifs
 			serifless        { false false }
 			topSerifed       { true  false }
@@ -319,7 +323,7 @@ glyph-block Letter-Latin-Lower-R : begin
 				include : dispiro
 					widths.rhs
 					straight.down.start (rBarLeftX + [HSwToV Stroke]) y2 [heading Downward]
-					CurlyTail.f fine 0 m2 x2 (swBefore -- Stroke)
+					CurlyTail.f fine 0 m2 x2
 
 			create-glyph "turnrHookTop.\(suffix)" : glyph-proc
 				set-width df.width

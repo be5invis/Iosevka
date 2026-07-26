@@ -12,8 +12,8 @@ glyph-block Mark-Overlay : begin
 	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
 	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid TildeShape RingShape
 
-	local tildeHeight : 0.75 * (aboveMarkTop - aboveMarkBot)
-	local tildeHalfWidth : markExtend + [HSwToV : 0.4 * Stroke]
+	define tildeHeight : 0.75 * (aboveMarkTop - aboveMarkBot)
+	define tildeHalfWidth : markExtend + [HSwToV : 0.4 * Stroke]
 
 	do "Overlay on stems"
 		create-glyph 'tildeOver' 0x334 : glyph-proc
@@ -41,10 +41,10 @@ glyph-block Mark-Overlay : begin
 
 			local shift : (ttop - tbot) * 1.2
 			include : addTilde
-			include : ApparentTranslate 0 (shift * (+1.0))
+			include : ApparentTranslate 0 ((+1.0) * shift)
 
 			include : addTilde
-			include : ApparentTranslate 0 (shift * (-0.5))
+			include : ApparentTranslate 0 ((-0.5) * shift)
 
 		create-glyph 'tildeOverOnExension' : glyph-proc
 			set-width 0
@@ -157,8 +157,8 @@ glyph-block Mark-Overlay : begin
 			include : TildeShape
 				ttop      --  (XH / 2 + tildeHeight / 2)
 				tbot      --  (XH / 2 - tildeHeight / 2)
-				leftEnd   --  (markMiddle - Width / 2 + SB)
-				rightEnd  --  (markMiddle + Width / 2 - SB)
+				leftEnd   --  (markMiddle - (RightSB - SB) / 2)
+				rightEnd  --  (markMiddle + (RightSB - SB) / 2)
 				hs        --  (OverlayStroke / 2)
 
 		create-glyph 'tildeStrike/adwsMM' : glyph-proc
@@ -224,9 +224,9 @@ glyph-block Mark-Overlay : begin
 
 		create-glyph 'dblLongVStrokeOver' 0x20E6 : glyph-proc
 			set-width 0
+			set-mark-anchor 'slash' markMiddle (XH / 2) markMiddle (XH / 2)
 			local dy : CAP * 0.6
 			local gap : Math.max fineDbl (Width * 0.1)
-			set-mark-anchor 'slash' markMiddle (XH / 2) markMiddle (XH / 2)
 			include : dispiro
 				widths.center fineDbl
 				flat (markMiddle - gap) ((XH / 2) - dy)
@@ -238,10 +238,10 @@ glyph-block Mark-Overlay : begin
 
 		create-glyph 'dblLongSlash' 0x20EB : glyph-proc
 			set-width 0
+			set-mark-anchor 'slash' markMiddle (XH / 2) markMiddle (XH / 2)
 			local dx : (RightSB - SB) / 2 + O * 3 - 0.5 * fineDbl
 			local dy : CAP * 0.6
 			local gap : Math.max fineDbl (Width * 0.1)
-			set-mark-anchor 'slash' markMiddle (XH / 2) markMiddle (XH / 2)
 			include : dispiro
 				widths.center fineDbl
 				flat ((markMiddle - gap) - dx) ((XH / 2) - dy)
@@ -254,9 +254,9 @@ glyph-block Mark-Overlay : begin
 		create-glyph 'wideSlash' : glyph-proc
 			local df : DivFrame para.advanceScaleMM 3
 			set-width 0
+			set-mark-anchor 'slash' markMiddle (XH / 2) markMiddle (XH / 2)
 			local dx : (df.rightSB - df.leftSB) / 2 - O * 3 - 0.5 * fine
 			local dy : XH * 0.6
-			set-mark-anchor 'slash' markMiddle (XH / 2) markMiddle (XH / 2)
 			include : dispiro
 				widths.center fine
 				flat (markMiddle - dx) ((XH / 2) - dy)
@@ -269,25 +269,25 @@ glyph-block Mark-Overlay : begin
 			define dims : ArrowDims MosaicWidth
 
 			define {
-				.arrowWidth arrowWidth
+				.arrowWidth    arrowWidth
 				.arrowHeadSize arrowHeadSize
 
-				.arrowSw arrowSw
-				.fine fine
-				.overlaySw overlaySw
-				.strokeSpan strokeSpan
+				.arrowSw     arrowSw
+				.fine        fine
+				.overlaySw   overlaySw
+				.strokeSpan  strokeSpan
 				.strokeSpan2 strokeSpan2
 				.dblArrSpace dblArrSpace
 				.dhtArrSpace dhtArrSpace
-				.dblArrSw dblArrSw
-				.dhtArrSw dhtArrSw
-				.terminal terminal
+				.dblArrSw    dblArrSw
+				.dhtArrSw    dhtArrSw
+				.terminal    terminal
 			} dims
 
-			local VRingRadius : arrowHeadSize * 0.7
-			local HRingRadius : Math.min VRingRadius : arrowWidth - 2 * arrowHeadSize - 0.3 * terminal
-			local VRingSw : AdviceStrokeInSpace VRingRadius 2.25
-			local HRingSw : AdviceStrokeInSpace HRingRadius 2.25
+			define VRingRadius : arrowHeadSize * 0.7
+			define HRingRadius : Math.min VRingRadius : arrowWidth - 2 * arrowHeadSize - 0.3 * terminal
+			define VRingSw : AdviceStrokeInSpace VRingRadius 2.25
+			define HRingSw : AdviceStrokeInSpace HRingRadius 2.25
 
 			create-glyph [MangleName 'arrSlashOver'] : glyph-proc
 				set-width 0
@@ -295,105 +295,119 @@ glyph-block Mark-Overlay : begin
 				local dy : arrowHeadSize * 1.1
 				set-mark-anchor 'slash' 0 0 0 0
 				include : dispiro
-					flat (-dx) (-dy) [widths.center overlaySw]
+					widths.center overlaySw
+					flat (-dx) (-dy)
 					curl (+dx) (+dy)
 
 			create-glyph [MangleName 'arrDblSlashOver'] : glyph-proc
 				set-width 0
+				set-mark-anchor 'slash' 0 0 0 0
 				local gap : clamp dblArrSw (dblArrSpace - 2 * dblArrSw) (dblArrSpace / 4)
 				local dx : arrowHeadSize * 0.4
 				local dy : arrowHeadSize * 1.1
-				set-mark-anchor 'slash' 0 0 0 0
 				include : dispiro
-					flat (+gap - dx) (-dy) [widths.center dblArrSw]
-					curl (+gap + dx) (+dy)
+					widths.center dblArrSw
+					flat ((+gap) - dx) (-dy)
+					curl ((+gap) + dx) (+dy)
 				include : dispiro
-					flat (-gap - dx) (-dy) [widths.center dblArrSw]
-					curl (-gap + dx) (+dy)
+					widths.center dblArrSw
+					flat ((-gap) - dx) (-dy)
+					curl ((-gap) + dx) (+dy)
 
 			create-glyph [MangleName 'arrVStrokeOver'] : glyph-proc
 				set-width 0
-				local dy strokeSpan
 				set-mark-anchor 'slash' 0 0 0 0
+				local dy strokeSpan
 				include : dispiro
-					flat 0 (-dy) [widths.center overlaySw]
+					widths.center overlaySw
+					flat 0 (-dy)
 					curl 0 (+dy)
 
 			create-glyph [MangleName 'dblArrVStrokeOver'] : glyph-proc
 				set-width 0
-				local dy strokeSpan2
 				set-mark-anchor 'slash' 0 0 0 0
+				local dy strokeSpan2
 				include : dispiro
-					flat 0 (-dy) [widths.center overlaySw]
+					widths.center overlaySw
+					flat 0 (-dy)
 					curl 0 (+dy)
 
 			create-glyph [MangleName 'arrDblVStrokeOver'] : glyph-proc
 				set-width 0
+				set-mark-anchor 'slash' 0 0 0 0
 				local dy strokeSpan
 				local gap : clamp dblArrSw (dblArrSpace - 2 * dblArrSw) (dblArrSpace / 4)
-				set-mark-anchor 'slash' 0 0 0 0
 				include : dispiro
-					flat (-gap) (-dy) [widths.center dblArrSw]
+					widths.center dblArrSw
+					flat (-gap) (-dy)
 					curl (-gap) (+dy)
 				include : dispiro
-					flat (+gap) (-dy) [widths.center dblArrSw]
+					widths.center dblArrSw
+					flat (+gap) (-dy)
 					curl (+gap) (+dy)
 
 			create-glyph [MangleName 'arrDhtVStrokeOver'] : glyph-proc
 				set-width 0
+				set-mark-anchor 'slash' 0 0 0 0
 				local dy strokeSpan
 				local gap : clamp dhtArrSw (dhtArrSpace - 2 * dhtArrSw) (dhtArrSpace / 4)
-				set-mark-anchor 'slash' 0 0 0 0
 				include : dispiro
-					flat (-gap) (-dy) [widths.center dhtArrSw]
+					widths.center dhtArrSw
+					flat (-gap) (-dy) 
 					curl (-gap) (+dy)
 				include : dispiro
-					flat (+gap) (-dy) [widths.center dhtArrSw]
+					widths.center dhtArrSw
+					flat (+gap) (-dy)
 					curl (+gap) (+dy)
 
 			create-glyph [MangleName 'arrHStrokeOver'] : glyph-proc
 				set-width 0
-				local dx strokeSpan
 				set-mark-anchor 'slash' 0 0 0 0
+				local dx strokeSpan
 				include : dispiro
-					flat (-dx) 0 [widths.center overlaySw]
+					widths.center overlaySw
+					flat (-dx) 0
 					curl (+dx) 0
 
 			create-glyph [MangleName 'arrDblHStrokeOver'] : glyph-proc
 				set-width 0
-				local dx strokeSpan
-				local gap : clamp overlaySw (1.5 * arrowHeadSize - 2 * overlaySw) (1.5 * arrowHeadSize / 4)
 				set-mark-anchor 'slash' 0 0 0 0
+				local dx strokeSpan
+				local gap : clamp overlaySw (1.5 * arrowHeadSize - 2 * overlaySw) ((1.5 * arrowHeadSize) / 4)
 				include : dispiro
-					flat (-dx) (-gap) [widths.center overlaySw]
+					widths.center overlaySw
+					flat (-dx) (-gap)
 					curl (+dx) (-gap)
 				include : dispiro
-					flat (-dx) (+gap) [widths.center overlaySw]
+					widths.center overlaySw
+					flat (-dx) (+gap)
 					curl (+dx) (+gap)
 
 			create-glyph [MangleName 'arrCrossOver'] : glyph-proc
 				set-width 0
-				local r : 0.7 * HRingRadius + 0.5 * overlaySw
 				set-mark-anchor 'slash' 0 0 0 0
+				local r : 0.7 * HRingRadius + 0.5 * overlaySw
 				include : dispiro
-					flat (-r) (-r) [widths.center overlaySw]
+					widths.center overlaySw
+					flat (-r) (-r)
 					curl (+r) (+r)
 				include : dispiro
-					flat (-r) (+r) [widths.center overlaySw]
+					widths.center overlaySw
+					flat (-r) (+r)
 					curl (+r) (-r)
 
 			create-glyph [MangleName 'arrLobeOver'] : glyph-proc
 				set-width 0
 				set-mark-anchor 'slash' 0 0 0 0
+				local xSide : HRingRadius * 0.8
 				local ySide : HRingRadius * (-1.2)
-				local xSide : HRingRadius *   0.8
-				local yBot  : HRingRadius * (-2)
+				local yBot  : HRingRadius * (-2.0)
 				include : dispiro
 					widths.rhs arrowSw
 					g4 0 (arrowSw / 2)
-					g4.down.mid xSide  ySide [widths.rhs fine]
+					g4.down.mid (+xSide) ySide [widths.rhs fine]
 					Arch.rhs yBot (sw -- arrowSw)
-					g4.up.mid (-xSide) ySide [widths.rhs fine]
+					g4.up.mid   (-xSide) ySide [widths.rhs fine]
 					g4 0 (arrowSw / 2)
 
 			define [ArrowRingOverlay r sw] :  glyph-proc
@@ -406,22 +420,22 @@ glyph-block Mark-Overlay : begin
 				set-mark-anchor 'slash' 0 0 0 0
 				local rin : r - 0.5 * sw
 				include : RingStrokeAt 0 0 r sw
-				include : VBar.m 0 (-rin) rin sw
-				include : HBar.m (-rin) rin 0 sw
+				include : VBar.m 0 (-rin) (+rin) sw
+				include : HBar.m (-rin) (+rin) 0 sw
 
 			define [ArrowRingMaskOverlay r sw] :  glyph-proc
 				set-width 0
 				set-mark-anchor 'slash' 0 0 0 0
 				include : RingAt 0 0 r sw
 
-			# create-glyph [MangleName 'arrRingOver'] : ArrowRingOverlay VRingRadius VRingSw
-			# create-glyph [MangleName 'arrRingOverMask'] : ArrowRingMaskOverlay VRingSw VRingSw
-			create-glyph [MangleName 'arrRingOverLR'] : ArrowRingOverlay HRingRadius HRingSw
+			# create-glyph [MangleName 'arrRingOver']     : ArrowRingOverlay     VRingRadius VRingSw
+			# create-glyph [MangleName 'arrRingOverMask'] : ArrowRingMaskOverlay VRingSw     VRingSw
+			create-glyph [MangleName 'arrRingOverLR']     : ArrowRingOverlay     HRingRadius HRingSw
 			create-glyph [MangleName 'arrRingPlusOverLR'] : ArrowRingPlusOverlay HRingRadius HRingSw
 			create-glyph [MangleName 'arrRingOverLRMask'] : ArrowRingMaskOverlay HRingRadius HRingSw
 
 	do "Half-XH marks for spacing modifiers"
-		local ext : Math.min markExtend (aboveMarkTop - aboveMarkBot)
+		define ext : Math.min markExtend (aboveMarkTop - aboveMarkBot)
 
 		create-glyph 'leftTackOver' : glyph-proc
 			set-width 0
@@ -487,29 +501,29 @@ glyph-block Mark-Overlay : begin
 			include : with-transform [ApparentTranslate (-markMiddle) (-aboveMarkMid)]
 				refer-glyph 'leftHalfRingAbove'
 
-		create-glyph 'cyrlInvKavykaOver' : glyph-proc
+		create-glyph 'cyrl/invKavykaOver' : glyph-proc
 			set-width 0
 			set-mark-anchor 'overlay' 0 0 0 0
 
 			include : with-transform [ApparentTranslate (-markMiddle) (-aboveMarkMid)]
-				refer-glyph 'cyrlInvKavykaAbove'
+				refer-glyph 'cyrl/invKavykaAbove'
 
-		create-glyph 'cyrlKavykaOver' : glyph-proc
+		create-glyph 'cyrl/kavykaOver' : glyph-proc
 			set-width 0
 			set-mark-anchor 'overlay' 0 0 0 0
 
 			include : with-transform [ApparentTranslate (-markMiddle) (-aboveMarkMid)]
-				refer-glyph 'cyrlKavykaAbove'
+				refer-glyph 'cyrl/kavykaAbove'
 
 		foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
-			create-glyph "cyrlKavykaWithDotOver.\(suffix)" : glyph-proc
+			create-glyph "cyrl/kavykaWithDotOver.\(suffix)" : glyph-proc
 				set-width 0
 				set-mark-anchor 'overlay' 0 0 0 0
 
 				include : with-transform [ApparentTranslate (-markMiddle) (-aboveMarkMid)]
-					refer-glyph "cyrlKavykaWithDotAbove.\(suffix)"
+					refer-glyph "cyrl/kavykaWithDotAbove.\(suffix)"
 
-		select-variant 'cyrlKavykaWithDotOver' (follow -- 'diacriticDot')
+		select-variant 'cyrl/kavykaWithDotOver' (follow -- 'diacriticDot')
 
 	do "Inner dots"
 		glyph-block-export InnerDot
