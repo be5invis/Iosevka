@@ -1,7 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
-import [MathSansSerif] from "@iosevka/glyph/relation"
+import [MathSansSerif DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -10,14 +10,15 @@ glyph-block Letter-Latin-Upper-T : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateTurnedLetter
+	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
 	glyph-block-import Letter-Shared-Metrics : EFVJutLength
-	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay UpwardHookShape MidHook
-	glyph-block-import Letter-Shared-Shapes : CyrDescender HalfRingDescender SerifFrame
-	glyph-block-import Letter-Shared-Shapes : LeftHook RetroflexHook
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay SerifFrame UpwardHookShape
+	glyph-block-import Letter-Shared-Shapes : CyrDescender RetroflexHook MidHook LeftHook
+	glyph-block-import Letter-Latin-C : CLetterForm CConfig
 
 	define [TLeftX  df] : df.leftSB  + 0.75 * OX
 	define [TRightX df] : df.rightSB - 0.75 * OX
-	define [TShape df top doTopSerifs doBottomSerifs doBottomSerifsRightHalfOnly] : glyph-proc
+	define [TShape df top doTopSerifs doBottomSerif fBottomSerifRightHalfOnly] : glyph-proc
 		include : tagged 'strokeV' : VBar.m df.middle 0 top
 
 		local l : TLeftX  df
@@ -30,12 +31,10 @@ glyph-block Letter-Latin-Upper-T : begin
 			local swVJut : Math.min VJutStroke : VSwToH : 0.625 * ((df.middle - [HSwToV HalfStroke]) - l)
 			include : tagged 'serifRT' : VSerif.dr r top VJut swVJut
 			include : tagged 'serifLT' : VSerif.dl l top VJut swVJut
-		if doBottomSerifs : begin
-			include : tagged 'serifMB' : HSerif.rb df.middle 0 MidJutCenter
-			if [not doBottomSerifsRightHalfOnly]
-				include : tagged 'serifMB' : HSerif.lb df.middle 0 MidJutCenter
+		if doBottomSerif : begin
+			include : tagged 'serifMB' : HSerif.[if fBottomSerifRightHalfOnly 'rb' 'mb'] df.middle 0 MidJutCenter
 
-	define [CyrKomiTjeShape df top doTopSerifs doBottomSerifs] : glyph-proc
+	define [CyrKomiTjeShape df top doTopSerifs doBottomSerif] : glyph-proc
 		local sw : df.adviceThinnerStroke 2.75
 		local left : [mix df.leftSB df.rightSB 0.3] + OX
 		local right : df.rightSB - OX
@@ -62,7 +61,7 @@ glyph-block Letter-Latin-Upper-T : begin
 			include : tagged 'serifLT' : VSerif.dl xTopBarLeft  top jutTop swVJut
 		if SLAB : include [SerifFrame (top / 2 + HalfStroke) 0 left right (swRef -- sw)].rt.full
 
-	define [CyrTeMidHookShape pArc] : function [df top doTopSerifs doBottomSerifs] : glyph-proc
+	define [CyrTeMidHookShape pArc] : function [df top doTopSerifs doBottomSerif] : glyph-proc
 		local sw : df.adviceThinnerStroke 2.75
 		local left : [mix df.leftSB df.rightSB 0.3] + OX
 		local right : df.rightSB - OX
@@ -83,23 +82,23 @@ glyph-block Letter-Latin-Upper-T : begin
 			sw     -- sw
 
 		if doTopSerifs : begin
-			local { jutTop jutBot jutMid } : EFVJutLength top 0 HBarPos sw
+			local { jutTop jutBot jutMid } : EFVJutLength top 0 (HBarPos - (sw / 4 + O) / top) sw
 			local swVJut : Math.min (VJutStroke * (sw / Stroke)) : VSwToH : 0.625 * (left - xTopBarLeft)
 			include : tagged 'serifRT' : VSerif.dr xTopBarRight top jutTop swVJut
 			include : tagged 'serifLT' : VSerif.dl xTopBarLeft  top jutTop swVJut
 
-		if doBottomSerifs : begin
+		if doBottomSerif : begin
 			local jut : Math.max Jut : mix [HSwToV HalfStroke] MidJutCenter ((6 / 7) * df.adws)
-			include : intersection
+			include : tagged 'serifMB' : intersection
 				MaskLeft : mix (left + [HSwToV sw]) (right - [HSwToV sw]) 0.625
 				HSerif.mb (left + [HSwToV : 0.5 * sw]) 0 (jut - [HSwToV : 0.5 * (Stroke - sw)]) sw
 
-	define [CyrTweUpperShape df top doTopSerifs doBottomSerifs] : glyph-proc
+	define [CyrTweUpperShape df top doTopSerifs doBottomSerif] : glyph-proc
 		include : TShape df top doTopSerifs false
 		eject-contour 'strokeV'
 
-	define [CyrTallTeShape df top doTopSerifs doBottomSerifs] : glyph-proc
-		define doFullSerifs : doTopSerifs && doBottomSerifs && !para.isItalic
+	define [CyrTallTeShape df top doTopSerifs doBottomSerif] : glyph-proc
+		define doFullSerifs : doTopSerifs && doBottomSerif && !para.isItalic
 
 		local xLeft : df.leftSB + 0.75 * OX
 		local xBarRight : mix df.width df.rightSB 1.5
@@ -109,7 +108,7 @@ glyph-block Letter-Latin-Upper-T : begin
 
 		if doTopSerifs : begin
 			include : tagged 'serifLT' : VSerif.dl xLeft top VJut
-		if doBottomSerifs : begin
+		if doBottomSerif : begin
 			include : tagged 'serifMB' : if para.isItalic [HSerif.rb xBarRight 0 SideJut] : union
 				HSerif.rb (xBarRight - [HSwToV HalfStroke]) 0 Jut
 				HSerif.lb (xBarRight - [HSwToV HalfStroke]) 0 MidJutSide
@@ -175,12 +174,12 @@ glyph-block Letter-Latin-Upper-T : begin
 				jut -- [if doSB MidJutCenter Jut]
 
 		create-glyph "cyrl/TeMidHook.\(suffix)" : glyph-proc
-			local df : include : DivFrame adws
+			local df : include : DivFrame adws 3
 			include : df.markSet.capDesc
 			include : [CyrTeMidHookShape 1] df CAP doST doSB
 
 		create-glyph "cyrl/teMidHook.upright.\(suffix)" : glyph-proc
-			local df : include : DivFrame adws
+			local df : include : DivFrame adws 3
 			include : df.markSet.p
 			include : [CyrTeMidHookShape (HBarPos ** 0.3)] df XH doST doSB
 
@@ -206,22 +205,48 @@ glyph-block Letter-Latin-Upper-T : begin
 			include : CyrTweUpperShape df XH doST doSB
 			set-base-anchor 'cvDecompose' (df.width / 2) XH
 
-		create-glyph "cyrl/Tsse.\(suffix)" : glyph-proc
-			local df : include : DivFrame adws
-			include : df.markSet.capDesc
-			include : TShape df CAP doST doSB true
-			include : HalfRingDescender (df.middle - [HSwToV : 0.5 * Stroke]) 0
+		DefineSelectorGlyph "cyrl/Tsse" suffix [DivFrame adws] 'capDesc'
+		DefineSelectorGlyph "cyrl/tsse" suffix [DivFrame adws] 'p'
 
-		create-glyph "cyrl/tsse.\(suffix)" : glyph-proc
-			local df : include : DivFrame adws
-			include : df.markSet.p
-			include : TShape df XH doST doSB true
-			include : HalfRingDescender (df.middle - [HSwToV : 0.5 * Stroke]) 0
+		foreach { suffixEs { styTop styBot } } [Object.entries CConfig] : do
+			define [TsseDescenderShape df ada adb] : begin
+				local left : df.middle - [HSwToV HalfStroke]
+				local left0 : left - SB
+				local sl : [mix left0 left 0.5] + O * 2
+				local sr : mix sl (left0 + [mix RightSB SB : StrokeWidthBlend 0.95 0.96]) 2
+				local subDf : DivFrame (((sr - sl) + 2 * SB) / Width) 2.5 1.0
+				local st : 0 + subDf.mvs
+				local sb : 0 - (LongVJut - QuarterStroke) - 0.5 * subDf.mvs
+				local p : (st - sb) / (XH - 0)
+				local es : CLetterForm subDf 3 styBot st sb
+					hook   -- (Hook * p)
+					sw     -- subDf.mvs
+					ada    -- (ada * p)
+					adb    -- (adb * p)
+				return : difference
+					with-transform [ApparentTranslate (sl - subDf.leftSB) 0] [es.full]
+					intersection [MaskAbove O] [MaskRight df.middle]
+
+			if (!styTop) : begin
+				create-glyph "cyrl/Tsse.\(suffix).\(suffixEs)" : glyph-proc
+					set-width 0
+					set-mark-anchor 'cvDecompose' 0 0
+					include : TShape [DivFrame adws] CAP doST doSB true
+					include : TsseDescenderShape [DivFrame adws] ArchDepthA ArchDepthB
+
+				create-glyph "cyrl/tsse.\(suffix).\(suffixEs)" : glyph-proc
+					set-width 0
+					set-mark-anchor 'cvDecompose' 0 0
+					include : TShape [DivFrame adws] XH doST doSB true
+					include : TsseDescenderShape [DivFrame adws] SmallArchDepthA SmallArchDepthB
+
+		select-variant "cyrl/Tsse.\(suffix)" (follow -- 'C/bottomSerif')
+		select-variant "cyrl/tsse.\(suffix)" (follow -- 'c/bottomSerif')
 
 		create-glyph "currency/tengeSign.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.capital
-			local gap : Math.max (CAP * 0.1) HalfStroke
+			local gap : Math.max HalfStroke : 0.1 * (CAP - 0)
 			include : HBar.t [TLeftX df] [TRightX df] CAP OverlayStroke
 			include : TShape df (CAP - OverlayStroke - gap) doST doSB
 
@@ -262,8 +287,8 @@ glyph-block Letter-Latin-Upper-T : begin
 	derive-composites 'cyrl/Twe' 0xA68C 'cyrl/Twe/upper' 'cyrl/Twe/middle'
 	derive-composites 'cyrl/twe' 0xA68D 'cyrl/twe/upper' 'cyrl/twe/middle'
 
-	select-variant 'cyrl/Tsse' 0xA690 (follow -- 'T')
-	select-variant 'cyrl/tsse' 0xA691 (follow -- 'T')
+	CreateSelectorVariants 'cyrl/Tsse' 0xA690 [Object.keys TConfig] (follow -- 'T')
+	CreateSelectorVariants 'cyrl/tsse' 0xA691 [Object.keys TConfig] (follow -- 'T')
 
 	select-variant 'currency/tengeSign' 0x20B8 (follow -- 'T')
 
@@ -288,7 +313,7 @@ glyph-block Letter-Latin-Upper-T : begin
 			include : tagged 'serifRB' : VSerif.ur r 0   VJut swVJut
 			include : tagged 'serifLB' : VSerif.ul l 0   VJut swVJut
 
-	define [SampiShape df top bottom doTopSerifs doBottomSerifs] : glyph-proc
+	define [SampiShape df top bottom doTopSerifs doBottomSerif] : glyph-proc
 		define kSampiDepth 0.45
 
 		local l : TLeftX  df
@@ -301,7 +326,7 @@ glyph-block Letter-Latin-Upper-T : begin
 		include : VBar.l l top [mix (top - Stroke) bottom kSampiDepth] swVJut
 		include : VBar.r r top [mix (top - Stroke) bottom kSampiDepth] swVJut
 
-		if doBottomSerifs : include : HSerif.mb df.middle bottom MidJutCenter
+		if doBottomSerif : include : HSerif.mb df.middle bottom MidJutCenter
 
 	create-glyph 'grek/SampiArchaic' 0x372 : glyph-proc
 		local df : include : DivFrame para.advanceScaleT
