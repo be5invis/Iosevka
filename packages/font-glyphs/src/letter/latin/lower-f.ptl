@@ -95,10 +95,10 @@ glyph-block Letter-Latin-Lower-F : begin
 
 		include : match counterHook
 			[Just CH-NONE]          : SetPalatalHookPos barLeft
+			[Just CH-SERIF]         : SmallFBottomSerif df
 			[Just CH-EXTENSION]     : SmallFDownExtension barLeft
 			[Just CH-HOOK]          : SmallFDownHook df barRight [Math.max SB : barRight - (crossRight - barLeft)]
 			[Just CH-DIAGONAL-HOOK] : SmallFDiagonalTail df barLeft
-			[Just CH-SERIF]         : SmallFBottomSerif df
 
 	define [NarrowStdFShapeT sink df offset barleft sw] : begin
 		local pAdaptive : if (para.advanceScaleF < 1) ((1 - df.adws) / (1 - para.advanceScaleF)) 0
@@ -135,10 +135,10 @@ glyph-block Letter-Latin-Lower-F : begin
 
 		include : match counterHook
 			[Just CH-NONE]          : SetPalatalHookPos barLeft
+			[Just CH-SERIF]         : SmallFBottomSerif df
 			[Just CH-EXTENSION]     : SmallFDownExtension barLeft
 			[Just CH-HOOK]          : SmallFDownHook df barRight [Math.max df.leftSB : barRight - 0.75 * (crossRight - barLeft)]
 			[Just CH-DIAGONAL-HOOK] : SmallFDiagonalTail df barLeft
-			[Just CH-SERIF]         : SmallFBottomSerif df
 
 	define [NarrowFShape clcStyle] : function [df m bh counterHook] : glyph-proc
 		local topHookExt : match clcStyle
@@ -179,10 +179,10 @@ glyph-block Letter-Latin-Lower-F : begin
 
 		include : match counterHook
 			[Just CH-NONE]          : SetPalatalHookPos barLeft
+			[Just CH-SERIF]         : NarrowBottomSerif df
 			[Just CH-EXTENSION]     : SmallFDownExtension barLeft
 			[Just CH-HOOK]          : SmallFDownHook df barRight (barRight - (crossRight - barLeft))
 			[Just CH-DIAGONAL-HOOK] : SmallFDiagonalTail df barLeft
-			[Just CH-SERIF]         : NarrowBottomSerif df
 
 	define SmallFConfig : SuffixCfg.weave
 		object # body
@@ -213,20 +213,23 @@ glyph-block Letter-Latin-Lower-F : begin
 
 		create-glyph "fPalatalHook.\(suffix)" : glyph-proc
 			include [refer-glyph "f.\(suffix)"] AS_BASE ALSO_METRICS
-			if currentGlyph.baseAnchors.palatalHookPos : begin
-				local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.overlay
-				local pos    : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookPos
-				local gap : Math.max (Width / 8) [AdviceStroke 8]
-				include : PalatalHook.r
-					xLink -- attach.x
-					x -- pos.x
-					y -- pos.y
+			local attach : currentGlyph.gizmo.unapply          currentGlyph.baseAnchors.overlay
+			local pos    : currentGlyph.gizmo.unapplyIfPresent currentGlyph.baseAnchors.palatalHookPos
+			include : PalatalHook.r
+				xLink   -- attach.x
+				x       -- [if pos pos.x : attach.x + (RightSB - SB) / 2]
+				y       -- [if pos pos.y 0]
+				refSw   -- [AdviceStroke : if pos 2 3]
+				maskOut -- [if pos [no-shape] [intersection [MaskBelow 0] [MaskLeft : attach.x + [HSwToV HalfStroke]]]]
 
 	select-variant 'f' 'f'
 	link-reduced-variant 'f/sansSerif' 'f' MathSansSerif
-	select-variant 'fHookBottom'  0x192  (shapeFrom -- 'f')
-	select-variant 'fPalatalHook' 0x1D82 (follow -- 'fLenis')
-	select-variant 'fLenis'       0xAB35 (shapeFrom -- 'f')
+	select-variant 'fHookBottom' 0x192  (shapeFrom -- 'f')
+	select-variant 'fLenis'      0xAB35 (shapeFrom -- 'f')
+
+	select-variant 'fPalatalHook' 0x1D82 (follow -- 'f')
+	select-variant 'fLenisPalatalHook'   (follow -- 'fLenis') (shapeFrom -- 'fPalatalHook')
+
 	select-variant 'f/phoneticLeft' (shapeFrom -- 'f')
 	select-variant 'f/compLigLeft1' (shapeFrom -- 'f')
 	select-variant 'f/compLigLeft2' (shapeFrom -- 'f')
