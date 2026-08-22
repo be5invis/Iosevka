@@ -366,9 +366,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-five-upright-flat-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-flat-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'upright-flat-serifed'</code>, <code>cv05 = 4</code></td></tr>
     <tr><td><code>5</code> with upright upper-left bar, flat middle part, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-five-upright-flat-hook-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-flat-hook-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'upright-flat-hook-serifless'</code>, <code>cv05 = 5</code></td></tr>
-    <tr><td><code>5</code> with upright upper-left bar, and flat middle part and hook; without serifs</td></tr>
+    <tr><td><code>5</code> with upright upper-left bar, and flat middle part and flat hook; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-five-upright-flat-hook-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-upright-flat-hook-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'upright-flat-hook-serifed'</code>, <code>cv05 = 6</code></td></tr>
-    <tr><td><code>5</code> with upright upper-left bar, flat middle part and hook, and serifs</td></tr>
+    <tr><td><code>5</code> with upright upper-left bar, flat middle part and flat hook, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-arched-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-arched-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-arched-serifless'</code>, <code>cv05 = 7</code></td></tr>
     <tr><td><code>5</code> with arched middle part; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-arched-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-arched-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-arched-serifed'</code>, <code>cv05 = 8</code></td></tr>
@@ -378,9 +378,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-flat-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-flat-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-flat-serifed'</code>, <code>cv05 = 10</code></td></tr>
     <tr><td><code>5</code> with flat middle part, and serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-flat-hook-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-flat-hook-serifless.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-flat-hook-serifless'</code>, <code>cv05 = 11</code></td></tr>
-    <tr><td><code>5</code> with flat middle part and hook; without serifs</td></tr>
+    <tr><td><code>5</code> with flat middle part and flat hook; without serifs</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-five-oblique-flat-hook-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-five-oblique-flat-hook-serifed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>five = 'oblique-flat-hook-serifed'</code>, <code>cv05 = 12</code></td></tr>
-    <tr><td><code>5</code> with flat middle part and hook, and serifs</td></tr>
+    <tr><td><code>5</code> with flat middle part and flat hook, and serifs</td></tr>
     </table></details>
   - Styles for `6`
     <details><summary>3 variants</summary>

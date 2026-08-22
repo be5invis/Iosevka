@@ -1,12 +1,14 @@
 $$include '../../meta/macros.ptl'
 
-import [mix fallback SuffixCfg] from "@iosevka/util"
+import [mix fallback] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
 glyph-block Letter-Latin-Ezh : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
 	glyph-block-import Letter-Shared-Metrics : EFVJutLength
 	glyph-block-import Letter-Shared-Shapes : CurlyTail SerifedArcEnd PalatalHook RetroflexHook
 	glyph-block-import Letter-Latin-S : AdviceSArchDepth SNeck
@@ -121,7 +123,7 @@ glyph-block Letter-Latin-Ezh : begin
 						__ : list
 							g4 xArcMid yArcMid
 							HookEnd bottom (sw -- stroke)
-							g4 (df.leftSB + OX) (bottom + hook)
+							g4 (df.leftSB + [if (origBar === nothing) OX : HSwToV : 0.5 * (origBar - stroke)]) (bottom + hook)
 
 			if fSerifed : begin
 				local { jutTop jutBot jutMid } : EFVJutLength top bottom pyMidLeft stroke nothing hook
@@ -216,7 +218,7 @@ glyph-block Letter-Latin-Ezh : begin
 						__ : list
 							g4 xArcMid yArcMid
 							HookEnd bottom (sw -- stroke)
-							g4 (RightSB - OX) (bottom + hook)
+							g4 (RightSB - [if (origBar === nothing) OX : HSwToV : 0.5 * (origBar - stroke)]) (bottom + hook)
 
 			if fSerifed : begin
 				local { jutTop jutBot jutMid } : EFVJutLength top bottom pyMidRight stroke nothing hook
@@ -314,7 +316,7 @@ glyph-block Letter-Latin-Ezh : begin
 				terminal  -- TERMINAL-CURL
 			include : ezh.Shape
 
-		create-glyph "ezhRetroflexHook.\(suffix)" : glyph-proc
+		create-glyph "ezhRTail.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			local stroke : AdviceStroke2 2 3 (XH - 0)
 			define ezh : Ezh [DivFrame 1] XH 0
@@ -356,6 +358,49 @@ glyph-block Letter-Latin-Ezh : begin
 				maskOut -- [intersection [MaskBelow (yArcMid - stroke / 2)] [MaskLeft (xArcMid + O)]]
 
 		if [not fSerifed] : begin
+			DefineSelectorGlyph "lyogh"      suffix [DivFrame 1] 'bp'
+			DefineSelectorGlyph "lyoghRTail" suffix [DivFrame 1] 'bp'
+
+			create-glyph "lyogh.\(suffix).serifless" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				define yogh : Ezh [DivFrame 1] XH Descender
+					fCursive  -- fCursive
+					fSerifed  -- fSerifed
+					pxMidLeft -- 0.40
+					pyMidLeft -- [if fCursive 0.50 0.55]
+					stroke    -- [AdviceStroke2 2 3 (XH - Descender)]
+					hook      -- SHook
+					origBar   -- Stroke
+					ada       -- SmallArchDepthA
+					adb       -- SmallArchDepthB
+				include : yogh.Shape
+				include : VBar.l SB 0 Ascender
+				create-forked-glyph "lyogh.\(suffix).hooky" : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
+
+			select-variant "lyogh.\(suffix)" (follow -- 'lyogh/l')
+
+			create-glyph "lyoghRTail.\(suffix).serifless" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				define yogh : Ezh [DivFrame 1] XH 0
+					fCursive  -- fCursive
+					fSerifed  -- fSerifed
+					pxMidLeft -- 0.40
+					pyMidLeft -- [if fCursive 0.50 0.52]
+					stroke    -- [AdviceStroke2 2 3 XH]
+					hook      -- SHook
+					origBar   -- Stroke
+					ada       -- SmallArchDepthA
+					adb       -- SmallArchDepthB
+					terminal  -- TERMINAL-DESC
+				include : yogh.Shape
+				include : VBar.l SB 0 Ascender
+				include : RetroflexHook.lExt SB 0
+				create-forked-glyph "lyoghRTail.\(suffix).hooky" : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
+
+			select-variant "lyoghRTail.\(suffix)" (follow -- 'lyogh/l')
+
 			create-glyph "ezh/phoneticRight.\(suffix)" : glyph-proc
 				include : MarkSet.p
 				define ezh : Ezh [DivFrame 1] XH Descender
@@ -369,7 +414,7 @@ glyph-block Letter-Latin-Ezh : begin
 					adb       -- SmallArchDepthB
 				include : ezh.Shape
 
-			create-glyph "ezhRetroflexHook/phoneticRight.\(suffix)" : glyph-proc
+			create-glyph "ezhRTail/phoneticRight.\(suffix)" : glyph-proc
 				include : MarkSet.p
 				local stroke : AdviceStroke2 2 3 (XH - Descender)
 				define ezh : Ezh [DivFrame 1] XH Descender
@@ -414,106 +459,74 @@ glyph-block Letter-Latin-Ezh : begin
 	select-variant 'revEzh'  0x1B8  (follow -- 'Ezh')
 	select-variant 'smcpEzh' 0x1D23 (follow -- 'Ezh')
 
-	select-variant 'ezh'              0x292
-	select-variant 'revezh'           0x1B9   (follow -- 'ezh')
-	select-variant 'ezhTail'          0x1BA   (follow -- 'ezh')
-	select-variant 'ezhCurlyTail'     0x293   (follow -- 'ezh')
-	select-variant 'ezhRetroflexHook' 0x1D9A  (follow -- 'ezh')
-	select-variant 'ezhPalatalHook'   0x1DF18 (follow -- 'ezh')
+	select-variant 'ezh'            0x292
+	select-variant 'revezh'         0x1B9   (follow -- 'ezh')
+	select-variant 'ezhTail'        0x1BA   (follow -- 'ezh')
+	select-variant 'ezhCurlyTail'   0x293   (follow -- 'ezh')
+	select-variant 'ezhRTail'       0x1D9A  (follow -- 'ezh')
+	select-variant 'ezhPalatalHook' 0x1DF18 (follow -- 'ezh')
+
+	CreateSelectorVariants 'lyogh'      0x26E   [Object.keys EzhConfig] (follow -- 'ezh/phoneticRight')
+	CreateSelectorVariants 'lyoghRTail' 0x1DF05 [Object.keys EzhConfig] (follow -- 'ezh/phoneticRight')
 
 	select-variant 'ezh/phoneticRight'
-	select-variant 'ezhRetroflexHook/phoneticRight' (follow -- 'ezh/phoneticRight')
-	select-variant 'ezhPalatalHook/phoneticRight'   (follow -- 'ezh/phoneticRight')
+	select-variant 'ezhRTail/phoneticRight'       (follow -- 'ezh/phoneticRight')
+	select-variant 'ezhPalatalHook/phoneticRight' (follow -- 'ezh/phoneticRight')
 
 	alias 'cyrl/abk/Dze' 0x4E0 'Ezh'
 	alias 'cyrl/abk/dze' 0x4E1 'ezh'
-
-	# Variants for Ezh don't make sense for Lyogh.
-	create-glyph 'lyogh.serifless' : glyph-proc
-		include : MarkSet.bp
-		define yogh : Ezh [DivFrame 1] XH Descender
-			pxMidLeft -- 0.40
-			pyMidLeft -- 0.55
-			stroke    -- [AdviceStroke2 2 3 (XH - Descender)]
-			hook      -- SHook
-			origBar   -- Stroke
-			ada       -- SmallArchDepthA
-			adb       -- SmallArchDepthB
-		include : yogh.Shape
-		include : VBar.l SB 0 Ascender
-		create-forked-glyph 'lyogh.hooky' : HSerif.lt SB Ascender SideJut
-
-	select-variant 'lyogh' 0x26E
-
-	create-glyph 'lyoghRTail.serifless' : glyph-proc
-		include : MarkSet.b
-		define yogh : Ezh [DivFrame 1] XH 0
-			pxMidLeft -- 0.40
-			pyMidLeft -- 0.52
-			stroke    -- [AdviceStroke2 2 3 XH]
-			hook      -- SHook
-			origBar   -- Stroke
-			ada       -- SmallArchDepthA
-			adb       -- SmallArchDepthB
-			terminal  -- TERMINAL-DESC
-		include : yogh.Shape
-		include : VBar.l SB 0 Ascender
-		include : RetroflexHook.lExt SB 0
-		create-forked-glyph 'lyoghRTail.hooky' : HSerif.lt SB Ascender SideJut
-
-	select-variant 'lyoghRTail' 0x1DF05 (follow -- 'lyogh')
 
 	do "Visigothic Z"
 		glyph-block-import Letter-Latin-C : CLetterForm CConfig
 
 		define FLAT-CONNECTION 3
 
-		foreach { suffix { sty styBot } } [Object.entries CConfig] : do
+		foreach { suffix { styTop styBot } } [Object.entries CConfig] : do
 			if [not styBot] : begin
 				create-glyph "ZVisigothic.\(suffix)" : glyph-proc
 					include : MarkSet.capital
 					local stroke : AdviceStroke2 2 3 (XH - 0)
-					define C : CLetterForm [DivFrame 1] sty FLAT-CONNECTION CAP (XH - stroke)
+					define c : CLetterForm [DivFrame 1] styTop FLAT-CONNECTION CAP (XH - stroke)
 						sw   -- stroke
 						hook -- [Math.max AHook (Hook * ((CAP - (XH - stroke)) / XH))]
 						ada  -- ArchDepthA
 						adb  -- ArchDepthB
-					define Z : Ezh [DivFrame 1] XH 0
+					define z : Ezh [DivFrame 1] XH 0
 						pyMidLeft -- 0.52
 						stroke    -- stroke
 						hook      -- [Math.max AHook (Hook * (XH / CAP))]
 						ada       -- ArchDepthA
 						adb       -- ArchDepthB
-					define [object xTopRight] : Z.Dim
+					define [object xTopRight] : z.Dim
 					include : union
-						difference [C.full] : intersection
+						difference [c.full] : intersection
 							MaskBelow (XH - O)
 							MaskRight xTopRight
 						new-glyph : glyph-proc
-							include : Z.Shape
+							include : z.Shape
 							eject-contour 'strokeTop'
 
 				create-glyph "zVisigothic.\(suffix)" : glyph-proc
 					include : MarkSet.bp
 					local stroke : AdviceStroke2 2 3 (XH - Descender)
-					define C : CLetterForm [DivFrame 1] sty FLAT-CONNECTION Ascender (XH - stroke)
+					define c : CLetterForm [DivFrame 1] styTop FLAT-CONNECTION Ascender (XH - stroke)
 						sw   -- stroke
 						hook -- SHook
 						ada  -- SmallArchDepthA
 						adb  -- SmallArchDepthB
-					define Z : Ezh [DivFrame 1] XH Descender
+					define z : Ezh [DivFrame 1] XH Descender
 						pyMidLeft -- 0.55
 						stroke    -- stroke
 						hook      -- SHook
 						ada       -- SmallArchDepthA
 						adb       -- SmallArchDepthB
-					define [object xTopRight] : Z.Dim
+					define [object xTopRight] : z.Dim
 					include : union
-						difference [C.full] : intersection
+						difference [c.full] : intersection
 							MaskBelow (XH - O)
 							MaskRight xTopRight
 						new-glyph : glyph-proc
-							include : Z.Shape
+							include : z.Shape
 							eject-contour 'strokeTop'
 
 		select-variant 'ZVisigothic' 0xA762 (follow -- 'C/topSerif')

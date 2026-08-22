@@ -25,53 +25,53 @@ glyph-block Letter-Latin-C : begin
 	define FLAT-CONNECTION 3
 
 	glyph-block-export CShapeT
-	define [CShapeT sink offset df st sb top bot ada adb hook sw origBar] : sink
+	define [CShapeT sink offset df st sb top bot ada adb hook sw origBar ox oy] : sink
 		widths.lhs sw
 		match st
-			[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs (df.rightSB - offset) top sw [fallback hook Hook] origBar
-			[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs (df.rightSB - offset) top sw [fallback hook Hook] origBar
+			[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs (df.rightSB - offset) top sw [fallback hook Hook] origBar (o -- oy)
+			[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs (df.rightSB - offset) top sw [fallback hook Hook] origBar (o -- oy)
 			[Just FLAT-CONNECTION] : list
 				flat (df.width - offset) (top - offset)
 				curl [Arch.adjust-x.top df.middle (sw -- sw)] (top - offset)
 				archv
 			__ : list
-				g4 (df.rightSB - offset) (top - [fallback hook Hook])
-				HookStart (top - offset) (sw -- sw)
-		flatside.ld (df.leftSB + offset) bot top ada adb
+				g4   (df.rightSB - offset) (top - [fallback hook Hook])
+				HookStart (top - offset) (sw -- sw) (o -- oy)
+		flatside.ld (df.leftSB + offset) bot top ada adb ox
 		match sb
-			[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs (df.rightSB - offset) bot sw [fallback hook Hook] origBar
-			[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs (df.rightSB - offset) bot sw [fallback hook Hook] origBar
+			[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs (df.rightSB - offset) bot sw [fallback hook Hook] origBar (o -- oy)
+			[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs (df.rightSB - offset) bot sw [fallback hook Hook] origBar (o -- oy)
 			[Just FLAT-CONNECTION] : list
 				arcvh
 				flat [Arch.adjust-x.bot df.middle (sw -- sw)] (bot + offset)
 				curl (df.width - offset) (bot + offset)
 			__ : list
-				HookEnd (bot + offset) (sw -- sw)
-				g4 (df.rightSB - offset) (bot + [fallback hook Hook])
+				HookEnd (bot + offset) (sw -- sw) (o -- oy)
+				g4   (df.rightSB - offset) (bot + [fallback hook Hook])
 
-	define [RevCShapeT sink offset df st sb top bot ada adb hook sw origBar] : sink
+	define [RevCShapeT sink offset df st sb top bot ada adb hook sw origBar ox oy] : sink
 		widths.rhs sw
 		match st
-			[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs (df.leftSB + offset) top sw [fallback hook Hook] origBar
-			[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs (df.leftSB + offset) top sw [fallback hook Hook] origBar
+			[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs (df.leftSB + offset) top sw [fallback hook Hook] origBar (o -- oy)
+			[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs (df.leftSB + offset) top sw [fallback hook Hook] origBar (o -- oy)
 			[Just FLAT-CONNECTION] : list
 				flat (0 + offset) (top - offset)
 				curl [Arch.adjust-x.top df.middle (sw -- sw)] (top - offset)
 				archv
 			__ : list
-				g4 (df.leftSB + offset) (top - [fallback hook Hook])
-				HookStart (top - offset) (sw -- sw)
-		flatside.rd (df.rightSB - offset) bot top ada adb
+				g4   (df.leftSB + offset) (top - [fallback hook Hook])
+				HookStart (top - offset) (sw -- sw) (o -- oy)
+		flatside.rd (df.rightSB - offset) bot top ada adb ox
 		match sb
-			[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs (df.leftSB + offset) bot sw [fallback hook Hook]
-			[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs (df.leftSB + offset) bot sw [fallback hook Hook]
+			[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs (df.leftSB + offset) bot sw [fallback hook Hook] origBar (o -- oy)
+			[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs (df.leftSB + offset) bot sw [fallback hook Hook] origBar (o -- oy)
 			[Just FLAT-CONNECTION] : list
 				arcvh
 				flat [Arch.adjust-x.bot df.middle (sw -- sw)] (bot + offset)
 				curl (0 + offset) (bot + offset)
 			__ : list
-				HookEnd (bot + offset) (sw -- sw)
-				g4 (df.leftSB + offset) (bot + [fallback hook Hook])
+				HookEnd (bot + offset) (sw -- sw) (o -- oy)
+				g4   (df.leftSB + offset) (bot + [fallback hook Hook])
 
 	define [AutoStartSerifR df sty top hook sw] : match sty
 		[Just SLAB-CLASSICAL] : ArcStartSerif.R       df.rightSB top [fallback sw Stroke] [fallback hook Hook]
@@ -107,20 +107,20 @@ glyph-block Letter-Latin-C : begin
 			CurlyTail.n fine bot df.rightSB 0 bot (yLoopTop -- loopTop)
 
 	glyph-block-export CLetterForm
-	define [CLetterForm] : with-params [df sty styBot top bot [ada ArchDepthA] [adb ArchDepthB] [hook Hook] [sw Stroke] [ob nothing]] : namespace
-		export : define [base] : CShapeT dispiro 0 df sty styBot top bot ada adb hook sw ob
+	define [CLetterForm] : with-params [df sty styBot top bot [ada ArchDepthA] [adb ArchDepthB] [hook Hook] [sw Stroke] [ob nothing] [ox nothing] [oy nothing]] : namespace
+		export : define [base] : CShapeT dispiro 0 df sty styBot top bot ada adb hook sw ob ox oy
 		export : define [topSerif] : AutoStartSerifR  df sty    top hook sw
 		export : define [botSerif] : AutoStartSerifRB df styBot bot hook sw
 
-		export : define [revBase] : RevCShapeT dispiro 0 df sty styBot top bot ada adb hook sw ob
+		export : define [revBase] : RevCShapeT dispiro 0 df sty styBot top bot ada adb hook sw ob ox oy
 		export : define [revTopSerif] : AutoStartSerifL  df sty    top hook sw
 		export : define [revBotSerif] : AutoStartSerifLB df styBot bot hook sw
 
 		export : define [hookTop] : TopHook.toRight.arcStart df.rightSB top hook (refSw -- sw)
 
 		# Used by Cyrillic Koppa
-		export : define [baseTopOnly] : CShapeT dispiro 0 df sty SLAB-NONE                  top bot ada adb hook sw ob
-		export : define [descBase]    : CShapeT dispiro 0 df sty (styBot || SLAB-CLASSICAL) top bot ada adb hook sw ob
+		export : define [baseTopOnly] : CShapeT dispiro 0 df sty SLAB-NONE                  top bot ada adb hook sw ob ox oy
+		export : define [descBase]    : CShapeT dispiro 0 df sty (styBot || SLAB-CLASSICAL) top bot ada adb hook sw ob ox oy
 
 		export : define [full]    : composite-proc [base]    [topSerif]    [botSerif]
 		export : define [revFull] : composite-proc [revBase] [revTopSerif] [revBotSerif]

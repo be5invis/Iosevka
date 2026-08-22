@@ -51,14 +51,13 @@ glyph-block Letter-Cyrillic-De : begin
 			curl xTopLeft [mix top (0 + swOuter + TailY - swInner / 2) 0.75]
 			g4   left     (0 + swOuter)
 
-		local xSerifShift : TanSlope * swOuter * DesignParameters.serifShiftX
 		include : if SLAB
 			dispiro
 				widths.rhs swOuter
-				flat (xTopLeft - descenderOverflow - xSerifShift) top
+				flat (xTopLeft - descenderOverflow - swOuter * SerifShiftX) top
 				if (fCapital || !para.isItalic)
 					list
-						curl (xTopRight + descenderOverflow - xSerifShift) top
+						curl (xTopRight + descenderOverflow - swOuter * SerifShiftX) top
 					list
 						curl xTopRight top [heading Rightward]
 			HBar.t xTopLeft xTopRight top swOuter
@@ -110,38 +109,39 @@ glyph-block Letter-Cyrillic-De : begin
 	select-variant 'cyrl/DeSoft' 0xA662 (follow -- 'cyrl/EnGhe/Ghe')
 	select-variant 'cyrl/deSoft' 0xA663 (follow -- 'cyrl/enghe/ghe')
 
-	foreach { suffix { { desc } { st sb } } } [Object.entries ZeConfig] : do
-		define [DzzeDescendershape de ada adb] : begin
-			local sr : [mix RightSB Width 0.5] - O * 2
-			local sl : mix sr de.xTopRight 2
-			local sw : AdviceStroke 2.5 : ((sr - sl) + 2 * SB) / Width
-			local shapeBot : de.desc - 0.5 * sw
-			local hook : Hook * (0 - shapeBot) / CAP
-			local ze : CyrZe 3 sb sw shapeBot
-				left   -- sl
-				right  -- sr
-				hook   -- hook
+	foreach { suffix { { desc } { styTop styBot } } } [Object.entries ZeConfig] : do
+		define [DzzeDescenderShape de ada adb] : begin
+			local zeRight : [mix RightSB Width 0.5] - O * 2
+			local zeLeft : mix zeRight de.xTopRight 2
+			local sw : AdviceStroke 2.5 (((zeRight - zeLeft) + 2 * SB) / Width)
+			local zeTop : 0 + sw
+			local zeBot : de.desc - 0.5 * sw
+			local p : (zeTop - zeBot) / (CAP - 0)
+			local ze : CyrZe 3 styBot zeTop zeBot
+				left   -- zeLeft
+				right  -- zeRight
+				hook   -- (Hook * p)
 				stroke -- sw
 				xo     -- (0.5 * O)
 				barPos -- 0.5
-				ada    -- ada
-				adb    -- adb
+				ada    -- (ada * p)
+				adb    -- (adb * p)
 			return : union [ze.Shape] [ze.AutoEndSerifL]
 
-		if (!desc && !st) : begin
+		if (!desc && !styTop) : begin
 			create-glyph "cyrl/Dzze.\(suffix)" : glyph-proc
 				include : MarkSet.capital
 				include : ExtendBelowBaseAnchors BottomExtension
 				local de : include : CyrDeShape true CAP SB RightSB
 				eject-contour 'footR'
-				include : DzzeDescendershape de ArchDepthA ArchDepthB
+				include : DzzeDescenderShape de ArchDepthA ArchDepthB
 
 			create-glyph "cyrl/dzze.upright.\(suffix)" : glyph-proc
 				include : MarkSet.e
 				include : ExtendBelowBaseAnchors BottomExtension
 				local de : include : CyrDeShape false XH SB RightSB
 				eject-contour 'footR'
-				include : DzzeDescendershape de SmallArchDepthA SmallArchDepthB
+				include : DzzeDescenderShape de SmallArchDepthA SmallArchDepthB
 
 	create-glyph 'cyrl/Dwe' 0xA680 : glyph-proc
 		include : MarkSet.capital
@@ -196,8 +196,8 @@ glyph-block Letter-Cyrillic-De : begin
 
 	CreateAccentedComposition 'cyrl/dwe.italic' null 'cyrl/dwe.italic/base' 'commaTR'
 
-	foreach { suffix { { desc } { st sb } } } [Object.entries ZeConfig] : do
-		if (desc && !st) : begin
+	foreach { suffix { { desc } { styTop styBot } } } [Object.entries ZeConfig] : do
+		if (desc && !styTop) : begin
 			create-glyph "cyrl/dzze.italic.\(suffix)" : glyph-proc
 				local df : include : DivFrame para.advanceScaleMM 3
 				include : df.markSet.bp
@@ -206,7 +206,7 @@ glyph-block Letter-Cyrillic-De : begin
 				include : CyrDeItalicShape subDf df.mvs
 
 				local shift : df.width - subDf.width
-				local ze : CyrZe 1 sb XH Descender
+				local ze : CyrZe 1 styBot XH Descender
 					left      -- ((subDf.leftSB  + OX) + shift)
 					right     -- ((subDf.rightSB - OX) + shift)
 					blend     -- 0.7

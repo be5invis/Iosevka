@@ -12,27 +12,30 @@ glyph-block Letter-Greek-Lower-Xi : begin
 	define SHAPE-ROUNDED  0
 	define SHAPE-FLAT-TOP 1
 
-	define [LowerXiShape shape] : glyph-proc
-		local adaTop : ArchDepthAOf : ArchDepth * 0.45
-		local adbTop : ArchDepthBOf : ArchDepth * 0.45
-		local adaBot : ArchDepthAOf : ArchDepth * 0.55
-		local adbBot : ArchDepthBOf : ArchDepth * 0.55
+	define pyBar 0.55
 
+	define [LowerXiShape shape] : glyph-proc
+		local adaTop : ArchDepthAOf : ArchDepth * (1 - pyBar)
+		local adbTop : ArchDepthBOf : ArchDepth * (1 - pyBar)
+		local adaBot : ArchDepthAOf : ArchDepth * (0 + pyBar)
+		local adbBot : ArchDepthBOf : ArchDepth * (0 + pyBar)
+
+		local fineMid : Stroke * CThin
 		local fineTop : Stroke * CThinB
-		local fine : Stroke * CThin
 		local xBarStart : mix SB RightSB : match shape
 			[Just SHAPE-ROUNDED]  0.625
-			[Just SHAPE-FLAT-TOP] 0.75
+			[Just SHAPE-FLAT-TOP] 0.750
 		local xBarEnd : mix SB RightSB : match shape
-			[Just SHAPE-ROUNDED]  0.75
-			[Just SHAPE-FLAT-TOP] 0.85
-		local yBar : mix Stroke Ascender 0.52
+			[Just SHAPE-ROUNDED]  0.750
+			[Just SHAPE-FLAT-TOP] 0.850
+		local yBarTop : mix Stroke Ascender pyBar
+		local yBarBot : yBarTop - Stroke
 
 		local xUpperArcLeft : match shape
-			[Just SHAPE-ROUNDED]  : SB + 0
+			[Just SHAPE-ROUNDED]  :      SB                + 0
 			[Just SHAPE-FLAT-TOP] : [mix SB RightSB 0.075] + OX
 		local xLowerArcLeft : match shape
-			[Just SHAPE-ROUNDED]  : SB + OX * 2
+			[Just SHAPE-ROUNDED]  :      SB                + OX * 2
 			[Just SHAPE-FLAT-TOP] : [mix SB RightSB 0.025] + OX * 2
 
 		include : match shape
@@ -42,35 +45,32 @@ glyph-block Letter-Greek-Lower-Xi : begin
 		include : dispiro
 			match shape
 				[Just SHAPE-ROUNDED] : list
-					g4 (RightSB + O) (Ascender - Hook) [widths.lhs]
+					g4   (RightSB + O) (Ascender - Hook) [widths.lhs]
 					HookStart Ascender
 				[Just SHAPE-FLAT-TOP] : list
-					flat xBarEnd (Ascender - Stroke + fineTop) [widths.lhs fineTop]
-					curl [Arch.adjust-x.top xBarStart (sw -- fineTop)] (Ascender - Stroke + fineTop) [widths.lhs fineTop]
+					flat                    xBarEnd    ((Ascender - Stroke) + fineTop) [widths.lhs fineTop]
+					curl [Arch.adjust-x.top xBarStart] ((Ascender - Stroke) + fineTop) [widths.lhs fineTop]
 					archv 16
-			g4 xUpperArcLeft [YSmoothMidL Ascender (yBar - fine) adaTop adbTop] [widths.lhs]
+			g4   xUpperArcLeft [YSmoothMidL Ascender yBarBot adaTop adbTop] [widths.lhs]
 			arcvh 16
-			flat [Arch.adjust-x.bot xBarStart (sw -- fine)] (yBar - fine) [widths.lhs.heading fine Rightward]
-			curl xBarEnd (yBar - fine) [widths.lhs.heading fine Rightward]
+			flat [Arch.adjust-x.bot xBarStart] (yBarTop - fineMid) [widths.lhs.heading fineMid Rightward]
+			curl                    xBarEnd    (yBarTop - fineMid) [widths.lhs.heading fineMid Rightward]
 		include : dispiro
-			flat xBarEnd (yBar - Stroke + fine) [widths.lhs.heading fine Leftward]
-			curl [Arch.adjust-x.top xBarStart (sw -- fine)] (yBar - Stroke + fine) [widths.lhs.heading fine Leftward]
+			flat                    xBarEnd    (yBarBot + fineMid) [widths.lhs.heading fineMid Leftward]
+			curl [Arch.adjust-x.top xBarStart] (yBarBot + fineMid) [widths.lhs.heading fineMid Leftward]
 			archv 16
-			g4 xLowerArcLeft (0.9 * [YSmoothMidL (yBar - Stroke + fine) 0 adaBot adbBot]) [widths.lhs]
+			g4   xLowerArcLeft [mix 0 [YSmoothMidL yBarTop 0 adaBot adbBot] 0.9] [widths.lhs]
 			arcvh 16
-			g4 [mix (xLowerArcLeft + [HSwToV Stroke]) (RightSB - [HSwToV Stroke]) 0.6] 0 [heading Rightward]
+			g4   [mix (xLowerArcLeft + [HSwToV Stroke]) (RightSB - [HSwToV Stroke]) 0.6] 0 [heading Rightward]
 			archv 16
 			g4.down.mid (RightSB - [HSwToV Stroke]) [mix Descender Stroke 0.5] [heading Downward]
 			arcvh 16
-			flat (RightSB - (Stroke - [mix Descender Stroke 0.5]) * 1.1) (Descender + Stroke)
-			curl [Math.min (RightSB - (Stroke - [mix Descender Stroke 0.5]) * 1.1 - 1) [mix SB RightSB 0.5]] (Descender + Stroke)
+			flat                    (RightSB - (Stroke - [mix Descender Stroke 0.5]) * 1.1)      (Descender + Stroke)
+			curl [Math.min Middle : (RightSB - (Stroke - [mix Descender Stroke 0.5]) * 1.1) - 1] (Descender + Stroke)
 
-	create-glyph 'grek/xi.flatTop' : glyph-proc
+	create-glyph : glyph-proc
 		include : MarkSet.bp
-		include : LowerXiShape SHAPE-FLAT-TOP
-
-	create-glyph 'grek/xi.rounded' : glyph-proc
-		include : MarkSet.bp
-		include : LowerXiShape SHAPE-ROUNDED
+		create-forked-glyph "grek/xi.flatTop" : LowerXiShape SHAPE-FLAT-TOP
+		create-forked-glyph "grek/xi.rounded" : LowerXiShape SHAPE-ROUNDED
 
 	select-variant 'grek/xi' 0x3BE
