@@ -48,7 +48,7 @@ glyph-block Letter-Latin-Lower-A : begin
 						list
 							g4 df.leftSB (XH - AHook)
 							HookStart XH (sw -- stroke)
-				flat (df.rightSB - [HSwToV : stroke - [fallback fine stroke]]) [Math.max (XH - [ADoubleStoreySmoothB df]) (y0 + TINY)] [if fine [widths.rhs fine] nothing]
+				flat (df.rightSB - [HSwToV : stroke - [fallback fine stroke]]) [Math.max (XH - [ADoubleStoreySmoothB df]) (y0 + TINY + [HSwToV : Math.abs : TanSlope * [fallback fine stroke]])] [if fine [widths.rhs fine] nothing]
 				[if isMask corner curl] (df.rightSB - [HSwToV : stroke - [fallback fine stroke]]) y0 [heading Downward]
 				if isMask { [corner df.leftSB y0] } {}
 
@@ -115,8 +115,8 @@ glyph-block Letter-Latin-Lower-A : begin
 			begin [SerifFrame.fromDf df XH 0 (swRef -- [fallback _sw : ADoubleStoreyStroke df]) (swSerif -- df.mvs)].rb.outer
 
 		export : define [Tailed df hookStyle _sw] : union
-			HookAndBar df hookStyle (XH - [ADoubleStoreySmoothB df] + O) _sw
-			Arc        df 0         0                                    _sw
+			HookAndBar df hookStyle [ADoubleStoreySmoothA df] _sw
+			Arc        df 0         0                         _sw
 			RightwardTailedBar df.rightSB 0 (XH - [ADoubleStoreySmoothB df]) [fallback _sw : ADoubleStoreyStroke df]
 
 		export : define [FlatBottomSerifless df hookStyle _sw] : union
@@ -141,15 +141,6 @@ glyph-block Letter-Latin-Lower-A : begin
 			[Just ToothlessCorner]     : ArcMask df 1 DToothlessRise            _sw
 			[Just ToothlessRounded]    : ArcMask df 2 [ADoubleStoreySmoothA df] _sw
 			__                         : ArcMask df 0 0                         _sw
-
-	define [OverlayW bw] : glyph-proc
-		define l : mix 0     SB      0.3
-		define r : mix Width RightSB 0.3
-		local y : mix 0 XH 0.5
-		include : dispiro
-			widths.center bw
-			flat l y
-			curl r y
 
 	glyph-block-export DoubleStoreyConfig
 	define DoubleStoreyConfig : object
@@ -358,9 +349,6 @@ glyph-block Letter-Latin-Lower-A : begin
 			include [refer-glyph "a.\(suffix)"] AS_BASE ALSO_METRICS
 			eject-contour 'serifRB'
 			include : RetroflexHook.rSideJut RightSB 0 (yOverflow -- Stroke)
-		create-glyph "aBar.\(suffix)" : glyph-proc
-			include [refer-glyph "a.\(suffix)"] AS_BASE ALSO_METRICS
-			include : OverlayW [Math.min OverlayStroke : AdviceStroke2 2 3 XH]
 
 	select-variant 'a' 'a'
 	link-reduced-variant 'a/sansSerif' 'a' MathSansSerif
@@ -379,8 +367,6 @@ glyph-block Letter-Latin-Lower-A : begin
 	select-variant 'aScript' 0x251  (follow -- [conditional-follow SLAB 'a/singleStorey/autoSerifed/slab' 'a/singleStorey/autoSerifed/sans']) (shapeFrom -- 'a')
 
 	select-variant 'aScriptRetroflexHook' 0x1D90 (follow -- [conditional-follow SLAB 'aRetroflexHook/singleStorey/autoSerifed/slab' 'aRetroflexHook/singleStorey/autoSerifed/sans']) (shapeFrom -- 'aRetroflexHook')
-
-	select-variant 'aScriptBar' 0xAB30 (follow -- [conditional-follow SLAB 'a/singleStorey/autoSerifed/slab' 'a/singleStorey/autoSerifed/sans']) (shapeFrom -- 'aBar')
 
 	CreateTurnedLetter 'turnAScript' 0x2C70 'AScript' HalfAdvance (CAP / 2)
 	CreateTurnedLetter 'turnaScript' 0x252  'aScript' HalfAdvance (XH / 2)

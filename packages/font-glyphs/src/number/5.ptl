@@ -12,12 +12,21 @@ glyph-block Digits-Five : begin
 	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
 	glyph-block-import Letter-Arc-Hook : Toothed Toothless Rounded Flat
 
-	define [FiveShape] : with-params [
-			top bp pBarPosSwAdj [sw Stroke] [bbd 0] [obl 0] [zt 0]
-			[bowlTopArcC Rounded] [bowlBotArcC Rounded] [pXLeft 0.025] [slab SLAB]
-		] : glyph-proc
-		local t1 : (top * bp + sw * pBarPosSwAdj) * 0.8
-		local t2 : (top * bp + sw * pBarPosSwAdj) * 1.0
+	define flex-params [FiveShape] : glyph-proc
+		local-parameter : top
+		local-parameter : bp
+		local-parameter : pBarPosSwAdj
+		local-parameter : sw          -- Stroke
+		local-parameter : bbd         -- 0
+		local-parameter : obl         -- 0
+		local-parameter : zt          -- 0
+		local-parameter : bowlTopArcC -- Rounded
+		local-parameter : bowlBotArcC -- Rounded
+		local-parameter : pXLeft      -- 0.025
+		local-parameter : slab        -- SLAB
+
+		local t1 : mix 0 ([mix 0 top bp] + sw * pBarPosSwAdj) 0.8
+		local t2 : mix 0 ([mix 0 top bp] + sw * pBarPosSwAdj) 1.0
 		local xLeft : [mix SB RightSB pXLeft] + zt
 		local xRight : [mix RightSB SB 0.05] - (OX - O)
 
@@ -25,54 +34,75 @@ glyph-block Digits-Five : begin
 
 		local boxTop : new Box t2 0 xLeft RightSB
 		local boxBot : new Box t2 0 SB RightSB
-		local ArcTop : bowlTopArcC boxTop (sw -- sw) (barSw -- sw) (hook -- AHook * (top / CAP)) (xShrink -- [HSwToV : 0.5 * sw])
-		local ArcBot : bowlBotArcC boxBot (sw -- sw) (barSw -- sw) (hook --  Hook * (top / CAP))
+		local ArcTop : bowlTopArcC boxTop
+			sw      -- sw
+			barSw   -- sw
+			hook    -- (AHook * (top / CAP))
+			xShrink -- [HSwToV : 0.5 * sw]
+		local ArcBot : bowlBotArcC boxBot
+			sw    -- sw
+			barSw -- sw
+			hook  -- (Hook * (top / CAP))
 
 		include : difference
-			glyph-proc
+			new-glyph : glyph-proc
 				local fiveStroke : include : dispiro
 					ArcTop.hookStartL
 					g4 (RightSB - OX) [YSmoothMidR t2 0 ArchDepthA ArchDepthB]
 					ArcBot.hookEndL
 				local firstKnot fiveStroke.rhsKnots.0
-
 				local oblCor : Math.hypot 1 obl
 				local xVBar : firstKnot.x - oblCor * [HSwToV sw] + [if (bowlTopArcC === Flat) [HSwToV : 0.5 * sw] 0]
 				local xVBarOffset : (top - firstKnot.y) * obl
 				include : HBar.t [if zt SB (xVBar + xVBarOffset)] xRight top sw
 				include : union
-					intersection [Rect (firstKnot.y + sw) firstKnot.y 0 Width] : dispiro
-						flat xVBar firstKnot.y [widths.rhs.heading (sw) Upward]
-						flat (xVBar + xVBarOffset) top [heading Upward]
-					intersection [Rect top (firstKnot.y + sw) 0 Width] : dispiro
-						flat xVBar firstKnot.y [widths.rhs.heading (oblCor * sw) Upward]
-						flat (xVBar + xVBarOffset) top [heading Upward]
-
+					intersection
+						Rect (firstKnot.y + sw) firstKnot.y 0 Width
+						dispiro
+							widths.rhs sw
+							flat  xVBar                firstKnot.y [heading Upward]
+							flat (xVBar + xVBarOffset) top         [heading Upward]
+					intersection
+						Rect top (firstKnot.y + sw) 0 Width
+						dispiro
+							widths.rhs (oblCor * sw)
+							flat  xVBar                firstKnot.y [heading Upward]
+							flat (xVBar + xVBarOffset) top         [heading Upward]
 				if bbd : begin
 					local boxTop2 : boxTop.pad TINY
 					local boxBot2 : boxBot.pad TINY
-					local ArcTop2 : bowlTopArcC boxTop2 (sw -- sw) (barSw -- sw) (hook -- AHook * (top / CAP)) (xShrink -- [HSwToV : 0.5 * sw])
-					local ArcBot2 : bowlBotArcC boxBot2 (sw -- sw) (barSw -- sw) (hook --  Hook * (top / CAP))
-
-					local mask : spiro-outline
+					local ArcTop2 : bowlTopArcC boxTop2
+						sw      -- sw
+						barSw   -- sw
+						hook    -- (AHook * (top / CAP))
+						xShrink -- [HSwToV : 0.5 * sw]
+					local ArcBot2 : bowlBotArcC boxBot2
+						sw    -- sw
+						barSw -- sw
+						hook  -- (Hook * (top / CAP))
+					local [mask] : spiro-outline
 						ArcTop2.hookStartL
 						g4 (boxTop2.r - OX) [YSmoothMidR t2 0 ArchDepthA ArchDepthB]
 						ArcBot2.hookEndL
-					include : intersection mask [VBar.r (RightSB - OX - bbd) 0 CAP sw]
-					include : difference [VBar.r (firstKnot.x + bbd) 0 CAP sw] mask [Rect (t2 / 2) 0 0 Width]
-
+					include : intersection
+						mask
+						VBar.r (RightSB - OX - bbd) 0 CAP sw
+					include : difference
+						VBar.r (firstKnot.x  + bbd) 0 CAP sw
+						mask
+						Rect (t2 / 2) 0 0 Width
 			Rect (t2 / 2 + t2 * kGap) (t2 / 2 - t2 * kGap) 0 Middle
 
 		if (!bbd && slab) : include : VSerif.dr xRight top [Math.min VJut ((top - t2) * 0.8)]
 
 	define FiveConfig : SuffixCfg.weave
-		object # upper-left-bar
-			"upright" 0
-			"oblique" (1 / 12)
+		object # upper-left bar
+			"upright"   0
+			"oblique"   (1/12)
 		object # arcs
-			"arched"    { Rounded Rounded DesignParameters.fiveBarPos           0     0.025 }
-			"flat"      { Flat    Rounded (7 / 8 * DesignParameters.fiveBarPos) (1/3) 0.05  }
-			"flat-hook" { Flat    Flat    (7 / 8 * DesignParameters.fiveBarPos) (1/3) 0.05  }
+			"arched"    { Rounded Rounded (1.000 * DesignParameters.fiveBarPos) 0     0.025 }
+			"flat"      { Flat    Rounded (0.875 * DesignParameters.fiveBarPos) (1/3) 0.050 }
+			"flatHook"  { Flat    Flat    (0.875 * DesignParameters.fiveBarPos) (1/3) 0.050 }
 		object # serifs
 			"serifless" false
 			"serifed"   true
@@ -80,20 +110,40 @@ glyph-block Digits-Five : begin
 	foreach { suffix { obl { bowlTopArcC bowlBotArcC pBarPos pBarPosSwAdj pXLeft } slab } } [pairs-of FiveConfig] : do
 		create-glyph "five.lnum.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : FiveShape CAP pBarPos pBarPosSwAdj (bowlTopArcC -- bowlTopArcC) (bowlBotArcC -- bowlBotArcC) (obl -- obl) (pXLeft -- pXLeft) (slab -- slab)
+			include : FiveShape CAP pBarPos pBarPosSwAdj
+				bowlTopArcC -- bowlTopArcC
+				bowlBotArcC -- bowlBotArcC
+				obl         -- obl
+				pXLeft      -- pXLeft
+				slab        -- slab
 
 		create-glyph "five.onum.\(suffix)" : glyph-proc
 			include : OnumMarks.p
-			include : FiveShape CAP pBarPos pBarPosSwAdj (bowlTopArcC -- bowlTopArcC) (bowlBotArcC -- bowlBotArcC) (obl -- obl) (pXLeft -- pXLeft) (slab -- slab)
+			include : FiveShape CAP pBarPos pBarPosSwAdj
+				bowlTopArcC -- bowlTopArcC
+				bowlBotArcC -- bowlBotArcC
+				obl         -- obl
+				pXLeft      -- pXLeft
+				slab        -- slab
 			include : ShiftDown
 
 		create-glyph "zhuangToneFive.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : FiveShape CAP pBarPos pBarPosSwAdj (bowlTopArcC -- bowlTopArcC) (bowlBotArcC -- bowlBotArcC) (zt -- ((RightSB - SB) * 0.05)) (pXLeft -- pXLeft) (slab -- slab)
+			include : FiveShape CAP pBarPos pBarPosSwAdj
+				bowlTopArcC -- bowlTopArcC
+				bowlBotArcC -- bowlBotArcC
+				zt          -- ((RightSB - SB) * 0.05)
+				pXLeft      -- pXLeft
+				slab        -- slab
 
 		create-glyph "zhuangtonefive.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : FiveShape XH pBarPos pBarPosSwAdj (bowlTopArcC -- bowlTopArcC) (bowlBotArcC -- bowlBotArcC) (zt -- ((RightSB - SB) * 0.05)) (pXLeft -- pXLeft) (slab -- slab)
+			include : FiveShape XH pBarPos pBarPosSwAdj
+				bowlTopArcC -- bowlTopArcC
+				bowlBotArcC -- bowlBotArcC
+				zt          -- ((RightSB - SB) * 0.05)
+				pXLeft      -- pXLeft
+				slab        -- slab
 
 	select-variant 'five.lnum' [CodeLnum '5'] (follow -- 'five')
 	select-variant 'five.onum' [CodeOnum '5'] (follow -- 'five')

@@ -1021,10 +1021,9 @@ glyph-block Letter-Shared-Shapes : begin
 
 		local leftCenter  : box.l + [HSwToV HalfStroke]
 		local rightCenter : box.r - [HSwToV HalfStroke]
-		local adj : TanSlope * Stroke * DesignParameters.serifShiftX
 		return : intersection s : union
-			Rect box.t [mix box.t box.b 0.5] (leftCenter - Jut) (rightCenter + Jut - adj)
-			Rect [mix box.t box.b 0.5] box.b (leftCenter - Jut + adj) (rightCenter + Jut)
+			Rect box.t [mix box.t box.b 0.5] (leftCenter - Jut) (rightCenter + Jut - SerifShiftS)
+			Rect [mix box.t box.b 0.5] box.b (leftCenter - Jut + SerifShiftS) (rightCenter + Jut)
 
 	glyph-block-export LegShape
 	define [LegShape] : with-params [ztop zbot xmid [sw Stroke]] : glyph-proc
@@ -1132,13 +1131,13 @@ glyph-block Letter-Shared-Shapes : begin
 			export : define [lSideJut] : with-params [x y [yOverflow 0] [refSw Stroke] [jut Jut] [sideJut (jut - [HSwToV : 0.5 * refSw])]] : begin
 				local sw : Sw refSw
 				local xLink : x + [HSwToV : 0.5 * refSw] - TanSlope * sw
-				local xPos  : x + [HSwToV : 0.5 * sw] - sideJut + sw * TanSlope * (DesignParameters.serifShiftX - 1)
+				local xPos  : x + [HSwToV : 0.5 * sw] - sideJut + sw * (SerifShiftX - TanSlope)
 				return : Impl xPos y xLink y yOverflow sw
 
 			export : define [rSideJut] : with-params [x y [yOverflow 0] [refSw Stroke] [jut Jut] [sideJut (jut - [HSwToV : 0.5 * refSw])]] : begin
 				local sw : Sw refSw
 				local xLink : x - [HSwToV : 0.5 * refSw]
-				local xPos  : x - [HSwToV : 0.5 * sw] + sideJut + sw * TanSlope * (DesignParameters.serifShiftX + 1)
+				local xPos  : x - [HSwToV : 0.5 * sw] + sideJut + sw * (SerifShiftX + TanSlope)
 				return : Impl xPos y xLink y yOverflow sw
 
 		# Diacritical descender of cyrillics
@@ -1216,20 +1215,6 @@ glyph-block Letter-Shared-Shapes : begin
 					yDepth -- TailY
 					sw     -- sw
 					yExtension -- [Math.max 0 : yAttach + yOverflow - y + (fullDepth - TailY)]
-
-		# Half-circle hook, used by Tsse
-		glyph-block-export HalfRingDescender
-		define [HalfRingDescender x y] : glyph-proc
-			local sw : Math.min (0.5 * (0 - Descender)) [AdviceStroke 3]
-			local r : (sw - Descender) / 2
-			include : lift-@ : dispiro
-				widths.lhs sw
-				g4.left.start x (@yT = y + sw) [heading Leftward]
-				archv
-				g4.down.mid (x - r) [mix @yT @yB 0.5] [heading Downward]
-				arcvh
-				flat x (@yB = y + sw - 2 * r) [heading Rightward]
-				curl (x + [HSwToV Stroke]) @yB
 
 		# Cyrillic "Middle Hook" Characters
 		glyph-block-export MidHook
