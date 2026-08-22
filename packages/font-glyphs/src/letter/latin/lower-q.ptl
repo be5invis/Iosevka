@@ -8,93 +8,142 @@ glyph-module
 glyph-block Letter-Latin-Lower-Q : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Shared-Metrics : markHalfStroke
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar RightwardDiagTailedBar
-	glyph-block-import Letter-Shared-Shapes : OBarRight TopHook RetroflexHook
+	glyph-block-import Letter-Shared-Shapes : OBarRight TopHook RetroflexHook PalatalHook
 
 	define TERMINAL-NORMAL  0
 	define TERMINAL-TAILED  1
 	define TERMINAL-DIAG    2
 
-	define [EaredBody terminal top bottom _ada _adb] : glyph-proc
-		local ada : fallback _ada SmallArchDepthA
-		local adb : fallback _adb SmallArchDepthB
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRight.shape
-			top -- top
-			ada -- ada
-			adb -- adb
-		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar     RightSB bottom top
-			[Just TERMINAL-DIAG]   : RightwardDiagTailedBar RightSB bottom top
-			__                     : VBar.r                 RightSB bottom top
+	define [EaredBody terminal df top bottom _ada _adb] : glyph-proc
+		local ada : fallback _ada df.smallArchDepthA
+		local adb : fallback _adb df.smallArchDepthB
+		set-base-anchor 'overlay' df.middle (top / 2)
+		set-base-anchor 'strike'  df.middle (top / 2)
+		include : OBarRight.shape top 0 df.leftSB df.rightSB
+			ada  -- ada
+			adb  -- adb
+			sw   -- df.mvs
+			fine -- df.shoulderFine
+		match terminal
+			[Just TERMINAL-TAILED] : begin
+				include : RightwardTailedBar df.rightSB bottom top df.mvs
+				set-base-anchor 'trailing' (df.rightSB + SideJut) bottom
+			[Just TERMINAL-DIAG] : begin
+				define path : include : RightwardDiagTailedBar df.rightSB bottom top df.mvs
+				define lastKnot path.rhsKnots.[path.rhsKnots.length - 1]
+				set-base-anchor 'palatalHookAttach' lastKnot.x lastKnot.y
+				set-base-anchor 'trailing'          lastKnot.x lastKnot.y
+			__ : begin
+				include : VBar.r df.rightSB bottom top df.mvs
+				set-base-anchor 'trailing' df.rightSB Descender
 
-	define [TopCutBody terminal top bottom _ada _adb] : glyph-proc
-		local ada : fallback _ada SmallArchDepthA
-		local adb : fallback _adb SmallArchDepthB
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRight.shape
-			top -- top
-			ada -- ada
-			adb -- adb
-		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar     RightSB bottom (top - HalfStroke)
-			[Just TERMINAL-DIAG]   : RightwardDiagTailedBar RightSB bottom (top - HalfStroke)
-			__                     : VBar.r                 RightSB bottom (top - HalfStroke)
+	define [TopCutBody terminal df top bottom _ada _adb] : glyph-proc
+		local ada : fallback _ada df.smallArchDepthA
+		local adb : fallback _adb df.smallArchDepthB
+		set-base-anchor 'overlay' df.middle (top / 2)
+		set-base-anchor 'strike'  df.middle (top / 2)
+		include : OBarRight.shape top 0 df.leftSB df.rightSB
+			ada  -- ada
+			adb  -- adb
+			sw   -- df.mvs
+			fine -- df.shoulderFine
+		match terminal
+			[Just TERMINAL-TAILED] : begin
+				include : RightwardTailedBar df.rightSB bottom (top - HalfStroke) df.mvs
+				set-base-anchor 'trailing' (df.rightSB + SideJut) bottom
+			[Just TERMINAL-DIAG] : begin
+				define path : include : RightwardDiagTailedBar df.rightSB bottom (top - HalfStroke) df.mvs
+				define lastKnot path.rhsKnots.[path.rhsKnots.length - 1]
+				set-base-anchor 'palatalHookAttach' lastKnot.x lastKnot.y
+				set-base-anchor 'trailing'          lastKnot.x lastKnot.y
+			__ : begin
+				include : VBar.r df.rightSB bottom (top - HalfStroke) df.mvs
+				set-base-anchor 'trailing' df.rightSB Descender
 		include : spiro-outline
-			corner  RightSB                     top
-			corner  RightSB                    (top - HalfStroke)
-			corner (RightSB - [HSwToV Stroke]) (top - HalfStroke)
+			corner  df.rightSB                     top
+			corner  df.rightSB                    (top - HalfStroke)
+			corner (df.rightSB - [HSwToV df.mvs]) (top - HalfStroke)
 
-	define [FlatTopBody terminal top bottom _ada _adb] : glyph-proc
-		local ada : fallback _ada SmallArchDepthA
-		local adb : fallback _adb SmallArchDepthB
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRight.earlessCorner
-			top -- top
-			ada -- ada
-			adb -- adb
+	define [FlatTopBody terminal df top bottom _ada _adb] : glyph-proc
+		local ada : fallback _ada df.smallArchDepthA
+		local adb : fallback _adb df.smallArchDepthB
+		set-base-anchor 'overlay' df.middle (top / 2)
+		set-base-anchor 'strike'  df.middle (top / 2)
+		include : OBarRight.earlessCorner top 0 df.leftSB df.rightSB
+			ada  -- ada
+			adb  -- adb
+			sw   -- df.mvs
+			fine -- df.shoulderFine
 			rise -- 0
-		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar     RightSB bottom top
-			[Just TERMINAL-DIAG]   : RightwardDiagTailedBar RightSB bottom top
-			__                     : VBar.r                 RightSB bottom top
+		match terminal
+			[Just TERMINAL-TAILED] : begin
+				include : RightwardTailedBar df.rightSB bottom top df.mvs
+				set-base-anchor 'trailing' (df.rightSB + SideJut) bottom
+			[Just TERMINAL-DIAG] : begin
+				define path : include : RightwardDiagTailedBar df.rightSB bottom top df.mvs
+				define lastKnot path.rhsKnots.[path.rhsKnots.length - 1]
+				set-base-anchor 'palatalHookAttach' lastKnot.x lastKnot.y
+				set-base-anchor 'trailing'          lastKnot.x lastKnot.y
+			__ : begin
+				include : VBar.r df.rightSB bottom top df.mvs
+				set-base-anchor 'trailing' df.rightSB Descender
 
-	define [EarlessCornerBody terminal top bottom _ada _adb] : glyph-proc
-		local ada : fallback _ada SmallArchDepthA
-		local adb : fallback _adb SmallArchDepthB
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRight.earlessCorner
-			top -- top
-			ada -- ada
-			adb -- adb
-		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar     RightSB bottom (top - DToothlessRise)
-			[Just TERMINAL-DIAG]   : RightwardDiagTailedBar RightSB bottom (top - DToothlessRise)
-			__                     : VBar.r                 RightSB bottom (top - DToothlessRise)
+	define [EarlessCornerBody terminal df top bottom _ada _adb] : glyph-proc
+		local ada : fallback _ada df.smallArchDepthA
+		local adb : fallback _adb df.smallArchDepthB
+		set-base-anchor 'overlay' df.middle (top / 2)
+		set-base-anchor 'strike'  df.middle (top / 2)
+		include : OBarRight.earlessCorner top 0 df.leftSB df.rightSB
+			ada  -- ada
+			adb  -- adb
+			sw   -- df.mvs
+			fine -- df.shoulderFine
+		match terminal
+			[Just TERMINAL-TAILED] : begin
+				include : RightwardTailedBar df.rightSB bottom (top - DToothlessRise) df.mvs
+				set-base-anchor 'trailing' (df.rightSB + SideJut) bottom
+			[Just TERMINAL-DIAG] : begin
+				define path : include : RightwardDiagTailedBar df.rightSB bottom (top - DToothlessRise) df.mvs
+				define lastKnot path.rhsKnots.[path.rhsKnots.length - 1]
+				set-base-anchor 'palatalHookAttach' lastKnot.x lastKnot.y
+				set-base-anchor 'trailing'          lastKnot.x lastKnot.y
+			__ : begin
+				include : VBar.r df.rightSB bottom (top - DToothlessRise) df.mvs
+				set-base-anchor 'trailing' df.rightSB Descender
 
-	define [EarlessRoundedBody terminal top bottom _ada _adb] : glyph-proc
-		local ada : fallback _ada SmallArchDepthA
-		local adb : fallback _adb SmallArchDepthB
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRight.earlessRounded
-			top -- top
-			ada -- ada
-			adb -- adb
+	define [EarlessRoundedBody terminal df top bottom _ada _adb] : glyph-proc
+		local ada : fallback _ada df.smallArchDepthA
+		local adb : fallback _adb df.smallArchDepthB
+		set-base-anchor 'overlay' df.middle (top / 2)
+		set-base-anchor 'strike'  df.middle (top / 2)
+		include : OBarRight.earlessRounded top 0 df.leftSB df.rightSB
+			ada  -- ada
+			adb  -- adb
+			sw   -- df.mvs
+			fine -- df.shoulderFine
 			yTerminal -- ada
-		include : match terminal
-			[Just TERMINAL-TAILED] : RightwardTailedBar     RightSB bottom (top - adb)
-			[Just TERMINAL-DIAG]   : RightwardDiagTailedBar RightSB bottom (top - adb)
-			__                     : VBar.r                 RightSB bottom (top - adb)
+		match terminal
+			[Just TERMINAL-TAILED] : begin
+				include : RightwardTailedBar df.rightSB bottom (top - adb) df.mvs
+				set-base-anchor 'trailing' (df.rightSB + SideJut) bottom
+			[Just TERMINAL-DIAG] : begin
+				define path : include : RightwardDiagTailedBar df.rightSB bottom (top - adb) df.mvs
+				define lastKnot path.rhsKnots.[path.rhsKnots.length - 1]
+				set-base-anchor 'palatalHookAttach' lastKnot.x lastKnot.y
+				set-base-anchor 'trailing'          lastKnot.x lastKnot.y
+			__ : begin
+				include : VBar.r df.rightSB bottom (top - adb) df.mvs
+				set-base-anchor 'trailing' df.rightSB Descender
 
-	define [RtSerif y] : tagged 'serifRT' : HSerif.rt RightSB y SideJut
-	define [RbSerif y] : tagged 'serifRB' : union
-		HSerif.lb (RightSB - [HSwToV HalfStroke]) y MidJutSide
-		HSerif.rb (RightSB - [HSwToV HalfStroke]) y Jut
-	define [RbSerifOuter y] : tagged 'serifRB' : HSerif.rb RightSB y SideJut
-	define [RtSerifAuto y] : NeedSlab SLAB : RtSerif y
-	define [RbSerifAuto y] : NeedSlab SLAB : RbSerif y
+	define [RtSerif df y] : tagged 'serifRT' : HSerif.rt df.rightSB y SideJut df.mvs
+	define [RbSerif df y] : tagged 'serifRB' : union
+		HSerif.lb (df.rightSB - [HSwToV : 0.5 * df.mvs]) y (MidJutSide - [HSwToV : 0.5 * (Stroke - df.mvs)]) df.mvs
+		HSerif.rb (df.rightSB - [HSwToV : 0.5 * df.mvs]) y (Jut        - [HSwToV : 0.5 * (Stroke - df.mvs)]) df.mvs
+	define [RbSerifOuter df y] : tagged 'serifRB' : HSerif.rb df.rightSB y SideJut df.mvs
+	define [RtSerifAuto df y] : NeedSlab SLAB : RtSerif df y
+	define [RbSerifAuto df y] : NeedSlab SLAB : RbSerif df y
 
 	define QConfig : SuffixCfg.weave
 		object # body
@@ -117,33 +166,56 @@ glyph-block Letter-Latin-Lower-Q : begin
 	foreach { suffix { Body terminal { sRT sRB } } } [Object.entries QConfig] : do
 		create-glyph "q.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			include : Body terminal XH Descender
-			if sRT : include : sRT XH
-			if sRB : include : sRB Descender
+			include : Body terminal [DivFrame 1] XH Descender
+			if sRT : include : sRT [DivFrame 1] XH
+			if sRB : include : sRB [DivFrame 1] Descender
 			include : LeaningAnchor.Below.VBar.r RightSB
+
+		create-glyph "qPalatalHook.\(suffix)" : match terminal
+			[Just TERMINAL-DIAG] : glyph-proc
+				include [refer-glyph "q.\(suffix)"] AS_BASE ALSO_METRICS
+				local attach : currentGlyph.gizmo.unapply (currentGlyph.baseAnchors.palatalHookAttach || currentGlyph.baseAnchors.bottomRight)
+				include : PalatalHook.r attach.x Descender (yAttach -- attach.y)
+			__ : glyph-proc
+				local df : include : DivFrame para.advanceScaleM 1
+				include : df.markSet.p
+				local subDf : DivFrame (0.75 * para.advanceScaleM) 2
+				include : Body terminal subDf XH Descender
+				if sRT : include : sRT subDf XH
+				if sRB : include : sRB subDf Descender
+				local tinyGap : Math.max (Width / 32) : AdviceStroke 24
+				local sideJut : if (sRB || terminal !== TERMINAL-NORMAL) SideJut 0
+				include : PalatalHook.r
+					x       -- (df.rightSB + sideJut + 2 * tinyGap)
+					y       -- 0
+					xLink   -- subDf.rightSB
+					refSw   -- subDf.mvs
+					maskOut -- [intersection [MaskBelow 0] [MaskLeft : subDf.rightSB + sideJut + 2 * tinyGap]]
 
 		if (terminal === TERMINAL-NORMAL && !sRB) : begin
 			create-glyph "qCapRTail.\(suffix)" : glyph-proc
 				include : MarkSet.capDesc
-				include : Body terminal CAP 0 ArchDepthA ArchDepthB
+				include : Body terminal [DivFrame 1] CAP 0 ArchDepthA ArchDepthB
+				if sRT : include : sRT [DivFrame 1] CAP
 				include : RetroflexHook.rExt RightSB 0
-				if sRT : include : sRT CAP
 				include : LeaningAnchor.Below.VBar.r RightSB
 
 			create-glyph "qRTail.\(suffix)" : glyph-proc
 				include : MarkSet.p
-				include : Body terminal XH 0
+				include : Body terminal [DivFrame 1] XH 0
+				if sRT : include : sRT [DivFrame 1] XH
 				include : RetroflexHook.rExt RightSB 0
-				if sRT : include : sRT XH
 				include : LeaningAnchor.Below.VBar.r RightSB
 
 	select-variant 'q' 'q'
 	link-reduced-variant 'q/sansSerif' 'q' MathSansSerif
-	alias 'cyrl/qa' 0x51B 'q'
 	select-variant 'QRTail' 0x24A (shapeFrom -- 'qCapRTail') (follow -- 'qRTail')
 	select-variant 'qRTail' 0x24B
-	select-variant "q/hookTopBase" (shapeFrom -- 'q')
+	select-variant 'qPalatalHook' 0x1DF34 (follow -- 'q')
 
+	alias 'cyrl/qa' 0x51B 'q'
+
+	select-variant "q/hookTopBase" (shapeFrom -- 'q')
 	derive-glyphs 'qHookTop' 0x2A0 "q/hookTopBase" : function [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : VBar.r RightSB 0 XH

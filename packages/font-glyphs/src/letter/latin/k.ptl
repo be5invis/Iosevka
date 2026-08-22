@@ -18,7 +18,7 @@ glyph-block Letter-Latin-K : begin
 
 	define [KBalance      slabLT   fStraightBar] : if fStraightBar (Width / 32) 0
 	define [KBalanceRight slabLegs fStraightBar] : if slabLegs 0 : if fStraightBar (Width / 32) 0
-	define [KOvershootX slabLegs fStraightBar top swRef] : if fStraightBar (([if slabLegs 0 : (-4) * OX] - swRef / 3) * (XH / top)) 0
+	define [KOvershootX slabLegs fStraightBar top swRef] : if fStraightBar (([if slabLegs 0 (-4)] * OX - swRef / 3) * (XH / top)) 0
 
 	# The mode parameter of KLegSlabs is a bitmasked interger, with the following bits [F T B]
 	# F: Whether the serif is full
@@ -150,7 +150,7 @@ glyph-block Letter-Latin-K : begin
 			local kshRightHookTop : kshRight - HookX * 0.5 + [HSwToV : 0.5 * stroke]
 
 			local xAttach : kshLeft + [HSwToV stroke] + (leadGap || fine)
-			local yAttach : [mix 0 top : if leadGap 0.42 0.49] - stroke * [if leadGap 1 (-0.1)]
+			local yAttach : [mix 0 top : if leadGap 0.42 0.49] - stroke * [if leadGap (+1.0) (-0.1)]
 			local coYAttach : top - yAttach
 
 			set-base-anchor 'overlay' [mix left right 0.5] (top / 2)
@@ -171,8 +171,8 @@ glyph-block Letter-Latin-K : begin
 						flat [mix (kshRightHookTop - ox) xAttach kHookTopMix] [mix top yAttach kHookTopMix] [widths.rhs : mix stroke fine kHookTopMix]
 						curl [mix (kshRightHookTop - ox) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
 			: else : begin
-				local xRef : linreg yAttach xAttach top kshRight (top * 0.75)
-				set-base-anchor 'armOverlay' (xRef - [HSwToV HalfStroke]) (top * 0.75)
+				local xRef : linreg yAttach xAttach top kshRight [mix 0 top 0.75]
+				set-base-anchor 'armOverlay' (xRef - [HSwToV HalfStroke]) [mix 0 top 0.75]
 				include : tagged 'strokeRT' : intersection
 					StrokeMask true top (0.5 * top) 0
 					dispiro
@@ -192,8 +192,8 @@ glyph-block Letter-Latin-K : begin
 					arcvh
 					straight.left.end (right - HookX - [HSwToV : 0.5 * stroke]) hookDepth
 			: else : begin
-				local xRef : linreg coYAttach xAttach 0 kshRight (top * 0.25)
-				set-base-anchor 'legOverlay' (xRef - [HSwToV HalfStroke]) (top * 0.25)
+				local xRef : linreg coYAttach xAttach 0 kshRight [mix 0 top 0.25]
+				set-base-anchor 'legOverlay' (xRef - [HSwToV HalfStroke]) [mix 0 top 0.25]
 				include : tagged 'strokeRB' : intersection
 					StrokeMask false (0.5 * top) 0 0
 					dispiro
@@ -398,7 +398,7 @@ glyph-block Letter-Latin-K : begin
 				CursiveLoopT spiro-outline (-O) left right stroke top slabLT slabLegs
 
 	define CyrlVbGap : (RightSB - SB) * 0.375
-	define [CyrlVbLength top] : top * 0.375 + Stroke
+	define [CyrlVbLength top] : (top - 0) * 0.375 + Stroke
 	define CyrlVbSw : AdviceStroke 3
 
 	define UpperKConfig : SuffixCfg.weave
@@ -440,7 +440,12 @@ glyph-block Letter-Latin-K : begin
 			1 : HSerif.mb (xBarLeft + [HSwToV : 0.5 * swRef]) 0 (Jut - [HSwToV : 0.5 * (Stroke - swRef)]) swSerif
 			_ : glyph-proc
 
-	define [CyrlKaVBar top xBarLeft] : VBar.m
+	define [KBarShape top xBarLeft] : HOverlayBar
+		xBarLeft - 0.7 * (SB - 0)
+		mix SB RightSB 0.92
+		begin (top / 2)
+
+	define [CyrlKaVBarShape top xBarLeft] : VBar.m
 		xBarLeft + [HSwToV : 0.5 * CyrlVbSw] + 0.7 * CyrlVbGap
 		top / 2 - [CyrlVbLength top] / 2
 		top / 2 + [CyrlVbLength top] / 2
@@ -492,10 +497,14 @@ glyph-block Letter-Latin-K : begin
 				top   -- (CAP - [if slabLT Stroke 0])
 				space -- { 0 [mix SB RightSB 0.75] }
 
+		create-glyph "KBar.\(suffix)" : glyph-proc
+			include [refer-glyph "K.\(suffix)"] AS_BASE ALSO_METRICS
+			include : KBarShape CAP (SB + [KBalance slabLT fStraightBar])
+
 		create-glyph "KVBar.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : KBaseShape CyrlVbSw CAP
-			include : CyrlKaVBar CAP (SB + [KBalance slabLT fStraightBar])
+			include : CyrlKaVBarShape CAP (SB + [KBalance slabLT fStraightBar])
 
 		create-glyph "grek/KaiSymbol.\(suffix)" : glyph-proc
 			include [refer-glyph "K.\(suffix)"] AS_BASE ALSO_METRICS
@@ -515,7 +524,7 @@ glyph-block Letter-Latin-K : begin
 		create-glyph "smcpKVBar.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : KBaseShape CyrlVbSw XH
-			include : CyrlKaVBar XH (SB + [KBalance slabLT fStraightBar])
+			include : CyrlKaVBarShape XH (SB + [KBalance slabLT fStraightBar])
 
 		create-glyph "KHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -606,6 +615,10 @@ glyph-block Letter-Latin-K : begin
 				bot   -- XH
 				top   -- (Ascender - [if slabLT Stroke 0])
 
+		create-glyph "kBar.\(suffix)" : glyph-proc
+			include [refer-glyph "k.\(suffix)"] AS_BASE ALSO_METRICS
+			include : KBarShape XH (SB + [KBalance slabLT fStraightBar])
+
 		create-glyph "kHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			local xBarLeft : SB + [KBalance slabLT fStraightBar]
@@ -641,6 +654,7 @@ glyph-block Letter-Latin-K : begin
 	select-variant 'KHookTop' 0x198
 	select-variant 'KDescender' 0x2C69
 	select-variant 'KStroke' 0xA740 (follow -- 'K')
+	select-variant 'KBar' 0x1DF48 (follow -- 'K')
 
 	alias 'grek/Kappa' 0x39A 'K'
 	alias-reduced-variant 'grek/Kappa/sansSerif' 'grek/Kappa' 'K/sansSerif' MathSansSerif
@@ -659,6 +673,7 @@ glyph-block Letter-Latin-K : begin
 	select-variant 'kDescender' 0x2C6A
 	select-variant 'kPalatalHook' 0x1D84 (follow -- 'kDescender')
 	select-variant 'kStroke' 0xA741 (follow -- 'k')
+	select-variant 'kBar' 0x1DF49 (follow -- 'k')
 
 	select-variant 'latn/kappa' 0x138 (shapeFrom -- 'smcpK')
 
@@ -685,7 +700,7 @@ glyph-block Letter-Latin-K : begin
 
 	select-variant 'turnk' 0x29E (follow -- 'k')
 
-	derive-multi-part-glyphs 'kDot' null {'k' 'dotAbove'} : lambda [srcs gr] : glyph-proc
+	derive-multi-part-glyphs 'kDot' null { 'k' 'dotAbove' } : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
 		include : refer-glyph mark
 		include : Translate (Width + [HSwToV HalfStroke]) 0
