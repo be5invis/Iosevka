@@ -323,7 +323,7 @@ glyph-block Letter-Latin-K : begin
 			define arcTerminalX : mix arcStartX kshRight pArcTerminalX
 			define arcBottomX   : mix arcStartX kshRight pArcBottomX
 			define arcBottomY   : mix 0 top pArcBottomY
-			define arcTerminalY : arcBottomY + arcStroke * 0.125 - O
+			define arcTerminalY : arcBottomY - O + arcStroke * 0.125
 			define arcRightX    : kshRight * pArcRightX + [HSwToV : 0.2 * stroke]
 			define arcRightY    : mix arcBottomY top pArcRightY
 
@@ -339,7 +339,7 @@ glyph-block Letter-Latin-K : begin
 					swAfter  -- dim.arcStroke
 					p        -- dim.pArcTopX
 
-				g4.down.mid (dim.arcRightX - offset) (dim.arcRightY - 0.5 * dim.arcRightSlope * [HSwToV dim.arcStroke])
+				g4.down.mid (dim.arcRightX - offset) (dim.arcRightY - [HSwToV : dim.arcRightSlope * 0.5 * dim.arcStroke])
 					heading {.y dim.arcRightSlope .x HVContrast}
 				arcvh
 				g4 dim.arcBottomX (dim.arcBottomY   - dim.arcStroke + offset) [widths.rhs.heading dim.arcTerminalFine Leftward]
@@ -351,8 +351,8 @@ glyph-block Letter-Latin-K : begin
 			define [BottomStrokeMask] : Rect XH 0 0 [if slabLegs (dim.kshRight + SideJut + TanSlope * Stroke) VERY-FAR]
 
 			include : CursiveLoopT dispiro 0 left right stroke top slabLT slabLegs
-			set-base-anchor 'overlay' [mix left right 0.5] (top / 2)
-			set-base-anchor 'strike'  [mix left right 0.5] (top / 2)
+			set-base-anchor 'overlay' [mix left right 0.5] (dim.arcBottomY - dim.arcStroke + dim.arcTerminalFine / 2)
+			set-base-anchor 'strike'  [mix left right 0.5] (dim.arcBottomY - dim.arcStroke + dim.arcTerminalFine / 2)
 			set-base-anchor 'legOverlay' [mix dim.arcTerminalX dim.kshRight : StrokeWidthBlend 0.5 0.6] [mix dim.arcTerminalY 0 : StrokeWidthBlend 0.6 0.65]
 			include : difference
 				intersection [BottomStrokeMask] : dispiro
@@ -386,8 +386,8 @@ glyph-block Letter-Latin-K : begin
 			define tailAngle : Math.min 85 (DiagTailAngle + 3)
 			define dtInnerRadius : [clamp 0.125 1 : mix 1 (Width / HalfUPM) 3] * TightBendInnerRadius
 
-			set-base-anchor 'overlay' [mix left right 0.5] (top / 2)
-			set-base-anchor 'strike'  [mix left right 0.5] (top / 2)
+			set-base-anchor 'overlay' [mix left right 0.5] (dim.arcBottomY - dim.arcStroke + dim.arcTerminalFine / 2)
+			set-base-anchor 'strike'  [mix left right 0.5] (dim.arcBottomY - dim.arcStroke + dim.arcTerminalFine / 2)
 			set-base-anchor 'legOverlay' [mix xDTStart xDTEnd : StrokeWidthBlend 0.65 0.75] [mix dim.arcTerminalY 0 : StrokeWidthBlend 0.6 0.65]
 			define innerX : xDTEnd + 0.5 * swDiagTailAdj
 			include : difference
@@ -440,10 +440,10 @@ glyph-block Letter-Latin-K : begin
 			1 : HSerif.mb (xBarLeft + [HSwToV : 0.5 * swRef]) 0 (Jut - [HSwToV : 0.5 * (Stroke - swRef)]) swSerif
 			_ : glyph-proc
 
-	define [KBarShape top xBarLeft] : HOverlayBar
-		xBarLeft - 0.7 * (SB - 0)
-		mix SB RightSB 0.92
-		begin (top / 2)
+	define [KBarShape top xBarLeft] : glyph-proc
+		local l : xBarLeft - 0.7 * (SB - 0)
+		local r : mix SB RightSB 0.92
+		include : HOverlayBar l r currentGlyph.baseAnchors.overlay.y
 
 	define [CyrlKaVBarShape top xBarLeft] : VBar.m
 		xBarLeft + [HSwToV : 0.5 * CyrlVbSw] + 0.7 * CyrlVbGap
@@ -455,7 +455,7 @@ glyph-block Letter-Latin-K : begin
 	create-glyph 'UpperKaiSymbolAttachment' : glyph-proc
 		set-width 0
 		set-mark-anchor 'trailing' 0 0
-		define shapeDepth : 0.8 * Descender - QuarterStroke
+		define shapeDepth : [mix 0 Descender 0.8] - QuarterStroke
 		define kSw : mix 1 HVContrast Math.SQRT1_2
 		include : PointingTo 0 0 shapeDepth shapeDepth : function [mag] : union
 			dispiro
@@ -466,7 +466,7 @@ glyph-block Letter-Latin-K : begin
 				dispiro
 					widths.center (Stroke / kSw)
 					flat 0 (Stroke * kSw + SideJut)
-					curl 0 (0 - SideJut)
+					curl 0 (0            - SideJut)
 				no-shape
 
 	# Main building
