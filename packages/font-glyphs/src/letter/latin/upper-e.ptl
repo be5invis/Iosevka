@@ -10,6 +10,7 @@ glyph-block Letter-Latin-Upper-E : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateAccentedComposition SetGrekUpperTonos CreateTurnedLetter
 	glyph-block-import Letter-Shared-Metrics : EFMidBarShrinkK EFMidBarPosY EFVJutLength
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
 
 	define kSB 1.0
 	define xEBarLeft     : [mix 0     SB      kSB] - O
@@ -72,6 +73,21 @@ glyph-block Letter-Latin-Upper-E : begin
 			include : EShape XH (serifLT -- lt) (serifLB -- lb) (serifRT -- rt) (serifRB -- rb) (serifRM -- rm)
 			set-base-anchor 'trailing' RightSB 0
 
+		create-glyph "smcpEBar.\(suffix)" : glyph-proc
+			include [refer-glyph "smcpE.\(suffix)"] AS_BASE ALSO_METRICS
+			local stroke : AdviceStroke2 2 3 XH
+			local barPos : EFMidBarPosY XH 0
+			local swVJut : VJutStroke * (stroke / Stroke)
+			local xRight : piecewise
+				rm : [mix Width RightSB : EFMidBarShrinkK [DivFrame 1] rt] - [HSwToV swVJut]
+				rb :            RightSB                                    - [HSwToV swVJut]
+				true      Width
+			include : LetterBarOverlay.l.in
+				x     -- xEBarLeft
+				top   -- (barPos - stroke / 2)
+				bot   -- (0 + stroke)
+				space -- { 0 xRight }
+
 		create-glyph "revE.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : RevEShape CAP (serifRT -- lt) (serifRB -- lb) (serifLT -- rt) (serifLB -- rb) (serifLM -- rm)
@@ -87,7 +103,8 @@ glyph-block Letter-Latin-Upper-E : begin
 	select-variant 'exists' 0x2203 (follow -- 'E/sansSerif') (shapeFrom -- 'revE')
 	CreateAccentedComposition 'notExists' 0x2204 'exists' 'longSlash'
 
-	select-variant 'smcpE' 0x1D07 (follow -- 'E')
+	select-variant 'smcpE'    0x1D07  (follow -- 'E')
+	select-variant 'smcpEBar' 0x1DF43 (follow -- 'E')
 	CreateTurnedLetter 'turnSmcpE' 0x2C7B 'smcpE' HalfAdvance (XH / 2)
 
 	glyph-block-import Letter-Blackboard : BBS BBD

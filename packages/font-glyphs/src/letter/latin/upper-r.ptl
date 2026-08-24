@@ -10,7 +10,8 @@ glyph-block Letter-Latin-Upper-R : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared : CreateTurnedLetter
-	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar RetroflexHook
+	glyph-block-import Letter-Shared-Metrics : BowlXDepth
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar RetroflexHook PalatalHook
 	glyph-block-import Letter-Latin-Upper-P : PShape RevPShape PBarPosY PRotundaShape BBPShape PShapeOutline
 
 	define [RLegTerminalX    fStraightLeg right sw] : right - [if fStraightLeg 2 0] * OX
@@ -32,6 +33,7 @@ glyph-block Letter-Latin-Upper-R : begin
 				Rect top bottom (-VERY-FAR) [if slab xRightBottomSerifStart (+VERY-FAR)]
 				ExtLineLhsToRhs xLeftTop top xRightBottom bottom sw
 			if slab : include : tagged 'serifRB' : HSerif.rb xRightBottomSerifStart bottom (SideJut + Jut / 8) sw
+			set-base-anchor 'palatalHookAttach' xRightBottomSerifStart bottom
 
 		export : define [Curly top bottom left right charTop charLeft slab sw] : glyph-proc
 			local xRightBottom : RLegTerminalX false right sw
@@ -43,6 +45,7 @@ glyph-block Letter-Latin-Upper-R : begin
 					quadControls 0 0.4 8
 					g4 left top
 			if slab : include : tagged 'serifRB' : HSerif.rb right bottom (SideJut + Jut / 8) sw
+			set-base-anchor 'palatalHookAttach' right bottom
 
 		export : define [Standing top bottom left right charTop charLeft slab sw] : glyph-proc
 			local fine : sw * CThinB
@@ -58,6 +61,7 @@ glyph-block Letter-Latin-Upper-R : begin
 				curl (right + O)             yOffset [heading Downward]
 				curl (right + O - xOverflow) bottom  [heading Downward]
 			if slab : include : tagged 'serifRB' : HSerif.rb right bottom SideJut sw
+			set-base-anchor 'palatalHookAttach' right bottom
 
 	define RevRLegShape : namespace
 		export : define [Straight top bottom left right charTop charRight slab sw] : glyph-proc
@@ -220,6 +224,16 @@ glyph-block Letter-Latin-Upper-R : begin
 			include : StrikeAnchor XH swXH
 			include : RShape legShape XH (sw -- swXH) (slab -- slabs) (legSlab -- doLegSlab) (open -- fGap)
 
+		create-glyph "smcpRPalatalHook.\(suffix)" : glyph-proc
+			include [refer-glyph "smcpR.\(suffix)"] AS_BASE ALSO_METRICS
+			eject-contour 'serifRB'
+			local attach : currentGlyph.gizmo.unapply (currentGlyph.baseAnchors.palatalHookAttach || currentGlyph.baseAnchors.bottomRight)
+			include : PalatalHook.rSideJut
+				x     -- attach.x
+				y     -- attach.y
+				refSw -- swXH
+				jut   -- ([HSwToV : 0.5 * swXH] + SideJut + Jut / 8)
+
 		create-glyph "Yr.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
 			local top : [mix 0 CAP 0.825] + [if fSlabBot (-0.2125) (+0.2500)] * Stroke
@@ -318,6 +332,20 @@ glyph-block Letter-Latin-Upper-R : begin
 
 	CreateTurnedLetter 'turnSmcpR' 0x1D1A 'smcpR'    HalfAdvance (XH / 2)
 	CreateTurnedLetter 'invSmcpR'  0x281  'revSmcpR' HalfAdvance (XH / 2)
+
+	select-variant 'smcpRPalatalHook' 0x1DF35 (follow -- 'R/descBase')
+	derive-glyphs 'invSmcpRPalatalHook' 0x1DF36 'invSmcpR' : function [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		local sw : AdviceStroke2 2 3 XH
+		local bp : XH - [PBarPosY XH sw PShape.BarPos]
+		local adb : YSmoothMidR bp 0
+			ArchDepthAOf (ArchDepth * 0.9)
+			ArchDepthBOf (ArchDepth * 0.9)
+		local xTurn : Arch.adjust-x.bot (RightSB - [BowlXDepth bp 0 SB RightSB sw]) (sw -- sw)
+		include : PalatalHook.r
+			x -- [mix xTurn RightSB 0.75]
+			y -- 0
+			yAttach -- [mix 0 adb : archv.yFromX 0.75]
 
 	select-variant 'cyrl/Ya' 0x42F (shapeFrom -- 'revR')
 	select-variant 'cyrl/ya' 0x44F (shapeFrom -- 'revSmcpR')

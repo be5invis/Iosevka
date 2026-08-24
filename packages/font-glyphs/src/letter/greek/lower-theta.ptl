@@ -1,7 +1,6 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
-import [DesignParameters] from "../../meta/aesthetics.mjs"
 
 glyph-module
 
@@ -9,28 +8,36 @@ glyph-block Letter-Greek-Lower-Theta : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Common-OShape-Variants : OvalShapeT DiamondShapeT
+	glyph-block-import Letter-Shared-Shapes : ArcStartSerifStroke PalatalHook
 
 	define [ThetaShapeBase shapeT] : namespace
-		define [outlineT sink offsetX offsetY top] : shapeT sink (top - offsetY) (offsetY) (SB + offsetX) (RightSB - offsetX)
-		export : define [Shape top] : outlineT dispiro 0 0 top
-		export : define [Mask top] : outlineT spiro-outline 1 1 top
+		define [outlineT sink offsetX offsetY top] : shapeT sink (top - offsetY) (0 + offsetY) (SB + offsetX) (RightSB - offsetX)
+		export : define [Shape top] : outlineT dispiro       0 0 top
+		export : define [Mask  top] : outlineT spiro-outline 1 1 top
 
 	define Capsule : ThetaShapeBase OShapeT
-	define Oval : ThetaShapeBase OvalShapeT
+	define Oval    : ThetaShapeBase OvalShapeT
 	define Diamond : ThetaShapeBase DiamondShapeT
 
 	define ThetaConfig : object
-		'capsule' Capsule
-		'oval'    Oval
-		'diamond' Diamond
+		'capsule' { Capsule [ArchDepthAClamped Ascender 0 SmallArchDepthA SmallArchDepthB] }
+		'oval'    { Oval    [YSmoothMidR       Ascender 0 SmallArchDepthA SmallArchDepthB] }
+		'diamond' { Diamond 0                                                              }
 
-	foreach { suffix ShapeBase } [pairs-of ThetaConfig] : begin
+	foreach { suffix { ShapeBase y0R } } [pairs-of ThetaConfig] : begin
 		create-glyph "grek/theta.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : ShapeBase.Shape Ascender
 			include : intersection
 				ShapeBase.Mask Ascender
-				HBar.m SB RightSB (0.5 * Ascender)
+				HBar.m SB RightSB [mix 0 Ascender 0.5]
+			set-base-anchor 'palatalHookAttach'
+				if y0R
+					mix [Arch.adjust-x.bot Middle] (RightSB - OX) 0.75
+					[Arch.adjust-x.bot Middle] + [HSwToV : 0.5 * ArcStartSerifStroke]
+				if y0R
+					mix O y0R [archv.yFromX 0.75]
+					begin 0
 
 	create-glyph 'grek/theta.cursive' : glyph-proc
 		include : MarkSet.b
@@ -43,17 +50,23 @@ glyph-block Letter-Greek-Lower-Theta : begin
 		define fine : AdviceStroke2 3 3 Ascender
 		include : intersection [MaskLeft : mix RightSB Width 0.5] : dispiro
 			widths.lhs
-			flat (SB + OX) (0.45 * Ascender) [heading Downward]
-			curl (SB + OX) SmallArchDepthB
+			flat (SB + OX) [mix 0 Ascender 0.45] [heading Downward]
+			curl (SB + OX) (0 + SmallArchDepthB)
 			Arch.lhs 0
-			flat (RightSB - OX) SmallArchDepthA
+			flat (RightSB - OX) (0 + SmallArchDepthA)
 			curl (RightSB - OX) (Ascender - topSMB)
 			Arch.lhs Ascender (swAfter -- fine) (blendPost -- {})
 			g4 xTopLeft (Ascender - topSMA) [widths.lhs fine]
-			g4 [mix xTopLeft RightSB 0.5] [mix (Ascender - topSMA) (Ascender / 2 - HalfStroke) 0.9]
-			g4 [mix RightSB Width 0.5] (Ascender / 2 - HalfStroke)
+			g4 [mix xTopLeft RightSB 0.5] [mix (Ascender - topSMA) ([mix 0 Ascender 0.5] - HalfStroke) 0.9]
+			g4 [mix RightSB Width 0.5] ([mix 0 Ascender 0.5] - HalfStroke)
 			g4 coXTopLeft (Ascender - topSMA)
 
 	select-variant 'grek/theta' 0x3B8
 	select-variant 'grek/theta/nonCursive' (shapeFrom -- 'grek/theta')
+
 	alias 'grek/thetaSymbol' 0x03D1 'grek/theta.cursive'
+
+	derive-glyphs 'latn/thetaPalatalHook' 0x1DF3C 'grek/theta/nonCursive' : lambda [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		local attach : currentGlyph.gizmo.unapply (currentGlyph.baseAnchors.palatalHookAttach || currentGlyph.baseAnchors.bottomRight)
+		include : PalatalHook.r attach.x 0 (yAttach -- attach.y)

@@ -194,6 +194,8 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	do "c subglyphs"
 		glyph-block-import Letter-Latin-C : CLetterForm CConfig
 
+		define FLAT-CONNECTION 3
+
 		define [OpenOShape df styTop styBot] : new-glyph : glyph-proc
 			local subDf : df.slice 3 2 OX
 			local lf : CLetterForm subDf styTop styBot XH 0
@@ -202,7 +204,6 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				sw  -- df.mvs
 			include : lf.revFull
 
-		define FLAT-CONNECTION 3
 		define [EsTeLeftShape subDf styBot] : new-glyph : glyph-proc
 			local lf : CLetterForm subDf FLAT-CONNECTION styBot XH 0
 				ada -- subDf.smallArchDepthA
@@ -220,16 +221,16 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 			if (!styTop) : begin
 				create-glyph "cyrl/este.upright/es.\(suffix)" : glyph-proc
 					local df : include : DivFrame para.advanceScaleMM 3.5
-					local subDfLeft : df.slice 3.25 1.875
 					include : df.markSet.e
 					set-base-anchor 'cvDecompose' 0 0
+					local subDfLeft : df.slice 3.25 1.875
 					include : EsTeLeftShape subDfLeft styBot
 
 				create-glyph "cyrl/este.italic/es.\(suffix)" : glyph-proc
-					local df : include : DivFrame para.advanceScaleMM 4.75
-					local subDfLeft : df.slice 4.5 2
+					local df : include : DivFrame [mix 1 para.advanceScaleMM 2] 4.75
 					include : df.markSet.e
 					set-base-anchor 'cvDecompose' 0 0
+					local subDfLeft : df.slice 4.5 2
 					include : EsTeLeftShape subDfLeft styBot
 
 	do "Te (upright) subglyphs"
@@ -241,7 +242,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 			if doTopSerifs : begin
 				local swVJut : Math.min subDf.mvs : VSwToH : 0.625 * (subDf.rightSB - (subDf.middle + [HSwToV : 0.5 * subDf.mvs]))
-				include : VSerif.dr subDf.rightSB XH VJut swVJut
+				include : tagged 'serifRT' : VSerif.dr subDf.rightSB XH VJut swVJut
 			if doBottomSerifs : begin
 				local midJutCenter : mix [HSwToV : 0.5 * subDf.mvs] MidJutCenter (subDf.width / Width)
 				include : tagged 'serifMB' : HSerif.mb subDf.middle 0 midJutCenter subDf.mvs
@@ -249,11 +250,10 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		foreach { suffix { adws doST doSB } } [Object.entries TConfig] : do
 			create-glyph "cyrl/este.upright/te.\(suffix)" : glyph-proc
 				local df : DivFrame para.advanceScaleMM 3.5
-				local subDfLeft : df.slice 3.25 1.875
-				local subDfRight : df.restCompact 1 subDfLeft 2
-
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
+				local subDfLeft : df.slice 3.25 1.875
+				local subDfRight : df.restCompact 1 subDfLeft 2
 				include : EsTeRightShape subDfRight doST doSB
 				include : ApparentTranslate (df.width - subDfRight.width) 0
 
@@ -262,11 +262,11 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 		foreach { suffix { { Body earless } { shortLeg } { tailed } { Serifs } } } [pairs-of SmallMConfig] : do
 			create-glyph "cyrl/este.italic/te.\(suffix)" : glyph-proc
-				local df : DivFrame para.advanceScaleMM 4.75
-				local subDfLeft : df.slice 4.5 2
-				local subDfRight : df.restCompact 0.5 subDfLeft 3
+				local df : DivFrame [mix 1 para.advanceScaleMM 2] 4.75
 				set-width 0
 				set-mark-anchor 'cvDecompose' 0 0
+				local subDfLeft : df.slice 4.5 2
+				local subDfRight : df.restCompact 0.5 subDfLeft 3
 				include : mShapeBodyImpl subDfRight XH Body earless shortLeg tailed Serifs
 				include : ApparentTranslate (df.width - subDfRight.width) 0
 
@@ -301,8 +301,8 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 			create-glyph "cyrl/rha/er.\(suffix)" : glyph-proc
 				local df : include : DivFrame para.advanceScaleM 3
 				include : df.markSet.p
-				local subDf : df.slice 3 2
 				set-base-anchor 'cvDecompose' 0 0
+				local subDf : df.slice 3 2
 
 				include : Body
 					left  -- subDf.leftSB
@@ -399,9 +399,9 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 	do "subglyph diacritics"
 		create-glyph "turnoeSlash/oSlash/overlay" : glyph-proc
-			local fine : 0.375 * OverlayStroke
 			local df : DivFrame para.advanceScaleMM 3
 			local { subDf shift } : SubDfAndShift 1 df OX
+			local fine : 0.375 * OverlayStroke
 			include : dispiro
 				widths.center (2 * fine)
 				flat (shift + subDf.leftSB  + OX + fine) [mix XH 0 1.05]
