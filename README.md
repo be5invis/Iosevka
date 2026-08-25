@@ -39,6 +39,7 @@
     * Ubuntu Linux: Install one of the [fonts-iosevka packages](https://aiei.ch/deb/fonts-iosevka/).
     * Void Linux: Install the font with `xbps-install font-iosevka`.
     * Fedora: Install the font(s) from [the COPR here](https://copr.fedorainfracloud.org/coprs/peterwu/iosevka/). Run `dnf search iosevka` to discover available fonts and `dnf install` to install the chosen one(s).
+    * openSUSE Tumbleweed: [iosevka-fonts](https://software.opensuse.org/package/iosevka-fonts) package produces many variants, run `zypper se 'iosevka*fonts'` to discover available fonts, and `zypper in` to install the chosen one(s).
   * **FreeBSD**: The font can be installed with `pkg install iosevka`.
   * **OpenBSD**: Run `pkg_info -Q iosevka` to see which Iosevka packages are available. Use `pkg_add` to install the chosen package(s).
 
