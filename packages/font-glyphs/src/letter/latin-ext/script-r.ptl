@@ -12,7 +12,7 @@ glyph-block Letter-Latin-Script-R : begin
 
 	define [xLeft     df] : df.leftSB + 0.75 * OX
 	define [xBarRight df] : df.width - df.leftSB * 1.5
-	define [ScriptRShape top left right fTailed sw] : glyph-proc
+	define [ScriptRShape fCapital top left right fTailed sw] : glyph-proc
 		include : tagged 'strokeR' : if fTailed
 			RightwardTailedBar right 0 (top - 0.5 * sw) (sw -- sw)
 			VBar.r             right 0 (top - 0.5 * sw) sw
@@ -23,14 +23,14 @@ glyph-block Letter-Latin-Script-R : begin
 				g4      left             (top - O) [heading Rightward]
 				g4 [mix left right 0.5]  (top + O)
 				g4           right       (top - O) [heading Rightward]
-		if (SLAB && !fTailed) : include : if para.isItalic [HSerif.rb right 0 SideJut] : union
+		if (SLAB && !fTailed) : include : if (!fCapital && para.isItalic) [HSerif.rb right 0 SideJut] : union
 			HSerif.rb (right - [HSwToV : 0.5 * sw]) 0 Jut
 			HSerif.lb (right - [HSwToV : 0.5 * sw]) 0 MidJutSide
 
 	create-glyph 'RScript' 0xAB6C : glyph-proc
 		local df : include : DivFrame 1
 		include : df.markSet.capital
-		include : ScriptRShape CAP [xLeft df] [xBarRight df] false df.mvs
+		include : ScriptRShape true CAP [xLeft df] [xBarRight df] false df.mvs
 		include : LeaningAnchor.Below.VBar.r [xBarRight df]
 
 	define ScriptRConfig : object
@@ -41,15 +41,15 @@ glyph-block Letter-Latin-Script-R : begin
 		create-glyph "rScript.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.e
-			include : ScriptRShape XH [xLeft df] [xBarRight df] doTail df.mvs
+			include : ScriptRShape false XH [xLeft df] [xBarRight df] doTail df.mvs
 			include : LeaningAnchor.Below.VBar.r [xBarRight df]
 
 	select-variant 'rScript' 0xAB4B (follow -- 'cyrl/che')
 
-	define [ScriptRWithBowlShape df top] : glyph-proc
+	define [ScriptRWithBowlShape fCapital df top] : glyph-proc
 		local subDf : DivFrame (0.75 * df.adws) 2
 
-		include : ScriptRShape top [xLeft subDf] [xBarRight subDf] true subDf.mvs
+		include : ScriptRShape fCapital top [xLeft subDf] [xBarRight subDf] true subDf.mvs
 		eject-contour 'strokeR'
 
 		local swBowl : [AdviceStroke 3] * (subDf.mvs / Stroke)
@@ -74,9 +74,9 @@ glyph-block Letter-Latin-Script-R : begin
 	create-glyph 'RScriptBowl' 0xAB6D : glyph-proc
 		local df : include : DivFrame para.advanceScaleM 1
 		include : df.markSet.capital
-		include : ScriptRWithBowlShape df CAP
+		include : ScriptRWithBowlShape true df CAP
 
 	create-glyph 'rScriptBowl' 0xAB4C : glyph-proc
 		local df : include : DivFrame para.advanceScaleM 1
 		include : df.markSet.e
-		include : ScriptRWithBowlShape df XH
+		include : ScriptRWithBowlShape false df XH
