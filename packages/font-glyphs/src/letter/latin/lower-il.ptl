@@ -163,7 +163,7 @@ glyph-block Letter-Latin-Lower-I : begin
 		export : define [HookyShort   df top xMiddle _stroke] : tagged 'serifLT' : HSerif.lt xMiddle top [ILJut.HookyShort   df top xMiddle _stroke] Stroke _stroke
 		export : define [SerifedShort df top xMiddle _stroke] : tagged 'serifLT' : HSerif.lt xMiddle top [ILJut.SerifedShort df top xMiddle _stroke] Stroke _stroke
 
-	define [calcPhoneticHookPos g] : begin
+	define [CalcPhoneticHookPos g] : begin
 		local attach : if g.baseAnchors.trailing
 			g.gizmo.unapply g.baseAnchors.trailing
 			g.gizmo.unapply g.baseAnchors.overlay
@@ -239,6 +239,16 @@ glyph-block Letter-Latin-Lower-I : begin
 			include : Marks  df CAP xMiddle
 			include : Serifs df CAP xMiddle
 
+		create-glyph "dotlessiRetroflexHook.\(suffix)" : glyph-proc
+			include [refer-glyph "dotlessi.\(suffix)"] AS_BASE ALSO_METRICS
+			local { attach posX maskY } : CalcPhoneticHookPos currentGlyph
+			include : ExtendBelowBaseAnchors Descender
+			include : intersection [MaskBelow maskY] : RetroflexHook.r
+				x -- posX
+				y -- 0
+				xLink -- attach.x
+				yOverflow -- Stroke
+
 		create-glyph "cyrl/palochka.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
 			include : df.markSet.b
@@ -297,6 +307,22 @@ glyph-block Letter-Latin-Lower-I : begin
 			include [refer-glyph "l.\(suffix)"] AS_BASE ALSO_METRICS
 			include : RetroflexHook.mExt [xMiddleT df] 0
 
+		if (Body !== ILBody.PhoneticLeft) : begin
+			define [xShift df] : [xMiddleTCenter df] - [xMiddleT df]
+
+			create-glyph "l.\(suffix)PR" : glyph-proc
+				local df : include : DivFrame adws
+				include : df.markSet.b
+				include : with-transform [Translate [xShift df] 0] [refer-glyph "l.\(suffix)"]
+				include : Marks df Ascender [xMiddleTCenter df]
+
+			create-glyph "lRTail.\(suffix)PR" : glyph-proc
+				local df : include : DivFrame adws
+				include : df.markSet.b
+				include : with-transform [Translate [xShift df] 0] [refer-glyph "lRTail.\(suffix)"]
+				include : Marks df Ascender [xMiddleTCenter df]
+				include : ExtendBelowBaseAnchors Descender
+
 		create-glyph "llWelsh.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1 2
 			local subDf : DivFrame (2 / 3) (3 / 2)
@@ -310,19 +336,9 @@ glyph-block Letter-Latin-Lower-I : begin
 			include : HOverlayBar [mix df.leftSB 0 0.7] [mix df.rightSB df.width 0.7] [mix 0 Ascender 0.625]
 			include : df.markSet.b
 
-		create-glyph "dotlessiRetroflexHook.\(suffix)" : glyph-proc
-			include [refer-glyph "dotlessi.\(suffix)"] AS_BASE ALSO_METRICS
-			local { attach posX maskY } : calcPhoneticHookPos currentGlyph
-			include : ExtendBelowBaseAnchors Descender
-			include : intersection [MaskBelow maskY] : RetroflexHook.r
-				x -- posX
-				y -- 0
-				xLink -- attach.x
-				yOverflow -- Stroke
-
 		create-glyph "lPalatalHook.\(suffix)" : glyph-proc
 			include [refer-glyph "l.\(suffix)"] AS_BASE ALSO_METRICS
-			local { attach posX maskY } : calcPhoneticHookPos currentGlyph
+			local { attach posX maskY } : CalcPhoneticHookPos currentGlyph
 			include : PalatalHook.r
 				x -- posX
 				y -- 0
@@ -386,10 +402,12 @@ glyph-block Letter-Latin-Lower-I : begin
 
 		CreateTurnedLetter 'turnl' 0xA781 'l' HalfAdvance (XH / 2)
 		select-variant 'l/phoneticLeft' (shapeFrom -- 'l')
+		select-variant 'l/phoneticRight' (shapeFrom -- 'l')
 		select-variant 'l/compLigRight' (shapeFrom -- 'l')
 		select-variant 'lDot/base' (follow -- 'l')
 		select-variant 'lRTail' 0x26D
 		select-variant 'lRTail/reduced/decompress' (shapeFrom -- 'lRTail')
+		select-variant 'lRTail/phoneticRight' (shapeFrom -- 'lRTail')
 		select-variant 'llWelsh' 0x1EFB (follow -- 'l')
 		select-variant 'lPalatalHook' 0x1D85 (follow -- 'l')
 		select-variant 'lPalatalHook/reduced/decompress' (shapeFrom -- 'lPalatalHook') (follow -- 'l/reduced/decompress')
@@ -406,6 +424,9 @@ glyph-block Letter-Latin-Lower-I : begin
 		derive-composites 'lBelt'            0x26C   'l/reduced/decompress'            'lBelt/overlay'
 		derive-composites 'lBeltRTail'       0xA78E  'lRTail/reduced/decompress'       'lBelt/overlay'
 		derive-composites 'lBeltPalatalHook' 0x1DF13 'lPalatalHook/reduced/decompress' 'lBelt/overlay'
+
+		derive-composites 'lBelt/phoneticRight'      null 'l/phoneticRight'      'lBelt/overlay'
+		derive-composites 'lBeltRTail/phoneticRight' null 'lRTail/phoneticRight' 'lBelt/overlay'
 
 		derive-composites 'lDot' 0x140 'lDot/base' 'LDot/dot'
 
