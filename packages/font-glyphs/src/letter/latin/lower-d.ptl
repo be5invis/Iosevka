@@ -97,14 +97,18 @@ glyph-block Letter-Latin-Lower-D : begin
 		local yOverlay : mix XH (Ascender - [if topSerif Stroke 0]) 0.5
 
 		do
-			create-glyph "d.\(suffix)"           : make [DivFrame 1.00]
-			create-glyph "dCaron/base.\(suffix)" : make [DivFrame 0.95]
-		: where : [make df] : glyph-proc
+			create-glyph "d.\(suffix)"           : make [DivFrame 1.00] false
+			create-glyph "dCaron/base.\(suffix)" : make [DivFrame 0.95] false
+			if ([not bottomSerif] && Body === ToothedBody) : create-glyph "d/phoneticLeft2.\(suffix)" : make
+				DivFrame (([mix Width RightSB 0.5] - [HSwToV QuarterStroke]) / Width) 2 1
+				begin true
+		: where : [make df fPhoneticLeft] : glyph-proc
 			include : DivFrame 1
 			include : df.markSet.b
 			include : Body df Ascender
 			if topSerif    : include : topSerif    df Ascender
 			if bottomSerif : include : bottomSerif df Ascender
+			if fPhoneticLeft : include : HBar.t (df.rightSB + O) (RightSB + SideJut) XH
 			include : LeaningAnchor.Above.VBar.r df.rightSB df.mvs
 			set-base-anchor 'overlayOnExtension' (df.rightSB - [HSwToV : 0.5 * df.mvs]) yOverlay
 			set-base-anchor 'overlay' df.middle (XH / 2)
@@ -114,14 +118,6 @@ glyph-block Letter-Latin-Lower-D : begin
 			local df : DivFrame 1
 			include [refer-glyph "d.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.r.in df.rightSB XH (Ascender - [if topSerif Stroke 0])
-
-		if ([not bottomSerif] && Body === ToothedBody) : create-glyph "d/phoneticLeft2.\(suffix)" : glyph-proc
-			local df : include : DivFrame 1
-			include : df.markSet.b
-			local gap : 0.5 * (SB - 0) + [HSwToV QuarterStroke]
-			include : with-transform [Translate (-gap) 0] [refer-glyph "d.\(suffix)"]
-			include : LeaningAnchor.Above.VBar.r (df.rightSB - gap) df.mvs
-			include : HBar.t (df.rightSB - gap + O) (df.rightSB + SideJut) XH
 
 		create-glyph "latn/de.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
