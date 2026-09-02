@@ -1,6 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix clamp SuffixCfg] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -8,7 +9,8 @@ glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
-	glyph-block-import Letter-Shared : CreateAccentedComposition CreateCommaCaronComposition CreateTurnedLetter
+	glyph-block-import Letter-Shared : CreateAccentedComposition CreateCommaCaronComposition
+	glyph-block-import Letter-Shared : CreateDependentComposite CreateTurnedLetter
 	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth ConnectedCedilla
 	glyph-block-import Letter-Shared-Shapes : DiagTail TopHook PalatalHook
 	glyph-block-import Letter-Shared-Shapes : SerifedArcEnd InwardSlabArcEnd
@@ -368,11 +370,28 @@ glyph-block Letter-Latin-Lower-T : begin
 
 
 	select-variant 't' 't'
+	select-variant 't/compLigRight'
+
 	select-variant 't/phoneticLeft1' (shapeFrom -- 't')
 	select-variant 't/phoneticLeft2'
 	select-variant 't/phoneticLeft3' (follow -- 't')
 	select-variant 't/phoneticLeft4' (shapeFrom -- 't/phoneticLeft3') (follow -- 't/phoneticLeft1')
-	select-variant 't/compLigRight'
+
+	create-glyph 't/phoneticLeft5/selector.serifless' : glyph-proc
+		set-width dfN.width
+		include : dfN.markSet.b
+		DependentSelector.set currentGlyph 'serifless'
+
+	create-glyph 't/phoneticLeft5/selector.serifed' : glyph-proc
+		set-width dfN.width
+		include : dfN.markSet.b
+		DependentSelector.set currentGlyph 'serifed'
+
+	select-variant 't/phoneticLeft5/selector' (follow -- 'l/bottomSerif/leftHalf')
+
+	CreateDependentComposite 't/phoneticLeft5' null 't/phoneticLeft5/selector' : object
+		'serifless' 't/phoneticLeft3'
+		'serifed'   't/phoneticLeft4'
 
 	CreateCommaCaronComposition 'tCaron' 0x165 't'
 	CreateAccentedComposition 'tWedge' null 't' 'caronAbove'
@@ -415,7 +434,7 @@ glyph-block Letter-Latin-Lower-T : begin
 
 	foreach { suffix { top } } [Object.entries TSUpperConfig] : do
 		create-glyph "tsLig/upperHalf.\(suffix)" : glyph-proc
-			define df : DivFrame 1
+			local df : include : DivFrame 1
 			set-base-anchor 'cvDecompose' 0 0
 			include : difference
 				TsLigStrokeShape df Stroke top false
@@ -429,7 +448,7 @@ glyph-block Letter-Latin-Lower-T : begin
 
 	foreach { suffix { doBS } } [Object.entries TSLowerConfig] : do
 		create-glyph "tsLig/lowerHalf.\(suffix)" : glyph-proc
-			define df : DivFrame 1
+			local df : include : DivFrame 1
 			include : df.markSet.b
 			set-mark-anchor 'cvDecompose' 0 0
 			include : intersection
