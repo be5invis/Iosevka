@@ -96,6 +96,11 @@ glyph-block Letter-Latin-Lower-M : begin
 		if [not shortLeg] : include : SmallMBottomMiddleSerif df top mbot fFull _sw
 		if [not tailed] : include : SmallMBottomRightSerif df top rbot (fFull || shortLeg) _sw
 
+	define [OuterSerifs df top lbot mbot rbot earless shortLeg tailed _sw] : glyph-proc
+		if [not earless] : include : SmallMTopLeftSerif df top lbot false _sw
+		include : SmallMBottomLeftSerif df top lbot false _sw
+		if [not tailed] : include : SmallMBottomRightSerif df top rbot false _sw
+
 	define [SmallTurnedMSerifs df top lbot mbot rbot earless shortLeg tailed _sw] : glyph-proc
 		if [not earless] : include : SmallMTopLeftSerif df top lbot true _sw
 		include : SmallMBottomMotionLeftSerif df top lbot true _sw
@@ -394,15 +399,16 @@ glyph-block Letter-Latin-Lower-M : begin
 
 	define TurnMConfig : SuffixCfg.weave
 		object # body
-			toothed            { SmallMArches                        0 0 }
-			tailed             { SmallMArches                        0 1 }
-			flatBottom         { FlatTopSmallMShape                  0 0 }
-			toothlessCorner    { EarlessCornerDoubleArchSmallMShape  1 0 }
-			toothlessRounded   { EarlessRoundedDoubleArchSmallMShape 1 0 }
+			toothed                { SmallMArches                        0 0 }
+			tailed                 { SmallMArches                        0 1 }
+			flatBottom             { FlatTopSmallMShape                  0 0 }
+			toothlessCorner        { EarlessCornerDoubleArchSmallMShape  1 0 }
+			toothlessRounded       { EarlessRoundedDoubleArchSmallMShape 1 0 }
 		function [body] : object # serifs
-			serifless          { no-shape   no-shape           }
-			serifed            { FullSerifs SmallTurnedMSerifs }
-			bottomRightSerifed { LtSerifs   LtSerifs           } # The name-shaping mapping is swapped by design
+			serifless              { no-shape    no-shape           }
+			serifed                { FullSerifs  SmallTurnedMSerifs }
+			bottomRightSerifed     { LtSerifs    LtSerifs           } # The name-shaping mapping is swapped by design
+			bilateralMotionSerifed { OuterSerifs OuterSerifs        }
 			motionSerifed : match body
 				([Just 'toothed'] || [Just 'flatBottom']) { LtRbSerifs LtRbSerifs }
 				__                                        { RbSerifs   RbSerifs   } # The name-shaping mapping is swapped by design
@@ -432,6 +438,18 @@ glyph-block Letter-Latin-Lower-M : begin
 			include : PointingTo Width realTop Width realBot : function [] : glyph-proc
 				include : turnMShapeBody df RightSB
 				include : Translate 0 (SB / 2)
+
+		create-glyph "UNotch.\(suffix)" : glyph-proc
+			local df : include dfM
+			include : df.markSet.capital
+			include : turnMShapeBodyImpl df CAP Body toothless true tailed USerifs nothing
+				SmallMSmoothA df ArchDepth
+				SmallMSmoothB df ArchDepth
+
+		create-glyph "uNotch.\(suffix)" : glyph-proc
+			local df : include dfM
+			include : df.markSet.e
+			include : turnMShapeBodyImpl df XH Body toothless true tailed LSerifs
 
 		if (!tailed) : begin
 			create-glyph "turnmLongLeg.\(suffix)" : glyph-proc
@@ -468,6 +486,9 @@ glyph-block Letter-Latin-Lower-M : begin
 	select-variant 'turnmLongLeg/reduced' (shapeFrom -- 'turnmLongLeg') (follow -- 'uuLongLeg/reduced')
 
 	select-variant 'turnmSideways' 0x1D1F (follow -- [conditional-follow [MEnoughSpaceForFullSerifs dfM] 'uu' 'uu/reduced'])
+
+	select-variant 'UNotch' 0x1DF7C (follow -- 'U')
+	select-variant 'uNotch' 0x1DF7D (follow -- 'u')
 
 	select-variant 'cyrl/sha.italic' (shapeFrom -- 'turnm') (follow -- [conditional-follow [MEnoughSpaceForFullSerifs dfM] 'cyrl/sha.italic' 'cyrl/sha.italic/reduced'])
 	select-variant 'cyrl/sha/reduced.italic' (shapeFrom -- 'turnm') (follow -- 'cyrl/sha.italic/reduced')
