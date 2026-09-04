@@ -89,33 +89,37 @@ glyph-block Letter-Latin-Lower-M : begin
 		local gap : (df.rightSB - df.leftSB) / 2 - 1.5 * ink
 		return : 0.5 * ink + 0.375 * gap > para.refJut
 
-	define [FullSerifs df top lbot mbot rbot tailed earless _sw] : glyph-proc
+	define [FullSerifs df top lbot mbot rbot earless shortLeg tailed _sw] : glyph-proc
 		local fFull : MEnoughSpaceForFullSerifs df _sw
 		if [not earless] : include : SmallMTopLeftSerif df top lbot fFull _sw
-		include : SmallMBottomLeftSerif df top lbot fFull _sw
-		include : SmallMBottomMiddleSerif df top mbot fFull _sw
-		if [not tailed] : include : SmallMBottomRightSerif df top rbot fFull _sw
+		include : SmallMBottomLeftSerif df top lbot (fFull || shortLeg) _sw
+		if [not shortLeg] : include : SmallMBottomMiddleSerif df top mbot fFull _sw
+		if [not tailed] : include : SmallMBottomRightSerif df top rbot (fFull || shortLeg) _sw
 
-	define [SmallTurnedMSerifs df top lbot mbot rbot tailed earless _sw] : glyph-proc
+	define [OuterSerifs df top lbot mbot rbot earless shortLeg tailed _sw] : glyph-proc
+		if [not earless] : include : SmallMTopLeftSerif df top lbot false _sw
+		include : SmallMBottomLeftSerif df top lbot false _sw
+		if [not tailed] : include : SmallMBottomRightSerif df top rbot false _sw
+
+	define [SmallTurnedMSerifs df top lbot mbot rbot earless shortLeg tailed _sw] : glyph-proc
 		if [not earless] : include : SmallMTopLeftSerif df top lbot true _sw
 		include : SmallMBottomMotionLeftSerif df top lbot true _sw
-		include : SmallMBottomMotionMiddleSerif df top mbot true _sw
+		if [not shortLeg] : include : SmallMBottomMotionMiddleSerif df top mbot true _sw
 		if [not tailed] : include : SmallMBottomMotionRightSerif df top rbot true _sw
 
-	define [AutoSerifs df top lbot mbot rbot tailed earless _sw] : if SLAB
-		FullSerifs df top lbot mbot rbot tailed earless _sw
-		no-shape
+	define [AutoSerifs df top lbot mbot rbot earless shortLeg tailed _sw] : NeedSlab SLAB
+		FullSerifs df top lbot mbot rbot earless shortLeg tailed _sw
 
-	define [LtSerifs df top lbot mbot rbot tailed earless _sw] : glyph-proc
+	define [LtSerifs df top lbot mbot rbot earless shortLeg tailed _sw] : glyph-proc
 		local fFull : MEnoughSpaceForFullSerifs df _sw
 		include : SmallMTopLeftSerif df top lbot fFull _sw
 
-	define [LtRbSerifs df top lbot mbot rbot tailed earless _sw] : glyph-proc
+	define [LtRbSerifs df top lbot mbot rbot earless shortLeg tailed _sw] : glyph-proc
 		local fFull : MEnoughSpaceForFullSerifs df _sw
 		include : SmallMTopLeftSerif df top lbot fFull _sw
 		include : SmallMBottomMotionRightSerif df top rbot fFull _sw
 
-	define [RbSerifs df top lbot mbot rbot tailed earless _sw] : glyph-proc
+	define [RbSerifs df top lbot mbot rbot earless shortLeg tailed _sw] : glyph-proc
 		local fFull : MEnoughSpaceForFullSerifs df _sw
 		include : SmallMBottomMotionRightSerif df top rbot fFull _sw
 
@@ -241,7 +245,7 @@ glyph-block Letter-Latin-Lower-M : begin
 		local sw : fallback _sw df.mvs
 		include : body df top 0 [if shortLeg [SmallMShortLegHeight df top sw _ada _adb] 0] [if tailed ([SmallMSmoothHeight df top sw _ada _adb] + O) 0] sw _ada _adb
 		if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df top sw _ada _adb] (sw -- sw)
-		include : serifs df top 0 [if shortLeg [SmallMShortLegHeight df top sw _ada _adb] 0] 0 tailed earless
+		include : serifs df top 0 [if shortLeg [SmallMShortLegHeight df top sw _ada _adb] 0] 0 earless shortLeg tailed
 		set-base-anchor 'overlay' df.middle (top / 2)
 		set-base-anchor 'strike'  df.middle (top / 2)
 
@@ -381,10 +385,10 @@ glyph-block Letter-Latin-Lower-M : begin
 	select-variant 'meng' 0x271
 	select-variant 'mCrossedTail' 0xAB3A (follow -- 'meng')
 
-	define [turnMShapeBodyImpl df top body toothless tailed serifs _sw _ada _adb] : glyph-proc
+	define [turnMShapeBodyImpl df top body toothless shortLeg tailed serifs _sw _ada _adb] : glyph-proc
 		local sw : fallback _sw df.mvs
-		include : body df top 0 0 0 sw _ada _adb
-		include : serifs df top 0 0 0 false toothless sw
+		include : body df top 0 [if shortLeg [SmallMShortLegHeight df top sw _ada _adb] 0] 0 sw _ada _adb
+		include : serifs df top 0 [if shortLeg [SmallMShortLegHeight df top sw _ada _adb] 0] 0 toothless shortLeg false sw
 		include : FlipAround df.middle (top / 2)
 		if tailed : begin
 			eject-contour 'barL'
@@ -395,22 +399,23 @@ glyph-block Letter-Latin-Lower-M : begin
 
 	define TurnMConfig : SuffixCfg.weave
 		object # body
-			toothed            { SmallMArches                        0 0 }
-			tailed             { SmallMArches                        0 1 }
-			flatBottom         { FlatTopSmallMShape                  0 0 }
-			toothlessCorner    { EarlessCornerDoubleArchSmallMShape  1 0 }
-			toothlessRounded   { EarlessRoundedDoubleArchSmallMShape 1 0 }
+			toothed                { SmallMArches                        0 0 }
+			tailed                 { SmallMArches                        0 1 }
+			flatBottom             { FlatTopSmallMShape                  0 0 }
+			toothlessCorner        { EarlessCornerDoubleArchSmallMShape  1 0 }
+			toothlessRounded       { EarlessRoundedDoubleArchSmallMShape 1 0 }
 		function [body] : object # serifs
-			serifless          { no-shape   no-shape           }
-			serifed            { FullSerifs SmallTurnedMSerifs }
-			bottomRightSerifed { LtSerifs   LtSerifs           } # The name-shaping mapping is swapped by design
+			serifless              { no-shape    no-shape           }
+			serifed                { FullSerifs  SmallTurnedMSerifs }
+			bottomRightSerifed     { LtSerifs    LtSerifs           } # The name-shaping mapping is swapped by design
+			bilateralMotionSerifed { OuterSerifs OuterSerifs        }
 			motionSerifed : match body
 				([Just 'toothed'] || [Just 'flatBottom']) { LtRbSerifs LtRbSerifs }
 				__                                        { RbSerifs   RbSerifs   } # The name-shaping mapping is swapped by design
 
 	foreach { suffix { { Body toothless tailed } { USerifs LSerifs } } } [pairs-of TurnMConfig] : do
 		define [turnMShapeBody df top _sw _ada _adb] : glyph-proc
-			include : turnMShapeBodyImpl df top Body toothless tailed LSerifs _sw _ada _adb
+			include : turnMShapeBodyImpl df top Body toothless false tailed LSerifs _sw _ada _adb
 
 		create-glyph "turnm.\(suffix)" : glyph-proc
 			local df : include dfM
@@ -420,7 +425,7 @@ glyph-block Letter-Latin-Lower-M : begin
 		create-glyph "turnmCap.\(suffix)" : glyph-proc
 			local df : include dfM
 			include : df.markSet.capital
-			include : turnMShapeBodyImpl df CAP Body toothless tailed USerifs nothing
+			include : turnMShapeBodyImpl df CAP Body toothless false tailed USerifs nothing
 				SmallMSmoothA df ArchDepth
 				SmallMSmoothB df ArchDepth
 
@@ -433,6 +438,18 @@ glyph-block Letter-Latin-Lower-M : begin
 			include : PointingTo Width realTop Width realBot : function [] : glyph-proc
 				include : turnMShapeBody df RightSB
 				include : Translate 0 (SB / 2)
+
+		create-glyph "UNotch.\(suffix)" : glyph-proc
+			local df : include dfM
+			include : df.markSet.capital
+			include : turnMShapeBodyImpl df CAP Body toothless true tailed USerifs nothing
+				SmallMSmoothA df ArchDepth
+				SmallMSmoothB df ArchDepth
+
+		create-glyph "uNotch.\(suffix)" : glyph-proc
+			local df : include dfM
+			include : df.markSet.e
+			include : turnMShapeBodyImpl df XH Body toothless true tailed LSerifs
 
 		if (!tailed) : begin
 			create-glyph "turnmLongLeg.\(suffix)" : glyph-proc
@@ -469,6 +486,9 @@ glyph-block Letter-Latin-Lower-M : begin
 	select-variant 'turnmLongLeg/reduced' (shapeFrom -- 'turnmLongLeg') (follow -- 'uuLongLeg/reduced')
 
 	select-variant 'turnmSideways' 0x1D1F (follow -- [conditional-follow [MEnoughSpaceForFullSerifs dfM] 'uu' 'uu/reduced'])
+
+	select-variant 'UNotch' 0x1DF7C (follow -- 'U')
+	select-variant 'uNotch' 0x1DF7D (follow -- 'u')
 
 	select-variant 'cyrl/sha.italic' (shapeFrom -- 'turnm') (follow -- [conditional-follow [MEnoughSpaceForFullSerifs dfM] 'cyrl/sha.italic' 'cyrl/sha.italic/reduced'])
 	select-variant 'cyrl/sha/reduced.italic' (shapeFrom -- 'turnm') (follow -- 'cyrl/sha.italic/reduced')
