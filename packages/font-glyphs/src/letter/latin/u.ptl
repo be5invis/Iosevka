@@ -14,6 +14,7 @@ glyph-block Letter-Latin-U : begin
 	glyph-block-import Letter-Shared-Shapes : uBowl RightwardTailedBar SerifFrame
 	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender CyrCurlDescender
 	glyph-block-import Letter-Shared-Shapes : RetroflexHook TopHook
+	glyph-block-import Letter-Latin-Upper-Q : QCurlyTail
 
 	glyph-block-export UShapeGroup
 	define [UShapeGroup ada adb] : namespace
@@ -147,11 +148,11 @@ glyph-block Letter-Latin-U : begin
 	glyph-block-export CapitalUConfigT
 	define [CapitalUConfigT shapeGroup] : SuffixCfg.weave
 		object # body
-			toothed           shapeGroup.Toothed
-			tailed            shapeGroup.Tailed
-			flatBottom        shapeGroup.FlatBottom
-			toothlessCorner   shapeGroup.ToothlessCorner
-			toothlessRounded  shapeGroup.ToothlessRounded
+			toothed          { shapeGroup.Toothed          RightSB            0              }
+			tailed           { shapeGroup.Tailed          (RightSB + SideJut) 0              }
+			flatBottom       { shapeGroup.FlatBottom       RightSB            0              }
+			toothlessCorner  { shapeGroup.ToothlessCorner  RightSB            DToothlessRise }
+			toothlessRounded { shapeGroup.ToothlessRounded null               null           }
 		function [body] : object # serifs
 			serifless                { no-shape                false }
 			bottomRightSerifed       { USerifs.BottomRight     false }
@@ -163,10 +164,10 @@ glyph-block Letter-Latin-U : begin
 				([Just 'toothed'] || [Just 'flatBottom']) { USerifs.Toothed         true  }
 				__                                        { USerifs.Toothless       true  }
 
-	foreach { suffix { Base { Slabs fSlabLT } } } [Object.entries : CapitalUConfigT UUpper] : do
+	foreach { suffix { { Base xRB yRB } { Slabs fSlabLT } } } [Object.entries : CapitalUConfigT UUpper] : do
 		create-glyph "U.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
-			include : MarkSet.capital
+			include : df.markSet.capital
 			include : Base  df CAP Stroke
 			include : Slabs df CAP Stroke
 
@@ -174,21 +175,31 @@ glyph-block Letter-Latin-U : begin
 			include [refer-glyph "U.\(suffix)"] AS_BASE ALSO_METRICS
 			include : SetGrekUpperTonos [if fSlabLT (-SideJut) 0]
 
+		create-glyph "URTail.\(suffix)" : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capDesc
+			include : Base  df CAP Stroke
+			include : Slabs df CAP Stroke
+			eject-contour 'serifRB'
+			include : if xRB
+				RetroflexHook.rExt xRB 0 (yAttach -- yRB)
+				QCurlyTail df
+
 		create-glyph "smcpU.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
-			include : MarkSet.e
+			include : df.markSet.e
 			include : Base  df XH Stroke
 			include : Slabs df XH Stroke
 
 	glyph-block-export SmallUConfigT
 	define [SmallUConfigT shapeGroup] : SuffixCfg.weave
 		object # body
-			toothed           shapeGroup.Toothed
-			tailed            shapeGroup.Tailed
-			flatBottom        shapeGroup.FlatBottom
-			toothlessCorner   shapeGroup.ToothlessCorner
-			toothlessRounded  shapeGroup.ToothlessRounded
-			descBase          shapeGroup.Toothed
+			toothed          { shapeGroup.Toothed          RightSB            0              }
+			tailed           { shapeGroup.Tailed          (RightSB + SideJut) 0              }
+			flatBottom       { shapeGroup.FlatBottom       RightSB            0              }
+			toothlessCorner  { shapeGroup.ToothlessCorner  RightSB            DToothlessRise }
+			toothlessRounded { shapeGroup.ToothlessRounded null               null           }
+			descBase         { shapeGroup.Toothed          RightSB            0              }
 		function [body] : object # serifs
 			serifless                  no-shape
 			bottomRightSerifed         USerifs.BottomRight
@@ -199,7 +210,7 @@ glyph-block Letter-Latin-U : begin
 				([Just 'toothed'] || [Just 'flatBottom']) USerifs.SmallToothed
 				__                                        USerifs.SmallToothless
 
-	foreach { suffix { Base Slabs } } [Object.entries : SmallUConfigT ULower] : do
+	foreach { suffix { { Base xRB yRB } Slabs } } [Object.entries : SmallUConfigT ULower] : do
 		create-glyph "u.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.e
@@ -270,6 +281,16 @@ glyph-block Letter-Latin-U : begin
 			include : Slabs df XH Stroke
 			eject-contour 'serifLT'
 
+		create-glyph "uRTail.\(suffix)" : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.p
+			include : Base  df XH Stroke
+			include : Slabs df XH Stroke
+			eject-contour 'serifRB'
+			include : if xRB
+				RetroflexHook.rExt xRB 0 (yAttach -- yRB)
+				QCurlyTail df
+
 		create-glyph "turnhHookLeft.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.p
@@ -319,16 +340,18 @@ glyph-block Letter-Latin-U : begin
 	link-reduced-variant 'U/sansSerif' 'U' MathSansSerif
 	select-variant 'U/withTonos' (follow -- 'U')
 	select-variant 'smcpU' 0x1D1C (follow -- 'U')
+	select-variant 'URTail' 0x1DF7A
 	select-variant 'uCap' (shapeFrom -- 'U') (follow -- 'u')
 
 	select-variant 'u' 'u'
 	link-reduced-variant 'u/sansSerif' 'u' MathSansSerif
 	select-variant 'u/descBase' (shapeFrom -- 'u')
 
-	select-variant 'turnh' 0x265 (follow -- 'uLongLeg')
-
+	select-variant 'turnh'     0x265 (follow -- 'uLongLeg')
 	select-variant 'uShortLeg' 0xAB4E
+
 	select-variant 'uHookLeft' 0xAB52
+	select-variant 'uRTail'    0x1DF7B
 
 	select-variant 'turnhHookLeft'      0x2AE (follow -- 'uHookLeftLongLeg')
 	select-variant 'turnhHookLeftRTail' 0x2AF (follow -- 'uHookLeftLongLegRTail')
