@@ -1,6 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -8,7 +9,10 @@ glyph-block Letter-Cyrillic-Upper-Shha : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : LeaningAnchor
+	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph
+	glyph-block-import Letter-Shared-Metrics : EFVJutLength
 	glyph-block-import Letter-Shared-Shapes : nShoulder SerifFrame TopHook CyrDescender
+	glyph-block-import Letter-Latin-Upper-T : TConfig
 	glyph-block-import Letter-Cyrillic-Yeri : YeriBarPos
 
 	define SLAB-NONE                   0
@@ -16,19 +20,21 @@ glyph-block Letter-Cyrillic-Upper-Shha : begin
 	define SLAB-TOP-LEFT-BOTTOM-RIGHT  2
 	define SLAB-ALL                    4
 
-	define [CyrShhaShape slabType] : glyph-proc
-		local yBarTop : [mix 0 CAP YeriBarPos] + HalfStroke
+	define [CyrShhaShape slabType _stroke] : glyph-proc
+		local stroke : fallback _stroke Stroke
+		local yBarTop : [mix 0 CAP YeriBarPos] + stroke / 2
 
-		include : tagged 'strokeL' : VBar.l SB 0 CAP
+		include : tagged 'strokeL' : VBar.l SB 0 CAP stroke
 		include : nShoulder.earlessCorner
 			left   -- SB
 			right  -- RightSB
 			top    -- yBarTop
 			bottom -- 0
+			stroke -- stroke
 			ada    -- [ArchDepthAClamped yBarTop 0]
 			adb    -- [ArchDepthBClamped yBarTop 0]
 
-		local sf : SerifFrame.fromDf [DivFrame 1] CAP 0
+		local sf : SerifFrame.fromDf [DivFrame 1] CAP 0 (swRef -- stroke)
 		include : tagged 'SerifLT' : match slabType
 			[Just SLAB-ALL]                   sf.lt.full
 			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] sf.lt.outer
@@ -62,8 +68,29 @@ glyph-block Letter-Cyrillic-Upper-Shha : begin
 			eject-contour 'serifLT'
 			include : TopHook.toRight.lBarInner SB 0 CAP
 
+		DefineSelectorGlyph "TH" suffix [DivFrame 1] 'capital'
+
+		foreach { suffixTe { adws doST doSB } } [Object.entries TConfig] : do
+			if [not doSB] : create-glyph "TH.\(suffix).\(suffixTe)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				local stroke : AdviceStroke2 2 3 CAP
+				include : CyrShhaShape slabType stroke
+
+				local xTopRight : mix SB RightSB 0.9
+				include : HBar.t (SB - O) xTopRight CAP stroke
+
+				if doST : begin
+					local { jutTop jutBot jutMid } : EFVJutLength CAP 0 YeriBarPos stroke
+					local swVJut : VJutStroke * (stroke / Stroke)
+					include : tagged 'serifRT' : VSerif.dr xTopRight CAP jutTop swVJut
+
+		select-variant "TH.\(suffix)" (follow -- 'T/rTailBase')
+
 	select-variant 'cyrl/Shha' 0x4BA (follow -- 'hCap')
 	select-variant 'cyrl/Hwe' 0xA694 (follow -- 'hCapHookTop')
+
+	CreateSelectorVariants 'TH' 0x1DF78 [Object.keys ShhaConfig] (follow -- 'hCap')
 
 	select-variant 'cyrl/Shha/descBase' (shapeFrom -- 'cyrl/Shha') (follow -- 'hCap/descBase')
 	derive-composites 'cyrl/ShhaDescender' 0x526 'cyrl/Shha/descBase' [CyrDescender.rSideJut RightSB 0]
