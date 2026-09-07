@@ -47,18 +47,22 @@ glyph-block Letter-Latin-Lower-T : begin
 			[Just SYM-LEFT] : begin df.rightSB
 			__              : [BarLeftPos df sym] + [Math.max ((df.rightSB - df.leftSB) * 0.75 + [HSwToV QuarterStroke]) [HSwToV : 2.25 * Stroke]]
 
+		export : define [Dims df sym] : begin
+			define xLeft : BarLeftPos    df sym
+			define xHook : xHookTerminal df sym
+			return : object xLeft xHook [yHook Hook]
+				ada [clamp Hook (1.2 * ([Arch.adjust-x.top [mix xLeft xHook 0.5]] - xLeft)) ArchDepthA]
+				adb [clamp Hook (1.2 * ([Arch.adjust-x.bot [mix xLeft xHook 0.5]] - xLeft)) ArchDepthB]
+
 		export : define [HookShapeT sink df sym offset top bot sw] : begin
-			local xLeft : BarLeftPos df sym
-			local xHook : xHookTerminal df sym
-			local xTurn : Arch.adjust-x.bot [mix xLeft xHook 0.5]
-			local adb : clamp Hook ((xTurn - xLeft) * 1.2) ArchDepthB
+			define [object xLeft xHook yHook adb] : Dims df sym
 
 			return : sink
 				widths.lhs sw
 				[if (sink == spiro-outline) corner flat] (offset + xLeft) top [heading Downward]
 				curl (offset + xLeft) (bot + adb)
 				HookEnd (bot + offset) (sw -- sw)
-				g4 (xHook - offset) (bot + Hook)
+				g4 (xHook - offset) (bot + yHook)
 				if (sink == spiro-outline) { [corner (xHook - offset) top] } {}
 
 		export : define [CrossBar df sym] : begin
@@ -268,7 +272,7 @@ glyph-block Letter-Latin-Lower-T : begin
 			hookless                       { dfF Hookless       }
 		object # symmetry
 			""                             SYM-BALANCED
-			"asymmetric"                   SYM-LEFT
+			asymmetric                     SYM-LEFT
 		object # height
 			""                             Ascender
 			shortNeck                      yShortNeck1
@@ -378,13 +382,13 @@ glyph-block Letter-Latin-Lower-T : begin
 	select-variant 't/phoneticLeft3/reduced' (shapeFrom -- 't/phoneticLeft3') (follow -- 't/phoneticLeft1')
 
 	create-glyph 't/phoneticLeft4/selector.serifless' : glyph-proc
-		set-width dfN.width
-		include : dfN.markSet.b
+		local df : include dfN
+		include : df.markSet.b
 		DependentSelector.set currentGlyph 'full'
 
 	create-glyph 't/phoneticLeft4/selector.serifed' : glyph-proc
-		set-width dfN.width
-		include : dfN.markSet.b
+		local df : include dfN
+		include : df.markSet.b
 		DependentSelector.set currentGlyph 'reduced'
 
 	select-variant 't/phoneticLeft4/selector' (follow -- 'l/bottomSerif/leftHalf')
@@ -399,14 +403,45 @@ glyph-block Letter-Latin-Lower-T : begin
 	derive-glyphs 'tCedilla' 0x163 't' ConnectedCedilla
 	CreateAccentedComposition 'tComma' 0x21B 't' 'commaBelow'
 
-	select-variant 'tHookTop' 0x1AD
 	select-variant 'tPalatalHook' 0x1AB (follow -- 't')
-	select-variant 'tRTail' 0x288
-	select-variant 'tCurlyTail' 0x236
-	select-variant "tHookTopRTail" 0x1DF09
 
-	CreateTurnedLetter "turnt" 0x287 "t" HalfAdvance (XH / 2)
+	select-variant 'tHookTop'      0x1AD
+	select-variant 'tRTail'        0x288
+	select-variant 'tHookTopRTail' 0x1DF09
+
+	CreateTurnedLetter 'turnt' 0x287 't' HalfAdvance (XH / 2)
+
+	select-variant 'tCurlyTail'     0x236
 	select-variant 'turntCurlyTail' 0x1DF0D (follow -- 'tHookTop')
+
+	define ClosedTConfig : object
+		hookless            { SYM-BALANCED }
+		hooklessAsymmetric  { SYM-LEFT     }
+
+	foreach { suffix { sym } } [pairs-of ClosedTConfig] : do
+		create-glyph "tClosed.\(suffix)" : glyph-proc
+			local df : include dfN
+			include : df.markSet.b
+
+			define [object xLeft xHook yHook ada adb] : BentHook.Dims df sym
+
+			include : LeaningAnchor.Above.Hook xLeft xHook
+			include : LeaningAnchor.Below.Hook xLeft xHook
+			set-base-anchor 'bottomRight' xHook yHook
+			set-base-anchor 'overlay' (xLeft + [HSwToV HalfStroke]) [mix 0 XH 0.58]
+
+			include : intersection
+				BentHook.CrossBar df sym
+				MaskLeft [mix (xLeft + [HSwToV Stroke]) (xHook - [HSwToV Stroke]) : StrokeWidthBlend 0.9 0.7]
+			include : dispiro
+				widths.lhs
+				flatside.ld xLeft 0 Ascender ada adb 0
+				Arch.lhs 0
+				g4   (xHook - OX) [YSmoothMidR Ascender 0 SmallArchDepthA SmallArchDepthB]
+				Arch.lhs Ascender
+				flatside.ld xLeft 0 Ascender ada adb 0
+
+	select-variant 'th' 0x1DF79 (shapeFrom -- 'tClosed') (follow -- 'tHookTopRTail')
 
 	# U+01BE is actually "t" and "s" combined together
 	define SLAB-NONE        0
