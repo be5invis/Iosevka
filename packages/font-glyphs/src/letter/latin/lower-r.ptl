@@ -52,7 +52,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			__                  : df.leftSB + RBalance * rBalanceMultiplier
 
 		local rTopSerifX : rBarLeftX + [HSwToV : 0.5 * strokeBar]
-		local rTopSerifJut : match mode
+		export : local rTopSerifJut : match mode
 			[Just RMode.Needle] : Math.max ([HSwToV : 0.5 * strokeBar] + SideJut) : mix (MidJutCenter - [IBalance df]) (rTopSerifX - df.leftSB) rSerifLeftExtender
 			__                  : [HSwToV : 0.5 * strokeBar] + SideJut + RBalance * rSerifLeftExtender
 		export : local [rTopSerif y] : tagged 'serifLT' : HSerif.lt rTopSerifX y rTopSerifJut
@@ -60,10 +60,10 @@ glyph-block Letter-Latin-Lower-R : begin
 		local rBottomSerifX : match mode
 			[Just RMode.Needle] : rTopSerifX + [IBalance df]
 			__                  : begin rTopSerifX
-		local rBottomSerifJutLeft : match mode
+		export : local rBottomSerifJutLeft : match mode
 			[Just RMode.Needle] : rTopSerifJut + [IBalance df]
 			__                  : begin rTopSerifJut
-		local rBottomSerifJutRight : mix [HSwToV : 0.5 * strokeBar] rBottomSerifJutLeft : match mode
+		export : local rBottomSerifJutRight : mix [HSwToV : 0.5 * strokeBar] rBottomSerifJutLeft : match mode
 			[Just RMode.Needle] : begin 1.0
 			__                  : begin 1.2
 		export : local [rBottomSerif y] : tagged 'serifLB' : union
@@ -143,7 +143,7 @@ glyph-block Letter-Latin-Lower-R : begin
 				g4.left.mid (rArchMiddleX - rCorX) (top - O) [widths.lhs.heading Stroke rArchMiddleWard]
 				archv 32
 				straight.down.end (rBarLeftX + [HSwToV : Stroke - ShoulderFine]) [Math.max (bottom + TINY) (top - rArchDepthA)] [widths.lhs.heading ShoulderFine Downward]
-			include : VBar.l rBarLeftX bottom top
+			include : tagged 'strokeL' : VBar.l rBarLeftX bottom top
 			if doBottomSerif : include : rBottomSerif bottom
 			if doTopSerif    : include : rTopSerif    top
 
@@ -157,7 +157,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : dispiro
 				widths.lhs (Stroke - rArchTopShiftY)
 				ArcKnots
-			include : VBar.l rBarLeftX bottom top
+			include : tagged 'strokeL' : VBar.l rBarLeftX bottom top
 			if doHookSerif : include : intersection
 				VSerif.dr (rHookX - rCorX) top VJut
 				spiro-outline
@@ -179,7 +179,7 @@ glyph-block Letter-Latin-Lower-R : begin
 				arcvh nothing DesignParameters.rHookSuperness
 				flat [Arch.adjust-x.top rArchMiddleX] top
 				curl (rBarLeftX - O) top [heading Leftward]
-			include : VBar.l rBarLeftX bottom top
+			include : tagged 'strokeL' : VBar.l rBarLeftX bottom top
 			if doBottomSerif : include : rBottomSerif bottom
 			if doTopSerif    : include : rTopSerif    top
 
@@ -191,7 +191,7 @@ glyph-block Letter-Latin-Lower-R : begin
 				arcvh nothing DesignParameters.rHookSuperness
 				g4.left.mid (rArchMiddleX - CorrectionOMidS) (top - O) [heading Leftward]
 				g4   rBarLeftX (top - DToothlessRise)
-			include : VBar.l rBarLeftX bottom (top - offsetY0)
+			include : tagged 'strokeL' : VBar.l rBarLeftX bottom (top - offsetY0)
 			if doBottomSerif : include : rBottomSerif bottom
 
 		export : define [EarlessCorner    df md top bottom ts bs] : [EarlessCornerShapeImpl DToothlessRise] df md top bottom ts bs
@@ -398,7 +398,7 @@ glyph-block Letter-Latin-Lower-R : begin
 				g4.left.start rHookX (top - O)
 				archv
 				straight.down.end (rBarLeftX + [HSwToV : Stroke - ShoulderFine]) [Math.max (bottom + TINY) (top - rArchDepthA)] [widths.lhs.heading ShoulderFine Downward]
-			include : VBar.l rBarLeftX bottom top
+			include : tagged 'strokeL' : VBar.l rBarLeftX bottom top
 			if doBottomSerif : include : rBottomSerif bottom
 			if doTopSerif    : include : rTopSerif    top
 
@@ -408,7 +408,7 @@ glyph-block Letter-Latin-Lower-R : begin
 				widths.lhs
 				flat rHookX top
 				curl (rBarLeftX - O) top [heading Leftward]
-			include : VBar.l rBarLeftX bottom top
+			include : tagged 'strokeL' : VBar.l rBarLeftX bottom top
 			if doBottomSerif : include : rBottomSerif bottom
 			if doTopSerif    : include : rTopSerif    top
 
@@ -418,7 +418,7 @@ glyph-block Letter-Latin-Lower-R : begin
 				widths.lhs
 				g4.left.start rHookX (top - O)
 				g4   rBarLeftX (top - DToothlessRise)
-			include : VBar.l rBarLeftX bottom (top - DToothlessRise)
+			include : tagged 'strokeL' : VBar.l rBarLeftX bottom (top - DToothlessRise)
 			if doBottomSerif : include : rBottomSerif bottom
 
 		export : define [EarlessRounded df md top bottom doTopSerif doBottomSerif] : glyph-proc
@@ -462,6 +462,46 @@ glyph-block Letter-Latin-Lower-R : begin
 	select-variant 'rNeedle' 0xAB47
 	select-variant 'rFlap' 0x27E (shapeFrom -- 'rNeedle')
 	select-variant 'rFlapPalatalHook' 0x1DF16 (shapeFrom -- 'rNeedlePalatalHook') (follow -- 'rFlap')
+
+	do "Lower i with pigtail"
+		glyph-block-import Letter-Shared-Shapes : RightwardTailedBar RightwardDiagTailedBar
+
+		define DotlessIPigtailConfig : SuffixCfg.combine
+			object # Tailless `i` variants
+				serifless          { { false false } no-shape }
+				hooky              { { false true  } no-shape }
+				hookyBottom        { { true  false } no-shape }
+				zshaped            { { true  true  } no-shape }
+			SuffixCfg.weave # Tailed `i` variants
+				object # Serifs
+					""           { false false }
+					serifed      { false true  }
+				object # Tail shape
+					flatTailed     RightwardTailedBar
+					diagonalTailed RightwardDiagTailedBar
+
+		foreach { suffix { { doTS doBS } TailShape } } [pairs-of DotlessIPigtailConfig] : do
+			define doTail : TailShape !== no-shape
+			define mode : if (doTail || doTS) RMode.NarrowHookSerifed RMode.NarrowHook
+
+			create-glyph "dotlessiPigtail.\(suffix)" : glyph-proc
+				local df : include dfF
+				include : df.markSet.e
+
+				define [object setTurnedMarks rBarLeftX rTopSerifJut] : RDim df mode
+				include : setTurnedMarks XH 0 (doTail || doTS) false
+
+				include : new-glyph : composite-proc
+					SmallRShape.Standard df mode XH 0 (doTail || doTS) false
+					FlipAround df.middle (XH / 2)
+				if doBS : include : tagged 'serifLB' : HSerif.lt (df.width - rBarLeftX - [HSwToV HalfStroke]) XH rTopSerifJut
+				if doTail : begin
+					eject-contour 'strokeL'
+					eject-contour 'serifLT'
+					include : TailShape (df.width - rBarLeftX) 0 XH
+
+		select-variant 'dotlessiPigtail'
+		CreateAccentedComposition 'iPigtail' 0x1DF70 'dotlessiPigtail' 'tittleAbove'
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	define [BBRShape df md] : glyph-proc
