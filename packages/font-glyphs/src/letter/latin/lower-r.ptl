@@ -468,19 +468,20 @@ glyph-block Letter-Latin-Lower-R : begin
 
 		define DotlessIPigtailConfig : SuffixCfg.combine
 			object # Tailless `i` variants
-				serifless          { { false false } no-shape }
-				hooky              { { false true  } no-shape }
-				hookyBottom        { { true  false } no-shape }
-				zshaped            { { true  true  } no-shape }
+				serifless          { { false false 0.0 } no-shape }
+				hooky              { { false true  1.0 } no-shape }
+				hookyBottom        { { true  false 0.0 } no-shape }
+				zshaped            { { true  true  1.0 } no-shape }
+				zshapedAsymmetric  { { true  true  0.5 } no-shape }
 			SuffixCfg.weave # Tailed `i` variants
 				object # Serifs
-					""           { false false }
-					serifed      { false true  }
+					""           { false false 0.0 }
+					serifed      { false true  1.0 }
 				object # Tail shape
 					flatTailed     RightwardTailedBar
 					diagonalTailed RightwardDiagTailedBar
 
-		foreach { suffix { { doTS doBS } TailShape } } [pairs-of DotlessIPigtailConfig] : do
+		foreach { suffix { { doTS doBS kJut } TailShape } } [pairs-of DotlessIPigtailConfig] : do
 			define doTail : TailShape !== no-shape
 			define mode : if (doTail || doTS) RMode.NarrowHookSerifed RMode.NarrowHook
 
@@ -494,7 +495,9 @@ glyph-block Letter-Latin-Lower-R : begin
 				include : new-glyph : composite-proc
 					SmallRShape.Standard df mode XH 0 (doTail || doTS) false
 					FlipAround df.middle (XH / 2)
-				if doBS : include : tagged 'serifLB' : HSerif.lt (df.width - rBarLeftX - [HSwToV HalfStroke]) XH rTopSerifJut
+				if doBS : begin
+					local jut : Math.max Jut : mix [HSwToV HalfStroke] rTopSerifJut kJut
+					include : tagged 'serifLB' : HSerif.lt (df.width - (rBarLeftX + [HSwToV HalfStroke])) XH jut
 				if doTail : begin
 					eject-contour 'strokeL'
 					eject-contour 'serifLT'
