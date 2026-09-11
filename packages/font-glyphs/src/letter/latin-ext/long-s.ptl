@@ -58,13 +58,14 @@ glyph-block Letter-Latin-Long-S : begin
 		LongSLowerHalf (-1) Middle [mix top bottom 0.5] bottom hookx hooky fine
 
 	define [IFishHookShape top bottom fSlab _kSerif] : glyph-proc
-		local balance : IBalance2 : DivFrame 1
+		local balance   : IBalance2 : DivFrame 1
+		local coBalance : IBalance  : DivFrame 1
 		local m : Middle + balance
 		include : VBar.m m bottom (top - Hook)
-		include : VerticalHook.m m (top - Hook) ((-LongJut) + balance) ((-Hook) + HalfStroke)
+		include : VerticalHook.m m (top - Hook) ((-LongJut) + coBalance) ((-Hook) + HalfStroke)
 		if fSlab : begin
 			local serifLength : Math.max Jut : mix [HSwToV HalfStroke] MidJutCenter : fallback _kSerif 1
-			local xSerifPos : m - [IBalance : DivFrame 1]
+			local xSerifPos : m - coBalance
 			include : HSerif.mb xSerifPos bottom serifLength
 
 	define [StandardSerifs m0 fSlab _kSerif] : glyph-proc
@@ -86,7 +87,7 @@ glyph-block Letter-Latin-Long-S : begin
 		local xTerminal : RightSB + RBalance2 + [Math.max 0 : m - [StdSmallFBarLeftPos0]]
 		include : dispiro
 			widths.lhs
-			g4 xTerminal (Ascender - Hook)
+			g4   xTerminal (Ascender - Hook)
 			HookStart Ascender
 			flat m (Ascender - ArchDepthA)
 			curl m 0 [heading Downward]
@@ -215,39 +216,34 @@ glyph-block Letter-Latin-Long-S : begin
 			include : StandardSerifs m serifStyle
 			create-forked-glyph "longsBar.bentHookDiagonalTailed\(suffix)" : LongSBentHookOverlayBar m
 
-	create-glyph "eshBaseline" 0xAB4D : glyph-proc
+	select-variant 'longs' 0x17F
+	select-variant 'longs/compLigLeft' (shapeFrom -- 'longs')
+	select-variant 'longsBar' 0x1E9D
+
+	alias 'esh' 0x283 "longs.flatHookTailedSerifless"
+
+	create-glyph 'eshBaseline' 0xAB4D : glyph-proc
 		include : MarkSet.b
 		include : LongSShape Ascender 0 (HookX + QuarterStroke) Hook
 
-	select-variant "longs" 0x17F
-	select-variant "longs/compLigLeft" (shapeFrom -- "longs")
-	select-variant "longsBar" 0x1E9D
-	alias "esh" 0x283 "longs.flatHookTailedSerifless"
+	derive-composites 'eshRTail' 0x1D98 'eshBaseline' : RetroflexHook.l
+		x -- (Middle - (HookX + QuarterStroke))
+		y -- 0
+		yOverflow -- Stroke
 
-	derive-composites "eshPalatalHook" 0x1D8B "esh" : PalatalHook.r
+	derive-composites 'eshRTail/phoneticRight' null 'esh' : RetroflexHook.l
+		x -- (Middle - (HookX + QuarterStroke))
+		y -- Descender
+		yOverflow -- Stroke
+
+	derive-composites 'eshPalatalHook' 0x1D8B 'esh' : PalatalHook.r
 		x       -- RightSB
 		y       -- 0
 		xLink   -- Middle
 		refSw   -- [AdviceStroke 3]
 		maskOut -- [intersection [MaskBelow 0] [MaskLeft : Middle + [HSwToV HalfStroke]]]
 
-	create-glyph "eshRTail" 0x1D98 : glyph-proc
-		include : MarkSet.bp
-		include : LongSShape Ascender 0 (HookX + QuarterStroke) Hook
-		include : RetroflexHook.l
-			x -- (Middle - (HookX + QuarterStroke))
-			y -- 0
-			yOverflow -- Stroke
-
-	create-glyph "eshRTail/phoneticRight" : glyph-proc
-		include : MarkSet.bp
-		include : LongSShape Ascender Descender (HookX + QuarterStroke) Hook
-		include : RetroflexHook.l
-			x -- (Middle - (HookX + QuarterStroke))
-			y -- Descender
-			yOverflow -- Stroke
-
-	create-glyph "eshCurlyTail" 0x286 : glyph-proc
+	create-glyph 'eshCurlyTail' 0x286 : glyph-proc
 		include : MarkSet.bp
 		local fine : AdviceStroke 3.5
 		local m : Middle - FBalance
@@ -264,29 +260,28 @@ glyph-block Letter-Latin-Long-S : begin
 	CreateAccentedComposition 'eshDblBar'          0x1DF0B 'esh'          'dblBarOver'
 	CreateAccentedComposition 'eshDblBarCurlyTail' 0x1DF0C 'eshCurlyTail' 'dblBarOver'
 
-	create-glyph "iFishHook" 0x27F : glyph-proc
+	create-glyph 'iFishHook' 0x27F : glyph-proc
 		include : MarkSet.p
 		include : IFishHookShape XH Descender SLAB
 
-	create-glyph "iviby" 0x285 : glyph-proc
+	create-glyph 'iviby' 0x285 : glyph-proc
 		include : MarkSet.p
 		include : RevLongSShape XH Descender (HookX + QuarterStroke) Hook
 
-	create-glyph "reveshLoop" 0x1AA : glyph-proc
-		local df : include : DivFrame para.advanceScaleI
-		include : df.markSet.bp
+	create-glyph 'reveshLoop' 0x1AA : glyph-proc
+		include : MarkSet.bp
 		local fine : AdviceStroke 4
 		include : dispiro
 			widths.center fine
-			g4.down.start df.middle (Ascender - fine * 1.5) [heading Downward]
+			g4.down.start Middle (Ascender - fine * 1.5) [heading Downward]
 			arcvh
-			g4 (df.middle - fine * 1) (Ascender - fine * 2.5) [heading Leftward]
+			g4   (Middle - fine * 1) (Ascender - fine * 2.5) [heading Leftward]
 			archv
-			g4 (df.middle - fine * 2) (Ascender - fine * 1.5) [heading Upward]
+			g4   (Middle - fine * 2) (Ascender - fine * 1.5) [heading Upward]
 			arcvh
-			g4 (df.middle - fine * 1) (Ascender - fine * 0.5) [heading Rightward]
+			g4   (Middle - fine * 1) (Ascender - fine * 0.5) [heading Rightward]
 			archv
-			flat df.middle (Ascender - fine * 1.5) [widths.center.heading Stroke Downward]
-			curl df.middle (Descender + Hook) [heading Downward]
+			flat Middle (Ascender - fine * 1.5) [widths.center.heading Stroke Downward]
+			curl Middle (Descender + Hook) [heading Downward]
 			arcvh
-			straight.right.end (df.middle + HookX) (Descender + O + HalfStroke)
+			straight.right.end (Middle + HookX) (Descender + O + HalfStroke)
