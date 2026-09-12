@@ -13,6 +13,7 @@ glyph-block Letter-Latin-Upper-A : begin
 	glyph-block-import Mark-Shared-Metrics : markHalfStroke
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateTurnedLetter
+	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
 	glyph-block-import Letter-Latin-V : VShapeOutline VShape VCornerHalfWidth
 
@@ -105,7 +106,7 @@ glyph-block Letter-Latin-Upper-A : begin
 			if ([maskBits slabKind SLAB-SMALL-CYRL] && para.isItalic) sf.lb.outer sf.lb.full
 		if [maskBits slabKind SLAB-RIGHT] : include
 			if ([maskBits slabKind SLAB-SMALL-CYRL] && para.isItalic) sf.rb.outer sf.rb.full
-		if [maskBits slabKind SLAB-TOP] : include : intersection [MaskLeft df.middle]
+		if [maskBits slabKind SLAB-TOP] : include : tagged 'serifLT' : intersection [MaskLeft df.middle]
 			if [maskBits slabKind : bitOr SLAB-LEFT SLAB-RIGHT]
 			: then : HSerif.lt df.middle top (MidJutSide + [HSwToV : 0.25 * sw]) sf.swSerif
 			: else : HSerif.lt df.middle top [mix MidJutSide LongJut 0.5]        sf.swSerif
@@ -123,7 +124,7 @@ glyph-block Letter-Latin-Upper-A : begin
 			triSerifed   [bitOr SLAB-TOP SLAB-LEFT SLAB-RIGHT]
 
 	foreach { suffix { bodyShape slabKind } } [Object.entries AConfig] : do
-		define [AShapeImpl mk top fTonos nOverlays] : glyph-proc
+		define [AShapeImpl mk top fTonos fSwash nOverlays] : glyph-proc
 			local df : include : DivFrame 1
 			include : df.markSet.(mk)
 			set-base-anchor 'trailing' df.rightSB 0
@@ -133,30 +134,48 @@ glyph-block Letter-Latin-Upper-A : begin
 
 			include : AShape.Letter df bodyShape slabKind top Stroke
 
-			if nOverlays : begin
-				local yBar : AShape.BarPos bodyShape slabKind top
-				match nOverlays
-					[Just 1] : begin
-						local yBot : if [maskBits slabKind : bitOr SLAB-LEFT SLAB-RIGHT] Stroke 0
-						include : HOverlayBar [mix 0 SB 0.3] [mix Width RightSB 0.3]
-							mix yBot (yBar - Stroke) 0.5
-							Math.min OverlayStroke : 0.625 * (yBar - Stroke - yBot)
-					[Just 2] : begin
-						eject-contour 'crossBar'
-						include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] (yBar - (Stroke - OverlayStroke) / 2)
-						include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix yBar top 0.25]
+			local yBar : AShape.BarPos bodyShape slabKind top
+
+			if (fSwash && bodyShape !== BODY-ROUND-TOP) : begin
+				eject-contour 'serifLT'
+				local xBowlLeft : [mix 0 SB 0.5] - [HSwToV HalfStroke]
+				local xTurn : xBowlLeft + [BowlXDepth top (yBar - Stroke) xBowlLeft Middle]
+				include : difference
+					dispiro
+						widths.lhs
+						flat Middle top [heading Leftward]
+						curl [Arch.adjust-x.top xTurn] top
+						archv
+						g4   (xBowlLeft + OX) [YSmoothMidL top (yBar - Stroke)]
+						arcvh
+						flat [Arch.adjust-x.bot xTurn] (yBar - Stroke)
+						curl Middle (yBar - Stroke) [heading Rightward]
+					AShape.Mask df bodyShape top Stroke
+
+			if nOverlays : match nOverlays
+				[Just 1] : begin
+					local yBot : if [maskBits slabKind : bitOr SLAB-LEFT SLAB-RIGHT] Stroke 0
+					include : HOverlayBar [mix 0 SB 0.3] [mix Width RightSB 0.3]
+						mix yBot (yBar - Stroke) 0.5
+						Math.min OverlayStroke : 0.625 * (yBar - Stroke - yBot)
+				[Just 2] : begin
+					eject-contour 'crossBar'
+					include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] (yBar - (Stroke - OverlayStroke) / 2)
+					include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix yBar top 0.25]
 
 		create-glyph "A.\(suffix)"          : AShapeImpl "capital" CAP
 		create-glyph "grek/Alpha.\(suffix)" : AShapeImpl "capital" CAP true
 		create-glyph "smcpA.\(suffix)"      : AShapeImpl "e"       XH
-		create-glyph "ABar.\(suffix)"       : AShapeImpl "capital" CAP false 1
+		create-glyph "ABar.\(suffix)"       : AShapeImpl "capital" CAP false false 1
+		create-glyph "ASwash.\(suffix)"     : AShapeImpl "capital" CAP false true
 
-		create-glyph "currency/australSign.\(suffix)" : AShapeImpl "capital" CAP false 2
+		create-glyph "currency/australSign.\(suffix)" : AShapeImpl "capital" CAP false false 2
 
 	select-variant 'A' 'A'
 	link-reduced-variant 'A/sansSerif' 'A' MathSansSerif
-	select-variant 'smcpA' 0x1D00  (follow -- 'A')
-	select-variant 'ABar'  0x1DF40 (follow -- 'A')
+	select-variant 'smcpA'     0x1D00  (follow -- 'A')
+	select-variant 'ABar'      0x1DF40 (follow -- 'A')
+	select-variant 'ASwash'    0x1DF68 (follow -- 'AHookLeft')
 	select-variant 'ARoundTop' 0x1DF6A (shapeFrom -- 'A') (follow -- 'A/roundTop')
 
 	select-variant 'grek/Alpha' 0x391 (follow -- 'A')
