@@ -9,6 +9,7 @@ glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateAccentedComposition
+	glyph-block-import Letter-Shared-Metrics : EFVJutLength EFMidBarPosY
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors
 
 	define [IShape df top] : glyph-proc
@@ -62,6 +63,21 @@ glyph-block Letter-Latin-Upper-I : begin
 			include : IShape df top
 			include : Serifs df top
 
+		create-glyph "AiDiphthong.\(suffix)" : glyph-proc
+			local df : include : DivFrame 1
+			include : df.markSet.capital
+			local subDf : DivFrame adws
+			include : with-transform [Translate (df.middle - subDf.middle) 0] [refer-glyph "I.\(suffix)"]
+			local xMidLeft  : [mix df.leftSB  df.rightSB 0.125] - [HSwToV HalfStroke]
+			local xMidRight : [mix df.rightSB df.leftSB  0.125] + [HSwToV HalfStroke]
+			local yBar : EFMidBarPosY CAP 0
+			include : HBar.m xMidLeft xMidRight yBar
+			if (Serifs !== ISerifs.None) : begin
+				local { jutTop jutBot jutMid } : EFVJutLength CAP 0
+				local swVJut : Math.min VJutStroke : VSwToH : 0.625 * ((df.middle - [HSwToV HalfStroke]) - xMidLeft)
+				include : VSerif.ml xMidLeft  yBar jutMid swVJut
+				include : VSerif.mr xMidRight yBar jutMid swVJut
+
 	select-variant 'I' 'I'
 	link-reduced-variant 'I/sansSerif' 'I' MathSansSerif
 	select-variant 'grek/Iota' 0x399 (follow -- 'I')
@@ -72,6 +88,8 @@ glyph-block Letter-Latin-Upper-I : begin
 
 	select-variant 'ISideways' 0xA7F7 (follow -- 'I')
 	select-variant 'ILonga' 0xA7FE (follow -- 'I')
+
+	select-variant 'AiDiphthong' 0x1DF6E (follow -- 'I')
 
 	CreateAccentedComposition 'IAcute' 0xCD 'I' 'acuteAbove'
 
