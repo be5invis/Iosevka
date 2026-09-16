@@ -115,6 +115,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : LeaningAnchor.Below.VBar.l rBarLeftX strokeBar
 			include : LeaningAnchor.Above.Hook [if doTopSerif (rTopSerifX - rTopSerifJut) rBarLeftX] rHookX
 			set-base-anchor 'overlay' (rBarLeftX + [HSwToV : 0.5 * strokeBar]) [mix bottom top 0.5]
+			set-base-anchor 'hooktopAttach' (rBarLeftX + [HSwToV : 0.5 * strokeBar]) top
 			local xAtt : if doBottomSerif (rBottomSerifX + rBottomSerifJutRight) (rBarLeftX + [HSwToV strokeBar])
 			local xPos : xAtt + [if doBottomSerif 0 : if para.isItalic SideJut : PalatalHook.adviceGap Stroke]
 			set-base-anchor 'palatalHookAttach' xAtt bottom
@@ -389,6 +390,52 @@ glyph-block Letter-Latin-Lower-R : begin
 	select-variant 'fInsular' 0xA77C (follow -- 'r/rTailBase')
 
 	CreateAccentedComposition 'turnrBar' 0x1DF50 'turnr' 'barOver'
+
+	glyph-block-export MidHeightRightHookXFromStem
+	define [MidHeightRightHookXFromStem g] : begin [g.gizmo.unapply : fallback g.baseAnchors.hooktopAttach g.baseAnchors.overlay].x
+
+	define [LFishHookStemX xOrig rGn dfOuter] : begin
+		local rRef : query-glyph rGn
+		local xRStem : begin [rRef.gizmo.unapply : fallback rRef.baseAnchors.hooktopAttach rRef.baseAnchors.overlay].x
+		local xRHook : begin [rRef.gizmo.unapply : fallback rRef.baseAnchors.leaningAbove rRef.baseAnchors.above].x
+		local spread : Math.max TINY : xRHook - xRStem + [HSwToV HalfStroke]
+		local k : Math.min 1 : (dfOuter.rightSB - xOrig - [HSwToV HalfStroke] - O) / spread
+		return : xOrig - k * spread
+
+	define [LFishHookStemXForGlyph xOrig rGn dfOuter xRStem] : match para.isQuasiProportional
+		true : begin xRStem
+		__   : LFishHookStemX xOrig rGn dfOuter
+
+	define [LFishHookLOverlay lGn xShift] : glyph-proc
+		include : with-transform [Translate xShift 0] : refer-glyph lGn
+
+	derive-multi-part-glyphs 'lFishHook' 0x1DF11 {'l' 'r'} : lambda [srcs gr] : glyph-proc
+		local { l r } srcs
+		local df : DivFrame 1
+		include : df.markSet.b
+
+		local lRef : query-glyph l
+		local xOrig : begin [lRef.gizmo.unapply : fallback lRef.baseAnchors.hooktopAttach lRef.baseAnchors.overlay].x
+
+		include [refer-glyph r] AS_BASE ALSO_METRICS
+		local xRStem : MidHeightRightHookXFromStem currentGlyph
+		local xStem : LFishHookStemXForGlyph xOrig r df xRStem
+		local xShift : xStem - xOrig
+		include : Translate (xStem - xRStem) 0
+
+		eject-contour 'strokeL'
+		eject-contour 'serifLT'
+		eject-contour 'serifLB'
+
+		include : VBar.m xStem 0 Ascender Stroke
+		include : intersection [MaskAbove (Ascender - MidJutCenter)] : LFishHookLOverlay l xShift
+		local yBottomCut : Math.max Hook (SmallArchDepthB + HalfStroke)
+		include : intersection [MaskBelow (yBottomCut + O)] : LFishHookLOverlay l xShift
+
+		include : LeaningAnchor.Above.At xStem
+		include : LeaningAnchor.Below.At xStem
+		set-base-anchor 'overlay' xStem [mix 0 Ascender OverlayPos]
+		set-base-anchor 'hooktopAttach' xStem XH
 
 	define NeedleRShape : namespace
 		export : define [Standard df md top bottom doTopSerif doBottomSerif] : glyph-proc

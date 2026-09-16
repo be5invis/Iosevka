@@ -291,8 +291,30 @@ glyph-block Mark-Above : begin
 
 			include : DrawAt (markMiddle - markExtend) aboveMarkMid (markDotsRadius * kdr)
 
+		create-glyph "dottedGraveAbove.\(suffix)" : glyph-proc
+			set-width 0
+			include : StdAnchors.wide
+			local lowerDotDx : markExtend + markDotsRadius * kdr
+			include : dispiro
+				flat (markMiddle + 1.000 * markStress) aboveMarkBot [widths.center : 2 * markFine]
+				curl (markMiddle - 0.875 * markExtend) aboveMarkTop [widths.center : 2 * markStress]
+			include : DrawAt (markMiddle + markExtend) [mix aboveMarkMid aboveMarkTop 0.7] (markDotsRadius * kdr)
+			include : DrawAt (markMiddle - lowerDotDx) [mix aboveMarkMid aboveMarkBot 0.7] (markDotsRadius * kdr)
+
+		create-glyph "dottedAcuteAbove.\(suffix)" : glyph-proc
+			set-width 0
+			include : StdAnchors.wide
+			local lowerDotDx : markExtend + markDotsRadius * kdr
+			include : dispiro
+				flat (markMiddle - 1.000 * markStress) aboveMarkBot [widths.center : 2 * markFine]
+				curl (markMiddle + 0.875 * markExtend) aboveMarkTop [widths.center : 2 * markStress]
+			include : DrawAt (markMiddle - markExtend) [mix aboveMarkMid aboveMarkTop 0.7] (markDotsRadius * kdr)
+			include : DrawAt (markMiddle + lowerDotDx) [mix aboveMarkMid aboveMarkBot 0.7] (markDotsRadius * kdr)
+
 	select-variant 'graveDotAbove' 0x1ADE (follow -- 'diacriticDot')
 	select-variant 'dotAcuteAbove' 0x1ADF (follow -- 'diacriticDot')
+	select-variant 'dottedGraveAbove' 0x1DC0 (follow -- 'diacriticDot')
+	select-variant 'dottedAcuteAbove' 0x1DC1 (follow -- 'diacriticDot')
 
 	#### Caret/Caron Marks
 	glyph-block-export CaretCaronWidth CaretCaronMidSw CaretCaronTerminalSw
@@ -436,6 +458,47 @@ glyph-block Mark-Above : begin
 			swMid   -- CaretCaronMidSw
 			swBar   -- (2 * markFine)
 
+	# Compound Chao-tone contours. 2-segment marks union a bar with one
+	# caret/caron half (shared MidSw curl). 3-segment marks overlap a full
+	# caron with a full caret so each interior join is that same cap.
+	define caretTop : aboveMarkTop + markFine * 0.7
+	define caretBot : aboveMarkBot + markStress - markFine
+	define caronTop : aboveMarkTop - markStress + 1.7 * markFine
+	define caronBot   aboveMarkBot
+	define toneStep : CaretCaronWidth / 2
+
+	define [ToneBarToPeak x top bot] : dispiro
+		flat x bot [widths.center CaretCaronTerminalSw]
+		curl x top [widths.center.heading CaretCaronMidSw Upward]
+
+	define [ToneBarToValley x top bot] : dispiro
+		flat x top [widths.center CaretCaronTerminalSw]
+		curl x bot [widths.center.heading CaretCaronMidSw Downward]
+
+	# 3-segment marks: overlap a caron and a caret so each interior join is
+	# the same MidSw curl-to-curl cap as U+0302 / U+030C (one contour).
+	create-glyph 'graveAcuteGraveAbove' 0x1DC8 : glyph-proc
+		set-width 0
+		include : StdAnchors.extraWide
+		local xV : markMiddle - toneStep / 2
+		local xP : markMiddle + toneStep / 2
+		include : union
+			CaronLeftShape caretTop caretBot xV CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskBelow caretTop] : CaronRightShape caretTop caretBot xV CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskAbove caretBot] : CaretLeftShape caretTop caretBot xP CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaretRightShape caretTop caretBot xP CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+
+	create-glyph 'acuteGraveAcuteAbove' 0x1DC9 : glyph-proc
+		set-width 0
+		include : StdAnchors.extraWide
+		local xP : markMiddle - toneStep / 2
+		local xV : markMiddle + toneStep / 2
+		include : union
+			CaretLeftShape caretTop caretBot xP CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskAbove caretBot] : CaretRightShape caretTop caretBot xP CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskBelow caretTop] : CaronLeftShape caretTop caretBot xV CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaronRightShape caretTop caretBot xV CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+
 	create-glyph 'dblCircumflexAbove' 0x1AB0 : glyph-proc
 		set-width 0
 		include : intersection [MaskRight markMiddle]
@@ -450,6 +513,141 @@ glyph-block Mark-Above : begin
 			with-transform [Translate (+markExtend) 0] : refer-glyph 'caronAbove'
 		include : intersection [MaskLeft markMiddle]
 			with-transform [Translate (-markExtend) 0] : refer-glyph 'caronAbove'
+		include : StdAnchors.extraWide
+
+	# 2-segment bar+caret/caron marks. The vertical bar sits half a
+	# stem-width off the join so bold stems do not fuse; a short foot
+	# reconnects them. The whole mark is recentered on markMiddle.
+	create-glyph 'barAcuteAbove' 0x1AD0 : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xJoin : markMiddle - toneStep / 2 + 0.5 * (barClear + midHalf - termHalf)
+		local xBar : xJoin - barClear
+		include : union
+			ToneBarToValley xBar caronTop caronBot
+			CaronBottomBarShape caronBot xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			CaronRightShape caronTop caronBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+
+	create-glyph 'graveBarAbove' 0x1AD1 : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xJoin : markMiddle + toneStep / 2 - 0.5 * (barClear + midHalf - termHalf)
+		local xBar : xJoin + barClear
+		include : union
+			CaronLeftShape caronTop caronBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaronBottomBarShape caronBot xJoin (2 * barClear) 0 (+1) CaretCaronMidSw (2 * markFine)
+			ToneBarToValley xBar caronTop caronBot
+
+	create-glyph 'barGraveAbove' 0x1AD2 : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xJoin : markMiddle - toneStep / 2 + 0.5 * (barClear + midHalf - termHalf)
+		local xBar : xJoin - barClear
+		include : union
+			ToneBarToPeak xBar caretTop caretBot
+			CaretTopBarShape caretTop xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			CaretRightShape caretTop caretBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+
+	create-glyph 'acuteBarAbove' 0x1AD3 : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xJoin : markMiddle + toneStep / 2 - 0.5 * (barClear + midHalf - termHalf)
+		local xBar : xJoin + barClear
+		include : union
+			CaretLeftShape caretTop caretBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaretTopBarShape caretTop xJoin (2 * barClear) 0 (+1) CaretCaronMidSw (2 * markFine)
+			ToneBarToPeak xBar caretTop caretBot
+
+	create-glyph 'barMacronAbove' 0x1AD4 : glyph-proc
+		set-width 0
+		include : StdAnchors.mediumWide
+		include : union
+			ToneBarToPeak (markMiddle - markExtend) caretTop caretBot
+			CaretTopBarShape caretTop markMiddle (2 * markExtend) 0 (+1) CaretCaronMidSw (2 * markFine)
+
+	create-glyph 'macronBarAbove' 0x1AD5 : glyph-proc
+		set-width 0
+		include : StdAnchors.mediumWide
+		include : union
+			CaretTopBarShape caretTop markMiddle (2 * markExtend) (-1) 0 CaretCaronMidSw (2 * markFine)
+			ToneBarToPeak (markMiddle + markExtend) caretTop caretBot
+
+	# U+1AD6 / U+1AD7 / U+1AD8. Zigzag is shifted so the full mark (bar +
+	# extra left span) is centered on markMiddle. The vertical bar sits
+	# half a stem-width left of the join so bold stems do not fuse.
+	create-glyph 'barAcuteGraveAbove' 0x1AD6 : glyph-proc
+		set-width 0
+		include : StdAnchors.extraWide
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xC : markMiddle + 0.5 * (barClear + midHalf - termHalf)
+		local xJoin : xC - toneStep
+		local xBar : xJoin - barClear
+		include : union
+			ToneBarToValley xBar caretTop caretBot
+			CaronBottomBarShape caretBot xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			intersection [MaskBelow caretTop] : CaronRightShape caretTop caretBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskAbove caretBot] : CaretLeftShape caretTop caretBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaretRightShape caretTop caretBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+
+	create-glyph 'barGraveAcuteAbove' 0x1AD7 : glyph-proc
+		set-width 0
+		include : StdAnchors.extraWide
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xC : markMiddle + 0.5 * (barClear + midHalf - termHalf)
+		local xJoin : xC - toneStep
+		local xBar : xJoin - barClear
+		include : union
+			ToneBarToPeak xBar caronTop caronBot
+			CaretTopBarShape caronTop xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			intersection [MaskAbove caronBot] : CaretRightShape caronTop caronBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskBelow caronTop] : CaronLeftShape caronTop caronBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaronRightShape caronTop caronBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+
+	create-glyph 'macronAcuteGraveAbove' 0x1AD8 : glyph-proc
+		set-width 0
+		include : StdAnchors.extraWide
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local xC : markMiddle + 0.5 * toneStep - 0.5 * termHalf
+		local xL : xC - toneStep
+		include : union
+			CaronBottomBarShape caretBot xL CaretCaronWidth (-1) 0 CaretCaronMidSw (2 * markFine)
+			intersection [MaskBelow caretTop] : CaronRightShape caretTop caretBot xL CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskAbove caretBot] : CaretLeftShape caretTop caretBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaretRightShape caretTop caretBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+
+	create-glyph 'caronAcuteAbove' 0x1AEC : glyph-proc
+		set-width 0
+		include : with-transform [Translate (-markExtend) 0] : refer-glyph 'caronAbove'
+		include : with-transform [Translate (+markExtend) 0] : refer-glyph 'acuteAbove'
+		include : StdAnchors.extraWide
+
+	create-glyph 'barDoubleAcuteAbove' 0x1AED : glyph-proc
+		set-width 0
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local barClear midHalf
+		local xJoin : markMiddle - markExtend + 0.5 * barClear
+		local xBar : xJoin - barClear
+		include : union
+			ToneBarToValley xBar caronTop caronBot
+			CaronBottomBarShape caronBot xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			CaronRightShape caronTop caronBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+		include : with-transform [Translate (+markExtend * 0.85 + 0.5 * barClear) 0] : refer-glyph 'acuteAbove'
 		include : StdAnchors.extraWide
 
 	#### Tilde Marks
