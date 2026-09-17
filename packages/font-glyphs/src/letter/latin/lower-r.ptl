@@ -27,7 +27,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		CornerHookSerifed  7
 		Earless            8
 		EarlessSerifed     9
-		Needle            10
+		Half              10
 
 	define [RDim df mode _stroke _strokeBar _fine] : namespace
 		local stroke    : fallback _stroke    Stroke
@@ -45,27 +45,27 @@ glyph-block Letter-Latin-Lower-R : begin
 			[Just RMode.CornerHookSerifed] { (4 / 3)           (2 / 3)  (3 / 4)  (2 / 3) }
 			[Just RMode.Earless]           {  1                 1       (1 / 2)  (1 / 3) }
 			[Just RMode.EarlessSerifed]    { (4 / 3)            1       (1 / 2)  (2 / 3) }
-			[Just RMode.Needle]            {  1                 1       (1 / 2)   0      }
+			[Just RMode.Half]              {  1                 1       (1 / 2)   0      }
 
 		export : local rBarLeftX : match mode
-			[Just RMode.Needle] : mix df.leftSB (df.middle - [HSwToV : 0.5 * strokeBar] - [IBalance2 df]) rBalanceMultiplier
-			__                  : df.leftSB + RBalance * rBalanceMultiplier
+			[Just RMode.Half] : mix df.leftSB (df.middle - [HSwToV : 0.5 * strokeBar] - [IBalance2 df]) rBalanceMultiplier
+			__                : df.leftSB + RBalance * rBalanceMultiplier
 
 		local rTopSerifX : rBarLeftX + [HSwToV : 0.5 * strokeBar]
 		export : local rTopSerifJut : match mode
-			[Just RMode.Needle] : Math.max ([HSwToV : 0.5 * strokeBar] + SideJut) : mix (MidJutCenter - [IBalance df]) (rTopSerifX - df.leftSB) rSerifLeftExtender
-			__                  : [HSwToV : 0.5 * strokeBar] + SideJut + RBalance * rSerifLeftExtender
+			[Just RMode.Half] : Math.max ([HSwToV : 0.5 * strokeBar] + SideJut) : mix (MidJutCenter - [IBalance df]) (rTopSerifX - df.leftSB) rSerifLeftExtender
+			__                : [HSwToV : 0.5 * strokeBar] + SideJut + RBalance * rSerifLeftExtender
 		export : local [rTopSerif y] : tagged 'serifLT' : HSerif.lt rTopSerifX y rTopSerifJut
 
 		local rBottomSerifX : match mode
-			[Just RMode.Needle] : rTopSerifX + [IBalance df]
-			__                  : begin rTopSerifX
+			[Just RMode.Half] : rTopSerifX + [IBalance df]
+			__                : begin rTopSerifX
 		export : local rBottomSerifJutLeft : match mode
-			[Just RMode.Needle] : rTopSerifJut + [IBalance df]
-			__                  : begin rTopSerifJut
+			[Just RMode.Half] : rTopSerifJut + [IBalance df]
+			__                : begin rTopSerifJut
 		export : local rBottomSerifJutRight : mix [HSwToV : 0.5 * strokeBar] rBottomSerifJutLeft : match mode
-			[Just RMode.Needle] : begin 1.0
-			__                  : begin 1.2
+			[Just RMode.Half] : begin 1.0
+			__                : begin 1.2
 		export : local [rBottomSerif y] : tagged 'serifLB' : union
 			HSerif.lb rBottomSerifX y rBottomSerifJutLeft
 			HSerif.rb rBottomSerifX y rBottomSerifJutRight
@@ -75,7 +75,7 @@ glyph-block Letter-Latin-Lower-R : begin
 				rBarLeftX + [HSwToV strokeBar]
 				df.rightSB + RBalance2 * rBalanceMultiplier - (OX - O)
 				mix 0.85 1.15 : if (para.advanceScaleF < 1) ((1 - df.adws) / (1 - para.advanceScaleF)) 0
-			[Just RMode.Needle] : Math.max
+			[Just RMode.Half] : Math.max
 				rBarLeftX + [HSwToV : strokeBar + 0.125 * stroke] + TINY + [Math.abs : TanSlope * stroke]
 				[Arch.adjust-x.top (rBarLeftX + [HSwToV : 0.5 * strokeBar] + HookX) (sw -- strokeA)] - OXHook
 			__ : df.rightSB + RBalance2 * rBalanceMultiplier - (OX - O)
@@ -105,7 +105,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			__ : begin 0
 		local rArchDepth : match mode
 			([Just RMode.Earless] || [Just RMode.EarlessSerifed]) : begin SmallArchDepth
-			[Just RMode.Needle]                                   : begin Hook
+			[Just RMode.Half]                                     : begin Hook
 			__                                                    : 0.47 * (XH - 0)
 		export : local rArchDepthA : ArchDepthAClamped XH 0
 			ArchDepthAOf rArchDepth
@@ -437,7 +437,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		set-base-anchor 'overlay' xStem [mix 0 Ascender OverlayPos]
 		set-base-anchor 'hooktopAttach' xStem XH
 
-	define NeedleRShape : namespace
+	define HalfRShape : namespace
 		export : define [Standard df md top bottom doTopSerif doBottomSerif] : glyph-proc
 			define [object rBarLeftX rBottomSerif rTopSerif rHookX rArchDepthA] : RDim df md
 			include : dispiro
@@ -478,37 +478,37 @@ glyph-block Letter-Latin-Lower-R : begin
 				curl rBarLeftX bottom [heading Downward]
 			if doBottomSerif : include : rBottomSerif bottom
 
-	define NeedleRConfig : SuffixCfg.weave
+	define HalfRConfig : SuffixCfg.weave
 		object # Body
-			""               NeedleRShape.Standard
-			flatTop          NeedleRShape.FlatTop
-			earlessCorner    NeedleRShape.EarlessCorner
-			earlessRounded   NeedleRShape.EarlessRounded
+			""               HalfRShape.Standard
+			flatTop          HalfRShape.FlatTop
+			earlessCorner    HalfRShape.EarlessCorner
+			earlessRounded   HalfRShape.EarlessRounded
 		object # Serifs
 			serifless      { false false }
 			topSerifed     { true  false }
 			baseSerifed    { false true  }
 			serifed        { true  true  }
 
-	foreach { suffix { Body { doTS doBS } } } [pairs-of NeedleRConfig] : do
-		create-glyph "rNeedle.\(suffix)" : glyph-proc
+	foreach { suffix { Body { doTS doBS } } } [pairs-of HalfRConfig] : do
+		create-glyph "rHalf.\(suffix)" : glyph-proc
 			local df : include : DivFrame para.advanceScaleI
 			include : df.markSet.e
 
-			define [object setMarks] : RDim df RMode.Needle
+			define [object setMarks] : RDim df RMode.Half
 			include : setMarks XH 0 doTS doBS
 
-			include : Body df RMode.Needle XH 0 doTS doBS
+			include : Body df RMode.Half XH 0 doTS doBS
 
-		create-glyph "rNeedlePalatalHook.\(suffix)" : glyph-proc
-			include [refer-glyph "rNeedle.\(suffix)"] AS_BASE ALSO_METRICS
+		create-glyph "rHalfPalatalHook.\(suffix)" : glyph-proc
+			include [refer-glyph "rHalf.\(suffix)"] AS_BASE ALSO_METRICS
 			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookAttach
 			local pos : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookPos
 			include : PalatalHook.r (x -- pos.x) (y -- pos.y) (xLink -- attach.x)
 
-	select-variant 'rNeedle' 0xAB47
-	select-variant 'rFlap' 0x27E (shapeFrom -- 'rNeedle')
-	select-variant 'rFlapPalatalHook' 0x1DF16 (shapeFrom -- 'rNeedlePalatalHook') (follow -- 'rFlap')
+	select-variant 'rHalf' 0xAB47
+	select-variant 'rFlap' 0x27E (shapeFrom -- 'rHalf')
+	select-variant 'rFlapPalatalHook' 0x1DF16 (shapeFrom -- 'rHalfPalatalHook') (follow -- 'rFlap')
 
 	do "Lower i with pigtail"
 		glyph-block-import Letter-Shared-Shapes : RightwardTailedBar RightwardDiagTailedBar

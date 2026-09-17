@@ -16,12 +16,11 @@ glyph-block Letter-Latin-Lower-A : begin
 	define HOOK-SLAB-NONE      0
 	define HOOK-SLAB-CLASSICAL 1 # TODO
 	define HOOK-SLAB-INWARD    2
+	define HOOK-HALF           3
 
 	glyph-block-export DoubleStorey
 	define DoubleStorey : namespace
 		export : define [Sw df] : df.adviceStroke2 2 3 XH
-		export : define SwAboveBar 0.425
-
 		export : define [SmoothA df] : begin
 			local sw : Sw df
 			local ad : ArchDepth * [StrokeWidthBlend 0.9 0.81 sw]
@@ -37,20 +36,29 @@ glyph-block Letter-Latin-Lower-A : begin
 
 		define [ADoubleStoreyHookAndBarT sink] : function [df hookStyle y0 stroke fine] : begin
 			local isMask : sink == spiro-outline
+			local barRightX : df.rightSB - [HSwToV : stroke - [fallback fine stroke]]
+			local hookLeftX : match hookStyle
+				[Just HOOK-HALF] : Math.min
+					barRightX - [HSwToV : [fallback fine stroke] + 0.125 * stroke] - TINY - [Math.abs : TanSlope * stroke]
+					[Arch.adjust-x.top (barRightX - [HSwToV : 0.5 * [fallback fine stroke]] - HookX) (sw -- [mix stroke [fallback fine stroke] 0.5])] + OXHook
+				__ : df.leftSB + 0
 			return : sink
 				widths.rhs stroke
 				match hookStyle
-					[Just HOOK-SLAB-INWARD] : InwardSlabArcStart.LtrRhs df.leftSB XH stroke AHook (swAfter -- fine)
+					[Just HOOK-SLAB-INWARD] : InwardSlabArcStart.LtrRhs hookLeftX XH stroke AHook (swAfter -- fine)
+					[Just HOOK-HALF] : list
+						g4.right.start hookLeftX (XH - O)
+						archv
 					__ : if fine
 						list
-							g4.up.start (df.leftSB + OXHook) (XH - AHook) [heading Upward]
+							g4.up.start hookLeftX (XH - AHook) [heading Upward]
 							Arch.rhs XH (sw -- stroke) (swAfter -- fine)
 						list
-							g4 df.leftSB (XH - AHook)
+							g4 hookLeftX (XH - AHook)
 							HookStart XH (sw -- stroke)
-				flat (df.rightSB - [HSwToV : stroke - [fallback fine stroke]]) [Math.max (XH - [SmoothB df]) (y0 + TINY + [HSwToV : Math.abs : TanSlope * [fallback fine stroke]])] [if fine [widths.rhs fine] nothing]
-				[if isMask corner curl] (df.rightSB - [HSwToV : stroke - [fallback fine stroke]]) y0 [heading Downward]
-				if isMask { [corner df.leftSB y0] } {}
+				flat barRightX [Math.max (XH - [SmoothB df]) (y0 + TINY + [HSwToV : Math.abs : TanSlope * [fallback fine stroke]])] [if fine [widths.rhs fine] nothing]
+				[if isMask corner curl] barRightX y0 [heading Downward]
+				if isMask { [corner hookLeftX y0] } {}
 
 		export : define [HookAndBar df hookStyle y0 stroke fine] : glyph-proc
 			local sw : fallback stroke : Sw df
@@ -65,7 +73,7 @@ glyph-block Letter-Latin-Lower-A : begin
 
 		define [ADoubleStoreyArcT sink] : function [df kind rise stroke fine bbd] : glyph-proc
 			local isMask : sink == spiro-outline
-			local barTop : [mix 0 XH DesignParameters.aBarPos] + stroke * SwAboveBar
+			local barTop : [mix 0 XH DesignParameters.aBarPos] + stroke * (0.5 + DesignParameters.aBarStrokeAdj)
 			local ada  : df.archDepthAOf (SmallArchDepth * 0.9) stroke
 			local adb  : df.archDepthBOf (SmallArchDepth * 0.9) stroke
 			local ada2 :    ArchDepthAOf (SmallArchDepth * DesignParameters.aBarPos)
@@ -160,21 +168,27 @@ glyph-block Letter-Latin-Lower-A : begin
 		doubleStoreyHookInwardSerifedToothlessRounded    { DoubleStorey.ToothlessRounded    nothing            HOOK-SLAB-INWARD }
 
 	foreach { suffix { body xTrailing hookStyle } } [Object.entries DoubleStoreyConfig] : do
-		create-glyph "a.\(suffix)" : glyph-proc
-			local df : include : DivFrame 1
+		do 
+			create-glyph "a.\(suffix)" : make [DivFrame 1]
+			if (!hookStyle) : begin
+				create-glyph "aHalf.\(suffix)" : make [DivFrame 1] HOOK-HALF
+		: where : [make df _hookStyle] : glyph-proc
+			set-width df.width
 			include : df.markSet.e
 			local sw : DoubleStorey.Sw df
-			local bp : mix 0 XH DesignParameters.aBarPos
-			set-base-anchor 'overlay' df.middle [mix 0 (bp + sw * DoubleStorey.SwAboveBar) 0.5]
-			set-base-anchor 'strike'  df.middle (bp + sw * (DoubleStorey.SwAboveBar - 0.5))
+			local bp : [mix 0 XH DesignParameters.aBarPos] + sw * DesignParameters.aBarStrokeAdj
+			set-base-anchor 'overlay' df.middle [mix 0 (bp + sw / 2) 0.5]
+			set-base-anchor 'strike'  df.middle bp
 			if xTrailing : set-base-anchor 'trailing' xTrailing 0
-			include : body df hookStyle
+			include : body df [fallback _hookStyle hookStyle]
+			
 		create-glyph "aSwash.\(suffix)" : glyph-proc
 			include [refer-glyph "a.\(suffix)"] AS_BASE ALSO_METRICS
 			eject-contour 'serifRB'
 			include : RetroflexHook.rExt RightSB 0
 				yAttach -- [DoubleStorey.SmoothA : DivFrame 1]
 				sw      -- [DoubleStorey.Sw      : DivFrame 1]
+
 		if (body === DoubleStorey.Serifless) : begin
 			create-glyph "aRetroflexHook.\(suffix)" : glyph-proc
 				include [refer-glyph "a.\(suffix)"] AS_BASE ALSO_METRICS
@@ -368,6 +382,8 @@ glyph-block Letter-Latin-Lower-A : begin
 	select-variant 'a' 'a'
 	link-reduced-variant 'a/sansSerif' 'a' MathSansSerif
 	link-reduced-variant 'a/doubleStorey' 'a'
+	select-variant 'aHalf' 0x1DF5A
+
 	select-variant 'cyrl/a' 0x430 (shapeFrom -- 'a')
 
 	CreateTurnedLetter 'turna' 0x250 'a/doubleStorey' HalfAdvance (XH / 2)
