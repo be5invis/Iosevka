@@ -194,6 +194,7 @@ glyph-block Letter-Latin-Upper-R : begin
 			serifed                      { PShape.SlabSymmetric true  }
 
 	foreach { suffix { legShape fGap { slabs doLegSlab } } } [Object.entries RConfig] : do
+		define fStraightLeg : legShape === RLegShape.Straight
 		define fSlabBot : slabs && slabs !== PShape.SlabMotion
 		define swCap : AdviceStroke2 2 3 CAP
 		define swXH  : AdviceStroke2 2 3 XH
@@ -225,11 +226,15 @@ glyph-block Letter-Latin-Upper-R : begin
 			include : MarkSet.e
 			include : StrikeAnchor XH swXH
 			include : RShape legShape XH (sw -- swXH) (slab -- slabs) (legSlab -- true) (open -- fGap)
+			local right : RightSB - O - [if slabs 0.125 0] * Jut
+			local shift : if fStraightLeg [RSlabExtraShift true swXH] 0
+			local xRightBottom : [RLegTerminalX fStraightLeg right swXH] + shift
+			local xRightBottomSerifStart : if fStraightLeg (xRightBottom - [HSwToV : 0.25 * swXH]) right
 			include : PalatalHook.rSideJut
-				x     -- RightSB
+				x     -- xRightBottomSerifStart
 				y     -- 0
 				refSw -- swXH
-				jut   -- ([HSwToV : 0.5 * swXH] + SideJut + Jut / 8)
+				jut   -- ([HSwToV : 0.5 * swXH] + SideJut + [if (legShape !== RLegShape.Standing) 0.125 0] * Jut)
 
 		create-glyph "Yr.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
