@@ -9,8 +9,9 @@ glyph-block Mark-Below : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
+	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markHalfStroke markStress markFine
 	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
+	glyph-block-import Mark-Above : WigglyLineShape
 
 	glyph-block-export belowMarkBot belowMarkTop belowMarkMid belowMarkStack
 	define belowMarkBot   (0 - AccentClearance - AccentHeight)
@@ -202,6 +203,44 @@ glyph-block Mark-Below : begin
 		include : with-transform [Translate (-markExtend) 0] : refer-glyph 'crossBelow'
 		include : with-transform [Translate (+markExtend) 0] : refer-glyph 'crossBelow'
 		include : StdAnchors.impl 0 1.5
+
+	create-glyph 'wigglyLineBelow' 0x1AB6 : glyph-proc
+		set-width 0
+		include : StdAnchors.impl 0 1.5
+		include : WigglyLineShape
+			ttop  -- belowMarkTop
+			tbot  -- (belowMarkBot + markFine / 2)
+			width -- (markExtend * 3)
+			hs    -- markHalfStroke
+
+	define centralizationFine : AdviceStroke 6
+	define slashDx : (RightSB - SB) / 2 + O * 3 - 0.5 * centralizationFine
+	define slashDy : XH * 0.6
+	define centralizationY0 Stroke
+	define centralizationY1 belowMarkBot
+	define centralizationCx : markMiddle - (RightSB - SB) / 3
+	define centralizationX0 : centralizationCx + slashDx * centralizationY0 / slashDy
+	define centralizationX1 : centralizationCx + slashDx * centralizationY1 / slashDy
+	define centralizationBlobR : 0.45 * AccentHeight
+
+	create-glyph 'lightCentralizationStrokeBelow' 0x1AB9 : glyph-proc
+		set-width 0
+		include : StdAnchors.impl 0 1.25 true
+		include : intersection [MaskBelow 0]
+			dispiro
+				widths.center centralizationFine
+				flat centralizationX0 centralizationY0
+				curl centralizationX1 centralizationY1
+
+	create-glyph 'strongCentralizationStrokeBelow' 0x1ABA : glyph-proc
+		set-width 0
+		include : StdAnchors.impl 0 1.25 true
+		include : intersection [MaskBelow 0]
+			dispiro
+				widths.center centralizationFine
+				flat centralizationX0 centralizationY0
+				curl centralizationX1 centralizationY1
+		include : DotAt centralizationX1 centralizationY1 centralizationBlobR
 
 	create-glyph 'leftParenBelow' 0x1AC3 : glyph-proc
 		set-width 0

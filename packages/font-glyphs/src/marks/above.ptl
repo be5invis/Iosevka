@@ -682,6 +682,64 @@ glyph-block Mark-Above : begin
 		ShapeConv.transferGenericShapeAsBezier {{inner outer}} cs GEOMETRY_PRECISION
 		currentGlyph.includeContours cs.contours
 
+	define [mixZ a b k] : object
+		x : mix a.x b.x k
+		y : mix a.y b.y k
+
+	define [flipZX z cx] : object
+		x : 2 * cx - z.x
+		y : 0 + z.y
+
+	# Two-period wave: left part of a tilde up to its trough, then the same curve mirrored.
+	# Split where the tangent is horizontal so the offset join stays G1.
+	glyph-block-export WigglyLineShape
+	define [WigglyLineShape] : with-params [ttop tbot width hs] : glyph-proc
+		define { z1 z2 z3 z4 } : include : TildeKnots
+			ttop     -- ttop
+			tbot     -- tbot
+			leftEnd  -- (markMiddle - 0.75 * width)
+			rightEnd -- (markMiddle + 0.25 * width)
+			hs       -- hs
+
+		local a : z2.y - z1.y
+		local b : z3.y - z2.y
+		local c : z4.y - z3.y
+		local qa : a - 2 * b + c
+		local qb : 2 * b - 2 * a
+		local qc a
+		local tJoin 0.75
+		if ([Math.abs qa] > 1e-8) : begin
+			local disc : Math.max 0 (qb * qb - 4 * qa * qc)
+			local rt : Math.sqrt disc
+			local tPlus  : ((0 - qb) + rt) / (2 * qa)
+			local tMinus : ((0 - qb) - rt) / (2 * qa)
+			if ((tPlus  > 0.5) && (tPlus  < 1)) : set tJoin tPlus
+			if ((tMinus > 0.5) && (tMinus < 1)) : set tJoin tMinus
+
+		local ab   : mixZ z1 z2 tJoin
+		local bc   : mixZ z2 z3 tJoin
+		local cd   : mixZ z3 z4 tJoin
+		local abc  : mixZ ab bc tJoin
+		local join : mixZ abc [mixZ bc cd tJoin] tJoin
+		local dx : markMiddle - join.x
+
+		define [at z] : object
+			x : z.x + dx
+			y : 0 + z.y
+
+		local j : at join
+		define boneL : new Arcs.Bez3 [at z1] [at ab] [at abc] j
+		define boneR : new Arcs.Bez3 j [flipZX [at abc] markMiddle] [flipZX [at ab] markMiddle] [flipZX [at z1] markMiddle]
+
+		define innerL : new OffsetCurve boneL (+hs) HVContrast
+		define innerR : new OffsetCurve boneR (+hs) HVContrast
+		define outerL : new OffsetCurve boneL (-hs) HVContrast
+		define outerR : new OffsetCurve boneR (-hs) HVContrast
+
+		define cs : new BezToContoursSink
+		ShapeConv.transferGenericShapeAsBezier {{innerL innerR [new Arcs.Reverted outerR] [new Arcs.Reverted outerL]}} cs GEOMETRY_PRECISION
+		currentGlyph.includeContours cs.contours
+
 	create-glyph 'tildeAbove' 0x303 : glyph-proc
 		set-width 0
 		include : StdAnchors.wide
