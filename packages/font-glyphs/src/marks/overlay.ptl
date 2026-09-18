@@ -551,6 +551,49 @@ glyph-block Mark-Overlay : begin
 
 		select-variant 'cyrl/kavykaWithDotOver' (follow -- 'diacriticDot')
 
+		define parenOverMid : XH / 2
+		define parenOverHalfH : 0.5 * (aboveMarkTop - aboveMarkBot) + markFine
+		define parenOverTop : parenOverMid + parenOverHalfH
+		define parenOverBot : parenOverMid - parenOverHalfH
+		define parenOverDepth : markExtend * 0.25
+		define parenOverLeft : markMiddle - 1.5 * markExtend
+		define parenOverRight : markMiddle + 1.5 * markExtend
+		define CombiningParenOverlayConfig : object
+			normal       { 0    1 }
+			largeContour { 0.25 0.75 }
+			flatArc      { 0.5  0.75 }
+
+		foreach { suffix { kOut kCurl } } [Object.entries CombiningParenOverlayConfig] : do
+			create-glyph "leftParenOver.\(suffix)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'overlay' markMiddle parenOverMid markMiddle parenOverMid
+				local depth : parenOverDepth * kCurl
+				local xOut : mix parenOverLeft (markMiddle + OX) kOut
+				include : dispiro
+					widths.lhs markFine
+					g4 (parenOverLeft + depth) parenOverTop
+					g4 xOut parenOverMid
+					g4 (parenOverLeft + depth) parenOverBot
+			create-glyph "rightParenOver.\(suffix)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'overlay' markMiddle parenOverMid markMiddle parenOverMid
+				local depth : parenOverDepth * kCurl
+				local xOut : mix parenOverRight (markMiddle - OX) kOut
+				include : dispiro
+					widths.rhs markFine
+					g4 (parenOverRight - depth) parenOverTop
+					g4 xOut parenOverMid
+					g4 (parenOverRight - depth) parenOverBot
+			create-glyph "parenOver.\(suffix)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'overlay' markMiddle parenOverMid markMiddle parenOverMid
+				include : refer-glyph "leftParenOver.\(suffix)"
+				include : refer-glyph "rightParenOver.\(suffix)"
+
+		select-variant 'leftParenOver'  (follow -- 'parenLeft')
+		select-variant 'rightParenOver' (follow -- 'parenRight')
+		select-variant 'parenOver' 0x1ABE (follow -- 'parenLeft')
+
 	do "Inner dots"
 		glyph-block-export InnerDot
 		define [InnerDot x y kHeight fRound kdr _space _adws] : begin
