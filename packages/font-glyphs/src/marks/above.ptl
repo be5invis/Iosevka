@@ -27,30 +27,40 @@ glyph-block Mark-Above : begin
 	define toneAboveBaseline aboveMarkBot
 
 	glyph-block-export MeasureGlyphBounds CenterMarkHorizontally AlignToneMarkAbove
+	# Visual bounds in design space, sampled from the outline (not cubic control points),
+	# with the italic gizmo unapplied so centering happens before italics.
 	define [MeasureGlyphBounds] : glyph-proc
 		local xMin 0x7fffffff
 		local xMax (0 - 0x7fffffff)
 		local yMin 0x7fffffff
 		local yMax (0 - 0x7fffffff)
-		foreach c [items-of : currentGlyph.geometry.toContours] : foreach z [items-of c] : begin
-			if (z.x < xMin) : set xMin z.x
-			if (z.x > xMax) : set xMax z.x
-			if (z.y < yMin) : set yMin z.y
-			if (z.y > yMax) : set yMax z.y
+		foreach contour [items-of : currentGlyph.geometry.toBezArcs] : foreach arc [items-of contour] : begin
+			foreach i [range 0 25] : begin
+				local z : arc.eval (i / 24)
+				local p : currentGlyph.gizmo.unapply z
+				if (p.x < xMin) : set xMin p.x
+				if (p.x > xMax) : set xMax p.x
+				if (p.y < yMin) : set yMin p.y
+				if (p.y > yMax) : set yMax p.y
 		if (xMin > xMax) : return nothing
-		return { xMin xMax yMin yMax }
+		return : object
+			xMin : 0 + xMin
+			xMax : 0 + xMax
+			yMin : 0 + yMin
+			yMax : 0 + yMax
 
 	define [CenterMarkHorizontally] : glyph-proc
 		local b : include : MeasureGlyphBounds
 		if [not b] : return nothing
 		local xShift : markMiddle - [mix b.xMin b.xMax 0.5]
-		if ([Math.abs xShift] > 1e-6) : currentGlyph.applyTransform [ApparentTranslate xShift 0] true
+		# Geometry only: moving the mark anchors with the outline would cancel the shift.
+		if ([Math.abs xShift] > 1e-6) : currentGlyph.applyTransform [ApparentTranslate xShift 0]
 
 	define [AlignToneMarkAbove] : glyph-proc
 		local b : include : MeasureGlyphBounds
 		if [not b] : return nothing
 		local yShift : toneAboveBaseline - b.yMin
-		if ([Math.abs yShift] > 1e-6) : currentGlyph.applyTransform [ApparentTranslate 0 yShift] true
+		if ([Math.abs yShift] > 1e-6) : currentGlyph.applyTransform [ApparentTranslate 0 yShift]
 
 	glyph-block-export commaOvershoot commaOvershoot2 commaAboveRadius
 	define commaOvershoot  : O * [linreg 16 0 90 (-1) markStroke]
@@ -325,9 +335,9 @@ glyph-block Mark-Above : begin
 			include : dispiro
 				flat (markMiddle + 1.000 * markStress) aboveMarkBot [widths.center : 2 * markFine]
 				curl (markMiddle - 0.875 * markExtend) aboveMarkTop [widths.center : 2 * markStress]
-			include : AlignToneMarkAbove
 			include : DrawAt (markMiddle + markExtend) [mix aboveMarkMid aboveMarkTop 0.7] (markDotsRadius * kdr)
 			include : DrawAt (markMiddle - lowerDotDx) [mix aboveMarkMid aboveMarkBot 0.7] (markDotsRadius * kdr)
+			include : AlignToneMarkAbove
 			include : CenterMarkHorizontally
 
 		create-glyph "dottedAcuteAbove.\(suffix)" : glyph-proc
@@ -337,9 +347,9 @@ glyph-block Mark-Above : begin
 			include : dispiro
 				flat (markMiddle - 1.000 * markStress) aboveMarkBot [widths.center : 2 * markFine]
 				curl (markMiddle + 0.875 * markExtend) aboveMarkTop [widths.center : 2 * markStress]
-			include : AlignToneMarkAbove
 			include : DrawAt (markMiddle - markExtend) [mix aboveMarkMid aboveMarkTop 0.7] (markDotsRadius * kdr)
 			include : DrawAt (markMiddle + lowerDotDx) [mix aboveMarkMid aboveMarkBot 0.7] (markDotsRadius * kdr)
+			include : AlignToneMarkAbove
 			include : CenterMarkHorizontally
 
 	select-variant 'graveDotAbove' 0x1ADE (follow -- 'diacriticDot')
