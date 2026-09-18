@@ -27,8 +27,6 @@ glyph-block Mark-Above : begin
 	define toneAboveBaseline aboveMarkBot
 
 	glyph-block-export MeasureGlyphBounds CenterMarkHorizontally AlignToneMarkAbove
-	# Visual bounds in design space, sampled from the outline (not cubic control points),
-	# with the italic gizmo unapplied so centering happens before italics.
 	define [MeasureGlyphBounds] : glyph-proc
 		local xMin 0x7fffffff
 		local xMax (0 - 0x7fffffff)
@@ -53,7 +51,6 @@ glyph-block Mark-Above : begin
 		local b : include : MeasureGlyphBounds
 		if [not b] : return nothing
 		local xShift : markMiddle - [mix b.xMin b.xMax 0.5]
-		# Geometry only: moving the mark anchors with the outline would cancel the shift.
 		if ([Math.abs xShift] > 1e-6) : currentGlyph.applyTransform [ApparentTranslate xShift 0]
 
 	define [AlignToneMarkAbove] : glyph-proc
@@ -771,9 +768,6 @@ glyph-block Mark-Above : begin
 		x : 2 * cx - z.x
 		y : 0 + z.y
 
-	# Two-period wave: left part of a tilde up to its trough, then the same curve mirrored.
-	# Split where the tangent is horizontal so the offset join stays G1.
-	# Build in design space, then apply the glyph gizmo so italics shear the wave like TildeShape.
 	glyph-block-export WigglyLineShape
 	define [WigglyLineShape] : with-params [ttop tbot width hs] : glyph-proc
 		define [designPt z] : currentGlyph.gizmo.unapply z
@@ -830,9 +824,6 @@ glyph-block Mark-Above : begin
 		ShapeConv.transferGenericShapeAsBezier {{innerL innerR [new Arcs.Reverted outerR] [new Arcs.Reverted outerL]}} cs GEOMETRY_PRECISION
 		currentGlyph.includeContours cs.contours
 
-	# Vertical two-bowl snake (a stacked pair of C-curves, not a single S).
-	# Same offset-cubic construction as the wiggly line; top bowl is wider.
-	# Stroke stays constant on the first arc; the second interpolates from hsTop to hsBot.
 	glyph-block-export SnakeBelowShape
 	define [SnakeBelowShape] : with-params [ttop tbot topAmp botAmp hsTop hsBot] : glyph-proc
 		define [framePt z] : currentGlyph.gizmo.apply z
