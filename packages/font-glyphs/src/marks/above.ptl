@@ -32,6 +32,9 @@ glyph-block Mark-Above : begin
 		local xMax (0 - 0x7fffffff)
 		local yMin 0x7fffffff
 		local yMax (0 - 0x7fffffff)
+		local xSum 0
+		local ySum 0
+		local n 0
 		foreach contour [items-of : currentGlyph.geometry.toBezArcs] : foreach arc [items-of contour] : begin
 			foreach i [range 0 25] : begin
 				local z : arc.eval (i / 24)
@@ -40,20 +43,26 @@ glyph-block Mark-Above : begin
 				if (p.x > xMax) : set xMax p.x
 				if (p.y < yMin) : set yMin p.y
 				if (p.y > yMax) : set yMax p.y
-		if (xMin > xMax) : return nothing
+				set xSum : xSum + p.x
+				set ySum : ySum + p.y
+				set n : n + 1
+		if (n <= 0) : return nothing
 		return : object
 			xMin : 0 + xMin
 			xMax : 0 + xMax
 			yMin : 0 + yMin
 			yMax : 0 + yMax
+			xAvg : xSum / n
+			yAvg : ySum / n
 
 	define [CenterMarkHorizontally] : glyph-proc
 		local b : include : MeasureGlyphBounds
 		if [not b] : return nothing
-		local xShift : markMiddle - [mix b.xMin b.xMax 0.5]
+		local xShift : markMiddle - b.xAvg
 		if ([Math.abs xShift] > 1e-6) : currentGlyph.applyTransform [ApparentTranslate xShift 0]
 
 	define [AlignToneMarkAbove] : glyph-proc
+		include : CenterMarkHorizontally
 		local b : include : MeasureGlyphBounds
 		if [not b] : return nothing
 		local yShift : toneAboveBaseline - b.yMin
@@ -335,7 +344,6 @@ glyph-block Mark-Above : begin
 			include : DrawAt (markMiddle + markExtend) [mix aboveMarkMid aboveMarkTop 0.7] (markDotsRadius * kdr)
 			include : DrawAt (markMiddle - lowerDotDx) [mix aboveMarkMid aboveMarkBot 0.7] (markDotsRadius * kdr)
 			include : AlignToneMarkAbove
-			include : CenterMarkHorizontally
 
 		create-glyph "dottedAcuteAbove.\(suffix)" : glyph-proc
 			set-width 0
@@ -347,7 +355,6 @@ glyph-block Mark-Above : begin
 			include : DrawAt (markMiddle - markExtend) [mix aboveMarkMid aboveMarkTop 0.7] (markDotsRadius * kdr)
 			include : DrawAt (markMiddle + lowerDotDx) [mix aboveMarkMid aboveMarkBot 0.7] (markDotsRadius * kdr)
 			include : AlignToneMarkAbove
-			include : CenterMarkHorizontally
 
 	select-variant 'graveDotAbove' 0x1ADE (follow -- 'diacriticDot')
 	select-variant 'dotAcuteAbove' 0x1ADF (follow -- 'diacriticDot')
