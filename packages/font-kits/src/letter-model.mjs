@@ -259,6 +259,9 @@ function CreateMarkSetBuilder(bindings, df) {
 				mix(a.baseAnchors.below.x, a.baseAnchors.above.x, bindings.OverlayPos),
 				mix(a.baseAnchors.below.y, a.baseAnchors.above.y, bindings.OverlayPos),
 			);
+			const overlayY = mix(zone.bot, zone.top, bindings.OverlayPos);
+			a.baseAnchors.overlayBraceL = ta(new Anchor(0, overlayY));
+			a.baseAnchors.overlayBraceR = ta(new Anchor(df.width, overlayY));
 			// Slash over entire letter
 			a.baseAnchors.slash = new Anchor(
 				mix(a.baseAnchors.below.x, a.baseAnchors.above.x, 0.5),

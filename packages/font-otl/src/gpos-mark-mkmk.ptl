@@ -5,7 +5,7 @@ define MarkClasses {
 	'above' 'tieAbove' 'leaningAbove' 'topLeft' 'topRight' 'grekUpperTonos' 'aboveBraceL' 'aboveBraceR'
 	'below' 'tieBelow' 'leaningBelow' 'bottomLeft' 'bottomRight' 'trailing' 'lf' 'belowBraceL' 'belowBraceR'
 
-	'overlay' 'slash' 'strike' 'overlayOnExtension'
+	'overlay' 'overlayBraceL' 'overlayBraceR' 'slash' 'strike' 'overlayOnExtension'
 	'cvDecompose' 'enclosureInner' 'enclosureInnerFirstHalf' 'enclosureInnerSecondHalf'
 	'fracBuildUp'
 }
@@ -15,6 +15,8 @@ define MarkInteractions : new Map : list
 	list 'aboveBraceR' {'aboveBraceR' 'above' 'tieAbove' 'leaningAbove' 'topLeft' 'topRight' 'grekUpperTonos'}
 	list 'belowBraceL' {'belowBraceL' 'below' 'tieBelow' 'leaningBelow' 'bottomLeft' 'bottomRight' 'trailing' 'lf'}
 	list 'belowBraceR' {'belowBraceR' 'below' 'tieBelow' 'leaningBelow' 'bottomLeft' 'bottomRight' 'trailing' 'lf'}
+	list 'overlayBraceL' {'overlayBraceL'}
+	list 'overlayBraceR' {'overlayBraceR'}
 
 
 define MkmkStackingLimit : new Set { 'above' 'below' }
@@ -49,10 +51,13 @@ export : define [buildMarkMkmk gpos glyphStore markGlyphs] : begin
 		local mkmkLookup : ensureLookup gpos mkmk cls
 
 		foreach { gn glyph } [glyphStore.namedEntries] : begin
-			if glyph.baseAnchors.(cls) : begin
+			local anchor glyph.baseAnchors.(cls)
+			if ([not anchor] && (cls === 'overlayBraceL' || cls === 'overlayBraceR'))
+				set anchor : SynthesizeOverlayBrace glyph [if (cls === 'overlayBraceL') 'L' 'R']
+			if anchor : begin
 				if [markGlyphs.all.has gn]
-				: then : addBaseAnchor mkmkLookup gn cls glyph.baseAnchors.(cls)
-				: else : addBaseAnchor markLookup gn cls glyph.baseAnchors.(cls)
+				: then : addBaseAnchor mkmkLookup gn cls anchor
+				: else : addBaseAnchor markLookup gn cls anchor
 
 	foreach markLookup [mark.lookupMap.values] : foreach mkmkLookup [mkmk.lookupMap.values]
 		gpos.setDependency markLookup mkmkLookup
@@ -92,3 +97,14 @@ define [addBaseAnchor lookup gn cls anchor] : begin
 		y     anchor.y
 	if [not lookup.bases.(gn)] : set lookup.bases.(gn) {.}
 	set lookup.bases.(gn).(cls) a
+
+define [SynthesizeOverlayBrace glyph side] : begin
+	if (glyph.advanceWidth <= 0) : return null
+	local ov glyph.baseAnchors.overlay
+	if [not ov] : set ov glyph.baseAnchors.strike
+	if [not ov] : set ov glyph.baseAnchors.slash
+	if [not ov] : return null
+	local nt : glyph.gizmo.unapply ov
+	local ny : 0 + nt.y
+	local nx : if (side === 'L') 0 glyph.advanceWidth
+	return : glyph.gizmo.applyXY nx ny
