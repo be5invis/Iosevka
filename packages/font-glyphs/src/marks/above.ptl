@@ -777,6 +777,19 @@ glyph-block Mark-Above : begin
 		x : 2 * cx - z.x
 		y : 0 + z.y
 
+	define [shiftZX z dx] : object
+		x : z.x + dx
+		y : 0 + z.y
+
+	define [splitBez p0 p1 p2 p3 t] : begin
+		local ab  : mixZ p0 p1 t
+		local bc  : mixZ p1 p2 t
+		local cd  : mixZ p2 p3 t
+		local abc : mixZ ab bc t
+		local bcd : mixZ bc cd t
+		local j   : mixZ abc bcd t
+		return { p0 ab abc j bcd cd p3 }
+
 	glyph-block-export WigglyLineShape
 	define [WigglyLineShape] : with-params [ttop tbot width hs] : glyph-proc
 		define [designPt z] : currentGlyph.gizmo.unapply z
@@ -800,37 +813,64 @@ glyph-block Mark-Above : begin
 		local qa : a - 2 * b + c
 		local qb : 2 * b - 2 * a
 		local qc a
-		local tJoin 0.75
+		local tPeak 0.25
+		local tTrough 0.75
 		if ([Math.abs qa] > 1e-8) : begin
 			local disc : Math.max 0 (qb * qb - 4 * qa * qc)
 			local rt : Math.sqrt disc
 			local tPlus  : ((0 - qb) + rt) / (2 * qa)
 			local tMinus : ((0 - qb) - rt) / (2 * qa)
-			if ((tPlus  > 0.5) && (tPlus  < 1)) : set tJoin tPlus
-			if ((tMinus > 0.5) && (tMinus < 1)) : set tJoin tMinus
+			if ((tPlus  > 0) && (tPlus  < 0.5)) : set tPeak tPlus
+			if ((tMinus > 0) && (tMinus < 0.5)) : set tPeak tMinus
+			if ((tPlus  > 0.5) && (tPlus  < 1)) : set tTrough tPlus
+			if ((tMinus > 0.5) && (tMinus < 1)) : set tTrough tMinus
 
-		local ab   : mixZ z1 z2 tJoin
-		local bc   : mixZ z2 z3 tJoin
-		local cd   : mixZ z3 z4 tJoin
-		local abc  : mixZ ab bc tJoin
-		local join : mixZ abc [mixZ bc cd tJoin] tJoin
-		local dx : markMiddle - join.x
+		define { l0 l1 l2 j _r1 _r2 _r3 } : splitBez z1 z2 z3 z4 tTrough
+		local tDown : tPeak / tTrough
+		define { _u0 _u1 _u2 peak d1 d2 d3 } : splitBez l0 l1 l2 j tDown
 
-		define [at z] : object
-			x : z.x + dx
-			y : 0 + z.y
+		local pPrime : flipZX peak j.x
+		local dxDown : pPrime.x - peak.x
+		local jPrime : shiftZX j dxDown
+		local md1 : shiftZX d1 dxDown
+		local md2 : shiftZX d2 dxDown
+		local mu1 : flipZX d2 j.x
+		local mu2 : flipZX d1 j.x
 
-		local j : at join
-		define boneL : new Arcs.Bez3 [framePt [at z1]] [framePt [at ab]] [framePt [at abc]] [framePt j]
-		define boneR : new Arcs.Bez3 [framePt j] [framePt [flipZX [at abc] markMiddle]] [framePt [flipZX [at ab] markMiddle]] [framePt [flipZX [at z1] markMiddle]]
+		local cx : mix j.x jPrime.x 0.5
+		local dx : markMiddle - cx
+		define [at z] : shiftZX z dx
 
-		define innerL : new OffsetCurve boneL (+hs) HVContrast
-		define innerR : new OffsetCurve boneR (+hs) HVContrast
-		define outerL : new OffsetCurve boneL (-hs) HVContrast
-		define outerR : new OffsetCurve boneR (-hs) HVContrast
+		local fL0 : framePt : at l0
+		local fL1 : framePt : at l1
+		local fL2 : framePt : at l2
+		local fJ  : framePt : at j
+		local fMu1 : framePt : at mu1
+		local fMu2 : framePt : at mu2
+		local fP   : framePt : at pPrime
+		local fMd1 : framePt : at md1
+		local fMd2 : framePt : at md2
+		local fJp  : framePt : at jPrime
+		local jpAt : at jPrime
+		local r1 : shiftZX [flipZX l2 j.x] (jPrime.x - j.x)
+		local r2 : shiftZX [flipZX l1 j.x] (jPrime.x - j.x)
+		local r3 : shiftZX [flipZX l0 j.x] (jPrime.x - j.x)
+		define boneL  : new Arcs.Bez3 fL0 fL1 fL2 fJ
+		define boneM1 : new Arcs.Bez3 fJ fMu1 fMu2 fP
+		define boneM2 : new Arcs.Bez3 fP fMd1 fMd2 fJp
+		define boneR  : new Arcs.Bez3 fJp [framePt : at r1] [framePt : at r2] [framePt : at r3]
+
+		define innerL  : new OffsetCurve boneL  (+hs) HVContrast
+		define innerM1 : new OffsetCurve boneM1 (+hs) HVContrast
+		define innerM2 : new OffsetCurve boneM2 (+hs) HVContrast
+		define innerR  : new OffsetCurve boneR  (+hs) HVContrast
+		define outerL  : new OffsetCurve boneL  (-hs) HVContrast
+		define outerM1 : new OffsetCurve boneM1 (-hs) HVContrast
+		define outerM2 : new OffsetCurve boneM2 (-hs) HVContrast
+		define outerR  : new OffsetCurve boneR  (-hs) HVContrast
 
 		define cs : new BezToContoursSink
-		ShapeConv.transferGenericShapeAsBezier {{innerL innerR [new Arcs.Reverted outerR] [new Arcs.Reverted outerL]}} cs GEOMETRY_PRECISION
+		ShapeConv.transferGenericShapeAsBezier {{innerL innerM1 innerM2 innerR [new Arcs.Reverted outerR] [new Arcs.Reverted outerM2] [new Arcs.Reverted outerM1] [new Arcs.Reverted outerL]}} cs GEOMETRY_PRECISION
 		currentGlyph.includeContours cs.contours
 
 	glyph-block-export SnakeBelowShape
