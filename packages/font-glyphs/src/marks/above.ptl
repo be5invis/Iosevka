@@ -1,7 +1,7 @@
 $$include '../meta/macros.ptl'
 
 import [Arcs ShapeConv] from "typo-geom"
-import [OffsetCurve BezToContoursSink GEOMETRY_PRECISION] from "@iosevka/geometry/curve-util"
+import [OffsetCurve TaperedOffsetCurve BezToContoursSink GEOMETRY_PRECISION] from "@iosevka/geometry/curve-util"
 import [mix linreg clamp fallback] from "@iosevka/util"
 import [DesignParameters] from "../meta/aesthetics.mjs"
 import [ScheduleLeaningMark] from "@iosevka/glyph/relation"
@@ -24,6 +24,49 @@ glyph-block Mark-Above : begin
 	define aboveMarkBot   : XH + AccentClearance
 	define aboveMarkMid   : mix aboveMarkBot aboveMarkTop 0.5
 	define aboveMarkStack : XH + AccentStackOffset
+	define toneAboveBaseline aboveMarkBot
+
+	glyph-block-export MeasureGlyphBounds CenterMarkHorizontally AlignToneMarkAbove
+	define [MeasureGlyphBounds] : glyph-proc
+		local xMin 0x7fffffff
+		local xMax (0 - 0x7fffffff)
+		local yMin 0x7fffffff
+		local yMax (0 - 0x7fffffff)
+		local xSum 0
+		local ySum 0
+		local n 0
+		foreach contour [items-of : currentGlyph.geometry.toBezArcs] : foreach arc [items-of contour] : begin
+			foreach i [range 0 25] : begin
+				local z : arc.eval (i / 24)
+				local p : currentGlyph.gizmo.unapply z
+				if (p.x < xMin) : set xMin p.x
+				if (p.x > xMax) : set xMax p.x
+				if (p.y < yMin) : set yMin p.y
+				if (p.y > yMax) : set yMax p.y
+				set xSum : xSum + p.x
+				set ySum : ySum + p.y
+				set n : n + 1
+		if (n <= 0) : return nothing
+		return : object
+			xMin : 0 + xMin
+			xMax : 0 + xMax
+			yMin : 0 + yMin
+			yMax : 0 + yMax
+			xAvg : xSum / n
+			yAvg : ySum / n
+
+	define [CenterMarkHorizontally] : glyph-proc
+		local b : include : MeasureGlyphBounds
+		if [not b] : return nothing
+		local xShift : markMiddle - b.xAvg
+		if ([Math.abs xShift] > 1e-6) : currentGlyph.applyTransform [ApparentTranslate xShift 0]
+
+	define [AlignToneMarkAbove] : glyph-proc
+		include : CenterMarkHorizontally
+		local b : include : MeasureGlyphBounds
+		if [not b] : return nothing
+		local yShift : toneAboveBaseline - b.yMin
+		if ([Math.abs yShift] > 1e-6) : currentGlyph.applyTransform [ApparentTranslate 0 yShift]
 
 	glyph-block-export commaOvershoot commaOvershoot2 commaAboveRadius
 	define commaOvershoot  : O * [linreg 16 0 90 (-1) markStroke]
@@ -278,7 +321,7 @@ glyph-block Mark-Above : begin
 			include : dispiro
 				flat (m1 + markStress) aboveMarkBot [widths.center : 2 * markFine]
 				curl (m1 - markExtend) aboveMarkTop [widths.center : 2 * markStress]
-
+			include : AlignToneMarkAbove
 			include : DrawAt (markMiddle + markExtend) aboveMarkMid (markDotsRadius * kdr)
 
 		create-glyph "dotAcuteAbove.\(suffix)" : glyph-proc
@@ -288,11 +331,35 @@ glyph-block Mark-Above : begin
 			include : dispiro
 				flat (m2 - markStress) aboveMarkBot [widths.center : 2 * markFine]
 				curl (m2 + markExtend) aboveMarkTop [widths.center : 2 * markStress]
-
+			include : AlignToneMarkAbove
 			include : DrawAt (markMiddle - markExtend) aboveMarkMid (markDotsRadius * kdr)
+
+		create-glyph "dottedGraveAbove.\(suffix)" : glyph-proc
+			set-width 0
+			include : StdAnchors.wide
+			local lowerDotDx : markExtend + markDotsRadius * kdr
+			include : dispiro
+				flat (markMiddle + 1.000 * markStress) aboveMarkBot [widths.center : 2 * markFine]
+				curl (markMiddle - 0.875 * markExtend) aboveMarkTop [widths.center : 2 * markStress]
+			include : DrawAt (markMiddle + markExtend) [mix aboveMarkMid aboveMarkTop 0.7] (markDotsRadius * kdr)
+			include : DrawAt (markMiddle - lowerDotDx) [mix aboveMarkMid aboveMarkBot 0.7] (markDotsRadius * kdr)
+			include : AlignToneMarkAbove
+
+		create-glyph "dottedAcuteAbove.\(suffix)" : glyph-proc
+			set-width 0
+			include : StdAnchors.wide
+			local lowerDotDx : markExtend + markDotsRadius * kdr
+			include : dispiro
+				flat (markMiddle - 1.000 * markStress) aboveMarkBot [widths.center : 2 * markFine]
+				curl (markMiddle + 0.875 * markExtend) aboveMarkTop [widths.center : 2 * markStress]
+			include : DrawAt (markMiddle - markExtend) [mix aboveMarkMid aboveMarkTop 0.7] (markDotsRadius * kdr)
+			include : DrawAt (markMiddle + lowerDotDx) [mix aboveMarkMid aboveMarkBot 0.7] (markDotsRadius * kdr)
+			include : AlignToneMarkAbove
 
 	select-variant 'graveDotAbove' 0x1ADE (follow -- 'diacriticDot')
 	select-variant 'dotAcuteAbove' 0x1ADF (follow -- 'diacriticDot')
+	select-variant 'dottedGraveAbove' 0x1DC0 (follow -- 'diacriticDot')
+	select-variant 'dottedAcuteAbove' 0x1DC1 (follow -- 'diacriticDot')
 
 	#### Caret/Caron Marks
 	glyph-block-export CaretCaronWidth CaretCaronMidSw CaretCaronTerminalSw
@@ -353,6 +420,7 @@ glyph-block Mark-Above : begin
 			pR      -- 0
 			swMid   -- CaretCaronMidSw
 			swBar   -- (2 * markFine)
+		include : AlignToneMarkAbove
 
 	create-glyph 'upbarAbove' 0x1DC7 : glyph-proc
 		set-width 0
@@ -372,6 +440,7 @@ glyph-block Mark-Above : begin
 			pR      -- (+1)
 			swMid   -- CaretCaronMidSw
 			swBar   -- (2 * markFine)
+		include : AlignToneMarkAbove
 
 	define [CaronLeftShape] : with-params [top bottom xMiddle width swEnd swMid] : dispiro
 		flat (xMiddle - (width / 2)) top    [widths.center swEnd]
@@ -416,6 +485,7 @@ glyph-block Mark-Above : begin
 			pR      -- 0
 			swMid   -- CaretCaronMidSw
 			swBar   -- (2 * markFine)
+		include : AlignToneMarkAbove
 
 	create-glyph 'downbarAbove' 0x1DC5 : glyph-proc
 		set-width 0
@@ -435,6 +505,48 @@ glyph-block Mark-Above : begin
 			pR      -- (+1)
 			swMid   -- CaretCaronMidSw
 			swBar   -- (2 * markFine)
+		include : AlignToneMarkAbove
+
+	define caretTop : aboveMarkTop + markFine * 0.7
+	define caretBot : aboveMarkBot + markStress - markFine
+	define caronTop : aboveMarkTop - markStress + 1.7 * markFine
+	define caronBot   aboveMarkBot
+	define toneStep : CaretCaronWidth / 2
+
+	define [ToneBarToPeak x top bot] : dispiro
+		flat x bot [widths.center CaretCaronTerminalSw]
+		curl x top [widths.center.heading CaretCaronMidSw Upward]
+
+	define [topBarXMin xMiddle width pL swMid] : Math.min (xMiddle + (width / 2) * pL) (xMiddle - [HSwToV : 0.5 * swMid])
+	define [topBarXMax xMiddle width pR swMid] : Math.max (xMiddle + (width / 2) * pR) (xMiddle + [HSwToV : 0.5 * swMid])
+
+	define [ToneBarToValley x top bot] : dispiro
+		flat x top [widths.center CaretCaronTerminalSw]
+		curl x bot [widths.center.heading CaretCaronMidSw Downward]
+
+	create-glyph 'graveAcuteGraveAbove' 0x1DC8 : glyph-proc
+		set-width 0
+		include : StdAnchors.extraWide
+		local xV : markMiddle - toneStep / 2
+		local xP : markMiddle + toneStep / 2
+		include : union
+			CaronLeftShape caretTop caretBot xV CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskBelow caretTop] : CaronRightShape caretTop caretBot xV CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskAbove caretBot] : CaretLeftShape caretTop caretBot xP CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaretRightShape caretTop caretBot xP CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+		include : AlignToneMarkAbove
+
+	create-glyph 'acuteGraveAcuteAbove' 0x1DC9 : glyph-proc
+		set-width 0
+		include : StdAnchors.extraWide
+		local xP : markMiddle - toneStep / 2
+		local xV : markMiddle + toneStep / 2
+		include : union
+			CaretLeftShape caretTop caretBot xP CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskAbove caretBot] : CaretRightShape caretTop caretBot xP CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskBelow caretTop] : CaronLeftShape caretTop caretBot xV CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaronRightShape caretTop caretBot xV CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+		include : AlignToneMarkAbove
 
 	create-glyph 'dblCircumflexAbove' 0x1AB0 : glyph-proc
 		set-width 0
@@ -450,6 +562,180 @@ glyph-block Mark-Above : begin
 			with-transform [Translate (+markExtend) 0] : refer-glyph 'caronAbove'
 		include : intersection [MaskLeft markMiddle]
 			with-transform [Translate (-markExtend) 0] : refer-glyph 'caronAbove'
+		include : StdAnchors.extraWide
+
+	create-glyph 'barAcuteAbove' 0x1AD0 : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xJoin : markMiddle - toneStep / 2 + 0.5 * (barClear + midHalf - termHalf)
+		local xBar : xJoin - barClear
+		include : union
+			ToneBarToValley xBar caronTop caronBot
+			CaronBottomBarShape caronBot xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			CaronRightShape caronTop caronBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+		include : AlignToneMarkAbove
+
+	create-glyph 'graveBarAbove' 0x1AD1 : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xJoin : markMiddle + toneStep / 2 - 0.5 * (barClear + midHalf - termHalf)
+		local xBar : xJoin + barClear
+		include : union
+			CaronLeftShape caronTop caronBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaronBottomBarShape caronBot xJoin (2 * barClear) 0 (+1) CaretCaronMidSw (2 * markFine)
+			ToneBarToValley xBar caronTop caronBot
+		include : AlignToneMarkAbove
+
+	create-glyph 'barGraveAbove' 0x1AD2 : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xJoin : markMiddle - toneStep / 2 + 0.5 * (barClear + midHalf - termHalf)
+		local xBar : xJoin - barClear
+		include : union
+			ToneBarToPeak xBar caretTop caretBot
+			CaretTopBarShape caretTop xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			CaretRightShape caretTop caretBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+		include : AlignToneMarkAbove
+
+	create-glyph 'acuteBarAbove' 0x1AD3 : glyph-proc
+		set-width 0
+		include : StdAnchors.medium
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xJoin : markMiddle + toneStep / 2 - 0.5 * (barClear + midHalf - termHalf)
+		local xBar : xJoin + barClear
+		include : union
+			CaretLeftShape caretTop caretBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaretTopBarShape caretTop xJoin (2 * barClear) 0 (+1) CaretCaronMidSw (2 * markFine)
+			ToneBarToPeak xBar caretTop caretBot
+		include : AlignToneMarkAbove
+
+	create-glyph 'barMacronAbove' 0x1AD4 : glyph-proc
+		set-width 0
+		include : StdAnchors.mediumWide
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xJoin : markMiddle - markExtend + 0.5 * (barClear + midHalf - termHalf)
+		local xBar : xJoin - barClear
+		local macW : 2 * (markMiddle + markExtend - xJoin)
+		local xBarL : xBar - termHalf
+		local xBarR : xBar + termHalf
+		local joinBarL : topBarXMin xJoin (2 * barClear) (-1) CaretCaronMidSw
+		local joinBarR : topBarXMin xJoin macW 0 CaretCaronMidSw
+		local joinBarL2 : topBarXMax xJoin (2 * barClear) 0 CaretCaronMidSw
+		local joinBarR2 : topBarXMax xJoin macW (+1) CaretCaronMidSw
+		local xMin : Math.min xBarL joinBarL joinBarR
+		local xMax : Math.max xBarR joinBarL2 joinBarR2
+		local xShift : markMiddle - [mix xMin xMax 0.5]
+		include : with-transform [ApparentTranslate xShift 0] : union
+			ToneBarToPeak xBar caretTop caretBot
+			CaretTopBarShape caretTop xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			CaretTopBarShape caretTop xJoin macW 0 (+1) CaretCaronMidSw (2 * markFine)
+		include : AlignToneMarkAbove
+
+	create-glyph 'macronBarAbove' 0x1AD5 : glyph-proc
+		set-width 0
+		include : StdAnchors.mediumWide
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xJoin : markMiddle + markExtend - 0.5 * (barClear + midHalf - termHalf)
+		local xBar : xJoin + barClear
+		local macW : 2 * (xJoin - (markMiddle - markExtend))
+		local xBarL : xBar - termHalf
+		local xBarR : xBar + termHalf
+		local joinMacL : topBarXMin xJoin macW (-1) CaretCaronMidSw
+		local joinBarL : topBarXMin xJoin (2 * barClear) 0 CaretCaronMidSw
+		local joinMacR : topBarXMax xJoin macW 0 CaretCaronMidSw
+		local joinBarR : topBarXMax xJoin (2 * barClear) (+1) CaretCaronMidSw
+		local xMin : Math.min xBarL joinMacL joinBarL
+		local xMax : Math.max xBarR joinMacR joinBarR
+		local xShift : markMiddle - [mix xMin xMax 0.5]
+		include : with-transform [ApparentTranslate xShift 0] : union
+			CaretTopBarShape caretTop xJoin macW (-1) 0 CaretCaronMidSw (2 * markFine)
+			CaretTopBarShape caretTop xJoin (2 * barClear) 0 (+1) CaretCaronMidSw (2 * markFine)
+			ToneBarToPeak xBar caretTop caretBot
+		include : AlignToneMarkAbove
+
+	create-glyph 'barAcuteGraveAbove' 0x1AD6 : glyph-proc
+		set-width 0
+		include : StdAnchors.extraWide
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xC : markMiddle + 0.5 * (barClear + midHalf - termHalf)
+		local xJoin : xC - toneStep
+		local xBar : xJoin - barClear
+		include : union
+			ToneBarToValley xBar caretTop caretBot
+			CaronBottomBarShape caretBot xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			intersection [MaskBelow caretTop] : CaronRightShape caretTop caretBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskAbove caretBot] : CaretLeftShape caretTop caretBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaretRightShape caretTop caretBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+		include : AlignToneMarkAbove
+
+	create-glyph 'barGraveAcuteAbove' 0x1AD7 : glyph-proc
+		set-width 0
+		include : StdAnchors.extraWide
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local barClear midHalf
+		local xC : markMiddle + 0.5 * (barClear + midHalf - termHalf)
+		local xJoin : xC - toneStep
+		local xBar : xJoin - barClear
+		include : union
+			ToneBarToPeak xBar caronTop caronBot
+			CaretTopBarShape caronTop xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			intersection [MaskAbove caronBot] : CaretRightShape caronTop caronBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskBelow caronTop] : CaronLeftShape caronTop caronBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaronRightShape caronTop caronBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+		include : AlignToneMarkAbove
+
+	create-glyph 'macronAcuteGraveAbove' 0x1AD8 : glyph-proc
+		set-width 0
+		include : StdAnchors.extraWide
+		local termHalf : HSwToV : 0.5 * CaretCaronTerminalSw
+		local xC : markMiddle + 0.5 * toneStep - 0.5 * termHalf
+		local xL : xC - toneStep
+		include : union
+			CaronBottomBarShape caretBot xL CaretCaronWidth (-1) 0 CaretCaronMidSw (2 * markFine)
+			intersection [MaskBelow caretTop] : CaronRightShape caretTop caretBot xL CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			intersection [MaskAbove caretBot] : CaretLeftShape caretTop caretBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+			CaretRightShape caretTop caretBot xC CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+		include : AlignToneMarkAbove
+
+	create-glyph 'caronAcuteAbove' 0x1AEC : glyph-proc
+		set-width 0
+		local acuteShift : markExtend + [StrokeWidthBlend 0 0.45] * markStroke
+		include : with-transform [Translate (-markExtend) 0] : refer-glyph 'caronAbove'
+		include : with-transform [Translate acuteShift 0] : refer-glyph 'acuteAbove'
+		include : AlignToneMarkAbove
+		include : StdAnchors.extraWide
+
+	create-glyph 'barDoubleAcuteAbove' 0x1AED : glyph-proc
+		set-width 0
+		local midHalf : HSwToV : 0.5 * CaretCaronMidSw
+		local barClear midHalf
+		local xJoin : markMiddle - markExtend + 0.5 * barClear
+		local xBar : xJoin - barClear
+		local acuteShift : markExtend * 0.85 + 0.5 * barClear + [StrokeWidthBlend 0 0.45] * markStroke
+		include : union
+			ToneBarToValley xBar caronTop caronBot
+			CaronBottomBarShape caronBot xJoin (2 * barClear) (-1) 0 CaretCaronMidSw (2 * markFine)
+			CaronRightShape caronTop caronBot xJoin CaretCaronWidth CaretCaronTerminalSw CaretCaronMidSw
+		include : with-transform [Translate acuteShift 0] : refer-glyph 'acuteAbove'
+		include : AlignToneMarkAbove
 		include : StdAnchors.extraWide
 
 	#### Tilde Marks
@@ -481,6 +767,148 @@ glyph-block Mark-Above : begin
 
 		define cs : new BezToContoursSink
 		ShapeConv.transferGenericShapeAsBezier {{inner outer}} cs GEOMETRY_PRECISION
+		currentGlyph.includeContours cs.contours
+
+	define [mixZ a b k] : object
+		x : mix a.x b.x k
+		y : mix a.y b.y k
+
+	define [flipZX z cx] : object
+		x : 2 * cx - z.x
+		y : 0 + z.y
+
+	define [shiftZX z dx] : object
+		x : z.x + dx
+		y : 0 + z.y
+
+	define [splitBez p0 p1 p2 p3 t] : begin
+		local ab  : mixZ p0 p1 t
+		local bc  : mixZ p1 p2 t
+		local cd  : mixZ p2 p3 t
+		local abc : mixZ ab bc t
+		local bcd : mixZ bc cd t
+		local j   : mixZ abc bcd t
+		return { p0 ab abc j bcd cd p3 }
+
+	glyph-block-export WigglyLineShape
+	define [WigglyLineShape] : with-params [ttop tbot width hs] : glyph-proc
+		define [designPt z] : currentGlyph.gizmo.unapply z
+		define [framePt z] : currentGlyph.gizmo.apply z
+
+		define { _z1 _z2 _z3 _z4 } : include : TildeKnots
+			ttop     -- ttop
+			tbot     -- tbot
+			leftEnd  -- (markMiddle - 0.75 * width)
+			rightEnd -- (markMiddle + 0.25 * width)
+			hs       -- hs
+
+		local z1 : designPt _z1
+		local z2 : designPt _z2
+		local z3 : designPt _z3
+		local z4 : designPt _z4
+
+		local a : z2.y - z1.y
+		local b : z3.y - z2.y
+		local c : z4.y - z3.y
+		local qa : a - 2 * b + c
+		local qb : 2 * b - 2 * a
+		local qc a
+		local tPeak 0.25
+		local tTrough 0.75
+		if ([Math.abs qa] > 1e-8) : begin
+			local disc : Math.max 0 (qb * qb - 4 * qa * qc)
+			local rt : Math.sqrt disc
+			local tPlus  : ((0 - qb) + rt) / (2 * qa)
+			local tMinus : ((0 - qb) - rt) / (2 * qa)
+			if ((tPlus  > 0) && (tPlus  < 0.5)) : set tPeak tPlus
+			if ((tMinus > 0) && (tMinus < 0.5)) : set tPeak tMinus
+			if ((tPlus  > 0.5) && (tPlus  < 1)) : set tTrough tPlus
+			if ((tMinus > 0.5) && (tMinus < 1)) : set tTrough tMinus
+
+		define { l0 l1 l2 j _r1 _r2 _r3 } : splitBez z1 z2 z3 z4 tTrough
+		local tDown : tPeak / tTrough
+		define { _u0 _u1 _u2 peak d1 d2 d3 } : splitBez l0 l1 l2 j tDown
+
+		local pPrime : flipZX peak j.x
+		local dxDown : pPrime.x - peak.x
+		local jPrime : shiftZX j dxDown
+		local md1 : shiftZX d1 dxDown
+		local md2 : shiftZX d2 dxDown
+		local mu1 : flipZX d2 j.x
+		local mu2 : flipZX d1 j.x
+
+		local cx : mix j.x jPrime.x 0.5
+		local dx : markMiddle - cx
+		define [at z] : shiftZX z dx
+
+		local fL0 : framePt : at l0
+		local fL1 : framePt : at l1
+		local fL2 : framePt : at l2
+		local fJ  : framePt : at j
+		local fMu1 : framePt : at mu1
+		local fMu2 : framePt : at mu2
+		local fP   : framePt : at pPrime
+		local fMd1 : framePt : at md1
+		local fMd2 : framePt : at md2
+		local fJp  : framePt : at jPrime
+		local jpAt : at jPrime
+		local r1 : shiftZX [flipZX l2 j.x] (jPrime.x - j.x)
+		local r2 : shiftZX [flipZX l1 j.x] (jPrime.x - j.x)
+		local r3 : shiftZX [flipZX l0 j.x] (jPrime.x - j.x)
+		define boneL  : new Arcs.Bez3 fL0 fL1 fL2 fJ
+		define boneM1 : new Arcs.Bez3 fJ fMu1 fMu2 fP
+		define boneM2 : new Arcs.Bez3 fP fMd1 fMd2 fJp
+		define boneR  : new Arcs.Bez3 fJp [framePt : at r1] [framePt : at r2] [framePt : at r3]
+
+		define innerL  : new OffsetCurve boneL  (+hs) HVContrast
+		define innerM1 : new OffsetCurve boneM1 (+hs) HVContrast
+		define innerM2 : new OffsetCurve boneM2 (+hs) HVContrast
+		define innerR  : new OffsetCurve boneR  (+hs) HVContrast
+		define outerL  : new OffsetCurve boneL  (-hs) HVContrast
+		define outerM1 : new OffsetCurve boneM1 (-hs) HVContrast
+		define outerM2 : new OffsetCurve boneM2 (-hs) HVContrast
+		define outerR  : new OffsetCurve boneR  (-hs) HVContrast
+
+		define cs : new BezToContoursSink
+		ShapeConv.transferGenericShapeAsBezier {{innerL innerM1 innerM2 innerR [new Arcs.Reverted outerR] [new Arcs.Reverted outerM2] [new Arcs.Reverted outerM1] [new Arcs.Reverted outerL]}} cs GEOMETRY_PRECISION
+		currentGlyph.includeContours cs.contours
+
+	glyph-block-export SnakeBelowShape
+	define [SnakeBelowShape] : with-params [ttop tbot topAmp botAmp hsTop hsBot] : glyph-proc
+		define [framePt z] : currentGlyph.gizmo.apply z
+		local midY : mix ttop tbot 0.45
+
+		define [pt x y] : framePt : object
+			x : 0 + x
+			y : 0 + y
+
+		local xT0 : markMiddle + 0.12 * topAmp
+		local xT1 : markMiddle - topAmp
+		local yT1 : mix ttop midY 0.3
+		local yT2 : mix ttop midY 0.7
+		local pT0 : pt xT0 ttop
+		local pT1 : pt xT1 yT1
+		local pT2 : pt xT1 yT2
+		local pT3 : pt markMiddle midY
+
+		local xB1 : markMiddle - botAmp
+		local yB1 : mix midY tbot 0.3
+		local yB2 : mix midY tbot 0.7
+		local xB3 : markMiddle + 0.1 * botAmp
+		local pB1 : pt xB1 yB1
+		local pB2 : pt xB1 yB2
+		local pB3 : pt xB3 tbot
+
+		define boneT : new Arcs.Bez3 pT0 pT1 pT2 pT3
+		define boneB : new Arcs.Bez3 pT3 pB1 pB2 pB3
+
+		define innerT : new OffsetCurve boneT hsTop HVContrast
+		define innerB : new TaperedOffsetCurve boneB hsTop hsBot HVContrast
+		define outerT : new OffsetCurve boneT (0 - hsTop) HVContrast
+		define outerB : new TaperedOffsetCurve boneB (0 - hsTop) (0 - hsBot) HVContrast
+
+		define cs : new BezToContoursSink
+		ShapeConv.transferGenericShapeAsBezier {{innerT innerB [new Arcs.Reverted outerB] [new Arcs.Reverted outerT]}} cs GEOMETRY_PRECISION
 		currentGlyph.includeContours cs.contours
 
 	create-glyph 'tildeAbove' 0x303 : glyph-proc

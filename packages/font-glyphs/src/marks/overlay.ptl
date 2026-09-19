@@ -551,6 +551,51 @@ glyph-block Mark-Overlay : begin
 
 		select-variant 'cyrl/kavykaWithDotOver' (follow -- 'diacriticDot')
 
+		define parenOverMid : XH / 2
+		define parenOverHalfH : 0.5 * (aboveMarkTop - aboveMarkBot) + markFine
+		define parenOverTop : parenOverMid + parenOverHalfH
+		define parenOverBot : parenOverMid - parenOverHalfH
+		define parenOverDepth : markExtend * 0.25
+		define CombiningParenOverlayConfig : object
+			normal       { 0    1 }
+			largeContour { 0.25 0.75 }
+			flatArc      { 0.5  0.75 }
+
+		foreach { suffix { kOut kCurl } } [Object.entries CombiningParenOverlayConfig] : do
+			create-glyph "leftParenOver.\(suffix)" : glyph-proc
+				set-width 0
+				local depth : parenOverDepth * kCurl
+				set-mark-anchor 'overlayBraceL' 0 parenOverMid (0 - depth) parenOverMid
+				local xInner : 0 + 0
+				local xOut : mix (0 - depth + OX) xInner kOut
+				include : dispiro
+					widths.lhs markFine
+					g4 xInner parenOverTop
+					g4 xOut parenOverMid
+					g4 xInner parenOverBot
+			create-glyph "rightParenOver.\(suffix)" : glyph-proc
+				set-width 0
+				local depth : parenOverDepth * kCurl
+				set-mark-anchor 'overlayBraceR' 0 parenOverMid (0 + depth) parenOverMid
+				local xInner : 0 + 0
+				local xOut : mix (0 + depth - OX) xInner kOut
+				include : dispiro
+					widths.rhs markFine
+					g4 xInner parenOverTop
+					g4 xOut parenOverMid
+					g4 xInner parenOverBot
+			create-glyph "parenOver.\(suffix)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'overlay' markMiddle parenOverMid markMiddle parenOverMid
+				include : with-transform [Translate (markMiddle - Middle) 0]
+					refer-glyph "leftParenOver.\(suffix)"
+				include : with-transform [Translate (markMiddle + Middle) 0]
+					refer-glyph "rightParenOver.\(suffix)"
+
+		select-variant 'leftParenOver'  (follow -- 'parenLeft')
+		select-variant 'rightParenOver' (follow -- 'parenRight')
+		select-variant 'parenOver' 0x1ABE (follow -- 'parenLeft')
+
 	do "Inner dots"
 		glyph-block-export InnerDot
 		define [InnerDot x y kHeight fRound kdr _space _adws] : begin
