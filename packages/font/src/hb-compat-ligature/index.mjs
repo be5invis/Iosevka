@@ -1,3 +1,4 @@
+import * as hb from "harfbuzzjs";
 import { Ot } from "ot-builder";
 
 import { buildTTF } from "../font-io/index.mjs";
@@ -11,23 +12,23 @@ export async function buildCompatLigatures(para, font) {
 
 	// Build a provisional in-memory TTF for shaping
 	const provisionalTtf = buildTTF(font);
-	const hb = await (await import("harfbuzzjs")).default;
 
 	// Setup HB objects
-	const hbBlob = hb.createBlob(provisionalTtf);
-	const hbFace = hb.createFace(hbBlob, 0);
-	const hbFont = hb.createFont(hbFace);
+	const hbBlob = new hb.Blob(provisionalTtf);
+	const hbFace = new hb.Face(hbBlob, 0);
+	const hbFont = new hb.Font(hbFace);
 
 	for (const entry of para.compatibilityLigatures) {
 		if (completedCodePoints.has(entry.unicode)) continue;
 
 		// Shape the text, produce the glyph list and their positions
-		const buffer = hb.createBuffer();
+		const buffer = new hb.Buffer();
 		buffer.addText(entry.sequence);
 		buffer.guessSegmentProperties();
-		hb.shape(hbFont, buffer, entry.featureTag);
-		const shapingResults = buffer.json();
-		buffer.destroy();
+		const feat = new hb.Feature(entry.featureTag);
+		hb.shape(hbFont, buffer, [feat]);
+		const shapingResults = buffer.getGlyphInfosAndPositions();
+		console.log(shapingResults);
 
 		// Create the ligature glyph
 		const ligature = new Ot.Glyph();
@@ -38,19 +39,19 @@ export async function buildCompatLigatures(para, font) {
 		let xCursor = 0;
 		let yCursor = 0;
 		for (const component of shapingResults) {
-			const x = xCursor + component.dx;
-			const y = yCursor + component.dy;
+			const x = xCursor + (component.xOffset || 0);
+			const y = yCursor + (component.yOffset || 0);
 
-			ligature.horizontal.end += component.ax;
+			ligature.horizontal.end += component.xAdvance || 0;
 			ligature.geometry.items.push(
 				new Ot.Glyph.TtReference(
-					glyphList.at(component.g),
+					glyphList.at(component.codepoint), // yeah, glyph ID called code point
 					Ot.Glyph.Transform2X3.Translate(x, y),
 				),
 			);
 
-			xCursor += component.ax;
-			yCursor += component.ay;
+			xCursor += component.xAdvance || 0;
+			yCursor += component.yAdvance || 0;
 		}
 
 		// Save the ligature glyph
@@ -64,8 +65,4 @@ export async function buildCompatLigatures(para, font) {
 		font.cmap.unicode.set(job.unicode, job.glyph);
 		if (font.gdef) font.gdef.glyphClassDef.set(job.glyph, Ot.Gdef.GlyphClass.Ligature);
 	}
-
-	hbFont.destroy();
-	hbFace.destroy();
-	hbBlob.destroy();
 }
