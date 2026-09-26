@@ -115,6 +115,28 @@ export class OffsetCurve {
 	}
 }
 
+export class TaperedOffsetCurve {
+	constructor(bone, offset0, offset1, contrast) {
+		this.bone = bone;
+		this.offset0 = offset0;
+		this.offset1 = offset1;
+		this.contrast = contrast;
+	}
+	eval(t) {
+		const c = this.bone.eval(t);
+		const d = this.bone.derivative(t);
+		const absD = Math.hypot(d.x, d.y);
+		const offset = mix(this.offset0, this.offset1, t);
+		return {
+			x: c.x - (d.y / absD) * offset * this.contrast,
+			y: c.y + (d.x / absD) * offset,
+		};
+	}
+	derivative(t) {
+		return derivativeFromFiniteDifference(this, t);
+	}
+}
+
 export function convertShapeToArcs(shape) {
 	return shape.map(convertContourToArcs);
 }

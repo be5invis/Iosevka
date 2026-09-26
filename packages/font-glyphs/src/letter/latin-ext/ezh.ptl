@@ -409,7 +409,7 @@ glyph-block Letter-Latin-Ezh : begin
 					fSerifed  -- fSerifed
 					pxMidLeft -- 0.40
 					pyMidLeft -- [if fCursive 0.50 0.52]
-					stroke    -- [AdviceStroke2 2 3 XH]
+					stroke    -- [AdviceStroke2 2 3 (XH - 0)]
 					hook      -- SHook
 					origBar   -- Stroke
 					ada       -- SmallArchDepthA
@@ -490,6 +490,61 @@ glyph-block Letter-Latin-Ezh : begin
 					refSw   -- [Math.min stroke : AdviceStroke 3]
 					maskOut -- [intersection [MaskBelow (yArcMid - stroke / 2)] [MaskLeft (xArcMid + O)]]
 
+			DefineSelectorGlyph "lyogh/phoneticRight"      suffix [DivFrame 1] 'bp'
+			DefineSelectorGlyph "lyoghRTail/phoneticRight" suffix [DivFrame 1] 'bp'
+
+			create-glyph "lyogh/phoneticRight.\(suffix).serifless" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				local gap : 0.5 * (SB - 0) + [HSwToV QuarterStroke]
+				local subDf : DivFrame ((Width - gap) / Width) 2 1
+				local stroke : subDf.adviceStroke2 2 3 (XH - Descender)
+				local origBar : subDf.adviceStroke 2
+				define yogh : Ezh subDf XH Descender
+					fCursive  -- fCursive
+					fSerifed  -- fSerifed
+					pxMidLeft -- [Math.max 0.40 : ([HSwToV origBar] + [Math.max (Width / 32) : AdviceStroke 24]) / (subDf.rightSB - subDf.leftSB)]
+					pyMidLeft -- [if fCursive 0.50 0.55]
+					stroke    -- stroke
+					hook      -- SHook
+					origBar   -- origBar
+					ada       -- [subDf.archDepthAOf SmallArchDepth stroke]
+					adb       -- [subDf.archDepthBOf SmallArchDepth stroke]
+				include : with-transform [Translate gap 0] : composite-proc
+					yogh.Shape
+					VBar.l subDf.leftSB 0 Ascender origBar
+				include : HBar.t (SB - SideJut) (subDf.leftSB + gap - O) XH
+				create-forked-glyph "lyogh/phoneticRight.\(suffix).hooky" : tagged 'serifLT' : HSerif.lt (subDf.leftSB + gap) Ascender SideJut origBar
+
+			select-variant "lyogh/phoneticRight.\(suffix)" (follow -- 'lyogh/l')
+
+			create-glyph "lyoghRTail/phoneticRight.\(suffix).serifless" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				local gap : 0.5 * (SB - 0) + [HSwToV QuarterStroke]
+				local subDf : DivFrame ((Width - gap) / Width) 2 1
+				local stroke : subDf.adviceStroke2 2 3 (XH - 0)
+				local origBar : subDf.adviceStroke 2
+				define yogh : Ezh subDf XH 0
+					fCursive  -- fCursive
+					fSerifed  -- fSerifed
+					pxMidLeft -- [Math.max 0.40 : ([HSwToV origBar] + [Math.max (Width / 32) : AdviceStroke 24]) / (subDf.rightSB - subDf.leftSB)]
+					pyMidLeft -- [if fCursive 0.50 0.55]
+					stroke    -- stroke
+					hook      -- SHook
+					origBar   -- origBar
+					ada       -- [subDf.archDepthAOf SmallArchDepth stroke]
+					adb       -- [subDf.archDepthBOf SmallArchDepth stroke]
+					terminal  -- TERMINAL-DESC
+				include : with-transform [Translate gap 0] : composite-proc
+					yogh.Shape
+					VBar.l subDf.leftSB 0 Ascender origBar
+					RetroflexHook.lExt subDf.leftSB 0 (sw -- origBar)
+				include : HBar.t (SB - SideJut) (subDf.leftSB + gap - O) XH
+				create-forked-glyph "lyoghRTail/phoneticRight.\(suffix).hooky" : tagged 'serifLT' : HSerif.lt (subDf.leftSB + gap) Ascender SideJut origBar
+
+			select-variant "lyoghRTail/phoneticRight.\(suffix)" (follow -- 'lyogh/l')
+
 	select-variant 'Ezh'     0x1B7
 	select-variant 'revEzh'  0x1B8  (follow -- 'Ezh')
 	select-variant 'smcpEzh' 0x1D23 (follow -- 'Ezh')
@@ -509,6 +564,9 @@ glyph-block Letter-Latin-Ezh : begin
 	select-variant 'ezhCurlyTail/phoneticRight'   (follow -- 'ezh/phoneticRight')
 	select-variant 'ezhRTail/phoneticRight'       (follow -- 'ezh/phoneticRight')
 	select-variant 'ezhPalatalHook/phoneticRight' (follow -- 'ezh/phoneticRight')
+
+	CreateSelectorVariants 'lyogh/phoneticRight'      null [Object.keys EzhConfig] (follow -- 'ezh/phoneticRight')
+	CreateSelectorVariants 'lyoghRTail/phoneticRight' null [Object.keys EzhConfig] (follow -- 'ezh/phoneticRight')
 
 	alias 'cyrl/abk/Dze' 0x4E0 'Ezh'
 	alias 'cyrl/abk/dze' 0x4E1 'ezh'

@@ -9,14 +9,24 @@ glyph-block Mark-Below : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
+	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markHalfStroke markStress markFine
 	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
+	glyph-block-import Mark-Above : WigglyLineShape SnakeBelowShape MeasureGlyphBounds CenterMarkHorizontally
 
 	glyph-block-export belowMarkBot belowMarkTop belowMarkMid belowMarkStack
 	define belowMarkBot   (0 - AccentClearance - AccentHeight)
 	define belowMarkTop   (0 - AccentClearance)
 	define belowMarkMid   [mix belowMarkBot belowMarkTop 0.5]
 	define belowMarkStack (0 - AccentStackOffset)
+	define toneBelowBaseline belowMarkTop
+
+	glyph-block-export AlignToneMarkBelow
+	define [AlignToneMarkBelow] : glyph-proc
+		include : CenterMarkHorizontally
+		local b : include : MeasureGlyphBounds
+		if [not b] : return nothing
+		local yShift : toneBelowBaseline - b.yMax
+		if ([Math.abs yShift] > 1e-6) : currentGlyph.applyTransform [ApparentTranslate 0 yShift]
 
 	define StdAnchors : namespace
 		export : define [impl padding k fLeaning] : glyph-proc
@@ -202,6 +212,55 @@ glyph-block Mark-Below : begin
 		include : with-transform [Translate (-markExtend) 0] : refer-glyph 'crossBelow'
 		include : with-transform [Translate (+markExtend) 0] : refer-glyph 'crossBelow'
 		include : StdAnchors.impl 0 1.5
+
+	create-glyph 'wigglyLineBelow' 0x1AB6 : glyph-proc
+		set-width 0
+		include : StdAnchors.impl 0 1.5
+		include : WigglyLineShape
+			ttop  -- belowMarkTop
+			tbot  -- (belowMarkBot + markFine / 2)
+			width -- (markExtend * 3)
+			hs    -- markHalfStroke
+		include : AlignToneMarkBelow
+
+	create-glyph 'snakeBelow' 0x1DC2 : glyph-proc
+		set-width 0
+		include : StdAnchors.impl 0 1.75
+		include : SnakeBelowShape
+			ttop   -- belowMarkTop
+			tbot   -- (belowMarkBot - 0.55 * AccentHeight)
+			topAmp -- (markExtend * 0.85)
+			botAmp -- (markExtend * 0.32)
+			hsTop  -- markFine
+			hsBot  -- (0.4 * markFine)
+		include : AlignToneMarkBelow
+
+	define centralizationFine : AdviceStroke 6
+	define slashDx : (RightSB - SB) / 2 + O * 3 - 0.5 * centralizationFine
+	define slashDy : XH * 0.6
+	define centralizationY0 Stroke
+	define centralizationY1 belowMarkBot
+	define centralizationCx : markMiddle - (RightSB - SB) / 3
+	define centralizationX0 : centralizationCx + slashDx * centralizationY0 / slashDy
+	define centralizationX1 : centralizationCx + slashDx * centralizationY1 / slashDy
+	define centralizationBlobR : 0.45 * AccentHeight
+
+	create-glyph 'lightCentralizationStrokeBelow' 0x1AB9 : glyph-proc
+		set-width 0
+		include : StdAnchors.impl 0 1.25 true
+		include : dispiro
+			widths.center centralizationFine
+			flat centralizationX0 centralizationY0
+			curl centralizationX1 centralizationY1
+
+	create-glyph 'strongCentralizationStrokeBelow' 0x1ABA : glyph-proc
+		set-width 0
+		include : StdAnchors.impl 0 1.25 true
+		include : dispiro
+			widths.center centralizationFine
+			flat centralizationX0 centralizationY0
+			curl centralizationX1 centralizationY1
+		include : DotAt centralizationX1 centralizationY1 centralizationBlobR
 
 	create-glyph 'leftParenBelow' 0x1AC3 : glyph-proc
 		set-width 0
