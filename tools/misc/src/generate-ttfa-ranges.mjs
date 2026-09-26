@@ -60,7 +60,7 @@ class InUnicodeDataSet {
 
 	async load() {
 		if (this.dataset) return;
-		const d = (await import(`@unicode/unicode-18.0.0/${this.subpath}/code-points.js`)).default;
+		const d = (await import(`@unicode/unicode-18.0.0/${this.subpath}/code-points.mjs`)).default;
 		this.dataset = new Set(d);
 	}
 
