@@ -2810,6 +2810,20 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-delta-flat-top.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-delta-flat-top.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-delta = 'flat-top'</code>, <code>cv72 = 2</code></td></tr>
     <tr><td>Greek lower Delta (<code>δ</code>) with flat top</td></tr>
     </table></details>
+  - Styles for `ζ` (Greek lower Zeta)
+    <details><summary>5 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-zeta-curly-tail.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-zeta-curly-tail.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-zeta = 'curly-tail'</code>, <code>VXAC = 1</code></td></tr>
+    <tr><td>Greek lower Zeta (<code>ζ</code>) with a curly tail (default)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-zeta-straight-tail.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-zeta-straight-tail.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-zeta = 'straight-tail'</code>, <code>VXAC = 2</code></td></tr>
+    <tr><td>Greek lower Zeta (<code>ζ</code>) with a straight tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-zeta-diagonal-tail.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-zeta-diagonal-tail.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-zeta = 'diagonal-tail'</code>, <code>VXAC = 3</code></td></tr>
+    <tr><td>Greek lower Zeta (<code>ζ</code>) with a diagonal tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-zeta-straight-tail-sharp-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-zeta-straight-tail-sharp-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-zeta = 'straight-tail-sharp-corner'</code>, <code>VXAC = 4</code></td></tr>
+    <tr><td>Greek lower Zeta (<code>ζ</code>) with a straight tail and a sharp corner</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-zeta-diagonal-tail-sharp-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-zeta-diagonal-tail-sharp-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-zeta = 'diagonal-tail-sharp-corner'</code>, <code>VXAC = 5</code></td></tr>
+    <tr><td>Greek lower Zeta (<code>ζ</code>) with a diagonal tail and a sharp corner</td></tr>
+    </table></details>
   - Styles for `η` (Greek lower Eta)
     <details><summary>10 variants</summary>
     <table>
@@ -3033,12 +3047,28 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Nu (<code>ν</code>) with casual shape, and serifs (default for Slab)</td></tr>
     </table></details>
   - Styles for `ξ` (Greek lower Xi)
-    <details><summary>2 variants</summary>
+    <details><summary>10 variants</summary>
     <table>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-rounded.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-rounded.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'rounded'</code>, <code>cv79 = 1</code></td></tr>
     <tr><td>Greek lower Xi (<code>ξ</code>) with rounded top</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-flat-top.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-flat-top.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'flat-top'</code>, <code>cv79 = 2</code></td></tr>
     <tr><td>Greek lower Xi (<code>ξ</code>) with flat top (default)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-rounded-straight-tail.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-rounded-straight-tail.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'rounded-straight-tail'</code>, <code>cv79 = 3</code></td></tr>
+    <tr><td>Greek lower Xi (<code>ξ</code>) with rounded top and a straight tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-flat-top-straight-tail.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-flat-top-straight-tail.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'flat-top-straight-tail'</code>, <code>cv79 = 4</code></td></tr>
+    <tr><td>Greek lower Xi (<code>ξ</code>) with flat top and a straight tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-rounded-diagonal-tail.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-rounded-diagonal-tail.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'rounded-diagonal-tail'</code>, <code>cv79 = 5</code></td></tr>
+    <tr><td>Greek lower Xi (<code>ξ</code>) with rounded top and a diagonal tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-flat-top-diagonal-tail.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-flat-top-diagonal-tail.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'flat-top-diagonal-tail'</code>, <code>cv79 = 6</code></td></tr>
+    <tr><td>Greek lower Xi (<code>ξ</code>) with flat top and a diagonal tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-rounded-straight-tail-sharp-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-rounded-straight-tail-sharp-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'rounded-straight-tail-sharp-corner'</code>, <code>cv79 = 7</code></td></tr>
+    <tr><td>Greek lower Xi (<code>ξ</code>) with rounded top, a straight tail, and a sharp corner</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-flat-top-straight-tail-sharp-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-flat-top-straight-tail-sharp-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'flat-top-straight-tail-sharp-corner'</code>, <code>cv79 = 8</code></td></tr>
+    <tr><td>Greek lower Xi (<code>ξ</code>) with flat top, a straight tail, and a sharp corner</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-rounded-diagonal-tail-sharp-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-rounded-diagonal-tail-sharp-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'rounded-diagonal-tail-sharp-corner'</code>, <code>cv79 = 9</code></td></tr>
+    <tr><td>Greek lower Xi (<code>ξ</code>) with rounded top, a diagonal tail, and a sharp corner</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-xi-flat-top-diagonal-tail-sharp-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-xi-flat-top-diagonal-tail-sharp-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-xi = 'flat-top-diagonal-tail-sharp-corner'</code>, <code>cv79 = 10</code></td></tr>
+    <tr><td>Greek lower Xi (<code>ξ</code>) with flat top, a diagonal tail, and a sharp corner</td></tr>
     </table></details>
   - Styles for `π` (Greek lower Pi)
     <details><summary>4 variants</summary>
@@ -3051,6 +3081,20 @@ Subsection `variants` is used to configure character variants in the font. Prope
     <tr><td>Greek lower Pi (<code>π</code>) with small-capital shape</td></tr>
     <tr><td rowspan="2" width="60"><img src="../images/cv-lower-pi-diagonal-tailed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-pi-diagonal-tailed.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-pi = 'diagonal-tailed'</code>, <code>cv80 = 4</code></td></tr>
     <tr><td>Greek lower Pi (<code>π</code>) with diagonal tail</td></tr>
+    </table></details>
+  - Styles for `ς` (Greek lower Final Sigma)
+    <details><summary>5 variants</summary>
+    <table>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-final-sigma-curly-tail.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-final-sigma-curly-tail.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-final-sigma = 'curly-tail'</code>, <code>VXAD = 1</code></td></tr>
+    <tr><td>Greek lower Final Sigma (<code>ς</code>) with a curly tail (default)</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-final-sigma-straight-tail.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-final-sigma-straight-tail.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-final-sigma = 'straight-tail'</code>, <code>VXAD = 2</code></td></tr>
+    <tr><td>Greek lower Final Sigma (<code>ς</code>) with a straight tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-final-sigma-diagonal-tail.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-final-sigma-diagonal-tail.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-final-sigma = 'diagonal-tail'</code>, <code>VXAD = 3</code></td></tr>
+    <tr><td>Greek lower Final Sigma (<code>ς</code>) with a diagonal tail</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-final-sigma-straight-tail-sharp-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-final-sigma-straight-tail-sharp-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-final-sigma = 'straight-tail-sharp-corner'</code>, <code>VXAD = 4</code></td></tr>
+    <tr><td>Greek lower Final Sigma (<code>ς</code>) with a straight tail and a sharp corner</td></tr>
+    <tr><td rowspan="2" width="60"><img src="../images/cv-lower-final-sigma-diagonal-tail-sharp-corner.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-final-sigma-diagonal-tail-sharp-corner.dark.svg#gh-dark-mode-only" width=32/></td><td><code>lower-final-sigma = 'diagonal-tail-sharp-corner'</code>, <code>VXAD = 5</code></td></tr>
+    <tr><td>Greek lower Final Sigma (<code>ς</code>) with a diagonal tail and a sharp corner</td></tr>
     </table></details>
   - Styles for `τ` (Greek lower Tau)
     <details><summary>6 variants</summary>
