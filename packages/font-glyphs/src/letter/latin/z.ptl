@@ -11,15 +11,14 @@ glyph-block Letter-Latin-Z : begin
 	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : HCurlyTail PalatalHook RetroflexHook CyrDescender
-	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-import Letter-Latin-X : XStrand
 
 	define MODE-Z      0
-	define MODE-RTAIL  1
-	define MODE-ZDESC  2
+	define MODE-ZDESC  1
+	define MODE-ZHOOK  2
 	define MODE-ZSWASH 3
 
-	define [DisplayBottomStroke mode] : not : mode === MODE-ZDESC || mode === MODE-ZSWASH
+	define [DisplayBottomStroke mode] : not : mode === MODE-ZHOOK || mode === MODE-ZSWASH
 
 	define [ZSerifless top] : glyph-proc
 
@@ -98,7 +97,7 @@ glyph-block Letter-Latin-Z : begin
 		if (mode != MODE-ZSWASH) : include : VBar.l SB 0 yFootHeight [VSwToH xDiagWidth]
 
 		include : tagged 'strokeBottom' : match mode
-			[Just MODE-RTAIL] : intersection
+			[Just MODE-ZDESC] : intersection
 				spiro-outline
 					corner (SB + xDiagWidth) yFootHeight
 					corner (SB + xDiagWidth) (-top)
@@ -113,7 +112,7 @@ glyph-block Letter-Latin-Z : begin
 						g2   (RightSB - xHookDepth) O [widths.rhs.heading Stroke Leftward]
 						flat [mix (RightSB - xHookDepth) SB kBot] (kBot * yTailDepth)
 						curl SB                                   (1    * yTailDepth)
-			([Just MODE-ZDESC] || [Just MODE-ZSWASH]) : no-shape
+			([Just MODE-ZHOOK] || [Just MODE-ZSWASH]) : no-shape
 			__ : intersection
 				spiro-outline
 					corner (SB + xDiagWidth - TINY) yFootHeight
@@ -130,13 +129,13 @@ glyph-block Letter-Latin-Z : begin
 					flat [mix (RightSB - xHookDepth) SB kBot] (kBot * yTailDepth)
 					curl SB                                   (1    * yTailDepth)
 
-		if (mode != MODE-RTAIL) : begin
+		if (mode != MODE-ZDESC) : begin
 			set-base-anchor "trailing" (RightSB - 0.55 * xHookDepth) 0
 
-	define [ZCursiveShape mode]      : ZCursiveShapeImpl CAP mode
+	define [ZCursiveShape      mode] : ZCursiveShapeImpl CAP mode
 	define [SmallZCursiveShape mode] : ZCursiveShapeImpl XH  mode
 
-	define [NoBottomStrokeMask top] : glyph-proc
+	define [NoBottomStrokeMask top] : no-shape
 	define [CurlyBottomStrokeMask top] : spiro-outline
 		corner 0 0
 		corner SB 0
@@ -202,23 +201,23 @@ glyph-block Letter-Latin-Z : begin
 			withCrossBar           { DBarOver   }
 			withHorizontalCrossBar { HBar.mOver }
 
-	foreach { suffix { {capital small bsMask} {serifs} {slash} } } [pairs-of ZConfig] : do
+	foreach { suffix { { capital small bsMask } { serifs } { slash } } } [pairs-of ZConfig] : do
 		create-glyph "Z.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : capital MODE-Z
 			if serifs : include : serifs CAP
 			if slash  : include : slash  CAP
 
-		create-glyph "Z/rtailBase.\(suffix)" : glyph-proc
+		create-glyph "Z/descBase.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : capital MODE-RTAIL
+			include : capital MODE-ZDESC
 			if serifs : include : serifs CAP
 			if slash  : include : slash  CAP
 
 		create-glyph "ZHookBottom.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
 			set-base-anchor 'overlay' Middle (CAP / 2)
-			include : capital MODE-ZDESC
+			include : capital MODE-ZHOOK
 			if serifs : include : serifs CAP
 			if slash  : include : slash  CAP
 			eject-contour 'serifRB'
@@ -229,12 +228,12 @@ glyph-block Letter-Latin-Z : begin
 			include : ExtendBelowBaseAnchors Descender
 			if (capital === ZCursiveShape)
 			: then : begin
-				include : capital MODE-RTAIL
+				include : capital MODE-ZDESC
 				if serifs : include : serifs CAP
 				if slash  : include : slash  CAP
 				include : ZemlyaBottomStrokeCursive
 			: else : begin
-				include : capital MODE-ZDESC
+				include : capital MODE-ZHOOK
 				if serifs : include : serifs CAP
 				if slash  : include : slash  CAP
 				eject-contour 'serifRB'
@@ -255,16 +254,16 @@ glyph-block Letter-Latin-Z : begin
 			if serifs : include : serifs XH
 			if slash  : include : slash  XH
 
-		create-glyph "z/rtailBase.\(suffix)" : glyph-proc
+		create-glyph "z/descBase.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : small MODE-RTAIL
+			include : small MODE-ZDESC
 			if serifs : include : serifs XH
 			if slash  : include : slash  XH
 
 		create-glyph "zHookBottom.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			set-base-anchor 'overlay' Middle (XH / 2)
-			include : small MODE-ZDESC
+			include : small MODE-ZHOOK
 			if serifs : include : serifs XH
 			if slash  : include : slash  XH
 			eject-contour 'serifRB'
@@ -275,12 +274,12 @@ glyph-block Letter-Latin-Z : begin
 			include : ExtendBelowBaseAnchors Descender
 			if (small === SmallZCursiveShape)
 			: then : begin
-				include : small MODE-RTAIL
+				include : small MODE-ZDESC
 				if serifs : include : serifs XH
 				if slash  : include : slash  XH
 				include : ZemlyaBottomStrokeCursive
 			: else : begin
-				include : small MODE-ZDESC
+				include : small MODE-ZHOOK
 				if serifs : include : serifs XH
 				if slash  : include : slash  XH
 				eject-contour 'serifRB'
@@ -297,7 +296,7 @@ glyph-block Letter-Latin-Z : begin
 
 		create-glyph "zCurlyTail.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : small MODE-ZDESC
+			include : small MODE-ZHOOK
 			if serifs : include : serifs XH
 			if slash  : include : slash  XH
 			eject-contour 'serifRB'
@@ -315,36 +314,35 @@ glyph-block Letter-Latin-Z : begin
 	link-reduced-variant 'Z/sansSerif' 'Z' MathSansSerif
 	link-reduced-variant 'Z/reduced' 'Z'
 	link-reduced-variant 'Z/reduced/sansSerif' 'Z'
-	select-variant 'Z/rtailBase' (follow -- 'Z')
+	select-variant 'Z/descBase' (follow -- 'Z')
 	select-variant 'smcpZ' 0x1D22 (shapeFrom -- 'z') (follow -- 'Z')
 
 	select-variant 'z' 'z'
 	link-reduced-variant 'z/sansSerif' 'z' MathSansSerif
 	link-reduced-variant 'z/reduced' 'z'
-	select-variant 'z/rtailBase' (follow -- 'z')
+	select-variant 'z/descBase' (follow -- 'z')
 
-	select-variant 'ZHookBottom' 0x224   (follow -- 'ZDesc')
-	select-variant 'zHookBottom' 0x225   (follow -- 'zDesc')
-	select-variant 'ZSwash'      0x2C7F  (follow -- 'ZDesc')
-	select-variant 'zSwash'      0x240   (follow -- 'zDesc')
-	select-variant 'zCurlyTail'  0x291   (follow -- 'zDesc')
-	select-variant 'cyrl/Zemlya' 0xA640  (follow -- 'ZDesc')
-	select-variant 'cyrl/zemlya' 0xA641  (follow -- 'zDesc')
-	select-variant 'cyrl/Zemlya/reduced' (follow -- 'ZDesc/reduced') (shapeFrom -- 'cyrl/Zemlya')
-	select-variant 'cyrl/zemlya/reduced' (follow -- 'zDesc/reduced') (shapeFrom -- 'cyrl/zemlya')
+	select-variant 'ZHookBottom' 0x224
+	select-variant 'zHookBottom' 0x225
+	select-variant 'ZSwash'      0x2C7F (follow -- 'ZHookBottom')
+	select-variant 'zSwash'      0x240  (follow -- 'zHookBottom')
+	select-variant 'zCurlyTail'  0x291  (follow -- 'zHookBottom')
+	select-variant 'cyrl/Zemlya' 0xA640 (follow -- 'ZHookBottom/reduced')
+	select-variant 'cyrl/zemlya' 0xA641 (follow -- 'zHookBottom/reduced')
 
-	select-variant 'z/phoneticRight'           (shapeFrom --'z')
-	select-variant 'z/rtailBase/phoneticRight' (shapeFrom --'z/rtailBase') (follow -- 'z/phoneticRight')
-	select-variant 'zCurlyTail/phoneticRight'  (shapeFrom --'zCurlyTail')  (follow -- 'zDesc/phoneticRight')
+	select-variant 'z/phoneticRight'          (shapeFrom --'z')
+	select-variant 'z/descBase/phoneticRight' (shapeFrom --'z/descBase') (follow -- 'z/phoneticRight')
+	select-variant 'zCurlyTail/phoneticRight' (shapeFrom --'zCurlyTail') (follow -- 'zHookBottom/phoneticRight')
 
-	derive-composites 'ZDesc'        0x2C6B 'Z/rtailBase' [CyrDescender.r RightSB 0]
-	derive-composites 'zDesc'        0x2C6C 'z/rtailBase' [CyrDescender.r RightSB 0]
+	derive-composites 'ZDescender'   0x2C6B 'Z/descBase' [CyrDescender.r RightSB 0]
+	derive-composites 'zDescender'   0x2C6C 'z/descBase' [CyrDescender.r RightSB 0]
 
-	derive-composites 'ZPalatalHook' 0xA7C6 'Z/rtailBase' [PalatalHook.r RightSB 0]
-	derive-composites 'zPalatalHook' 0x1D8E 'z/rtailBase' [PalatalHook.r RightSB 0]
+	derive-composites 'ZPalatalHook' 0xA7C6 'Z/descBase' [PalatalHook.r RightSB 0]
+	derive-composites 'zPalatalHook' 0x1D8E 'z/descBase' [PalatalHook.r RightSB 0]
+	derive-composites 'zPalatalHook/phoneticRight' null 'z/descBase/phoneticRight' [PalatalHook.r RightSB 0]
 
-	derive-composites 'zRTail'       0x290  'z/rtailBase' [RetroflexHook.r RightSB 0]
-	derive-composites 'zRTail/phoneticRight' null 'z/rtailBase/phoneticRight' [RetroflexHook.r RightSB 0]
+	derive-composites 'zRTail'       0x290  'z/descBase' [RetroflexHook.r RightSB 0]
+	derive-composites 'zRTail/phoneticRight' null 'z/descBase/phoneticRight' [RetroflexHook.r RightSB 0]
 
 	alias 'grek/Zeta' 0x396 'Z/reduced'
 	alias-reduced-variant 'grek/Zeta/sansSerif' 'grek/Zeta' 'Z/reduced/sansSerif' MathSansSerif
@@ -366,9 +364,10 @@ glyph-block Letter-Latin-Z : begin
 	CreateAccentedComposition 'ZStroke' 0x1B5 'Z/reduced' 'barOver'
 	CreateAccentedComposition 'zStroke' 0x1B6 'z/reduced' 'barOver'
 
-	CreateAccentedComposition 'cyrl/Dzelo' 0xA642 'cyrl/Zemlya/reduced' 'barOver'
-	CreateAccentedComposition 'cyrl/dzelo' 0xA643 'cyrl/zemlya/reduced' 'barOver'
+	CreateAccentedComposition 'cyrl/Dzelo' 0xA642 'cyrl/Zemlya' 'barOver'
+	CreateAccentedComposition 'cyrl/dzelo' 0xA643 'cyrl/zemlya' 'barOver'
 
+	glyph-block-import Letter-Blackboard : BBS BBD
 	define [BBZShape top] : glyph-proc
 		include : HBar.t SB RightSB top BBS
 		include : HBar.b SB RightSB 0   BBS

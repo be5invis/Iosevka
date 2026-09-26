@@ -7,18 +7,19 @@ glyph-module
 glyph-block Letter-Latin-Lower-Eth : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : PalatalHook
 
 	define fine ShoulderFine
 
-	define yMid : Ascender * 0.6
-	define yMid2 : YSmoothMidR yMid 0 SmallArchDepthA SmallArchDepthB
-	define yMid3 : mix yMid yMid2 0.875
+	define yMid1 : mix 0 Ascender 0.6
+	define yMid2 : YSmoothMidR yMid1 0 SmallArchDepthA SmallArchDepthB
+	define yMid3 : mix yMid1 yMid2 0.875
 
 	define [ArcStartKnots _flatY1 _flatY2] : list
 		widths.lhs fine
 		straight.up.mid (RightSB - OX - [HSwToV : Stroke - fine]) yMid2
-		Arch.lhs yMid (swBefore -- fine)
-		g4 (SB + OX) [YSmoothMidL yMid 0 SmallArchDepthA SmallArchDepthB]
+		Arch.lhs yMid1 (swBefore -- fine)
+		g4 (SB + OX) [YSmoothMidL yMid1 0 SmallArchDepthA SmallArchDepthB]
 		Arch.lhs 0
 		flat (RightSB - OX) [fallback _flatY1 yMid2]
 		curl (RightSB - OX) [fallback _flatY2 yMid3]
@@ -34,7 +35,7 @@ glyph-block Letter-Latin-Lower-Eth : begin
 		include : MarkSet.b
 		local yMockBarStart : yMid2 + Stroke * 0.3
 		local xTerminal : [mix SB RightSB 0.4] + [HSwToV HalfStroke]
-		local pStraightBarStart : 0.75 - (Stroke / Ascender)
+		local pStraightBarStart : 0.75 - Stroke / (Ascender - 0)
 		include : intersection [MaskBelow Ascender] : dispiro
 			ArcStartKnots
 			flat [mix Width xTerminal pStraightBarStart] [mix yMockBarStart CAP pStraightBarStart] [widths.lhs]
@@ -52,5 +53,10 @@ glyph-block Letter-Latin-Lower-Eth : begin
 
 	derive-composites 'eth' 0xF0 'dInsular' : dispiro
 		widths.center OverlayStroke
-		flat [mix SB RightSB 0.1]  [mix XH Ascender (-0.05)]
-		curl [mix SB RightSB 0.95] [mix XH Ascender 0.35]
+		flat [mix SB RightSB 0.10] [mix XH Ascender (-0.05)]
+		curl [mix SB RightSB 0.95] [mix XH Ascender (+0.35)]
+
+	derive-composites 'ethPalatalHook' 0x1DF2F 'eth' : PalatalHook.r
+		x -- [mix [Arch.adjust-x.bot Middle] (RightSB - OX) 0.75]
+		y -- 0
+		yAttach -- [mix O yMid2 : archv.yFromX 0.75]

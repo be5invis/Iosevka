@@ -15,20 +15,17 @@ glyph-block Letter-Latin-Lower-H : begin
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar nShoulder CyrDescender
 	glyph-block-import Letter-Shared-Shapes : TopHook PalatalHook EngHook RetroflexHook
 
-	define [SmallHSerifs tailed hookTop] : glyph-proc : begin
-		include : SmallHLeftSerifs tailed hookTop
+	define [SmallHTopLeftSerif tailed hookTop] : glyph-proc
+		if [not hookTop] : include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
+
+	define [SmallHSerifs tailed hookTop] : glyph-proc
+		include : SmallHTopLeftSerif tailed hookTop
+		include : tagged 'serifLB' : HSerif.mb (SB + [HSwToV HalfStroke]) 0 Jut
 		if [not tailed] : include : tagged 'serifRB' : HSerif.mb (RightSB - [HSwToV HalfStroke]) 0 Jut
 
-	define [SmallHLeftSerifs tailed hookTop] : glyph-proc : begin
-		include : SmallHTopLeftSerifs tailed hookTop
-		include : tagged 'serifLB' : HSerif.mb (SB + [HSwToV HalfStroke]) 0 Jut
-
 	define [SmallHMotionSerifs tailed hookTop] : glyph-proc
-		include : SmallHTopLeftSerifs tailed hookTop
+		include : SmallHTopLeftSerif tailed hookTop
 		if [not tailed] : include : tagged 'serifRB' : HSerif.rb RightSB 0 SideJut
-
-	define [SmallHTopLeftSerifs tailed hookTop] : glyph-proc
-		if [not hookTop] : include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
 
 	define [HBar.mOverlay fHasTopSerif] : glyph-proc
 		local barSpaceTop : Ascender - [if fHasTopSerif Stroke 0]
@@ -50,14 +47,16 @@ glyph-block Letter-Latin-Lower-H : begin
 			straight false
 			tailed   true
 		object # serifs
-			serifless      { no-shape            false }
-			serifed        { SmallHSerifs        true  }
-			motionSerifed  { SmallHMotionSerifs  true  }
-			topLeftSerifed { SmallHTopLeftSerifs true  }
+			serifless      { null               false }
+			serifed        { SmallHSerifs       true  }
+			motionSerifed  { SmallHMotionSerifs true  }
+			topLeftSerifed { SmallHTopLeftSerif true  }
 
-	foreach { suffix { fTailed {Serifs fHasTopSerif} } } [Object.entries HConfig] : do
+	foreach { suffix { fTailed { Serifs fHasTopSerif } } } [Object.entries HConfig] : do
 		create-glyph "h.\(suffix)" : glyph-proc
 			include : MarkSet.b
+			set-base-anchor 'overlay' Middle (XH / 2)
+			set-base-anchor 'strike'  Middle (XH / 2)
 			include : LeaningAnchor.Above.VBar.l SB
 			include : VBar.l SB 0 Ascender
 			include : nShoulder.shape
@@ -65,7 +64,7 @@ glyph-block Letter-Latin-Lower-H : begin
 				right -- RightSB
 				bottom -- [if fTailed (XH - SmallArchDepthB + O) 0]
 			if fTailed : include : RightwardTailedBar RightSB 0 (XH - SmallArchDepthB)
-			include : Serifs fTailed false
+			if Serifs : include : Serifs fTailed false
 
 		create-glyph "hStroke.\(suffix)" : glyph-proc
 			include [refer-glyph "h.\(suffix)"] AS_BASE ALSO_METRICS
@@ -73,6 +72,8 @@ glyph-block Letter-Latin-Lower-H : begin
 
 		create-glyph "hHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.b
+			set-base-anchor 'overlay' Middle (XH / 2)
+			set-base-anchor 'strike'  Middle (XH / 2)
 			include : LeaningAnchor.Above.VBar.l SB
 			include : TopHook.toRight.lBarInner SB 0 Ascender
 			include : nShoulder.shape
@@ -80,18 +81,20 @@ glyph-block Letter-Latin-Lower-H : begin
 				right -- RightSB
 				bottom -- [if fTailed (XH - SmallArchDepthB + O) 0]
 			if fTailed : include : RightwardTailedBar RightSB 0 (XH - SmallArchDepthB)
-			include : Serifs fTailed true
+			if Serifs : include : Serifs fTailed true
 
 		if [not fTailed] : begin
 			create-glyph "heng.\(suffix)" : glyph-proc
 				include : MarkSet.bp
+				set-base-anchor 'overlay' Middle (XH / 2)
+				set-base-anchor 'strike'  Middle (XH / 2)
 				include : LeaningAnchor.Above.VBar.l SB
 				include : VBar.l SB 0 Ascender
 				include : nShoulder.shape
 					left -- (SB + [HSwToV Stroke])
 					right -- RightSB
 					bottom -- 0
-				include : Serifs true false
+				if Serifs : include : Serifs true false
 				include : EngHook RightSB 0 Descender
 
 			create-glyph "hengStroke.\(suffix)" : glyph-proc
@@ -100,34 +103,36 @@ glyph-block Letter-Latin-Lower-H : begin
 
 			create-glyph "hengHookTop.\(suffix)" : glyph-proc
 				include : MarkSet.bp
+				set-base-anchor 'overlay' Middle (XH / 2)
+				set-base-anchor 'strike'  Middle (XH / 2)
 				include : LeaningAnchor.Above.VBar.l SB
 				include : TopHook.toRight.lBarInner SB 0 Ascender
 				include : nShoulder.shape
 					left -- (SB + [HSwToV Stroke])
 					right -- RightSB
 					bottom -- 0
-				include : Serifs true true
+				if Serifs : include : Serifs true true
 				include : EngHook RightSB 0 Descender
 
 	select-variant 'h' 'h'
-	link-reduced-variant 'h/descBase' 'h'
 	link-reduced-variant 'h/sansSerif' 'h' MathSansSerif
-
-	select-variant 'hStroke' 0x127 (follow -- 'h')
-
-	select-variant 'hHookTop' 0x266
-
-	select-variant 'heng' 0xA727
-	select-variant 'cyrl/dje' 0x452 (follow -- 'heng') (shapeFrom -- 'hengStroke')
+	select-variant 'hStroke'     0x127 (follow -- 'h')
+	select-variant 'hHookTop'    0x266
+	select-variant 'heng'        0xA727
+	select-variant 'cyrl/dje'    0x452 (follow -- 'heng') (shapeFrom -- 'hengStroke')
 	select-variant 'hengHookTop' 0x267
 
-	alias 'cyrl/shha' 0x4BB 'h'
-	alias 'cyrl/tshe' 0x45B 'hStroke'
-	alias 'cyrl/hwe'  0xA695 'hHookTop'
+	link-reduced-variant 'h/descBase' 'h'
+	derive-composites 'hDescender'   0x2C68 'h/descBase' [CyrDescender.rSideJut RightSB 0]
+	derive-composites 'hPalatalHook' 0xA795 'h/descBase' [PalatalHook.rSideJut  RightSB 0]
 
-	derive-composites 'hPalatalHook' 0xA795 'h/descBase' [PalatalHook.rSideJut RightSB 0]
-	derive-composites 'hDescender' 0x2C68 'h/descBase' [CyrDescender.rSideJut RightSB 0]
-	alias 'cyrl/shhaDescender' 0x527 'hDescender'
+	link-reduced-variant 'hStroke/descBase' 'hStroke' (follow -- 'h/descBase')
+	derive-composites 'hStrokePalatalHook' 0x1DF32 'hStroke/descBase' [PalatalHook.rSideJut  RightSB 0]
+
+	alias 'cyrl/tshe'          0x45B  'hStroke'
+	alias 'cyrl/shha'          0x4BB  'h'
+	alias 'cyrl/shhaDescender' 0x527  'hDescender'
+	alias 'cyrl/hwe'           0xA695 'hHookTop'
 
 	derive-multi-part-glyphs 'hDot' 0x1E23 { 'h' 'dotAbove' } : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs

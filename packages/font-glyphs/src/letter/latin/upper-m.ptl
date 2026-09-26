@@ -27,9 +27,9 @@ glyph-block Letter-Latin-Upper-M : begin
 
 	glyph-block-export MShape
 	define [MShape] : with-params [top df form slabType slanted [kMidHang df.adws] [middleYExt nothing]] : glyph-proc
-		local sidesSlope : if slanted 0.04 0
-		local xLeftTop  : df.leftSB  + top * sidesSlope
-		local xRightTop : df.rightSB - top * sidesSlope
+		local sidesSlope : if slanted 0.04 0.00
+		local xLeftTop  : df.leftSB  + (top - 0) * sidesSlope
+		local xRightTop : df.rightSB - (top - 0) * sidesSlope
 
 		local fHasBottomInnerSerif : match slabType
 			[Just SLAB-FULL]     true
@@ -37,30 +37,30 @@ glyph-block Letter-Latin-Upper-M : begin
 			__                   false
 
 		local swSideBot : match form
-			[Just FORM-SAN-SMALL] : df.adviceStroke 2.5
-			[Just FORM-SAN]       : df.adviceStroke 2.5
-			[Just FORM-TURN-W]    : df.adviceStroke 2.5
-			[Just FORM-HANGING]   : df.adviceStroke 2.5
+			[Just FORM-SAN-SMALL] : df.adviceStroke 2.50
+			[Just FORM-SAN]       : df.adviceStroke 2.50
+			[Just FORM-TURN-W]    : df.adviceStroke 2.50
+			[Just FORM-HANGING]   : df.adviceStroke 2.50
 			__                    : df.adviceStroke 2.75
 		local swSideTop : match form
-			[Just FORM-SAN-SMALL] : df.adviceStroke 3
-			[Just FORM-SAN]       : df.adviceStroke 3
-			[Just FORM-TURN-W]    : df.adviceStroke 3
-			__                    : df.adviceStroke 4
-		local swMiddle : df.adviceStroke 4.5
+			[Just FORM-SAN-SMALL] : df.adviceStroke 3.00
+			[Just FORM-SAN]       : df.adviceStroke 3.00
+			[Just FORM-TURN-W]    : df.adviceStroke 3.00
+			__                    : df.adviceStroke 4.00
+		local swMiddle : df.adviceStroke 4.50
 		local middleY : match form
-			[Just FORM-SAN-SMALL] : top * 0.55
-			[Just FORM-SAN]       : top * 0.55
-			[Just FORM-TURN-W]    : top * 0.45
-			[Just FORM-HANGING]   : top * 0.3 / (kMidHang * kMidHang)
+			[Just FORM-SAN-SMALL] : mix 0 top 0.55
+			[Just FORM-SAN]       : mix 0 top 0.55
+			[Just FORM-TURN-W]    : mix 0 top 0.45
+			[Just FORM-HANGING]   : mix 0 top : 0.30 / (kMidHang * kMidHang)
 			__                    : if fHasBottomInnerSerif swSideBot 0
 		local kMidShift : match form
 			[Just FORM-FLAT] 0.75
-			__               0.5
-		local kMidBotStrokeShrink : match form
-			[Just FORM-FLAT] : mix 1 df.adws (-0.5)
-			__               1
-		local swMiddleShrunk (kMidBotStrokeShrink * swMiddle)
+			__               0.50
+		local kMidBotStrokeShrink : mix df.adws 1 : match form
+			[Just FORM-FLAT] 1.50
+			__               1.00
+		local swMiddleShrink : kMidBotStrokeShrink * swMiddle
 
 		include : tagged 'strokeLeftBar' : dispiro
 			flat df.leftSB [if (form === FORM-SAN-SMALL) Descender 0] [widths.heading 0 swSideBot Upward]
@@ -72,20 +72,25 @@ glyph-block Letter-Latin-Upper-M : begin
 			straight.up.end xRightTop top [widths.heading swSideTop 0 Upward]
 		include : dispiro
 			flat (xLeftTop + kMidShift * [HSwToV swSideTop]) top [widths.lhs.heading swMiddle Downward]
-			curl (df.middle - [HSwToV : 0.5 * swMiddleShrunk]) middleY [widths.lhs.heading swMiddleShrunk Downward]
+			curl (df.middle - [HSwToV : 0.5 * swMiddleShrink]) middleY [widths.lhs.heading swMiddleShrink Downward]
 		include : dispiro
 			flat (xRightTop - kMidShift * [HSwToV swSideTop]) top [widths.rhs.heading swMiddle Downward]
-			curl (df.middle + [HSwToV : 0.5 * swMiddleShrunk]) middleY [widths.rhs.heading swMiddleShrunk Downward]
-		if (middleYExt !== nothing) : include : VBar.m df.middle middleYExt middleY swMiddleShrunk
+			curl (df.middle + [HSwToV : 0.5 * swMiddleShrink]) middleY [widths.rhs.heading swMiddleShrink Downward]
+		if (middleYExt !== nothing) : include : VBar.m df.middle middleYExt middleY swMiddleShrink
 
-		local sfT : SerifFrame top 0 xLeftTop  xRightTop  (swRef -- swSideBot) (hSplit -- 3) (fForceSymmetric -- (form !== FORM-FLAT))
-		local sfB : SerifFrame top 0 df.leftSB df.rightSB (swRef -- swSideBot) (hSplit -- 3) (fForceSymmetric -- (form !== FORM-FLAT))
+		local sfT : SerifFrame top 0 xLeftTop xRightTop
+			swRef  -- swSideBot
+			hSplit -- 3
+			fForceSymmetric -- (form !== FORM-FLAT)
+		local sfB : SerifFrame top 0 df.leftSB df.rightSB
+			swRef  -- swSideBot
+			hSplit -- 3
+			fForceSymmetric -- (form !== FORM-FLAT)
 		include : match slabType
 			[Just SLAB-NONE] : no-shape
 			[Just SLAB-FULL] : composite-proc sfT.lt.outer sfT.rt.outer sfB.lb.full sfB.rb.full
-			[Just SLAB-AUTO] : NeedSlab SLAB
-				composite-proc sfT.lt.outer sfT.rt.outer sfB.lb.full sfB.rb.full
-			[Just SLAB-MOTION] : composite-proc sfT.lt.outer
+			[Just SLAB-AUTO] : NeedSlab SLAB : composite-proc sfT.lt.outer sfT.rt.outer sfB.lb.full sfB.rb.full
+			[Just SLAB-MOTION] : begin sfT.lt.outer
 			[Just SLAB-SMALL-CYRILLIC] : composite-proc sfT.lt.outer
 				if para.isItalic [no-shape]   sfT.rt.outer
 				if para.isItalic sfB.lb.outer sfB.lb.full
@@ -193,12 +198,15 @@ glyph-block Letter-Latin-Upper-M : begin
 	CreateSelectorVariants 'cyrl/EmSoft' 0xA666 [Object.keys MConfig] (follow -- 'M')
 	CreateSelectorVariants 'cyrl/emSoft' 0xA667 [Object.keys MConfig] (follow -- 'cyrl/em')
 
-	derive-composites 'cyrl/EmTail' 0x4CD 'cyrl/Em' : do
+	derive-glyphs 'cyrl/EmTail' 0x4CD 'cyrl/Em' : lambda [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
 		local df : DivFrame para.advanceScaleM 3
-		CyrTailDescender.rSideJut df.rightSB 0 (sw -- df.mvs)
-	derive-composites 'cyrl/emTail' 0x4CE 'cyrl/em' : do
+		include : CyrTailDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
+
+	derive-glyphs 'cyrl/emTail' 0x4CE 'cyrl/em' : lambda [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
 		local df : DivFrame para.advanceScaleT 3
-		CyrTailDescender.rSideJut df.rightSB 0 (sw -- df.mvs)
+		include : CyrTailDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
 
 	alias 'grek/San' 0x3FA 'M.grekCapitalSan'
 	alias 'grek/san' 0x3FB 'smcpMWithDescender.grekSmallSan'
@@ -208,10 +216,10 @@ glyph-block Letter-Latin-Upper-M : begin
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	create-glyph 'mathbb/M' 0x1D544 : glyph-proc
 		local df : DivFrame 1 3
-		local bbs : AdviceStroke 8
-		local bbd : BBD * [Math.min (3 / 4) (bbs / BBS)]
+		local bbs : Math.min BBS : AdviceStroke 8
+		local bbd : BBD * [Math.min 0.75 (bbs / BBS)]
 		local kDiag : DiagCorDs CAP (df.rightSB - df.leftSB) bbd
-		local yTurnPos : CAP * 0.25
+		local yTurnPos : mix 0 CAP 0.25
 
 		include : MarkSet.capital
 		include : VBar.l df.leftSB 0 CAP bbs

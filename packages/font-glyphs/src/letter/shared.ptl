@@ -125,7 +125,8 @@ glyph-block Letter-Blackboard : begin
 
 glyph-block Letter-Shared-Metrics : begin
 	glyph-block-export BowlXDepth
-	define [BowlXDepth top bottom left right sw] : begin
+	define [BowlXDepth top bottom left right _sw] : begin
+		local sw : fallback _sw Stroke
 		local trShrink : Math.sqrt : (right - left) / (top - bottom)
 		return : Math.max
 			HSwToV : 1.25 * sw
@@ -167,7 +168,7 @@ glyph-block Letter-Shared-Shapes : begin
 			curl (x - [HSwToV sw]) (low + O + sw + hookTurn) [heading Downward]
 			arcvh
 			flat (x + hookTurn) (low + O) [heading Rightward]
-			curl (x + hookDepth + sw * TanSlope) (low + O)
+			curl (x + hookDepth + [Math.max 0 : sw * TanSlope]) (low + O)
 
 	glyph-block-export LeftwardTailedBar
 	define [LeftwardTailedBar] : with-params [x low high [sw Stroke]] : begin
@@ -183,7 +184,7 @@ glyph-block Letter-Shared-Shapes : begin
 			curl (x + [HSwToV sw]) (low + O + sw + hookTurn) [heading Downward]
 			arcvh
 			flat (x - hookTurn) (low + O) [heading Leftward]
-			curl (x - hookDepth - sw * TanSlope) (low + O)
+			curl (x - hookDepth + [Math.min 0 : sw * TanSlope]) (low + O)
 
 	glyph-block-export RightwardDiagTailedBar
 	define [RightwardDiagTailedBar] : with-params [x low high [sw Stroke]] : dispiro
@@ -803,8 +804,9 @@ glyph-block Letter-Shared-Shapes : begin
 				Arch.lhs cy (sw -- sw) (swBefore -- swBefore) (blendPost -- {}) (o -- o)
 				g2 sx (cy + DToothlessRise) [widths.lhs sw]
 
-	glyph-block-export ArcStartSerifWidth
+	glyph-block-export ArcStartSerifWidth ArcStartSerifStroke
 	define [ArcStartSerifWidth stroke] : clamp (stroke * 0.875) stroke VJutStroke
+	define ArcStartSerifStroke : ArcStartSerifWidth Stroke
 
 	glyph-block-export ArcStartSerifDepth
 	define [ArcStartSerifDepth hook] : hook - 0
@@ -1130,13 +1132,13 @@ glyph-block Letter-Shared-Shapes : begin
 
 			export : define [lSideJut] : with-params [x y [yOverflow 0] [refSw Stroke] [jut Jut] [sideJut (jut - [HSwToV : 0.5 * refSw])]] : begin
 				local sw : Sw refSw
-				local xLink : x + [HSwToV : 0.5 * refSw] - TanSlope * sw
+				local xLink : x + [HSwToV : 0.5 * refSw] - [Math.max 0 : TanSlope * sw]
 				local xPos  : x + [HSwToV : 0.5 * sw] - sideJut + sw * (SerifShiftX - TanSlope)
 				return : Impl xPos y xLink y yOverflow sw
 
 			export : define [rSideJut] : with-params [x y [yOverflow 0] [refSw Stroke] [jut Jut] [sideJut (jut - [HSwToV : 0.5 * refSw])]] : begin
 				local sw : Sw refSw
-				local xLink : x - [HSwToV : 0.5 * refSw]
+				local xLink : x - [HSwToV : 0.5 * refSw] - [Math.min 0 : TanSlope * sw]
 				local xPos  : x - [HSwToV : 0.5 * sw] + sideJut + sw * (SerifShiftX + TanSlope)
 				return : Impl xPos y xLink y yOverflow sw
 
@@ -1215,6 +1217,23 @@ glyph-block Letter-Shared-Shapes : begin
 					yDepth -- TailY
 					sw     -- sw
 					yExtension -- [Math.max 0 : yAttach + yOverflow - y + (fullDepth - TailY)]
+
+		# Half-circle hook
+		glyph-block-export HalfRingDescender
+		define [HalfRingDescender x y] : glyph-proc
+			local sw : Math.min
+				AdviceStroke 3
+				0.5 * (0 - Descender)
+			local r : (sw - Descender) / 2
+			include : ExtendBelowBaseAnchors (y + Descender)
+			include : lift-@ : dispiro
+				widths.lhs sw
+				g4.left.start x (@yT = y + sw) [heading Leftward]
+				archv
+				g4.down.mid (x - r) [mix @yT @yB 0.5] [heading Downward]
+				arcvh
+				flat x (@yB = y + sw - 2 * r) [heading Rightward]
+				curl (x + [HSwToV Stroke]) @yB
 
 		# Cyrillic "Middle Hook" Characters
 		glyph-block-export MidHook

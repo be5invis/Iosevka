@@ -10,8 +10,9 @@ glyph-block Letter-Latin-Upper-G : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors LeaningAnchor
 	glyph-block-import Letter-Shared : CreateTurnedLetter
-	glyph-block-import Letter-Shared-Shapes : SerifedArcStart InwardSlabArcStart TopHook
-	glyph-block-import Letter-Shared-Shapes : ArcStartSerif LetterBarOverlay
+	glyph-block-import Letter-Shared-Shapes : SerifedArcStart InwardSlabArcStart
+	glyph-block-import Letter-Shared-Shapes : ArcStartSerif ArcStartSerifStroke
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay TopHook PalatalHook
 
 	define BODY-TOOTHED            0
 	define BODY-TOOTHLESS-CORNER   1
@@ -37,12 +38,18 @@ glyph-block Letter-Latin-Upper-G : begin
 		local-parameter : adb      -- ArchDepthB
 		local-parameter : pyBar    -- GBarPos
 		local-parameter : fHookTop -- false
+		local-parameter : fHookBot -- false
 
 		local yBarTop : [mix 0 top pyBar] + HalfStroke
 		local hook : Math.min
 			Math.max AHook : Hook * (top / CAP)
 			mix Stroke (top - yBarTop) 0.554
 		local fine ShoulderFine
+		local coFine : match bodyType
+			[Just BODY-TOOTHED] : Math.max
+				AdviceStroke 5
+				Stroke - fine / 2
+			__ : begin ArcStartSerifStroke
 
 		local knots : match slabType
 			[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs RightSB top Stroke hook
@@ -84,7 +91,7 @@ glyph-block Letter-Latin-Upper-G : begin
 			match bodyType
 				[Just BODY-TOOTHED] : union
 					VBar.r RightSB ([Math.min ada : yBarTop - TINY] + O) yBarTop
-					VBar.r RightSB ([Math.min ada : yBarTop - TINY] + 0) rise [Math.max (Stroke - fine / 2) : AdviceStroke 5]
+					VBar.r RightSB ([Math.min ada : yBarTop - TINY] + 0) rise coFine
 				[Just BODY-TOOTHLESS-CORNER] : VBar.r RightSB rise yBarTop
 				__ : no-shape
 
@@ -92,6 +99,10 @@ glyph-block Letter-Latin-Upper-G : begin
 			include : TopHook.toRight.arcStart RightSB top hook
 			include : ExtendAboveBaseAnchors (top + (Ascender - XH))
 			include : LeaningAnchor.Above.VBar.r RightSB
+		if fHookBot : begin
+			include : PalatalHook.rExt RightSB 0
+				yAttach -- rise
+				sw      -- coFine
 
 	define GConfig : SuffixCfg.weave
 		object # body
@@ -121,6 +132,9 @@ glyph-block Letter-Latin-Upper-G : begin
 		create-glyph "smcpGHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : GShape XH bodyType crossbarType slabType rise (fHookTop -- true)
+		create-glyph "smcpGPalatalHook.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : GShape XH bodyType crossbarType slabType rise (fHookBot -- true)
 		create-glyph "GStroke.\(suffix)" : glyph-proc
 			include [refer-glyph "G.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.r.in
@@ -134,6 +148,7 @@ glyph-block Letter-Latin-Upper-G : begin
 	select-variant 'GHookTop' 0x193
 	select-variant 'smcpG' 0x262 (follow -- 'G')
 	select-variant 'smcpGHookTop' 0x29B (follow -- 'GHookTop')
+	select-variant 'smcpGPalatalHook' 0x1DF30 (follow -- 'G/descBase')
 	select-variant 'GStroke' 0x1E4 (follow -- 'G')
 
 	CreateTurnedLetter 'turnG/sansSerif' 0x2141 'G/sansSerif' HalfAdvance (CAP / 2)

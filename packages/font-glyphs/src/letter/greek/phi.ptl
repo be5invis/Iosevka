@@ -10,7 +10,7 @@ glyph-block Letter-Greek-Phi : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors ExtendBelowBaseAnchors
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
-	glyph-block-import Letter-Shared-Shapes : FlatHookDepth DiagTail OBarLeft OBarRight
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth DiagTail PalatalHook OBarLeft OBarRight
 	glyph-block-import Letter-Latin-Lower-T : yShortNeck1 yShortNeck2
 	glyph-block-import Letter-Latin-Upper-Thorn : ThornShapeImpl
 
@@ -27,7 +27,7 @@ glyph-block Letter-Greek-Phi : begin
 				HSwToV : clamp df.mvs Stroke : VSwToH : (r - l) - [HSwToV : 2.5 * df.mvs]
 		: else : begin
 			include : OShape y3 y2 df.leftSB df.rightSB df.mvs ada adb
-		return : object [swBar Stroke]
+		return : object [swBar : Math.min Stroke : df.adviceStroke 2]
 
 	define [CyrEfSplitRing df y2 y3 ada adb] : glyph-proc
 		include : VBar.m df.middle y2 y3 df.mvs
@@ -66,7 +66,7 @@ glyph-block Letter-Greek-Phi : begin
 			archv
 			flat (df.middle - [HSwToV : 0.5 * df.mvs]) [mix y2 y3 0.66]
 			curl (df.middle - [HSwToV : 0.5 * df.mvs]) (y2 + 0.2 * df.mvs) [heading Downward]
-		return : object [swBar Stroke]
+		return : object [swBar : Math.min Stroke : df.adviceStroke 2]
 
 	define [StraightBar df y1 y2 y3 y4 sw] : glyph-proc
 		include : VBar.m df.middle y1 (y2 + HalfStroke) sw
@@ -208,6 +208,30 @@ glyph-block Letter-Greek-Phi : begin
 		if SLAB : begin
 			include : tagged 'serifMT' : HSerif.mt df.middle Ascender  MidJutCenter
 			include : tagged 'serifMB' : HSerif.mb df.middle Descender MidJutCenter
+
+	create-glyph 'latn/phiPalatalHook' 0x1DF33 : glyph-proc
+		local adws : mix 1 para.advanceScaleM 2
+		local df : include : DivFrame adws 1
+		include : df.markSet.bp
+
+		local subDf : DivFrame (0.8 * adws) 3
+		local dim : include : [PhiRing false] subDf 0 XH subDf.smallArchDepthA subDf.smallArchDepthB
+		include : StraightBar subDf Descender 0 XH Ascender dim.swBar
+
+		local jut : [mix [HSwToV HalfStroke] MidJutCenter (0.6 * adws)] - [HSwToV : 0.5 * (Stroke - dim.swBar)]
+		if SLAB : begin
+			include : tagged 'serifMT' : HSerif.mt subDf.middle Ascender  jut
+			include : tagged 'serifMB' : HSerif.mb subDf.middle Descender jut
+
+		local tinyGap : Math.max (Width / 32) : AdviceStroke 24
+		local xMask : Math.max
+			subDf.middle + [HSwToV : 0.5 * dim.swBar] + 2 * tinyGap
+			subDf.middle + jut + tinyGap
+		include : PalatalHook.r df.rightSB 0
+			xLink   -- [mix [Arch.adjust-x.bot subDf.middle (sw -- subDf.mvs)] (subDf.rightSB - OX) 0.75]
+			yAttach -- [mix O [ArchDepthAClamped XH 0 subDf.smallArchDepthA subDf.smallArchDepthB] : archv.yFromX 0.75]
+			refSw   -- subDf.mvs
+			maskOut -- [intersection [MaskBelow 0] [MaskLeft xMask]]
 
 	define CyrlLowerEfConfig : SuffixCfg.weave
 		object # bowl

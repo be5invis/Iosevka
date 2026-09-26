@@ -8,21 +8,32 @@ glyph-module
 glyph-block Letter-Latin-Rams-Horn : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Shared-Shapes : SerifFrame PalatalHook
 
-	define [LatinGammaShape df top bottom] : glyph-proc
-		local fine : AdviceStroke 4
-		local d : fine + df.width * 0.05
+	define [LatinGammaShape df top bottom fMask] : glyph-proc
+		local fine : df.adviceStroke 4
+		local d : df.width * 0.05 + fine
+		local offset : if fMask 1 0
 
-		include : dispiro
-			widths.center
-			g4 (df.leftSB + [HSwToV HalfStroke] + O) top [heading Downward]
+		include : [if fMask spiro-outline dispiro] : list
+			[if fMask corner g4] (df.leftSB + O + offset + [HSwToV : 0.5 * df.mvs]) top [widths.center.heading df.mvs Downward]
 			quadControls 1 0.7 16
-			g4 (df.middle + d - fine / 2) (bottom + d * (1 - TanSlope * 0.5)) [widths.center fine]
-			Arch.rhs bottom (sw -- fine)
-			g4 (df.middle - d + fine / 2) (bottom + d * (1 + TanSlope * 0.5)) [widths.center fine]
+			g4 (df.middle + d - fine / 2 - offset) (bottom + d * (1 - TanSlope * 0.5)) [widths.center fine]
+			Arch.rhs (bottom + offset) (sw -- fine)
+			g4 (df.middle - d + fine / 2 + offset) (bottom + d * (1 + TanSlope * 0.5)) [widths.center fine]
 			quadControls 0 0.3 16
-			g4 (df.rightSB - [HSwToV HalfStroke] - O) top [widths.center.heading Stroke Upward]
+			[if fMask corner g4] (df.rightSB - O - offset - [HSwToV : 0.5 * df.mvs]) top [widths.center.heading df.mvs Upward]
+			if fMask { [close] } {}
+
+		return : object fine d
+
+	create-glyph 'latn/Gamma' 0x194 : glyph-proc
+		local df : include : DivFrame 1
+		include : df.markSet.capDesc
+		include : LatinGammaShape df CAP Descender
+		if SLAB : begin
+			local sf : SerifFrame.fromDf df CAP Descender
+			include : composite-proc sf.lt.full sf.rt.full
 
 	create-glyph 'latn/gamma' 0x263 : glyph-proc
 		local df : include : DivFrame 1
@@ -32,13 +43,21 @@ glyph-block Letter-Latin-Rams-Horn : begin
 			local sf : SerifFrame.fromDf df XH Descender
 			include : if para.isItalic sf.lt.outer : composite-proc sf.lt.full sf.rt.full
 
-	create-glyph 'latn/Gamma' 0x194 : glyph-proc
-		local df : include : DivFrame 1
-		include : df.markSet.capDesc
-		include : LatinGammaShape df CAP Descender
+	create-glyph 'latn/gammaPalatalHook' 0x1DF31 : glyph-proc
+		local df : include : DivFrame para.advanceScaleM 1
+		include : df.markSet.p
+		local subDf : DivFrame (0.75 * para.advanceScaleM) 2
+		local [object fine d] : include : LatinGammaShape subDf XH Descender
 		if SLAB : begin
-			local sf : SerifFrame.fromDf df CAP Descender
-			include : composite-proc sf.lt.full sf.rt.full
+			local sf : SerifFrame.fromDf subDf XH Descender
+			include : if para.isItalic sf.lt.outer : composite-proc sf.lt.full sf.rt.full
+		local tinyGap : Math.max (Width / 32) : AdviceStroke 24
+		include : difference
+			PalatalHook.r df.rightSB 0
+				xLink   -- subDf.middle
+				refSw   -- [mix subDf.mvs fine 0.5]
+				maskOut -- [intersection [MaskBelow 0] [MaskLeft : subDf.middle + d + tinyGap]]
+			LatinGammaShape subDf XH Descender true
 
 	define [RamsHornShape df top bottom fFill] : glyph-proc
 		local k1 0.625
@@ -86,15 +105,15 @@ glyph-block Letter-Latin-Rams-Horn : begin
 			include : VSerif.dl lExt (top - sw) (VJut * (sw / Stroke) - sw) swSlab
 			include : VSerif.dr rExt (top - sw) (VJut * (sw / Stroke) - sw) swSlab
 
-	create-glyph 'ramshorn' 0x264 : glyph-proc
-		local df : include : DivFrame [if SLAB para.advanceScaleT 1]
-		include : df.markSet.e
-		include : RamsHornShape df XH 0 false
-
 	create-glyph 'Ramshorn' 0xA7CB : glyph-proc
 		local df : include : DivFrame [if SLAB para.advanceScaleT 1]
 		include : df.markSet.capital
 		include : RamsHornShape df CAP 0 false
+
+	create-glyph 'ramshorn' 0x264 : glyph-proc
+		local df : include : DivFrame [if SLAB para.advanceScaleT 1]
+		include : df.markSet.e
+		include : RamsHornShape df XH 0 false
 
 	### Ayin
 	create-glyph 'latn/ayin' 0x1D25 : glyph-proc
