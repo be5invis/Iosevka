@@ -21,9 +21,9 @@ glyph-block Letter-Greek-Lower-Final-Sigma : begin
 
 	define TailBot : (-LongVJut) + QuarterStroke
 	define [TailBendX] : Math.max [HSwToV Stroke] (0.5 * Hook)
-	define [TailBendY] : Math.max Stroke (0.5 * Hook)
+	define [TailBendY] : Math.max         Stroke  (0.5 * Hook)
 
-	define [FinalSigmaEndingKnots] : list
+	define [CurlyTailKnots] : list
 		arcvh
 		g4 [Arch.adjust-x.bot Middle] 0
 		alsoThru 0.5 0.1353
@@ -64,7 +64,7 @@ glyph-block Letter-Greek-Lower-Final-Sigma : begin
 			HookStart XH
 			flatside.ld SB 0 XH SmallArchDepthA SmallArchDepthB
 			match tail
-				[Just TAIL-CURLY] : FinalSigmaEndingKnots
+				[Just TAIL-CURLY] : CurlyTailKnots
 				[Just TAIL-STRAIGHT] : StraightTailKnots Stroke RightSB [widths.rhs.heading Stroke Rightward]
 				[Just TAIL-DIAGONAL] : DiagonalTailKnots Stroke RightSB [widths.rhs.heading Stroke Rightward]
 				__ : Arc.hookEndR
@@ -73,28 +73,6 @@ glyph-block Letter-Greek-Lower-Final-Sigma : begin
 			[Just TAIL-STRAIGHT-SHARP-CORNER] : CyrDescender.r     RightSB 0 RightSB
 			[Just TAIL-DIAGONAL-SHARP-CORNER] : CyrTailDescender.r RightSB 0 RightSB
 			__ : begin [glyph-proc]
-
-	create-glyph "grek/sigmaFinal.curlyTail" : glyph-proc
-		include : MarkSet.p
-		include : FinalSigmaShape TAIL-CURLY
-
-	create-glyph "grek/sigmaFinal.straightTail" : glyph-proc
-		include : MarkSet.e
-		include : FinalSigmaShape TAIL-STRAIGHT
-
-	create-glyph "grek/sigmaFinal.diagonalTail" : glyph-proc
-		include : MarkSet.e
-		include : FinalSigmaShape TAIL-DIAGONAL
-
-	create-glyph "grek/sigmaFinal.straightTailSharpCorner" : glyph-proc
-		include : MarkSet.e
-		include : FinalSigmaShape TAIL-STRAIGHT-SHARP-CORNER
-
-	create-glyph "grek/sigmaFinal.diagonalTailSharpCorner" : glyph-proc
-		include : MarkSet.e
-		include : FinalSigmaShape TAIL-DIAGONAL-SHARP-CORNER
-
-	select-variant 'grek/sigmaFinal' 0x3C2
 
 	define [StigmaShape tail] : glyph-proc
 		define fine : AdviceStroke 3
@@ -108,7 +86,7 @@ glyph-block Letter-Greek-Lower-Final-Sigma : begin
 			archv 16
 			flatside.ld SB 0 XH SmallArchDepthA SmallArchDepthB
 			match tail
-				[Just TAIL-CURLY] : FinalSigmaEndingKnots
+				[Just TAIL-CURLY] : CurlyTailKnots
 				[Just TAIL-STRAIGHT] : StraightTailKnots Stroke RightSB [widths.rhs.heading Stroke Rightward]
 				[Just TAIL-DIAGONAL] : DiagonalTailKnots Stroke RightSB [widths.rhs.heading Stroke Rightward]
 				__ : Arc.hookEndR
@@ -118,27 +96,23 @@ glyph-block Letter-Greek-Lower-Final-Sigma : begin
 			[Just TAIL-DIAGONAL-SHARP-CORNER] : CyrTailDescender.r RightSB 0 RightSB
 			__ : begin [glyph-proc]
 
-	create-glyph "grek/stigma.curlyTail" : glyph-proc
-		include : MarkSet.p
-		include : StigmaShape TAIL-CURLY
+	define FinalSigmaConfig : object
+		curlyTail               { TAIL-CURLY                 'p' }
+		straightTail            { TAIL-STRAIGHT              'e' }
+		diagonalTail            { TAIL-DIAGONAL              'e' }
+		straightTailSharpCorner { TAIL-STRAIGHT-SHARP-CORNER 'e' }
+		diagonalTailSharpCorner { TAIL-DIAGONAL-SHARP-CORNER 'e' }
 
-	create-glyph "grek/stigma.straightTail" : glyph-proc
-		include : MarkSet.e
-		include : StigmaShape TAIL-STRAIGHT
+	foreach { suffix { tail mk } } [Object.entries FinalSigmaConfig] : do
+		create-glyph "grek/sigmaFinal.\(suffix)" : glyph-proc
+			include : MarkSet.(mk)
+			include : FinalSigmaShape tail
+		create-glyph "grek/stigma.\(suffix)" : glyph-proc
+			include : MarkSet.(mk)
+			include : StigmaShape tail
 
-	create-glyph "grek/stigma.diagonalTail" : glyph-proc
-		include : MarkSet.e
-		include : StigmaShape TAIL-DIAGONAL
-
-	create-glyph "grek/stigma.straightTailSharpCorner" : glyph-proc
-		include : MarkSet.e
-		include : StigmaShape TAIL-STRAIGHT-SHARP-CORNER
-
-	create-glyph "grek/stigma.diagonalTailSharpCorner" : glyph-proc
-		include : MarkSet.e
-		include : StigmaShape TAIL-DIAGONAL-SHARP-CORNER
-
-	select-variant 'grek/stigma' 0x3DB (follow -- 'grek/sigmaFinal')
+	select-variant 'grek/sigmaFinal' 0x3C2
+	select-variant 'grek/stigma'     0x3DB (follow -- 'grek/sigmaFinal')
 
 	create-glyph 'grek/Stigma' 0x3DA : glyph-proc
 		include : MarkSet.capital

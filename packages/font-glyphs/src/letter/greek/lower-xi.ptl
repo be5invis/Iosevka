@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from "@iosevka/util"
+import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
 import [Box] from "@iosevka/geometry/box"
 import [DesignParameters] from "../../meta/aesthetics.mjs"
 
@@ -26,7 +26,7 @@ glyph-block Letter-Greek-Lower-Xi : begin
 
 	define TailBot : (-LongVJut) + QuarterStroke
 	define [TailBendX] : Math.max [HSwToV Stroke] (0.5 * Hook)
-	define [TailBendY] : Math.max Stroke (0.5 * Hook)
+	define [TailBendY] : Math.max         Stroke  (0.5 * Hook)
 
 	define [StraightTailKnots yHoriz xDown wHoriz] : begin
 		local xTurn : xDown - [TailBendX]
@@ -118,20 +118,20 @@ glyph-block Letter-Greek-Lower-Xi : begin
 			[Just TAIL-DIAGONAL-SHARP-CORNER] : CyrTailDescender.r RightSB 0 RightSB
 			__ : begin [glyph-proc]
 
-	create-glyph : glyph-proc
-		include : MarkSet.bp
-		create-forked-glyph "grek/xi.flatTop" : LowerXiShape SHAPE-FLAT-TOP TAIL-CURLY
-		create-forked-glyph "grek/xi.rounded" : LowerXiShape SHAPE-ROUNDED  TAIL-CURLY
+	define LowerXiConfig : SuffixCfg.weave
+		object
+			flatTop                   SHAPE-FLAT-TOP
+			rounded                   SHAPE-ROUNDED
+		object
+			""                      { TAIL-CURLY                 'bp' }
+			straightTail            { TAIL-STRAIGHT              'b'  }
+			diagonalTail            { TAIL-DIAGONAL              'b'  }
+			straightTailSharpCorner { TAIL-STRAIGHT-SHARP-CORNER 'b'  }
+			diagonalTailSharpCorner { TAIL-DIAGONAL-SHARP-CORNER 'b'  }
 
-	create-glyph : glyph-proc
-		include : MarkSet.b
-		create-forked-glyph "grek/xi.roundedStraightTail" : LowerXiShape SHAPE-ROUNDED  TAIL-STRAIGHT
-		create-forked-glyph "grek/xi.flatTopStraightTail" : LowerXiShape SHAPE-FLAT-TOP TAIL-STRAIGHT
-		create-forked-glyph "grek/xi.roundedDiagonalTail" : LowerXiShape SHAPE-ROUNDED  TAIL-DIAGONAL
-		create-forked-glyph "grek/xi.flatTopDiagonalTail" : LowerXiShape SHAPE-FLAT-TOP TAIL-DIAGONAL
-		create-forked-glyph "grek/xi.roundedStraightTailSharpCorner" : LowerXiShape SHAPE-ROUNDED  TAIL-STRAIGHT-SHARP-CORNER
-		create-forked-glyph "grek/xi.flatTopStraightTailSharpCorner" : LowerXiShape SHAPE-FLAT-TOP TAIL-STRAIGHT-SHARP-CORNER
-		create-forked-glyph "grek/xi.roundedDiagonalTailSharpCorner" : LowerXiShape SHAPE-ROUNDED  TAIL-DIAGONAL-SHARP-CORNER
-		create-forked-glyph "grek/xi.flatTopDiagonalTailSharpCorner" : LowerXiShape SHAPE-FLAT-TOP TAIL-DIAGONAL-SHARP-CORNER
+	foreach { suffix { shape { tail mk } } } [Object.entries LowerXiConfig] : do
+		create-glyph "grek/xi.\(suffix)" : glyph-proc
+			include : MarkSet.(mk)
+			include : LowerXiShape shape tail
 
 	select-variant 'grek/xi' 0x3BE
