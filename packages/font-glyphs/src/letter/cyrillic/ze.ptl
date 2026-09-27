@@ -17,6 +17,7 @@ glyph-block Letter-Cyrillic-Ze : begin
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerif ArcEndSerif
 	glyph-block-import Letter-Shared-Shapes : RetroflexHook CyrDescender
 	glyph-block-import Letter-Shared-Shapes : UpwardHookShape RhoticHookShape
+	glyph-block-import Letter-Latin-S : AdviceSArchDepth SNeck
 
 	define SLAB-NONE       0
 	define SLAB-CLASSICAL  1
@@ -120,21 +121,21 @@ glyph-block Letter-Cyrillic-Ze : begin
 
 		export : define [LowerShape] : LowerShapeT dispiro
 
-		define [LowerShapeTailed] : begin
+		define [LowerShapeTailed ess] : begin
 			define [object stroke midx midy fine] : Dim
 			local middle : mix left right 0.5
+			local mockWidth : (right - left) + 2 * SB
+			local mockHeight : (midy + stroke / 2) - (bot + Descender)
+			local adb2 : AdviceSArchDepth mockHeight (+1) stroke
 			return : dispiro
-				flat ([Math.max middle : (left + 1.1 * ((bot + stroke) - [mix Descender (bot + stroke) 0.5])) + 1] + TanSlope * Stroke) Descender [widths.rhs stroke]
-				curl                    ((left + 1.1 * ((bot + stroke) - [mix Descender (bot + stroke) 0.5]))      + TanSlope * Stroke) Descender
+				flat midx   (midy - (stroke / 2 - fine)) [widths.heading 0 fine Rightward]
+				curl middle (midy - (stroke / 2 - fine)) [heading Rightward]
 				archv
-				g4.up.mid (left + [HSwToV : 0.5 * stroke]) [mix Descender (bot + stroke) 0.5] [widths.center.heading stroke Upward]
-				arcvh
-				g4   [Arch.adjust-x.bot middle] bot [widths.lhs stroke]
-				archv
-				g4   (right - xo * 2) [YSmoothMidR (midy + stroke / 2) bot ada adb]
-				arcvh
-				flat middle (midy - (stroke / 2 - fine)) [widths.heading fine 0 Leftward]
-				curl midx   (midy - (stroke / 2 - fine)) [heading Leftward]
+				g4   (right - xo * 2) ((midy + stroke / 2) - adb2) [widths.rhs stroke]
+				~~~ [SNeck [DivFrame (mockWidth / Width) 2] mockHeight stroke ess]
+				g4   (left  + xo) ((bot + Descender) + adb2) [widths.lhs stroke]
+				HookEnd (bot + Descender) (sw -- stroke) (o -- yo)
+				g4   (right - xo) ((bot + Descender) + hookBot)
 
 		export : define [Shape] : union
 			UpperShapeT dispiro
@@ -144,9 +145,13 @@ glyph-block Letter-Cyrillic-Ze : begin
 			UpperShapeT spiro-outline
 			LowerShapeT spiro-outline
 
-		export : define [KsiBaseShape] : union
+		export : define [CapitalKsiBaseShape] : union
 			UpperShapeT dispiro
-			LowerShapeTailed
+			LowerShapeTailed (stroke * EssRatioUpper)
+
+		export : define [SmallKsiBaseShape] : union
+			UpperShapeT dispiro
+			LowerShapeTailed (stroke * EssRatioLower)
 
 		export : define [AutoStartSerifL] : begin
 			define [object stroke] : Dim
@@ -491,7 +496,7 @@ glyph-block Letter-Cyrillic-Ze : begin
 					define [object midy] : ze.Dim
 					set-base-anchor 'overlay' Middle midy
 					set-base-anchor 'strike'  Middle midy
-					include : union [ze.KsiBaseShape] [ze.AutoStartSerifL]
+					include : union [ze.CapitalKsiBaseShape] [ze.AutoStartSerifL]
 
 				create-glyph "cyrl/ksi/base.\(suffix)" : glyph-proc
 					include : MarkSet.p
@@ -502,7 +507,7 @@ glyph-block Letter-Cyrillic-Ze : begin
 					define [object midy] : ze.Dim
 					set-base-anchor 'overlay' Middle midy
 					set-base-anchor 'strike'  Middle midy
-					include : union [ze.KsiBaseShape] [ze.AutoStartSerifL]
+					include : union [ze.SmallKsiBaseShape] [ze.AutoStartSerifL]
 
 	select-variant 'cyrl/Ze' 0x417
 	select-variant 'cyrl/ze' 0x437
