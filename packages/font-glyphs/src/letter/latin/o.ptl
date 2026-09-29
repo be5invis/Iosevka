@@ -299,29 +299,39 @@ glyph-block Letter-Latin-O : begin
 		y -- 0
 		yAttach -- [mix O SmallArchDepthB : archv.yFromX 0.75]
 
-	define [OCurlyTailShape top _ada _adb] : begin
+	define [OCurlyTailShape sign top _ada _adb] : begin
 		local ada : fallback _ada SmallArchDepthA
 		local adb : fallback _adb SmallArchDepthB
 		local sw   : AdviceStroke2 2 3 (XH - 0)
 		local fine : AdviceStroke2 3 3 (XH - 0)
 		local loopTop : mix fine XH 0.5
 		return : new-glyph : composite-proc
-			dispiro
-				widths.lhs fine
-				flat (RightSB - OX) [YSmoothMidR loopTop 0] [heading Upward]
-				curl (RightSB - OX) (top - [ArchDepthBClamped top 0 ada adb])
-				Arch.lhs top (sw -- sw) (swBefore -- fine)
-				flatside.ld SB 0 top ada adb
-				CurlyTail.n fine 0 (RightSB - OX) 0 0 (yLoopTop -- loopTop) (swBefore -- sw)
+			piecewise
+				(sign >= 0) : dispiro
+					widths.lhs fine
+					flat (RightSB - OX) [YSmoothMidR loopTop 0] [heading Upward]
+					curl (RightSB - OX) (top - [ArchDepthBClamped top 0 ada adb])
+					Arch.lhs top (sw -- sw) (swBefore -- fine)
+					flatside.ld SB 0 top ada adb
+					CurlyTail.n fine 0 (RightSB - OX) 0 0 (yLoopTop -- loopTop) (swBefore -- sw)
+				true : dispiro
+					widths.rhs fine
+					flat (SB + OX) [YSmoothMidL loopTop 0] [heading Upward]
+					curl (SB + OX) (top - [ArchDepthAClamped top 0 ada adb])
+					Arch.rhs top (sw -- sw) (swBefore -- fine)
+					flatside.rd RightSB 0 top ada adb
+					CurlyTail.n fine 0 (SB + OX) Width 0 (yLoopTop -- loopTop) (swBefore -- sw)
 			FlipAround Middle (top / 2)
 
-	create-glyph 'OCurlyTail' 0x1DF72 : glyph-proc
+	create-glyph : glyph-proc
 		include : MarkSet.capital
-		include : OCurlyTailShape CAP ArchDepthA ArchDepthB
+		create-forked-glyph 'OCurlyTail.upright' : OCurlyTailShape (+1) CAP ArchDepthA ArchDepthB
+		create-forked-glyph 'OCurlyTail.italic'  : OCurlyTailShape (-1) CAP ArchDepthA ArchDepthB
 
-	create-glyph 'oCurlyTail' 0x1DF73 : glyph-proc
+	create-glyph : glyph-proc
 		include : MarkSet.e
-		include : OCurlyTailShape XH nothing nothing
+		create-forked-glyph 'oCurlyTail.upright' : OCurlyTailShape (+1) XH nothing nothing
+		create-forked-glyph 'oCurlyTail.italic'  : OCurlyTailShape (-1) XH nothing nothing
 
 	create-glyph 'mathbb/O' 0x1D546 : glyph-proc
 		include : MarkSet.capital
