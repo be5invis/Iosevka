@@ -693,10 +693,11 @@ export class RemoveHolesGeometry extends GeometryBase {
 
 // This special geometry type is used in the finalization phase to create TTF contours.
 export class SimplifyGeometry extends GeometryBase {
-	constructor(geom, gizmo) {
+	constructor(geom, gizmo, fRemoveOverlap) {
 		super();
 		this.m_geom = geom;
 		this.m_gizmo = gizmo;
+		this.m_fRemoveOverlap = fRemoveOverlap;
 	}
 
 	// This will be cached by the caller, so we can afford to be a bit expensive here
@@ -714,18 +715,20 @@ export class SimplifyGeometry extends GeometryBase {
 	toBezArcs() {
 		let arcs = this.m_geom.toBezArcs();
 
-		const needsTransform = !Transform.isTranslate(this.m_gizmo);
-		if (needsTransform) CurveUtil.InPlaceTransformBez3Shape(this.m_gizmo.inverse(), arcs);
+		if (this.m_fRemoveOverlap) {
+			const needsTransform = !Transform.isTranslate(this.m_gizmo);
+			if (needsTransform) CurveUtil.InPlaceTransformBez3Shape(this.m_gizmo.inverse(), arcs);
 
-		if (this.m_geom.measureComplexity() & CPLX_NON_SIMPLE) {
-			arcs = TypoGeom.Boolean.removeOverlap(
-				arcs,
-				TypoGeom.Boolean.PolyFillType.NonZero,
-				CurveUtil.BOOLE_RESOLUTION,
-			);
+			if (this.m_geom.measureComplexity() & CPLX_NON_SIMPLE) {
+				arcs = TypoGeom.Boolean.removeOverlap(
+					arcs,
+					TypoGeom.Boolean.PolyFillType.NonZero,
+					CurveUtil.BOOLE_RESOLUTION,
+				);
+			}
+
+			if (needsTransform) CurveUtil.InPlaceTransformBez3Shape(this.m_gizmo, arcs);
 		}
-
-		if (needsTransform) CurveUtil.InPlaceTransformBez3Shape(this.m_gizmo, arcs);
 
 		return arcs;
 	}
@@ -737,7 +740,7 @@ export class SimplifyGeometry extends GeometryBase {
 		return this.m_geom.getDependencies();
 	}
 	filterTag(fn) {
-		return new SimplifyGeometry(this.m_geom.filterTag(fn), this.m_gizmo);
+		return new SimplifyGeometry(this.m_geom.filterTag(fn), this.m_gizmo, this.m_fRemoveOverlap);
 	}
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
@@ -747,6 +750,7 @@ export class SimplifyGeometry extends GeometryBase {
 		h.beginStruct("SimplifyGeometry");
 		h.embed(this.m_geom);
 		h.gizmo(this.m_gizmo);
+		h.bool(this.m_fRemoveOverlap);
 		h.endStruct();
 	}
 }
