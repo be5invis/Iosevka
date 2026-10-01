@@ -57,16 +57,17 @@ glyph-block Letter-Latin-Long-S : begin
 		LongSUpperHalf (-1) Middle top [mix top bottom 0.5] hookx hooky fine
 		LongSLowerHalf (-1) Middle [mix top bottom 0.5] bottom hookx hooky fine
 
-	define [IFishHookShape top bottom fSlab _kSerif] : glyph-proc
-		local balance   : IBalance2 : DivFrame 1
-		local coBalance : IBalance  : DivFrame 1
-		local m : Middle + balance
-		include : VBar.m m bottom (top - Hook)
-		include : VerticalHook.m m (top - Hook) ((-LongJut) + coBalance) ((-Hook) + HalfStroke)
+	define [IFishHookShape m0 fSlab _kSerif] : glyph-proc
+		local adws : currentGlyph.advanceWidth / Width
+		local balance   : IBalance2 [DivFrame adws]
+		local coBalance : IBalance  [DivFrame adws]
+		local m : m0 + balance
+		include : VBar.m m Descender (XH - Hook)
+		include : VerticalHook.m m (XH - Hook) ((-LongJut) + coBalance) ((-Hook) + HalfStroke)
 		if fSlab : begin
-			local serifLength : Math.max Jut : mix [HSwToV HalfStroke] MidJutCenter : fallback _kSerif 1
+			local serifLength : Math.max MidJutCenter : mix [HSwToV HalfStroke] LongJut : fallback _kSerif adws
 			local xSerifPos : m - coBalance
-			include : HSerif.mb xSerifPos bottom serifLength
+			include : HSerif.mb xSerifPos Descender serifLength
 
 	define [StandardSerifs m0 fSlab _kSerif] : glyph-proc
 		local m : m0 + [HSwToV HalfStroke]
@@ -260,9 +261,13 @@ glyph-block Letter-Latin-Long-S : begin
 	CreateAccentedComposition 'eshDblBar'          0x1DF0B 'esh'          'dblBarOver'
 	CreateAccentedComposition 'eshDblBarCurlyTail' 0x1DF0C 'eshCurlyTail' 'dblBarOver'
 
-	create-glyph 'iFishHook' 0x27F : glyph-proc
-		include : MarkSet.p
-		include : IFishHookShape XH Descender SLAB
+	create-glyph : glyph-proc
+		local df : include : DivFrame para.advanceScaleI
+		include : df.markSet.p
+		create-forked-glyph "iFishHook.serifless"   : IFishHookShape df.middle false
+		create-forked-glyph "iFishHook.baseSerifed" : IFishHookShape df.middle true
+
+	select-variant 'iFishHook' 0x27F
 
 	create-glyph 'iviby' 0x285 : glyph-proc
 		include : MarkSet.p
