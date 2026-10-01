@@ -1,7 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix fallback SuffixCfg] from "@iosevka/util"
-import [MathSansSerif] from "@iosevka/glyph/relation"
+import [MathSansSerif DependentSelector] from "@iosevka/glyph/relation"
 import [bitOr maskBits maskOffBits] from "@iosevka/util/mask-bit"
 
 glyph-module
@@ -10,9 +10,9 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
-	glyph-block-import Letter-Shared : CreateTurnedLetter
+	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph CreateTurnedLetter
 	glyph-block-import Letter-Latin-Upper-A : AShape ASerifs
-	glyph-block-import Letter-Latin-V : VShapeOutline VShape VHookRightShape
+	glyph-block-import Letter-Latin-V : VShapeOutline VShape VHookRightShape VHookLeftShape
 
 	define SLAB-NONE       0
 	define SLAB-TOP        1
@@ -20,15 +20,9 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 	define SLAB-RIGHT      4
 	define SLAB-SMALL-CYRL 8
 
-	define LambdaConfig : SuffixCfg.weave
-		object
-			straight     true
-			curly        false
-		object
-			serifless    SLAB-NONE
-			topSerifed   SLAB-TOP
-			baseSerifed  [bitOr SLAB-LEFT SLAB-RIGHT]
-			triSerifed   [bitOr SLAB-TOP SLAB-LEFT SLAB-RIGHT]
+	define [LambdaMask] : with-params [df fBarStraight top sw] : new-glyph : composite-proc
+		VShapeOutline df fBarStraight top sw
+		FlipAround df.middle (top / 2)
 
 	glyph-block-export LambdaShape
 	define [LambdaShape] : with-params [df fBarStraight slabKind top sw] : union
@@ -36,10 +30,6 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 			VShape df fBarStraight top sw
 			FlipAround df.middle (top / 2)
 		ASerifs df top sw slabKind
-
-	define [LambdaMask] : with-params [df fBarStraight top sw] : new-glyph : composite-proc
-		VShapeOutline df fBarStraight top sw
-		FlipAround df.middle (top / 2)
 
 	define flex-params [LambdaHookLeftShape] : begin
 		local-parameter : df
@@ -62,6 +52,37 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 				FlipAround df.middle (top / 2)
 			ASerifs df top sw [maskOffBits slabKind SLAB-LEFT]
 
+	define flex-params [LambdaHookRightShape] : begin
+		local-parameter : df
+		local-parameter : fBarStraight
+		local-parameter : slabKind
+		local-parameter : top
+		local-parameter : sw
+		local-parameter : hookWidthOuter -- (TailX / 3)
+		local-parameter : hookWidthInner -- (TailX / 3 - [HSwToV : 0.25 * sw])
+
+		return : union
+			new-glyph : composite-proc
+				VHookLeftShape
+					df             -- df
+					fBarStraight   -- fBarStraight
+					top            -- top
+					sw             -- sw
+					hookWidthOuter -- hookWidthOuter
+					hookWidthInner -- hookWidthInner
+				FlipAround df.middle (top / 2)
+			ASerifs df top sw [maskOffBits slabKind SLAB-RIGHT]
+
+	define LambdaConfig : SuffixCfg.weave
+		object
+			straight     true
+			curly        false
+		object
+			serifless    SLAB-NONE
+			topSerifed   SLAB-TOP
+			baseSerifed  [bitOr SLAB-LEFT SLAB-RIGHT]
+			triSerifed   [bitOr SLAB-TOP SLAB-LEFT SLAB-RIGHT]
+
 	foreach { suffix { fStraightBar slabKind } } [Object.entries LambdaConfig] : do
 		create-glyph "grek/Lambda.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -81,14 +102,23 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 				top          -- XH
 				sw           -- Stroke
 
-		create-glyph "cyrl/el.BGR.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : LambdaShape
+		DefineSelectorGlyph "cyrl/el.BGR" suffix [DivFrame 1] 'e'
+		create-glyph : glyph-proc
+			set-width 0
+			set-mark-anchor 'cvDecompose' 0 0
+			create-forked-glyph "cyrl/el.BGR.\(suffix).straight" : LambdaShape
 				df           -- [DivFrame 1]
 				fBarStraight -- fStraightBar
 				slabKind     -- [bitOr slabKind SLAB-SMALL-CYRL]
 				top          -- XH
 				sw           -- Stroke
+			create-forked-glyph "cyrl/el.BGR.\(suffix).tailed" : LambdaHookRightShape
+				df           -- [DivFrame 1]
+				fBarStraight -- fStraightBar
+				slabKind     -- [bitOr slabKind SLAB-SMALL-CYRL]
+				top          -- XH
+				sw           -- Stroke
+		select-variant "cyrl/el.BGR.\(suffix)" (follow -- 'cyrl/el')
 
 		create-glyph "cyrl/Yn.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
@@ -132,7 +162,7 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 	select-variant 'grek/smcpLambda' 0x1D27 (follow -- 'grek/Lambda')
 
 	alias 'cyrl/El.BGR' null 'grek/Lambda'
-	select-variant 'cyrl/el.BGR' (follow -- 'grek/Lambda')
+	CreateSelectorVariants 'cyrl/el.BGR' null [Object.keys LambdaConfig] (follow -- 'grek/Lambda')
 
 	select-variant 'cyrl/yn' 0xA65F (follow -- 'grek/Lambda')
 	select-variant 'cyrl/Yn' 0xA65E (follow -- 'grek/Lambda')
@@ -141,7 +171,8 @@ glyph-block Letter-Latin-Upper-Lambda-Delta : begin
 	glyph-block-export DeltaShape
 	define [DeltaShape] : with-params [df top bottom sw fBarStraight] : begin
 		local shapeHeight : Math.abs : top - bottom
-		return : with-transform [ApparentTranslate 0 bottom] : union
+		local shift : Math.min top bottom
+		return : with-transform [ApparentTranslate 0 shift] : union
 			LambdaShape
 				df           -- df
 				fBarStraight -- fBarStraight
