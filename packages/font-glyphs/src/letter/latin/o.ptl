@@ -12,7 +12,7 @@ glyph-block Letter-Latin-O : begin
 	glyph-block-import Mark-Above : RingDims RingShape
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors ExtendBelowBaseAnchors
 	glyph-block-import Letter-Shared : CreateAccentedComposition SetGrekUpperTonos
-	glyph-block-import Letter-Shared-Shapes : RetroflexHook CurlyTail
+	glyph-block-import Letter-Shared-Shapes : RetroflexHook FlatHookDepth
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	create-glyph 'O' 'O' : glyph-proc
@@ -299,39 +299,66 @@ glyph-block Letter-Latin-O : begin
 		y -- 0
 		yAttach -- [mix O SmallArchDepthB : archv.yFromX 0.75]
 
-	define [OCurlyTailShape sign top _ada _adb] : begin
-		local ada : fallback _ada SmallArchDepthA
-		local adb : fallback _adb SmallArchDepthB
-		local sw   : AdviceStroke2 2 3 (XH - 0)
-		local fine : AdviceStroke2 3 3 (XH - 0)
-		local loopTop : mix fine XH 0.5
-		return : new-glyph : composite-proc
-			piecewise
-				(sign >= 0) : dispiro
-					widths.lhs fine
-					flat (RightSB - OX) [YSmoothMidR loopTop 0] [heading Upward]
-					curl (RightSB - OX) (top - [ArchDepthBClamped top 0 ada adb])
-					Arch.lhs top (sw -- sw) (swBefore -- fine)
-					flatside.ld SB 0 top ada adb
-					CurlyTail.n fine 0 (RightSB - OX) 0 0 (yLoopTop -- loopTop) (swBefore -- sw)
-				true : dispiro
+	define [OFlourishShape sign df top _ada _adb] : begin
+		local ada : [fallback _ada SmallArchDepthA] * 0.75 * df.adws
+		local adb : [fallback _adb SmallArchDepthB] * 0.75 * df.adws
+		local stroke : df.adviceThinnerStroke2 2 3 (XH - 0) 0.75
+		local fine   : df.adviceThinnerStroke2 3 3 (XH - 0) 0.75
+
+		local gap : 0.375 * (df.rightSB - df.leftSB) - [HSwToV : 0.25 * stroke] + stroke / 16
+		local subDf : DivFrame [Math.min ((df.width - gap) / Width) (0.75 * df.adws)] 2
+
+		local hd : FlatHookDepth df
+		local yBarBottom : top - [mix XH 0 DesignParameters.eBarPos] - fine / 2
+		return : piecewise
+			(sign >= 0) : union
+				intersection [MaskRight subDf.rightSB] : dispiro
+					widths.lhs stroke
+					flat (df.rightSB + [HSwToV : 0.25 * stroke]) (yBarBottom + fine - Hook) [heading Upward]
+					curl (df.rightSB + [HSwToV : 0.25 * stroke]) (yBarBottom + fine - [Math.max Hook hd.y] + 0.25 * stroke) [heading Upward]
+					arcvh
+					flat [Math.max (df.rightSB - hd.x + [HSwToV : 0.5 * stroke]) subDf.rightSB] (yBarBottom + fine)
+					curl subDf.middle (yBarBottom + fine)
+				dispiro
 					widths.rhs fine
-					flat (SB + OX) [YSmoothMidL loopTop 0] [heading Upward]
-					curl (SB + OX) (top - [ArchDepthAClamped top 0 ada adb])
-					Arch.rhs top (sw -- sw) (swBefore -- fine)
-					flatside.rd RightSB 0 top ada adb
-					CurlyTail.n fine 0 (SB + OX) Width 0 (yLoopTop -- loopTop) (swBefore -- sw)
-			FlipAround Middle (top / 2)
+					flat subDf.rightSB yBarBottom [heading Leftward]
+					curl [Arch.adjust-x.bot subDf.middle (sw -- subDf.mvs)] yBarBottom
+					g4   (subDf.leftSB + OX) [YSmoothMidL top yBarBottom ada adb]
+					Arch.rhs top (sw -- stroke) (swBefore -- fine)
+					flatside.rd subDf.rightSB 0 top ada adb
+					Arch.rhs 0 (sw -- fine) (swBefore -- stroke)
+					flat (subDf.leftSB + OX) (0 + [ArchDepthBClamped top 0 ada adb])
+					curl (subDf.leftSB + OX) [YSmoothMidL top yBarBottom ada adb] [heading Upward]
+			true : let [shift : df.width - subDf.width] : union
+				intersection [MaskLeft : subDf.leftSB + shift] : dispiro
+					widths.rhs stroke
+					flat (df.leftSB - [HSwToV : 0.25 * stroke]) (yBarBottom + fine - Hook) [heading Upward]
+					curl (df.leftSB - [HSwToV : 0.25 * stroke]) (yBarBottom + fine - [Math.max Hook hd.y] + 0.25 * stroke) [heading Upward]
+					arcvh
+					flat [Math.min (df.leftSB + hd.x - [HSwToV : 0.5 * stroke]) (subDf.leftSB + shift)] (yBarBottom + fine)
+					curl (subDf.middle + shift) (yBarBottom + fine)
+				with-transform [Translate shift 0] : dispiro
+					widths.lhs fine
+					flat subDf.leftSB yBarBottom [heading Rightward]
+					curl [Arch.adjust-x.bot subDf.middle (sw -- subDf.mvs)] yBarBottom
+					g4   (subDf.rightSB - OX) [YSmoothMidR top yBarBottom ada adb]
+					Arch.lhs top (sw -- stroke) (swBefore -- fine)
+					flatside.ld subDf.leftSB 0 top ada adb
+					Arch.lhs 0 (sw -- fine) (swBefore -- stroke)
+					flat (subDf.rightSB - OX) (0 + [ArchDepthAClamped top 0 ada adb])
+					curl (subDf.rightSB - OX) [YSmoothMidR top yBarBottom ada adb] [heading Upward]
 
 	create-glyph : glyph-proc
-		include : MarkSet.capital
-		create-forked-glyph 'OCurlyTail.upright' : OCurlyTailShape (+1) CAP ArchDepthA ArchDepthB
-		create-forked-glyph 'OCurlyTail.italic'  : OCurlyTailShape (-1) CAP ArchDepthA ArchDepthB
+		local df : include : DivFrame para.advanceScaleM 3
+		include : df.markSet.capital
+		create-forked-glyph 'OFlourish.upright' : OFlourishShape (+1) df CAP ArchDepthA ArchDepthB
+		create-forked-glyph 'OFlourish.italic'  : OFlourishShape (-1) df CAP ArchDepthA ArchDepthB
 
 	create-glyph : glyph-proc
-		include : MarkSet.e
-		create-forked-glyph 'oCurlyTail.upright' : OCurlyTailShape (+1) XH nothing nothing
-		create-forked-glyph 'oCurlyTail.italic'  : OCurlyTailShape (-1) XH nothing nothing
+		local df : include : DivFrame para.advanceScaleM 3
+		include : df.markSet.e
+		create-forked-glyph 'oFlourish.upright' : OFlourishShape (+1) df XH nothing nothing
+		create-forked-glyph 'oFlourish.italic'  : OFlourishShape (-1) df XH nothing nothing
 
 	create-glyph 'mathbb/O' 0x1D546 : glyph-proc
 		include : MarkSet.capital
