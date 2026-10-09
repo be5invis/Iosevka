@@ -8,11 +8,11 @@ glyph-module
 glyph-block Letter-Latin-Lower-E : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
+	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 	glyph-block-import Letter-Shared : CreateSelectorVariants DefineSelectorGlyph CreateTurnedLetter
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth RetroflexHook RhoticHookShape
 	glyph-block-import Letter-Shared-Shapes : SerifedArcEnd InwardSlabArcEnd ArcEndSerif
-	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
-	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 	glyph-block-import Letter-Latin-C : CConfig
 
 	define [SmallEHook top stroke hook doSwash] : Math.min hook : if doSwash VERY-FAR
@@ -351,7 +351,7 @@ glyph-block Letter-Latin-Lower-E : begin
 		define rhoticDf : DivFrame para.advanceScaleM 1
 
 		DefineSelectorGlyph "schwaRhoticHook"    suffix rhoticDf 'e'
-		DefineSelectorGlyph "schwaRetroflexHook" suffix rhoticDf 'e'
+		DefineSelectorGlyph "schwaRetroflexHook" suffix rhoticDf 'p'
 
 		define abkCheDf : DivFrame para.advanceScaleM 3
 
@@ -396,7 +396,7 @@ glyph-block Letter-Latin-Lower-E : begin
 						turned -- true
 						styTop -- styTop
 						styBot -- styBot
-					include : RhoticHookShape (subDf.rightSB - [HSwToV : 1.25 * markFine]) rhoticDf.width [mix 0 XH DesignParameters.eBarPos] [mix 0 XH 0.2]
+					include : RhoticHookShape (subDf.rightSB - [HSwToV : 1.25 * markFine]) rhoticDf.width [mix XH 0 DesignParameters.eBarPos] [mix 0 XH 0.2]
 
 				create-glyph "schwaRetroflexHook.\(suffix).\(suffixSerif)" : glyph-proc
 					set-width 0
@@ -411,12 +411,12 @@ glyph-block Letter-Latin-Lower-E : begin
 						turned -- true
 						styTop -- styTop
 						styBot -- styBot
-					include : RetroflexHook.r
-						x       -- [mix RightSB rhoticDf.width 0.5]
+					include : let [fine : Math.min stroke : rhoticDf.adviceStroke 3] : RetroflexHook.r
+						x       -- [mix [Math.max RightSB : subDf.rightSB + [HSwToV : RetroflexHook.Sw fine]] rhoticDf.width 0.5]
 						y       -- 0
-						yAttach -- ([mix 0 XH DesignParameters.eBarPos] - HalfStroke)
+						yAttach -- ([mix XH 0 DesignParameters.eBarPos] - fine / 2)
 						xLink   -- (subDf.rightSB - [HSwToV : 0.5 * stroke])
-						refSw   -- [AdviceStroke 4]
+						refSw   -- fine
 
 			if (!styTop) : begin
 				create-glyph "cyrl/abk/Che.\(suffix).\(suffixSerif)" : glyph-proc
