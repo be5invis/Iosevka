@@ -39,13 +39,13 @@ glyph-block Letter-Latin-Lower-R : begin
 			[Just RMode.StandardSerifed]   { (4 / 3)           (2 / 3)  (3 / 4)  (2 / 3) }
 			[Just RMode.NarrowHook]        {  1                 1       (1 / 2)  (1 / 3) }
 			[Just RMode.NarrowHookSerifed] { (4 / 3)           (2 / 3)  (3 / 4)  (2 / 3) }
-			[Just RMode.Hookless]          { (2 * df.adws - 1)  0       0        (1 / 3) }
-			[Just RMode.HooklessSerifed]   { (2 * df.adws - 1)  0       0        (1 / 3) }
-			[Just RMode.CornerHook]        { (5 / 8)            0       0        (1 / 3) }
-			[Just RMode.CornerHookSerifed] { (4 / 3)            0       0        (2 / 3) }
+			[Just RMode.Hookless]          { (2 * df.adws - 1)  0        0       (1 / 3) }
+			[Just RMode.HooklessSerifed]   { (2 * df.adws - 1)  0        0       (1 / 3) }
+			[Just RMode.CornerHook]        { (5 / 8)            0        0       (1 / 3) }
+			[Just RMode.CornerHookSerifed] { (4 / 3)            0        0       (2 / 3) }
 			[Just RMode.Earless]           {  1                 1       (1 / 2)  (1 / 3) }
 			[Just RMode.EarlessSerifed]    { (4 / 3)            1       (1 / 2)  (2 / 3) }
-			[Just RMode.Half]              {  1                 1       (1 / 2)   0      }
+			[Just RMode.Half]              {  1                 0        0        0      }
 
 		export : local rBarLeftX : match mode
 			[Just RMode.Half] : mix df.leftSB (df.middle - [HSwToV : 0.5 * strokeBar] - [IBalance2 df]) rBalanceMultiplier
@@ -99,7 +99,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			__ : begin
 				0.65 + sign * 4 * TanSlope * strokeA / Width
 		local rMiddleIn : [mix (rBarLeftX + [HSwToV strokeBar]) (rHookRightXFull - [HSwToV : 1.05 * strokeA]) pMixIn] - sign * CorrectionOMidS
-		export : local rArchMiddleSkew : clamp 0 HVContrast ((rArchMiddleX - rMiddleIn) / stroke - sign * TanSlope)
+		export : local rSkew : clamp 0 HVContrast ((rArchMiddleX - rMiddleIn) / stroke - sign * TanSlope)
 		export : local rHookRightX : match mode
 			[Just RMode.Hookless]        : rArchMiddleX + TINY
 			[Just RMode.HooklessSerifed] : mix df.width rHookRightXFull df.adws
@@ -129,7 +129,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			set-base-anchor 'overlay' (rBarLeftX + [HSwToV : 0.5 * strokeBar]) [mix bottom top 0.5]
 			set-base-anchor 'hooktopAttach' (rBarLeftX + [HSwToV : 0.5 * strokeBar]) top
 			local xAtt : if doBottomSerif (rBottomLeftSerifX + rBottomSerifJutIn) (rBarLeftX + [HSwToV strokeBar])
-			local xPos : xAtt + [if doBottomSerif 0 : if para.isItalic SideJut : PalatalHook.adviceGap Stroke]
+			local xPos : xAtt + [if doBottomSerif 0 : PalatalHook.adviceGap Stroke]
 			set-base-anchor 'palatalHookAttach' xAtt bottom
 			set-base-anchor 'palatalHookPos'    xPos bottom
 			currentGlyph.copyBaseAnchorIfAbsent 'leaningAbove' 'above'
@@ -151,7 +151,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : LeaningAnchor.Above.Hook [if doTopSerif (rTopRightSerifX + rTopSerifJut) rBarRightX] rHookLeftX
 			set-base-anchor 'overlay' (rBarRightX - [HSwToV : 0.5 * strokeBar]) [mix bottom top 0.5]
 			local xAtt : if doBottomSerif (rBottomRightSerifX + rBottomSerifJutOut) rBarRightX
-			local xPos : xAtt + [if doBottomSerif 0 : if para.isItalic SideJut : PalatalHook.adviceGap Stroke]
+			local xPos : xAtt + [if doBottomSerif 0 : PalatalHook.adviceGap Stroke]
 			set-base-anchor 'palatalHookAttach' xAtt bottom
 			set-base-anchor 'palatalHookPos'    xPos bottom
 			currentGlyph.copyBaseAnchorIfAbsent 'leaningAbove' 'above'
@@ -168,12 +168,12 @@ glyph-block Letter-Latin-Lower-R : begin
 
 	define SmallRShape : namespace
 		export : define [Standard df md top bottom doTopSerif doBottomSerif] : glyph-proc
-			define [object rBarLeftX rBottomLeftSerif rTopLeftSerif rArchMiddleX rArchMiddleSkew rHookRightX rHookDepthY rCorX rArchDepthA] : RDim (+1) df md
+			define [object rBarLeftX rBottomLeftSerif rTopLeftSerif rArchMiddleX rSkew rHookRightX rHookDepthY rCorX rArchDepthA] : RDim (+1) df md
 			include : dispiro
 				widths.lhs
 				g4.up.start rHookRightX (top - rHookDepthY) [heading Upward]
 				arcvh 32 DesignParameters.rHookSuperness
-				g4.left.mid (rArchMiddleX - rCorX) (top - O) [widths.lhs.heading Stroke {.x (-rArchMiddleSkew) .y (-1)}]
+				g4.left.mid (rArchMiddleX - rCorX) (top - O) [widths.lhs.heading Stroke {.x (-rSkew) .y (-1)}]
 				archv 32
 				straight.down.end (rBarLeftX + [HSwToV : Stroke - ShoulderFine]) [Math.max (bottom + TINY) (top - rArchDepthA)] [widths.lhs.heading ShoulderFine Downward]
 			include : tagged 'strokeL' : VBar.l rBarLeftX bottom top
@@ -242,12 +242,12 @@ glyph-block Letter-Latin-Lower-R : begin
 
 	define SmallRevRShape : namespace
 		export : define [Standard df md top bottom doTopSerif doBottomSerif] : glyph-proc
-			define [object rBarRightX rBottomRightSerif rTopRightSerif rArchCoMiddleX rArchMiddleSkew rHookLeftX rHookDepthY rCorX rArchDepthB] : RDim (-1) df md
+			define [object rBarRightX rBottomRightSerif rTopRightSerif rArchCoMiddleX rSkew rHookLeftX rHookDepthY rCorX rArchDepthB] : RDim (-1) df md
 			include : dispiro
 				widths.rhs
 				g4.up.start rHookLeftX (top - rHookDepthY) [heading Upward]
 				arcvh 32 DesignParameters.rHookSuperness
-				g4.right.mid (rArchCoMiddleX - rCorX) (top - O) [widths.rhs.heading Stroke {.x (-rArchMiddleSkew) .y (+1)}]
+				g4.right.mid (rArchCoMiddleX - rCorX) (top - O) [widths.rhs.heading Stroke {.x (-rSkew) .y (+1)}]
 				archv 32
 				straight.down.end (rBarRightX - [HSwToV : Stroke - ShoulderFine]) [Math.max (bottom + TINY) (top - rArchDepthB)] [widths.rhs.heading ShoulderFine Downward]
 			include : tagged 'strokeR' : VBar.r rBarRightX bottom top
@@ -674,12 +674,12 @@ glyph-block Letter-Latin-Lower-R : begin
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	define [BBRShape df md] : glyph-proc
-		define [object rBarLeftX rArchMiddleX rArchMiddleSkew rHookRightX rHookDepthY rCorX rArchDepthA] : RDim (+1) df md BBS [VSwToH BBD] ShoulderFine
+		define [object rBarLeftX rArchMiddleX rSkew rHookRightX rHookDepthY rCorX rArchDepthA] : RDim (+1) df md BBS [VSwToH BBD] ShoulderFine
 		include : dispiro
 			widths.lhs BBS
 			g4.up.start rHookRightX (XH - rHookDepthY) [heading Upward]
 			arcvh nothing DesignParameters.rHookSuperness
-			g4.left.mid (rArchMiddleX - rCorX) (XH - O) [widths.lhs.heading BBS {.x (-rArchMiddleSkew) .y (-1)}]
+			g4.left.mid (rArchMiddleX - rCorX) (XH - O) [widths.lhs.heading BBS {.x (-rSkew) .y (-1)}]
 			archv
 			straight.down.end (rBarLeftX + BBD - [HSwToV ShoulderFine]) [Math.max (0 + TINY) (XH - rArchDepthA)] [widths.lhs.heading ShoulderFine Downward]
 		include : BBBarRight (rBarLeftX + BBD) 0 XH
