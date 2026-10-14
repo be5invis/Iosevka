@@ -181,6 +181,19 @@ glyph-block Letter-Latin-V : begin
 		local sf : SerifFrame top 0 ([mix 0 df.leftSB sbScale] - sbOffset) ([mix df.width df.rightSB sbScale] + sbOffset) (swRef -- swRef) (swSerif -- sw)
 		return : composite-proc sf.lt.outer
 
+	define [VDiagonalStrokeShape] : with-params [df fBarStraight top [swRef Stroke]] : begin
+		local sbScale  : if fBarStraight VStraightSbShrink 1
+		local sbOffset : if fBarStraight VStraightSbOffset 0
+		local cornerHW : VCornerHalfWidth * (swRef / Stroke)
+		local fine     : [AdviceStroke 6] * (swRef / Stroke)
+		local vxStartL : [mix 0        df.leftSB  sbScale] - sbOffset
+		local vxStartR : [mix df.width df.rightSB sbScale] + sbOffset
+		local vxEndL   : df.middle - cornerHW
+		local vxEndR   : df.middle + cornerHW
+		local dgCor    : DiagCor (top - 0) (vxStartR - vxEndR)
+		return : with-transform [Translate (vxStartL - vxEndR + [HSwToV : fine * dgCor]) 0]
+			ExtLineCenter vxEndR 0 vxStartR top fine 0.1
+
 	define VStandardConfig : SuffixCfg.weave
 		object # straight bar
 			straight              true
@@ -208,6 +221,14 @@ glyph-block Letter-Latin-V : begin
 				xLink -- Middle
 				x     -- (Middle + [HSwToV HalfStroke] + [PalatalHook.adviceGap Stroke])
 				y     -- 0
+
+		create-glyph "VDiagStroke.\(suffix)" : glyph-proc
+			include [refer-glyph "V.\(suffix)"] AS_BASE ALSO_METRICS
+			include : VDiagonalStrokeShape [DivFrame 1] fStraightBar CAP
+
+		create-glyph "vDiagStroke.\(suffix)" : glyph-proc
+			include [refer-glyph "v.\(suffix)"] AS_BASE ALSO_METRICS
+			include : VDiagonalStrokeShape [DivFrame 1] fStraightBar XH
 
 		create-glyph "VHookRight.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -300,6 +321,8 @@ glyph-block Letter-Latin-V : begin
 				y       -- 0
 				yAttach -- attach.y
 
+		derive-composites "vDiagStroke.\(suffix)" null "v.\(suffix)" 'shortSlash'
+
 	select-variant 'V' 'V'
 	link-reduced-variant 'V/sansSerif' 'V' MathSansSerif
 	select-variant 'smcpV' 0x1D20 (shapeFrom -- 'v') (follow -- 'V')
@@ -307,10 +330,13 @@ glyph-block Letter-Latin-V : begin
 	select-variant 'v' 'v'
 	link-reduced-variant 'v/sansSerif' 'v' MathSansSerif
 
-	select-variant "vPalatalHook" 0x1D8C (follow -- 'v')
+	select-variant 'vPalatalHook' 0x1D8C (follow -- 'v')
 
 	select-variant 'vHookRight' 0x2C71
 	select-variant 'vLoop'      0x2C74
+
+	select-variant 'VDiagStroke' 0xA75E (follow -- 'V')
+	select-variant 'vDiagStroke' 0xA75F (follow -- 'v')
 
 	select-variant 'cyrl/Izhitsa' 0x474 (shapeFrom -- 'VHookRight')
 	select-variant 'cyrl/izhitsa' 0x475 (shapeFrom -- 'vHookRight')
