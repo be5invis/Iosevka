@@ -150,6 +150,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : LeaningAnchor.Below.VBar.r rBarRightX strokeBar
 			include : LeaningAnchor.Above.Hook [if doTopSerif (rTopRightSerifX + rTopSerifJut) rBarRightX] rHookLeftX
 			set-base-anchor 'overlay' (rBarRightX - [HSwToV : 0.5 * strokeBar]) [mix bottom top 0.5]
+			set-base-anchor 'hooktopAttach' (rBarRightX - [HSwToV : 0.5 * strokeBar]) top
 			local xAtt : if doBottomSerif (rBottomRightSerifX + rBottomSerifJutOut) rBarRightX
 			local xPos : xAtt + [if doBottomSerif 0 : PalatalHook.adviceGap Stroke]
 			set-base-anchor 'palatalHookAttach' xAtt bottom
@@ -240,6 +241,29 @@ glyph-block Letter-Latin-Lower-R : begin
 				curl rBarLeftX bottom [heading Downward]
 			if doBottomSerif : include : rBottomLeftSerif bottom
 
+		define [HooklessFlapImpl doHookSerif] : function [df md top bottom doTopSerif doBottomSerif] : glyph-proc
+			define [object rBarLeftX rBottomLeftSerif rArchMiddleX rHookRightX rCorX rArchTopShiftY rArchDepthA] : RDim (+1) df md
+			define [ArcKnots] : list
+				flat (rHookRightX  - rCorX) (top - rArchTopShiftY) [if doHookSerif [heading Leftward] null]
+				curl (rArchMiddleX - rCorX) (top - rArchTopShiftY) [if doHookSerif [heading Leftward] null]
+				archv
+				flat rBarLeftX [Math.max (bottom + TINY + [HSwToV : Math.abs : TanSlope * Stroke]) (top - rArchDepthA)] [widths.lhs]
+				curl rBarLeftX bottom [heading Downward]
+			include : dispiro
+				widths.lhs (Stroke - rArchTopShiftY)
+				ArcKnots
+			if doHookSerif : include : intersection
+				VSerif.dr (rHookRightX - rCorX) top VJut
+				spiro-outline
+					ArcKnots
+					corner (rBarLeftX + TINY) bottom
+					corner VERY-FAR bottom
+					corner VERY-FAR top
+			if doBottomSerif : include : rBottomLeftSerif bottom
+
+		export : define [HooklessFlap   df md top bottom ts bs] : [HooklessFlapImpl false] df md top bottom ts bs
+		export : define [CornerHookFlap df md top bottom ts bs] : [HooklessFlapImpl true]  df md top bottom ts bs
+
 	define SmallRevRShape : namespace
 		export : define [Standard df md top bottom doTopSerif doBottomSerif] : glyph-proc
 			define [object rBarRightX rBottomRightSerif rTopRightSerif rArchCoMiddleX rSkew rHookLeftX rHookDepthY rCorX rArchDepthB] : RDim (-1) df md
@@ -314,6 +338,29 @@ glyph-block Letter-Latin-Lower-R : begin
 				curl rBarRightX bottom [heading Downward]
 			if doBottomSerif : include : rBottomRightSerif bottom
 
+		define [HooklessFlapImpl doHookSerif] : function [df md top bottom doTopSerif doBottomSerif] : glyph-proc
+			define [object rBarRightX rBottomRightSerif rArchCoMiddleX rHookLeftX rCorX rArchTopShiftY rArchDepthB] : RDim (-1) df md
+			define [ArcKnots] : list
+				flat (rHookLeftX     - rCorX) (top - rArchTopShiftY) [if doHookSerif [heading Rightward] null]
+				curl (rArchCoMiddleX - rCorX) (top - rArchTopShiftY) [if doHookSerif [heading Rightward] null]
+				archv
+				flat rBarRightX [Math.max (bottom + TINY + [HSwToV : Math.abs : TanSlope * Stroke]) (top - rArchDepthB)] [widths.rhs]
+				curl rBarRightX bottom [heading Downward]
+			include : dispiro
+				widths.rhs (Stroke - rArchTopShiftY)
+				ArcKnots
+			if doHookSerif : include : intersection
+				VSerif.dl (rHookLeftX - rCorX) top VJut
+				spiro-outline
+					ArcKnots
+					corner (rBarRightX - TINY) bottom
+					corner (-VERY-FAR) bottom
+					corner (-VERY-FAR) top
+			if doBottomSerif : include : rBottomRightSerif bottom
+
+		export : define [HooklessFlap   df md top bottom ts bs] : [HooklessFlapImpl false] df md top bottom ts bs
+		export : define [CornerHookFlap df md top bottom ts bs] : [HooklessFlapImpl true]  df md top bottom ts bs
+
 	define SmallRConfig : SuffixCfg.weave
 		object # Body
 			""               { SmallRShape.Standard         dfN RMode.Standard   RMode.StandardSerifed   }
@@ -325,6 +372,11 @@ glyph-block Letter-Latin-Lower-R : begin
 			cornerHooked     { SmallRShape.CornerHook       dfN RMode.CornerHook RMode.CornerHookSerifed }
 			compact          { SmallRShape.Hookless         dfF RMode.Hookless   RMode.HooklessSerifed   }
 			narrowHook       { SmallRShape.Standard         dfF RMode.NarrowHook RMode.NarrowHookSerifed }
+			# `rFlap` variants
+			earlessRoundedHookless     { SmallRShape.HooklessFlap   dfN RMode.Hookless   RMode.HooklessSerifed   }
+			earlessRoundedCornerHooked { SmallRShape.CornerHookFlap dfN RMode.CornerHook RMode.CornerHookSerifed }
+			earlessRoundedCompact      { SmallRShape.HooklessFlap   dfF RMode.Hookless   RMode.HooklessSerifed   }
+			earlessRoundedNarrowHook   { SmallRShape.EarlessRounded dfF RMode.NarrowHook RMode.NarrowHookSerifed }
 		object # Serifs
 			serifless        { false false }
 			topSerifed       { true  false }
@@ -481,6 +533,7 @@ glyph-block Letter-Latin-Lower-R : begin
 	select-variant 'turnrRTail'   0x27B (follow -- 'r/hookTopBase')
 	select-variant 'rLongLeg'     0x27C (follow -- 'r')
 	select-variant 'rRTail'       0x27D (follow -- 'r/rTailBase')
+	select-variant 'rFlap'        0x27E (shapeFrom -- 'r')
 
 	select-variant 'rPalatalHook' 0x1D89 (follow -- 'r')
 	select-variant 'turnrHookTop' 0x2C79 (follow -- 'r/rTailBase')
@@ -488,6 +541,7 @@ glyph-block Letter-Latin-Lower-R : begin
 
 	select-variant 'turnrLongLegRTail' 0x1DF08 (follow -- 'r/hookTopBase')
 	select-variant 'turnrPalatalHook'  0x1DF15 (follow -- 'r/ascBase')
+	select-variant 'rFlapPalatalHook'  0x1DF16 (follow -- 'rFlap') (shapeFrom -- 'rPalatalHook')
 	select-variant 'rRTailPalatalHook' 0x1DF37 (follow -- 'r/rTailBase')
 
 	select-variant 'SInsular' 0xA784 (follow -- 'r/rTailBase') (shapeFrom -- 'rCapLongLeg')
@@ -612,15 +666,7 @@ glyph-block Letter-Latin-Lower-R : begin
 
 			include : Body df RMode.Half XH 0 doTS doBS
 
-		create-glyph "rHalfPalatalHook.\(suffix)" : glyph-proc
-			include [refer-glyph "rHalf.\(suffix)"] AS_BASE ALSO_METRICS
-			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookAttach
-			local pos : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookPos
-			include : PalatalHook.r (x -- pos.x) (y -- pos.y) (xLink -- attach.x)
-
 	select-variant 'rHalf' 0xAB47
-	select-variant 'rFlap' 0x27E (shapeFrom -- 'rHalf')
-	select-variant 'rFlapPalatalHook' 0x1DF16 (shapeFrom -- 'rHalfPalatalHook') (follow -- 'rFlap')
 
 	define DotlessIPigtailUprightConfig : object
 		serifless          { false false 0.0 }
