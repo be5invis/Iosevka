@@ -313,6 +313,11 @@ glyph-block Common-Derivatives : begin
 		alias name unicode (name + '.slanted')
 		alias name unicode (name + '.upright')
 
+	glyph-block-export orthographic-slab
+	define [orthographic-slab level name unicode] : if level
+		alias name unicode (name + '.slab')
+		alias name unicode (name + '.sans')
+
 	### Various derivations for common operators, like turning or combining
 
 	glyph-block-export turned
@@ -325,12 +330,12 @@ glyph-block Common-Derivatives : begin
 				define y : if (_y <@ Function) [_y.call currentGlyph] _y
 				if mark : include mark
 
-				# This is [FlipAround], but we cannot use it because common-shapes depends on this
-				# glyph block
+				# This is `[FlipAround ...]`, but we cannot use it because `common-shapes`
+				# depends on this glyph block
 				include [currentGlyph.gizmo.inverse]
 				include : Translate (-x) (-y)
 				include : Scale (-1) (-1)
-				include : Translate x y
+				include : Translate (+x) (+y)
 				include currentGlyph.gizmo
 
 	glyph-block-export HCombine
@@ -338,9 +343,9 @@ glyph-block Common-Derivatives : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		create-glyph newid unicode : glyph-proc
 			include [refer-glyph id1] AS_BASE ALSO_METRICS
-			include : Translate (-spacing) 0
+			include : Translate (spacing * (-1.0)) 0
 			include [refer-glyph id2]
-			include : Translate (spacing / 2) 0
+			include : Translate (spacing * (+0.5)) 0
 
 	glyph-block-export HDual
 	define [HDual newid unicode id spacing] : begin
@@ -352,9 +357,9 @@ glyph-block Common-Derivatives : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		create-glyph newid unicode : glyph-proc
 			include [refer-glyph id2] AS_BASE ALSO_METRICS
-			include : Translate (-spacing * TanSlope) (-spacing)
+			include : Translate (spacing * (-1.0) * TanSlope) (spacing * (-1.0))
 			include [refer-glyph id1]
-			include : Translate (spacing * TanSlope / 2) (spacing / 2)
+			include : Translate (spacing * (+0.5) * TanSlope) (spacing * (+0.5))
 
 	glyph-block-export VDual
 	define [VDual newid unicode id spacing] : begin
