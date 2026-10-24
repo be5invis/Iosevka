@@ -28,7 +28,7 @@ export async function buildCompatLigatures(para, font) {
 		const feat = new hb.Feature(entry.featureTag);
 		hb.shape(hbFont, buffer, [feat]);
 		const shapingResults = buffer.getGlyphInfosAndPositions();
-		console.log(shapingResults);
+		// console.log(shapingResults);
 
 		// Create the ligature glyph
 		const ligature = new Ot.Glyph();

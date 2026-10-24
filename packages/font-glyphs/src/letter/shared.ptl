@@ -804,9 +804,8 @@ glyph-block Letter-Shared-Shapes : begin
 				Arch.lhs cy (sw -- sw) (swBefore -- swBefore) (blendPost -- {}) (o -- o)
 				g2 sx (cy + DToothlessRise) [widths.lhs sw]
 
-	glyph-block-export ArcStartSerifWidth ArcStartSerifStroke
+	glyph-block-export ArcStartSerifWidth
 	define [ArcStartSerifWidth stroke] : clamp (stroke * 0.875) stroke VJutStroke
-	define ArcStartSerifStroke : ArcStartSerifWidth Stroke
 
 	glyph-block-export ArcStartSerifDepth
 	define [ArcStartSerifDepth hook] : hook - 0
@@ -1103,11 +1102,12 @@ glyph-block Letter-Shared-Shapes : begin
 				yExtension -- yExtension
 
 	do "Descender shapes"
-		define [xLinkStroke xLink x yAttach sw]
-			if (xLink == nothing) [no-shape] : HBar.b
+		define [xLinkStroke xLink x yAttach sw refSw] : begin
+			return : if (xLink == nothing) [no-shape] : HBar.b
 				Math.min xLink : x - [HSwToV : 0.5 * sw]
 				Math.max xLink : x + [HSwToV : 0.5 * sw]
 				begin yAttach
+				begin refSw
 
 		define [Descenders Impl] : namespace
 			export : define Sw ArcStartSerifWidth
@@ -1115,49 +1115,49 @@ glyph-block Letter-Shared-Shapes : begin
 
 			export : define [m] : with-params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : begin
 				local sw : Sw refSw
-				return : Impl x y xLink yAttach yOverflow sw maskOut
+				return : Impl x y xLink yAttach yOverflow sw refSw maskOut
 			export : define [l] : with-params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : begin
 				local sw : Sw refSw
-				return : Impl (x + [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw maskOut
+				return : Impl (x + [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw refSw maskOut
 			export : define [r] : with-params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : begin
 				local sw : Sw refSw
-				return : Impl (x - [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw maskOut
+				return : Impl (x - [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw refSw maskOut
 
 			export : define [lExt] : with-params [x y xLink [yAttach y] [yOverflow 0] [sw Stroke] [maskOut null]] : begin
-				return : Impl (x + [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw maskOut
+				return : Impl (x + [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw sw maskOut
 			export : define [mExt] : with-params [x y xLink [yAttach y] [yOverflow 0] [sw Stroke] [maskOut null]] : begin
-				return : Impl x y xLink yAttach yOverflow sw maskOut
+				return : Impl x y xLink yAttach yOverflow sw sw maskOut
 			export : define [rExt] : with-params [x y xLink [yAttach y] [yOverflow 0] [sw Stroke] [maskOut null]] : begin
-				return : Impl (x - [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw maskOut
+				return : Impl (x - [HSwToV : 0.5 * sw]) y xLink yAttach yOverflow sw sw maskOut
 
 			export : define [lSideJut] : with-params [x y [yOverflow 0] [refSw Stroke] [jut Jut] [sideJut (jut - [HSwToV : 0.5 * refSw])]] : begin
 				local sw : Sw refSw
 				local xLink : x + [HSwToV : 0.5 * refSw] - [Math.max 0 : TanSlope * sw]
 				local xPos  : x + [HSwToV : 0.5 * sw] - sideJut + sw * (SerifShiftX - TanSlope)
-				return : Impl xPos y xLink y yOverflow sw
+				return : Impl xPos y xLink y yOverflow sw refSw
 
 			export : define [rSideJut] : with-params [x y [yOverflow 0] [refSw Stroke] [jut Jut] [sideJut (jut - [HSwToV : 0.5 * refSw])]] : begin
 				local sw : Sw refSw
 				local xLink : x - [HSwToV : 0.5 * refSw] - [Math.min 0 : TanSlope * sw]
 				local xPos  : x - [HSwToV : 0.5 * sw] + sideJut + sw * (SerifShiftX + TanSlope)
-				return : Impl xPos y xLink y yOverflow sw
+				return : Impl xPos y xLink y yOverflow sw refSw
 
 		# Diacritical descender of cyrillics
 		glyph-block-export CyrDescender
-		define CyrDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
+		define CyrDescender : Descenders : function [x y xLink yAttach yOverflow sw refSw] : glyph-proc
 			local extension : (-LongVJut) + QuarterStroke
 			include : ExtendBelowBaseAnchors (y + extension)
 			include : union
-				xLinkStroke xLink x yAttach sw
+				xLinkStroke xLink x yAttach sw refSw
 				VBar.m x yAttach (y + extension) sw
 
 		# Diagonal tail descender for cyrillic letters
 		glyph-block-export CyrTailDescender
-		define CyrTailDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
+		define CyrTailDescender : Descenders : function [x y xLink yAttach yOverflow sw refSw] : glyph-proc
 			local extension : (-LongVJut) + QuarterStroke
 			include : ExtendBelowBaseAnchors (y + extension)
 			include : union
-				xLinkStroke xLink x yAttach sw
+				xLinkStroke xLink x yAttach sw refSw
 				intersection
 					MaskBelow (yAttach + Stroke)
 					MaskAbove (y + extension)
@@ -1165,14 +1165,14 @@ glyph-block Letter-Shared-Shapes : begin
 
 		# Cyrillic long curl descender, used by old Abkazian letters
 		glyph-block-export CyrCurlDescender
-		define CyrCurlDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
+		define CyrCurlDescender : Descenders : function [x y xLink yAttach yOverflow sw refSw] : glyph-proc
 			local thinStroke : Math.min (0.25 * (0 - Descender)) [AdviceStroke 4]
 			local r : (0 - Descender) / 2
 			local sr : 0.5 * (r + thinStroke)
 			local xr : Math.max (x + [HSwToV : sw - thinStroke]) (x + [HSwToV : 0.5 * sw])
 			local xl : SB + OX
 			include : union
-				xLinkStroke xLink x yAttach sw
+				xLinkStroke xLink x yAttach sw refSw
 				dispiro
 					widths.rhs thinStroke
 					straight.down.start xr (y - 0) [heading Downward]
@@ -1186,14 +1186,14 @@ glyph-block Letter-Shared-Shapes : begin
 					flat (xl + sr) (y - 2 * r + 2 * sr) [heading Rightward]
 					curl (xr - r)  (y - 2 * r + 2 * sr) [heading Rightward]
 
-		# Palatal Hooks
+		# Palatal hooks
 		glyph-block-export PalatalHook
-		define PalatalHook : Descenders : function [x y xLink yAttach yOverflow sw maskOut] : glyph-proc
+		define PalatalHook : Descenders : function [x y xLink yAttach yOverflow sw refSw maskOut] : glyph-proc
 			local fullDepth : (-Descender) - 0.5 * sw - O
 			include : ExtendBelowBaseAnchors (y + Descender)
 			include : difference
 				union
-					xLinkStroke xLink x yAttach sw
+					xLinkStroke xLink x yAttach sw refSw
 					VerticalHook.m
 						x      -- x
 						y      -- (y - (fullDepth - TailY))
@@ -1205,18 +1205,20 @@ glyph-block Letter-Shared-Shapes : begin
 
 		# Retroflex hooks
 		glyph-block-export RetroflexHook
-		define RetroflexHook : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
+		define RetroflexHook : Descenders : function [x y xLink yAttach yOverflow sw refSw maskOut] : glyph-proc
 			local fullDepth : (-Descender) - 0.5 * sw - O
 			include : ExtendBelowBaseAnchors (y + Descender)
-			include : union
-				xLinkStroke xLink x yAttach sw
-				VerticalHook.m
-					x      -- x
-					y      -- (y - (fullDepth - TailY))
-					xDepth -- TailX
-					yDepth -- TailY
-					sw     -- sw
-					yExtension -- [Math.max 0 : yAttach + yOverflow - y + (fullDepth - TailY)]
+			include : difference
+				union
+					xLinkStroke xLink x yAttach sw refSw
+					VerticalHook.m
+						x      -- x
+						y      -- (y - (fullDepth - TailY))
+						xDepth -- TailX
+						yDepth -- TailY
+						sw     -- sw
+						yExtension -- [Math.max 0 : yAttach + yOverflow - y + (fullDepth - TailY)]
+				if maskOut maskOut [no-shape]
 
 		# Half-circle hook
 		glyph-block-export HalfRingDescender

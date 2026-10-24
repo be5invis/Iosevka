@@ -8,12 +8,12 @@ glyph-module
 glyph-block Letter-Latin-Lower-I : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Adjustment : LeaningAnchor ExtendBelowBaseAnchors
+	glyph-block-import Mark-Adjustment : LeaningAnchor
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateMultiAccentedComposition
 	glyph-block-import Letter-Shared : CreateCommaCaronComposition CreateTurnedLetter
-	glyph-block-import Letter-Shared-Shapes : FlatHookDepth DiagTail
-	glyph-block-import Letter-Shared-Shapes : CurlyTail BeltOverlay PalatalHook RetroflexHook
-	glyph-block-import Letter-Shared-Shapes : HalfRingDescender LetterBarOverlay RightwardTailedBar
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar CurlyTail FlatHookDepth DiagTail
+	glyph-block-import Letter-Shared-Shapes : VerticalHook PalatalHook RetroflexHook HalfRingDescender
+	glyph-block-import Letter-Shared-Shapes : BeltOverlay LetterBarOverlay
 
 	###########################################################################################
 	# Implementations
@@ -24,19 +24,19 @@ glyph-block Letter-Latin-Lower-I : begin
 	define MODE-L  1 # `l`-like letters
 
 	define [XMiddleT mode] : namespace
-		define [HookyImpl df doST doSB] : df.middle + ([boole doST] - [boole doSB]) * [IBalance2 df]
-		define [FlatTailedImpl df doST] : HookyImpl df (doST && mode !== MODE-L) true
-		define [TailedImpl df doST] : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [TailedDotlessIShift df])
-		export : define [Center df] : df.middle + 0
-		export : define [Serifed df] : df.middle + [IBalance df]
-		export : define [Hooky df] : HookyImpl df true false
-		export : define [HookyBottom df] : HookyImpl df false true
-		export : define [ZShaped df] : HookyImpl df true true
-		export : define [Tailed df] : TailedImpl df false
-		export : define [TailedSerifed df] : TailedImpl df true
-		export : define [FlatTailed df] : FlatTailedImpl df false
+		define [HookyImpl      df doST doSB] : df.middle + ([boole doST] - [boole doSB]) * [IBalance2 df]
+		define [FlatTailedImpl df doST]      : HookyImpl df (doST && mode !== MODE-L) true
+		define [TailedImpl     df doST]      : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [TailedDotlessIShift df])
+		export : define [Center            df] : df.middle + 0
+		export : define [Serifed           df] : df.middle + [IBalance df]
+		export : define [Hooky             df] : HookyImpl      df true  false
+		export : define [HookyBottom       df] : HookyImpl      df false true
+		export : define [ZShaped           df] : HookyImpl      df true  true
+		export : define [Tailed            df] : TailedImpl     df false
+		export : define [TailedSerifed     df] : TailedImpl     df true
+		export : define [FlatTailed        df] : FlatTailedImpl df false
 		export : define [SerifedFlatTailed df] : FlatTailedImpl df true
-		export : define [PhoneticLeft df] : df.leftSB + [HSwToV HalfStroke]
+		export : define [PhoneticLeft      df] : df.leftSB + [HSwToV HalfStroke]
 
 	define ILMarks : namespace
 		export : define [Serifless df top bot xMiddle _stroke] : glyph-proc
@@ -61,14 +61,16 @@ glyph-block Letter-Latin-Lower-I : begin
 			include : VBar.m xMiddle bot top stroke
 			local jut : Math.max Jut : mix [HSwToV : 0.5 * stroke] LongJut df.adws
 			include : tagged 'serifRB' : HSerif.rb xMiddle bot jut Stroke stroke
-			set-base-anchor 'trailing' (xMiddle + jut) bot
+			set-base-anchor 'trailing'          (xMiddle + jut) bot
+			set-base-anchor 'palatalHookAttach' (xMiddle + jut) bot
 
 		export : define [Serifed df top bot xMiddle _stroke] : glyph-proc
 			local stroke : fallback _stroke Stroke
 			include : VBar.m xMiddle bot top stroke
 			local jut : Math.max MidJutCenter : mix [HSwToV : 0.5 * stroke] LongJut df.adws
 			include : tagged 'serifMB' : HSerif.mb df.middle bot jut
-			set-base-anchor 'trailing' (df.middle + jut) bot
+			set-base-anchor 'trailing'          (df.middle + jut) bot
+			set-base-anchor 'palatalHookAttach' (df.middle + jut) bot
 
 		export : define [Tailed df top bot xMiddle _stroke] : glyph-proc
 			local stroke : fallback _stroke Stroke
@@ -85,9 +87,9 @@ glyph-block Letter-Latin-Lower-I : begin
 				HookEnd bot (sw -- stroke) (swTerminal -- fine) (isTail -- true)
 				g4   rightTerm (bot + hookDepth) [widths.lhs fine]
 
-			local xDot : xMiddle + [StrokeWidthBlend 0.25 0] * TanSlope * df.width
-			set-base-anchor 'trailing'        [mix left rightTerm 0.5] bot
-			set-base-anchor 'palatalHookMask' [mix left rightTerm 0.5] (bot + O + HalfStroke)
+			set-base-anchor 'trailing'          [mix left rightTerm 0.5] bot
+			set-base-anchor 'palatalHookAttach' [mix left rightTerm 0.5] bot
+			set-base-anchor 'palatalHookMask'   [mix left rightTerm 0.5] (bot + O + HalfStroke)
 
 		export : define [FlatTailed df top bot xMiddle _stroke] : glyph-proc
 			local stroke : fallback _stroke Stroke
@@ -103,7 +105,8 @@ glyph-block Letter-Latin-Lower-I : begin
 				flat (xMiddle + hd.x - [HSwToV : 0.5 * stroke]) (bot + 0.5 * stroke)
 				curl xFinal (bot + 0.5 * stroke)
 
-			set-base-anchor 'trailing' xFinal bot
+			set-base-anchor 'trailing'          xFinal bot
+			set-base-anchor 'palatalHookAttach' xFinal bot
 
 		export : define [SemiTailed df top bot xMiddle _stroke] : glyph-proc
 			local stroke : fallback _stroke Stroke
@@ -120,8 +123,9 @@ glyph-block Letter-Latin-Lower-I : begin
 				g2.right.mid (xMiddle + x0) (bot + O + 0.5 * stroke) [heading Rightward]
 				g4 (xMiddle + x1) (bot + O * (1 - 2 * hookScaleY) + 0.5 * stroke) [heading Rightward]
 
-			set-base-anchor 'trailing' (xMiddle + x0) bot
-			set-base-anchor 'palatalHookMask' (xMiddle + x0) (bot + O + HalfStroke)
+			set-base-anchor 'trailing'          (xMiddle + x0) bot
+			set-base-anchor 'palatalHookAttach' (xMiddle + x0) bot
+			set-base-anchor 'palatalHookMask'   (xMiddle + x0) (bot + O + HalfStroke)
 
 		export : define [ShortTailed df top bot xMiddle _stroke] : glyph-proc
 			local stroke : fallback _stroke Stroke
@@ -129,15 +133,15 @@ glyph-block Letter-Latin-Lower-I : begin
 
 		export : define [DiagTailed df top bot xMiddle _stroke] : glyph-proc
 			local stroke : fallback _stroke Stroke
-			set-base-anchor 'trailing' (xMiddle + [HSwToV : 0.75 * stroke]) bot
-			set-base-anchor 'palatalHookMask' currentGlyph.baseAnchors.trailing.x (bot + O + HalfStroke)
-
 			local depth : [DiagTail.StdDepth df stroke] - (df.middle - xMiddle) - 0.5 * stroke
-
 			include : dispiro
 				widths.center stroke
 				flat xMiddle top [heading Downward]
 				DiagTail.R xMiddle bot depth stroke
+
+			set-base-anchor 'trailing'          (xMiddle + [HSwToV : 0.75 * stroke]) bot
+			set-base-anchor 'palatalHookAttach' (xMiddle + [HSwToV : 0.75 * stroke]) bot
+			set-base-anchor 'palatalHookMask'   (xMiddle + [HSwToV : 0.75 * stroke]) (bot + O + HalfStroke)
 
 		export : define [PhoneticLeft df top bot xMiddle _stroke] : glyph-proc
 			local stroke : fallback _stroke Stroke
@@ -165,10 +169,8 @@ glyph-block Letter-Latin-Lower-I : begin
 		export : define [SerifedShort df top bot xMiddle _stroke] : tagged 'serifLT' : HSerif.lt xMiddle top [ILJut.SerifedShort df top bot xMiddle _stroke] Stroke _stroke
 
 	define [CalcPhoneticHookPos g] : begin
-		local attach : if g.baseAnchors.trailing
-			g.gizmo.unapply g.baseAnchors.trailing
-			g.gizmo.unapply g.baseAnchors.overlay
-		local posX : if g.baseAnchors.trailing
+		local attach : g.gizmo.unapply (g.baseAnchors.palatalHookAttach || g.baseAnchors.overlay)
+		local posX : if g.baseAnchors.palatalHookAttach
 			attach.x + [HSwToV : 0.5 * VJutStroke]
 			attach.x + [HSwToV HalfStroke] + [PalatalHook.adviceGap Stroke]
 		local maskY : if g.baseAnchors.palatalHookMask
@@ -195,8 +197,8 @@ glyph-block Letter-Latin-Lower-I : begin
 		'semiTailed'            { ILBody.SemiTailed    ILSerifs.None          ILMarks.Serifless  [XMiddleT mode].FlatTailed         para.advanceScaleI   Stroke }
 		'serifedSemiTailed'     { ILBody.SemiTailed    ILSerifs.Hooky         ILMarks.Serifed    [XMiddleT mode].SerifedFlatTailed  para.advanceScaleI   Stroke }
 		# Decompressed
-		'hookyDec'              { ILBody.Serifless     ILSerifs.Hooky         ILMarks.Serifed    [XMiddleT mode].Hooky              para.advanceScaleI   0      }
 		'seriflessDec'          { ILBody.Serifless     ILSerifs.None          ILMarks.Serifless  [XMiddleT mode].Center             para.advanceScaleI   0      }
+		'hookyDec'              { ILBody.Serifless     ILSerifs.Hooky         ILMarks.Serifed    [XMiddleT mode].Hooky              para.advanceScaleI   0      }
 		'tailedDec'             { ILBody.Tailed        ILSerifs.None          ILMarks.Serifless  [XMiddleT mode].Tailed             para.advanceScaleI   Stroke }
 		'diagonalTailedDec'     { ILBody.DiagTailed    ILSerifs.None          ILMarks.Serifless  [XMiddleT mode].Tailed             para.advanceScaleI   Stroke }
 		'flatTailedDec'         { ILBody.FlatTailed    ILSerifs.None          ILMarks.Serifless  [XMiddleT mode].FlatTailed         para.advanceScaleI   Stroke }
@@ -209,8 +211,8 @@ glyph-block Letter-Latin-Lower-I : begin
 		'seriflessRTailDec'     { ILBody.Serifless     ILSerifs.None          ILMarks.Serifless  [XMiddleT mode].HookyBottom        para.advanceScaleI   0      }
 		'hookyRTailDec'         { ILBody.Serifless     ILSerifs.Hooky         ILMarks.Serifed    [XMiddleT mode].Center             para.advanceScaleI   0      }
 		#
-		'hookyPL'               { ILBody.PhoneticLeft  ILSerifs.Hooky         ILMarks.Serifed    [XMiddleT mode].PhoneticLeft       1                    0      }
 		'seriflessPL'           { ILBody.PhoneticLeft  ILSerifs.None          ILMarks.Serifless  [XMiddleT mode].PhoneticLeft       1                    0      }
+		'hookyPL'               { ILBody.PhoneticLeft  ILSerifs.Hooky         ILMarks.Serifed    [XMiddleT mode].PhoneticLeft       1                    0      }
 		# Special variants for Tau, which is built using `dotlessi`
 		'tau/tailless'          { ILBody.Serifless     ILSerifs.None          ILMarks.Serifless  [XMiddleT mode].Center             1                    0      }
 		'tau/tailed'            { ILBody.Tailed        ILSerifs.None          ILMarks.Serifless  [XMiddleT mode].Tailed             1                    Stroke }
@@ -243,17 +245,22 @@ glyph-block Letter-Latin-Lower-I : begin
 		create-glyph "dotlessiRetroflexHook.\(suffix)" : glyph-proc
 			include [refer-glyph "dotlessi.\(suffix)"] AS_BASE ALSO_METRICS
 			local { attach posX maskY } : CalcPhoneticHookPos currentGlyph
-			include : ExtendBelowBaseAnchors Descender
-			include : intersection [MaskBelow maskY] : RetroflexHook.r
-				x -- posX
-				y -- 0
-				xLink -- attach.x
+			include : RetroflexHook.r
+				x         -- posX
+				y         -- 0
+				xLink     -- attach.x
 				yOverflow -- Stroke
+				maskOut   -- [MaskAbove maskY]
 
-		if (Body !== ILBody.Serifed) : create-glyph "dotlessaiDiphthong.\(suffix)" : glyph-proc
+		if (Body !== ILBody.Serifed) : create-glyph "dotlessaiDiphthong.upright.\(suffix)" : glyph-proc
 			local df : DivFrame adws
 			include [refer-glyph "dotlessi.\(suffix)"] AS_BASE ALSO_METRICS
 			include : HalfRingDescender ([xMiddleT df] - [HSwToV HalfStroke]) 0
+
+		create-glyph "dotlessaiDiphthong.italic.\(suffix)" : glyph-proc
+			local df : DivFrame adws
+			include [refer-glyph "dotlessi.\(suffix)"] AS_BASE ALSO_METRICS
+			include : RetroflexHook.mExt [xMiddleT df] 0
 
 		create-glyph "dotlessiStretched.\(suffix)" : glyph-proc
 			local df : include : DivFrame adws
@@ -332,10 +339,9 @@ glyph-block Letter-Latin-Lower-I : begin
 
 			create-glyph "lRTail/phoneticRight.\(suffix)" : glyph-proc
 				local df : include : DivFrame adws
-				include : df.markSet.b
+				include : df.markSet.bp
 				include : with-transform [Translate [xShift df] 0] [refer-glyph "lRTail.\(suffix)"]
 				include : Marks df Ascender 0 [xMiddleTCenter df]
-				include : ExtendBelowBaseAnchors Descender
 
 		create-glyph "llWelsh.\(suffix)" : glyph-proc
 			local df : include : DivFrame 1 2
@@ -354,11 +360,11 @@ glyph-block Letter-Latin-Lower-I : begin
 			include [refer-glyph "l.\(suffix)"] AS_BASE ALSO_METRICS
 			local { attach posX maskY } : CalcPhoneticHookPos currentGlyph
 			include : PalatalHook.r
-				x -- posX
-				y -- 0
-				xLink -- attach.x
+				x         -- posX
+				y         -- 0
+				xLink     -- attach.x
 				yOverflow -- Stroke
-				maskOut -- [MaskAbove maskY]
+				maskOut   -- [MaskAbove maskY]
 
 		create-glyph "lHighBar.\(suffix)" : glyph-proc
 			local df : DivFrame adws
@@ -379,10 +385,10 @@ glyph-block Letter-Latin-Lower-I : begin
 		CreateAccentedComposition 'i/compLigRight' null 'dotlessi/compLigRight' 'tittleAbove'
 		CreateAccentedComposition 'iRetroflexHook' 0x1D96 'dotlessiRetroflexHook' 'tittleAbove'
 
-		select-variant 'dotlessaiDiphthong'
-		CreateAccentedComposition 'aiDiphthong' 0x1DF6F 'dotlessaiDiphthong' 'tittleAbove'
+		select-variant 'dotlessaiDiphthong.upright' (follow -- 'dotlessiPigtail.upright')
+		select-variant 'dotlessaiDiphthong.italic'  (follow -- 'dotlessiRTail')
 
-		select-variant 'dotlessiStretched' (follow -- 'dotlessi')
+		select-variant 'dotlessiStretched'
 		CreateAccentedComposition 'iStretched' 0x1DF71 'dotlessiStretched' 'tittleAbove'
 
 		CreateAccentedComposition 'i.TRK' null 'dotlessi' 'i.TRK/tittleAbove'
@@ -414,6 +420,46 @@ glyph-block Letter-Latin-Lower-I : begin
 		CreateAccentedComposition 'iBarRetroflexHook' 0x1DF1A 'dotlessiBarRetroflexHook' 'tittleAbove'
 
 		CreateAccentedComposition 'iAcute' 0xED 'dotlessi' 'acuteAbove'
+
+		create-glyph "dotlessiStretchedHookLeft.serifless" : glyph-proc
+			local df : include : DivFrame para.advanceScaleI
+			include : df.markSet.p
+			local xMiddle : [XMiddleT MODE-I].[if para.isQuasiProportional 'Center' 'Hooky'] df
+			local hd {.x ([ILJut.Hooky df XH Descender xMiddle] + SerifShiftS) .y (Hook - HalfStroke)}
+			include : VerticalHook.m xMiddle (XH - hd.y - HalfStroke) (-hd.x) (-hd.y)
+			include : ILBody.Serifless df (XH - hd.y - HalfStroke) Descender xMiddle
+			include : ILMarks.Serifed  df  XH                      Descender xMiddle
+
+		create-glyph "dotlessiStretchedHookLeft.hookyBottom" : glyph-proc
+			local df : include : DivFrame para.advanceScaleI
+			include : df.markSet.p
+			local xMiddle : [XMiddleT MODE-I].[if para.isQuasiProportional 'Center' 'ZShaped'] df
+			local hd {.x ([ILJut.Hooky df XH Descender xMiddle] + SerifShiftS) .y (Hook - HalfStroke)}
+			include : VerticalHook.m xMiddle (XH - hd.y - HalfStroke) (-hd.x) (-hd.y)
+			include : ILBody.HookyBottom df (XH - hd.y - HalfStroke) Descender xMiddle
+			include : ILMarks.Serifed    df  XH                      Descender xMiddle
+
+		create-glyph "dotlessiStretchedHookLeft.serifed" : glyph-proc
+			local df : include : DivFrame para.advanceScaleI
+			include : df.markSet.p
+			local xMiddle : [XMiddleT MODE-I].[if para.isQuasiProportional 'Center' 'Serifed'] df
+			local hd {.x ([ILJut.Serifed df XH Descender xMiddle] + SerifShiftS) .y (Hook - HalfStroke)}
+			include : VerticalHook.m xMiddle (XH - hd.y - HalfStroke) (-hd.x) (-hd.y)
+			include : ILBody.Serifed  df (XH - hd.y - HalfStroke) Descender xMiddle
+			include : ILMarks.Serifed df  XH                      Descender xMiddle
+
+		select-variant 'dotlessiStretchedHookLeft' 0x27F
+
+		create-glyph 'dotlessiStretchedHookLeftRTail' 0x285 : glyph-proc
+			local df : include : DivFrame para.advanceScaleI
+			include : df.markSet.p
+			local xMiddle : [XMiddleT MODE-I].Center df
+			local hd {.x ([ILJut.Hooky df XH 0 xMiddle] + SerifShiftS) .y (Hook - HalfStroke)}
+			include : VerticalHook.m xMiddle (XH - hd.y - HalfStroke) (-hd.x) (-hd.y)
+			include : ILBody.Serifless df (XH - hd.y - HalfStroke) 0         xMiddle
+			include : ILMarks.Serifed  df  XH                      Descender xMiddle
+			currentGlyph.deleteBaseAnchor 'trailing'
+			include : RetroflexHook.mExt xMiddle 0
 
 	do "l glyphs"
 		select-variant 'l' 'l'

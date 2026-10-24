@@ -8,7 +8,7 @@ glyph-block Letter-Greek-Lower-Theta : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Common-OShape-Variants : OvalShapeT DiamondShapeT
-	glyph-block-import Letter-Shared-Shapes : ArcStartSerifStroke PalatalHook
+	glyph-block-import Letter-Shared-Shapes : PalatalHook
 
 	define [ThetaShapeBase shapeT] : namespace
 		define [outlineT sink offsetX offsetY top] : shapeT sink (top - offsetY) (0 + offsetY) (SB + offsetX) (RightSB - offsetX)
@@ -22,7 +22,7 @@ glyph-block Letter-Greek-Lower-Theta : begin
 	define ThetaConfig : object
 		'capsule' { Capsule [ArchDepthAClamped Ascender 0 SmallArchDepthA SmallArchDepthB] }
 		'oval'    { Oval    [YSmoothMidR       Ascender 0 SmallArchDepthA SmallArchDepthB] }
-		'diamond' { Diamond 0                                                              }
+		'diamond' { Diamond null                                                           }
 
 	foreach { suffix { ShapeBase y0R } } [pairs-of ThetaConfig] : begin
 		create-glyph "grek/theta.\(suffix)" : glyph-proc
@@ -31,15 +31,11 @@ glyph-block Letter-Greek-Lower-Theta : begin
 			include : intersection
 				ShapeBase.Mask Ascender
 				HBar.m SB RightSB [mix 0 Ascender 0.5]
-			set-base-anchor 'palatalHookAttach'
-				if y0R
-					mix [Arch.adjust-x.bot Middle] (RightSB - OX) 0.75
-					[Arch.adjust-x.bot Middle] + [HSwToV : 0.5 * ArcStartSerifStroke]
-				if y0R
-					mix O y0R [archv.yFromX 0.75]
-					begin 0
+			if y0R : set-base-anchor 'palatalHookAttach'
+				mix [Arch.adjust-x.bot Middle] (RightSB - OX) 0.75
+				mix O y0R [archv.yFromX 0.75]
 
-	create-glyph 'grek/theta.cursive' : glyph-proc
+	create-glyph "grek/theta.cursive" : glyph-proc
 		include : MarkSet.b
 
 		define pXTopLeft 0.2
@@ -64,9 +60,11 @@ glyph-block Letter-Greek-Lower-Theta : begin
 	select-variant 'grek/theta' 0x3B8
 	select-variant 'grek/theta/nonCursive' (shapeFrom -- 'grek/theta')
 
-	alias 'grek/thetaSymbol' 0x03D1 'grek/theta.cursive'
+	alias 'grek/thetaSymbol' 0x03D1 "grek/theta.cursive"
 
 	derive-glyphs 'latn/thetaPalatalHook' 0x1DF3C 'grek/theta/nonCursive' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		local attach : currentGlyph.gizmo.unapply (currentGlyph.baseAnchors.palatalHookAttach || currentGlyph.baseAnchors.bottomRight)
-		include : PalatalHook.r attach.x 0 (yAttach -- attach.y)
+		local attach : currentGlyph.gizmo.unapplyIfPresent currentGlyph.baseAnchors.palatalHookAttach
+		include : if attach
+			PalatalHook.r attach.x 0 (yAttach -- attach.y)
+			PalatalHook.r (Middle + [HSwToV HalfStroke] + [PalatalHook.adviceGap Stroke]) O (xLink -- Middle) (refSw -- [AdviceStroke 3])
