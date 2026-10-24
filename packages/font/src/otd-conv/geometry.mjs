@@ -33,28 +33,33 @@ class GemetryConverter {
 	}
 
 	#convertSimpleGeometry(g) {
-		const cacheKey = TrueTypeOutlineCodec.hashSource(g.geometry);
+		if (!g.gizmo) throw new TypeError("No gizmo");
+		const gSimplified = new Geom.SimplifyGeometry(
+			g.geometry,
+			g.gizmo,
+			this.para.removeOutlineOverlaps,
+		);
+
+		const cacheKey = TrueTypeOutlineCodec.hashSource(gSimplified);
 		const existing = this.cache.getGF(cacheKey, TrueTypeOutlineCodec);
 		if (existing) {
 			this.cache.refreshGF(cacheKey);
 			return existing;
 		}
 
-		const calculated = this.#convertSimpleGeometryImpl(g);
+		const calculated = this.#convertSimpleGeometryImpl(g._m_identifier, gSimplified);
 		this.cache.saveGF(cacheKey, TrueTypeOutlineCodec, calculated);
 		return calculated;
 	}
 
-	#convertSimpleGeometryImpl(g) {
+	#convertSimpleGeometryImpl(glyphIdentifier, geometry) {
 		try {
-			if (!g.gizmo) throw new TypeError("No gizmo");
-			const gSimplified = new Geom.SimplifyGeometry(g.geometry, g.gizmo);
 			return TrueTypeContourSetProxy.FromGeomContours(
-				gSimplified.toContours({ cache: this.cache }),
+				geometry.toContours({ cache: this.cache }),
 			);
 		} catch (e) {
 			console.error(
-				`Detected broken geometry when processing ${g._m_identifier} in ${this.para.naming.family} ${this.para.naming.weight} ${this.para.naming.width} ${this.para.naming.slope}`,
+				`Detected broken geometry when processing ${glyphIdentifier} in ${this.para.naming.family} ${this.para.naming.weight} ${this.para.naming.width} ${this.para.naming.slope}`,
 			);
 			console.error(e);
 			return new TrueTypeSpaceProxy();

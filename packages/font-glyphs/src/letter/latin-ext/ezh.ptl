@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix fallback] from "@iosevka/util"
+import [mix clamp fallback] from "@iosevka/util"
 import [DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
@@ -50,7 +50,13 @@ glyph-block Letter-Latin-Ezh : begin
 			local xArcMid : df.rightSB - OX * 2
 			local yArcMid : YSmoothMidR yMidLeft bottom ada adb
 
-			return : object xTopLeft xTopRight xMidLeft yMidLeft xArcMid yArcMid
+			local xArcTop : clamp
+				xMidLeft                            + TINY - [Math.min 0 : TanSlope * stroke]
+				xArcMid - [HSwToV : 1.125 * stroke] - TINY - [Math.max 0 : TanSlope * stroke]
+				Arch.adjust-x.top df.middle (sw -- stroke)
+			local yArcTop : yMidLeft - 0
+
+			return : object xTopLeft xTopRight xMidLeft yMidLeft xArcTop yArcTop xArcMid yArcMid
 
 		define [ConventionalTop] : glyph-proc
 			define [object xTopLeft xTopRight xMidLeft yMidLeft] : Dim
@@ -94,14 +100,14 @@ glyph-block Letter-Latin-Ezh : begin
 			include : tagged 'strokeMiddle' : ExtLineRhsToLhs xTopRight (top - yFootHeight) xMidLeft yMidLeft [VSwToH stroke]
 
 		export : define [Shape] : glyph-proc
-			define [object xTopLeft xTopRight xMidLeft yMidLeft xArcMid yArcMid] : Dim
+			define [object xTopLeft xTopRight xMidLeft yMidLeft xArcTop yArcTop xArcMid yArcMid] : Dim
 
 			include : union
 				if fCursive [CursiveTop] [ConventionalTop]
 				dispiro
 					widths.rhs stroke
 					flat xMidLeft yMidLeft [heading Rightward]
-					curl [Arch.adjust-x.top df.middle (sw -- stroke)] yMidLeft
+					curl xArcTop  yArcTop
 					archv
 					match terminal
 						[Just TERMINAL-NONE] : list
@@ -159,7 +165,13 @@ glyph-block Letter-Latin-Ezh : begin
 			local xArcMid : SB + OX * 2
 			local yArcMid : YSmoothMidL yMidRight bottom ada adb
 
-			return : object xTopLeft xTopRight xMidRight yMidRight xArcMid yArcMid
+			local xArcTop : clamp
+				xArcMid + [HSwToV : 1.125 * stroke] + TINY - [Math.min 0 : TanSlope * stroke]
+				xMidRight                           - TINY - [Math.max 0 : TanSlope * stroke]
+				Arch.adjust-x.top Middle (sw -- stroke)
+			local yArcTop : yMidRight - 0
+
+			return : object xTopLeft xTopRight xMidRight yMidRight xArcTop yArcTop xArcMid yArcMid
 
 		define [ConventionalTop] : glyph-proc
 			define [object xTopLeft xTopRight xMidRight yMidRight] : Dim
@@ -203,14 +215,14 @@ glyph-block Letter-Latin-Ezh : begin
 			include : tagged 'strokeMiddle' : ExtLineLhsToRhs xTopLeft (top - yFootHeight) xMidRight yMidRight [VSwToH stroke]
 
 		export : define [Shape] : glyph-proc
-			define [object xTopLeft xTopRight xMidRight yMidRight xArcMid yArcMid] : Dim
+			define [object xTopLeft xTopRight xMidRight yMidRight xArcTop yArcTop xArcMid yArcMid] : Dim
 
 			include : union
 				if fCursive [CursiveTop] [ConventionalTop]
 				dispiro
 					widths.lhs stroke
 					flat xMidRight yMidRight [heading Leftward]
-					curl [Arch.adjust-x.bot Middle (sw -- stroke)] yMidRight
+					curl xArcTop   yArcTop
 					archv
 					match terminal
 						[Just TERMINAL-NONE] : list
@@ -349,13 +361,17 @@ glyph-block Letter-Latin-Ezh : begin
 				ada       -- [subDf.archDepthAOf SmallArchDepth stroke]
 				adb       -- [subDf.archDepthBOf SmallArchDepth stroke]
 			include : ezh.Shape
-			define [object xArcMid yArcMid] : ezh.Dim
+			define [object xArcTop yArcTop xArcMid yArcMid] : ezh.Dim
+			local fine : Math.min stroke : subDf.adviceStroke 3
+			local pos    {.x df.rightSB .y 0}
+			local attach {.x [mix xArcMid xArcTop : arcvh.xFromY : clamp 0 1 : ([Math.max fine : yArcMid + fine / 2] - yArcMid) / (yArcTop - yArcMid)] .y [Math.max 0 : yArcMid - fine / 2]}
 			include : PalatalHook.r
-				x       -- df.rightSB
-				y       -- (yArcMid - stroke / 2)
-				xLink   -- (xArcMid + O)
-				refSw   -- [Math.min stroke : subDf.adviceStroke 3]
-				maskOut -- [intersection [MaskBelow (yArcMid - stroke / 2)] [MaskLeft (xArcMid + O)]]
+				x       -- pos.x
+				y       -- pos.y
+				xLink   -- attach.x
+				yAttach -- attach.y
+				refSw   -- fine
+				maskOut -- [intersection [MaskBelow attach.y] [MaskLeft attach.x]]
 
 		if [not fSerifed] : begin
 			DefineSelectorGlyph "lyogh"          suffix [DivFrame 1] 'bp'
@@ -482,13 +498,17 @@ glyph-block Letter-Latin-Ezh : begin
 					ada       -- SmallArchDepthA
 					adb       -- SmallArchDepthB
 				include : ezh.Shape
-				define [object xArcMid yArcMid] : ezh.Dim
+				define [object xArcTop yArcTop xArcMid yArcMid] : ezh.Dim
+				local fine : Math.min stroke : AdviceStroke 3
+				local pos    {.x ([mix 0 Width (4/3)] - SB) .y 0}
+				local attach {.x [mix xArcMid xArcTop : arcvh.xFromY : clamp 0 1 : ([Math.max fine : yArcMid + fine / 2] - yArcMid) / (yArcTop - yArcMid)] .y [Math.max 0 : yArcMid - fine / 2]}
 				include : PalatalHook.r
-					x       -- ([mix 0 Width (4/3)] - SB)
-					y       -- (yArcMid - stroke / 2)
-					xLink   -- (xArcMid + O)
-					refSw   -- [Math.min stroke : AdviceStroke 3]
-					maskOut -- [intersection [MaskBelow (yArcMid - stroke / 2)] [MaskLeft (xArcMid + O)]]
+					x       -- pos.x
+					y       -- pos.y
+					xLink   -- attach.x
+					yAttach -- attach.y
+					refSw   -- fine
+					maskOut -- [intersection [MaskBelow attach.y] [MaskLeft attach.x]]
 
 			DefineSelectorGlyph "lyogh/phoneticRight"      suffix [DivFrame 1] 'bp'
 			DefineSelectorGlyph "lyoghRTail/phoneticRight" suffix [DivFrame 1] 'bp'

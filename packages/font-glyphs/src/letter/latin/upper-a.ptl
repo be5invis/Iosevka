@@ -17,6 +17,7 @@ glyph-block Letter-Latin-Upper-A : begin
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
 	glyph-block-import Letter-Latin-V : VShapeOutline VShape VCornerHalfWidth
 	glyph-block-import Letter-Latin-V : VStraightSbShrink VStraightSbOffset
+	glyph-block-import Letter-Latin-V : VSlashOverlayShape
 
 	define BODY-CURLY      0
 	define BODY-STRAIGHT   1
@@ -100,8 +101,12 @@ glyph-block Letter-Latin-Upper-A : begin
 			[Just BODY-ROUND-TOP] : begin
 				return : RoundTopBottomRightRemovedImpl df slabKind top sw
 
+	define [ASlashOverlayShape df bodyShape top sw] : new-glyph : composite-proc
+		VSlashOverlayShape df (bodyShape === BODY-STRAIGHT) top sw
+		FlipAround df.middle (top / 2)
+
 	glyph-block-export ASerifs
-	define [ASerifs df top sw slabKind] : glyph-proc : begin
+	define [ASerifs df top sw slabKind] : glyph-proc
 		local sf : SerifFrame.fromDf df top 0
 		if [maskBits slabKind SLAB-LEFT] : include
 			if ([maskBits slabKind SLAB-SMALL-CYRL] && para.isItalic) sf.lb.outer sf.lb.full
@@ -129,74 +134,81 @@ glyph-block Letter-Latin-Upper-A : begin
 		local fSlabTop : maskBits slabKind SLAB-TOP
 		local fSlabBot : maskBits slabKind [bitOr SLAB-LEFT SLAB-RIGHT]
 
-		define [AShapeImpl mk top fTonos fSwash nOverlays] : glyph-proc
+		define [AShapeImpl mk top fTonos nOverlays] : glyph-proc
 			include : MarkSet.(mk)
 			set-base-anchor 'trailing' RightSB 0
 			if fTonos : include : SetGrekUpperTonos : match bodyShape
-				[Just BODY-ROUND-TOP] : begin 0
-				__                    : (RightSB - SB) * [if fSlabTop 0.0 0.2]
+				[Just BODY-ROUND-TOP] : begin       0
+				__                    : if fSlabTop 0 : (RightSB - SB) * 0.2
 
 			include : AShape.Letter [DivFrame 1] bodyShape slabKind top Stroke
 
-			local yBar : AShape.BarPos bodyShape slabKind top
-
-			if fSwash : begin
-				eject-contour 'serifLT'
-				local xBowlLeft : [mix 0 SB 0.5] - [HSwToV HalfStroke]
-				local xTurn : xBowlLeft + [BowlXDepth top (yBar - Stroke) xBowlLeft Middle]
-				include : difference
-					dispiro
-						widths.lhs
-						flat Middle top [heading Leftward]
-						curl [Arch.adjust-x.top xTurn] top
-						archv
-						g4   (xBowlLeft + OX) [YSmoothMidL top (yBar - Stroke)]
-						arcvh
-						flat [Arch.adjust-x.bot xTurn] (yBar - Stroke)
-						curl Middle (yBar - Stroke) [heading Rightward]
-					AShape.Mask [DivFrame 1] bodyShape top Stroke
-
-			if nOverlays : match nOverlays
-				[Just 1] : begin
-					local yBot : if fSlabBot Stroke 0
-					include : HOverlayBar [mix 0 SB 0.3] [mix Width RightSB 0.3]
-						mix yBot (yBar - Stroke) 0.5
-						Math.min OverlayStroke : 0.625 * (yBar - Stroke - yBot)
-				[Just 2] : begin
-					eject-contour 'crossBar'
-					include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] (yBar - (Stroke - OverlayStroke) / 2)
-					include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix yBar top 0.25]
+			if nOverlays : begin
+				local yBar : AShape.BarPos bodyShape slabKind top
+				match nOverlays
+					[Just 1] : begin
+						local yBot : if fSlabBot Stroke 0
+						include : HOverlayBar [mix 0 SB 0.3] [mix Width RightSB 0.3]
+							mix yBot (yBar - Stroke) 0.5
+							Math.min OverlayStroke : 0.625 * (yBar - Stroke - yBot)
+					[Just 2] : begin
+						eject-contour 'crossBar'
+						include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] (yBar - (Stroke - OverlayStroke) / 2)
+						include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix yBar top 0.25]
 
 		create-glyph "A.\(suffix)"          : AShapeImpl "capital" CAP
 		create-glyph "grek/Alpha.\(suffix)" : AShapeImpl "capital" CAP true
 		create-glyph "smcpA.\(suffix)"      : AShapeImpl "e"       XH
-		create-glyph "ABar.\(suffix)"       : AShapeImpl "capital" CAP false false 1
-		if (bodyShape !== BODY-ROUND-TOP) : begin
-			if (!fSlabTop) : create-glyph "ASwash.\(suffix)" : AShapeImpl "capital" CAP false true
-			create-glyph "ASquare.\(suffix)" : glyph-proc
-				local df : include : DivFrame [if fSlabTop para.advanceScaleT 1]
-				local shift : df.middle - Middle
-				include : with-transform [Translate shift 0] : glyph-proc
-					include [refer-glyph "A.\(suffix)"]
+		create-glyph "ABar.\(suffix)"       : AShapeImpl "capital" CAP false 1
+		match bodyShape
+			[Just BODY-ROUND-TOP] : begin
+				derive-composites "ASlash.\(suffix)" null "A.\(suffix)" 'longSlash'
+			__ : begin
+				create-glyph "ASlash.\(suffix)" : glyph-proc
+					include [refer-glyph "A.\(suffix)"] AS_BASE ALSO_METRICS
+					include : ASlashOverlayShape [DivFrame 1] bodyShape CAP
+				if (!fSlabTop) : create-glyph "ASwash.\(suffix)" : glyph-proc
+					include [refer-glyph "A.\(suffix)"] AS_BASE ALSO_METRICS
 					eject-contour 'serifLT'
-				include : df.markSet.capital
-				local xTopBarLeft  : Math.min
-					df.leftSB  + 0.75 * OX
-					[mix 0     SB      : if fBarStraight VStraightSbShrink 1] - [if fBarStraight VStraightSbOffset 0] - [if fSlabTop SideJut 0] + shift
-				local xTopBarRight : Math.max
-					df.rightSB - 0.75 * OX
-					[mix Width RightSB : if fBarStraight VStraightSbShrink 1] + [if fBarStraight VStraightSbOffset 0] + [if fSlabTop SideJut 0] + shift
-				include : HBar.t xTopBarLeft xTopBarRight CAP
-				if fSlabTop : begin
-					local swVJut : Math.min VJutStroke : df.adviceStroke 4.5
-					include : tagged 'serifLT' : VSerif.dl xTopBarLeft  CAP VJut swVJut
-					include : tagged 'serifRT' : VSerif.dr xTopBarRight CAP VJut swVJut
+					local yBar : AShape.BarPos bodyShape slabKind CAP
+					local xBowlLeft : [mix 0 SB 0.5] - [HSwToV HalfStroke]
+					local xTurn : xBowlLeft + [BowlXDepth CAP (yBar - Stroke) xBowlLeft Middle]
+					include : difference
+						dispiro
+							widths.lhs
+							flat Middle CAP [heading Leftward]
+							curl [Arch.adjust-x.top xTurn] CAP
+							archv
+							g4   (xBowlLeft + OX) [YSmoothMidL CAP (yBar - Stroke)]
+							arcvh
+							flat [Arch.adjust-x.bot xTurn] (yBar - Stroke)
+							curl Middle (yBar - Stroke) [heading Rightward]
+						AShape.Mask [DivFrame 1] bodyShape CAP Stroke
+				create-glyph "ASquare.\(suffix)" : glyph-proc
+					local df : include : DivFrame [if fSlabTop para.advanceScaleT 1]
+					local shift : df.middle - Middle
+					include : with-transform [Translate shift 0] : glyph-proc
+						include [refer-glyph "A.\(suffix)"]
+						eject-contour 'serifLT'
+					include : df.markSet.capital
+					local xTopBarLeft  : Math.min
+						df.leftSB  + 0.75 * OX
+						[mix 0     SB      : if fBarStraight VStraightSbShrink 1] - [if fBarStraight VStraightSbOffset 0] - [if fSlabTop SideJut 0] + shift
+					local xTopBarRight : Math.max
+						df.rightSB - 0.75 * OX
+						[mix Width RightSB : if fBarStraight VStraightSbShrink 1] + [if fBarStraight VStraightSbOffset 0] + [if fSlabTop SideJut 0] + shift
+					include : HBar.t xTopBarLeft xTopBarRight CAP
+					if fSlabTop : begin
+						local swVJut : Math.min VJutStroke : df.adviceStroke 4.5
+						include : tagged 'serifLT' : VSerif.dl xTopBarLeft  CAP VJut swVJut
+						include : tagged 'serifRT' : VSerif.dr xTopBarRight CAP VJut swVJut
 
-		create-glyph "currency/australSign.\(suffix)" : AShapeImpl "capital" CAP false false 2
+		create-glyph "currency/australSign.\(suffix)" : AShapeImpl "capital" CAP false 2
 
 	select-variant 'A' 'A'
 	link-reduced-variant 'A/sansSerif' 'A' MathSansSerif
 	select-variant 'smcpA'     0x1D00  (follow -- 'A')
+	select-variant 'ASlash'    0x23A   (follow -- 'A')
 	select-variant 'ABar'      0x1DF40 (follow -- 'A')
 	select-variant 'ASwash'    0x1DF68 (follow -- 'AHookLeft')
 	select-variant 'ARoundTop' 0x1DF6A (shapeFrom -- 'A') (follow -- 'A/roundTop')

@@ -481,6 +481,10 @@ export function SetupBuilders(bindings) {
 		);
 	}
 	archv.superness = s => new ArcHvInterpolator(DEFAULT_STEPS, s);
+	archv.yFromX = (px, superness) => {
+		const s = fallback(superness, Superness);
+		return 1 - (1 - px ** s) ** (1 / s);
+	};
 	function arcvh(samples, superness) {
 		return new ArcVhInterpolator(
 			fallback(samples, DEFAULT_STEPS),
@@ -488,19 +492,17 @@ export function SetupBuilders(bindings) {
 		);
 	}
 	arcvh.superness = s => new ArcVhInterpolator(DEFAULT_STEPS, s);
-	archv.yFromX = (px, _s) => {
-		const s = fallback(_s, Superness);
-		return 1 - (1 - px ** s) ** (1 / s);
+	arcvh.xFromY = (py, superness) => {
+		const s = fallback(superness, Superness);
+		return 1 - (1 - py ** s) ** (1 / s);
 	};
-	archv.sCos = (angle, _s) => {
+	archv.sCos = (angle, superness) => {
 		const c = Math.cos((angle / 180) * Math.PI);
-		if (c < 0) return -((-c) ** (2 / fallback(_s, Superness)));
-		else return c ** (2 / fallback(_s, Superness));
+		return Math.sign(c) * (Math.abs(c) ** (2 / fallback(superness, Superness)));
 	};
-	archv.sSin = (angle, _s) => {
+	archv.sSin = (angle, superness) => {
 		const s = Math.sin((angle / 180) * Math.PI);
-		if (s < 0) return -((-s) ** (2 / fallback(_s, Superness)));
-		else return s ** (2 / fallback(_s, Superness));
+		return Math.sign(s) * (Math.abs(s) ** (2 / fallback(superness, Superness)));
 	};
 
 	function dispiro(...controls) {
