@@ -9,29 +9,29 @@ glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateAccentedComposition
-	glyph-block-import Letter-Shared-Metrics : EFVJutLength EFMidBarPosY
+	glyph-block-import Letter-Shared-Metrics : EFVJutLength
 	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors
 
 	define [IShape df top] : glyph-proc
 		include : VBar.m df.middle 0 top
 
 	define ISerifs : namespace
-		export : define [Impl df top jut] : glyph-proc
+		export : define [Impl jut] : function [df top _kSerif] : glyph-proc
 			include : tagged 'serifMB' : HSerif.mb df.middle 0   jut
 			include : tagged 'serifMT' : HSerif.mt df.middle top jut
 			set-base-anchor 'trailing' (df.middle + jut) 0
 
-		export : define [None df top] : glyph-proc
+		export : define [None df top _kSerif] : glyph-proc
 			local jut : HSwToV HalfStroke
 			set-base-anchor 'trailing' (df.middle + jut) 0
 			return : object jut
-		export : define [Long df top] : glyph-proc
-			local jut : Math.max MidJutCenter : mix [HSwToV HalfStroke] LongJut df.adws
-			include : Impl df top jut
+		export : define [Long df top _kSerif] : glyph-proc
+			local jut : Math.max MidJutCenter : mix [HSwToV HalfStroke] LongJut [fallback _kSerif df.adws]
+			include : [Impl jut] df top
 			return : object jut
-		export : define [Short df top] : glyph-proc
-			local jut : Math.max Jut : mix [HSwToV HalfStroke] MidJutCenter df.adws
-			include : Impl df top jut
+		export : define [Short df top _kSerif] : glyph-proc
+			local jut : Math.max Jut : mix [HSwToV HalfStroke] MidJutCenter [fallback _kSerif df.adws]
+			include : [Impl jut] df top
 			return : object jut
 
 	define UpperIConfig : object
@@ -47,6 +47,12 @@ glyph-block Letter-Latin-Upper-I : begin
 			include : IShape df CAP
 			local serifs : include : Serifs df CAP
 			create-forked-glyph "grek/Iota.\(suffix)" : SetGrekUpperTonos [Math.min 0 : df.middle - serifs.jut - SB]
+
+		create-glyph "smcpI.UPPH.\(suffix)" : glyph-proc
+			local df : include : DivFrame adws
+			include : df.markSet.e
+			include : IShape df XH [Math.min adws (2 / 3)]
+			include : Serifs df XH [Math.min adws (2 / 3)]
 
 		create-glyph "ISideways.\(suffix)" : glyph-proc
 			local df : DivFrame (XH / Width) 2 ((XH * 0.1) / SB)
@@ -64,26 +70,30 @@ glyph-block Letter-Latin-Upper-I : begin
 			include : Serifs df top
 
 		create-glyph "AiDiphthong.\(suffix)" : glyph-proc
-			local df : include : DivFrame 1
+			local df : include : DivFrame 1 2
 			include : df.markSet.capital
-			local subDf : DivFrame adws
-			include : with-transform [Translate (df.middle - subDf.middle) 0] [refer-glyph "I.\(suffix)"]
+			include : IShape df CAP adws
+			include : Serifs df CAP adws
 			local xMidLeft  : [mix df.leftSB  df.rightSB 0.125] - [HSwToV HalfStroke]
 			local xMidRight : [mix df.rightSB df.leftSB  0.125] + [HSwToV HalfStroke]
-			local yBar : EFMidBarPosY CAP 0
+			local yBar : mix 0 CAP OverlayPos
 			include : HBar.m xMidLeft xMidRight yBar
 			if (Serifs !== ISerifs.None) : begin
-				local { jutTop jutBot jutMid } : EFVJutLength CAP 0
+				local { jutTop jutBot jutMid } : EFVJutLength CAP 0 OverlayPos
 				local swVJut : Math.min VJutStroke : VSwToH : 0.625 * ((df.middle - [HSwToV HalfStroke]) - xMidLeft)
 				include : VSerif.ml xMidLeft  yBar jutMid swVJut
 				include : VSerif.mr xMidRight yBar jutMid swVJut
 
 	select-variant 'I' 'I'
 	link-reduced-variant 'I/sansSerif' 'I' MathSansSerif
+	select-variant 'smcpI.UPPH' (follow -- 'I')
+
 	select-variant 'grek/Iota' 0x399 (follow -- 'I')
 	link-reduced-variant 'grek/Iota/sansSerif' 'grek/Iota' MathSansSerif (follow -- 'I/sansSerif')
+
 	alias 'cyrl/IUkrainian' 0x406 'I'
 	CreateAccentedComposition 'cyrl/Yi' 0x407 'I' 'dieresisAbove'
+
 	alias 'cyrl/Palochka' 0x4C0 'I'
 
 	select-variant 'ISideways' 0xA7F7 (follow -- 'I')
@@ -97,7 +107,8 @@ glyph-block Letter-Latin-Upper-I : begin
 		local df : include : DivFrame para.advanceScaleI
 		include : df.markSet.e
 		include : IShape df XH
-		include : ISerifs.Impl df XH MidJutCenter
+		include : [ISerifs.Impl MidJutCenter] df XH
+	alias 'smcpI.DFLT' null 'smcpI'
 
 	CreateAccentedComposition 'smcpIBar' 0x1D7B 'smcpI' 'barOver'
 
