@@ -13,32 +13,86 @@ glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import Letter-Shared-Shapes : OBarLeft TopHook
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
 
-	define [ToothedBody yTop] : union
-		OBarLeft.shape
-		VBar.l SB 0 yTop
+	define [ToothedBody df yTop] : glyph-proc
+		include : OBarLeft.shape
+			top   -- XH
+			bot   -- 0
+			left  -- df.leftSB
+			right -- df.rightSB
+			sw    -- df.mvs
+			fine  -- df.shoulderFine
+			ada   -- df.smallArchDepthA
+			adb   -- df.smallArchDepthB
+		include : tagged 'strokeL' : VBar.l df.leftSB 0 yTop df.mvs
+		set-base-anchor 'palatalHookAttach'
+			mix [Arch.adjust-x.bot [mix (df.leftSB + [HSwToV : df.mvs - df.shoulderFine]) (df.rightSB - OX) 0.5] (sw -- df.mvs)] (df.rightSB - OX) 0.75
+			mix O df.smallArchDepthA [archv.yFromX 0.75]
 
-	define [BottomCutBody yTop] : union
-		OBarLeft.shape
-		VBar.l SB HalfStroke yTop
-		spiro-outline
-			corner  SB                    0
-			corner  SB                    HalfStroke
-			corner (SB + [HSwToV Stroke]) HalfStroke
+	define [BottomCutBody df yTop] : glyph-proc
+		include : OBarLeft.shape
+			top   -- XH
+			bot   -- 0
+			left  -- df.leftSB
+			right -- df.rightSB
+			sw    -- df.mvs
+			fine  -- df.shoulderFine
+			ada   -- df.smallArchDepthA
+			adb   -- df.smallArchDepthB
+		include : tagged 'strokeL' : union [VBar.l df.leftSB HalfStroke yTop df.mvs] : spiro-outline
+			corner  df.leftSB                    0
+			corner  df.leftSB                    HalfStroke
+			corner (df.leftSB + [HSwToV df.mvs]) HalfStroke
+		set-base-anchor 'palatalHookAttach'
+			mix [Arch.adjust-x.bot [mix (df.leftSB + [HSwToV : df.mvs - df.shoulderFine]) (df.rightSB - OX) 0.5] (sw -- df.mvs)] (df.rightSB - OX) 0.75
+			mix O df.smallArchDepthA [archv.yFromX 0.75]
 
-	define [FlatBottomBody yTop] : union
-		OBarLeft.toothlessCorner (rise -- 0)
-		VBar.l SB 0 yTop
+	define [FlatBottomBody df yTop] : glyph-proc
+		include : OBarLeft.toothlessCorner (rise -- 0)
+			top   -- XH
+			bot   -- 0
+			left  -- df.leftSB
+			right -- df.rightSB
+			sw    -- df.mvs
+			fine  -- df.shoulderFine
+			ada   -- df.smallArchDepthA
+			adb   -- df.smallArchDepthB
+		include : tagged 'strokeL' : VBar.l df.leftSB 0 yTop df.mvs
+		set-base-anchor 'palatalHookAttach'
+			mix [Arch.adjust-x.bot [mix df.leftSB (df.rightSB - OX) 0.5] (sw -- df.mvs)] (df.rightSB - OX) 0.75
+			mix 0 df.smallArchDepthA [archv.yFromX 0.75]
 
-	define [ToothlessCornerBody yTop] : union
-		OBarLeft.toothlessCorner
-		VBar.l SB DToothlessRise yTop
+	define [ToothlessCornerBody df yTop] : glyph-proc
+		include : OBarLeft.toothlessCorner (rise -- DToothlessRise)
+			top   -- XH
+			bot   -- 0
+			left  -- df.leftSB
+			right -- df.rightSB
+			sw    -- df.mvs
+			fine  -- df.shoulderFine
+			ada   -- df.smallArchDepthA
+			adb   -- df.smallArchDepthB
+		include : tagged 'strokeL' : VBar.l df.leftSB DToothlessRise yTop df.mvs
+		set-base-anchor 'palatalHookAttach'
+			mix [Arch.adjust-x.bot [mix df.leftSB (df.rightSB - OX) 0.5] (sw -- df.mvs)] (df.rightSB - OX) 0.75
+			mix O df.smallArchDepthA [archv.yFromX 0.75]
 
-	define [ToothlessRoundedBody yTop] : begin
-		return : OBarLeft.toothlessRounded (yTerminal -- yTop)
+	define [ToothlessRoundedBody df yTop] : glyph-proc
+		include : OBarLeft.toothlessRounded (yTerminal -- yTop)
+			top   -- XH
+			bot   -- 0
+			left  -- df.leftSB
+			right -- df.rightSB
+			sw    -- df.mvs
+			fine  -- df.shoulderFine
+			ada   -- df.smallArchDepthA
+			adb   -- df.smallArchDepthB
+		set-base-anchor 'palatalHookAttach'
+			mix [Arch.adjust-x.bot [mix df.leftSB (df.rightSB - OX) 0.5] (sw -- df.mvs)] (df.rightSB - OX) 0.75
+			mix O df.smallArchDepthA [archv.yFromX 0.75]
 
-	define [LTSerifs] : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
-	define [LBSerifs] : tagged 'serifLB' : HSerif.lb SB 0 SideJut
-	define [FullSerifs] : composite-proc [LTSerifs] [LBSerifs]
+	define [LTSerifs df] : tagged 'serifLT' : HSerif.lt df.leftSB Ascender SideJut df.mvs
+	define [LBSerifs df] : tagged 'serifLB' : HSerif.lb df.leftSB 0        SideJut df.mvs
+	define [FullSerifs df] : composite-proc [LTSerifs df] [LBSerifs df]
 
 	define BConfig : SuffixCfg.weave
 		object # body
@@ -54,11 +108,12 @@ glyph-block Letter-Latin-Lower-B : begin
 			serifed         { FullSerifs true   }
 
 	foreach { suffix { Body { Serifs doST } } } [Object.entries BConfig] : do
-		local yOverlay : mix XH (Ascender - [if doST Stroke 0]) 0.5
+		define yOverlay : mix XH (Ascender - [if doST Stroke 0]) 0.5
+
 		create-glyph "b.\(suffix)" : glyph-proc
 			include : MarkSet.b
-			include : Body Ascender
-			include : Serifs
+			include : Body   [DivFrame 1] Ascender
+			include : Serifs [DivFrame 1]
 			include : LeaningAnchor.Above.VBar.l SB
 			set-base-anchor 'overlayOnExtension' (SB + [HSwToV HalfStroke]) yOverlay
 			set-base-anchor 'overlay' Middle (XH / 2)
@@ -77,8 +132,8 @@ glyph-block Letter-Latin-Lower-B : begin
 
 		create-glyph "latn/be.\(suffix)" : glyph-proc
 			include : MarkSet.b
-			include : Body Ascender
-			include : Serifs
+			include : Body   [DivFrame 1] Ascender
+			include : Serifs [DivFrame 1]
 			local xTopRight : mix SB RightSB 0.9
 			include : HBar.t (SB - O) xTopRight Ascender
 			if doST : include : VSerif.dr xTopRight Ascender [Math.min VJut : mix Stroke (Ascender - XH) 0.5]
@@ -86,8 +141,8 @@ glyph-block Letter-Latin-Lower-B : begin
 
 		if [not doST] : create-glyph "bHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.b
-			include : Body XH
-			include : Serifs
+			include : Body   [DivFrame 1] XH
+			include : Serifs [DivFrame 1]
 			include : TopHook.toRight.lBarInner SB (XH / 2) Ascender
 			include : LeaningAnchor.Above.VBar.l SB
 
@@ -102,12 +157,15 @@ glyph-block Letter-Latin-Lower-B : begin
 
 	select-variant 'bHookTop' 0x253
 
-	derive-composites 'bPalatalHook' 0x1D80 'b' : PalatalHook.r
-		x -- [mix [Arch.adjust-x.bot Middle] RightSB 0.75]
-		y -- 0
-		yAttach -- [mix O SmallArchDepthA : archv.yFromX 0.75]
+	derive-glyphs 'bPalatalHook' 0x1D80 'b' : lambda [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		local attach : currentGlyph.gizmo.unapply (currentGlyph.baseAnchors.palatalHookAttach || currentGlyph.baseAnchors.bottomRight)
+		include : PalatalHook.r
+			x -- attach.x
+			y -- 0
+			yAttach -- attach.y
 
-	derive-multi-part-glyphs 'bDot' 0x1E03 {'b' 'dotAbove'} : lambda [srcs gr] : glyph-proc
+	derive-multi-part-glyphs 'bDot' 0x1E03 { 'b' 'dotAbove' } : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
 		include : refer-glyph mark
 		include : Translate (Width + [HSwToV HalfStroke]) 0
