@@ -1,6 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
+import [DependentSelector] from "@iosevka/glyph/relation"
 import [Point] from "@iosevka/geometry/point"
 
 glyph-module
@@ -8,8 +9,8 @@ glyph-module
 glyph-block Letter-Latin-Lower-AE-OE : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Adjustment : LeaningAnchor
-	glyph-block-import Letter-Shared : CreateTurnedLetter
+	glyph-block-import Letter-Shared : CreateTurnedLetter CreateSelectorVariants
+	glyph-block-import Letter-Latin-Lower-E : SmallEConfig
 
 	glyph-block-export SubDfAndShift
 	define [SubDfAndShift pShift df _o] : begin
@@ -29,13 +30,16 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		glyph-block-import Letter-Latin-Lower-A : DoubleStorey DoubleStoreyConfig
 
 		foreach { suffix { hookStyle { body } } } [Object.entries DoubleStoreyConfig] : do
+			define df : DivFrame para.advanceScaleMM 3
+			define { subDf shift } : SubDfAndShift 1 df
+
 			if (body === DoubleStorey.ToothlessRounded) : begin
+				define rise : ArchDepthBClamped XH 0 subDf.smallArchDepthA subDf.smallArchDepthB
+
 				create-glyph : glyph-proc
-					local df : include : DivFrame para.advanceScaleMM 3
+					set-width df.width
 					include : df.markSet.e
 					set-base-anchor 'cvDecompose' 0 0
-					local subDf : df.slice 3 2
-					local rise : ArchDepthBClamped XH 0 subDf.smallArchDepthA subDf.smallArchDepthB
 					create-forked-glyph "ae/a.\(suffix)" : union
 						DoubleStorey.HookAndBar subDf hookStyle rise df.mvs (df.mvs * CThinB)
 						DoubleStorey.Arc        subDf 0         rise df.mvs (df.mvs * CThinB)
@@ -46,10 +50,18 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 						DoubleStorey.HookAndBar subDf hookStyle rise df.mvs
 						DoubleStorey.Arc        subDf 0         rise df.mvs (df.mvs * CThinB)
 
+				create-glyph "turnae/turna.\(suffix)" : glyph-proc
+					set-width 0
+					set-mark-anchor 'cvDecompose' 0 0
+					include : with-transform [ApparentTranslate shift 0] : composite-proc
+						union
+							DoubleStorey.HookAndBar subDf hookStyle rise df.mvs (df.mvs * CThinB)
+							DoubleStorey.Arc        subDf 0         rise df.mvs (df.mvs * CThinB)
+						FlipAround subDf.middle (XH / 2)
+
 			create-glyph "aa.\(suffix)" : glyph-proc
-				local df : include : DivFrame para.advanceScaleMM 3
+				set-width df.width
 				include : df.markSet.e
-				local { subDf shift } : SubDfAndShift 1 df
 				local barTop : [mix 0 XH DesignParameters.aBarPos] + df.mvs * (0.5 + DesignParameters.aBarStrokeAdj)
 				local ada2 : ArchDepthAOf (SmallArchDepth * DesignParameters.aBarPos)
 				local adb2 : ArchDepthBOf (SmallArchDepth * DesignParameters.aBarPos)
@@ -73,6 +85,97 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 						with-transform [ApparentTranslate ((+0.50) * df.mvs) 0] [right]
 						with-transform [ApparentTranslate ((+0.75) * df.mvs) 0] [right]
 						with-transform [ApparentTranslate ((+1.00) * df.mvs) 0] [right]
+
+	do "c/e subglyphs"
+		glyph-block-import Letter-Latin-C : CLetterForm CConfig
+		glyph-block-import Letter-Shared : DefineSelectorGlyph
+
+		define FLAT-CONNECTION 3
+
+		define [OpenOShape df styTop styBot] : new-glyph : glyph-proc
+			local subDf : df.slice 3 2 OX
+			local lf : CLetterForm subDf styTop styBot XH 0
+				ada -- subDf.smallArchDepthA
+				adb -- subDf.smallArchDepthB
+				sw  -- df.mvs
+			include : lf.revFull
+
+		define [EsTeLeftShape subDf styBot] : new-glyph : glyph-proc
+			local lf : CLetterForm subDf FLAT-CONNECTION styBot XH 0
+				ada -- subDf.smallArchDepthA
+				adb -- subDf.smallArchDepthB
+				sw  -- subDf.mvs
+			include : lf.full
+
+		foreach { suffix { styTop styBot } } [Object.entries CConfig] : do
+			create-glyph "oOpene/oOpen.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.advanceScaleMM 3
+				include : df.markSet.e
+				set-base-anchor 'cvDecompose' 0 0
+				include : OpenOShape df styTop styBot
+
+			if (!styTop) : begin
+				create-glyph "cyrl/este.upright/es.\(suffix)" : glyph-proc
+					local df : include : DivFrame para.advanceScaleMM 3.5
+					include : df.markSet.e
+					set-base-anchor 'cvDecompose' 0 0
+					local subDfLeft : df.slice 3.25 1.875
+					include : EsTeLeftShape subDfLeft styBot
+
+				create-glyph "cyrl/este.italic/es.\(suffix)" : glyph-proc
+					local df : include : DivFrame [mix 1 para.advanceScaleMM 2] 4.75
+					include : df.markSet.e
+					set-base-anchor 'cvDecompose' 0 0
+					local subDfLeft : df.slice 4.5 2
+					include : EsTeLeftShape subDfLeft styBot
+
+		foreach { suffix { body revbody } } [Object.entries SmallEConfig] : do
+			define df : DivFrame para.advanceScaleMM 3
+			define { subDf shift } : SubDfAndShift 1 df OX
+
+			create-glyph "ae/e.\(suffix)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : with-transform [ApparentTranslate shift 0]
+					body subDf XH
+						stroke -- df.mvs
+						hook   -- AHook
+						ada    -- subDf.smallArchDepthA
+						adb    -- subDf.smallArchDepthB
+
+			DefineSelectorGlyph "turnae/turne"   suffix df 'e'
+			DefineSelectorGlyph "turnaInve/reve" suffix df 'e'
+
+			foreach { suffixSerif { styTop styBot } } [Object.entries CConfig] : do
+				if (!styBot) : begin
+					create-glyph "turnae/turne.\(suffix).\(suffixSerif)" : glyph-proc
+						set-width 0
+						set-mark-anchor 'cvDecompose' 0 0
+						include : body subDf XH
+							stroke -- df.mvs
+							hook   -- AHook
+							ada    -- subDf.smallArchDepthA
+							adb    -- subDf.smallArchDepthB
+							turned -- true
+							styTop -- styTop
+							styBot -- styBot
+
+					create-glyph "turnaInve/reve.\(suffix).\(suffixSerif)" : glyph-proc
+						set-width 0
+						set-mark-anchor 'cvDecompose' 0 0
+						include : new-glyph : composite-proc
+							revbody subDf XH
+								stroke -- df.mvs
+								hook   -- AHook
+								ada    -- subDf.smallArchDepthA
+								adb    -- subDf.smallArchDepthB
+								turned -- true
+								styTop -- styTop
+								styBot -- styBot
+							FlipAround subDf.middle (XH / 2)
+
+			select-variant "turnae/turne.\(suffix)"   (follow -- 'cyrl/e/topSerif')
+			select-variant "turnaInve/reve.\(suffix)" (follow -- 'cyrl/yeUkrainian/topSerif')
 
 	do "o subglyphs"
 		glyph-block-import Letter-Shared-Shapes : OBarLeft OBarRight
@@ -123,34 +226,6 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				adb       -- subDf.smallArchDepthB
 				yend      -- (XH - [ArchDepthAClamped XH 0 subDf.smallArchDepthA subDf.smallArchDepthB] + O)
 
-	do "e subglyphs"
-		glyph-block-import Letter-Latin-Lower-E : SmallEConfig
-
-		define df : DivFrame para.advanceScaleMM 3
-		define { subDf shift } : SubDfAndShift 1 df OX
-
-		foreach { suffix { body revbody } } [Object.entries SmallEConfig] : do
-			create-glyph "ae/e.\(suffix)" : glyph-proc
-				set-width 0
-				set-mark-anchor 'cvDecompose' 0 0
-				include : with-transform [ApparentTranslate shift 0]
-					body subDf XH
-						stroke -- df.mvs
-						hook   -- AHook
-						ada    -- subDf.smallArchDepthA
-						adb    -- subDf.smallArchDepthB
-
-			create-glyph "aInve/inve.\(suffix)" : glyph-proc
-				set-width 0
-				set-mark-anchor 'cvDecompose' 0 0
-				include : with-transform [ApparentTranslate shift 0]
-					revbody subDf XH
-						stroke -- df.mvs
-						hook   -- AHook
-						ada    -- subDf.smallArchDepthA
-						adb    -- subDf.smallArchDepthB
-						turned -- true
-
 	do "u subglyphs"
 		glyph-block-import Letter-Shared-Shapes : uBowl
 		glyph-block-import Letter-Latin-U : UShapeGroup USerifs SmallUConfigT
@@ -190,48 +265,6 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				include : Slabs subDf XH df.mvs
 				include : ApparentTranslate shift 0
 				eject-contour 'serifLT'
-
-	do "c subglyphs"
-		glyph-block-import Letter-Latin-C : CLetterForm CConfig
-
-		define FLAT-CONNECTION 3
-
-		define [OpenOShape df styTop styBot] : new-glyph : glyph-proc
-			local subDf : df.slice 3 2 OX
-			local lf : CLetterForm subDf styTop styBot XH 0
-				ada -- subDf.smallArchDepthA
-				adb -- subDf.smallArchDepthB
-				sw  -- df.mvs
-			include : lf.revFull
-
-		define [EsTeLeftShape subDf styBot] : new-glyph : glyph-proc
-			local lf : CLetterForm subDf FLAT-CONNECTION styBot XH 0
-				ada -- subDf.smallArchDepthA
-				adb -- subDf.smallArchDepthB
-				sw  -- subDf.mvs
-			include : lf.full
-
-		foreach { suffix { styTop styBot } } [Object.entries CConfig] : do
-			create-glyph "oeOpen/oOpen.\(suffix)" : glyph-proc
-				local df : include : DivFrame para.advanceScaleMM 3
-				include : df.markSet.e
-				set-base-anchor 'cvDecompose' 0 0
-				include : OpenOShape df styTop styBot
-
-			if (!styTop) : begin
-				create-glyph "cyrl/este.upright/es.\(suffix)" : glyph-proc
-					local df : include : DivFrame para.advanceScaleMM 3.5
-					include : df.markSet.e
-					set-base-anchor 'cvDecompose' 0 0
-					local subDfLeft : df.slice 3.25 1.875
-					include : EsTeLeftShape subDfLeft styBot
-
-				create-glyph "cyrl/este.italic/es.\(suffix)" : glyph-proc
-					local df : include : DivFrame [mix 1 para.advanceScaleMM 2] 4.75
-					include : df.markSet.e
-					set-base-anchor 'cvDecompose' 0 0
-					local subDfLeft : df.slice 4.5 2
-					include : EsTeLeftShape subDfLeft styBot
 
 	do "Te (upright) subglyphs"
 		glyph-block-import Letter-Latin-Upper-T : TConfig
@@ -295,6 +328,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 					include : VBar.r subDf.rightSB [PBarPosY XH df.mvs PShape.BarPos] XH df.mvs
 
 	do "Er subglyphs"
+		glyph-block-import Mark-Adjustment : LeaningAnchor
 		glyph-block-import Letter-Latin-Lower-P : PConfig
 
 		foreach { suffix { Body { Serifs doTS doBS } } } [Object.entries PConfig] : do
@@ -398,8 +432,10 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 						LhaRightShape subDf CAP 0 0.1 0.28
 
 	do "subglyph diacritics"
-		create-glyph "turnoeSlash/oSlash/overlay" : glyph-proc
+		create-glyph "turnoSlashe/turnoSlash/overlay" : glyph-proc
 			local df : DivFrame para.advanceScaleMM 3
+			set-width 0
+			set-mark-anchor 'cvDecompose' 0 0
 			local { subDf shift } : SubDfAndShift 1 df OX
 			local fine : 0.375 * OverlayStroke
 			include : dispiro
@@ -407,8 +443,10 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				flat (shift + subDf.leftSB  + OX + fine) [mix XH 0 1.05]
 				curl (shift + subDf.rightSB - OX - fine) [mix 0 XH 1.05]
 
-		create-glyph "turnoeBar/oBar/overlay" : glyph-proc
+		create-glyph "turnoBare/turnoBar/overlay" : glyph-proc
 			local df : DivFrame para.advanceScaleMM 3
+			set-width 0
+			set-mark-anchor 'cvDecompose' 0 0
 			local { subDf shift } : SubDfAndShift 1 df OX
 			include : HBar.m (shift + subDf.leftSB + [HSwToV : 0.5 * df.mvs]) (shift + subDf.rightSB - [HSwToV : 0.5 * df.mvs]) (XH / 2) df.mvs
 
@@ -429,18 +467,28 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	derive-composites 'au' 0xA737 'au/a' 'au/u'
 	derive-composites 'uo' 0xAB63 'uo/u' 'uo/o'
 
-	CreateTurnedLetter 'turnae' 0x1D02 'ae' HalfAdvance (XH / 2) [DivFrame para.advanceScaleMM 3]
-	CreateTurnedLetter 'turnoe' 0x1D14 'oe' HalfAdvance (XH / 2) [DivFrame para.advanceScaleMM 3]
+	CreateSelectorVariants "turnae/turne"   null [Object.keys SmallEConfig] (follow -- 'e')
+	CreateSelectorVariants "turnaInve/reve" null [Object.keys SmallEConfig] (follow -- 'e')
 
-	select-variant "aInve/inve" (follow -- 'e')
-	derive-composites 'aInve' 0xAB31 'ae/a' 'aInve/inve'
-	derive-composites 'oInve' 0xAB40 'oe/o' 'aInve/inve'
+	select-variant "turnae/turna" (follow -- 'ae/a')
 
-	derive-composites 'turnoeSlash' 0xAB41 'turnoe' 'turnoeSlash/oSlash/overlay'
-	derive-composites 'turnoeBar'   0xAB42 'turnoe' 'turnoeBar/oBar/overlay'
+	derive-composites 'turnae' 0x1D02 'turnae/turne' 'turnae/turna'
+	derive-composites 'turnoe' 0x1D14 'turnae/turne' 'ao/o'
 
-	select-variant "oeOpen/oOpen" (follow -- 'oOpen')
-	derive-composites 'oeOpen' 0xAB62 'oeOpen/oOpen' 'ae/e'
+	CreateTurnedLetter 'turnae.UPPH' null 'ae' HalfAdvance (XH / 2) [DivFrame para.advanceScaleMM 3]
+	CreateTurnedLetter 'turnoe.UPPH' null 'oe' HalfAdvance (XH / 2) [DivFrame para.advanceScaleMM 3]
+
+	derive-composites 'turnaInve' null 'turnaInve/reve' 'turnae/turna'
+	derive-composites 'turnoInve' null 'turnaInve/reve' 'ao/o'
+
+	CreateTurnedLetter 'aInve' 0xAB31 'turnaInve' HalfAdvance (XH / 2) [DivFrame para.advanceScaleMM 3]
+	CreateTurnedLetter 'oInve' 0xAB40 'turnoInve' HalfAdvance (XH / 2) [DivFrame para.advanceScaleMM 3]
+
+	derive-composites 'turnoSlashe' 0xAB41 'turnoe' 'turnoSlashe/turnoSlash/overlay'
+	derive-composites 'turnoBare'   0xAB42 'turnoe' 'turnoBare/turnoBar/overlay'
+
+	select-variant "oOpene/oOpen" (follow -- 'oOpen')
+	derive-composites 'oOpene' 0xAB62 'oOpene/oOpen' 'ae/e'
 
 	select-variant "cyrl/este.upright/es" (follow -- 'c/bottomSerif')
 	select-variant "cyrl/este.upright/te" (follow -- 'T')
