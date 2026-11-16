@@ -16,7 +16,6 @@ export const Dotless = {
 	},
 };
 
-export const LowerYDotAtBelow = LinkedGlyphProp("LowerYDotAtBelow");
 export const DependentSelector = LinkedGlyphProp("DependentSelector");
 export const MathSansSerif = LinkedGlyphProp("MathSansSerif");
 export const VS01 = LinkedGlyphProp("VS01");
