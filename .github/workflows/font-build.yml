@@ -1,0 +1,79 @@
+name: Build Iosevka Custom (Windows TTC)
+
+on:
+  workflow_dispatch:
+    inputs:
+      iosevka_ref:
+        description: "Iosevka tag/branch to build (e.g. v33.0.0 or main)"
+        default: "main"
+      release:
+        description: "Also publish the .ttc files as a GitHub Release"
+        type: boolean
+        default: false
+
+env:
+  PLAN_NAME: IosevkaCustom   # must match [buildPlans.IosevkaCustom] in the toml
+
+concurrency:
+  group: build-font
+  cancel-in-progress: true
+
+permissions:
+  contents: write            # only used when "release" is ticked
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300     # hard limit per job is 6 hours
+    steps:
+      - name: Checkout this repo (build plan)
+        uses: actions/checkout@v4
+        with:
+          path: plan
+
+      - name: Checkout Iosevka source
+        uses: actions/checkout@v4
+        with:
+          repository: be5invis/Iosevka
+          ref: ${{ inputs.iosevka_ref }}
+          path: iosevka
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install ttfautohint
+        run: sudo apt-get update && sudo apt-get install -y ttfautohint
+
+      - name: Install dependencies
+        working-directory: iosevka
+        run: npm install
+
+      - name: Copy build plan
+        run: cp plan/private-build-plans.toml iosevka/private-build-plans.toml
+
+      - name: Build SuperTTC
+        working-directory: iosevka
+        run: npm run build -- sgr-ttc::${{ env.PLAN_NAME }} --jCmd=$(nproc)
+
+      - name: Output size
+        run: |
+          find iosevka/dist -name '*.ttc' -exec ls -lh {} \;
+          df -h .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PLAN_NAME }}-ttc
+          path: iosevka/dist/**/*.ttc
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Publish release
+        if: ${{ inputs.release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.PLAN_NAME }}-${{ github.run_number }}
+          name: ${{ env.PLAN_NAME }} build ${{ github.run_number }}
+          files: iosevka/dist/**/*.ttc
