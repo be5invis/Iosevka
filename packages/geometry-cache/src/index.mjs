@@ -4,7 +4,7 @@ import zlib from "node:zlib";
 
 import { decode, encode } from "@msgpack/msgpack";
 
-const Edition = 75;
+const Edition = 76;
 const MAX_AGE = 32;
 
 class GfEntry {

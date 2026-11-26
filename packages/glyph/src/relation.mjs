@@ -16,7 +16,6 @@ export const Dotless = {
 	},
 };
 
-export const LowerYDotAtBelow = LinkedGlyphProp("LowerYDotAtBelow");
 export const DependentSelector = LinkedGlyphProp("DependentSelector");
 export const MathSansSerif = LinkedGlyphProp("MathSansSerif");
 export const VS01 = LinkedGlyphProp("VS01");
@@ -41,6 +40,10 @@ export const LocalizedForm = {
 	PLK: LinkedGlyphProp("PolishLoc"),
 	TRK: LinkedGlyphProp("TurkishLoc"),
 	IPPH: LinkedGlyphProp("IPALoc"),
+	UPPH: {
+		Upright: LinkedGlyphProp("UPALocUpright"),
+		Italic: LinkedGlyphProp("UPALocItalic"),
+	},
 };
 
 export const Texture = {
@@ -201,6 +204,8 @@ export const AnyLocalizedForm = {
 		if (LocalizedForm.PLK.get(glyph)) grs.push(LocalizedForm.PLK);
 		if (LocalizedForm.TRK.get(glyph)) grs.push(LocalizedForm.TRK);
 		if (LocalizedForm.IPPH.get(glyph)) grs.push(LocalizedForm.IPPH);
+		if (LocalizedForm.UPPH.Upright.get(glyph)) grs.push(LocalizedForm.UPPH.Upright);
+		if (LocalizedForm.UPPH.Italic.get(glyph)) grs.push(LocalizedForm.UPPH.Italic);
 		if (grs.length) return grs;
 		return null;
 	},

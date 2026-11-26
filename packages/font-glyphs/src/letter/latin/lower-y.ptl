@@ -1,15 +1,17 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg fallback SuffixCfg] from "@iosevka/util"
-import [LowerYDotAtBelow MathSansSerif OgonekTrY] from "@iosevka/glyph/relation"
+import [DependentSelector MathSansSerif OgonekTrY] from "@iosevka/glyph/relation"
 
 glyph-module
 
 glyph-block Letter-Latin-Lower-Y : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Below : belowMarkStack
-	glyph-block-import Letter-Shared : CreateAccentedComposition CreateTurnedLetter
+	glyph-block-import Mark-Below : belowMarkTop belowMarkStack
+	glyph-block-import Mark-Horn-And-Angle : Horn
+	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors LeaningAnchor
+	glyph-block-import Letter-Shared : CreateDependentComposite CreateTurnedLetter
 	glyph-block-import Letter-Shared-Shapes : uBowl FlatHookDepth SerifFrame
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay BeltOverlay TopHook
 
@@ -319,8 +321,18 @@ glyph-block Letter-Latin-Lower-Y : begin
 			include : MarkSet.p
 			set-base-anchor 'overlay' Middle 0
 			set-base-anchor 'strike'  Middle (XH / 2)
-			set-base-anchor 'yBelowDot' (RightSB - 0.5 * DotRadius) (Descender + AccentStackOffset + DotRadius)
 			include : Shapes.SmallYShape XH Descender
+
+		create-glyph "yBelowdot/base.\(suffix)" : glyph-proc
+			include [refer-glyph "y.\(suffix)"] AS_BASE ALSO_METRICS
+			local attX : Math.max [mix Width RightSB 2] (Middle + [HSwToV HalfStroke])
+			local horn : Horn attX belowMarkTop 0 AccentClearance (+2.0) (-1.0)
+			local [object radius startX] : horn.dim
+			local r : mix radius DotRadius 0.5
+			include : LeaningAnchor.Below.At (startX - r)
+			include : ExtendBelowBaseAnchors belowMarkStack
+			set-base-anchor 'bottomRight' attX 0
+			DependentSelector.set currentGlyph 'nonCursive'
 
 		create-glyph "yCap.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -358,14 +370,14 @@ glyph-block Letter-Latin-Lower-Y : begin
 				FlatSlashShape [mix SB RightSB 0.45] [mix 0 Ascender 0.8] (OverlayStroke / 2)
 				Shapes.SmallLambdaTailedShape Ascender 0
 
-	alias 'grek/lambda.tailedTurn'                     null 'grek/lambdaTailed.straightTurn'
-	alias 'latn/lambdaStroke.tailedTurn'               null 'latn/lambdaStrokeTailed.straightTurn'
-	alias 'grek/lambda.tailedTurnSerifless'            null 'grek/lambdaTailed.straightTurnSerifless'
-	alias 'latn/lambdaStroke.tailedTurnSerifless'      null 'latn/lambdaStrokeTailed.straightTurnSerifless'
-	alias 'grek/lambda.curlyTailedTurn'                null 'grek/lambdaTailed.curlyTurn'
-	alias 'latn/lambdaStroke.curlyTailedTurn'          null 'latn/lambdaStrokeTailed.curlyTurn'
-	alias 'grek/lambda.curlyTailedTurnSerifless'       null 'grek/lambdaTailed.curlyTurnSerifless'
-	alias 'latn/lambdaStroke.curlyTailedTurnSerifless' null 'latn/lambdaStrokeTailed.curlyTurnSerifless'
+	alias "grek/lambda.tailedTurn"               null "grek/lambdaTailed.straightTurn"
+	alias "grek/lambda.tailedTurnSerifless"      null "grek/lambdaTailed.straightTurnSerifless"
+	alias "grek/lambda.curlyTailedTurn"          null "grek/lambdaTailed.curlyTurn"
+	alias "grek/lambda.curlyTailedTurnSerifless" null "grek/lambdaTailed.curlyTurnSerifless"
+	alias "latn/lambdaStroke.tailedTurn"               null "latn/lambdaStrokeTailed.straightTurn"
+	alias "latn/lambdaStroke.tailedTurnSerifless"      null "latn/lambdaStrokeTailed.straightTurnSerifless"
+	alias "latn/lambdaStroke.curlyTailedTurn"          null "latn/lambdaStrokeTailed.curlyTurn"
+	alias "latn/lambdaStroke.curlyTailedTurnSerifless" null "latn/lambdaStrokeTailed.curlyTurnSerifless"
 
 	define CursiveYShape : namespace
 		export : define [Arc top bottom] : uBowl.shape
@@ -413,10 +425,13 @@ glyph-block Letter-Latin-Lower-Y : begin
 			include : MarkSet.p
 			set-base-anchor 'overlay' Middle [mix O (Descender + [Math.max hookEnd Stroke]) 0.5]
 			set-base-anchor 'strike'  Middle (XH / 2)
-			set-base-anchor 'yBelowDot' Middle Descender
 			include : CursiveYShape.Arc XH 0
 			include : hookShape XH Descender
 			include : CursiveYShape.Serifs XH slabKind
+
+		create-glyph "yBelowdot/base.\(suffix)" : glyph-proc
+			include [refer-glyph "y.\(suffix)"] AS_BASE ALSO_METRICS
+			DependentSelector.set currentGlyph 'cursive'
 
 		create-glyph "yCap.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -447,6 +462,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 	select-variant 'y' 'y'
 	link-reduced-variant 'y/sansSerif' 'y' MathSansSerif
 	select-variant 'y/nonCursive' (shapeFrom -- 'y')
+	select-variant 'yBelowdot/base' (follow -- 'y')
 	select-variant 'yHookRight' 0x1B4
 	select-variant 'yLowBar' 0x1DF55 (follow -- 'y')
 
@@ -461,19 +477,18 @@ glyph-block Letter-Latin-Lower-Y : begin
 	select-variant 'latn/lambda' 0xA7DB (shapeFrom -- 'grek/lambda')
 	select-variant 'latn/lambdaStroke' 0x19B (follow -- 'latn/lambda')
 
-	CreateTurnedLetter 'turny' 0x28E 'y/nonCursive' HalfAdvance (XH / 2)
+	CreateTurnedLetter 'turny'      0x28E 'y/nonCursive' HalfAdvance (XH / 2)
+	CreateTurnedLetter 'turny.UPPH' null  'y'            HalfAdvance (XH / 2)
+
 	derive-glyphs 'turnyBelt' 0x1DF06 'y/nonCursive' : function [src sel] : glyph-proc
 		include : MarkSet.b
 		include [refer-glyph src]
 		include : FlipAround Middle (XH / 2)
 		include : BeltOverlay.at Middle XH
 
-	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
-		create-glyph "yDotBelow/dotBelow.\(suffix)" : glyph-proc
-			set-mark-anchor 'yBelowDot' 0 0 0 belowMarkStack
-			include : DrawAt 0 (-AccentStackOffset) (DotRadius * kdr)
-	select-variant 'yDotBelow/dotBelow' (follow -- 'diacriticDot')
-	CreateAccentedComposition 'yDotBelow' 0x1EF5 'y' 'yDotBelow/dotBelow'
+	CreateDependentComposite 'yBelowdot' 0x1EF5 'yBelowdot/base' : object
+		'nonCursive' 'dotBR'
+		'cursive'    'dotBelow'
 
 	# Blackboard
 	glyph-block-import Letter-Blackboard : BBS BBD

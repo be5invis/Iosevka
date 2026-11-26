@@ -3,7 +3,6 @@ $$include '../meta/macros.ptl'
 import [Arcs ShapeConv] from "typo-geom"
 import [OffsetCurve TaperedOffsetCurve BezToContoursSink GEOMETRY_PRECISION] from "@iosevka/geometry/curve-util"
 import [mix linreg clamp fallback] from "@iosevka/util"
-import [DesignParameters] from "../meta/aesthetics.mjs"
 import [ScheduleLeaningMark] from "@iosevka/glyph/relation"
 import [Box] from "@iosevka/geometry/box"
 import [Point] from "@iosevka/geometry/point"
@@ -14,10 +13,11 @@ glyph-block Mark-Above : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Symbol-Arrow-Shared : ArrowDims ArrowT
-
-	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markHalfStroke markStress markFine
+	glyph-block-import Mark-Shared-Metrics : markMiddle markExtend
+	glyph-block-import Mark-Shared-Metrics : markStroke markHalfStroke markStress markFine
 	glyph-block-import Mark-Shared-Metrics : asciiMarkZoomX asciiMarkZoomY
-	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius dialytikaRadius
+	glyph-block-import Mark-Shared-Metrics : markDotsRadius dialytikaRadius commaRadius
+	glyph-block-import Mark-Shared-Metrics : commaOvershoot commaOvershoot2
 
 	glyph-block-export aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
 	define aboveMarkTop   : XH + AccentClearance + AccentHeight
@@ -67,11 +67,6 @@ glyph-block Mark-Above : begin
 		if [not b] : return nothing
 		local yShift : toneAboveBaseline - b.yMin
 		if ([Math.abs yShift] > 1e-6) : currentGlyph.applyTransform [ApparentTranslate 0 yShift]
-
-	glyph-block-export commaOvershoot commaOvershoot2 commaAboveRadius
-	define commaOvershoot  : O * [linreg 16 0 90 (-1) markStroke]
-	define commaOvershoot2 : O * [linreg 16 1 90 (-1) markStroke]
-	define commaAboveRadius : 0.85 * DotRadius * markHalfStroke / HalfStroke
 
 	glyph-block-export StdAnchors
 	define StdAnchors : namespace
@@ -1280,11 +1275,11 @@ glyph-block Mark-Above : begin
 			curl (markMiddle - (markExtend - fine)) hookTop [heading Leftward]
 
 	#### Comma Marks
-	create-glyph 'commaAbove.round' : glyph-proc
+	create-glyph "commaAbove.round" : glyph-proc
 		set-width 0
 		include : StdAnchors.narrow
 
-		local radius commaAboveRadius
+		local radius commaRadius
 		include : Ring (aboveMarkTop + commaOvershoot) (aboveMarkTop - radius * 2 + commaOvershoot) (markMiddle - radius) (markMiddle + radius)
 		include : dispiro
 			widths.rhs [Math.min radius : markFine * [linreg 16 2 90 1.75 markStroke]]
@@ -1293,11 +1288,11 @@ glyph-block Mark-Above : begin
 			g4   [mix markMiddle (markMiddle - radius) 0.2] (aboveMarkBot - radius - commaOvershoot2)
 		include : ApparentTranslate 0 (DotRadius * 0.3)
 
-	create-glyph 'commaAbove.square' : glyph-proc
+	create-glyph "commaAbove.square" : glyph-proc
 		set-width 0
 		include : StdAnchors.narrow
 
-		local radius : commaAboveRadius * SquareDotScalar
+		local radius : commaRadius * SquareDotScalar
 		include : Rect aboveMarkTop (aboveMarkTop - radius * 2) (markMiddle - radius) (markMiddle + radius)
 		include : dispiro
 			widths.rhs [Math.min radius : markFine * [linreg 16 2 90 1.75 markStroke]]
@@ -1310,8 +1305,8 @@ glyph-block Mark-Above : begin
 	select-variant 'commaAbove' 0x313 (follow -- 'diacriticDot')
 	select-variant 'commaAbove/asPunctuation' (shapeFrom -- 'commaAbove') (follow -- 'punctuationDot')
 
-	derive-composites 'commaAboveZero.round'  null 'commaAbove.round'  [ApparentTranslate (-markMiddle) ((-aboveMarkTop) + commaAboveRadius)]
-	derive-composites 'commaAboveZero.square' null 'commaAbove.square' [ApparentTranslate (-markMiddle) ((-aboveMarkTop) + commaAboveRadius * SquareDotScalar)]
+	derive-composites "commaAboveZero.round"  null "commaAbove.round"  [ApparentTranslate (-markMiddle) ((-aboveMarkTop) + commaRadius)]
+	derive-composites "commaAboveZero.square" null "commaAbove.square" [ApparentTranslate (-markMiddle) ((-aboveMarkTop) + commaRadius * SquareDotScalar)]
 	select-variant 'commaAboveZero' (follow -- 'punctuationDot')
 
 	derive-glyphs 'commaGrekUpperTonos' null 'commaAbove' : function [src gr] : glyph-proc
@@ -1328,14 +1323,14 @@ glyph-block Mark-Above : begin
 	derive-glyphs 'turnCommaAbove' 0x312 'commaAbove' : function [src gr] : glyph-proc
 		set-width 0
 		include : refer-glyph src
-		include : FlipAround markMiddle ([mix aboveMarkTop (aboveMarkBot - commaAboveRadius) 0.5] + (DotRadius * 0.3) + commaOvershoot / 2)
+		include : FlipAround markMiddle ([mix aboveMarkTop (aboveMarkBot - commaRadius) 0.5] + (DotRadius * 0.3) + commaOvershoot / 2)
 		include : StdAnchors.narrow
 
-	create-glyph 'revCommaAbove.round' : glyph-proc
+	create-glyph "revCommaAbove.round" : glyph-proc
 		set-width 0
 		include : StdAnchors.narrow
 
-		local radius commaAboveRadius
+		local radius commaRadius
 		include : Ring (aboveMarkTop + commaOvershoot) (aboveMarkTop - radius * 2 + commaOvershoot) (markMiddle - radius) (markMiddle + radius)
 		include : dispiro
 			widths.lhs [Math.min radius : markFine * [linreg 16 2 90 1.75 markStroke]]
@@ -1344,11 +1339,11 @@ glyph-block Mark-Above : begin
 			g4   [mix markMiddle (markMiddle + radius) 0.2] (aboveMarkBot - radius - commaOvershoot2)
 		include : ApparentTranslate 0 (DotRadius * 0.3)
 
-	create-glyph 'revCommaAbove.square' : glyph-proc
+	create-glyph "revCommaAbove.square" : glyph-proc
 		set-width 0
 		include : StdAnchors.narrow
 
-		local radius : commaAboveRadius * SquareDotScalar
+		local radius : commaRadius * SquareDotScalar
 		include : Rect (aboveMarkTop + commaOvershoot) (aboveMarkTop - radius * 2 + commaOvershoot) (markMiddle - radius) (markMiddle + radius)
 		include : dispiro
 			widths.lhs [Math.min radius : markFine * [linreg 16 2 90 1.75 markStroke]]

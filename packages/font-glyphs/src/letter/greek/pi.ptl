@@ -1,7 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback SuffixCfg] from "@iosevka/util"
-import [DesignParameters] from "../../meta/aesthetics.mjs"
+import [DependentSelector] from "@iosevka/glyph/relation"
 
 glyph-module
 
@@ -9,7 +9,7 @@ glyph-block Letter-Greek-Pi : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft BBBarRight
-	glyph-block-import Letter-Shared : CreateTurnedLetter
+	glyph-block-import Letter-Shared : CreateTurnedLetter CreateDependentComposite
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar RightwardDiagTailedBar
 	glyph-block-import Letter-Shared-Shapes : SerifFrame CyrDescender MidHook
 
@@ -47,39 +47,47 @@ glyph-block Letter-Greek-Pi : begin
 		include : MarkSet.capital
 		include : PiShape [DivFrame 1] CAP 0 (shrinkRate -- 0) (doSerif -- SLAB)
 
-	alias 'cyrl/Pe' 0x41F 'grek/Pi'
-
-	CreateTurnedLetter 'amalg' 0x2A3F 'grek/Pi' HalfAdvance (CAP / 2)
-
 	create-glyph 'grek/smcpPi' 0x1D28 : glyph-proc
 		include : MarkSet.e
 		include : PiShape [DivFrame 1] XH 0 (shrinkRate -- 0) (doSerif -- SLAB)
 
-	create-glyph 'cyrl/pe.upright' : glyph-proc
-		include : MarkSet.e
-		include : PiShape [DivFrame 1] XH 0 (shrinkRate -- 0) (doSerif -- SLAB)
+	CreateTurnedLetter 'amalg' 0x2A3F 'grek/Pi' HalfAdvance (CAP / 2)
 
-	derive-composites 'cyrl/PeDescender' 0x524 'cyrl/Pe' [CyrDescender.rSideJut RightSB 0]
-	derive-composites 'cyrl/peDescender.upright' null 'cyrl/pe.upright' [CyrDescender.rSideJut RightSB 0]
+	alias 'cyrl/Pe'         0x41F 'grek/Pi'
+	alias 'cyrl/pe.upright' null  'grek/smcpPi'
+
+	derive-composites 'cyrl/PeDescender'         0x524 'cyrl/Pe'         [CyrDescender.rSideJut RightSB 0]
+	derive-composites 'cyrl/peDescender.upright' null  'cyrl/pe.upright' [CyrDescender.rSideJut RightSB 0]
 
 	define SmallPiShrink : (1/6) - [HSwToV QuarterStroke] / (RightSB - SB)
 
-	define SmallPiConfig : SuffixCfg.weave
-		object # body
-			""             { SmallPiShrink false }
-			smallCapital   { 0             SLAB  }
-		object # tail
-			tailless         TERMINAL-STRAIGHT
-			tailed           TERMINAL-TAILED
-			diagonalTailed   TERMINAL-DIAGONAL
+	define SmallPiConfig : object
+		'tailless'       { TERMINAL-STRAIGHT false }
+		'tailed'         { TERMINAL-TAILED   false }
+		'diagonalTailed' { TERMINAL-DIAGONAL false }
+		'smallCapital'   { null              true  }
 
-	foreach { suffix { { shrink slab } tail } } [pairs-of SmallPiConfig] : do
-		create-glyph "grek/pi.\(suffix)" : glyph-proc
-			define df : include : DivFrame 1
+	foreach { suffix { tail fSmcp } } [pairs-of SmallPiConfig] : do
+		create-glyph "grek/pi/selector.\(suffix)" : glyph-proc
+			local df : include : DivFrame 1
 			include : df.markSet.e
-			include : PiShape df XH 0 (shrinkRate -- shrink) (doSerif -- slab) (terminal -- tail)
+			DependentSelector.set currentGlyph "\(suffix)"
 
-	select-variant 'grek/pi' 0x3C0
+		if (!fSmcp) : begin
+			create-glyph "grek/pi/\(suffix)" : glyph-proc
+				local df : include : DivFrame 1
+				include : df.markSet.e
+				include : PiShape df XH 0 (shrinkRate -- SmallPiShrink) (terminal -- tail)
+			alias "grek/pi.UPPH.\(suffix)" null "grek/pi/\(suffix)"
+
+	select-variant 'grek/pi/selector' (follow -- 'grek/pi')
+	select-variant 'grek/pi.UPPH'     (follow -- 'grek/pi/reduced')
+
+	CreateDependentComposite 'grek/pi' 0x3C0 'grek/pi/selector' : object
+		'tailless'       'grek/pi/tailless'
+		'tailed'         'grek/pi/tailed'
+		'diagonalTailed' 'grek/pi/diagonalTailed'
+		'smallCapital'   'grek/smcpPi'
 
 	define [CyrlPeHookShape df top] : glyph-proc
 		local xm : df.middle + [HSwToV : 0.5 * df.mvs]

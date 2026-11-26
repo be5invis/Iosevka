@@ -1,93 +1,88 @@
 $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from "@iosevka/util"
-import [DesignParameters] from "../meta/aesthetics.mjs"
 
 glyph-module
 
 glyph-block Mark-Horn-And-Angle : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Shared-Metrics : markMiddle markExtend markStroke markHalfStroke
+	glyph-block-import Mark-Shared-Metrics : markStress markFine markDotsRadius commaRadius
+	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack CyrKavykaShape
+	glyph-block-import Mark-Below : belowMarkBot belowMarkTop belowMarkMid belowMarkStack
 
-	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
-	glyph-block-import Mark-Shared-Metrics : markHalfStroke markMiddle markDotsRadius
-	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
-	glyph-block-import Mark-Above : CyrKavykaShape commaAboveRadius
-	glyph-block-import Mark-Below : belowMarkBot belowMarkTop belowMarkMid
+	### Horn and angle marks
 
-	# horn and angle marks
-	define [HornDim attX attY overshootX overshootY krY] : begin
-		local radius commaAboveRadius
-		local hornFine   : Math.min (radius * 0.75) (markFine * 1.75)
-		local hornStroke : Math.min (radius * 1)    (markFine * 1.75)
-		local startX : attX + 2 * radius
-		local startY : attY + krY * radius + (aboveMarkTop - aboveMarkBot) / 2
-		return : object radius hornFine hornStroke startX startY
+	glyph-block-export Horn
+	define [Horn attX attY overflowX overflowY krX krY] : namespace
+		export : define [dim] : begin
+			local radius commaRadius
+			local fine   : Math.min (radius * 0.75) (markFine * 1.75)
+			local stroke : Math.min (radius * 1.00) (markFine * 1.75)
+			local startX : attX + krX * radius
+			local startY : attY + krY * radius + [Math.sign krY] * (aboveMarkTop - aboveMarkBot) / 2
+			return : object radius fine stroke startX startY
 
-	define [HornMarkAnchor attX attY overshootX overshootY krY] : glyph-proc
-		local [object radius hornFine startX startY] : HornDim attX attY overshootX overshootY krY
-		set-mark-anchor 'topRight' attX attY startX startY
-		set-base-anchor 'aboveBraceL' (startX - radius) startY
-		set-base-anchor 'aboveBraceR' (startX - radius) startY
+		export : define anchor : namespace
+			export : define [mark] : glyph-proc
+				local [object radius fine startX startY] : dim
+				set-mark-anchor 'topRight' attX attY startX startY
+				set-base-anchor 'aboveBraceL' (startX - radius) startY
+				set-base-anchor 'aboveBraceR' (startX - radius) startY
 
-	glyph-block-export HornBaseAnchor
-	define [HornBaseAnchor attX attY overshootX overshootY krY] : glyph-proc
-		local [object radius hornFine startX startY] : HornDim attX attY overshootX overshootY krY
-		set-base-anchor 'topRight' startX startY
-		set-base-anchor 'aboveBraceL' (startX - radius) startY
-		set-base-anchor 'aboveBraceR' (startX - radius) startY
+			export : define [base] : glyph-proc
+				local [object radius fine startX startY] : dim
+				set-base-anchor 'topRight' startX startY
+				set-base-anchor 'aboveBraceL' (startX - radius) startY
+				set-base-anchor 'aboveBraceR' (startX - radius) startY
 
-	define [HornShape attX attY overshootX overshootY krY] : glyph-proc
-		local [object radius hornFine hornStroke startX startY] : HornDim attX attY overshootX overshootY krY
-		include : union
-			RingAt (startX - radius) startY (radius - hornFine / 8)
-			dispiro
-				g4 (startX + OX) (startY) [widths.rhs : hornFine / 4]
-				arcvh
-				g4 (startX - radius) (startY - radius)
-				archv
-				g4 (startX - 2 * radius) (startY)
-				arcvh
-				g4 (startX - radius) (startY + radius) [widths.rhs : hornFine / 2]
-				archv
-				g4 startX startY [widths.rhs hornFine]
-				quadControls 0 0.75 16 : object : blend : lambda [t]
-					widths.rhs [mix hornFine hornStroke t]
-				g4 (attX - overshootX - [HSwToV HalfStroke]) (attY - overshootY - Stroke) [widths.rhs hornStroke]
+		export : define shape : namespace
+			export : define [round] : glyph-proc
+				local [object radius fine stroke startX startY] : dim
+				include : union
+					RingAt (startX - radius) startY (radius - fine / 8)
+					dispiro
+						widths.rhs (fine / 4)
+						g4 (startX + OX) (startY)
+						arcvh
+						g4 (startX - radius * 1) (startY - radius)
+						archv
+						g4 (startX - radius * 2) (startY)
+						arcvh
+						g4 (startX - radius * 1) (startY + radius) [widths.rhs (fine / 2)]
+						archv
+						g4 startX startY [widths.rhs fine]
+						quadControls 0 0.75 16 : object : blend : lambda [t] : widths.rhs [mix fine stroke t]
+						g4 (attX - overflowX - [HSwToV HalfStroke]) (attY - overflowY - Stroke) [widths.rhs stroke]
 
-	define [SquareHornShape attX attY overshootX overshootY krY] : glyph-proc
-		local [object [radius r] hornFine hornStroke startX startY] : HornDim attX attY overshootX overshootY krY
-		local radius : r * SquareDotScalar
-		include : union
-			SquareAt (startX - radius) startY radius
-			dispiro
-				flat startX (startY + radius) [widths.rhs.heading hornFine Downward]
-				curl startX (startY - radius)
-				quadControls 0 0.8 8 : object : blend : lambda [t]
-					widths.rhs [mix hornFine hornStroke t]
-				g4 (attX - overshootX - [HSwToV HalfStroke]) (attY - overshootY - Stroke) [widths.rhs hornStroke]
+			export : define [square] : glyph-proc
+				local [object [radius r] fine stroke startX startY] : dim
+				local radius : r * SquareDotScalar
+				include : union
+					SquareAt (startX - radius) startY radius
+					dispiro
+						widths.rhs fine
+						flat startX (startY + radius) [heading Downward]
+						curl startX (startY - radius)
+						quadControls 0 0.8 8 : object : blend : lambda [t] : widths.rhs [mix fine stroke t]
+						g4 (attX - overflowX - [HSwToV HalfStroke]) (attY - overflowY - Stroke) [widths.rhs stroke]
 
-	create-glyph 'horn.round' : glyph-proc
+	create-glyph : glyph-proc
 		set-width 0
-		include : HornShape      0 XH 0 0 0.5
-		include : HornMarkAnchor 0 XH 0 0 0.5
-
-	create-glyph 'horn.square' : glyph-proc
-		set-width 0
-		include : SquareHornShape 0 XH 0 0 0.5
-		include : HornMarkAnchor  0 XH 0 0 0.5
+		local horn : Horn 0 XH 0 0 (+2.0) (+0.5)
+		include : horn.anchor.mark
+		create-forked-glyph "horn.round"  : horn.shape.round
+		create-forked-glyph "horn.square" : horn.shape.square
 
 	select-variant 'horn' 0x31B (follow -- 'diacriticDot')
 
-	create-glyph 'longHorn.round' : glyph-proc
+	create-glyph : glyph-proc
 		set-width 0
-		include : HornShape      0 XH (Width / 2) (ArchDepthB) 0.5
-		include : HornMarkAnchor 0 XH (Width / 2) (ArchDepthB) 0.5
-
-	create-glyph 'longHorn.square' : glyph-proc
-		set-width 0
-		include : SquareHornShape 0 XH (Width / 2) (ArchDepthB) 0.5
-		include : HornMarkAnchor  0 XH (Width / 2) (ArchDepthB) 0.5
+		local horn : Horn 0 XH Middle ArchDepthB (+2.0) (+0.5)
+		include : horn.anchor.mark
+		create-forked-glyph "longHorn.round"  : horn.shape.round
+		create-forked-glyph "longHorn.square" : horn.shape.square
 
 	select-variant 'longHorn' null (follow -- 'diacriticDot')
 
@@ -113,42 +108,62 @@ glyph-block Mark-Horn-And-Angle : begin
 	create-glyph 'retroflexHookBR' 0x322 : glyph-proc
 		set-width 0
 		set-mark-anchor 'bottomRight' 0 0 0 belowMarkBot
-		set-base-anchor 'belowBraceL' (0.5 * HookX - 0.25 * markExtend - [HSwToV : 0.75 * Stroke]) ((-0.5) * Hook - HalfStroke)
-		set-base-anchor 'belowBraceR' (0.5 * HookX + 0.25 * markExtend - [HSwToV : 0.5  * Stroke]) ((-0.5) * Hook - HalfStroke)
+		set-base-anchor 'belowBraceL' ((+0.5) * HookX - 0.25 * markExtend - [HSwToV : 0.75 * Stroke]) ((-0.5) * Hook - HalfStroke)
+		set-base-anchor 'belowBraceR' ((+0.5) * HookX + 0.25 * markExtend - [HSwToV : 0.50 * Stroke]) ((-0.5) * Hook - HalfStroke)
 		include : dispiro
 			widths.rhs
 			flat 0 (-O) [heading Downward]
 			curl 0 0 [heading Downward]
-			straight.right.end (HookX - [HSwToV HalfStroke]) (-Hook + HalfStroke)
+			straight.right.end ((+HookX) - [HSwToV HalfStroke]) ((-Hook) + HalfStroke)
 
 	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
 		create-glyph "dotTR.\(suffix)" : glyph-proc
 			set-width 0
-			local [object radius startX startY] : HornDim 0 XH 0 0 0.5
+			local attX : markMiddle + (RightSB - SB) / 2
+			local horn : Horn attX aboveMarkBot 0 AccentClearance (+2.0) (+1.0)
+			local [object radius startX] : horn.dim
 			local r : mix radius DotRadius 0.5
-			include : DrawAt ((+startX) - r) (0 + startY) (r * kdr)
-			set-mark-anchor 'topRight' 0 XH (+startX) (0 + startY)
-			set-base-anchor 'aboveBraceL' ((+startX) - r) (0 + startY)
-			set-base-anchor 'aboveBraceR' ((+startX) - r) (0 + startY)
+			set-mark-anchor 'topRight' attX XH startX aboveMarkStack
+			set-base-anchor 'aboveBraceL' (startX - r) aboveMarkMid
+			set-base-anchor 'aboveBraceR' (startX - r) aboveMarkMid
+			include : DrawAt (startX - r) aboveMarkMid (r * kdr)
+
 		create-glyph "dotTL.\(suffix)" : glyph-proc
 			set-width 0
-			local [object radius startX startY] : HornDim 0 XH 0 0 0.5
+			local attX : markMiddle - (RightSB - SB) / 2
+			local horn : Horn attX aboveMarkBot 0 AccentClearance (-2.0) (+1.0)
+			local [object radius startX] : horn.dim
 			local r : mix radius DotRadius 0.5
-			include : DrawAt ((-startX) + r) (0 + startY) (r * kdr)
-			set-mark-anchor 'topLeft' 0 XH (-startX) (0 + startY)
-			set-base-anchor 'aboveBraceL' ((-startX) + r) (0 + startY)
-			set-base-anchor 'aboveBraceR' ((-startX) + r) (0 + startY)
+			set-mark-anchor 'topLeft' attX XH startX aboveMarkStack
+			set-base-anchor 'aboveBraceL' (startX + r) aboveMarkMid
+			set-base-anchor 'aboveBraceR' (startX + r) aboveMarkMid
+			include : DrawAt (startX + r) aboveMarkMid (r * kdr)
+
+		create-glyph "dotBR.\(suffix)" : glyph-proc
+			set-width 0
+			local attX : markMiddle + (RightSB - SB) / 2
+			local horn : Horn attX belowMarkTop 0 AccentClearance (+2.0) (-1.0)
+			local [object radius startX] : horn.dim
+			local r : mix radius DotRadius 0.5
+			set-mark-anchor 'bottomRight' attX 0 startX belowMarkStack
+			set-base-anchor 'belowBraceL' (startX - r) belowMarkMid
+			set-base-anchor 'belowBraceR' (startX - r) belowMarkMid
+			include : DrawAt (startX - r) belowMarkMid (r * kdr)
+
 		create-glyph "dotBL.\(suffix)" : glyph-proc
 			set-width 0
-			local [object radius startX startY] : HornDim 0 XH 0 0 0.5
+			local attX : markMiddle - (RightSB - SB) / 2
+			local horn : Horn attX belowMarkTop 0 AccentClearance (-2.0) (-1.0)
+			local [object radius startX] : horn.dim
 			local r : mix radius DotRadius 0.5
-			include : DrawAt ((-startX) + r) (XH - startY) (r * kdr)
-			set-mark-anchor 'bottomLeft' 0 0 (-startX) (XH - startY)
-			set-base-anchor 'belowBraceL' ((-startX) + r) (XH - startY)
-			set-base-anchor 'belowBraceR' ((-startX) + r) (XH - startY)
+			set-mark-anchor 'bottomLeft' attX 0 startX belowMarkStack
+			set-base-anchor 'belowBraceL' (startX + r) belowMarkMid
+			set-base-anchor 'belowBraceR' (startX + r) belowMarkMid
+			include : DrawAt (startX + r) belowMarkMid (r * kdr)
 
 	select-variant 'dotTR' 0x358  (follow -- 'diacriticDot')
 	select-variant 'dotTL' 0x1DF8 (follow -- 'diacriticDot')
+	select-variant 'dotBR'        (follow -- 'diacriticDot')
 	select-variant 'dotBL' 0x1DFA (follow -- 'diacriticDot')
 
 	derive-glyphs 'commaTR' 0x315 'commaAbove' : function [src gr] : glyph-proc
