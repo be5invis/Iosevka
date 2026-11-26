@@ -8,37 +8,38 @@ glyph-block Letter-Cyrillic-Fita : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define FitaWave : XH / 16
-	define [FitaLeft  sw] : SB      + [HSwToV : 0.5 * sw]
-	define [FitaRight sw] : RightSB - [HSwToV : 0.5 * sw]
-	define [FitaCrossbar y sw swc] : dispiro
-		widths.center swc
-		g4.right.mid [mix [FitaLeft sw] Middle (-1)] y
-		g4.right.mid [mix [FitaLeft sw] Middle (-0.5)] (y - FitaWave)
-		g4 [FitaLeft sw] y
-		g4.right.mid [mix [FitaLeft sw] Middle 0.5] (y + FitaWave)
-		g4 Middle y
-		g4.right.mid [mix [FitaRight sw] Middle 0.5] (y - FitaWave)
-		g4 [FitaRight sw] y
-		g4.right.mid [mix [FitaRight sw] Middle (-0.5)] (y + FitaWave)
-		g4.right.mid [mix [FitaRight sw] Middle (-1)] y
+	define [FitaCrossbar t b l r swRef] : begin
+		local a : 0.0625 * (XH - 0)
+		local sw : Math.min swRef (a * 2)
+			AdviceStroke2 3 4 (t - b) (((r - l) + 2 * SB) / Width)
+		return : lift-@ : dispiro
+			widths.center sw
+			g4.right.mid [mix @xL @xM (-1.0)]               @yM
+			g4.right.mid [mix @xL @xM (-0.5)]              (@yM - a)
+			g4           (@xL = l + [HSwToV : 0.5 * swRef]) @yM
+			g4.right.mid [mix @xL @xM (+0.5)]              (@yM + a)
+			g4           (@xM = [mix l r 0.5])             (@yM = [mix b t 0.5])
+			g4.right.mid [mix @xR @xM (+0.5)]              (@yM - a)
+			g4           (@xR = r - [HSwToV : 0.5 * swRef]) @yM
+			g4.right.mid [mix @xR @xM (-0.5)]              (@yM + a)
+			g4.right.mid [mix @xR @xM (-1.0)]               @yM
 
 	create-glyph 'cyrl/Fita' 0x472 : glyph-proc
-		define sw  : AdviceStroke2 2 3 CAP
-		define swc : Math.min (FitaWave * 2) [AdviceStroke2 3 4 CAP]
 		include : MarkSet.capital
+		local sw : AdviceStroke2 2 3 CAP
 		include : union
 			OShape CAP 0 SB RightSB sw ArchDepthA ArchDepthB
 			intersection
 				OShapeOutline.NoOvershoot CAP 0 SB RightSB sw ArchDepthA ArchDepthB
-				FitaCrossbar (CAP / 2) sw swc
+				FitaCrossbar              CAP 0 SB RightSB sw
 
 	create-glyph 'cyrl/fita' 0x473 : glyph-proc
-		define sw  : AdviceStroke2 2 3 XH
-		define swc : Math.min (FitaWave * 2) [AdviceStroke2 3 4 XH]
 		include : MarkSet.e
+		local sw : AdviceStroke2 2 3 XH
 		include : union
 			OShape XH 0 SB RightSB sw SmallArchDepthA SmallArchDepthA
 			intersection
 				OShapeOutline.NoOvershoot XH 0 SB RightSB sw SmallArchDepthA SmallArchDepthA
-				FitaCrossbar (XH / 2) sw swc
+				FitaCrossbar              XH 0 SB RightSB sw
+
+	alias 'oBar.UPPH' null 'cyrl/fita'

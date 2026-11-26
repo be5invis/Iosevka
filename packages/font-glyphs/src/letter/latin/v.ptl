@@ -13,11 +13,12 @@ glyph-block Letter-Latin-V : begin
 
 	glyph-block-export VCornerHalfWidth
 	define VCornerHalfWidth : HSwToV : 1.15 * HalfStroke
-	define VCurviness   0.3
+
 	define VShapeFine : Math.max
 		Stroke * [if SLAB para.vtipfineSlab para.vtipfine]
 		VCornerHalfWidth * 1.2
 	define VShapeFineStraight : 1.15 * (Stroke * CThin)
+
 	define pInktrap (2 / 3)
 	define VShapeMiddleWidth : Math.min [mix Stroke VShapeFineStraight pInktrap] [AdviceStroke 3]
 
@@ -25,7 +26,8 @@ glyph-block Letter-Latin-V : begin
 	define VStraightSbShrink : mix 1 (DesignParameters.straightVShapeSbShrink * [StrokeWidthBlend 1 0.75]) : if SLAB 0.75 1
 	define VStraightSbOffset : OX * [StrokeWidthBlend 1 2]
 
-	define [VShapeTopFlat top] : Math.min (top * 0.9) (top - [if SLAB Stroke 0])
+	define [VShapeTopFlat top] : Math.min [mix 0 top 0.9] (top - [if SLAB Stroke 0])
+	define VCurviness 0.3
 
 	glyph-block-export VShapeOutline
 	define [VShapeOutline] : with-params [df fBarStraight top [sw Stroke]] : glyph-proc
@@ -38,7 +40,8 @@ glyph-block Letter-Latin-V : begin
 		define vxEndL : df.middle - cornerHW + clearance
 		define vxEndR : df.middle + cornerHW - clearance
 
-		if fBarStraight : do
+		if fBarStraight
+		: then : do
 			include : spiro-outline
 				flat   [mix vxStartL vxEndL 0]        [mix top 0 0]
 				curl   [mix vxStartL vxEndL pInktrap] [mix top 0 pInktrap]
@@ -59,10 +62,11 @@ glyph-block Letter-Latin-V : begin
 
 	define [VBottomCapShape df fBarStraight sw] : begin
 		define cornerHW : VCornerHalfWidth * (sw / Stroke)
+		define fine     : Math.min sw : [if fBarStraight VShapeFineStraight VShapeFine] * (sw / Stroke)
 		return : spiro-outline
 			corner (df.middle + cornerHW) 0
 			corner (df.middle - cornerHW) 0
-			corner df.middle [Math.min sw : if fBarStraight VShapeFineStraight VShapeFine]
+			corner  df.middle            (0 + fine)
 
 	glyph-block-export VShape
 	define [VShape] : with-params [df fBarStraight top [sw Stroke]] : glyph-proc
@@ -74,19 +78,20 @@ glyph-block Letter-Latin-V : begin
 		define vxEndL : df.middle - cornerHW
 		define vxEndR : df.middle + cornerHW
 
-		if fBarStraight : do
+		if fBarStraight
+		: then : do
 			define dgCor : DiagCor (top - 0) (vxEndL - vxStartL)
-			define startSW : dgCor * sw
-			define midSW : dgCor * VShapeMiddleWidth * (sw / Stroke)
-			define endSW : Math.min sw : VShapeFineStraight * (sw / Stroke)
+			define swStart : dgCor *           sw
+			define swMid   : dgCor * [Math.min sw : VShapeMiddleWidth  * (sw / Stroke)]
+			define swEnd   :          Math.min sw : VShapeFineStraight * (sw / Stroke)
 			include : tagged 'strokeDown' : dispiro
-				flat [mix vxStartL vxEndL 0]        [mix top 0 0]        [widths.lhs.heading startSW Downward]
-				curl [mix vxStartL vxEndL pInktrap] [mix top 0 pInktrap] [widths.lhs.heading midSW Downward]
-				g4   [mix vxStartL vxEndL 1]        [mix top 0 1]        [widths.lhs.heading endSW Downward]
+				flat [mix vxStartL vxEndL 0]        [mix top 0 0]        [widths.lhs.heading swStart Downward]
+				curl [mix vxStartL vxEndL pInktrap] [mix top 0 pInktrap] [widths.lhs.heading swMid   Downward]
+				g4   [mix vxStartL vxEndL 1]        [mix top 0 1]        [widths.lhs.heading swEnd   Downward]
 			include : tagged 'strokeUp' : dispiro
-				flat [mix vxStartR vxEndR 0]        [mix top 0 0]        [widths.rhs.heading startSW Downward]
-				curl [mix vxStartR vxEndR pInktrap] [mix top 0 pInktrap] [widths.rhs.heading midSW Downward]
-				g4   [mix vxStartR vxEndR 1]        [mix top 0 1]        [widths.rhs.heading endSW Downward]
+				flat [mix vxStartR vxEndR 0]        [mix top 0 0]        [widths.rhs.heading swStart Downward]
+				curl [mix vxStartR vxEndR pInktrap] [mix top 0 pInktrap] [widths.rhs.heading swMid   Downward]
+				g4   [mix vxStartR vxEndR 1]        [mix top 0 1]        [widths.rhs.heading swEnd   Downward]
 		: else : do
 			define fine : Math.min sw : VShapeFine * (sw / Stroke)
 			include : tagged 'strokeDown' : dispiro
@@ -112,7 +117,7 @@ glyph-block Letter-Latin-V : begin
 		eject-contour 'bottomCap'
 
 		define cornerHW : VCornerHalfWidth * (sw / Stroke)
-		define fine     : VShapeFine       * (sw / Stroke)
+		define fine     : Math.min sw : [if fBarStraight VShapeFineStraight VShapeFine] * (sw / Stroke)
 		include : union [VBottomCapShape df fBarStraight sw] : dispiro
 			widths.rhs sw
 			straight.left.start (df.rightSB + hookWidthOuter - [Math.min 0 : 1.2 * sw * TanSlope]) ((top - O) - sw)
@@ -127,7 +132,7 @@ glyph-block Letter-Latin-V : begin
 		eject-contour 'bottomCap'
 
 		define cornerHW : VCornerHalfWidth * (sw / Stroke)
-		define fine     : VShapeFine       * (sw / Stroke)
+		define fine     : Math.min sw : [if fBarStraight VShapeFineStraight VShapeFine] * (sw / Stroke)
 		include : union [VBottomCapShape df fBarStraight sw] : dispiro
 			widths.lhs sw
 			straight.right.start (df.leftSB - hookWidthOuter - [Math.max 0 : 1.2 * sw * TanSlope]) ((top - O) - sw)
@@ -141,7 +146,7 @@ glyph-block Letter-Latin-V : begin
 		eject-contour 'bottomCap'
 
 		define cornerHW : VCornerHalfWidth * (sw / Stroke)
-		define fine     : VShapeFine       * (sw / Stroke)
+		define fine     : Math.min sw : [if fBarStraight VShapeFineStraight VShapeFine] * (sw / Stroke)
 		define sbScale : if fBarStraight VStraightSbShrink 1
 		define vxStartL : mix 0 df.leftSB sbScale
 		define vxEndL : df.middle - cornerHW

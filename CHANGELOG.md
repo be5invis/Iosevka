@@ -1,5 +1,15 @@
 ## Modifications since last major version
 
+### 34.9.2
+
+* Add Latin/Greek localization forms for UPA (`*-fonupa`).
+* Make Latin Open O (`Ɔ`, `ɔ`) and Lower Turned E (`ǝ`) follow serif variants of Cyrillic E (`Э`, `э`).
+* Add Characters:
+  - UAE DIRHAM SIGN (`U+20C3`).
+* Refine shape of the following characters:
+  - LATIN SMALL LETTER Y WITH DOT BELOW (`U+1EF5`).
+
+
 ### 34.9.1
 
 * Add Characters:

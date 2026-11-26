@@ -557,7 +557,7 @@ export class BooleanGeometry extends GeometryBase {
 	}
 	hash(h) {
 		h.beginStruct("BooleanGeometry");
-		h.u32(this.m_operator);
+		h.str(this.m_operator);
 		h.beginArray(this.m_operands.length);
 		for (const operand of this.m_operands) h.embed(operand);
 		h.endArray();
