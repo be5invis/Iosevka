@@ -12,7 +12,6 @@ glyph-block Letter-Latin-W : begin
 	glyph-block-import Letter-Shared-Shapes : SerifFrame VerticalHook
 	glyph-block-import Letter-Latin-Lower-M : EarlessRoundedDoubleArchSmallMShape
 	glyph-block-import Letter-Latin-Upper-M : MShape
-	glyph-block-import Letter-Latin-Lower-Y : NonCursiveYShapeT NonCursiveYConfig
 
 	define FORM-CURLY             0
 	define FORM-STRAIGHT          1
@@ -159,7 +158,7 @@ glyph-block Letter-Latin-W : begin
 		local sfm : SerifFrame top 0 (df.leftSB + oSlabPos) (df.rightSB - oSlabPos) (hSplit -- 3)
 
 		include : match slabType
-			[Just SERIFS-NONE]           : glyph-proc
+			[Just SERIFS-NONE]           : no-shape
 			[Just SERIFS-AUTO]           : NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full
 			[Just SERIFS-ALL]            : composite-proc sf.lt.full sf.rt.full
 			[Just SERIFS-ALL-OUTER]      : composite-proc sfm.lt.outer sfm.rt.outer
@@ -269,28 +268,6 @@ glyph-block Letter-Latin-W : begin
 			yDepth -- (-TailY)
 			sw     -- dim.strokeOuter
 
-	define [VYShape df top straightBar bottomShape slabKind] : glyph-proc
-		# Y -> W configs
-		local wBodyType : if straightBar FORM-STRAIGHT FORM-CURLY
-		local { doSlabTop doSlabBottom doSlabMotion } slabKind
-		local wSlabType : if doSlabTop SERIFS-ALL-OUTER : if doSlabMotion SERIFS-MOTION SERIFS-NONE
-		local dim : WDim df top wBodyType wSlabType MIDH-TOP
-
-		local r df.width
-		local l : mix r dim.xBot2 2
-
-		local YShape : NonCursiveYShapeT straightBar bottomShape { false doSlabBottom false } l r (l + df.leftSB) df.mvs
-		local YShapeRight : YShape.RightHalf 0 1 # = TS-NONE SHRINK-INNER
-		include : YShape.SmallYShape top Descender df.mvs
-
-		eject-contour 'leftHalf'
-
-		include : difference
-			WShapeImpl df top wBodyType wSlabType MIDH-TOP
-			intersection [MaskBelow : top / 2] [MaskAbove : Descender + df.mvs] : YShapeRight.splitMask top Descender
-
-		eject-contour 'strokeUp2'
-
 	define [WVertSides df top bodyType slabType midHClass] : glyph-proc
 		local wMidHeight : WMidHeight df top bodyType midHClass
 		local wMidHeightExt : WMidHeightExt wMidHeight top bodyType midHClass
@@ -384,7 +361,7 @@ glyph-block Letter-Latin-W : begin
 		include : match slabType
 			[Just SERIFS-CURSIVE] : NeedSlab SLAB sf.lt.outer
 			[Just SERIFS-MOTION]  : begin sf.lt.outer
-			___                   : glyph-proc
+			___                   : no-shape
 
 	define [WCursiveImpl      df top bodyType slabType midHClass] : WCursiveImplImpl false df top bodyType slabType midHClass
 	define [WHookRightCursive df top bodyType slabType midHClass] : WCursiveImplImpl true  df top bodyType slabType midHClass
@@ -473,54 +450,91 @@ glyph-block Letter-Latin-W : begin
 			include : HOverlayBar [mix df.leftSB 0 0.7] [mix df.rightSB df.width 0.7] [mix 0 CAP 0.60]
 			include : HOverlayBar [mix df.leftSB 0 0.7] [mix df.rightSB df.width 0.7] [mix 0 CAP 0.35]
 
-	# VY
-	foreach { suffix { straightBar bottomShape slabKind } } [Object.entries NonCursiveYConfig] : do
-		create-glyph "VY.\(suffix)" : glyph-proc
-			local df : include : DivFrame adwsLower 3
-			include : df.markSet.p
-			include : VYShape df CAP straightBar bottomShape slabKind
-
-		create-glyph "vy.\(suffix)" : glyph-proc
-			local df : include : DivFrame adwsLower 3
-			include : df.markSet.p
-			include : VYShape df XH straightBar bottomShape slabKind
-
-	select-variant 'VY' 0xA760 (follow -- 'y/nonCursive')
-	select-variant 'vy' 0xA761 (follow -- 'y/nonCursive')
-
 	select-variant 'W' 'W'
 	link-reduced-variant 'W/sansSerif' 'W' MathSansSerif
 	select-variant 'smcpW' 0x1D21 (follow -- 'W')
-	select-variant 'WHookRight' 0x2C72
 
 	select-variant 'w' 'w'
 	link-reduced-variant 'w/sansSerif' 'w' MathSansSerif
-	select-variant 'wBar' 0x1DF3F (follow -- 'w')
 	select-variant 'ww' 0x2AC (follow -- 'w')
+
+	select-variant 'WHookRight' 0x2C72
 	select-variant 'wHookRight' 0x2C73
+
+	select-variant 'wBar' 0x1DF3F (follow -- 'w')
 
 	select-variant 'currency/wonSign' 0x20A9 (follow -- 'W')
 
 	CreateTurnedLetter 'turnw' 0x28D 'w' HalfAdvance (XH / 2)
 
+	alias 'cyrl/Omega' 0x460 "W.cyrlOmega"
+	alias 'cyrl/omega' 0x461 "w.cyrlOmega"
+
 	alias 'cyrl/We' 0x51C 'W'
 	alias 'cyrl/we' 0x51D 'w'
 
-	alias 'cyrl/Omega' 0x460 'W.cyrlOmega'
-	alias 'cyrl/omega' 0x461 'w.cyrlOmega'
+	do "VY"
+		glyph-block-import Letter-Latin-Lower-Y : NonCursiveYShapeT NonCursiveYConfig
 
-	glyph-block-import Letter-Blackboard : BBS BBD
-	glyph-block-import Letter-Latin-V : BBVShape BBVOuterMaskShape
+		define TS-NONE      0
+		define SHRINK-INNER 1
 
-	define [BBWShape top] : begin
-		local offset : BBD * 2
-		local ksW : [AdviceStroke2 8 2 top] / BBS
-		local kdW : Math.min ksW 0.75
-		return : union
-			difference
-				BBVShape SB (RightSB - offset) kdW ksW top
-				BBVOuterMaskShape (SB + offset) RightSB kdW ksW top
-			BBVShape (SB + offset) RightSB kdW ksW top
+		define [VYShape df top straightBar bottomShape slabKind] : glyph-proc
+			local { doSerifLT doSerifRT doSerifMB } slabKind
 
-	create-glyph 'mathbb/W' 0x1D54E : composite-proc [MarkSet.capital] [BBWShape CAP]
-	create-glyph 'mathbb/w' 0x1D568 : composite-proc [MarkSet.e]       [BBWShape XH]
+			# Y to W configs
+			local wBodyType : if straightBar FORM-STRAIGHT FORM-CURLY
+			local wSlabType : piecewise
+				doSerifRT [if SLAB SERIFS-ALL SERIFS-ALL-OUTER]
+				doSerifLT SERIFS-MOTION
+				true      SERIFS-NONE
+			local wMidHClass : if SLAB MIDH-ALMOST-TOP MIDH-TOP
+			local [object [xBot2 m]] : WDim df top wBodyType wSlabType wMidHClass
+
+			local r df.width
+			local l [mix r m 2]
+
+			local YShape : NonCursiveYShapeT straightBar bottomShape { false false doSerifMB } l r df.leftSB df.mvs
+			include : YShape.SmallYShape top Descender df.mvs
+			eject-contour 'leftHalf'
+
+			local YShapeRight : YShape.RightHalf TS-NONE SHRINK-INNER
+			include : difference
+				new-glyph : glyph-proc
+					include : WShapeImpl df top wBodyType wSlabType wMidHClass
+					eject-contour 'strokeUp2'
+				intersection
+					MaskBelow (top / 2)
+					MaskAbove (Descender + df.mvs)
+					YShapeRight.splitMask top Descender
+
+		foreach { suffix { straightBar bottomShape slabKind } } [Object.entries NonCursiveYConfig] : do
+			create-glyph "VY.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.advanceScaleMM 3
+				include : df.markSet.capDesc
+				include : VYShape df CAP straightBar bottomShape slabKind
+
+			create-glyph "vy.\(suffix)" : glyph-proc
+				local df : include : DivFrame para.advanceScaleM 3
+				include : df.markSet.p
+				include : VYShape df XH straightBar bottomShape slabKind
+
+		select-variant 'VY' 0xA760 (follow -- 'y/nonCursive')
+		select-variant 'vy' 0xA761 (follow -- 'y/nonCursive')
+
+	do "Blackboard W"
+		glyph-block-import Letter-Blackboard : BBS BBD
+		glyph-block-import Letter-Latin-V : BBVShape BBVOuterMaskShape
+
+		define [BBWShape top] : begin
+			local offset : BBD * 2
+			local ksW : [AdviceStroke2 8 2 top] / BBS
+			local kdW : Math.min ksW 0.75
+			return : union
+				difference
+					BBVShape SB (RightSB - offset) kdW ksW top
+					BBVOuterMaskShape (SB + offset) RightSB kdW ksW top
+				BBVShape (SB + offset) RightSB kdW ksW top
+
+		create-glyph 'mathbb/W' 0x1D54E : composite-proc [MarkSet.capital] [BBWShape CAP]
+		create-glyph 'mathbb/w' 0x1D568 : composite-proc [MarkSet.e]       [BBWShape XH]
